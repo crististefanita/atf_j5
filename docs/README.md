@@ -1,0 +1,19 @@
+# Documentația laboratorului Rentz
+
+## Pe scurt
+
+Documentația activă explică Rentz, modelul offline și verificarea independentă. [Aria Rentz](rentz/README.md) deține contractele curente, iar [feedback-ul Rentz](feedback/ATF_Rentz.md) păstrează criteriile deschise.
+
+## Trasee de lectură
+
+| Întrebare | Document responsabil |
+|---|---|
+| Cum funcționează sub-jocurile? | [Reguli](rentz/ATF_Rules.md) |
+| Ce știm și ce trebuie confirmat? | [Proveniență](rentz/ATF_RuleSources.md) |
+| Cine deține starea, observația și scorul? | [Arhitectură](rentz/ATF_Architecture.md) |
+| Ce verificăm fără interfață? | [Componente](rentz/ATF_Components.md) |
+| Ce reutilizăm fără reguli Whist? | [Transfer](rentz/ATF_Transfer.md) |
+
+## Materiale istorice
+
+Fișierele pentru Contract Whist și feedback-urile lor sunt materiale anterioare, păstrate separat de aria normativă Rentz. [Indexul testelor istorice](../reference-tests/README.md) delimitează perimetrul; rezultatele lor nu sunt atribuite motorului nou.

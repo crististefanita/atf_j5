@@ -1,0 +1,126 @@
+schemaVersion: 1
+domain: rentz
+reference:
+  package: com.boonwiz.rentz
+  officialPage: https://play.google.com/store/apps/details?id=com.boonwiz.rentz
+  observedVersion: 1.0.2
+  declaredMinimumAndroidApi: 26
+  apkSha256: 622747ea8a323fd13ac6a6d2d88170ae067b753683b52ff68e2a3daa737e1518
+  apkResourceKeys: [rules_cards, rules_tricks, rules_plus, rules_blind, rules_rentz, rules_choose, rules_minus, r_start_jack, r_start_middle]
+manifestRole: TRACEABILITY_NOT_RUNTIME_INTERPRETER
+claims:
+  - id: TABLE-SIZE
+    status: PUBLISHER_DECLARED
+    source: PUBLISHER_DESCRIPTION
+    rule: Three to six players, eight cards per player.
+    implementation: Card.deck
+    verification: RentzRulesTest.deckAndOpeningRankFitTheTable
+  - id: DECK-RANKS
+    status: PUBLISHER_APK_DECLARED
+    source: APK_RESOURCE:rules_cards
+    rule: Keep ranks 9-A, 7-A, 5-A or 3-A for three, four, five or six players.
+    implementation: Card.deck
+    verification: RentzRulesTest.deckAndOpeningRankFitTheTable
+  - id: EIGHT-CONTRACTS
+    status: PUBLISHER_DECLARED
+    source: PUBLISHER_DESCRIPTION
+    rule: Each chooser selects every enabled base contract once; selection rotates.
+    implementation: RentzMatch.choose
+    verification: RentzRulesTest.completeOfflineMatchesConserveCardsAndChooseEveryGameOnce
+  - id: FOLLOW-SUIT-NO-TRUMP
+    status: PUBLISHER_APK_DECLARED
+    source: APK_RESOURCE:rules_tricks
+    rule: Follow the led suit if possible; otherwise discard freely. No trump exists.
+    implementation: TrickRules.legal
+    verification: RentzRulesTest.followSuitIsMandatoryAndThereIsNoTrump
+  - id: HIGHEST-LED-SUIT
+    status: PUBLISHER_APK_DECLARED
+    source: APK_RESOURCE:rules_tricks
+    rule: The highest rank of the led suit wins the completed trick.
+    implementation: TrickRules.winner
+    verification: RentzRulesTest.followSuitIsMandatoryAndThereIsNoTrump
+  - id: TOTALS-OVERLAP
+    status: PUBLISHER_DECLARED
+    source: PUBLISHER_DESCRIPTION
+    rule: Totals adds tricks, queens, diamonds and king-of-hearts penalties; queen of diamonds contributes to both categories.
+    implementation: ScoreProfile.trickPoints
+    verification: RentzRulesTest.scoringAddsOverlappingPenaltiesAndBlindDoublesOnce
+  - id: KING-TERMINATION
+    status: PUBLISHER_DECLARED_WITH_SETTLEMENT_INTERPRETATION
+    source: PUBLISHER_DESCRIPTION
+    rule: King of hearts ends the deal when the containing trick has a determinable winner.
+    implementation: RentzMatch.play
+    verification: RentzSequenceTest.kingOfHeartsSettlesOnlyAfterTheWholeTrick
+  - id: TEN-TERMINATION
+    status: PUBLISHER_APK_DECLARED
+    source: APK_RESOURCE:rules_plus
+    rule: The ten-of-clubs deal ends after settlement of the trick containing that card.
+    implementation: RentzMatch.play
+    verification: RentzSequenceTest.finishingAHandDoesNotAllowDuplicatedSettlementOrAnEarlyNextHand
+  - id: BLIND
+    status: PUBLISHER_DECLARED
+    source: PUBLISHER_DESCRIPTION
+    rule: Choose before revealing the hand; multiply every player's deal points by two exactly once.
+    implementation: RentzMatch.choose
+    verification: RentzRulesTest.blindChoiceRejectsPreviouslyRevealedCardsWithoutChangingState
+  - id: BLIND-LAST-CHOICE
+    status: PUBLISHER_APK_DECLARED
+    source: APK_RESOURCE:rules_blind
+    rule: Blind choice is forbidden when the chooser has only one remaining contract; refusal preserves the full state and choice.
+    implementation: RentzMatch.choose
+    verification: RentzBoundaryTest.theLastRemainingContractCannotBeChosenBlindAndRefusalIsAtomic
+  - id: SEQUENCE-OPENING
+    status: PUBLISHER_DECLARED
+    source: PUBLISHER_DESCRIPTION
+    rule: Start from Q, J, 10 or 9 according to player count, then extend each suit contiguously.
+    implementation: RentzBoard
+    verification: RentzRulesTest.sequenceOnlyAcceptsAnOpeningOrAnAdjacentCardOfThatSuit
+  - id: SEQUENCE-ACE-LOWEST
+    status: PUBLISHER_DECLARED_WITH_ELIGIBILITY_INTERPRETATION
+    source: PUBLISHER_DESCRIPTION
+    rule: An ace grants another play while cards remain; the lowest card skips the next eligible player.
+    implementation: RentzMatch.play
+    verification: RentzSequenceTest.acesRepeatAndLowestCardsSkipExactlyOneEligiblePlayer
+  - id: SEQUENCE-MANDATORY-PLAY
+    status: PUBLISHER_APK_DECLARED
+    source: APK_RESOURCE:rules_rentz
+    rule: Passing is permitted only when no card fits the current sequence board.
+    implementation: RentzMatch.pass
+    verification: RentzSequenceTest.mandatoryPlayRefusesPassAndPreservesTheBoard
+  - id: SEQUENCE-FIRST-PLAYER
+    status: PUBLISHER_DECLARED_WITH_OPENING_INTERPRETATION
+    source: PUBLISHER_DESCRIPTION
+    rule: The chooser starts the sequencing deal; no forced clubs opening is modelled.
+    implementation: RentzMatch.choose
+    verification: RentzBoundaryTest.chooserLeadsEachBaseContractAtEveryTableSize
+  - id: PUBLIC-SCORE-SETTLEMENT
+    status: LAB_VARIANT_REQUIRES_REFERENCE_CONFIRMATION
+    source: LAB_CONTRACT
+    rule: Publish trick points only after the full trick, sequence points at deal settlement, and reset deal facts without changing match totals or old snapshots.
+    implementation: RentzMatch.observe
+    verification: RentzSettlementTest.nextDealResetsOnlyDealFactsAndDoesNotMutatePastSnapshots
+  - id: CHOOSER-LEADS
+    status: PUBLISHER_DECLARED
+    source: PUBLISHER_DESCRIPTION
+    rule: The player choosing the deal's game also leads; detailed Rentz opening exceptions remain a separate interpretation.
+    implementation: RentzMatch.choose
+    verification: RentzBoundaryTest.chooserLeadsEachBaseContractAtEveryTableSize
+  - id: FIXED-DISTRIBUTION
+    status: LAB_VARIANT_REQUIRES_REFERENCE_CONFIRMATION
+    source: LAB_CONTRACT
+    rule: Offline fixtures replace only the first distribution, partition the whole active deck and preserve hidden-card boundaries and blind choice.
+    implementation: OpeningDeal
+    verification: RentzBoundaryTest.fixedDistributionRequiresExactlyTheActiveDeck
+  - id: ACE-WITHOUT-CONTINUATION
+    status: PUBLISHER_DECLARED_WITH_ELIGIBILITY_INTERPRETATION
+    source: PUBLISHER_DESCRIPTION
+    rule: The ace retains the actor's turn without waiving legal adjacency; if no continuation fits, the actor passes.
+    implementation: RentzMatch.pass
+    verification: RentzBoundaryTest.aceCanKeepTheTurnWithoutCreatingAPlayableContinuation
+notImplemented:
+  - Original Classic and Traditional numerical presets until independently confirmed.
+  - Optional Totals-plus and disabling selected contracts.
+  - Configurable sequence opening from the jack at every table size.
+  - Refusing a Rentz deal or compulsory blind final choices from other rule families.
+  - Daily deals, ranking, advertisements, achievements and undo.
+  - Reference-app parity or expert-strength AI claims.

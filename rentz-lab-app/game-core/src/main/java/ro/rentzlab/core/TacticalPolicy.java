@@ -1,0 +1,75 @@
+package ro.rentzlab.core;
+
+import java.util.*;
+
+/** Local, public-information continuation policy. No sampled or real opponent hand is accepted. */
+public final class TacticalPolicy {
+    private TacticalPolicy() { }
+    public static Card card(RentzMatch.Observation view,ScoreProfile scoring,PolicySettings settings) {
+        if(view.phase()!=RentzMatch.Phase.PLAY||view.turn()!=view.seat()||view.legal().isEmpty())throw new IllegalArgumentException("Acting player with a legal card required");
+        if(view.contract()==Contract.RENTZ)return sequence(view,settings);
+        if(view.trick().isEmpty()) {
+            if(view.contract()==Contract.WHIST)return highest(view.legal());
+            if(view.contract()==Contract.TEN_CLUBS)return view.legal().stream().filter(c->!target(c,Card.Suit.CLUBS,10)).min(order()).orElse(view.legal().get(0));
+            return lowest(view.legal());
+        }
+        Card.Suit suit=view.trick().get(0).card().suit();
+        boolean follows=view.legal().get(0).suit()==suit;
+        if(!follows) {
+            if(view.contract()==Contract.WHIST||view.contract()==Contract.TEN_CLUBS)
+                return view.legal().stream().filter(c->view.contract()!=Contract.TEN_CLUBS||!target(c,Card.Suit.CLUBS,10)).min(order()).orElse(view.legal().get(0));
+            return view.legal().stream().max(Comparator.<Card>comparingInt(c->penalty(c,view.contract(),scoring)).thenComparing(order())).orElseThrow(java.util.NoSuchElementException::new);
+        }
+        int highest=view.trick().stream().map(TrickRules.Play::card).filter(c->c.suit()==suit).mapToInt(Card::rank).max().orElseThrow(java.util.NoSuchElementException::new);
+        var losing=view.legal().stream().filter(c->c.rank()<highest).collect(java.util.stream.Collectors.toList());
+        var winning=view.legal().stream().filter(c->c.rank()>highest).collect(java.util.stream.Collectors.toList());
+        if(view.contract()==Contract.WHIST) {
+            if(winning.isEmpty())return lowest(view.legal());
+            return view.trick().size()==view.players()-1?lowest(winning):highest(winning);
+        }
+        if(view.contract()==Contract.TEN_CLUBS) {
+            boolean targetVisible=view.trick().stream().anyMatch(p->target(p.card(),Card.Suit.CLUBS,10));
+            if(targetVisible&&!winning.isEmpty())return view.trick().size()==view.players()-1?lowest(winning):highest(winning);
+            if(!losing.isEmpty())return losing.stream().filter(c->!target(c,Card.Suit.CLUBS,10)).min(order()).orElse(lowest(losing));
+            return lowest(view.legal());
+        }
+        if(!losing.isEmpty())return highest(losing);
+        // Last seat already knows the trick is unavoidable: expend strength while it is safe to do so.
+        return view.trick().size()==view.players()-1?highest(view.legal()):lowest(view.legal());
+    }
+    public static Contract choose(RentzMatch.Observation view) {return LabPolicy.choose(view);}
+    private static Card sequence(RentzMatch.Observation view,PolicySettings settings) {
+        var ace=view.legal().stream().filter(c->c.rank()==14).min(order());if(ace.isPresent())return ace.get();
+        Card best=null;double bestValue=Double.NEGATIVE_INFINITY;
+        for(Card card:view.legal()) {
+            var board=new RentzBoard(view.players());for(Card old:view.board())board.play(old);board.play(card);
+            var remaining=new ArrayList<>(view.hand());remaining.remove(card);
+            int chain=0;boolean changed;
+            do {changed=false;for(Card own:new ArrayList<>(remaining))if(board.fits(own)){board.play(own);remaining.remove(own);chain++;changed=true;}}while(changed);
+            double value=chain*settings.ownChainWeight();
+            if(card.rank()==15-2*view.players()) {
+                int next=nextActive(view.seat(),view.handSizes());
+                value+=settings.skipThreatWeight()/(double)view.handSizes().get(next);
+            }
+            int exposed=0;var actual=new RentzBoard(view.players());for(Card old:view.board())actual.play(old);actual.play(card);
+            for(Card unknown:Card.deck(view.players()))if(!view.hand().contains(unknown)&&!view.seen().contains(unknown)&&actual.fits(unknown))exposed++;
+            value-=settings.releaseWeight()*exposed;
+            if(value>bestValue+1e-9||Math.abs(value-bestValue)<=1e-9&&(best==null||order().compare(card,best)<0)){best=card;bestValue=value;}
+        }
+        return Objects.requireNonNull(best);
+    }
+    private static int nextActive(int seat,List<Integer> sizes){for(int step=1;step<=sizes.size();step++){int next=(seat+step)%sizes.size();if(sizes.get(next)>0)return next;}throw new IllegalArgumentException("No active seat");}
+    private static int penalty(Card card,Contract contract,ScoreProfile scoring) {
+        return switch(contract) {
+            case QUEENS -> card.rank()==12?scoring.queenPenalty():0;
+            case DIAMONDS -> card.suit()==Card.Suit.DIAMONDS?scoring.diamondPenalty():0;
+            case KING_HEARTS -> target(card,Card.Suit.HEARTS,13)?scoring.kingPenalty():0;
+            case TOTALS -> (card.rank()==12?scoring.queenPenalty():0)+(card.suit()==Card.Suit.DIAMONDS?scoring.diamondPenalty():0)+(target(card,Card.Suit.HEARTS,13)?scoring.kingPenalty():0);
+            default -> 0;
+        };
+    }
+    private static boolean target(Card card,Card.Suit suit,int rank){return card.suit()==suit&&card.rank()==rank;}
+    static Comparator<Card> order(){return Comparator.comparingInt(Card::rank).thenComparing(c->c.suit().ordinal());}
+    private static Card lowest(List<Card> cards){return cards.stream().min(order()).orElseThrow(java.util.NoSuchElementException::new);}
+    private static Card highest(List<Card> cards){return cards.stream().max(order()).orElseThrow(java.util.NoSuchElementException::new);}
+}

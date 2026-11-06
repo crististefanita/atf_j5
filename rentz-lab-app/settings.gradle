@@ -1,0 +1,12 @@
+pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        def localRepository=providers.gradleProperty('rentz.mavenRepository').orNull
+        if(localRepository) { maven { url=uri(localRepository) } }
+        google(); mavenCentral()
+    }
+}
+rootProject.name = 'RentzLab'
+include ':game-core'
+include ':app'

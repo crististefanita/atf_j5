@@ -1,0 +1,23 @@
+# Laboratorul aplicației Rentz
+
+## Pe scurt
+
+Directorul deține modelul local independent al jocului, jucătorii Normal/Hard și [prezentarea Android minimală](app/README.md). [Motorul](game-core/README.md) rămâne verificabil fără dispozitiv; adaptorul grafic apelează același domeniu și păstrează separat jurnalul privat și observația jucătorului.
+
+## Intrări
+
+| Intrare | Scop |
+|---|---|
+| Maven din proiect | Motor, integrare cu Kit și publicarea verificărilor. |
+| `algorithm-build` | Configurare Gradle exclusiv JVM pentru motor. |
+| `settings.gradle` | Motorul și aplicația Android; SDK-ul este necesar pentru această selecție. |
+
+Dintr-o copie temporară completă, cu JDK și dependențele Gradle disponibile:
+
+```powershell
+.\gradlew.bat -p algorithm-build :game-core:test --offline --no-daemon
+```
+
+Rezultatul califică modelul și profilul declarat; [sursele regulilor](../docs/rentz/ATF_RuleSources.md) dețin limita față de aplicația originală.
+
+[Protocolul Android](../docs/rentz/ATF_Android.md) explică build-ul izolat, identitatea APK-ului și acceptanța prin controale native. Instalarea nu este o condiție pentru evaluarea offline a jucătorilor.

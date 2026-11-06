@@ -1,0 +1,20 @@
+schemaVersion: 1
+role: PARTIAL_REFERENCE_OBSERVATIONS
+referencePackage: com.boonwiz.rentz
+presetIdentity: UNCONFIRMED
+runtimeProfile: false
+players: 4
+sources:
+  choice: https://play-lh.googleusercontent.com/XbSyzNbAyr9sh0O-jG9sr_RFhLnFGoibPkNWAM79pTPnTaGiERKgLtpOxXwyUZ0L_sXOeOLaYsrdQmQwGGmp=w5120-h2880-rw
+  score: https://play-lh.googleusercontent.com/lj2xRIll26m3L6mxft-5RZCkKIpAQcuKKEmxIyK012HFJyClcxVPynek3Ql7998MCXgcyVJpcCHIgLNGxVfOCzY=w5120-h2880-rw
+readings:
+  trickPenalty: {magnitude: 50, certainty: PUBLISHER_SCREENSHOT_OBSERVED, source: choice}
+  queenPenalty: {magnitude: 40, certainty: PUBLISHER_SCREENSHOT_OBSERVED, source: choice}
+  diamondPenalty: {magnitude: 30, certainty: PUBLISHER_SCREENSHOT_OBSERVED, source: choice}
+  kingHeartsPenalty: {magnitude: 200, certainty: PUBLISHER_SCREENSHOT_OBSERVED, source: choice}
+  tenClubsReward: {magnitude: 200, certainty: PUBLISHER_SCREENSHOT_OBSERVED, source: choice}
+  firstFinishReward: {magnitude: 400, certainty: PUBLISHER_SCREENSHOT_OBSERVED, source: choice}
+  whistTrickReward: {magnitude: null, certainty: UNCONFIRMED, source: null}
+  otherFinishRewards: {magnitude: null, certainty: UNCONFIRMED, source: null}
+# The public score sheet shows this multiset; it does not label every finishing position.
+unorderedFourPlayerFinishAwards: [0, 100, 200, 400]

@@ -1,0 +1,13 @@
+schemaVersion: 1
+profile: laboratory
+status: LABORATORY_ONLY
+referencePresetParity: UNCONFIRMED
+penaltyMagnitudes:
+  trick: 10
+  queen: 25
+  diamond: 20
+  kingHearts: 100
+rewards:
+  trick: 10
+  tenClubs: 100
+  finishingPlaces: [300, 200, 100, 0, 0, 0]

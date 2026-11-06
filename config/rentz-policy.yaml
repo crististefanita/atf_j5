@@ -1,0 +1,38 @@
+schemaVersion: 1
+id: RENTZ_PUBLIC_LOOKAHEAD_V1
+status: EXPERIMENTAL_CANDIDATE
+information: OWN_HAND_AND_PUBLIC_EVENTS
+normal:
+  choice: BASELINE_HAND_STRENGTH
+  card: PUBLIC_TACTICAL
+hard:
+  worlds: 8
+  riskWeight: 0.05
+  ownChainWeight: 3.0
+  releaseWeight: 0.3
+  skipThreatWeight: 2.0
+rules:
+  - id: NEGATIVE_VOID_TARGET
+    condition: Off suit, cannot win; dispose of the highest current penalty, then strength.
+    implementation: TacticalPolicy.card
+    verification: RentzAiTest.negativeTargetIsDiscardedWhenOffSuitCannotWin
+  - id: SAFE_LOSER_AND_CHEAP_WINNER
+    condition: Negative game sheds the highest safe loser; last seat in positive Whist spends the cheapest winner.
+    implementation: TacticalPolicy.card
+    verification: RentzAiTest.safeLoserDisposesOfHigherStrengthAndLastWinnerSpendsTheCheapestCard
+  - id: SEQUENCE_OWN_CHAIN
+    condition: Weight owned continuations and exposed opponent frontiers; this feature is not a guaranteed future sequence.
+    implementation: TacticalPolicy.card
+    verification: RentzAiTest.sequenceOpeningFavorsAnOwnedChainAndAcePreservesEveryOtherContinuation
+  - id: PUBLIC_ACE_EXTRA_TURN
+    condition: An available ace disposes of itself without consuming any other legal continuation in the laboratory sequence rules.
+    implementation: SearchPolicy.card
+    verification: RentzAiTest.sequenceOpeningFavorsAnOwnedChainAndAcePreservesEveryOtherContinuation
+  - id: PUBLIC_FEASIBLE_WORLDS
+    condition: Remove played and own cards; respect suit voids and the frontier at every public Rentz pass.
+    implementation: KnowledgeSampler.sample
+    verification: RentzAiTest.sampledWorldsReplayPublicStateAndPreserveActorCards
+  - id: SAME_OBSERVATION_SAME_DECISION
+    condition: Opposing real hands and dealing seed never enter the actor decision.
+    implementation: SearchPolicy.choose
+    verification: RentzAiTest.identicalObservationCannotRevealDifferentRealOpposingHandsOrDealSeeds
