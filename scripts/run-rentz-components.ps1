@@ -71,6 +71,20 @@ $afterPaths=@(foreach($part in $parts){
 $populationChanges=@(Compare-Object @($manifest.path | Sort-Object) @($afterPaths | Sort-Object))
 $healthy=$exit -eq 0 -and $results.Count -ge 4 -and @($results | Where-Object {$_.failed -or $_.errors -or $_.skipped -or $_.tests -lt 1}).Count -eq 0 -and $drift.Count -eq 0
 $healthy=$healthy -and $populationChanges.Count -eq 0
-[ordered]@{status=$(if($healthy){'PASS'}else{'FAIL'});source=$root;stage=$stage;repository=$repository;infrastructureControls=$infrastructureControls;results=$results;drift=$drift;populationChanges=$populationChanges;scope='Offline Rentz model and ATF integration; reference parity and Android E2E are not qualified.'} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath "$RunRoot\result.json" -Encoding utf8NoBOM
+$nativeRuntime='';$nativeRuntimeSha256=''
+if($healthy){
+    [xml]$nativeTest=Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'atf-tests/TEST-atf.rentz.android.RentzNativeFlowTest.xml')
+    $testedClasspath=($nativeTest.testsuite.properties.property|Where-Object{$_.name-eq'java.class.path'}).value
+    if(-not$testedClasspath){throw 'Native adapter needs its tested classpath.'}
+    $entries=@($testedClasspath.Split([IO.Path]::PathSeparator)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)})
+    if(-not$entries.Count){throw 'Native adapter classpath has no explicit entries.'}
+    $classpath=$entries -join [IO.Path]::PathSeparator
+    $adapterSource=Join-Path $stage 'atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java'
+    $adapterClass=Join-Path $stage 'atf-tests/target/test-classes/atf/rentz/android/RentzNativeFlow.class'
+    $nativeRuntime=Join-Path $RunRoot 'native-runtime.json'
+    [ordered]@{mainClass='atf.rentz.android.RentzNativeFlow';classpath=$classpath;source=$adapterSource;sourceSha256=(Get-FileHash -LiteralPath $adapterSource -Algorithm SHA256).Hash;classFile=$adapterClass;classSha256=(Get-FileHash -LiteralPath $adapterClass -Algorithm SHA256).Hash;scope='Compiled test adapter, qualified offline; no Android execution implied'}|ConvertTo-Json|Set-Content -LiteralPath $nativeRuntime -Encoding utf8NoBOM
+    $nativeRuntimeSha256=(Get-FileHash -LiteralPath $nativeRuntime -Algorithm SHA256).Hash
+}
+[ordered]@{status=$(if($healthy){'PASS'}else{'FAIL'});source=$root;stage=$stage;repository=$repository;infrastructureControls=$infrastructureControls;nativeRuntime=$nativeRuntime;nativeRuntimeSha256=$nativeRuntimeSha256;results=$results;drift=$drift;populationChanges=$populationChanges;scope='Offline Rentz model and ATF integration; reference parity and Android E2E are not qualified.'} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath "$RunRoot\result.json" -Encoding utf8NoBOM
 if (-not $healthy) { throw "Component run not qualified; inspect $RunRoot" }
 Write-Output $RunRoot

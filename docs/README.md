@@ -12,6 +12,10 @@ Documentația activă explică Rentz, modelul offline și verificarea independen
 | Ce știm și ce trebuie confirmat? | [Proveniență](rentz/ATF_RuleSources.md) |
 | Cine deține starea, observația și scorul? | [Arhitectură](rentz/ATF_Architecture.md) |
 | Ce verificăm fără interfață? | [Componente](rentz/ATF_Components.md) |
+| Cum evaluăm și îmbunătățim jucătorii? | [Învățare offline](rentz/ATF_Learning.md) |
+| Cine poate salva după pauză sau înlocuire? | [Lifecycle](rentz/ATF_Lifecycle.md) |
+| Cum calificăm aplicația Android? | [Android](rentz/ATF_Android.md) |
+| Unde sunt sursele, fixture-urile și rezultatele? | [Infrastructură](rentz/ATF_Infrastructure.md) |
 | Ce reutilizăm fără reguli Whist? | [Transfer](rentz/ATF_Transfer.md) |
 
 ## Materiale istorice

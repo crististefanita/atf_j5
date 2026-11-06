@@ -5,7 +5,7 @@
 [Registrul Rentz](ATF_Rentz.md) păstrează lacunele active ale regulilor, modelului și integrării. O regulă stabilă are document responsabil în [aria Rentz](../rentz/README.md); rezultatele concrete rămân în depozitul extern.
 
 - [ToDo pentru tabla Rentz și scor](ATF_Rentz_UI_ToDo.md) deține cerințele de prezentare, prioritățile, dependențele și criteriile de acceptanță prin componente și E2E selectiv.
-- [Integritate și calitate](ATF_RentzQuality.md) deține riscurile încă deschise ale lifecycle-ului, coeziunii, adaptoarelor și adopției binare. Contractele stabile ale validării au documentație și regresii la proprietarul lor.
+- [Integritate și calitate](ATF_RentzQuality.md) deține criteriile încă deschise ale adaptoarelor și adopției binare. Validarea, lifecycle-ul și guvernanța sursei au contracte stabile și regresii la proprietarul lor; calificarea nativă rămâne separată.
 
 ## Închidere și transfer
 

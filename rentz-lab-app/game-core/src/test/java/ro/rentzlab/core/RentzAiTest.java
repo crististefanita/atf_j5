@@ -1,5 +1,7 @@
 package ro.rentzlab.core;
 
+import ro.rentzlab.ai.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

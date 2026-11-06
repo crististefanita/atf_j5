@@ -4,6 +4,15 @@
 
 Model Java fără dependențe Android sau ATF în producție. Deține distribuirea, cele opt sub-jocuri, secvențele, rotația, refuzul și scorul unui profil explicit.
 
+## Organizare și dependențe
+
+| Pachet | Responsabilitate |
+|---|---|
+| [`ro.rentzlab.core`](src/main/java/ro/rentzlab/core/) | Vocabularul, starea partidei, legalitatea, secvențele și scorul; nu depinde de politicile AI. |
+| [`ro.rentzlab.ai`](src/main/java/ro/rentzlab/ai/) | Portul jucătorului, tactica, inferența și căutarea; consumă observațiile și API-ul motorului. |
+
+Aliasurile regulilor din YAML se rezolvă prin registrul tipizat al claselor publice, fără a presupune că toate implementările au același pachet. [Guvernanța sursei](../../config/java-source-layout.json) declară rădăcinile și direcțiile permise; mutarea unei clase nu schimbă punctajul sau ponderile.
+
 ## Contracte
 
 | API | Responsabilitate |

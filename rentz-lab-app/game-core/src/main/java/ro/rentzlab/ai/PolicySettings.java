@@ -1,4 +1,4 @@
-package ro.rentzlab.core;
+package ro.rentzlab.ai;
 
 /** Search budget and tactical coefficients; rules and score magnitudes are separate inputs. */
 public record PolicySettings(int worlds,double riskWeight,double ownChainWeight,double releaseWeight,double skipThreatWeight) {

@@ -13,7 +13,7 @@
 
 ## Integrare și infrastructură
 
-[Registrul de calitate](ATF_RentzQuality.md) deține riscurile lifecycle-ului, coeziunea și probele încă lipsă ale adaptoarelor. Validarea strictă a datelor are contract și regresii în [evaluare](../rentz/ATF_Learning.md), [persistență](../../rentz-lab-app/app/README.md) și [infrastructură](../rentz/ATF_Infrastructure.md); aceste probe nu califică automat restul integrării.
+[Registrul de calitate](ATF_RentzQuality.md) deține adopția binară și probele încă lipsă ale adaptoarelor. [Lifecycle-ul](../rentz/ATF_Lifecycle.md), [guvernanța sursei](../rentz/ATF_Components.md) și validarea strictă au contracte și componente proprii; acceptanța nativă a pauzei, relansării și filesystem-ului rămâne distinctă de JVM.
 
 | Prioritate | Responsabil și diferență | Criteriu de închidere |
 |---|---|---|

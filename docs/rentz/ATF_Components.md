@@ -23,6 +23,11 @@ O regulă se verifică prin API-ul minim care îi observă efectul. Partida virt
 | Sesiune Android fără dispozitiv | Refuz fără jurnalizare, proiecție proprie, reluare deterministă, identități incompatibile și eligibilitatea pe nevăzute la ultima alegere. | [GameSessionTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/GameSessionTest.java), executat prin Gradle. |
 | Codec fără dispozitiv | Document unic strict, tipuri și domenii numerice exacte, payload de comandă, format vechi explicit și restaurare validă. | [SessionJsonValidationTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/SessionJsonValidationTest.java), executat prin Gradle. |
 | Infrastructură fără dispozitiv | Descoperirea scripturilor, citiri TEMP cu domeniu explicit, API-uri alternative și linkuri refuzate fără urmărire. | [Controale PowerShell](../../atf-tests/tools/test-workspace-governance.ps1), incluse de lansator înaintea Maven. |
+| Lifecycle fără dispozitiv | Checkpoint durabil, pauză, proprietar înlocuit, calcul necooperant, callback întârziat și refuz IO fără adoptarea candidatului. | [Componente de lifecycle](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/) și [contractul](ATF_Lifecycle.md). |
+| CLI nativ fără dispozitiv | Proces Java real pentru decizie publică, audit, expunere și erori; transport Unicode și scor public corupt confruntat cu vecinul valid. | [RentzNativeFlowTest](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlowTest.java). |
+| Guvernanță Java | Inventar complet, pachet și cale, coeziune fără derogări, importuri și direcția model–AI. | [SourceLayoutTest](../../atf-tests/src/test/java/atf/rentz/governance/SourceLayoutTest.java). |
+
+[Politica sursei](../../config/java-source-layout.json) declară modulele și rădăcinile mixte, plus metadatele, materialele istorice și arborii generați excluși explicit. Un director generat este exclus prin calea sa completă; un pachet Java cu același nume rămâne guvernat. Orice Java activ din afara rădăcinilor este refuzat, iar `tools` nu devine un source-set compilat prin simpla prezență a unui fișier.
 
 ## Oracol și control negativ
 

@@ -1,4 +1,6 @@
-package ro.rentzlab.core;
+package ro.rentzlab.ai;
+
+import ro.rentzlab.core.*;
 
 import java.util.Comparator;
 

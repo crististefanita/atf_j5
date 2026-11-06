@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import ro.rentzlab.core.Contract;
-import ro.rentzlab.core.RentzPlayer;
+import ro.rentzlab.ai.RentzPlayer;
 
 import java.util.List;
 

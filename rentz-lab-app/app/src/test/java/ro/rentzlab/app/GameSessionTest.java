@@ -1,4 +1,6 @@
 package ro.rentzlab.app;
+
+import ro.rentzlab.ai.*;
 import org.junit.Test;
 import ro.rentzlab.core.*;
 import static org.junit.Assert.*;

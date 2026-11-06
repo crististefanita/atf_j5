@@ -38,9 +38,12 @@ Motorul deține distribuirea completă. Politica primește numai mâna actorului
 | `OfflineArena`, `EvaluationRegistry` | Jocuri complete CPU, comparare pereche, expunerea datelor și retenția externă. |
 | `GameSession`, `SessionJson` | Comenzi ale adaptorului Android, jurnal privat reproductibil și observație publică serializată separat. |
 | `SavedJson` | Cititor strict comun JVM/Android; document unic și numere exacte înaintea validării formei și rejucării comenzilor. |
-| `MainActivity` | Prezentare nativă minimală, executor serial pentru mutări, istoric și reluare. |
+| `MainActivity`, `RentzApplication` | Prezentare nativă și compoziția unui repository unic în proces; fără calcul AI sau scriere directă în activitate. |
+| `SessionController`, `SessionRepository`, `FileSessionStorage` | Checkpoint, copie separată, proprietar revocabil și înlocuire atomică; [contractul de lifecycle](ATF_Lifecycle.md) deține intercalările. |
 
 ## Memoria publică
+
+Pachetul `ro.rentzlab.core` deține modelul și regulile, iar `ro.rentzlab.ai` deține politicile și inferența. AI consumă observația motorului; motorul nu importă politica. [Inventarul Java](../../config/java-source-layout.json) și guvernanța permanentă protejează această direcție și rădăcinile Maven/Android.
 
 Înaintea dezvăluirii, mâna proprie poate fi ascunsă pentru alegerea pe nevăzute. În joc, observația conține mâna actorului, dimensiunile adverse, angajamentul pe nevăzute, punctele mâinii, totalurile, ordinea sosirilor și evenimentele publice; seed-ul și mâinile adverse nu sunt câmpuri ale observației. Listele sunt copii imuabile, astfel încât mutările ulterioare nu rescriu o observație deja primită.
 

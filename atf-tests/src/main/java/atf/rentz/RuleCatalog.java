@@ -5,11 +5,16 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.regex.Pattern;
-import ro.rentzlab.core.Card;
+import ro.rentzlab.core.*;
+import ro.rentzlab.ai.*;
 
 /** Audits provenance and live bindings; neither manifest nor partial observations become a runtime profile. */
 public final class RuleCatalog {
     private RuleCatalog() { }
+    private static final Map<String,Class<?>> IMPLEMENTATIONS=java.util.stream.Stream.of(
+            Card.class,Contract.class,OpeningDeal.class,RentzMatch.class,RentzBoard.class,ScoreProfile.class,TrickRules.class,
+            KnowledgeSampler.class,LabPolicy.class,PolicySettings.class,RentzPlayer.class,SearchPolicy.class,TacticalPolicy.class)
+            .collect(java.util.stream.Collectors.toUnmodifiableMap(Class::getSimpleName,type->type));
     public enum Certainty { PUBLISHER_SCREENSHOT_OBSERVED, UNCONFIRMED }
     public record Reading(Integer magnitude,Certainty certainty,String sourceId) { }
     public record Evidence(int players,String presetIdentity,Map<String,Reading> readings,List<Integer> unorderedFinishAwards) { }
@@ -82,10 +87,9 @@ public final class RuleCatalog {
         for(var claim:claims) {
             String[] implementation=claim.implementation().split("\\.",-1);
             if(implementation.length<1||implementation.length>2||!implementation[0].matches("[A-Z][A-Za-z0-9]+"))throw new IllegalArgumentException("Implementation binding");
-            try {
-                var type=Class.forName("ro.rentzlab.core."+implementation[0],false,RuleCatalog.class.getClassLoader());
-                if(implementation.length==2&&Arrays.stream(type.getMethods()).noneMatch(m->m.getName().equals(implementation[1])))throw new IllegalArgumentException("Missing method: "+claim.implementation());
-            }catch(ClassNotFoundException error){throw new IllegalArgumentException("Missing class: "+claim.implementation(),error);}
+            var type=IMPLEMENTATIONS.get(implementation[0]);
+            if(type==null)throw new IllegalArgumentException("Missing class: "+claim.implementation());
+            if(implementation.length==2&&Arrays.stream(type.getMethods()).noneMatch(m->m.getName().equals(implementation[1])))throw new IllegalArgumentException("Missing method: "+claim.implementation());
             String[] test=claim.verification().split("\\.",-1);
             if(test.length!=2||!test[0].matches("[A-Z][A-Za-z0-9]+Test")||!test[1].matches("[A-Za-z][A-Za-z0-9]+"))throw new IllegalArgumentException("Test binding");
             Path path=project.resolve("rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/"+test[0]+".java");

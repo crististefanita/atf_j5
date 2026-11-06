@@ -41,7 +41,11 @@ Fișierul debug este numai citit pentru sincronizare și decizie. Adaptorul nu i
 
 ## Livrabile și limite
 
-[Lansatorul nativ](../../atf-tests/tools/run-android-sanity.ps1) cere calificarea componentelor și a APK-ului, apoi verifică o distribuire completă, istoricul și reluarea după repornirea procesului. [Adaptorul Java](../../atf-tests/tools/RentzNativeFlow.java) separă modurile de decizie, audit și publicare prin biblioteca declarată în `lib`.
+[Lansatorul nativ](../../atf-tests/tools/run-android-sanity.ps1) cere calificarea componentelor și a APK-ului, apoi verifică o distribuire completă, istoricul și reluarea după repornirea procesului. [Adaptorul Java](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) separă modurile de decizie, audit și publicare prin biblioteca declarată în `lib`.
+
+Adaptorul aparține source-set-ului de test și se compilează prin Maven. Rularea componentelor publică `native-runtime.json` cu numele complet al clasei, classpath explicit și identitatea sursei și clasei compilate; lansatorul verifică descriptorul înaintea controlului Android. Nu se compilează manual o copie Java din `tools` și nu se înlocuiește snapshot-ul calificat cu sursa live.
+
+[Lifecycle-ul](ATF_Lifecycle.md) separă checkpoint-ul, proprietatea și calculul de fundal. Probele JVM preced calibrarea nativă pentru pauză, relansare și erori de filesystem; nici compilarea, nici testarea CLI nu constituie execuție pe dispozitiv.
 
 | Livrabil sau limită | Contract |
 |---|---|

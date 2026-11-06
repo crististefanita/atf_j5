@@ -1,5 +1,7 @@
 package atf.rentz;
 
+import ro.rentzlab.ai.*;
+
 import atf.testkit.AtfComponentTest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;

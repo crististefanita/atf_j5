@@ -1,3 +1,7 @@
+package atf.rentz.android;
+
+import ro.rentzlab.ai.*;
+
 import atf.rentz.OfflineGameAudit;
 import atf.reporting.configuration.ReportingSettings;
 import atf.reporting.contract.*;

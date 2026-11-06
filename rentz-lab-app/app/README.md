@@ -8,12 +8,19 @@ Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu tr
 
 | Componentă | Contract |
 |---|---|
-| [MainActivity](src/main/java/ro/rentzlab/app/MainActivity.java) | Controale native, accesibilitate, afișare și coordonarea unui singur executor pentru mutări. |
+| [MainActivity](src/main/java/ro/rentzlab/app/MainActivity.java) | Controale native, afișare și traducerea evenimentelor Android în activare, suspendare și închidere. |
+| [RentzApplication](src/main/java/ro/rentzlab/app/RentzApplication.java) | Un singur repository al sesiunii în proces, partajat între instanțele activității. |
+| [SessionController](src/main/java/ro/rentzlab/app/lifecycle/SessionController.java) | Checkpoint pe proprietar, calcul pe copie separată și refuzul rezultatelor ori callback-urilor depășite. |
+| [SessionRepository](src/main/java/ro/rentzlab/app/lifecycle/SessionRepository.java) | Generația proprietarului și serializarea verificării identității cu scrierea sau callback-ul. |
+| [FileSessionStorage](src/main/java/ro/rentzlab/app/lifecycle/FileSessionStorage.java) | Înlocuire atomică din staging unic în cache; fișierele canonice și originale refuzate sunt păstrate. |
 | [GameSession](src/main/java/ro/rentzlab/app/GameSession.java) | Comenzi validate de motor, jurnal reproductibil și avansarea adversarilor până la următoarea decizie umană. |
 | [SessionJson](src/main/java/ro/rentzlab/app/SessionJson.java) | Serializare explicită; observația actorului și jurnalul privat sunt documente distincte. |
 | [SavedJson](src/main/java/ro/rentzlab/app/SavedJson.java) | Citire strictă a unui singur document și valori exacte înaintea restaurării. |
 | [Componente de sesiune](src/test/java/ro/rentzlab/app/GameSessionTest.java) | Refuz fără jurnalizare, restaurare, istoric și frontiera informației. |
 | [Componente ale salvării](src/test/java/ro/rentzlab/app/SessionJsonValidationTest.java) | Intrări invalide, limite numerice, compatibilitate explicită și vecini valizi. |
+| [Componente de lifecycle](src/test/java/ro/rentzlab/app/lifecycle/) | Intercalări deterministe, proprietar înlocuit, anulare ignorată, refuz IO și livrări întârziate, fără emulator. |
+
+[Contractul de lifecycle](../../docs/rentz/ATF_Lifecycle.md) explică ordinea checkpoint-urilor, reluarea și limita calificării JVM. Politica AI primește numai observația permisă, chiar dacă motorul de fundal reconstruiește privat partida din seed și jurnal.
 
 ## Salvare și reluare
 

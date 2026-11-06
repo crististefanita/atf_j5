@@ -1,5 +1,7 @@
 package atf.rentz;
 
+import ro.rentzlab.ai.*;
+
 import atf.testkit.AtfComponentTest;
 import atf.testkit.assertions.*;
 import org.junit.jupiter.api.*;

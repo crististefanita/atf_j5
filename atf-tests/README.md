@@ -74,4 +74,6 @@ Rezultatul roșu se păstrează înaintea curățării, iar aceleași criterii s
 
 [Build-ul izolat](../scripts/build-rentz-android.ps1) cere o rulare de componente trecută, confruntă sursa motorului, execută testele Gradle și păstrează identitatea APK-ului. [Lansatorul nativ](tools/run-android-sanity.ps1) cere acest receipt înaintea rezervării dispozitivului.
 
-Decizia independentă, auditul și publicarea au moduri separate în [adaptor](tools/RentzNativeFlow.java). [Protocolul Android](../docs/rentz/ATF_Android.md) delimitează distribuirea completă, istoricul și reluarea față de o partidă completă sau echivalența cu aplicația originală.
+Decizia independentă, auditul și publicarea au moduri separate în [adaptorul compilat de test](src/test/java/atf/rentz/android/RentzNativeFlow.java). [Componentele CLI](src/test/java/atf/rentz/android/RentzNativeFlowTest.java) verifică procesele fără ADB; lansatorul consumă descriptorul `native-runtime.json` al rulării calificate, cu classpath explicit și hash-uri.
+
+[Guvernanța sursei](src/test/java/atf/rentz/governance/SourceLayoutTest.java) folosește [inventarul declarat](../config/java-source-layout.json) pentru source-set-uri mixte, acoperirea fișierelor active, coeziune și limite de import. [Protocolul Android](../docs/rentz/ATF_Android.md) delimitează distribuirea completă, istoricul și reluarea față de o partidă completă sau echivalența cu aplicația originală.
