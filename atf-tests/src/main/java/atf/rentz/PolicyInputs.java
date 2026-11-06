@@ -13,14 +13,21 @@ public final class PolicyInputs {
     public static PolicySettings read(Path path,Path project) throws IOException {
         var root=YamlDocuments.read(path);
         fields(root,Set.of("schemaVersion","id","status","information","normal","hard","rules"));
-        if(!root.required("schemaVersion").isInt()||root.required("schemaVersion").intValue()!=1
-                ||!root.required("id").asText().equals("RENTZ_PUBLIC_LOOKAHEAD_V1")||!root.required("status").asText().equals("EXPERIMENTAL_CANDIDATE")
+        int version=root.required("schemaVersion").isInt()?root.required("schemaVersion").intValue():0;
+        if(version<1||version>3
+                ||!root.required("id").asText().equals(version==3?"RENTZ_CONTEXTUAL_SEARCH_V3":version==2?"RENTZ_PUBLIC_MATCH_V2":"RENTZ_PUBLIC_LOOKAHEAD_V1")||!root.required("status").asText().equals("EXPERIMENTAL_CANDIDATE")
                 ||!root.required("information").asText().equals("OWN_HAND_AND_PUBLIC_EVENTS"))throw new IllegalArgumentException("Policy identity or information boundary");
         var normal=root.required("normal");fields(normal,Set.of("choice","card"));
         if(!normal.required("choice").asText().equals("BASELINE_HAND_STRENGTH")||!normal.required("card").asText().equals("PUBLIC_TACTICAL"))throw new IllegalArgumentException("Normal policy binding");
-        var hard=root.required("hard");fields(hard,Set.of("worlds","riskWeight","ownChainWeight","releaseWeight","skipThreatWeight"));
+        var expected=new HashSet<>(Set.of("worlds","riskWeight","ownChainWeight","releaseWeight","skipThreatWeight"));if(version>=2)expected.add("objective");if(version==3)expected.addAll(Set.of("tactic","maxTransitions"));
+        var hard=root.required("hard");fields(hard,expected);
         if(!hard.required("worlds").isInt())throw new IllegalArgumentException("Integer world budget required");
-        var settings=new PolicySettings(hard.required("worlds").intValue(),number(hard,"riskWeight"),number(hard,"ownChainWeight"),number(hard,"releaseWeight"),number(hard,"skipThreatWeight"));
+        if(version>=2&&!hard.required("objective").isTextual()||version==3&&(!hard.required("tactic").isTextual()||!hard.required("maxTransitions").isInt()))throw new IllegalArgumentException("Typed objective, tactic and transition limit required");
+        var objective=version>=2?PolicySettings.Objective.valueOf(hard.required("objective").textValue()):PolicySettings.Objective.HAND_MARGIN;
+        if(version==2&&objective==PolicySettings.Objective.HAND_MARGIN)throw new IllegalArgumentException("Full-match policy requires a match objective");
+        var tactic=version==3?PolicySettings.Tactic.valueOf(hard.required("tactic").textValue()):PolicySettings.Tactic.LEGACY;
+        int limit=version==3?hard.required("maxTransitions").intValue():PolicySettings.DEFAULT_MAX_TRANSITIONS;
+        var settings=new PolicySettings(hard.required("worlds").intValue(),number(hard,"riskWeight"),number(hard,"ownChainWeight"),number(hard,"releaseWeight"),number(hard,"skipThreatWeight"),objective,tactic,limit);
         var rules=root.required("rules");if(!rules.isArray()||rules.isEmpty())throw new IllegalArgumentException("Code-bound strategy rules required");
         var ids=new HashSet<String>();var claims=new ArrayList<RuleCatalog.Claim>();
         for(var rule:rules){fields(rule,Set.of("id","condition","implementation","verification"));String id=rule.required("id").asText();if(!id.matches("[A-Z][A-Z_]+")||!ids.add(id)||!rule.required("condition").isTextual()||rule.required("condition").textValue().isBlank())throw new IllegalArgumentException("Rule identity or condition");claims.add(new RuleCatalog.Claim(id,"LAB_VARIANT_REQUIRES_REFERENCE_CONFIRMATION","LAB_CONTRACT",rule.required("implementation").asText(),rule.required("verification").asText()));}

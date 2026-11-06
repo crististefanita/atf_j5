@@ -13,7 +13,7 @@ Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări 
 | [Motor Rentz](rentz-lab-app/game-core/README.md) | Cărți, levate fără atu, opt sub-jocuri, secvențe, rotație, scor și jucători Normal/Hard. |
 | [Aplicație locală](rentz-lab-app/app/README.md) | Prototip Android nativ, sesiune salvată, istoric și reluare. |
 | [Testare și integrare](atf-tests/README.md) | Profil YAML tipizat, componente, arenă offline și acceptanța bibliotecilor comune. |
-| [Kit](atf-test-kit/README.md) | Clasificare, lifecycle JUnit și păstrarea comparațiilor evaluate. |
+| [Kit](lib/README.TestKit.md#scope-și-integrare) | Clasificare, lifecycle JUnit și păstrarea comparațiilor evaluate. |
 | [Observarea referinței](rentz-reference/README.md) | Identitatea aplicației originale și capturi Android cu rezervare exclusivă. |
 | [Documentație Rentz](docs/rentz/README.md) | Reguli, proveniență, arhitectură, componente și transfer. |
 
@@ -36,7 +36,7 @@ Un rezultat al modelului verifică regula implementată și profilul său. Echiv
 
 ## Pornire
 
-Din rădăcina proiectului, cu JDK 21, Maven și dependențele locale pregătite:
+Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven și dependențele locale pregătite:
 
 ```powershell
 .\scripts\run-rentz-components.ps1

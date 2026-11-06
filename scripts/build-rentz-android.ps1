@@ -13,6 +13,7 @@ Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $root
 if($RunRoot.StartsWith($root+'\',[StringComparison]::OrdinalIgnoreCase)-or$RunRoot-eq$root-or(Test-Path -LiteralPath $RunRoot)){throw 'A fresh external build directory is required.'}
 $component=Get-Content -Raw -LiteralPath (Join-Path $ComponentRun 'result.json')|ConvertFrom-Json
 if($component.status-ne'PASS'){throw 'Qualified offline component source required.'}
+if($component.collection.name-ne'regression'-or-not$component.androidJvm){throw 'Full offline regression including Android JVM is required before assembling an APK.'}
 $lab=Join-Path $root 'rentz-lab-app'
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 $stage=New-AtfWorkspace -Kind android -ProjectRoot $root

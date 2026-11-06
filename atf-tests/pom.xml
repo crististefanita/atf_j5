@@ -5,9 +5,12 @@
   <dependencies>
     <dependency><groupId>com.fasterxml.jackson.dataformat</groupId><artifactId>jackson-dataformat-yaml</artifactId></dependency>
     <dependency><groupId>atf.api</groupId><artifactId>rentz-game-core</artifactId><version>${project.version}</version></dependency>
-    <dependency><groupId>atf.api</groupId><artifactId>atf-test-kit</artifactId><version>${project.version}</version></dependency>
+    <dependency><groupId>atf.api</groupId><artifactId>atf-test-kit</artifactId><version>${atf.testkit.version}</version></dependency>
     <dependency><groupId>atf.api</groupId><artifactId>atf-core</artifactId><version>${atf.core.version}</version></dependency>
     <dependency><groupId>atf.api</groupId><artifactId>atf-reporting</artifactId><version>${atf.reporting.version}</version></dependency>
     <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
+    <dependency><groupId>org.junit.platform</groupId><artifactId>junit-platform-launcher</artifactId><scope>test</scope></dependency>
+    <dependency><groupId>atf.api</groupId><artifactId>atf-console</artifactId><version>${atf.console.version}</version><scope>test</scope></dependency>
+    <dependency><groupId>atf.api</groupId><artifactId>atf-mock</artifactId><version>${atf.mock.version}</version><scope>test</scope></dependency>
   </dependencies>
 </project>

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "activeRoots": [
+    "docs/rentz",
+    "docs/feedback"
+  ],
+  "activeFiles": [
+    "docs/README.md",
+    "docs/history/contract-whist/README.md"
+  ],
+  "historyRoot": "docs/history/contract-whist",
+  "retention": {
+    "mode": "PRESERVE_REFERENCED_HISTORY",
+    "deletion": "EXPLICIT_REVIEW_ONLY",
+    "evidence": "KEEP_EXTERNAL_TARGETS",
+    "originals": "EXTERNAL_IMMUTABLE_AUDIT"
+  },
+  "historical": [
+    {
+      "path": "docs/history/contract-whist/ORIGINAL_INSTRUCTIONS_COVERAGE.md",
+      "originalPath": "docs/ORIGINAL_INSTRUCTIONS_COVERAGE.md",
+      "originalSha256": "69e2b6bc501599d2e480d8c262f49b5926c5ee2ae66a5907d0cc139366aada21",
+      "sha256": "69e2b6bc501599d2e480d8c262f49b5926c5ee2ae66a5907d0cc139366aada21",
+      "status": "HISTORICAL_SNAPSHOT"
+    },
+    {
+      "path": "docs/history/contract-whist/ATF_Android_Whist_Testing.md",
+      "originalPath": "docs/ATF_Android_Whist_Testing.md",
+      "originalSha256": "26b60ac280fa8df0b37bb4c57df9bfb3167d6792d3514c8f28385d002911886f",
+      "sha256": "1167cd2b0c9baeb4705871cebe7b5cdf2fc0f62ef2c42a12ba4be82522b7359f",
+      "status": "HISTORICAL_SNAPSHOT"
+    },
+    {
+      "path": "docs/history/contract-whist/ORIGINAL_ROMANIAN_HARD_LIVE.md",
+      "originalPath": "docs/ORIGINAL_ROMANIAN_HARD_LIVE.md",
+      "originalSha256": "d469ea46b6add487483e7dc7a0aaeec11306785ce9873acd5e4457f53ea4b1f2",
+      "sha256": "2a9ce77d6d03dcbc77c6bc0fae17f6febabc1ac145743753f4b99fa9cdd5a6da",
+      "status": "HISTORICAL_SNAPSHOT"
+    },
+    {
+      "path": "docs/history/contract-whist/ORIGINAL_ROMANIAN_LIVE_Feedback.md",
+      "originalPath": "docs/feedback/ORIGINAL_ROMANIAN_LIVE_Feedback.md",
+      "originalSha256": "7e79f876bbf88197e4e81be5c46856e41ac40db5af69d45a693571371a9d7dea",
+      "sha256": "7e79f876bbf88197e4e81be5c46856e41ac40db5af69d45a693571371a9d7dea",
+      "status": "HISTORICAL_SNAPSHOT"
+    },
+    {
+      "path": "docs/history/contract-whist/REFERENCE_MATCH_Feedback.md",
+      "originalPath": "docs/feedback/REFERENCE_MATCH_Feedback.md",
+      "originalSha256": "855968d1d3f0a4022c3e210599ea193b2abf523037773296392dc8893bd56fc2",
+      "sha256": "22c33147b4b53a82938beaa1305ddd72ca64f292d07a01dc894f7a549b084c55",
+      "status": "HISTORICAL_SNAPSHOT"
+    }
+  ],
+  "launchers": [
+    {
+      "document": "rentz-lab-app/README.md",
+      "script": "scripts/run-rentz-components.ps1",
+      "collection": "quick",
+      "shell": "PowerShell 7",
+      "jdk": "JDK 21",
+      "sdk": false
+    },
+    {
+      "document": "rentz-lab-app/game-core/README.md",
+      "script": "scripts/run-rentz-components.ps1",
+      "collection": "learning",
+      "shell": "PowerShell 7",
+      "jdk": "JDK 21",
+      "sdk": false
+    },
+    {
+      "document": "rentz-lab-app/app/README.md",
+      "script": "scripts/run-rentz-components.ps1",
+      "collection": "android-jvm",
+      "shell": "PowerShell 7",
+      "jdk": "JDK 21",
+      "sdk": true
+    }
+  ]
+}

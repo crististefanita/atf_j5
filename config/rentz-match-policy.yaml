@@ -1,0 +1,29 @@
+schemaVersion: 3
+id: RENTZ_CONTEXTUAL_SEARCH_V3
+status: EXPERIMENTAL_CANDIDATE
+information: OWN_HAND_AND_PUBLIC_EVENTS
+normal:
+  choice: BASELINE_HAND_STRENGTH
+  card: PUBLIC_TACTICAL
+hard:
+  worlds: 8
+  riskWeight: 0.05
+  ownChainWeight: 3.0
+  releaseWeight: 0.3
+  skipThreatWeight: 2.0
+  objective: MATCH_WIN_SHARE
+  tactic: LEGACY
+  maxTransitions: 65536
+rules:
+  - id: TERMINAL_WIN_SHARE
+    condition: Score simulated final winners with split ties; the estimate is conditional on the rollout model, not calibrated real-world probability.
+    implementation: MatchUtility.value
+    verification: RentzMatchStrategyTest.matchWinUtilitySharesTiesAndNeverConfusesMarginWithVictory
+  - id: PUBLIC_MATCH_PROGRESS
+    condition: Rebuild scores and remaining choices from the complete public hand ledger; the dealing seed and real opposing cards are absent.
+    implementation: FullMatchRollout.restore
+    verification: RentzMatchStrategyTest.identicalCurrentCardsUsePublicTotalsToDistinguishALockedWinFromALockedLoss
+  - id: FUTURE_CONTRACT_ALLOCATION
+    condition: Every alternative continues the remaining schedule with the same hypothetical future shuffles; choosing a contract consumes its future availability.
+    implementation: FullMatchRollout.complete
+    verification: RentzMatchStrategyTest.publicProgressPreservesRemainingChoicesAndIsImmutable

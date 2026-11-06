@@ -5,7 +5,7 @@
 [Registrul Rentz](ATF_Rentz.md) păstrează lacunele active ale regulilor, modelului și integrării. O regulă stabilă are document responsabil în [aria Rentz](../rentz/README.md); rezultatele concrete rămân în depozitul extern.
 
 - [ToDo pentru tabla Rentz și scor](ATF_Rentz_UI_ToDo.md) deține cerințele de prezentare, prioritățile, dependențele și criteriile de acceptanță prin componente și E2E selectiv.
-- [Integritate și calitate](ATF_RentzQuality.md) deține criteriile încă deschise ale adaptoarelor și adopției binare. Validarea, lifecycle-ul și guvernanța sursei au contracte stabile și regresii la proprietarul lor; calificarea nativă rămâne separată.
+- [Integritate și calitate](ATF_RentzQuality.md) deține criteriile strategice și documentare încă deschise. Validarea, lifecycle-ul, guvernanța sursei și [calificarea consumatorului](../rentz/ATF_Qualification.md) au contracte și probe proprii; calificarea nativă rămâne separată.
 
 ## Închidere și transfer
 
@@ -19,4 +19,4 @@
 
 ## Materiale istorice
 
-[Observarea Romanian Hard](ORIGINAL_ROMANIAN_LIVE_Feedback.md) și [partida-model anterioară](REFERENCE_MATCH_Feedback.md) rămân materiale Contract Whist. Nu intră în calificarea Rentz și nu sunt backlog-ul regulilor noului joc.
+[Arhiva Contract Whist](../history/contract-whist/README.md) păstrează separat observațiile și feedback-urile anterioare, cu inventar și retenție verificabile. Aceste instantanee nu intră în calificarea Rentz.

@@ -13,6 +13,7 @@ Rentz combină sub-jocuri cu levate și construirea secvențelor pe culori. Mode
 | Stare, observație și politică | [Arhitectură](ATF_Architecture.md) |
 | Proprietar, checkpoint și calcul suspendabil | [Lifecycle](ATF_Lifecycle.md) |
 | Cazuri mici, frontiere și oracole | [Componente](ATF_Components.md) |
+| Adopție binară, colecții, procese și publicare | [Calificare offline](ATF_Qualification.md) |
 | Politici, memorie publică, lumi ipotetice și evaluare | [Învățare și joc offline](ATF_Learning.md) |
 | Sesiune nativă, identitate APK și acceptanță delimitată | [Android](ATF_Android.md) |
 | Inventar, workspace-uri și curățare verificabilă | [Infrastructură](ATF_Infrastructure.md) |

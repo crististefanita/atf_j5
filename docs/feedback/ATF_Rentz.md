@@ -45,4 +45,4 @@ Kitul și JAR-urile au responsabilități comune, iar legalitatea și scorul apa
 
 [Kit J0](../../../atf_j0/docs/feedback/ATF_Common_Test_Support_Feedback.md#kit-library-151--distribuție-unică-fără-surse-paralele) deține pachetul și API-ul. J5 păstrează proba Rentz și scriptul TMP.
 
-library-provenance.json declară încă consumer atf_j4: păstrați acel fapt ca proveniență a copiei și înregistrați distinct adopția J5 înaintea calificării noului binar. Aceasta nu este acceptanță moștenită și nu cere inițializare Git.
+Identitatea copiei inițiale rămâne în istoricul provenienței; adopția Kit este înregistrată distinct pentru J5. Componentele Rentz verifică binarul, iar scriptul păstrează inventarul reactorului fără surse Kit; acceptanța Android rămâne separată.

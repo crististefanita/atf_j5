@@ -46,6 +46,20 @@ Kitul și biblioteca păstrează comparația evaluată. Regula și oracolul se d
 
 ## Ce cere un consumator nou
 
+| Lecție strategică reutilizabilă | Aplicare în alt joc |
+|---|---|
+| Obiectiv înainte de ponderi | Separați punctele medii, probabilitatea modelată de victorie și resursele rămase; numiți explicit orizontul. |
+| Viitor ipotetic comun | Comparați alternativele pe aceleași scenarii fezabile, fără acces la viitorul real al simulatorului. |
+| Memorie publică suficientă | Reconstruiți progresul și resursele consumate dintr-un registru imuabil; nu transmiteți jurnalul privat politicii. |
+| Orizont lung cu model finit | Testați separat reconstrucția și calitatea continuării; o simulare mai lungă poate agrava eroarea modelului. |
+| Unitate experimentală | Agregați pozițiile corelate înaintea intervalului de incertitudine; o rotație nu este o distribuire nouă. |
+| Dreptul de a refuza promovarea | Păstrați reperul, lotul rezervat și rezultatele negative; o implementare corectă nu implică progres strategic. |
+| Control la aceeași poziție | Înlocuiți numai actorul evaluat; o masă uniform mai slabă nu este termenul de comparație pentru progresul versiunii noi. |
+| Model propriu și advers | Rafinarea continuării proprii nu rescrie implicit comportamentul adversarilor; declarați și testați ambele roluri. |
+| Limită și consum | Numărați lucrul reproductibil și măsurați timpul separat; același plafon nu dovedește același cost consumat. |
+| Dovadă înainte de sampling | O frontieră demonstrabilă public poate închide o decizie; păstrați incertitudinea unde premisa nu este confirmată. |
+| Oprire fără favorizare | Confirmați un scenariu numai după toate alternativele; o evaluare incompletă nu justifică preferința pentru prima opțiune. |
+
 Definiți pachetul, regulile, rolurile, observația, acțiunile, terminarea și unitățile scorului înaintea reutilizării interfeței. Configurația testării primește rădăcină și inventar explicite; căile sau modulele proiectului-sursă nu devin precondiții ascunse.
 
 | Regim | Identitate și limită |

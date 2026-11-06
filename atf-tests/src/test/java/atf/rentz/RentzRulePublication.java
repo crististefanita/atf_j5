@@ -3,6 +3,8 @@ package atf.rentz;
 import atf.reporting.configuration.ReportingSettings;
 import atf.reporting.contract.*;
 import atf.reporting.extent.session.ExtentReportSession;
+import atf.reporting.model.timing.ReportPhaseTiming;
+import atf.reporting.model.diagnostic.ReportPhaseDiagnostic;
 import atf.testkit.assertions.*;
 import java.nio.file.*;
 import java.util.*;
@@ -10,7 +12,8 @@ import java.util.*;
 /** Maps evaluated Kit checks; never recomputes a business verdict or implements a renderer. */
 final class RentzRulePublication implements ComponentAuditExtension.Publication {
     static final class Report implements AutoCloseable {
-        final ExtentReportSession session;
+        final AtfReportPorts.Session session;
+        Report(AtfReportPorts.Session session) { this.session=Objects.requireNonNull(session); }
         Report() throws Exception {
             Path output=Path.of(System.getProperty("rentz.report.output","target/rentz-rules-extent.html")).toAbsolutePath();
             Files.createDirectories(output.getParent());session=new ExtentReportSession(output,ReportingSettings.defaults());
@@ -28,6 +31,8 @@ final class RentzRulePublication implements ComponentAuditExtension.Publication 
             for(var phaseResult:result.phases()){
                 var phaseStatus=AtfReportStatus.valueOf(phaseResult.outcome()==ComponentAssertionAudit.Outcome.ABORTED?"SKIP":phaseResult.outcome().name());
                 try(var phase=scenario.startPhase(phaseResult.phase().name());var checks=phase.startAssertionStep("Comparații evaluate prin Test Kit")){
+                    phaseResult.timing().ifPresent(timing->phase.executionTiming(new ReportPhaseTiming(timing.elapsed(),timing.intervals())));
+                    if(!phaseResult.diagnostic().isBlank())phase.diagnostic(phaseResult.outcome()==ComponentAssertionAudit.Outcome.ABORTED?ReportPhaseDiagnostic.Kind.EXECUTION_ABORTED:ReportPhaseDiagnostic.Kind.EXECUTION_FAILURE,phaseResult.diagnostic());
                     checks.assertions(phaseResult.checks().stream().map(c->new AtfAssertion(c.name(),c.expected(),c.actual(),c.passed())).toList());
                     checks.complete(phaseStatus);phase.complete(phaseStatus);
                 }

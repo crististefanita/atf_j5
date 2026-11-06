@@ -1,19 +1,76 @@
 {
   "packageLimit": 8,
-  "mavenModules": ["atf-test-kit", "rentz-lab-app/game-core", "atf-tests"],
-  "excludedTrees": [".git", ".idea", "reference-tests", "atf-test-kit/target", "atf-tests/target", "rentz-lab-app/game-core/target", "rentz-lab-app/build", "rentz-lab-app/app/build", "rentz-lab-app/game-core/build", "rentz-lab-app/.gradle", "rentz-lab-app/algorithm-build/.gradle"],
+  "mavenModules": [
+    "rentz-lab-app/game-core",
+    "atf-tests"
+  ],
+  "excludedTrees": [
+    ".git",
+    ".idea",
+    "reference-tests",
+    "atf-tests/target",
+    "rentz-lab-app/game-core/target",
+    "rentz-lab-app/build",
+    "rentz-lab-app/app/build",
+    "rentz-lab-app/game-core/build",
+    "rentz-lab-app/.gradle",
+    "rentz-lab-app/algorithm-build/.gradle"
+  ],
   "roots": [
-    {"path":"atf-test-kit/src/main/java","role":"main","forbidden":["android","ro.rentzlab","atf.reporting"]},
-    {"path":"atf-test-kit/src/test/java","role":"test","forbidden":[]},
-    {"path":"rentz-lab-app/game-core/src/main/java","role":"main","forbidden":["android","ro.rentzlab.app","org.junit","atf.testkit","atf.reporting"]},
-    {"path":"rentz-lab-app/game-core/src/test/java","role":"test","forbidden":[]},
-    {"path":"rentz-lab-app/app/src/main/java","role":"main","forbidden":["org.junit","atf.testkit","atf.reporting"]},
-    {"path":"rentz-lab-app/app/src/test/java","role":"test","forbidden":[]},
-    {"path":"atf-tests/src/main/java","role":"main","forbidden":["android"]},
-    {"path":"atf-tests/src/test/java","role":"test","forbidden":[]},
-    {"path":"atf-tests/tools","role":"tools","forbidden":[]}
+    {
+      "path": "rentz-lab-app/game-core/src/main/java",
+      "role": "main",
+      "forbidden": [
+        "android",
+        "ro.rentzlab.app",
+        "org.junit",
+        "atf.testkit",
+        "atf.reporting"
+      ]
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java",
+      "role": "test",
+      "forbidden": []
+    },
+    {
+      "path": "rentz-lab-app/app/src/main/java",
+      "role": "main",
+      "forbidden": [
+        "org.junit",
+        "atf.testkit",
+        "atf.reporting"
+      ]
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java",
+      "role": "test",
+      "forbidden": []
+    },
+    {
+      "path": "atf-tests/src/main/java",
+      "role": "main",
+      "forbidden": [
+        "android"
+      ]
+    },
+    {
+      "path": "atf-tests/src/test/java",
+      "role": "test",
+      "forbidden": []
+    },
+    {
+      "path": "atf-tests/tools",
+      "role": "tools",
+      "forbidden": []
+    }
   ],
   "productionBoundaries": [
-    {"package":"ro.rentzlab.core","forbidden":["ro.rentzlab.ai"]}
+    {
+      "package": "ro.rentzlab.core",
+      "forbidden": [
+        "ro.rentzlab.ai"
+      ]
+    }
   ]
 }

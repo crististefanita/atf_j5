@@ -26,7 +26,7 @@ Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 $stage=New-AtfWorkspace -Kind reference -ProjectRoot $j5Root
 New-Item -ItemType Directory -Path $RunRoot | Out-Null
 Copy-Item -LiteralPath "$root\pom.xml","$root\atf.yaml","$root\lib","$root\config" -Destination $stage -Recurse
-foreach($module in @('atf-test-kit','atf-mock','atf-validation','atf-console','atf-android','atf-test-android')){
+foreach($module in @('atf-validation','atf-test-android','atf-tests')){
     foreach($file in Get-ChildItem -LiteralPath "$root\$module" -File -Recurse){
         $relative=[IO.Path]::GetRelativePath("$root\$module",$file.FullName)
         if(($relative -split '[\\/]') | Where-Object {$_ -in @('target','build','.git','.gradle','artifacts')}){continue}

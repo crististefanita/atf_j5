@@ -2,7 +2,7 @@
 
 ## Pe scurt
 
-Java 21 și Maven; patru JAR-uri thin, cu tranzitivele din POM. Ghidurile sunt autonome față de sursele producătorului.
+Java 21 și Maven; cinci JAR-uri thin, cu tranzitivele din POM. Ghidurile sunt autonome față de sursele producătorului.
 
 | Ghid | Artefact, grup `atf.api` | Utilizare |
 |---|---|---|
@@ -10,10 +10,11 @@ Java 21 și Maven; patru JAR-uri thin, cu tranzitivele din POM. Ghidurile sunt a
 | [Reporting](README.Reporting.md) | `atf-reporting` | Extent/fallback și dovezi auditabile. |
 | [Console](README.Console.md) | `atf-console` | Diagnostic Maven și IntelliJ. |
 | [Mock](README.Mock.md) | `atf-mock` | Componente și contracte HTTP offline. |
+| [Test Kit](README.TestKit.md) | `atf-test-kit` · audit și lifecycle JUnit neutru | Clasificare, comparații și suportul testelor. |
 
 ## Integrare
 
-1. Într-o copie TMP a unui consumer ATF, `mvn -B -ntp -N validate` instalează perechile din lib în repository-ul Maven selectat.
+1. Într-un workspace creat prin [infrastructura proiectului](../docs/rentz/ATF_Infrastructure.md), `mvn -B -ntp -N validate` instalează perechile din lib în repository-ul Maven selectat.
 2. Declarați dependența în modulul apelant; coordonatele și versiunea sunt în POM-ul alăturat JAR-ului.
 3. IntelliJ folosește același JDK și repository Maven; reîncărcați POM-ul rădăcină.
 
@@ -35,9 +36,9 @@ Declarați, de exemplu, `atf.api:atf-reporting:<versiunea din POM>` în dependen
 
 ## Identitate și verificare
 
-- O singură pereche JAR/POM per bibliotecă și aceste cinci ghiduri, direct în lib.
+- O singură pereche JAR/POM per bibliotecă, indexul și cele cinci ghiduri, direct în lib.
 - În ATF, pom.xml selectează versiunile; library-provenance.json păstrează hash-urile și originea.
-- Guvernanța și acceptanța rulează în TMP; fiecare consumer verifică propriul profil și classpath.
+- [Poarta adopției](../docs/rentz/ATF_Qualification.md#poarta-bibliotecilor) verifică perechile, proveniența și CodeSource; fiecare consumator califică propriul profil și classpath într-un workspace înregistrat.
 
 ## Alegerea verificării minime
 
@@ -47,6 +48,7 @@ Declarați, de exemplu, `atf.api:atf-reporting:<versiunea din POM>` în dependen
 | Reporting | [Exemplul minim](README.Reporting.md#exemplu-minim) | Publicarea încheiată, urmată de propagarea comparației eșuate. |
 | Console | [Exemplul minim](README.Console.md#exemplu-minim) | Mesaj vizibil sau consolă dezactivată, după politica explicită. |
 | Mock | [Exemplul minim](README.Mock.md#exemplu-minim) | Configurația și cererea produc răspunsul ori fallback-ul declarat. |
+| Test Kit | [Exemplul minim](README.TestKit.md#exemplu-minim) | Comparație evaluată o dată, PASS/FAIL și cauza JUnit păstrate. |
 
 Verificați întâi compilarea pe perechile fizice JAR/POM, apoi comportamentul fragmentului. Contractele aplicației, transportul real și prezentarea interactivă se califică separat în consumer.
 

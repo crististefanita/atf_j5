@@ -34,6 +34,7 @@ var total = body.path("total").decimalValue();
 ## Utilizare în ATF
 
 - Injectați un `ApiTransport` în `ApiExecutor`; transportul real sau mock se alege explicit la compoziție.
+- `HttpClientTransport` și `UrlConnectionTransport` propagă anularea către operația deținută; fallback-ul include body-ul în deadline. Anularea nu dovedește rollback și nu autorizează replay.
 - Reutilizați snapshot-ul de configurație al rulării; oracolul, aserțiunile și verdictul de business aparțin consumerului.
 - Păstrați modelul original pentru comparație; redactarea și preview-ul se aplică la publicarea diagnosticului.
 - Core expune porturi neutre; [Console](README.Console.md), [Mock](README.Mock.md) și [Reporting](README.Reporting.md) au roluri distincte.

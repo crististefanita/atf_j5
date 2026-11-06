@@ -22,8 +22,10 @@ $receipt=Get-Content -Raw -LiteralPath (Join-Path $ComponentRun 'result.json')|C
 if($receipt.status-ne'PASS'){throw 'A passing frozen component run is required.'}
 $stage=[IO.Path]::GetFullPath($receipt.stage)
 if(-not(Test-Path -LiteralPath $stage -PathType Container)){throw 'Frozen compiled snapshot is unavailable; do not replace it with HEAD.'}
-[xml]$xml=Get-Content -Raw -LiteralPath (Join-Path $ComponentRun 'atf-tests/TEST-atf.rentz.RentzRuleComponentTest.xml')
-$classpath=($xml.testsuite.properties.property|Where-Object {$_.name-eq'java.class.path'}).value
+if(-not$receipt.arenaRuntime-or-not$receipt.arenaRuntimeSha256-or(Get-FileHash -LiteralPath $receipt.arenaRuntime).Hash-ne$receipt.arenaRuntimeSha256){throw 'Qualified arena runtime descriptor required'}
+$runtime=Get-Content -Raw -LiteralPath $receipt.arenaRuntime|ConvertFrom-Json
+if($runtime.mainClass-ne'atf.rentz.OfflineArena'-or$runtime.classFile-ne(Join-Path $stage 'atf-tests/target/classes/atf/rentz/OfflineArena.class')-or(Get-FileHash -LiteralPath $runtime.classFile).Hash-ne$runtime.classSha256){throw 'Arena compiled class identity differs'}
+$classpath=$runtime.classpath
 if(-not$classpath){throw 'Effective tested classpath missing.'}
 $entries=@($classpath.Split([IO.Path]::PathSeparator)|Where-Object {-not[string]::IsNullOrWhiteSpace($_)})
 $classpath=$entries -join [IO.Path]::PathSeparator

@@ -7,13 +7,16 @@ import java.util.*;
 import java.util.regex.Pattern;
 import ro.rentzlab.core.*;
 import ro.rentzlab.ai.*;
+import ro.rentzlab.ai.search.DecisionEvaluator;
+import ro.rentzlab.ai.search.RolloutBudget;
+import ro.rentzlab.ai.tactics.TargetTactics;
 
 /** Audits provenance and live bindings; neither manifest nor partial observations become a runtime profile. */
 public final class RuleCatalog {
     private RuleCatalog() { }
     private static final Map<String,Class<?>> IMPLEMENTATIONS=java.util.stream.Stream.of(
             Card.class,Contract.class,OpeningDeal.class,RentzMatch.class,RentzBoard.class,ScoreProfile.class,TrickRules.class,
-            KnowledgeSampler.class,LabPolicy.class,PolicySettings.class,RentzPlayer.class,SearchPolicy.class,TacticalPolicy.class)
+            KnowledgeSampler.class,LabPolicy.class,PolicySettings.class,RentzPlayer.class,SearchPolicy.class,TacticalPolicy.class,MatchUtility.class,FullMatchRollout.class,DecisionEvaluator.class,RolloutBudget.class,TargetTactics.class)
             .collect(java.util.stream.Collectors.toUnmodifiableMap(Class::getSimpleName,type->type));
     public enum Certainty { PUBLISHER_SCREENSHOT_OBSERVED, UNCONFIRMED }
     public record Reading(Integer magnitude,Certainty certainty,String sourceId) { }

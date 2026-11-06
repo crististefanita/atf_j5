@@ -29,10 +29,13 @@ Motorul deține distribuirea completă. Politica primește numai mâna actorului
 | `RentzBoard` | Deschidere și extindere contiguă pe culori. |
 | `ScoreProfile` | Punctaj, cumul și protecție numerică. |
 | `RentzMatch` | Faze, alegător, rotație, refuz, închidere și istoric. |
-| `Observation` | Mână proprie, dimensiuni adverse, masă și evenimente publice. |
+| `Observation` | Mână proprie, dimensiuni adverse, masă, evenimente publice și registru imuabil al mâinilor încheiate. |
+| `MatchUtility`, `FullMatchRollout` | Separă obiectivele finale și continuarea ipotetică; [învățarea](ATF_Learning.md) definește portofoliul rămas și limitele candidatului offline. |
 | `LabPolicy` | Reper determinist și explicabil, fără calificare expert. |
 | `RentzPlayer`, `TacticalPolicy`, `SearchPolicy` | Port Normal/Hard, tactică publică și compararea alternativelor pe lumi comune. |
 | `KnowledgeSampler`, `PolicySettings` | Distribuiri ipotetice fezabile și buget/ponderi distincte de regulile de scor. |
+| `DecisionEvaluator`, `RolloutBudget` | Evaluare în pachetul `ai.search`, cu lot comun atomic și plafon de tranziții. Măsurarea lucrului nu este o limită de timp CPU. |
+| `TargetTactics` | Dovada țintei și costul local în `ai.tactics`; politica proprie și modelul adversarilor au roluri separate. |
 | `RuleProfiles` | Citire strictă a profilului YAML în infrastructura JVM. |
 | `RuleCatalog` | Proveniență parțială și legături ale manifestului către API-ul și declarațiile de test curente. |
 | `OfflineArena`, `EvaluationRegistry` | Jocuri complete CPU, comparare pereche, expunerea datelor și retenția externă. |
@@ -45,9 +48,13 @@ Motorul deține distribuirea completă. Politica primește numai mâna actorului
 
 Pachetul `ro.rentzlab.core` deține modelul și regulile, iar `ro.rentzlab.ai` deține politicile și inferența. AI consumă observația motorului; motorul nu importă politica. [Inventarul Java](../../config/java-source-layout.json) și guvernanța permanentă protejează această direcție și rădăcinile Maven/Android.
 
-Înaintea dezvăluirii, mâna proprie poate fi ascunsă pentru alegerea pe nevăzute. În joc, observația conține mâna actorului, dimensiunile adverse, angajamentul pe nevăzute, punctele mâinii, totalurile, ordinea sosirilor și evenimentele publice; seed-ul și mâinile adverse nu sunt câmpuri ale observației. Listele sunt copii imuabile, astfel încât mutările ulterioare nu rescriu o observație deja primită.
-
-Evenimentul păstrează actorul, acțiunea, cartea și dimensiunea tablei înaintea acțiunii. Un pas descrie frontiera din acel moment; alte mutări pot deschide continuări noi, deci pasul nu dovedește imposibilitatea permanentă de a juca.
+| Informație | Contract |
+|---|---|
+| Mâna proprie | Poate rămâne ascunsă înaintea alegerii pe nevăzute; în joc este vizibilă actorului. |
+| Observație publică | Dimensiunile adverse, angajamentul pe nevăzute, punctele mâinii, totalurile, ordinea sosirilor și evenimentele publice; exclude seed-ul și mâinile adverse. |
+| Stabilitate | Listele produse de motor sunt copii imuabile; mutările ulterioare nu rescriu o observație deja primită. `completedHands` păstrează și vectorii de puncte/totaluri imuabili. |
+| Eveniment | Actorul, acțiunea, cartea și dimensiunea tablei înaintea acțiunii. |
+| Pas | Descrie frontiera curentă; alte mutări pot deschide continuări, deci nu dovedește imposibilitatea permanentă de a juca. |
 
 ## Configurație și trasabilitate
 
@@ -56,6 +63,7 @@ Evenimentul păstrează actorul, acțiunea, cartea și dimensiunea tablei înain
 | [Punctaj](../../config/rentz-score-profiles.yaml) | `RuleProfiles` → `ScoreProfile` | Configurație executabilă, tipizată, cu identitate de laborator și probă de paritate cu fabrica Java. |
 | [Manifest](../../config/rentz-rules.yaml) | `RuleCatalog.claims` și auditul legăturilor | Statut, proveniență și referințe către implementare și componente; nu interpretează strategie. |
 | [Observații](../../config/rentz-reference-observations.yaml) | `RuleCatalog.evidence` | Informație numerică parțială despre sursă, cu necunoscute păstrate; nu produce profil executabil. |
+| [Strategie Hard](../../config/rentz-hard-policy.yaml) și [profil contextual](../../config/rentz-contextual-policy.yaml) | `PolicyInputs` → `PolicySettings` | Obiectiv, tactică, număr de lumi și plafon de tranziții tipizate; dovada publică este separată de euristicile experimentale. |
 
 Toate intrările refuză chei duplicate, câmpuri necunoscute și documente YAML suplimentare. Schimbarea unei reguli cere reconcilierea codului, componentelor și statutului; auditul legăturilor nu demonstrează semantic adevărul regulii sau execuția testului indicat.
 

@@ -15,6 +15,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @AtfComponentTest
 class SourceLayoutTest {
+    @Test void androidCoreCannotCallCollectionFactoriesUnavailableWithoutDesugaring()throws Exception{
+        var forbidden=java.util.regex.Pattern.compile("\\b(?:List|Set|Map)\\s*\\.\\s*(?:of|copyOf|ofEntries)\\s*\\(");
+        assertTrue(forbidden.matcher("List.copyOf(values)").find());assertTrue(forbidden.matcher("java.util.Set.of(value)").find());
+        assertFalse(forbidden.matcher("EnumSet.copyOf(values)").find());
+        Path base=project().resolve("rentz-lab-app/game-core/src/main/java");var findings=new ArrayList<String>();
+        try(var walk=Files.walk(base)){for(Path file:walk.filter(Files::isRegularFile).filter(p->p.toString().endsWith(".java")).toList()){
+            if(forbidden.matcher(AtfJavaSourceReferences.codeOnly(Files.readString(file))).find())findings.add(base.relativize(file).toString());
+        }}
+        assertTrue(findings.isEmpty(),()->"Collection factories exceed minSdk without core-library desugaring: "+findings);
+    }
     private static Path project(){
         Path root=Path.of(System.getProperty("user.dir")).toAbsolutePath();
         while(root!=null&&!Files.isRegularFile(root.resolve("config/java-source-layout.json")))root=root.getParent();
@@ -56,7 +66,7 @@ class SourceLayoutTest {
         var document=factory.newDocumentBuilder().parse(root.resolve("pom.xml").toFile()).getDocumentElement();var modules=new ArrayList<String>();
         for(var node=document.getFirstChild();node!=null;node=node.getNextSibling())if(node instanceof Element element&&element.getTagName().equals("modules"))for(var child=element.getFirstChild();child!=null;child=child.getNextSibling())if(child instanceof Element module&&module.getTagName().equals("module"))modules.add(module.getTextContent().strip());
         assertEquals(strings(policy(root).required("mavenModules")),modules);
-        for(String name:List.of("atf-core","atf-reporting","atf-console","atf-mock","atf-reporting-tests"))assertFalse(Files.exists(root.resolve(name)),name);
+        for(String name:List.of("atf-core","atf-reporting","atf-console","atf-mock","atf-test-kit","atf-reporting-tests"))assertFalse(Files.exists(root.resolve(name)),name);
     }
     @Test void lexicalControlsRejectMissingOrWrongPackagesDuplicateImportsAndRealDependencies(){
         assertEquals(List.of("GOV-PACKAGE-MISSING"),SourceLayoutRules.inspect("C.java","class C {}",List.of()));

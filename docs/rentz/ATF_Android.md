@@ -43,12 +43,12 @@ Fișierul debug este numai citit pentru sincronizare și decizie. Adaptorul nu i
 
 [Lansatorul nativ](../../atf-tests/tools/run-android-sanity.ps1) cere calificarea componentelor și a APK-ului, apoi verifică o distribuire completă, istoricul și reluarea după repornirea procesului. [Adaptorul Java](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) separă modurile de decizie, audit și publicare prin biblioteca declarată în `lib`.
 
-Adaptorul aparține source-set-ului de test și se compilează prin Maven. Rularea componentelor publică `native-runtime.json` cu numele complet al clasei, classpath explicit și identitatea sursei și clasei compilate; lansatorul verifică descriptorul înaintea controlului Android. Nu se compilează manual o copie Java din `tools` și nu se înlocuiește snapshot-ul calificat cu sursa live.
-
-[Lifecycle-ul](ATF_Lifecycle.md) separă checkpoint-ul, proprietatea și calculul de fundal. Probele JVM preced calibrarea nativă pentru pauză, relansare și erori de filesystem; nici compilarea, nici testarea CLI nu constituie execuție pe dispozitiv.
-
 | Livrabil sau limită | Contract |
 |---|---|
+| Compilare Maven | Adaptorul aparține source-set-ului de test; nu se compilează manual o copie Java din `tools`. |
+| Descriptorul `native-runtime.json` | Numele complet al clasei, classpath explicit și identitatea sursei și clasei compilate; lansatorul verifică descriptorul și păstrează snapshot-ul calificat. |
+| [Lifecycle](ATF_Lifecycle.md) | Checkpoint, proprietate și calcul de fundal; probele JVM preced calibrarea nativă pentru pauză, relansare și erori de filesystem. |
+| Calificare | Compilarea și testarea CLI nu constituie execuție pe dispozitiv. |
 | Dovezi externe | Comparații evaluate, acțiuni, capturi originale și identitatea binarului. |
 | Populație | O distribuire nu califică toate sub-jocurile, partida completă, toate rezoluțiile sau fidelitatea față de referință. |
 | Eroare | Dovezile sunt păstrate și verdictul rămâne eșuat. |

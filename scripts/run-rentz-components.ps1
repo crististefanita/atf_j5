@@ -2,12 +2,15 @@ param(
     [string]$RunRoot = '',
     [string]$JavaHome = 'C:\tools\Java21\jdk-21.0.12.1+1',
     [string]$Maven = 'C:\tools\Maven\apache-maven-3.10.0\bin\mvn.cmd',
-    [string]$MavenRepository = ''
+    [string]$MavenRepository = '',
+    [ValidateSet('quick','regression','learning','infrastructure','android-jvm')][string]$Collection='regression'
 )
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $root
+Import-Module (Join-Path $PSScriptRoot 'TestCollections.psm1') -Force
+$plan=Get-RentzTestPlan -ProjectRoot $root -Collection $Collection
 if (-not $RunRoot) { $RunRoot = Join-Path (Join-Path (Get-AtfDataRoot -ProjectRoot $root) 'components') ((Get-Date -Format yyyyMMdd-HHmmss)+'-'+[guid]::NewGuid().ToString('N').Substring(0,8)) }
 $RunRoot = [IO.Path]::GetFullPath($RunRoot)
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $root
@@ -21,7 +24,10 @@ New-Item -ItemType Directory -Path $RunRoot | Out-Null
 $infrastructureControls=Join-Path (Get-AtfInfrastructurePath -Area governance -ProjectRoot $root) ('component-controls-'+[guid]::NewGuid().ToString('N'))
 & (Join-Path $root 'atf-tests/tools/test-workspace-governance.ps1') -RunRoot $infrastructureControls *> (Join-Path $RunRoot 'infrastructure-controls.log')
 if($LASTEXITCODE-ne0){throw "Infrastructure controls failed; inspect $infrastructureControls"}
-$parts = @('pom.xml','lib','atf-test-kit','atf-tests','rentz-lab-app','config','docs/rentz/ATF_Infrastructure.md','scripts/run-rentz-components.ps1','scripts/AtfMavenCache.psm1','scripts/InfrastructureWorkspaces.psm1')
+$runtimeControls=Join-Path (Get-AtfInfrastructurePath -Area governance -ProjectRoot $root) ('runtime-controls-'+[guid]::NewGuid().ToString('N'))
+& (Join-Path $root 'atf-tests/tools/test-runtime-controls.ps1') -RunRoot $runtimeControls *> (Join-Path $RunRoot 'runtime-controls.log')
+if($LASTEXITCODE-ne0){throw "Runtime controls failed; inspect $runtimeControls"}
+$parts = @('pom.xml','README.md','library-provenance.json','lib','atf-tests','rentz-lab-app','config','docs','reference-tests/README.md','scripts')
 $manifest = [Collections.Generic.List[object]]::new()
 foreach ($part in $parts) {
     $origin = Join-Path $root $part
@@ -46,12 +52,14 @@ try {
     Push-Location $stage
     try {
         New-Item -ItemType Directory -Path "$stage/runtime"|Out-Null
-        & $Maven -B -o "-Dmaven.repo.local=$repository" "-Djava.io.tmpdir=$stage/runtime" '-Datf.test.heap.max=256m' "-Drentz.report.output=$RunRoot\rentz-rules-extent.html" test *> "$RunRoot\maven.log"
+        $arguments=@('-B','-o',"-Dmaven.repo.local=$repository","-Djava.io.tmpdir=$stage/runtime",'-Datf.test.heap.max=256m',"-Drentz.report.output=$RunRoot\rentz-rules-extent.html")
+        if($plan.selectors.Count){$arguments+=@('-Dsurefire.failIfNoSpecifiedTests=false',('-Dtest='+($plan.selectors-join',')),'test')}else{$arguments+=@('-N','validate')}
+        & $Maven @arguments *> "$RunRoot\maven.log"
         $exit=$LASTEXITCODE
     } finally { Pop-Location }
 } finally { $env:JAVA_HOME=$savedJava; $cacheLease.Dispose() }
 $results=@()
-foreach ($module in @('atf-test-kit','rentz-lab-app/game-core','atf-tests')) {
+foreach ($module in @('rentz-lab-app/game-core','atf-tests')) {
     $reports=Join-Path $stage "$module/target/surefire-reports"
     $destination=Join-Path $RunRoot ($module.Replace('/','-'))
     New-Item -ItemType Directory -Path $destination | Out-Null
@@ -61,7 +69,14 @@ foreach ($module in @('atf-test-kit','rentz-lab-app/game-core','atf-tests')) {
         $results+=[pscustomobject]@{module=$module;name=$xml.testsuite.name;tests=[int]$xml.testsuite.tests;failed=[int]$xml.testsuite.failures;errors=[int]$xml.testsuite.errors;skipped=[int]$xml.testsuite.skipped}
     }
 }
-$drift=@(foreach($row in $manifest){if((Get-FileHash -LiteralPath (Join-Path $root $row.path) -Algorithm SHA256).Hash -ne $row.sha256){$row.path}})
+$populationFailure=''
+try{Assert-RentzTestPopulation -Plan $plan -Results $results}catch{$populationFailure=$_.Exception.Message}
+$androidRun='';$androidFailure=''
+if($exit-eq0-and-not$populationFailure-and$plan.androidJvm){
+    $androidRun=Join-Path $RunRoot 'android-jvm'
+    try{& (Join-Path $PSScriptRoot 'test-rentz-android-jvm.ps1') -SourceRoot $stage -RunRoot $androidRun -JavaHome $JavaHome -MavenRepository $repository *> "$RunRoot/android-jvm.log";if($LASTEXITCODE-ne0){throw 'Android JVM stage failed'}}catch{$androidFailure=$_.Exception.Message}
+}
+$drift=@(foreach($row in $manifest){if(-not(Test-Path -LiteralPath (Join-Path $root $row.path))-or(Get-FileHash -LiteralPath (Join-Path $root $row.path) -Algorithm SHA256).Hash -ne $row.sha256){$row.path}})
 $afterPaths=@(foreach($part in $parts){
     $origin=Join-Path $root $part
     if(Test-Path -LiteralPath $origin -PathType Leaf){$files=@(Get-Item -LiteralPath $origin)}
@@ -69,10 +84,10 @@ $afterPaths=@(foreach($part in $parts){
     foreach($file in $files){[IO.Path]::GetRelativePath($root,$file.FullName).Replace('\','/')}
 })
 $populationChanges=@(Compare-Object @($manifest.path | Sort-Object) @($afterPaths | Sort-Object))
-$healthy=$exit -eq 0 -and $results.Count -ge 4 -and @($results | Where-Object {$_.failed -or $_.errors -or $_.skipped -or $_.tests -lt 1}).Count -eq 0 -and $drift.Count -eq 0
+$healthy=$exit -eq 0 -and -not$populationFailure -and -not$androidFailure -and $drift.Count -eq 0
 $healthy=$healthy -and $populationChanges.Count -eq 0
 $nativeRuntime='';$nativeRuntimeSha256=''
-if($healthy){
+if($healthy-and@($results|Where-Object name -EQ 'atf.rentz.android.RentzNativeFlowTest').Count){
     [xml]$nativeTest=Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'atf-tests/TEST-atf.rentz.android.RentzNativeFlowTest.xml')
     $testedClasspath=($nativeTest.testsuite.properties.property|Where-Object{$_.name-eq'java.class.path'}).value
     if(-not$testedClasspath){throw 'Native adapter needs its tested classpath.'}
@@ -85,6 +100,15 @@ if($healthy){
     [ordered]@{mainClass='atf.rentz.android.RentzNativeFlow';classpath=$classpath;source=$adapterSource;sourceSha256=(Get-FileHash -LiteralPath $adapterSource -Algorithm SHA256).Hash;classFile=$adapterClass;classSha256=(Get-FileHash -LiteralPath $adapterClass -Algorithm SHA256).Hash;scope='Compiled test adapter, qualified offline; no Android execution implied'}|ConvertTo-Json|Set-Content -LiteralPath $nativeRuntime -Encoding utf8NoBOM
     $nativeRuntimeSha256=(Get-FileHash -LiteralPath $nativeRuntime -Algorithm SHA256).Hash
 }
-[ordered]@{status=$(if($healthy){'PASS'}else{'FAIL'});source=$root;stage=$stage;repository=$repository;infrastructureControls=$infrastructureControls;nativeRuntime=$nativeRuntime;nativeRuntimeSha256=$nativeRuntimeSha256;results=$results;drift=$drift;populationChanges=$populationChanges;scope='Offline Rentz model and ATF integration; reference parity and Android E2E are not qualified.'} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath "$RunRoot\result.json" -Encoding utf8NoBOM
+$arenaRuntime='';$arenaRuntimeSha256=''
+if($healthy-and@($results|Where-Object name -EQ 'atf.rentz.OfflineArenaComponentTest').Count){
+    [xml]$arenaTest=Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'atf-tests/TEST-atf.rentz.OfflineArenaComponentTest.xml')
+    $classpath=(@((($arenaTest.testsuite.properties.property|Where-Object name -EQ 'java.class.path').value).Split([IO.Path]::PathSeparator)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)})-join[IO.Path]::PathSeparator)
+    $arenaClass=Join-Path $stage 'atf-tests/target/classes/atf/rentz/OfflineArena.class'
+    $arenaRuntime=Join-Path $RunRoot 'arena-runtime.json'
+    [ordered]@{mainClass='atf.rentz.OfflineArena';classpath=$classpath;classFile=$arenaClass;classSha256=(Get-FileHash $arenaClass).Hash}|ConvertTo-Json|Set-Content -LiteralPath $arenaRuntime -Encoding utf8NoBOM
+    $arenaRuntimeSha256=(Get-FileHash $arenaRuntime).Hash
+}
+[ordered]@{status=$(if($healthy){'PASS'}else{'FAIL'});collection=$plan;source=$root;stage=$stage;repository=$repository;infrastructureControls=$infrastructureControls;runtimeControls=$runtimeControls;nativeRuntime=$nativeRuntime;nativeRuntimeSha256=$nativeRuntimeSha256;arenaRuntime=$arenaRuntime;arenaRuntimeSha256=$arenaRuntimeSha256;androidJvm=$androidRun;androidFailure=$androidFailure;selectedPopulationFailure=$populationFailure;results=$results;drift=$drift;populationChanges=$populationChanges;scope='Selected offline components; reference parity and Android E2E are not qualified.'} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath "$RunRoot\result.json" -Encoding utf8NoBOM
 if (-not $healthy) { throw "Component run not qualified; inspect $RunRoot" }
 Write-Output $RunRoot

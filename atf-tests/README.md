@@ -53,6 +53,20 @@ Test Kit păstrează rezultatul comparației efective. Publicatorul mapează faz
 
 [Protocolul învățării](../docs/rentz/ATF_Learning.md) separă dezvoltarea, admiterea datelor noi, progresul observat și calificarea E2E. XML-ul componentelor, rezultatul strategic și raportul narativ sunt populații și livrabile distincte.
 
+## Colecții și porți offline
+
+[Calificarea consumatorului](../docs/rentz/ATF_Qualification.md) deține contractele binare, selecțiile și probele de eșec. [Registrul colecțiilor](../config/test-collections.json) selectează etapele, iar lansatorul confruntă populația executată cu sursele înghețate.
+
+| Intrare | Utilizare |
+|---|---|
+| `run-rentz-components.ps1 -Collection regression` | Intrarea standard: toate testele Maven, componentele Android JVM și controalele PowerShell. |
+| `-Collection quick` | Reguli și frontiere, adopție binară și guvernanță Java, fără etapa Gradle. |
+| `-Collection learning` | Politici și arena ca mecanism; evaluările pe partide noi cer protocol separat. |
+| `-Collection infrastructure` | Biblioteci, surse, publicare și controale runtime. |
+| `-Collection android-jvm` | Coordonare și codec prin Gradle, fără asamblare APK sau dispozitiv. |
+
+Comenzile pornesc din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, cache-uri pregătite și SDK pentru Android JVM. Un selector gol ori fără țintă, XML lipsă, suite goale și skip-uri refuză calificarea; HTML-ul narativ nu înlocuiește inventarul probelor.
+
 ## Accesul la dependențe
 
 Componentele și arena rezervă exclusiv cache-ul Maven comun pe durata utilizării. Bootstrap-ul nu poate rescrie JAR-uri încă deschise de un proces Java; concurența este refuzată înaintea execuției, iar rezervarea se eliberează și la eroare.
@@ -74,6 +88,9 @@ Rezultatul roșu se păstrează înaintea curățării, iar aceleași criterii s
 
 [Build-ul izolat](../scripts/build-rentz-android.ps1) cere o rulare de componente trecută, confruntă sursa motorului, execută testele Gradle și păstrează identitatea APK-ului. [Lansatorul nativ](tools/run-android-sanity.ps1) cere acest receipt înaintea rezervării dispozitivului.
 
-Decizia independentă, auditul și publicarea au moduri separate în [adaptorul compilat de test](src/test/java/atf/rentz/android/RentzNativeFlow.java). [Componentele CLI](src/test/java/atf/rentz/android/RentzNativeFlowTest.java) verifică procesele fără ADB; lansatorul consumă descriptorul `native-runtime.json` al rulării calificate, cu classpath explicit și hash-uri.
-
-[Guvernanța sursei](src/test/java/atf/rentz/governance/SourceLayoutTest.java) folosește [inventarul declarat](../config/java-source-layout.json) pentru source-set-uri mixte, acoperirea fișierelor active, coeziune și limite de import. [Protocolul Android](../docs/rentz/ATF_Android.md) delimitează distribuirea completă, istoricul și reluarea față de o partidă completă sau echivalența cu aplicația originală.
+| Mecanism | Contract |
+|---|---|
+| [Adaptorul compilat de test](src/test/java/atf/rentz/android/RentzNativeFlow.java) | Separă decizia independentă, auditul și publicarea; [componentele CLI](src/test/java/atf/rentz/android/RentzNativeFlowTest.java) verifică procesele fără ADB. |
+| Descriptorul `native-runtime.json` | Identifică sursa, clasa compilată și classpath-ul explicit al rulării calificate; lansatorul verifică hash-urile înaintea utilizării. |
+| [Guvernanța sursei](src/test/java/atf/rentz/governance/SourceLayoutTest.java) | Verifică [inventarul declarat](../config/java-source-layout.json): source-set-uri mixte, acoperirea fișierelor active, coeziune și limite de import. |
+| [Protocolul Android](../docs/rentz/ATF_Android.md) | Delimitează distribuirea completă, istoricul și reluarea față de o partidă completă sau echivalența cu aplicația originală. |

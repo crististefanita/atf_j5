@@ -1,0 +1,25 @@
+schemaVersion: 3
+id: RENTZ_CONTEXTUAL_SEARCH_V3
+status: EXPERIMENTAL_CANDIDATE
+information: OWN_HAND_AND_PUBLIC_EVENTS
+normal:
+  choice: BASELINE_HAND_STRENGTH
+  card: PUBLIC_TACTICAL
+hard:
+  worlds: 8
+  riskWeight: 0.05
+  ownChainWeight: 3.0
+  releaseWeight: 0.3
+  skipThreatWeight: 2.0
+  objective: HAND_MARGIN
+  tactic: PUBLIC_TEN_PROOF_ONLY
+  maxTransitions: 65536
+rules:
+  - id: PROVED_HAND_TARGET_CAPTURE
+    condition: Captura publică sigură a zece­lui închide mâna cu punctajul maxim propriu; restul deciziilor și continuărilor păstrează reperul legacy.
+    implementation: SearchPolicy.card
+    verification: RentzHardRefinementTest.provedTenExitRepairsALegacySearchErrorWithoutChangingTheRestOfTheTactic
+  - id: SYMMETRIC_WORK_BUDGET
+    condition: Numai lumi complete pentru toate alternativele contribuie la estimare; epuizarea nu publică un prefix de opțiuni.
+    implementation: DecisionEvaluator.evaluate
+    verification: RentzHardRefinementTest.aPartiallyEvaluatedWorldIsDiscardedForEveryAlternative

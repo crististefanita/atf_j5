@@ -56,6 +56,16 @@ Citirea folosește același [JsonReader strict](https://javadoc.io/static/com.go
 
 ## Verificare
 
-Testele JVM confruntă sesiunea și corpusul de validare JSON; ele nu califică lifecycle-ul activității sau întregul runtime Android. [Acceptanța Android](../../docs/rentz/ATF_Android.md) califică separat instalarea, controalele efective, afișarea și repornirea procesului pe configurația folosită; o mână completă nu echivalează cu o partidă completă.
+Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și cache-urile Gradle/Maven pregătite:
 
-Interfața nu reproduce grafica produsului original. Localizarea extinsă, preferințele persistente, accesibilitatea completă și matricea de dimensiuni se califică separat de acest adaptor minimal.
+```powershell
+.\scripts\run-rentz-components.ps1 -Collection android-jvm
+```
+
+Lansatorul pregătește [workspace-ul înregistrat](../../docs/rentz/ATF_Infrastructure.md) și descriptorul runtime înaintea testelor JVM. Calificarea completă offline folosește `regression`.
+
+| Arie | Ce califică |
+|---|---|
+| Componente JVM | Sesiunea, validarea JSON și intercalările modelului de lifecycle; fără APK sau controlul dispozitivului. |
+| [Acceptanță Android](../../docs/rentz/ATF_Android.md) | Instalarea, controalele efective, afișarea și repornirea procesului pe configurația folosită; o mână nu califică o partidă completă. |
+| Prezentare extinsă | Localizarea, preferințele, accesibilitatea și matricea de dimensiuni cer calificare separată; prototipul nu reproduce grafica produsului original. |

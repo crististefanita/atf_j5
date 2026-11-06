@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "consumer": "atf_j5",
+  "sourceOwner": "atf_j0",
+  "artifacts": [
+    {
+      "name": "core",
+      "marker": "atf.core.json.JsonDocuments"
+    },
+    {
+      "name": "reporting",
+      "marker": "atf.reporting.extent.session.ExtentReportSession"
+    },
+    {
+      "name": "console",
+      "marker": "atf.console.AtfConsoleReporter"
+    },
+    {
+      "name": "mock",
+      "marker": "atf.mock.AtfMockTransport"
+    },
+    {
+      "name": "test-kit",
+      "marker": "atf.testkit.assertions.RecordedAssertions"
+    }
+  ],
+  "guides": [
+    "README.md",
+    "README.Core.md",
+    "README.Reporting.md",
+    "README.Console.md",
+    "README.Mock.md",
+    "README.TestKit.md"
+  ]
+}

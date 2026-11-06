@@ -54,7 +54,7 @@ if ($ContinueFrom) {
 }
 
 Copy-Item -LiteralPath (Join-Path $j4Root 'pom.xml'),(Join-Path $j4Root 'atf.yaml'),(Join-Path $j4Root 'lib'),(Join-Path $j4Root 'config') -Destination $stage -Recurse
-foreach ($module in @('atf-test-kit','atf-mock','atf-validation','atf-console','atf-android','atf-test-android')) {
+foreach ($module in @('atf-validation','atf-test-android','atf-tests')) {
     & robocopy (Join-Path $j4Root $module) (Join-Path $stage $module) /E /XD target build .git .gradle artifacts /NFL /NDL /NJH /NJS /NP | Out-Null
     if ($LASTEXITCODE -ge 8) { throw "Could not stage J4 module $module." }
 }

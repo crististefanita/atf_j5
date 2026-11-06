@@ -12,17 +12,25 @@ public final class RentzMatch {
     public enum Phase { CHOOSE, PLAY, DEAL_END, MATCH_END }
     public enum Action { CHOOSE, PLAY, PASS }
     public record TurnEvent(int sequence,int seat,Action action,Card card,int boardCardCount) { }
-    public record HandResult(int number, int chooser, Contract contract, boolean blind, List<Integer> points, List<Integer> totals) { }
+    public record HandResult(int number, int chooser, Contract contract, boolean blind, List<Integer> points, List<Integer> totals) {
+        public HandResult { points=Card.immutable(points);totals=Card.immutable(totals); }
+    }
     public record Observation(int seat, int players, int turn, int chooser, int handNumber, Phase phase,
                               Contract contract, boolean blind, boolean revealed, List<Card> hand, List<Card> legal,
                               List<Integer> handSizes, List<Integer> dealPoints, List<Integer> totals, List<Integer> finishOrder, List<TrickRules.Play> trick,
-                              List<Card> seen, List<TurnEvent> events, List<Card> board, Set<Contract> available) { }
+                              List<Card> seen, List<TurnEvent> events, List<Card> board, Set<Contract> available,List<HandResult> completedHands) {
+        public Observation { completedHands=completedHands==null?Collections.emptyList():Card.immutable(completedHands); }
+        public Observation(int seat,int players,int turn,int chooser,int handNumber,Phase phase,Contract contract,boolean blind,boolean revealed,List<Card> hand,List<Card> legal,List<Integer> handSizes,List<Integer> dealPoints,List<Integer> totals,List<Integer> finishOrder,List<TrickRules.Play> trick,List<Card> seen,List<TurnEvent> events,List<Card> board,Set<Contract> available){
+            this(seat,players,turn,chooser,handNumber,phase,contract,blind,revealed,hand,legal,handSizes,dealPoints,totals,finishOrder,trick,seen,events,board,available,Collections.emptyList());
+        }
+    }
     private final int players;
     private final int firstChooser;
     private final ScoreProfile scoring;
     private final Random shuffle;
     private final List<EnumSet<Contract>> remaining = new ArrayList<>();
     private final List<HandResult> history = new ArrayList<>();
+    private List<HandResult> publicHistory=Collections.emptyList();
     private final List<List<Card>> hands = new ArrayList<>();
     private final List<TrickRules.Play> trick = new ArrayList<>();
     private final List<Card> seen = new ArrayList<>();
@@ -45,6 +53,29 @@ public final class RentzMatch {
     public static RentzMatch fromOpeningDeal(OpeningDeal opening,long continuationSeed,ScoreProfile scoring,int firstChooser) {
         java.util.Objects.requireNonNull(opening);
         return new RentzMatch(opening.players(),continuationSeed,scoring,firstChooser,opening);
+    }
+    /** Rebuilds a hypothetical continuation from public results, never from real opposing hands or a dealing seed. */
+    public static RentzMatch fromPublicProgress(OpeningDeal opening,long hypotheticalSeed,ScoreProfile scoring,int currentChooser,List<HandResult> completed){
+        java.util.Objects.requireNonNull(completed);int players=opening.players();
+        if(completed.size()>=players*8)throw new IllegalArgumentException("No unplayed hand in public progress");
+        int first=completed.isEmpty()?currentChooser:completed.get(0).chooser();
+        var game=new RentzMatch(players,hypotheticalSeed,scoring,first,opening);
+        for(var hand:completed){
+            int number=game.history.size()+1;
+            if(hand.number()!=number||hand.chooser()!=(first+number-1)%players||hand.contract()==null||hand.points().size()!=players||hand.totals().size()!=players||!game.remaining.get(hand.chooser()).contains(hand.contract())||hand.blind()&&game.remaining.get(hand.chooser()).size()==1)throw new IllegalArgumentException("Public contract schedule");
+            long fund=publicFund(scoring,hand.contract(),players)*(hand.blind()?2L:1L),sum=0;
+            for(int seat=0;seat<players;seat++){
+                int point=hand.points().get(seat);if(point<Math.min(0,fund)||point>Math.max(0,fund))throw new IllegalArgumentException("Public hand score range");sum+=point;
+                game.totals[seat]=Math.addExact(game.totals[seat],point);if(game.totals[seat]!=hand.totals().get(seat))throw new IllegalArgumentException("Public cumulative score");
+            }
+            if(sum!=fund)throw new IllegalArgumentException("Public hand score fund");
+            game.remaining.get(hand.chooser()).remove(hand.contract());game.history.add(hand);
+        }
+        game.handNumber=completed.size();if((first+game.handNumber)%players!=currentChooser)throw new IllegalArgumentException("Public chooser rotation");
+        game.publicHistory=Card.immutable(game.history);game.deal(opening);return game;
+    }
+    private static long publicFund(ScoreProfile p,Contract contract,int players){
+        return switch(contract){case TRICKS->-8L*p.trickPenalty();case QUEENS->-4L*p.queenPenalty();case DIAMONDS->-2L*players*p.diamondPenalty();case KING_HEARTS->-p.kingPenalty();case WHIST->8L*p.trickReward();case TEN_CLUBS->p.tenReward();case TOTALS->-8L*p.trickPenalty()-4L*p.queenPenalty()-2L*players*p.diamondPenalty()-p.kingPenalty();case RENTZ->p.finishRewards().subList(0,players).stream().mapToLong(Integer::longValue).sum();};
     }
     private RentzMatch(int players,long seed,ScoreProfile scoring,int firstChooser,OpeningDeal opening) {
         Card.deck(players);
@@ -76,7 +107,7 @@ public final class RentzMatch {
         int displayedHand=(phase==Phase.DEAL_END||phase==Phase.MATCH_END)?handNumber:handNumber+1;
         return new Observation(seat,players,turn,chooser,displayedHand,phase,contract,blind,visible,own,Card.immutable(legal),
                 Card.immutable(sizes),Card.immutable(currentPoints),Card.immutable(scores),Card.immutable(finishOrder),Card.immutable(trick),Card.immutable(seen),Card.immutable(events),board.played(),
-                Collections.unmodifiableSet(EnumSet.copyOf(remaining.get(seat))));
+                Collections.unmodifiableSet(EnumSet.copyOf(remaining.get(seat))),publicHistory);
     }
     public List<HandResult> history() { return Card.immutable(history); }
     public void choose(int seat, Contract selected, boolean blind) {
@@ -131,6 +162,7 @@ public final class RentzMatch {
         var delta=new ArrayList<Integer>();var sum=new ArrayList<Integer>();
         for(int s=0;s<players;s++){totals[s]=Math.addExact(totals[s],points[s]);delta.add(points[s]);sum.add(totals[s]);}
         history.add(new HandResult(handNumber+1,chooser,contract,blind,Card.immutable(delta),Card.immutable(sum)));
+        publicHistory=Card.immutable(history);
         handNumber++; phase=handNumber==players*Contract.values().length?Phase.MATCH_END:Phase.DEAL_END;
     }
     public void nextHand() { if(phase!=Phase.DEAL_END)throw new IllegalStateException("Deal is not complete");deal(); }

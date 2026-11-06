@@ -1,0 +1,41 @@
+schemaVersion: 3
+id: RENTZ_CONTEXTUAL_SEARCH_V3
+status: EXPERIMENTAL_CANDIDATE
+information: OWN_HAND_AND_PUBLIC_EVENTS
+normal:
+  choice: BASELINE_HAND_STRENGTH
+  card: PUBLIC_TACTICAL
+hard:
+  worlds: 8
+  riskWeight: 0.05
+  ownChainWeight: 3.0
+  releaseWeight: 0.3
+  skipThreatWeight: 2.0
+  objective: HAND_MARGIN
+  tactic: PUBLIC_TARGET_AWARE
+  maxTransitions: 65536
+rules:
+  - id: AVOID_SELF_PENALTY
+    condition: Ultimul actor obligat să câștige minimizează penalitatea propriei cărți; între costuri egale elimină puterea mai mare.
+    implementation: TargetTactics.negativeFollow
+    verification: RentzHardRefinementTest.unavoidableLastTrickDoesNotCaptureOwnQueenWhenAnotherWinnerCostsNothing
+  - id: DISPOSE_SAFE_PENALTY
+    condition: Între cărți sigur pierzătoare pe culoarea cerută se elimină întâi contribuția penalizată, apoi puterea.
+    implementation: TargetTactics.negativeFollow
+    verification: RentzHardRefinementTest.aSafeLosingQueenIsDisposedBeforeAHigherNonPenaltyCard
+  - id: PUBLIC_TEN_MASTER
+    condition: Fără treflă mai mare necunoscută în afara mâinii proprii, păstrează zecele prin ieșirea câștigătoare și capturează ținta devenită maestru public.
+    implementation: TargetTactics.tenMaster
+    verification: RentzHardRefinementTest.publicTenMasterUsesTheWinningExitAndThenCollectsTheTarget
+  - id: SYMMETRIC_WORK_BUDGET
+    condition: Numai lumi evaluate complet pentru toate alternativele contribuie la estimare; lipsa unui lot complet produce fallback public explicit.
+    implementation: DecisionEvaluator.evaluate
+    verification: RentzHardRefinementTest.aPartiallyEvaluatedWorldIsDiscardedForEveryAlternative
+  - id: SEPARATE_OPPONENT_MODEL
+    condition: Continuarea proprie folosește regulile candidatului; adversarii păstrează modelul tactic legacy declarat, fără acces la identitatea sau cărțile lor reale.
+    implementation: TacticalPolicy.continuation
+    verification: RentzHardRefinementTest.continuationDoesNotSilentlyUpgradeTheUnknownOpponentModel
+  - id: PROVED_HAND_TARGET_CAPTURE
+    condition: Pentru obiectivul marjei mâinii, captura sigură a zece­lui închide sub-jocul cu punctajul maxim propriu și evită sampling-ul; nu pretinde optimalitate pentru orizontul întregii partide.
+    implementation: SearchPolicy.card
+    verification: RentzHardRefinementTest.publicTenMasterUsesTheWinningExitAndThenCollectsTheTarget

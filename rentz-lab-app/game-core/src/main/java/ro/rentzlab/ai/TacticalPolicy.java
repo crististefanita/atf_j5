@@ -7,8 +7,16 @@ import java.util.*;
 /** Local, public-information continuation policy. No sampled or real opponent hand is accepted. */
 public final class TacticalPolicy {
     private TacticalPolicy() { }
+    public static Card continuation(RentzMatch.Observation view,int rootSeat,ScoreProfile scoring,PolicySettings settings){return select(view,scoring,settings,view.seat()==rootSeat);}
     public static Card card(RentzMatch.Observation view,ScoreProfile scoring,PolicySettings settings) {
+        return select(view,scoring,settings,true);
+    }
+    private static Card select(RentzMatch.Observation view,ScoreProfile scoring,PolicySettings settings,boolean ownContinuation){
         if(view.phase()!=RentzMatch.Phase.PLAY||view.turn()!=view.seat()||view.legal().isEmpty())throw new IllegalArgumentException("Acting player with a legal card required");
+        if(ownContinuation&&settings.tactic()==PolicySettings.Tactic.PUBLIC_TARGET_AWARE){
+            Card proved=ro.rentzlab.ai.tactics.TargetTactics.tenMaster(view);if(proved!=null)return proved;
+            Card local=ro.rentzlab.ai.tactics.TargetTactics.negativeFollow(view,scoring);if(local!=null)return local;
+        }
         if(view.contract()==Contract.RENTZ)return sequence(view,settings);
         if(view.trick().isEmpty()) {
             if(view.contract()==Contract.WHIST)return highest(view.legal());

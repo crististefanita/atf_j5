@@ -12,11 +12,13 @@ Directorul deține modelul local independent al jocului, jucătorii Normal/Hard 
 | `algorithm-build` | Configurare Gradle exclusiv JVM pentru motor. |
 | `settings.gradle` | Motorul și aplicația Android; SDK-ul este necesar pentru această selecție. |
 
-Dintr-o copie temporară completă, cu JDK și dependențele Gradle disponibile:
+Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven și cache-ul pregătit:
 
 ```powershell
-.\gradlew.bat -p algorithm-build :game-core:test --offline --no-daemon
+.\scripts\run-rentz-components.ps1 -Collection quick
 ```
+
+Lansatorul alocă un workspace înregistrat și rezultate externe, apoi verifică identitatea sursei și populația executată. SDK-ul Android nu este necesar acestei selecții; [infrastructura](../docs/rentz/ATF_Infrastructure.md) definește directoarele, cache-urile și contractul izolării.
 
 Rezultatul califică modelul și profilul declarat; [sursele regulilor](../docs/rentz/ATF_RuleSources.md) dețin limita față de aplicația originală.
 

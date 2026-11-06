@@ -2,45 +2,95 @@
 
 ## Pe scurt
 
-**Deschis.** Registrul păstrează riscurile tehnice încă necalificate. [Regulile și fidelitatea](ATF_Rentz.md) și [prezentarea tablei și scorului](ATF_Rentz_UI_ToDo.md) au criterii proprii.
+Registrul separă mecanismele implementate de promovarea strategică și de integrarea nativă încă necalificate. [Regulile și fidelitatea](ATF_Rentz.md) și [prezentarea tablei și scorului](ATF_Rentz_UI_ToDo.md) au criterii proprii.
 
-Validarea strictă are contract stabil în [învățare și admiterea datelor](../rentz/ATF_Learning.md), [salvarea sesiunii](../../rentz-lab-app/app/README.md) și [infrastructură](../rentz/ATF_Infrastructure.md). [Lifecycle-ul](../rentz/ATF_Lifecycle.md) și [guvernanța sursei](../rentz/ATF_Components.md) au contracte și componente proprii; execuția nativă se califică separat.
+| Contract stabil | Document responsabil |
+|---|---|
+| Validare și date | [Învățare](../rentz/ATF_Learning.md), [sesiune](../../rentz-lab-app/app/README.md) și [infrastructură](../rentz/ATF_Infrastructure.md). |
+| Proprietate și sursă | [Lifecycle](../rentz/ATF_Lifecycle.md) și [guvernanță Java](../rentz/ATF_Components.md); execuția nativă se califică separat. |
+| Adopție, colecții, proces și publicare | [Calificarea consumatorului](../rentz/ATF_Qualification.md). |
+| Proiecții și geometrie | [Backlog UI](ATF_Rentz_UI_ToDo.md); probele offline nu închid calibrarea vizuală. |
 
 | ID | Prioritate | Statut și impact | Responsabil |
 |---|---|---|---|
-| Q06 | P2 | Adopția bibliotecilor nu are încă o poartă permanentă completă a consumatorului. | Integrarea binară; bibliotecile la responsabilul comun. |
-| Q07 | P2 | Lipsesc probe negative proprii pentru procese, lifecycle, publicare și selecțiile de testare. | Adaptoarele de testare. |
-| Q08 | P2 | Limita strategică este documentată; evaluarea curentă nu califică optimizarea întregii partide. | Politicile și protocolul AI. |
-| Q09 | P2 | Navigarea și exemplele de pornire nu conduc uniform către infrastructura efectivă. | Documentația consumatorului. |
-
-## Q06–Q07: adopție binară și probe de eșec
-
-Există și o diferență de livrare: J5 declară Reporting J20, iar consumatorul comparat declară J21. [Identitățile comparate](../../../../rentz_back/infrastructure/governance/20261106-deep-audit/library-comparison.json) păstrează versiunile și hash-urile efective. Reconciliați livrarea responsabilului comun și schimbările relevante, apoi calificați adopția J5; nu copiați un JAR doar fiindcă are număr mai mare și nu rescrieți proveniența veche ca și cum ar fi acceptanță nouă.
-
-| Arie | Cerință de închidere |
-|---|---|
-| Biblioteci | Verificați permanent perechile fizice JAR/POM, proveniența, hash-urile, absența surselor producătorului, originea claselor și contractele consumate. O copie cu proveniență a proiectului anterior nu este acceptanță moștenită. Păstrați Test Kit sursă până la adopția binară verificată; [rutarea responsabilității](README.md) rămâne unică. |
-| Publicare | Eșec în pregătire, corp, închidere și publicare, păstrând cauza primară și erorile secundare; temporizarea publicării rămâne distinctă. Verificați expected/actual și populația selectată pe JAR-ul fizic. Nu modificați rendererul pentru a masca un defect al intrărilor. |
-| Procese și Android | Mock-uri de proces pentru timeout, exit zero cu eroare, lipsa unui fișier nou, Unicode și proprietar schimbat. Testele nu ating emulatorul și nu folosesc un XML vechi drept succes. |
-| Selecții | Intrări rapide, regresie, strategie/învățare, infrastructură și Android JVM explicite. Selecția standard trebuie să includă porțile relevante; o probă nouă nu devine invizibilă doar pentru că nu produce Extent. |
-| Prezentare | Implementați proiecții și geometrie prin componente înaintea extinderii E2E; [backlog-ul UI](ATF_Rentz_UI_ToDo.md) deține matricea, tabla și scorul, fără duplicare aici. |
+| Q08 | P2 | Obiective și continuare completă implementate offline; promovarea produsului cere progres independent și integrare proprie. | Politicile și protocolul AI. |
+| Q09 | P2 | Rute înregistrate, proveniență diferențiată și arhivă inventariată; contractul permanent protejează retenția și comenzile. | Documentația consumatorului. |
 
 ## Q08: forța AI se măsoară la obiectivul declarat
 
-[Mecanismul curent](../rentz/ATF_Learning.md) optimizează marja mâinii pe lumi fezabile și un buget finit. Proba descriptivă cu aceleași cărți publice și totaluri diferite produce aceleași estimări; aceasta este limita căutării locale, nu o încălcare a legalității.
+[Mecanismul](../rentz/ATF_Learning.md) păstrează reperul pe marja mâinii și introduce separat punctele finale și creditul de victorie la finalul partidei. Registrul public imuabil reface totalurile, rotația și portofoliul rămas; seed-ul real și cărțile adverse reale rămân excluse.
 
-- Definiți separat optimizarea mediei de puncte, șansa de a câștiga partida și alocarea sub-jocurilor rămase. Ponderile schimbate nu demonstrează automat progres la toate trei.
-- Extindeți regresiile situaționale pentru alegerea sub-jocului, cărți periculoase, pas și frontierele de sosire. O pierdere salvată devine regresie numai după justificarea independentă a așteptării.
-- Comparați candidatul înghețat cu Normal și reperul păstrat, pe distribuiri noi și familii distincte; agregați pe distribuire, fără a trata rotațiile corelate drept observații independente.
-- Păstrați incertitudinea samplerului, bugetul și identitatea YAML/fabricii/APK. Nu numiți „perfect” un câștig agregat și nu ajustați candidatul pe lotul destinat evaluării noi.
+| Contract implementat | Verificare și limită |
+|---|---|
+| Obiectiv și orizont | [Regresii situaționale](../../rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzMatchStrategyTest.java): egalități, puncte versus victorie, progres public și secrete reale distincte. |
+| Alegeri rămase | Reconstrucție și continuare completă fără căutare recursivă; consistența registrului nu înlocuiește auditul tuturor cărților trecute. |
+| Comparație independentă | Hard legacy la aceeași poziție, cu aceiași adversari Normal sau Hard; lumi, risc și plafon de tranziții aliniate, rotații agregate pe seed. |
+| Model advers separat | Rafinarea continuării proprii nu schimbă tacit adversarii simulați; tactica legacy a modelului este declarată și verificată separat. |
+| Dovadă publică | Captura sigură a țintei poate închide decizia `HAND_MARGIN` fără sampling; necunoscutul invalidează scurtătura și păstrează căutarea. |
+| Oprire simetrică | Numai lumi complete pentru toate alternativele contribuie la estimări; fallback-ul și costul efectiv rămân vizibile. |
+| Refuzul promovării | [Poarta evaluării](../../atf-tests/src/test/java/atf/rentz/OfflineArenaComponentTest.java) refuză familii lipsă, obiectiv nepotrivit, date insuficiente sau alt lot. |
+| Incertitudine | Bootstrap finit pe seed-uri și corecție pe familii; nici samplerul, nici continuarea tactică nu sunt modele calibrate ale adversarului real. |
+
+### Condiții rămase înaintea promovării
+
+- Un orizont mai lung trebuie să depășească reperul pe obiectivul declarat, pe lot nou, fără ajustare după expunere. O regresie măsurată păstrează candidatul experimental și implicitul produsului neschimbat.
+- Diagnosticul separă variația lumilor de eroarea politicii de continuare; o pierdere devine regresie mică numai cu justificarea independentă a deciziei.
+- Profilul contextual rămâne separat de candidatul cu dovadă publică. Reguli locale plauzibile sau componente verzi nu justifică păstrarea lor într-un candidat care pierde comparația pereche.
+- Integrarea Android trebuie să transporte registrul public complet și să alinieze codec-ul, identitatea politicii și APK-ul înaintea calificării native. Componentele JVM nu închid această frontieră.
 
 ## Q09: documentația trebuie să arate mecanismul complet
 
-- Exemplele modulelor trebuie să pornească dintr-un workspace înregistrat și să precizeze PowerShell, JDK, SDK și directorul de execuție relevant; „copie temporară completă” nu definește singură contractul infrastructurii.
-- În [observarea referinței](../../rentz-reference/README.md), distingeți regula declarată în resurse de regula observată în execuție și de interpretarea laboratorului.
-- Izolați documentele istorice Contract Whist de traseul activ Rentz printr-un inventar și o regulă de retenție; nu lăsați ghiduri vechi la nivelul contractelor curente și nu mutați dovezile indicate de ele fără o arhivă verificabilă.
-- Nu copiați scoruri de audit, numere de teste sau rezultate de partide în README-uri. Guvernanța de stil și linkuri trebuie completată cu verificarea afirmațiilor față de cod și cu probele negative ale contractului.
+| Contract implementat | Protecție permanentă |
+|---|---|
+| Pornire | README-urile modulelor indică rădăcina, PowerShell, JDK, condiția SDK și colecția lansatorului înregistrat. |
+| Proveniență | [Observarea referinței](../../rentz-reference/README.md) distinge declarația publicată, resursa APK, observația de runtime și interpretarea laboratorului. |
+| Istoric | [Arhiva Contract Whist](../history/contract-whist/README.md) are inventar, hash-uri și retenție; dovezile externe rămân la destinațiile originale. |
+| Corpus complet | [Guvernanța documentară](../../atf-tests/src/test/java/atf/rentz/governance/DocumentationContractTest.java) verifică traseele și controlează negativ omisiunea, alterarea arhivei și lansatorul neînregistrat. |
+
+Rezultatele, identitățile și pașii RED/GREEN rămân în [auditul extern](../../../../rentz_back/infrastructure/governance/20261106-q08-q09-ff1d7846/TDD.md). README-urile explică mecanismele; nu copiază scoruri de audit sau rezultate de partide.
+
+[Auditul bugetelor egale](../../../../rentz_back/infrastructure/governance/20261106-hard-equal-24c98bb8/TDD.md) separă reproducerea reperului, ablațiile de dezvoltare, corecția controlului și verdictul pe lot nou. Nu atribuiți un câștig împotriva unei mese uniform Normal progresului față de versiunea Hard păstrată.
 
 ## Ordine de rezolvare
 
-Q06–Q07 ca porți permanente → calibrare nativă, UI și evoluția AI pe criteriile proprii. Închideți fiecare lacună cu implementarea, identitatea sursei și proba relevantă; un raport integral verde pe populația veche nu o închide.
+Păstrați Q09 prin colecția `infrastructure` și regresia standard. Calificați separat progresul strategic Q08, integrarea nativă și prezentarea; un raport verde al componentelor nu demonstrează superioritate de joc.
+
+## Q10: o legătură YAML trebuie să indice un test executabil
+
+**P1 · deschis · responsabil: catalogul regulilor și guvernanța Rentz.**
+
+[Verificarea legăturilor](../../atf-tests/src/main/java/atf/rentz/RuleCatalog.java) caută declarația metodei prin expresie regulată în textul brut. Un comentariu, un literal sau o metodă ajutătoare fără adnotare poate satisface această căutare; existența unei potriviri textuale nu stabilește identitatea unei probe JUnit.
+
+| Frontieră | Criteriu de închidere |
+|---|---|
+| Declarație reală | Comentariile, literalii și blocurile de text nu devin metode; diagnosticul numește regula, fișierul și metoda. |
+| Execuție eligibilă | Metoda aparține clasei legate și unui test recunoscut; metodele ajutătoare și adnotările străine sunt refuzate. |
+| Forme valide | Păstrați testele parametrizate existente, adnotările calificate și pozițiile legale față de modificatori; evitați înlocuirea cu alt regex îngust. |
+| Populație | Rezolvarea declarației, descoperirea de către JUnit și execuția în colecția selectată au verdicte separate. |
+| Regresie | Păstrați controale negative independente și vecini valizi în colecția de infrastructură; nu modificați așteptările ca să accepte declarația artificială. |
+
+Reproducerea și identitatea codului verificat sunt în [auditul extern](../../../../rentz_back/infrastructure/governance/20261106-cross-quality-6e8cd680/rule-binding-probe.json); [rețeta](../../../../rentz_back/infrastructure/governance/20261106-cross-quality-6e8cd680/run-rule-binding-probe.ps1) execută catalogul compilat, fără emulator.
+
+## Q11: paritatea guvernanței trebuie să fie permanentă și delimitată
+
+**P2 · deschis · responsabil: integrarea testelor și documentația consumatorului.**
+
+[Guvernanța sursei](../../atf-tests/src/test/java/atf/rentz/governance/SourceLayoutTest.java) protejează inventarul, coeziunea și dependențele. [Contractul documentar](../../atf-tests/src/test/java/atf/rentz/governance/DocumentationContractTest.java) protejează retenția și rutele de pornire; niciunul nu constituie singur controlul complet al stilului sau al nivelurilor executabile.
+
+- Introduceți un control permanent al nivelului testelor Maven, cu adnotări compuse, forme calificate, ambiguități și clase ajutătoare distincte. Clasificați explicit probele Gradle, fără dependențe ATF în producția motorului.
+- Integrați regulile documentare comune printr-un contract verificat: inventar complet de README-uri și ghiduri active, structură, linkuri și fragmente, stil, proză și legende. Păstrați arhiva istorică sub retenția ei explicită.
+- Un audit extern cu validatorii comuni nu înlocuiește colecția permanentă; păstrați rădăcina și sursele validatorului identificabile, cu defect injectat și vecin valid.
+- Schimbarea testelor-gate trebuie să păstreze criteriul independent, motivul și baza de comparație; metadata declarativă nu dovedește singură verificarea diferenței Git.
+
+API-ul comun se solicită prin [responsabilitățile bibliotecilor](README.md); nu copiați întregul reactor sau implementarea bibliotecilor în consumator.
+
+## Q12: lizibilitate și coeziune dincolo de numărul de fișiere
+
+**P2 · deschis · responsabil: motorul, politicile și arena offline.**
+
+[RentzMatch](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/RentzMatch.java), [DecisionEvaluator](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/ai/search/DecisionEvaluator.java) și [OfflineArena](../../atf-tests/src/main/java/atf/rentz/OfflineArena.java) comprimă tranziții, validări și agregări în instrucțiuni lungi. Limita de opt fișiere nu măsoară densitatea ori numărul motivelor de schimbare.
+
+- Separați semantic restaurarea progresului public, tranziția de joc și agregarea experimentului; evitați un pachet artificial sau o clasă creată doar pentru prag.
+- Declarați importurile și etapele evaluării explicit, păstrând fațadele, ordinea consumului aleatorului și plafonul reproductibil.
+- Calificați refactorizarea prin aceleași observații publice, alegeri, estimări, scoruri și costuri deterministe; timpii se măsoară separat.
+- Nu amestecați această lucrare cu promovarea profilului AI sau cu schimbarea interfeței.

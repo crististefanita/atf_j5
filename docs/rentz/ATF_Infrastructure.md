@@ -27,6 +27,19 @@ Lansatoarele și controalele infrastructurii folosesc PowerShell 7.
 | Destinație de produs | Trebuie să fie într-o colecție declarată din depozitul extern, fără ieșire prin linkuri. |
 | Cache de build | Se creează sub `infrastructure/cache`; seeding-ul nu mută și nu rescrie dovezile istorice. |
 | JVM de componente | Directorul temporar al procesului este în workspace-ul înregistrat, separat de sursa live. |
+| Colecții offline | [Selectorul](../../scripts/TestCollections.psm1) citește registrul, iar lansatorul confruntă populația executată cu cea selectată; [calificarea](ATF_Qualification.md) separă Maven, Android JVM și controalele PowerShell. |
+| Android JVM | [Lansatorul dedicat](../../scripts/test-rentz-android-jvm.ps1) copiază sursa calificării în workspace Android; nu produce APK și nu rezervă dispozitiv. |
+
+## Inventarul documentației
+
+[Politica documentară](../../config/documentation-policy.json) separă rădăcinile active, indexurile și instantaneele istorice. [Contractul executabil](../../atf-tests/src/test/java/atf/rentz/governance/DocumentationContractTest.java) verifică documentele neclasificate, hash-urile arhivei și rutele modulelor către lansatoare și colecții înregistrate.
+
+| Frontieră | Responsabilitate |
+|---|---|
+| Corpus înghețat | Producătorul componentelor copiază întregul `docs`, README-urile modulelor și indexul istoric; o copie incompletă nu califică inventarul. |
+| Ghid activ | Stil, legături, scheme și afirmații confruntate cu sursa; rezultatele unei rulări rămân externe. |
+| Istoric | Hash inițial și hash arhivat, cu ajustarea linkurilor relative; originalul brut și jurnalul mutării rămân în guvernanța externă. |
+| Retenție | Dovezile externe nu se mută implicit, iar eliminarea cere revizuire explicită. |
 
 ## Rolurile scripturilor și citirea TEMP
 

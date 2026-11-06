@@ -13,7 +13,10 @@
     "scripts/run-original-romanian-hard.ps1",
     "scripts/run-reference-match.ps1",
     "scripts/AtfMavenCache.psm1",
+    "scripts/TestCollections.psm1",
+    "scripts/test-rentz-android-jvm.ps1",
     "atf-tests/tools/test-cache-lease.ps1",
+    "atf-tests/tools/test-runtime-controls.ps1",
     "atf-tests/tools/run-arena.ps1",
     "atf-tests/tools/run-android-sanity.ps1",
     "rentz-reference/tools/RentzAndroid.psm1"

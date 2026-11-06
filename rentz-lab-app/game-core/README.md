@@ -10,6 +10,8 @@ Model Java fără dependențe Android sau ATF în producție. Deține distribuir
 |---|---|
 | [`ro.rentzlab.core`](src/main/java/ro/rentzlab/core/) | Vocabularul, starea partidei, legalitatea, secvențele și scorul; nu depinde de politicile AI. |
 | [`ro.rentzlab.ai`](src/main/java/ro/rentzlab/ai/) | Portul jucătorului, tactica, inferența și căutarea; consumă observațiile și API-ul motorului. |
+| [`ro.rentzlab.ai.search`](src/main/java/ro/rentzlab/ai/search/) | Evaluarea pe loturi comune și bugetul determinist de tranziții; nu primește starea reală privată a mesei. |
+| [`ro.rentzlab.ai.tactics`](src/main/java/ro/rentzlab/ai/tactics/) | Dovezi publice pentru ținte și reguli locale de cost; distincte de oracolul scorului. |
 
 Aliasurile regulilor din YAML se rezolvă prin registrul tipizat al claselor publice, fără a presupune că toate implementările au același pachet. [Guvernanța sursei](../../config/java-source-layout.json) declară rădăcinile și direcțiile permise; mutarea unei clase nu schimbă punctajul sau ponderile.
 
@@ -19,6 +21,7 @@ Aliasurile regulilor din YAML se rezolvă prin registrul tipizat al claselor pub
 |---|---|
 | `Card.deck` | Pachet distinct cu opt cărți pentru fiecare loc. |
 | `OpeningDeal`, `RentzMatch.fromOpeningDeal` | Primă distribuire controlată, validată și imuabilă; continuarea folosește seed separat. |
+| `RentzMatch.fromPublicProgress` | Reface scorul și alegerile rămase din registrul public validat, cu distribuire și viitor ipotetice. |
 | `TrickRules` | Urmarea culorii și câștigătorul fără atu. |
 | `RentzBoard` | Extinderea contiguă pe culori. |
 | `ScoreProfile` | Ponderi de punctaj, cumul și interval numeric sigur. |
@@ -27,17 +30,22 @@ Aliasurile regulilor din YAML se rezolvă prin registrul tipizat al claselor pub
 | `RentzPlayer` | Port stabil cu niveluri Normal și Hard, pe observația actorului. |
 | `TacticalPolicy` | Ținte negative, conservarea puterii și continuări Rentz. |
 | `KnowledgeSampler` | Cărți necunoscute, culori absente, pasuri și distribuiri fezabile. |
-| `SearchPolicy`, `PolicySettings` | Lumi comune, continuarea mâinii și buget/ponderi explicite. |
+| `SearchPolicy`, `PolicySettings` | Lumi comune, obiectiv declarat, orizont de mână sau partidă și buget/ponderi explicite. |
+| `MatchUtility`, `FullMatchRollout` | Utilități finale separate și continuare ipotetică pe istoricul public; candidat offline, fără schimbarea implicită a produsului. |
+| `DecisionEvaluator`, `RolloutBudget` | Numai lumi complet evaluate pentru toate alternativele; oprire simetrică și fallback public explicit. |
+| `TargetTactics` | Captură demonstrabilă a țintei și penalitatea propriei cărți; continuarea adversă păstrează modelul legacy declarat. |
 
 `laboratory()` este profil provizoriu, separat de preset-urile originale neconfirmate. [Regulile](../../docs/rentz/ATF_Rules.md) dețin semantica și limitele, iar [manifestul](../../config/rentz-rules.yaml) indică statutul fiecărei afirmații.
 
 ## Verificare
 
-Dintr-o copie temporară completă a proiectului, cu Maven și JDK 21:
+Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven și cache-ul pregătit, fără SDK Android:
 
 ```powershell
-mvn -B -o -pl rentz-lab-app/game-core -am test
+.\scripts\run-rentz-components.ps1 -Collection learning
 ```
+
+[Infrastructura](../../docs/rentz/ATF_Infrastructure.md) creează copia înregistrată și păstrează rezultatele extern. Selecția `learning` confruntă politicile și protocolul arenei; `regression` adaugă restul componentelor și cere SDK Android pentru etapa JVM a aplicației.
 
 | Familie | Verificare |
 |---|---|
@@ -46,6 +54,7 @@ mvn -B -o -pl rentz-lab-app/game-core -am test
 | [Scor](src/test/java/ro/rentzlab/core/RentzSettlementTest.java) | Capturator, contribuții și fonduri recalculate independent, sosiri și resetare. |
 | [Frontiere](src/test/java/ro/rentzlab/core/RentzBoundaryTest.java) | Distribuiri controlate și refuzuri fără mutație. |
 | [Jucători](src/test/java/ro/rentzlab/core/RentzAiTest.java) | Reguli tactice, lumi fezabile și aceeași decizie pentru aceeași observație. |
+| [Rafinarea Hard](src/test/java/ro/rentzlab/core/RentzHardRefinementTest.java) | Ținte demonstrate public, incertitudine păstrată, cost local și buget fără prefix parțial de alternative. |
 
 Partida virtuală este integrare de domeniu, fără interfața originală. Componentele mici păstrează așteptări independente și refuzuri fără mutație; [strategia testării](../../docs/rentz/ATF_Components.md) explică interpretarea rezultatului.
 

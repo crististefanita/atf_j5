@@ -1,4 +1,4 @@
-# Componentele care verifică regulile Rentz
+# Componentele și porțile de calificare Rentz
 
 ## Alegerea nivelului
 
@@ -17,6 +17,10 @@ O regulă se verifică prin API-ul minim care îi observă efectul. Partida virt
 | Profil YAML | Paritate tipizată, duplicate, câmpuri necunoscute, tip greșit și statut necalificat. | `RentzRuleComponentTest` și [RuleProfiles](../../atf-tests/src/main/java/atf/rentz/RuleProfiles.java) |
 | Proveniență și trasabilitate | Observații parțiale care nu devin preset, necunoscut diferit de zero, document unic, API și declarație de test existente. | [RuleCatalog](../../atf-tests/src/main/java/atf/rentz/RuleCatalog.java) și componentele ATF. |
 | Politici | Ținte negative, câștigător economic, lanț propriu, as, lumi compatibile și aceeași decizie pentru aceeași observație permisă. | [RentzAiTest](../../rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzAiTest.java) |
+| Strategie de partidă | Obiective distincte, egalități, registru public, portofoliu rămas și aceeași decizie în lumi reale ascunse diferite. | [RentzMatchStrategyTest](../../rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzMatchStrategyTest.java) |
+| Rafinarea Hard | Penalitate locală, captură publică demonstrată, necunoscut păstrat, model advers separat și buget oprit simetric. | [RentzHardRefinementTest](../../rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzHardRefinementTest.java) |
+| Incertitudine | Agregare pe distribuire, rotații complete, obiectiv primar și refuzul promovării fără progres calificat. | [ClusteredEvaluationTest](../../atf-tests/src/test/java/atf/rentz/evaluation/ClusteredEvaluationTest.java) și poarta arenei. |
+| Portabilitate API | Garda statică refuză fabricile `List/Set/Map.of/copyOf` în motorul fără core-library desugaring; nu este inventarul complet al API-urilor Android. | [SourceLayoutTest](../../atf-tests/src/test/java/atf/rentz/governance/SourceLayoutTest.java); runtime-ul nativ se califică separat. |
 | Evaluare offline | Refuzul datelor expuse, registru corupt sau concurent, oracol negativ și jurnale private numai pentru rolul evaluat. | [OfflineArenaComponentTest](../../atf-tests/src/test/java/atf/rentz/OfflineArenaComponentTest.java) |
 | Registru strict | Proprietăți duplicate la orice nivel, tipuri coercibile, câmpuri incompatibile și conținut suplimentar; refuz fără schimbarea octeților și păstrarea expunerii în vecinul valid. | [EvaluationRegistryValidationTest](../../atf-tests/src/test/java/atf/rentz/EvaluationRegistryValidationTest.java) |
 | Partidă virtuală | Conservare, epuizarea alegerilor, rotație, scor și limită de acțiuni. | Cazurile generate din `RentzRulesTest`. |
@@ -26,6 +30,9 @@ O regulă se verifică prin API-ul minim care îi observă efectul. Partida virt
 | Lifecycle fără dispozitiv | Checkpoint durabil, pauză, proprietar înlocuit, calcul necooperant, callback întârziat și refuz IO fără adoptarea candidatului. | [Componente de lifecycle](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/) și [contractul](ATF_Lifecycle.md). |
 | CLI nativ fără dispozitiv | Proces Java real pentru decizie publică, audit, expunere și erori; transport Unicode și scor public corupt confruntat cu vecinul valid. | [RentzNativeFlowTest](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlowTest.java). |
 | Guvernanță Java | Inventar complet, pachet și cale, coeziune fără derogări, importuri și direcția model–AI. | [SourceLayoutTest](../../atf-tests/src/test/java/atf/rentz/governance/SourceLayoutTest.java). |
+| Adopție binară | Perechi fizice, proveniență, CodeSource, refuzuri și contracte publice. | [Componentele bibliotecilor](../../atf-tests/src/test/java/atf/rentz/libraries/). |
+| Publicare | Temporizare, diagnostic, faze de eroare, cauze combinate și artefacte Extent/fallback. | [Adaptorul și probele sale](../../atf-tests/src/test/java/atf/rentz/RentzRulePublicationTest.java). |
+| Selecție și proces | Populație explicită, proprietar schimbat, timeout, captură nouă și cleanup. | [Controale runtime](../../atf-tests/tools/test-runtime-controls.ps1). |
 
 [Politica sursei](../../config/java-source-layout.json) declară modulele și rădăcinile mixte, plus metadatele, materialele istorice și arborii generați excluși explicit. Un director generat este exclus prin calea sa completă; un pachet Java cu același nume rămâne guvernat. Orice Java activ din afara rădăcinilor este refuzat, iar `tools` nu devine un source-set compilat prin simpla prezență a unui fișier.
 
@@ -57,13 +64,13 @@ Suma cumulativă, cardurile conservate și refuzul unei comenzi au proprietăți
 
 ## Execuție
 
-Din rădăcina proiectului, cu JDK 21, Maven și cache pregătit:
+Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și cache-urile pregătite:
 
 ```powershell
-.\scripts\run-rentz-components.ps1
+.\scripts\run-rentz-components.ps1 -Collection regression
 ```
 
-Lansatorul copiază sursele și bibliotecile, verifică identitățile și păstrează XML-urile în afara proiectului. Test Kit înregistrează comparațiile efectiv evaluate, iar [publicatorul](../../atf-tests/src/test/java/atf/rentz/RentzRulePublication.java) transmite rezultatul bibliotecii Extent, fără renderer local.
+Lansatorul copiază sursele și bibliotecile, verifică populațiile Maven și Android JVM și păstrează XML-urile în afara proiectului. [Calificarea offline](ATF_Qualification.md) deține colecțiile și porțile; Test Kit înregistrează comparațiile efectiv evaluate, iar [publicatorul](../../atf-tests/src/test/java/atf/rentz/RentzRulePublication.java) transmite rezultatul bibliotecii Extent.
 
 XML-urile păstrează întreaga populație executată. Raportul narativ publică selecția de contracte ATF auditate, fără multiplicarea fiecărei distribuiri generate într-un scenariu separat; populațiile și scopurile nu se confundă.
 
