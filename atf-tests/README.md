@@ -59,6 +59,17 @@ Componentele și arena rezervă exclusiv cache-ul Maven comun pe durata utiliză
 
 [Componenta rezervării](tools/test-cache-lease.ps1) verifică refuzul concurent și reutilizarea după eliberare, fără Maven sau emulator. Classpath-ul arenei elimină intrările goale și păstrează identitatea JAR-urilor folosite.
 
+## Guvernanța directoarelor
+
+[Inventarul infrastructurii](../docs/rentz/ATF_Infrastructure.md) definește checkout-urile, colecțiile de dovezi și spațiile de lucru admise. Lansatoarele active verifică inventarul înaintea execuției; compilarea folosește o copie izolată cu descriptor, sub rădăcina externă documentată.
+
+| Probă | Contract |
+|---|---|
+| [Test live](../scripts/test-infrastructure-governance.ps1) | Refuză directoare neînregistrate, descriptor invalid, scripturi fără rol și sursele TEMP recunoscute din producători. Nu șterge automat. |
+| [Controale negative](tools/test-workspace-governance.ps1) | Cazuri independente pentru sursă, proiect, artefact, familie interzisă, identitate, parser și limitele căilor. |
+
+Rezultatul roșu se păstrează înaintea curățării, iar aceleași criterii se rulează după remediere. Receipt-urile istorice nu sunt rescrise ca și cum ar fi folosit noua rădăcină.
+
 ## Acceptanța Android locală
 
 [Build-ul izolat](../scripts/build-rentz-android.ps1) cere o rulare de componente trecută, confruntă sursa motorului, execută testele Gradle și păstrează identitatea APK-ului. [Lansatorul nativ](tools/run-android-sanity.ps1) cere acest receipt înaintea rezervării dispozitivului.

@@ -7,6 +7,10 @@ param(
 )
 $ErrorActionPreference='Stop'
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
+Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
+Assert-AtfInfrastructure -ProjectRoot $project
+Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
+Assert-AtfArtifactPath -Path $Registry -ProjectRoot $project
 $ComponentRun=[IO.Path]::GetFullPath($ComponentRun)
 $RunRoot=[IO.Path]::GetFullPath($RunRoot)
 $Registry=[IO.Path]::GetFullPath($Registry)

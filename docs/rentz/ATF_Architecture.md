@@ -37,6 +37,7 @@ Motorul deține distribuirea completă. Politica primește numai mâna actorului
 | `RuleCatalog` | Proveniență parțială și legături ale manifestului către API-ul și declarațiile de test curente. |
 | `OfflineArena`, `EvaluationRegistry` | Jocuri complete CPU, comparare pereche, expunerea datelor și retenția externă. |
 | `GameSession`, `SessionJson` | Comenzi ale adaptorului Android, jurnal privat reproductibil și observație publică serializată separat. |
+| `SavedJson` | Cititor strict comun JVM/Android; document unic și numere exacte înaintea validării formei și rejucării comenzilor. |
 | `MainActivity` | Prezentare nativă minimală, executor serial pentru mutări, istoric și reluare. |
 
 ## Memoria publică

@@ -7,6 +7,9 @@ param(
 )
 $ErrorActionPreference='Stop'
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
+Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
+Assert-AtfInfrastructure -ProjectRoot $project
+Assert-AtfArtifactPath -Path $BuildRun -ProjectRoot $project
 $BuildRun=[IO.Path]::GetFullPath($BuildRun)
 $run=Join-Path $BuildRun $RunName
 if(Test-Path -LiteralPath $run){throw 'Fresh native run required.'}

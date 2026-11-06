@@ -36,8 +36,9 @@ if (-not (Test-Path -LiteralPath (Join-Path $JavaHome 'bin\java.exe') -PathType 
 
 $evidence = Join-Path $RunRoot 'evidence'
 $native = Join-Path $RunRoot 'native'
-$stage = Join-Path ([IO.Path]::GetTempPath()) ('ATF_J5_REFERENCE_MATCH_' + [guid]::NewGuid().ToString('N'))
-New-Item -ItemType Directory -Path $evidence,$native,$stage | Out-Null
+Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
+$stage = New-AtfWorkspace -Kind reference -ProjectRoot $j5Root
+New-Item -ItemType Directory -Path $evidence,$native | Out-Null
 if ($ContinueFrom) {
     $priorRun = [IO.Path]::GetFullPath($ContinueFrom)
     foreach ($sourceRoot in @($j4Root,$j5Root)) {

@@ -6,15 +6,22 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
-if (-not $RunRoot) { $RunRoot = Join-Path 'C:\work\rentz_back\components' ((Get-Date -Format yyyyMMdd-HHmmss)+'-'+[guid]::NewGuid().ToString('N').Substring(0,8)) }
+Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
+Assert-AtfInfrastructure -ProjectRoot $root
+if (-not $RunRoot) { $RunRoot = Join-Path (Join-Path (Get-AtfDataRoot -ProjectRoot $root) 'components') ((Get-Date -Format yyyyMMdd-HHmmss)+'-'+[guid]::NewGuid().ToString('N').Substring(0,8)) }
 $RunRoot = [IO.Path]::GetFullPath($RunRoot)
+Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $root
 if ($RunRoot.Equals($root,[StringComparison]::OrdinalIgnoreCase) -or $RunRoot.StartsWith($root+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)) { throw 'Results belong outside the source project.' }
 if (Test-Path -LiteralPath $RunRoot) { throw 'A fresh run directory is required.' }
 Import-Module (Join-Path $PSScriptRoot 'AtfMavenCache.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 $repository = Resolve-AtfJ5MavenRepository -Repository $MavenRepository
-$stage = Join-Path ([IO.Path]::GetTempPath()) ('rentz-components-'+[guid]::NewGuid().ToString('N'))
-New-Item -ItemType Directory -Path $RunRoot,$stage | Out-Null
-$parts = @('pom.xml','lib','atf-test-kit','atf-tests','rentz-lab-app','config','scripts/run-rentz-components.ps1','scripts/AtfMavenCache.psm1')
+$stage = New-AtfWorkspace -Kind components -ProjectRoot $root
+New-Item -ItemType Directory -Path $RunRoot | Out-Null
+$infrastructureControls=Join-Path (Get-AtfInfrastructurePath -Area governance -ProjectRoot $root) ('component-controls-'+[guid]::NewGuid().ToString('N'))
+& (Join-Path $root 'atf-tests/tools/test-workspace-governance.ps1') -RunRoot $infrastructureControls *> (Join-Path $RunRoot 'infrastructure-controls.log')
+if($LASTEXITCODE-ne0){throw "Infrastructure controls failed; inspect $infrastructureControls"}
+$parts = @('pom.xml','lib','atf-test-kit','atf-tests','rentz-lab-app','config','docs/rentz/ATF_Infrastructure.md','scripts/run-rentz-components.ps1','scripts/AtfMavenCache.psm1','scripts/InfrastructureWorkspaces.psm1')
 $manifest = [Collections.Generic.List[object]]::new()
 foreach ($part in $parts) {
     $origin = Join-Path $root $part
@@ -38,7 +45,8 @@ try {
     $env:JAVA_HOME=$JavaHome
     Push-Location $stage
     try {
-        & $Maven -B -o "-Dmaven.repo.local=$repository" '-Datf.test.heap.max=256m' "-Drentz.report.output=$RunRoot\rentz-rules-extent.html" test *> "$RunRoot\maven.log"
+        New-Item -ItemType Directory -Path "$stage/runtime"|Out-Null
+        & $Maven -B -o "-Dmaven.repo.local=$repository" "-Djava.io.tmpdir=$stage/runtime" '-Datf.test.heap.max=256m' "-Drentz.report.output=$RunRoot\rentz-rules-extent.html" test *> "$RunRoot\maven.log"
         $exit=$LASTEXITCODE
     } finally { Pop-Location }
 } finally { $env:JAVA_HOME=$savedJava; $cacheLease.Dispose() }
@@ -63,6 +71,6 @@ $afterPaths=@(foreach($part in $parts){
 $populationChanges=@(Compare-Object @($manifest.path | Sort-Object) @($afterPaths | Sort-Object))
 $healthy=$exit -eq 0 -and $results.Count -ge 4 -and @($results | Where-Object {$_.failed -or $_.errors -or $_.skipped -or $_.tests -lt 1}).Count -eq 0 -and $drift.Count -eq 0
 $healthy=$healthy -and $populationChanges.Count -eq 0
-[ordered]@{status=$(if($healthy){'PASS'}else{'FAIL'});source=$root;stage=$stage;repository=$repository;results=$results;drift=$drift;populationChanges=$populationChanges;scope='Offline Rentz model and ATF integration; reference parity and Android E2E are not qualified.'} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath "$RunRoot\result.json" -Encoding utf8NoBOM
+[ordered]@{status=$(if($healthy){'PASS'}else{'FAIL'});source=$root;stage=$stage;repository=$repository;infrastructureControls=$infrastructureControls;results=$results;drift=$drift;populationChanges=$populationChanges;scope='Offline Rentz model and ATF integration; reference parity and Android E2E are not qualified.'} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath "$RunRoot\result.json" -Encoding utf8NoBOM
 if (-not $healthy) { throw "Component run not qualified; inspect $RunRoot" }
 Write-Output $RunRoot

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "owner": "atf_j5",
+  "sourceGroupDirectories": ["atf_j0", "atf_j1", "atf_j2", "atf_j3", "atf_j4", "atf_j5"],
+  "sourceDirectories": [".git", ".idea", ".mvn", "atf-test-kit", "atf-tests", "config", "docs", "lib", "reference-tests", "rentz-lab-app", "rentz-reference", "scripts"],
+  "artifactDirectories": ["android-acceptance", "components", "infrastructure", "learning", "onboarding", "policy-evolution", "rules-clarification", "ui-review"],
+  "infrastructureDirectories": ["workspaces", "cache", "governance"],
+  "workspaceKinds": ["components", "android", "reference", "fixture", "governance"],
+  "forbiddenSystemTempPrefixes": ["whist-screen-compile-"],
+  "producerScripts": [
+    "scripts/run-rentz-components.ps1",
+    "scripts/build-rentz-android.ps1",
+    "scripts/run-original-romanian-hard.ps1",
+    "scripts/run-reference-match.ps1",
+    "scripts/AtfMavenCache.psm1",
+    "atf-tests/tools/test-cache-lease.ps1",
+    "atf-tests/tools/run-arena.ps1",
+    "atf-tests/tools/run-android-sanity.ps1",
+    "rentz-reference/tools/RentzAndroid.psm1"
+  ],
+  "reviewedTempReaders": [
+    {
+      "path": "scripts/InfrastructureWorkspaces.psm1",
+      "role": "allocator",
+      "functions": ["Get-AtfDataRoot", "Assert-AtfInfrastructure"],
+      "reason": "Citește limita TEMP pentru refuzul destinațiilor și inventarierea familiei istorice; alocarea rămâne sub rădăcina înregistrată."
+    },
+    {
+      "path": "scripts/test-infrastructure-governance.ps1",
+      "role": "governance",
+      "functions": ["<script>"],
+      "reason": "Inventariază TEMP în mod read-only; rezultatele se scriu în colecția de guvernanță înregistrată."
+    },
+    {
+      "path": "atf-tests/tools/test-workspace-governance.ps1",
+      "role": "governance",
+      "functions": ["<script>"],
+      "reason": "Construiește căi pentru controale negative; fixture-urile și rezultatele sunt alocate exclusiv prin infrastructură."
+    }
+  ],
+  "documentation": "docs/rentz/ATF_Infrastructure.md"
+}

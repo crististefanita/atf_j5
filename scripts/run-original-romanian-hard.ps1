@@ -22,8 +22,9 @@ if(-not $RunRoot){$RunRoot='C:\work\whist_back\original-hard-live\'+(Get-Date -F
 $RunRoot=[IO.Path]::GetFullPath($RunRoot)
 if($RunRoot.StartsWith([IO.Path]::GetFullPath($root)+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Evidence belongs outside the source project.'}
 if(Test-Path -LiteralPath $RunRoot){throw 'A fresh run folder is required; partial matches and failures are never overwritten.'}
-$stage=Join-Path ([IO.Path]::GetTempPath()) ('ATF_J5_ORIGINAL_'+[guid]::NewGuid().ToString('N'))
-New-Item -ItemType Directory -Path $RunRoot,$stage | Out-Null
+Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
+$stage=New-AtfWorkspace -Kind reference -ProjectRoot $j5Root
+New-Item -ItemType Directory -Path $RunRoot | Out-Null
 Copy-Item -LiteralPath "$root\pom.xml","$root\atf.yaml","$root\lib","$root\config" -Destination $stage -Recurse
 foreach($module in @('atf-test-kit','atf-mock','atf-validation','atf-console','atf-android','atf-test-android')){
     foreach($file in Get-ChildItem -LiteralPath "$root\$module" -File -Recurse){

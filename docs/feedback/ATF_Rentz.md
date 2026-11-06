@@ -13,23 +13,31 @@
 
 ## Integrare și infrastructură
 
+[Registrul de calitate](ATF_RentzQuality.md) deține riscurile lifecycle-ului, coeziunea și probele încă lipsă ale adaptoarelor. Validarea strictă a datelor are contract și regresii în [evaluare](../rentz/ATF_Learning.md), [persistență](../../rentz-lab-app/app/README.md) și [infrastructură](../rentz/ATF_Infrastructure.md); aceste probe nu califică automat restul integrării.
+
 | Prioritate | Responsabil și diferență | Criteriu de închidere |
 |---|---|---|
 | P1 | Referința: pornirea poate produce WebView negru pe configurația Android inspectată. | Identificați runtime-ul și cauza prin probe delimitate; un ecran utilizabil și instrucțiuni lizibile preced calificarea regulilor. Instalarea sau PID-ul procesului nu constituie succes funcțional. |
 | P2 | Instrumente: helperul PowerShell este separat de adaptorul Java și nu are încă o suită proprie de procese controlate. | Refuz, timeout, fluxuri, proprietar schimbat, eroare cu exit zero și lipsa fișierului nou sunt detectate fără dispozitiv. |
 | P2 | Consumator: publicatorul minim păstrează comparațiile, dar calificarea fazelor eșuate și a temporizării cere probe negative proprii. | Cazuri cu eroare în pregătire/corp/închidere și publicație eșuată; păstrați cauza și separați costul publicării de timpul testului. |
-| P2 | Android local: prezentarea este un prototip, iar un sanity cu o distribuire nu acoperă matricea sub-jocurilor, meselor și dimensiunilor. | Cazuri de componente pentru prezentarea stărilor, text și istoric, apoi E2E selectiv pentru secvențe, ținte negative/pozitive, pe nevăzute și mese de trei până la șase locuri. |
+| P1 | Android local: tabla Rentz, contextul mutărilor și tabela de scor sunt încă prezentări de prototip. | Închideți [ToDo-urile de interfață](ATF_Rentz_UI_ToDo.md): deschidere J reală, geometrie stabilă, scor explicabil și toate coloanele accesibile, prin componente și acceptanță nativă selectivă. |
 | P2 | Persistență: versiunea regulilor este explicită; compatibilitatea veche este limitată la reluarea validată a comenzilor, fără migrarea scorului sau a opțiunilor noi. | Calificați migrări reprezentative și refuzul sesiunilor incompatibile, cu păstrarea fișierului original. Orice schimbare de profil sau candidat cere identitate și strategie explicită. |
 
 ## Transferul generic
 
 Kitul și JAR-urile au responsabilități comune, iar legalitatea și scorul aparțin domeniului Rentz. API-ul de guvernanță reutilizabil trebuie să accepte rădăcină, inventar și module mixte Maven/Gradle explicit, fără impunerea motorului altui joc.
 
-## Istoric: extinderea calificării grafice
+## Guvernanța infrastructurii
 
-Sanity-ul verifică accesul la istoric și starea scorului, fără confruntarea fiecărei coloane după derulare orizontală. [Captura nativă](../../../../rentz_back/android-acceptance/20261106-003/native/checkpoint-06.png) păstrează viewportul original; coloanele din afara lui nu sunt calificate prin acea imagine.
+[Contractul implementat](../rentz/ATF_Infrastructure.md) păstrează registrul, allocatorul și probele roșu/verde la consumator. Extinderea către alte proiecte trebuie să adopte explicit rădăcinile, proprietarii și producătorii lor; o rulare trecută aici nu certifică toate directoarele temporare ale celorlalte proiecte sau ale sistemului.
 
-Pentru închidere: componente de prezentare pentru toate locurile și scorurile, apoi o probă E2E cu derulare până la ultima coloană, etichete complete și comparații puncte/total pentru fiecare jucător. Nu înlocuiți captura originală cu un tabel recompus pentru a ascunde frontiera viewportului.
+| Prioritate | Cerință rămasă | Criteriu de închidere |
+|---|---|---|
+| P2 | Retenția copiilor istorice referite de receipt-uri și classpath-uri trebuie reconciliată înaintea unei curățări mai largi. | Inventar cu proprietar și dovada utilizării, arhivă portabilă verificată și eliminare numai după eliberarea proceselor; nu redenumiți proveniența istorică pentru a obține verde. |
+
+## Prezentare și tabelă de scor
+
+[Backlog-ul UI](ATF_Rentz_UI_ToDo.md) centralizează constatările, capturile și criteriile de închidere. Accesul la istoric și acordul stării cu oracolul nu califică singure lizibilitatea, toate coloanele după derulare sau păstrarea tablei terminale.
 
 [Contractul regulilor](../rentz/ATF_Rules.md) · [Lecțiile transferului](../rentz/ATF_Transfer.md) · [Rutarea bibliotecilor](README.md)
 

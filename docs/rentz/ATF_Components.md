@@ -18,8 +18,11 @@ O regulă se verifică prin API-ul minim care îi observă efectul. Partida virt
 | Proveniență și trasabilitate | Observații parțiale care nu devin preset, necunoscut diferit de zero, document unic, API și declarație de test existente. | [RuleCatalog](../../atf-tests/src/main/java/atf/rentz/RuleCatalog.java) și componentele ATF. |
 | Politici | Ținte negative, câștigător economic, lanț propriu, as, lumi compatibile și aceeași decizie pentru aceeași observație permisă. | [RentzAiTest](../../rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzAiTest.java) |
 | Evaluare offline | Refuzul datelor expuse, registru corupt sau concurent, oracol negativ și jurnale private numai pentru rolul evaluat. | [OfflineArenaComponentTest](../../atf-tests/src/test/java/atf/rentz/OfflineArenaComponentTest.java) |
+| Registru strict | Proprietăți duplicate la orice nivel, tipuri coercibile, câmpuri incompatibile și conținut suplimentar; refuz fără schimbarea octeților și păstrarea expunerii în vecinul valid. | [EvaluationRegistryValidationTest](../../atf-tests/src/test/java/atf/rentz/EvaluationRegistryValidationTest.java) |
 | Partidă virtuală | Conservare, epuizarea alegerilor, rotație, scor și limită de acțiuni. | Cazurile generate din `RentzRulesTest`. |
 | Sesiune Android fără dispozitiv | Refuz fără jurnalizare, proiecție proprie, reluare deterministă, identități incompatibile și eligibilitatea pe nevăzute la ultima alegere. | [GameSessionTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/GameSessionTest.java), executat prin Gradle. |
+| Codec fără dispozitiv | Document unic strict, tipuri și domenii numerice exacte, payload de comandă, format vechi explicit și restaurare validă. | [SessionJsonValidationTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/SessionJsonValidationTest.java), executat prin Gradle. |
+| Infrastructură fără dispozitiv | Descoperirea scripturilor, citiri TEMP cu domeniu explicit, API-uri alternative și linkuri refuzate fără urmărire. | [Controale PowerShell](../../atf-tests/tools/test-workspace-governance.ps1), incluse de lansator înaintea Maven. |
 
 ## Oracol și control negativ
 

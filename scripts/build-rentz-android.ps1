@@ -6,13 +6,17 @@ param(
 )
 $ErrorActionPreference='Stop'
 $root=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
+Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
+Assert-AtfInfrastructure -ProjectRoot $root
 $RunRoot=[IO.Path]::GetFullPath($RunRoot)
+Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $root
 if($RunRoot.StartsWith($root+'\',[StringComparison]::OrdinalIgnoreCase)-or$RunRoot-eq$root-or(Test-Path -LiteralPath $RunRoot)){throw 'A fresh external build directory is required.'}
 $component=Get-Content -Raw -LiteralPath (Join-Path $ComponentRun 'result.json')|ConvertFrom-Json
 if($component.status-ne'PASS'){throw 'Qualified offline component source required.'}
 $lab=Join-Path $root 'rentz-lab-app'
-$stage=Join-Path ([IO.Path]::GetTempPath()) ('rentz-android-'+[guid]::NewGuid().ToString('N'))
-New-Item -ItemType Directory -Path $RunRoot,$stage|Out-Null
+Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
+$stage=New-AtfWorkspace -Kind android -ProjectRoot $root
+New-Item -ItemType Directory -Path $RunRoot|Out-Null
 $stage|Set-Content -LiteralPath (Join-Path $RunRoot 'stage.txt') -Encoding utf8NoBOM
 $manifest=@(foreach($file in Get-ChildItem -LiteralPath $lab -Recurse -File|Where-Object{[IO.Path]::GetRelativePath($lab,$_.FullName)-notmatch'(^|[\\/])(build|target|\.gradle|\.git)([\\/]|$)'-and$_.Name-ne'local.properties'}){
     $relative=[IO.Path]::GetRelativePath($lab,$file.FullName);$target=Join-Path $stage $relative
