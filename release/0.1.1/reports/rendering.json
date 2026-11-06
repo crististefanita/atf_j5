@@ -1,0 +1,100 @@
+{
+  "status": "PASS",
+  "scope": "Offline Chromium, real clicks on scenario, phase and disclosure controls; no GitHub browser or game execution",
+  "reports": [
+    {
+      "report": "component/rentz-rules.html",
+      "cases": 13,
+      "assertionRows": 63,
+      "status": "PASS",
+      "scriptErrors": [],
+      "disclosuresOpened": 0,
+      "fullBodiesVisible": 0,
+      "verification": "Earlier real offline Chromium run; these four HTML files remained unchanged during the body-retention correction",
+      "sha256": "d4d40d980fd36fb524dc2b8fe0f98def9d011ebf5ab4bb9012c073371bc67af4"
+    },
+    {
+      "report": "distribution/download-components.html",
+      "cases": 19,
+      "assertionRows": 54,
+      "status": "PASS",
+      "scriptErrors": [],
+      "disclosuresOpened": 0,
+      "fullBodiesVisible": 0,
+      "verification": "Earlier real offline Chromium run; these four HTML files remained unchanged during the body-retention correction",
+      "sha256": "c2188dd9ac84eb1e64156278e78c7b1200ab10916868c0b1aca8efa16ebbdb80"
+    },
+    {
+      "report": "distribution/release-governance.html",
+      "cases": 13,
+      "assertionRows": 37,
+      "status": "PASS",
+      "scriptErrors": [],
+      "disclosuresOpened": 0,
+      "fullBodiesVisible": 0,
+      "verification": "Earlier real offline Chromium run; these four HTML files remained unchanged during the body-retention correction",
+      "sha256": "4b01ba9d0d160baf5701445522d98449195bf4593e70c2aec6f4eef99ac05c27"
+    },
+    {
+      "report": "distribution/release-git-policy.html",
+      "cases": 2,
+      "assertionRows": 7,
+      "status": "PASS",
+      "scriptErrors": [],
+      "disclosuresOpened": 0,
+      "fullBodiesVisible": 0,
+      "verification": "Earlier real offline Chromium run; these four HTML files remained unchanged during the body-retention correction",
+      "sha256": "c9dd281a2e7c848a7b849853b08ce92745cfa0661c433f9e1f7705ff4efdad1a"
+    },
+    {
+      "assertionRows": 13,
+      "scriptErrors": [],
+      "status": "PASS",
+      "report": "distribution/apk-validation.html",
+      "disclosuresOpened": 5,
+      "cases": 1,
+      "fullBodiesVisible": 4,
+      "sha256": "b21fec0ab885d03e2d1e63bb978daf46d402b81bcd15d02f2982d3a51d646a73"
+    },
+    {
+      "assertionRows": 13,
+      "scriptErrors": [],
+      "status": "PASS",
+      "report": "distribution/mobile-download.html",
+      "disclosuresOpened": 5,
+      "cases": 1,
+      "fullBodiesVisible": 4,
+      "sha256": "2689bb872445813df324063b68377a85e5418c3b12060c9dbfa6d12a8cffa936"
+    },
+    {
+      "assertionRows": 6,
+      "scriptErrors": [],
+      "status": "PASS",
+      "report": "distribution/download-live.html",
+      "disclosuresOpened": 1,
+      "cases": 1,
+      "fullBodiesVisible": 0,
+      "sha256": "78b3fca05561dbe79983c43e13265257561ba4215bff2dca5f96e147c0f7b3cb"
+    },
+    {
+      "assertionRows": 0,
+      "scriptErrors": [],
+      "status": "PASS",
+      "report": "diagnostics/preparation-attempts.html",
+      "disclosuresOpened": 18,
+      "cases": 6,
+      "fullBodiesVisible": 6,
+      "sha256": "a67360f36e5cebf33de11c973ccf5dcd62cf5c7c8c1de65eae5d76f9474fa9e7"
+    },
+    {
+      "disclosuresOpened": 0,
+      "report": "distribution/release-body-retention.html",
+      "status": "PASS",
+      "scriptErrors": [],
+      "assertionRows": 7,
+      "fullBodiesVisible": 0,
+      "cases": 1,
+      "sha256": "544bcc5fdf91206a2f97a4e9d9fb3d955e6f43d3c109ab5e4e63a4915c953dbe"
+    }
+  ]
+}

@@ -92,6 +92,26 @@ class ReleaseGovernanceTest {
         }
         assertThrows(NullPointerException.class,()->atf.rentz.distribution.ReleaseDownloadAcceptance.comparisons(target,null),"No proof means no implicit PASS");
     }
+    @Test void retainedDeliveryBodiesAreCompleteInsteadOfPreviewOnly() throws Exception {
+        Path root=ReleaseCatalog.root();
+        String version=ReleaseCatalog.read(root.resolve("release/index.json")).required("currentVersion").asText();
+        Path reports=root.resolve("release/"+version+"/reports");
+        for(String name:java.util.List.of("distribution/apk-validation.html","distribution/mobile-download.html","diagnostics/preparation-attempts.html")) {
+            Path file=reports.resolve(name);
+            if(Files.isRegularFile(file)) assertTrue(hasFullBodies(Files.readString(file)),"Retained evidence must contain full bodies: "+name);
+        }
+        String original="<pre class=\"json-code atf-observation-body\">"+"actual evidence ".repeat(20)+"</pre>";
+        assertTrue(hasFullBodies(original),"A full neighboring body remains acceptable");
+        assertFalse(hasFullBodies("<pre>unrelated log</pre>"),"A title or unrelated block cannot replace the evidence body");
+        assertFalse(hasFullBodies(original.replace("actual evidence ".repeat(20),"prefix… [truncated; showing first 100 of 300 chars]")),
+                "The original preview-loss defect is rejected");
+        assertFalse(hasFullBodies(original.replace("actual evidence ".repeat(20),"")),"An empty body cannot qualify retention");
+    }
+    private static boolean hasFullBodies(String html) {
+        var bodies=java.util.regex.Pattern.compile("(?s)<pre[^>]*class=\"[^\"]*atf-observation-body[^\"]*\"[^>]*>(.*?)</pre>")
+                .matcher(html).results().map(match->match.group(1)).toList();
+        return !bodies.isEmpty() && bodies.stream().allMatch(body->!body.isBlank() && !body.contains("[truncated; showing first"));
+    }
     private static String guide(String state) {
         String local="release/1.2.0/";
         String entry=state.equals("PUBLISHED")?"https://github.com/example/game/releases/tag/v1.2.0":local+"README.md";

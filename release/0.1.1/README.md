@@ -2,11 +2,11 @@
 
 ## Pe scurt
 
-**PREPARED — candidat Release calificat local.** Publicarea GitHub și proba distribuției sunt etape distincte.
+**PUBLISHED — Rentz Lab 0.1.1.**
 
-## Descărcare locală
+## Descărcare
 
-- [APK](RentzLab-0.1.1.apk) · [SHA-256](RentzLab-0.1.1.apk.sha256).
+- [APK](https://github.com/crististefanita/atf_j5/releases/download/v0.1.1/RentzLab-0.1.1.apk) · [SHA-256](https://github.com/crististefanita/atf_j5/releases/download/v0.1.1/RentzLab-0.1.1.apk.sha256).
 - Versiune **0.1.1**, cod **2**, minimum API 26, target API 36; APK Release nedebuggable.
 - Mărime: **771144 bytes**; SHA-256: **a51fd7ad872708f3751ef168ca5df41de1bdcd3f21b92791ba551f7a0b16b0a4**.
 

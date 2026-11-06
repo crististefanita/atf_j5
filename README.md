@@ -8,8 +8,8 @@ Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări 
 
 ## Jocul
 
-- **[Rentz Lab 0.1.1](release/0.1.1/README.md)** — candidat Release calificat local.
-- **[Descarcă APK 0.1.1](release/0.1.1/RentzLab-0.1.1.apk)** — copia locală verificată; publicarea GitHub urmează.
+- [Release 0.1.1](https://github.com/crististefanita/atf_j5/releases/tag/v0.1.1) — prezentare și descărcare.
+- [Descarcă APK 0.1.1](https://github.com/crististefanita/atf_j5/releases/download/v0.1.1/RentzLab-0.1.1.apk).
 
 ## Module și responsabilități
 

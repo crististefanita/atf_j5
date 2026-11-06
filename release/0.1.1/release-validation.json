@@ -13,10 +13,11 @@
     "debuggable": false
   },
   "publication": {
-    "state": "PREPARED",
-    "sourceCommit": null,
+    "state": "PUBLISHED",
+    "sourceCommit": "705d73ab82dcbe9cea6707e072cf812a94476552",
     "evidenceCommit": null,
-    "releaseId": null
+    "releaseId": 436972046,
+    "publishedAt": "2026-11-06T20:26:56Z"
   },
   "qualification": {
     "status": "PASS",
@@ -147,15 +148,23 @@
       "errors": 0,
       "skipped": 0
     },
-    "nativeUiExecuted": false
+    "nativeUiExecuted": false,
+    "additionalGovernance": {
+      "tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "scope": "Post-publication retained-body guard, including negative neighbors; separate from primary population",
+      "report": "reports/distribution/release-body-retention.html"
+    }
   },
   "integrity": {
     "kind": "OBSERVED_PAYLOAD_HASHES",
     "files": [
       {
         "path": "README.md",
-        "bytes": 855,
-        "sha256": "aed9ea5a6b5b5631a8c704b1a89f9c921d2d4c9e23b5a21db5c280674e917553"
+        "bytes": 901,
+        "sha256": "6e0a269e771d5e79779066932270af3eb9018df08b6c199611ebbafbd89c7192"
       },
       {
         "path": "release-notes.md",
@@ -184,18 +193,33 @@
       },
       {
         "path": "reports/diagnostics/preparation-attempts.html",
-        "bytes": 2441213,
-        "sha256": "858d901751042958f736928ea729594e35153e7d1aa7b63ca323fb31d83e6e4c"
+        "bytes": 2465781,
+        "sha256": "a67360f36e5cebf33de11c973ccf5dcd62cf5c7c8c1de65eae5d76f9474fa9e7"
       },
       {
         "path": "reports/distribution/apk-validation.html",
-        "bytes": 2414061,
-        "sha256": "b94b1db8634b3d974fa6a256c62904095d407be53886e694e91d21aa06fd65f0"
+        "bytes": 2420822,
+        "sha256": "b21fec0ab885d03e2d1e63bb978daf46d402b81bcd15d02f2982d3a51d646a73"
       },
       {
         "path": "reports/distribution/download-components.html",
         "bytes": 2538487,
         "sha256": "c2188dd9ac84eb1e64156278e78c7b1200ab10916868c0b1aca8efa16ebbdb80"
+      },
+      {
+        "path": "reports/distribution/download-live.html",
+        "bytes": 2411674,
+        "sha256": "78b3fca05561dbe79983c43e13265257561ba4215bff2dca5f96e147c0f7b3cb"
+      },
+      {
+        "path": "reports/distribution/mobile-download.html",
+        "bytes": 2437758,
+        "sha256": "2689bb872445813df324063b68377a85e5418c3b12060c9dbfa6d12a8cffa936"
+      },
+      {
+        "path": "reports/distribution/release-body-retention.html",
+        "bytes": 2412709,
+        "sha256": "544bcc5fdf91206a2f97a4e9d9fb3d955e6f43d3c109ab5e4e63a4915c953dbe"
       },
       {
         "path": "reports/distribution/release-git-policy.html",
@@ -208,14 +232,24 @@
         "sha256": "4b01ba9d0d160baf5701445522d98449195bf4593e70c2aec6f4eef99ac05c27"
       },
       {
+        "path": "reports/github-release.json",
+        "bytes": 859,
+        "sha256": "b960aacb69b41b30022dab1c0ae393c597b2a203b530d63ca6bbfb0d67fb6184"
+      },
+      {
         "path": "reports/qualification.json",
         "bytes": 18705,
         "sha256": "72e589adaf3bed84e59e59c170f45243e12d71e0595ad0f44fa223af92622c60"
       },
       {
         "path": "reports/README.md",
-        "bytes": 2757,
-        "sha256": "2cb1550d92d58ae496b6fa5a51a63306fc56bba895d0ac541bf986cdf0db02f3"
+        "bytes": 5309,
+        "sha256": "9ef1173d0a36d916f09697448f8c9dde618154fba468eea7d3e76fb3053bc3ca"
+      },
+      {
+        "path": "reports/rendering.json",
+        "bytes": 3465,
+        "sha256": "935d31962fd75dad970b9d15166a714d6e3d6c3fa80e66dc8721182d9e53edf6"
       },
       {
         "path": "reports/source-reconciliation.json",
@@ -245,8 +279,31 @@
     ]
   },
   "source": {
-    "sourceCommit": null,
+    "sourceCommit": "705d73ab82dcbe9cea6707e072cf812a94476552",
     "buildInputManifest": "reports/apk-inputs.json",
     "buildSnapshotSha256": "2956069a45858c1829ca70f505198801b5969409e05b6b25d9b50c3404cbab3b"
+  },
+  "distribution": {
+    "api": "PASS_SIX_COMPARISONS",
+    "android": "PASS_THIRTEEN_COMPARISONS_API28",
+    "browser": "PAGE_NOT_FOUND_IN_MCP",
+    "nativeGameUiExecuted": false,
+    "apiAssets": [
+      {
+        "name": "RentzLab-0.1.1.apk",
+        "assetId": 718448977,
+        "bytes": 771144,
+        "sha256": "a51fd7ad872708f3751ef168ca5df41de1bdcd3f21b92791ba551f7a0b16b0a4",
+        "http": 200
+      },
+      {
+        "name": "RentzLab-0.1.1.apk.sha256",
+        "assetId": 718449035,
+        "bytes": 86,
+        "sha256": "f1987812675a04bc9cd7984a329b13b02b1271476697117780e55b37886511df",
+        "http": 200
+      }
+    ],
+    "apiZipCrc": "PASS"
   }
 }

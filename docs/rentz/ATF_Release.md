@@ -1,6 +1,6 @@
 # Livrarea și distribuția Rentz Lab
 
-## Contract
+## Pe scurt
 
 O livrare identifică exact APK-ul semnat, sursele construirii, selecțiile trecute și copia primită de utilizator. Publicarea GitHub și folderul documentar sunt suprafețe distincte.
 
@@ -90,3 +90,9 @@ $runtime = Get-Content -Raw <ComponentRun>/native-runtime.json | ConvertFrom-Jso
 - Tokenul se citește din `GH_TOKEN` sau `GITHUB_TOKEN`; nu se transmite ca argument și nu intră în rapoarte.
 - Intrarea cere starea PUBLISHED și identitatea curentă verificată; produce șase comparații efective și diagnostic FAIL la eroare, fără fallback la o versiune anterioară.
 - Componentele offline califică separat oracolul comparațiilor, metadata și transportul loopback. Raportul live rămâne distinct de navigarea browserului și de instalarea Android.
+
+## Corpuri complete în dosarul de audit
+
+- Raportul de livrare configurează explicit `new ReportingSettings(240, ReportingSettings.DISABLE_BODY_DISPLAY_LIMIT)`: bugetul aserțiunii rămâne separat de păstrarea integrală a corpului. Setarea implicită a corpului este un preview de 100 de caractere, nu o arhivă recuperabilă prin expandare.
+- Deschideți efectiv scenariul, faza și fiecare disclosure de corp în browserul offline; verificați ultima aserțiune și textul integral al dovezii. Nu considerați prezența unui titlu sau a prefixului JSON drept audit complet.
+- Dacă prezentarea a trunchiat o probă capturată, regenerați numai HTML-ul din aceleași intrări, păstrând verdictul și durata execuției originale. Fără replay implicit sau nou rezultat JUnit dedus.
