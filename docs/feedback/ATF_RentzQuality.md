@@ -55,22 +55,6 @@ Rezultatele, identitățile și pașii RED/GREEN rămân în [auditul extern](..
 
 Păstrați Q09 prin colecția `infrastructure` și regresia standard. Calificați separat progresul strategic Q08, integrarea nativă și prezentarea; un raport verde al componentelor nu demonstrează superioritate de joc.
 
-## Q10: o legătură YAML trebuie să indice un test executabil
-
-**P1 · deschis · responsabil: catalogul regulilor și guvernanța Rentz.**
-
-[Verificarea legăturilor](../../atf-tests/src/main/java/atf/rentz/RuleCatalog.java) caută declarația metodei prin expresie regulată în textul brut. Un comentariu, un literal sau o metodă ajutătoare fără adnotare poate satisface această căutare; existența unei potriviri textuale nu stabilește identitatea unei probe JUnit.
-
-| Frontieră | Criteriu de închidere |
-|---|---|
-| Declarație reală | Comentariile, literalii și blocurile de text nu devin metode; diagnosticul numește regula, fișierul și metoda. |
-| Execuție eligibilă | Metoda aparține clasei legate și unui test recunoscut; metodele ajutătoare și adnotările străine sunt refuzate. |
-| Forme valide | Păstrați testele parametrizate existente, adnotările calificate și pozițiile legale față de modificatori; evitați înlocuirea cu alt regex îngust. |
-| Populație | Rezolvarea declarației, descoperirea de către JUnit și execuția în colecția selectată au verdicte separate. |
-| Regresie | Păstrați controale negative independente și vecini valizi în colecția de infrastructură; nu modificați așteptările ca să accepte declarația artificială. |
-
-Reproducerea și identitatea codului verificat sunt în [auditul extern](../../../../rentz_back/infrastructure/governance/20261106-cross-quality-6e8cd680/rule-binding-probe.json); [rețeta](../../../../rentz_back/infrastructure/governance/20261106-cross-quality-6e8cd680/run-rule-binding-probe.ps1) execută catalogul compilat, fără emulator.
-
 ## Q11: paritatea guvernanței trebuie să fie permanentă și delimitată
 
 **P2 · deschis · responsabil: integrarea testelor și documentația consumatorului.**
@@ -94,3 +78,18 @@ API-ul comun se solicită prin [responsabilitățile bibliotecilor](README.md); 
 - Declarați importurile și etapele evaluării explicit, păstrând fațadele, ordinea consumului aleatorului și plafonul reproductibil.
 - Calificați refactorizarea prin aceleași observații publice, alegeri, estimări, scoruri și costuri deterministe; timpii se măsoară separat.
 - Nu amestecați această lucrare cu promovarea profilului AI sau cu schimbarea interfeței.
+
+## Distribuția APK
+
+| Prioritate | Lacună delimitată | Criteriu de închidere |
+|---|---|---|
+| P1 | Traseul personal README → GitHub Release → fișier salvat în browser cere dovadă distinctă față de API și transferul nativ. | Versiune curentă, sesiune autentificată, bytes, SHA-256 și CRC; orice blocare a clientului rămâne diagnostic, fără substituirea cu un PASS API. |
+| P2 | Contractele de transport și arhivă sunt adaptoare locale provenite din modelul J4; reutilizarea printr-o bibliotecă comună nu este încă împachetată. | Prin ownerul comun, promovați un API generic cu nume de produs configurabil și oracole negative independente. Păstrați în J5 selecția versiunii, regulile Rentz și acceptanța consumatorului. |
+
+[Procesul livrării](../rentz/ATF_Release.md) separă DRAFT, PREPARED și PUBLISHED; o pregătire validă nu este un APK calificat.
+
+## Proveniența livrării și populația testelor
+
+- **P2:** unele invocări Gradle parametrizate au același display name în aceeași clasă. Introduceți identități XML neambigue; păstrați toate invocările originale și nu deduceți metode unice din etichete.
+- **Contract permanent:** release-ul 0.1.1 califică snapshot-ul J21 identificat în dosar. Refactorizările live și Reporting J22 cer calificare proprie și versiune nouă; nu înlocuiți asset-ul publicat.
+- **P2:** formalizați reconcilierea diferențelor exclusiv documentare într-un compositor versionat, cu controale negative. Receipt-ul original FAIL se păstrează, iar calificarea compusă identifică explicit execuțiile și diferența acceptată.

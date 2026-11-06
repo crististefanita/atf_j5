@@ -1,0 +1,24 @@
+{
+  "componentRun": "C:\\work\\rentz_back\\components\\release-0.1.1-20261106-qualified",
+  "originalRun": "C:\\work\\rentz_back\\components\\release-0.1.1-20261106-9a4063-r6",
+  "tests": 270,
+  "focusedRecheck": 26,
+  "documentationDelta": [
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/README.md",
+      "snapshotSha256": "815ff5af49e10fdbf08b3392e28d06bcf5de7edc9bf2333db63df57569429090",
+      "currentSha256": "0b7de2a1665d516b8465894d657dc049e33f2ff1343fb688a62b3b1a7d2b0a90"
+    },
+    {
+      "path": "release/README.md",
+      "snapshotSha256": "54213b6cedb1de7b6530652712d6a1d9381601dd81593f314503630bb6508fff",
+      "currentSha256": "1fa5927678780f7574b86f5bb5c3eedf7817c36edf7ba57ebef48e71a32ab4dc"
+    },
+    {
+      "path": "release/0.1.1/reports/README.md",
+      "snapshotSha256": "38d3f40af0ba3ff354d842815275b61581c2a76d49c58412a9241045bf2779d0",
+      "currentSha256": "8f8053667eef574f7f8cc685449cb9d8ffac4f28fff40a25f67b78f464f7c067"
+    }
+  ],
+  "originalOutcomePreserved": true
+}

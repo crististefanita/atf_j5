@@ -1,0 +1,170 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites><testsuite name="ro.rentzlab.app.GameSessionTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:27.266Z" hostname="DESKTOP-BLFSO18" time="0.643">
+  <properties />
+  <testcase name="aCompleteHandAndHistorySurviveRestoration" classname="ro.rentzlab.app.GameSessionTest" time="0.339" />
+  <testcase name="aSavedSnapshotCannotBeChangedByLaterCommands" classname="ro.rentzlab.app.GameSessionTest" time="0.001" />
+  <testcase name="incompatibleSavedIdentitiesAreRejected" classname="ro.rentzlab.app.GameSessionTest" time="0.001" />
+  <testcase name="publicProjectionContainsNoSeedOrOpposingHandAndSaveRestoresExactly" classname="ro.rentzlab.app.GameSessionTest" time="0.15" />
+  <testcase name="rejectedHumanCommandDoesNotEnterTheSavedJournal" classname="ro.rentzlab.app.GameSessionTest" time="0.0" />
+  <testcase name="blindEligibilityDisappearsBeforeTheLastChoice" classname="ro.rentzlab.app.GameSessionTest" time="0.122" />
+  <testcase name="interruptedBotProgressCanResumeFromTheSameCommands" classname="ro.rentzlab.app.GameSessionTest" time="0.014" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.app.lifecycle.FileSessionStorageTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:28.033Z" hostname="DESKTOP-BLFSO18" time="0.123">
+  <properties />
+  <testcase name="missingDataAndUnexpectedFileNamesNeverCreateAReplacement" classname="ro.rentzlab.app.lifecycle.FileSessionStorageTest" time="0.021" />
+  <testcase name="defaultAtomicBackendReplacesBothCanonicalFilesAndLeavesNoStagingResidue" classname="ro.rentzlab.app.lifecycle.FileSessionStorageTest" time="0.047" />
+  <testcase name="everyWriteUsesADifferentStagingFileOutsideCanonicalData" classname="ro.rentzlab.app.lifecycle.FileSessionStorageTest" time="0.033" />
+  <testcase name="failedAtomicReplacePreservesOriginalAndCleansOnlyItsOwnStagingFile" classname="ro.rentzlab.app.lifecycle.FileSessionStorageTest" time="0.022" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.app.lifecycle.SessionControllerTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:28.165Z" hostname="DESKTOP-BLFSO18" time="0.093">
+  <properties />
+  <testcase name="failedBotCheckpointCannotAdoptTheUnpersistedCandidate" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.021" />
+  <testcase name="callbackQueuedBeforeCloseCannotReachTheDestroyedOwner" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.006" />
+  <testcase name="realBotProgressIsIsolatedUntilAuthorizedDeliveryAndSurvivesReload" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.006" />
+  <testcase name="acceptedHumanCommandIsDurableBeforeBotWorkStarts" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.005" />
+  <testcase name="anOlderActivityCannotOverwriteANewOwnersGame" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.025" />
+  <testcase name="delayedFailureIsDiscardedAfterPause" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.004" />
+  <testcase name="changedRevisionInvalidatesAnAlreadyCalculatedResult" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.001" />
+  <testcase name="closeIsIdempotentAndCannotBeReactivated" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.002" />
+  <testcase name="rejectedDeliveryKeepsTheCheckpointAndReleasesBusyState" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.004" />
+  <testcase name="failedHumanCheckpointKeepsThePreviousStateAndDoesNotScheduleBots" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.005" />
+  <testcase name="calculationIgnoringCancellationCannotMutateOrSaveTheLiveSession" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.005" />
+  <testcase name="pausedControllerReloadsTheLatestCheckpointAndAcceptsNewWork" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.001" />
+  <testcase name="rejectedWorkerDoesNotLeaveTheControllerBusy" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.006" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.app.lifecycle.SessionRepositoryTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:28.295Z" hostname="DESKTOP-BLFSO18" time="0.02">
+  <properties />
+  <testcase name="corruptReadIsPreservedWithoutResetOrWrite" classname="ro.rentzlab.app.lifecycle.SessionRepositoryTest" time="0.003" />
+  <testcase name="closingAnOldHandleCannotRevokeANewerOwner" classname="ro.rentzlab.app.lifecycle.SessionRepositoryTest" time="0.001" />
+  <testcase name="validSessionAndPublicProjectionUseDifferentDocuments" classname="ro.rentzlab.app.lifecycle.SessionRepositoryTest" time="0.012" />
+  <testcase name="claimingNewOwnershipRevokesEveryOldWriteAndCallback" classname="ro.rentzlab.app.lifecycle.SessionRepositoryTest" time="0.004" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.app.SessionJsonValidationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:27.944Z" hostname="DESKTOP-BLFSO18" time="0.059">
+  <properties />
+  <testcase name="integerFieldsRejectFractionsStringsBooleansNullAndOverflow" classname="ro.rentzlab.app.SessionJsonValidationTest" time="0.025" />
+  <testcase name="shapeAndIdentityTypesAreExactButMissingLegacyRulesRemainSupported" classname="ro.rentzlab.app.SessionJsonValidationTest" time="0.006" />
+  <testcase name="commandFieldsAreTypedAndIrrelevantPayloadIsRefused" classname="ro.rentzlab.app.SessionJsonValidationTest" time="0.005" />
+  <testcase name="oneStrictDocumentRejectsTrailingTextDuplicatesAndLenientSyntax" classname="ro.rentzlab.app.SessionJsonValidationTest" time="0.019" />
+  <testcase name="exactLongSeedsCanonicalCommandsAndWhitespaceRoundTrip" classname="ro.rentzlab.app.SessionJsonValidationTest" time="0.002" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.core.RentzAiTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:16.969Z" hostname="DESKTOP-BLFSO18" time="0.591">
+  <properties />
+  <testcase name="offSuitHistoryRemovesRemainingCardsOfTheLedSuit()" classname="ro.rentzlab.core.RentzAiTest" time="0.136" />
+  <testcase name="rentzPassRestrictsThePastFrontierWithoutForbiddingFutureExtensions()" classname="ro.rentzlab.core.RentzAiTest" time="0.006" />
+  <testcase name="tenOfClubsIsNotGivenAwayOnAnUnwinnableOffSuitTrick()" classname="ro.rentzlab.core.RentzAiTest" time="0.008" />
+  <testcase name="samplingIsDiverseAndImmutableWithoutClaimingUniformity()" classname="ro.rentzlab.core.RentzAiTest" time="0.013" />
+  <testcase name="hardReturnsLegalFiniteEstimatesAndDoesNotMutateTheRealMatch()" classname="ro.rentzlab.core.RentzAiTest" time="0.0" />
+  <testcase name="negativeTargetIsDiscardedWhenOffSuitCannotWin()" classname="ro.rentzlab.core.RentzAiTest" time="0.017" />
+  <testcase name="safeLoserDisposesOfHigherStrengthAndLastWinnerSpendsTheCheapestCard()" classname="ro.rentzlab.core.RentzAiTest" time="0.002" />
+  <testcase name="sequenceOpeningFavorsAnOwnedChainAndAcePreservesEveryOtherContinuation()" classname="ro.rentzlab.core.RentzAiTest" time="0.008" />
+  <testcase name="identicalObservationCannotRevealDifferentRealOpposingHandsOrDealSeeds()" classname="ro.rentzlab.core.RentzAiTest" time="0.115" />
+  <testcase name="[1] 3" classname="ro.rentzlab.core.RentzAiTest" time="0.056" />
+  <testcase name="[2] 4" classname="ro.rentzlab.core.RentzAiTest" time="0.011" />
+  <testcase name="[3] 5" classname="ro.rentzlab.core.RentzAiTest" time="0.015" />
+  <testcase name="[4] 6" classname="ro.rentzlab.core.RentzAiTest" time="0.026" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.core.RentzBoundaryTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:17.569Z" hostname="DESKTOP-BLFSO18" time="0.307">
+  <properties />
+  <testcase name="zeroScoringDoesNotWaiveLegalPlayOrTerminateAnUnfinishedDeal()" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.009" />
+  <testcase name="continuationSeedDoesNotChangeTheInjectedFirstDeal()" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.017" />
+  <testcase name="distributionOwnsItsCopiesAndTheActorDoesNotReceiveTheFixture()" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.013" />
+  <testcase name="aceCanKeepTheTurnWithoutCreatingAPlayableContinuation()" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.001" />
+  <testcase name="[1] 3" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.007" />
+  <testcase name="[2] 4" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.009" />
+  <testcase name="[3] 5" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.001" />
+  <testcase name="[4] 6" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.001" />
+  <testcase name="[1] 3" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.007" />
+  <testcase name="[2] 4" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.004" />
+  <testcase name="[3] 5" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.013" />
+  <testcase name="[4] 6" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.002" />
+  <testcase name="[1] 3" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.022" />
+  <testcase name="[2] 4" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.009" />
+  <testcase name="[3] 5" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.014" />
+  <testcase name="[4] 6" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.045" />
+  <testcase name="aConsumedChoiceIsNotRestoredWhenTheChooserReturns()" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.003" />
+  <testcase name="offSuitOwnedForeignAndOutOfDeckCardsAreRefusedBeforeMutation()" classname="ro.rentzlab.core.RentzBoundaryTest" time="0.004" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.core.RentzHardRefinementTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:17.884Z" hostname="DESKTOP-BLFSO18" time="1.49">
+  <properties />
+  <testcase name="penaltyOrderingUsesTheConfiguredScoreRatherThanTheCardName()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="0.007" />
+  <testcase name="publicTenMasterUsesTheWinningExitAndThenCollectsTheTarget()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="0.004" />
+  <testcase name="aSafeLosingQueenIsDisposedBeforeAHigherNonPenaltyCard()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="0.003" />
+  <testcase name="unavoidableLastTrickDoesNotCaptureOwnQueenWhenAnotherWinnerCostsNothing()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="0.003" />
+  <testcase name="aPartiallyEvaluatedWorldIsDiscardedForEveryAlternative()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="0.124" />
+  <testcase name="completedSearchPublishesMeasuredWorkAndActualCommonWorldCount()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="0.021" />
+  <testcase name="continuationDoesNotSilentlyUpgradeTheUnknownOpponentModel()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="0.004" />
+  <testcase name="anUnknownHigherClubPreventsThePublicCertaintyShortcut()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="0.005" />
+  <testcase name="tinyBudgetCannotPublishAnUnpairedPrefixOfAlternatives()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="0.021" />
+  <testcase name="contextualSearchStillCannotReadRealOpposingHandsOrTheFutureSeed()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="1.184" />
+  <testcase name="provedTenExitRepairsALegacySearchErrorWithoutChangingTheRestOfTheTactic()" classname="ro.rentzlab.core.RentzHardRefinementTest" time="0.028" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.core.RentzMatchStrategyTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:19.393Z" hostname="DESKTOP-BLFSO18" time="0.091">
+  <properties />
+  <testcase name="identicalCurrentCardsUsePublicTotalsToDistinguishALockedWinFromALockedLoss()" classname="ro.rentzlab.core.RentzMatchStrategyTest" time="0.011" />
+  <testcase name="declaredMatchObjectiveMustActuallyContinueBeyondTheCurrentHand()" classname="ro.rentzlab.core.RentzMatchStrategyTest" time="0.012" />
+  <testcase name="matchWinUtilitySharesTiesAndNeverConfusesMarginWithVictory()" classname="ro.rentzlab.core.RentzMatchStrategyTest" time="0.008" />
+  <testcase name="invalidPublicLedgersCannotInjectScoresChoicesOrExtraHands()" classname="ro.rentzlab.core.RentzMatchStrategyTest" time="0.004" />
+  <testcase name="aRareJackpotCannotMasqueradeAsTheHigherWinChance()" classname="ro.rentzlab.core.RentzMatchStrategyTest" time="0.003" />
+  <testcase name="ownFinalPointsRemainASeparateDeclaredObjective()" classname="ro.rentzlab.core.RentzMatchStrategyTest" time="0.001" />
+  <testcase name="publicProgressPreservesRemainingChoicesAndIsImmutable()" classname="ro.rentzlab.core.RentzMatchStrategyTest" time="0.009" />
+  <testcase name="nonDefaultObjectivesRefuseMissingPublicHistoryAndInvalidValues()" classname="ro.rentzlab.core.RentzMatchStrategyTest" time="0.002" />
+  <testcase name="fullMatchGoalsCannotReadRealOpposingCardsOrTheActualFutureSeed()" classname="ro.rentzlab.core.RentzMatchStrategyTest" time="0.005" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.core.RentzRulesTest" tests="18" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:19.487Z" hostname="DESKTOP-BLFSO18" time="0.445">
+  <properties />
+  <testcase name="sequenceRankEffectsNeverLeakIntoTheTrickGames()" classname="ro.rentzlab.core.RentzRulesTest" time="0.012" />
+  <testcase name="[1] 0" classname="ro.rentzlab.core.RentzRulesTest" time="0.001" />
+  <testcase name="[2] 1" classname="ro.rentzlab.core.RentzRulesTest" time="0.003" />
+  <testcase name="[3] 2" classname="ro.rentzlab.core.RentzRulesTest" time="0.002" />
+  <testcase name="[4] 3" classname="ro.rentzlab.core.RentzRulesTest" time="0.002" />
+  <testcase name="blindChoiceRejectsPreviouslyRevealedCardsWithoutChangingState()" classname="ro.rentzlab.core.RentzRulesTest" time="0.005" />
+  <testcase name="sequenceOnlyAcceptsAnOpeningOrAnAdjacentCardOfThatSuit()" classname="ro.rentzlab.core.RentzRulesTest" time="0.001" />
+  <testcase name="[1] 3" classname="ro.rentzlab.core.RentzRulesTest" time="0.107" />
+  <testcase name="[2] 4" classname="ro.rentzlab.core.RentzRulesTest" time="0.109" />
+  <testcase name="[3] 5" classname="ro.rentzlab.core.RentzRulesTest" time="0.139" />
+  <testcase name="[4] 6" classname="ro.rentzlab.core.RentzRulesTest" time="0.0" />
+  <testcase name="[1] 3" classname="ro.rentzlab.core.RentzRulesTest" time="0.002" />
+  <testcase name="[2] 4" classname="ro.rentzlab.core.RentzRulesTest" time="0.006" />
+  <testcase name="[3] 5" classname="ro.rentzlab.core.RentzRulesTest" time="0.001" />
+  <testcase name="[4] 6" classname="ro.rentzlab.core.RentzRulesTest" time="0.0" />
+  <testcase name="scoringAddsOverlappingPenaltiesAndBlindDoublesOnce()" classname="ro.rentzlab.core.RentzRulesTest" time="0.001" />
+  <testcase name="illegalTurnAndPassPreserveTheObservation()" classname="ro.rentzlab.core.RentzRulesTest" time="0.0" />
+  <testcase name="followSuitIsMandatoryAndThereIsNoTrump()" classname="ro.rentzlab.core.RentzRulesTest" time="0.002" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.core.RentzSequenceTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:19.935Z" hostname="DESKTOP-BLFSO18" time="0.05">
+  <properties />
+  <testcase name="finishingAHandDoesNotAllowDuplicatedSettlementOrAnEarlyNextHand()" classname="ro.rentzlab.core.RentzSequenceTest" time="0.003" />
+  <testcase name="numericOverflowCannotSilentlyChangeTheScore()" classname="ro.rentzlab.core.RentzSequenceTest" time="0.003" />
+  <testcase name="kingOfHeartsSettlesOnlyAfterTheWholeTrick()" classname="ro.rentzlab.core.RentzSequenceTest" time="0.001" />
+  <testcase name="[1] 3" classname="ro.rentzlab.core.RentzSequenceTest" time="0.004" />
+  <testcase name="[2] 4" classname="ro.rentzlab.core.RentzSequenceTest" time="0.008" />
+  <testcase name="[3] 5" classname="ro.rentzlab.core.RentzSequenceTest" time="0.007" />
+  <testcase name="[4] 6" classname="ro.rentzlab.core.RentzSequenceTest" time="0.003" />
+  <testcase name="publicEventsKeepActorAndBoardContextAfterACompletedTrick()" classname="ro.rentzlab.core.RentzSequenceTest" time="0.003" />
+  <testcase name="mandatoryPlayRefusesPassAndPreservesTheBoard()" classname="ro.rentzlab.core.RentzSequenceTest" time="0.001" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.core.RentzSettlementTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:56:19.987Z" hostname="DESKTOP-BLFSO18" time="0.313">
+  <properties />
+  <testcase name="nextDealResetsOnlyDealFactsAndDoesNotMutatePastSnapshots()" classname="ro.rentzlab.core.RentzSettlementTest" time="0.014" />
+  <testcase name="[1] 3" classname="ro.rentzlab.core.RentzSettlementTest" time="0.053" />
+  <testcase name="[2] 4" classname="ro.rentzlab.core.RentzSettlementTest" time="0.102" />
+  <testcase name="[3] 5" classname="ro.rentzlab.core.RentzSettlementTest" time="0.019" />
+  <testcase name="[4] 6" classname="ro.rentzlab.core.RentzSettlementTest" time="0.049" />
+  <testcase name="[1] 3" classname="ro.rentzlab.core.RentzSettlementTest" time="0.011" />
+  <testcase name="[2] 4" classname="ro.rentzlab.core.RentzSettlementTest" time="0.005" />
+  <testcase name="[3] 5" classname="ro.rentzlab.core.RentzSettlementTest" time="0.007" />
+  <testcase name="[4] 6" classname="ro.rentzlab.core.RentzSettlementTest" time="0.018" />
+  <system-out />
+  <system-err />
+</testsuite></testsuites>

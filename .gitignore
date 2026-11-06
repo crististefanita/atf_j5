@@ -1,0 +1,13 @@
+/atf-tests/target/
+/rentz-lab-app/game-core/target/
+/rentz-lab-app/.gradle/
+/rentz-lab-app/build/
+/rentz-lab-app/app/build/
+/rentz-lab-app/game-core/build/
+/rentz-lab-app/algorithm-build/.gradle/
+/rentz-lab-app/local.properties
+/release/**/*.apk
+/release/**/*.apk.sha256
+*.p12
+*.jks
+*.keystore

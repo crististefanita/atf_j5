@@ -27,3 +27,5 @@ Rentz combină sub-jocuri cu levate și construirea secvențelor pe culori. Mode
 4. Actualizați documentul responsabil și păstrați rezultatele extern.
 
 [Proiect](../../README.md) · [Motor](../../rentz-lab-app/game-core/README.md) · [Feedback](../feedback/ATF_Rentz.md)
+
+[Livrarea și distribuția APK](ATF_Release.md) descrie stările, semnarea, dosarul și descărcarea verificată.

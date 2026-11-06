@@ -1,0 +1,4 @@
+# Preserve hashed APK build inputs and immutable release evidence byte for byte.
+rentz-lab-app/** -text
+release/** -text
+lib/** -text

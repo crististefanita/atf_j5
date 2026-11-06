@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "versionName": "0.1.1",
+    "versionCode": 2,
+    "applicationId": "ro.rentzlab.app",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "apkName": "RentzLab-0.1.1.apk",
+    "apkBytes": 771144,
+    "sha256": "a51fd7ad872708f3751ef168ca5df41de1bdcd3f21b92791ba551f7a0b16b0a4",
+    "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+    "debuggable": false
+  },
+  "publication": {
+    "state": "PREPARED",
+    "sourceCommit": null,
+    "evidenceCommit": null,
+    "releaseId": null
+  },
+  "qualification": {
+    "status": "PASS",
+    "tests": 270,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "groups": [
+      {
+        "group": "maven-core",
+        "file": "reports/test-results/maven-core.xml",
+        "tests": 87,
+        "duplicateDisplayNames": [],
+        "identityScope": "Unique primary class/name invocations",
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "group": "maven-atf",
+        "file": "reports/test-results/maven-atf.xml",
+        "tests": 150,
+        "duplicateDisplayNames": [],
+        "identityScope": "Unique primary class/name invocations",
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "group": "android-jvm",
+        "file": "reports/test-results/android-jvm.xml",
+        "tests": 33,
+        "duplicateDisplayNames": [],
+        "identityScope": "Unique primary class/name invocations",
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "buildRecheck": {
+      "group": "build-recheck",
+      "file": "reports/test-results/build-recheck.xml",
+      "tests": 120,
+      "duplicateDisplayNames": [
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzBoundaryTest.xml",
+          "class": "ro.rentzlab.core.RentzBoundaryTest",
+          "displayName": "[1] 3"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzBoundaryTest.xml",
+          "class": "ro.rentzlab.core.RentzBoundaryTest",
+          "displayName": "[2] 4"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzBoundaryTest.xml",
+          "class": "ro.rentzlab.core.RentzBoundaryTest",
+          "displayName": "[3] 5"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzBoundaryTest.xml",
+          "class": "ro.rentzlab.core.RentzBoundaryTest",
+          "displayName": "[4] 6"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzBoundaryTest.xml",
+          "class": "ro.rentzlab.core.RentzBoundaryTest",
+          "displayName": "[1] 3"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzBoundaryTest.xml",
+          "class": "ro.rentzlab.core.RentzBoundaryTest",
+          "displayName": "[2] 4"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzBoundaryTest.xml",
+          "class": "ro.rentzlab.core.RentzBoundaryTest",
+          "displayName": "[3] 5"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzBoundaryTest.xml",
+          "class": "ro.rentzlab.core.RentzBoundaryTest",
+          "displayName": "[4] 6"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzRulesTest.xml",
+          "class": "ro.rentzlab.core.RentzRulesTest",
+          "displayName": "[1] 3"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzRulesTest.xml",
+          "class": "ro.rentzlab.core.RentzRulesTest",
+          "displayName": "[2] 4"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzRulesTest.xml",
+          "class": "ro.rentzlab.core.RentzRulesTest",
+          "displayName": "[3] 5"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzRulesTest.xml",
+          "class": "ro.rentzlab.core.RentzRulesTest",
+          "displayName": "[4] 6"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzSettlementTest.xml",
+          "class": "ro.rentzlab.core.RentzSettlementTest",
+          "displayName": "[1] 3"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzSettlementTest.xml",
+          "class": "ro.rentzlab.core.RentzSettlementTest",
+          "displayName": "[2] 4"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzSettlementTest.xml",
+          "class": "ro.rentzlab.core.RentzSettlementTest",
+          "displayName": "[3] 5"
+        },
+        {
+          "file": "C:\\work\\rentz_back\\android-acceptance\\release-0.1.1-20261106-923fabac\\tests\\game-core\\TEST-ro.rentzlab.core.RentzSettlementTest.xml",
+          "class": "ro.rentzlab.core.RentzSettlementTest",
+          "displayName": "[4] 6"
+        }
+      ],
+      "identityScope": "Repeated build: XML invocation count; display labels may be ambiguous and are not counted as new unique tests",
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "nativeUiExecuted": false
+  },
+  "integrity": {
+    "kind": "OBSERVED_PAYLOAD_HASHES",
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 855,
+        "sha256": "aed9ea5a6b5b5631a8c704b1a89f9c921d2d4c9e23b5a21db5c280674e917553"
+      },
+      {
+        "path": "release-notes.md",
+        "bytes": 635,
+        "sha256": "1a6adae981c79811d7929c980c6ac42d4abb3f22aebe09813d6113e769f6aed4"
+      },
+      {
+        "path": "RentzLab-0.1.1.apk",
+        "bytes": 771144,
+        "sha256": "a51fd7ad872708f3751ef168ca5df41de1bdcd3f21b92791ba551f7a0b16b0a4"
+      },
+      {
+        "path": "RentzLab-0.1.1.apk.sha256",
+        "bytes": 86,
+        "sha256": "f1987812675a04bc9cd7984a329b13b02b1271476697117780e55b37886511df"
+      },
+      {
+        "path": "reports/apk-inputs.json",
+        "bytes": 9048,
+        "sha256": "2956069a45858c1829ca70f505198801b5969409e05b6b25d9b50c3404cbab3b"
+      },
+      {
+        "path": "reports/component/rentz-rules.html",
+        "bytes": 2508336,
+        "sha256": "d4d40d980fd36fb524dc2b8fe0f98def9d011ebf5ab4bb9012c073371bc67af4"
+      },
+      {
+        "path": "reports/diagnostics/preparation-attempts.html",
+        "bytes": 2441213,
+        "sha256": "858d901751042958f736928ea729594e35153e7d1aa7b63ca323fb31d83e6e4c"
+      },
+      {
+        "path": "reports/distribution/apk-validation.html",
+        "bytes": 2414061,
+        "sha256": "b94b1db8634b3d974fa6a256c62904095d407be53886e694e91d21aa06fd65f0"
+      },
+      {
+        "path": "reports/distribution/download-components.html",
+        "bytes": 2538487,
+        "sha256": "c2188dd9ac84eb1e64156278e78c7b1200ab10916868c0b1aca8efa16ebbdb80"
+      },
+      {
+        "path": "reports/distribution/release-git-policy.html",
+        "bytes": 2419511,
+        "sha256": "c9dd281a2e7c848a7b849853b08ce92745cfa0661c433f9e1f7705ff4efdad1a"
+      },
+      {
+        "path": "reports/distribution/release-governance.html",
+        "bytes": 2497274,
+        "sha256": "4b01ba9d0d160baf5701445522d98449195bf4593e70c2aec6f4eef99ac05c27"
+      },
+      {
+        "path": "reports/qualification.json",
+        "bytes": 18705,
+        "sha256": "72e589adaf3bed84e59e59c170f45243e12d71e0595ad0f44fa223af92622c60"
+      },
+      {
+        "path": "reports/README.md",
+        "bytes": 2757,
+        "sha256": "2cb1550d92d58ae496b6fa5a51a63306fc56bba895d0ac541bf986cdf0db02f3"
+      },
+      {
+        "path": "reports/source-reconciliation.json",
+        "bytes": 1051,
+        "sha256": "7d1063086478539434b86e57665141d8bbc13c0eed1a1ca36bcc0bbdefa8828e"
+      },
+      {
+        "path": "reports/test-results/android-jvm.xml",
+        "bytes": 6107,
+        "sha256": "97eb0aa7b8652805094199c1fef3cb005a51f13da0ee72b4f5eb3cb6c7be59b0"
+      },
+      {
+        "path": "reports/test-results/build-recheck.xml",
+        "bytes": 18038,
+        "sha256": "68abc5122f647d4d303bc0753097feb7fe3c88ec2ee90cf0532155eb21a50672"
+      },
+      {
+        "path": "reports/test-results/maven-atf.xml",
+        "bytes": 257273,
+        "sha256": "a331d7b5683027be2e03198939fc2c1b6709c0072ef65ef37ac5f4b19f6f5550"
+      },
+      {
+        "path": "reports/test-results/maven-core.xml",
+        "bytes": 88616,
+        "sha256": "5d4a36e220be2206cf50a566a73539f587afd771df6b849ff39d41c9dc4222b5"
+      }
+    ]
+  },
+  "source": {
+    "sourceCommit": null,
+    "buildInputManifest": "reports/apk-inputs.json",
+    "buildSnapshotSha256": "2956069a45858c1829ca70f505198801b5969409e05b6b25d9b50c3404cbab3b"
+  }
+}

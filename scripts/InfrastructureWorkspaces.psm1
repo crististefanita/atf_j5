@@ -122,7 +122,7 @@ function Assert-AtfArtifactPath {
 }
 
 function Get-AtfInfrastructurePath {
-    param([Parameter(Mandatory)][ValidateSet('workspaces','cache','governance')][string]$Area,[string]$ProjectRoot=(Split-Path -Parent $PSScriptRoot))
+    param([Parameter(Mandatory)][ValidateSet('workspaces','cache','governance','signing')][string]$Area,[string]$ProjectRoot=(Split-Path -Parent $PSScriptRoot))
     Get-AtfWorkspacePolicy -ProjectRoot $ProjectRoot|Out-Null
     $path=Join-Path (Get-AtfDataRoot -ProjectRoot $ProjectRoot) ('infrastructure/'+$Area)
     Assert-AtfPhysicalPath -Path $path

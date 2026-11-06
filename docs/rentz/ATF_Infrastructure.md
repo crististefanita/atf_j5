@@ -12,6 +12,7 @@ Lansatoarele și controalele infrastructurii folosesc PowerShell 7.
 | Sursa Rentz | Modulele, configurația, documentația și scripturile declarate. |
 | Depozitul extern | `RENTZ_DATA_ROOT`, implicit directorul `rentz_back` de lângă grupul checkout-urilor; colecții explicite de APK-uri, dovezi și învățare. |
 | `infrastructure/workspaces` | Copii de compilare și fixture-uri cu descriptor `.atf-workspace.json`; identitatea directorului trebuie să coincidă cu descriptorul. |
+| `infrastructure/signing` | Cheia persistentă Rentz și credențiala DPAPI, cu ACL privat; nu se curăță ca un cache și nu se copiază în release. |
 | `infrastructure/cache` | Dependențe reutilizabile; nu este sursă și nu devine rezultat de testare. |
 | `infrastructure/governance` | Rezultate imuabile ale guvernanței, inclusiv proba negativă înaintea curățării. |
 
@@ -66,3 +67,7 @@ Analiza AST protejează formele declarate și recunoscute, nu reprezintă un san
 4. Rulați aceleași criterii și controalele negative, apoi păstrați rezultatul trecut.
 
 Copiile istorice indicate de receipt-uri nu se rebotează și nu se șterg în masă pentru a obține verde. Datele și procesele altui proprietar se păstrează; restricția unei familii vechi nu este o permisiune de a curăța întregul director temporar.
+
+## Dosarul selectat al livrării
+
+Directorul sursă `release` este catalogul documentar și copia selectată a livrării, nu o destinație pentru rulările curente. [Procesul APK](ATF_Release.md) permite numai promovarea explicită a dovezilor calificate; toate rulările și build-urile intermediare folosesc în continuare colecțiile externe înregistrate.

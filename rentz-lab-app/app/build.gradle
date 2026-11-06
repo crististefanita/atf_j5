@@ -4,7 +4,35 @@ android {
     compileSdk 36
     defaultConfig { applicationId 'ro.rentzlab.app'; minSdk 26; targetSdk 36; versionCode 2; versionName '0.1.1' }
     buildFeatures { buildConfig true }
+    signingConfigs {
+        release {
+            def store = System.getenv('RENTZ_STORE_FILE')
+            if (store) {
+                storeFile file(store)
+                storePassword System.getenv('RENTZ_STORE_PASSWORD')
+                keyAlias 'rentzlab-release'
+                keyPassword System.getenv('RENTZ_STORE_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+tasks.register('validateReleaseSigning') {
+    doLast {
+        if (!System.getenv('RENTZ_STORE_FILE') || !System.getenv('RENTZ_STORE_PASSWORD')) {
+            throw new GradleException('Release signing identity must be supplied externally; no unsigned delivery.')
+        }
+    }
+}
+tasks.configureEach {
+    if (name == 'preReleaseBuild') { dependsOn tasks.named('validateReleaseSigning') }
 }
 dependencies {
     implementation project(':game-core')

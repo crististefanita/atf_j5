@@ -6,6 +6,11 @@ Laborator specializat în regulile Rentz și verificarea lor prin componente off
 
 Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări legale, închiderea mâinii și scor. Interfața grafică și integrarea Android se tratează separat, după stabilizarea acestor contracte.
 
+## Jocul
+
+- **[Rentz Lab 0.1.1](release/0.1.1/README.md)** — candidat Release calificat local.
+- **[Descarcă APK 0.1.1](release/0.1.1/RentzLab-0.1.1.apk)** — copia locală verificată; publicarea GitHub urmează.
+
 ## Module și responsabilități
 
 | Zonă | Responsabilitate |
@@ -47,6 +52,10 @@ Lansatorul execută o copie temporară și păstrează rezultatele în afara sur
 [Reguli](docs/rentz/ATF_Rules.md) · [Surse și certitudine](docs/rentz/ATF_RuleSources.md) · [Feedback activ](docs/feedback/ATF_Rentz.md)
 
 [Jocul și evaluarea offline](docs/rentz/ATF_Learning.md) explică memoria publică, politicile, compararea distribuirilor și separarea dezvoltării de evaluarea nouă. O partidă a modelului nu confirmă automat comportamentul aplicației originale.
+
+## Documentație
+
+[Catalogul livrării](release/README.md) · [Procesul de release](docs/rentz/ATF_Release.md)
 
 ## Materiale păstrate separat
 

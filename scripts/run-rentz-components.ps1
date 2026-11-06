@@ -27,7 +27,7 @@ if($LASTEXITCODE-ne0){throw "Infrastructure controls failed; inspect $infrastruc
 $runtimeControls=Join-Path (Get-AtfInfrastructurePath -Area governance -ProjectRoot $root) ('runtime-controls-'+[guid]::NewGuid().ToString('N'))
 & (Join-Path $root 'atf-tests/tools/test-runtime-controls.ps1') -RunRoot $runtimeControls *> (Join-Path $RunRoot 'runtime-controls.log')
 if($LASTEXITCODE-ne0){throw "Runtime controls failed; inspect $runtimeControls"}
-$parts = @('pom.xml','README.md','library-provenance.json','lib','atf-tests','rentz-lab-app','config','docs','reference-tests/README.md','scripts')
+$parts = @('pom.xml','README.md','.gitattributes','.gitignore','library-provenance.json','lib','atf-tests','rentz-lab-app','config','docs','release','reference-tests/README.md','scripts')
 $manifest = [Collections.Generic.List[object]]::new()
 foreach ($part in $parts) {
     $origin = Join-Path $root $part
@@ -52,7 +52,7 @@ try {
     Push-Location $stage
     try {
         New-Item -ItemType Directory -Path "$stage/runtime"|Out-Null
-        $arguments=@('-B','-o',"-Dmaven.repo.local=$repository","-Djava.io.tmpdir=$stage/runtime",'-Datf.test.heap.max=256m',"-Drentz.report.output=$RunRoot\rentz-rules-extent.html")
+        $arguments=@('-B','-o',"-Dmaven.repo.local=$repository","-Djava.io.tmpdir=$stage/runtime",'-Datf.test.heap.max=256m',"-Drentz.report.output=$RunRoot\rentz-rules-extent.html","-Drentz.release.report.directory=$RunRoot\release-contracts")
         if($plan.selectors.Count){$arguments+=@('-Dsurefire.failIfNoSpecifiedTests=false',('-Dtest='+($plan.selectors-join',')),'test')}else{$arguments+=@('-N','validate')}
         & $Maven @arguments *> "$RunRoot\maven.log"
         $exit=$LASTEXITCODE

@@ -5,7 +5,7 @@
     "quick": {"maven": ["RentzRulesTest", "RentzBoundaryTest", "RentzSequenceTest", "RentzSettlementTest", "RentzRuleComponentTest", "Library*Test", "SourceLayoutTest"], "androidJvm": false, "runtimeControls": true},
     "regression": {"maven": ["*Test"], "androidJvm": true, "runtimeControls": true},
     "learning": {"maven": ["RentzAiTest", "RentzMatchStrategyTest", "RentzHardRefinementTest", "OfflineArenaComponentTest", "ClusteredEvaluationTest"], "androidJvm": false, "runtimeControls": true},
-    "infrastructure": {"maven": ["SourceLayoutTest", "DocumentationContractTest", "Library*Test", "RentzRulePublication*Test"], "androidJvm": false, "runtimeControls": true},
+    "infrastructure": {"maven": ["RuleBindingGovernanceTest", "SourceLayoutTest", "DocumentationContractTest", "Library*Test", "RentzRulePublication*Test"], "androidJvm": false, "runtimeControls": true},
     "android-jvm": {"maven": [], "androidJvm": true, "runtimeControls": true}
   }
 }

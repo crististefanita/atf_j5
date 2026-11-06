@@ -26,7 +26,7 @@ Test Kit păstrează rezultatul comparației efective. Publicatorul mapează faz
 | Sursă | Contract |
 |---|---|
 | [RuleProfiles](src/main/java/atf/rentz/RuleProfiles.java) | Citire YAML strictă și identitate explicită de laborator. |
-| [RuleCatalog](src/main/java/atf/rentz/RuleCatalog.java) | Valori parțiale cu sursă și auditul legăturilor manifestului la codul live; nu produce preset executabil. |
+| [RuleCatalog](src/main/java/atf/rentz/RuleCatalog.java) | Valori parțiale și legături la implementare și declarații JUnit eligibile; [analiza sintactică](../docs/rentz/ATF_Qualification.md#legăturile-manifestelor-către-teste) rămâne distinctă de execuție. |
 | [YamlDocuments](src/main/java/atf/rentz/YamlDocuments.java) | Un singur document, fără chei duplicate sau ignorarea unui document suplimentar. |
 | [PolicyInputs](src/main/java/atf/rentz/PolicyInputs.java) | Buget, ponderi finite și legături ale regulilor tactice la cod și componente. |
 | [OfflineArena](src/main/java/atf/rentz/OfflineArena.java) | Partide complete CPU, control pereche, locuri rotite și selecția jurnalelor. |

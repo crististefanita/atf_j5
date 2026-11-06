@@ -58,6 +58,37 @@ Comanda pornește din rădăcina proiectului în PowerShell 7, cu JDK 21, Maven,
 - Asamblarea APK cere calificarea `regression`, inclusiv Android JVM; o colecție focalizată nu devine acceptanță integrală prin redenumirea rezultatului.
 - Arena și adaptorul nativ cer descriptorul clasei compilate și componenta lor calificată; nu depind de existența unui scenariu narativ fără legătură.
 
+## Legăturile manifestelor către teste
+
+[Catalogul regulilor](../../atf-tests/src/main/java/atf/rentz/RuleCatalog.java) leagă fiecare regulă de implementare și de o declarație de test eligibilă. Referința metodei are forma clasei și a numelui ei; metoda trebuie să fie declarată direct, fără supraîncărcare ambiguă, în clasa și pachetul așteptate.
+
+[Verificatorul sintactic](../../atf-tests/src/main/java/atf/rentz/bindings/TestVerification.java) folosește parserul public al JDK-ului, fără generare de clase, procesarea adnotărilor sau executarea testelor. Fișierul este analizat o singură dată în lotul apelului, iar managerul de fișiere este închis și la eroare; un apel nou recitește sursa.
+
+| Frontieră | Contract |
+|---|---|
+| Proprietar | Clasă concretă și metodă directă unică, de instanță, cu rezultat void și corp. |
+| Marker | Jupiter Test sau ParameterizedTest, calificat ori rezolvat neambiguu prin importuri; numele străine sau mascate sunt refuzate. |
+| Text și sintaxă | Comentariile, literalii și blocurile de text nu declară metode; sintaxa invalidă este refuzată cu identitatea regulii, fișierului și metodei. |
+| Domeniu | Catalogul nu deduce moștenirea, adnotările compuse sau alte forme Jupiter; acestea cer o extindere explicită, nu acceptare după nume. |
+
+Un import explicit are prioritate față de importurile cu wildcard. Dacă markerul simplu rămâne ambiguu între pachete necunoscute, declarați importul explicit sau numele calificat; existența unui marker în altă clasă nu autorizează metoda legată.
+
+```mermaid
+flowchart LR
+    SOURCE[Sursă Java] -->|identifică| DECL[Declarație eligibilă]
+    DECL -->|intră în| SELECT[Colecție selectată]
+    SELECT -->|execută prin JUnit| RECEIPT[Rezultat și populație]
+```
+
+<details>
+<summary>Legendă: declarația nu este rezultat de execuție</summary>
+
+Catalogul verifică prima relație. JUnit descoperă testele, iar lansatorul verifică populația și rezultatele selecției; o legătură validă nu dovedește rularea metodei, rezolvarea parametrilor sau fidelitatea regulii față de produsul original.
+
+</details>
+
+[Regresiile legăturilor](../../atf-tests/src/test/java/atf/rentz/governance/RuleBindingGovernanceTest.java) aparțin colecției de infrastructură și validează și manifestele curente de reguli și politici. JDK 21 este precondiție a verificatorului; motorul Android nu primește această dependență.
+
 ## Proces și captură proaspătă
 
 | Frontieră | Invariantă |

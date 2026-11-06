@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites><testsuite name="ro.rentzlab.app.GameSessionTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:45:59.068Z" hostname="DESKTOP-BLFSO18" time="0.732">
+  <properties />
+  <testcase name="aCompleteHandAndHistorySurviveRestoration" classname="ro.rentzlab.app.GameSessionTest" time="0.257" />
+  <testcase name="aSavedSnapshotCannotBeChangedByLaterCommands" classname="ro.rentzlab.app.GameSessionTest" time="0.0" />
+  <testcase name="incompatibleSavedIdentitiesAreRejected" classname="ro.rentzlab.app.GameSessionTest" time="0.004" />
+  <testcase name="publicProjectionContainsNoSeedOrOpposingHandAndSaveRestoresExactly" classname="ro.rentzlab.app.GameSessionTest" time="0.292" />
+  <testcase name="rejectedHumanCommandDoesNotEnterTheSavedJournal" classname="ro.rentzlab.app.GameSessionTest" time="0.002" />
+  <testcase name="blindEligibilityDisappearsBeforeTheLastChoice" classname="ro.rentzlab.app.GameSessionTest" time="0.141" />
+  <testcase name="interruptedBotProgressCanResumeFromTheSameCommands" classname="ro.rentzlab.app.GameSessionTest" time="0.013" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.app.lifecycle.FileSessionStorageTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:45:59.887Z" hostname="DESKTOP-BLFSO18" time="0.241">
+  <properties />
+  <testcase name="missingDataAndUnexpectedFileNamesNeverCreateAReplacement" classname="ro.rentzlab.app.lifecycle.FileSessionStorageTest" time="0.033" />
+  <testcase name="defaultAtomicBackendReplacesBothCanonicalFilesAndLeavesNoStagingResidue" classname="ro.rentzlab.app.lifecycle.FileSessionStorageTest" time="0.095" />
+  <testcase name="everyWriteUsesADifferentStagingFileOutsideCanonicalData" classname="ro.rentzlab.app.lifecycle.FileSessionStorageTest" time="0.036" />
+  <testcase name="failedAtomicReplacePreservesOriginalAndCleansOnlyItsOwnStagingFile" classname="ro.rentzlab.app.lifecycle.FileSessionStorageTest" time="0.076" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.app.lifecycle.SessionControllerTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:46:00.136Z" hostname="DESKTOP-BLFSO18" time="0.089">
+  <properties />
+  <testcase name="failedBotCheckpointCannotAdoptTheUnpersistedCandidate" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.03" />
+  <testcase name="callbackQueuedBeforeCloseCannotReachTheDestroyedOwner" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.009" />
+  <testcase name="realBotProgressIsIsolatedUntilAuthorizedDeliveryAndSurvivesReload" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.025" />
+  <testcase name="acceptedHumanCommandIsDurableBeforeBotWorkStarts" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.003" />
+  <testcase name="anOlderActivityCannotOverwriteANewOwnersGame" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.008" />
+  <testcase name="delayedFailureIsDiscardedAfterPause" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.001" />
+  <testcase name="changedRevisionInvalidatesAnAlreadyCalculatedResult" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.001" />
+  <testcase name="closeIsIdempotentAndCannotBeReactivated" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.0" />
+  <testcase name="rejectedDeliveryKeepsTheCheckpointAndReleasesBusyState" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.005" />
+  <testcase name="failedHumanCheckpointKeepsThePreviousStateAndDoesNotScheduleBots" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.002" />
+  <testcase name="calculationIgnoringCancellationCannotMutateOrSaveTheLiveSession" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.001" />
+  <testcase name="pausedControllerReloadsTheLatestCheckpointAndAcceptsNewWork" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.001" />
+  <testcase name="rejectedWorkerDoesNotLeaveTheControllerBusy" classname="ro.rentzlab.app.lifecycle.SessionControllerTest" time="0.001" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.app.lifecycle.SessionRepositoryTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:46:00.232Z" hostname="DESKTOP-BLFSO18" time="0.009">
+  <properties />
+  <testcase name="corruptReadIsPreservedWithoutResetOrWrite" classname="ro.rentzlab.app.lifecycle.SessionRepositoryTest" time="0.0" />
+  <testcase name="closingAnOldHandleCannotRevokeANewerOwner" classname="ro.rentzlab.app.lifecycle.SessionRepositoryTest" time="0.0" />
+  <testcase name="validSessionAndPublicProjectionUseDifferentDocuments" classname="ro.rentzlab.app.lifecycle.SessionRepositoryTest" time="0.002" />
+  <testcase name="claimingNewOwnershipRevokesEveryOldWriteAndCallback" classname="ro.rentzlab.app.lifecycle.SessionRepositoryTest" time="0.002" />
+  <system-out />
+  <system-err />
+</testsuite><testsuite name="ro.rentzlab.app.SessionJsonValidationTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-06T19:45:59.832Z" hostname="DESKTOP-BLFSO18" time="0.044">
+  <properties />
+  <testcase name="integerFieldsRejectFractionsStringsBooleansNullAndOverflow" classname="ro.rentzlab.app.SessionJsonValidationTest" time="0.016" />
+  <testcase name="shapeAndIdentityTypesAreExactButMissingLegacyRulesRemainSupported" classname="ro.rentzlab.app.SessionJsonValidationTest" time="0.003" />
+  <testcase name="commandFieldsAreTypedAndIrrelevantPayloadIsRefused" classname="ro.rentzlab.app.SessionJsonValidationTest" time="0.008" />
+  <testcase name="oneStrictDocumentRejectsTrailingTextDuplicatesAndLenientSyntax" classname="ro.rentzlab.app.SessionJsonValidationTest" time="0.011" />
+  <testcase name="exactLongSeedsCanonicalCommandsAndWhitespaceRoundTrip" classname="ro.rentzlab.app.SessionJsonValidationTest" time="0.003" />
+  <system-out />
+  <system-err />
+</testsuite></testsuites>

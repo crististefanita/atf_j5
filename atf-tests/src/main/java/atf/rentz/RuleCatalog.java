@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
-import java.util.regex.Pattern;
+import atf.rentz.bindings.TestVerification;
 import ro.rentzlab.core.*;
 import ro.rentzlab.ai.*;
 import ro.rentzlab.ai.search.DecisionEvaluator;
@@ -87,6 +87,7 @@ public final class RuleCatalog {
     }
 
     public static void verifyBindings(Path project,List<Claim> claims) throws IOException {
+        var references = new ArrayList<TestVerification.Reference>();
         for(var claim:claims) {
             String[] implementation=claim.implementation().split("\\.",-1);
             if(implementation.length<1||implementation.length>2||!implementation[0].matches("[A-Z][A-Za-z0-9]+"))throw new IllegalArgumentException("Implementation binding");
@@ -96,8 +97,9 @@ public final class RuleCatalog {
             String[] test=claim.verification().split("\\.",-1);
             if(test.length!=2||!test[0].matches("[A-Z][A-Za-z0-9]+Test")||!test[1].matches("[A-Za-z][A-Za-z0-9]+"))throw new IllegalArgumentException("Test binding");
             Path path=project.resolve("rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/"+test[0]+".java");
-            if(!Files.isRegularFile(path)||!Pattern.compile("\\bvoid\\s+"+Pattern.quote(test[1])+"\\s*\\(").matcher(Files.readString(path)).find())throw new IllegalArgumentException("Missing test declaration: "+claim.verification());
+            references.add(new TestVerification.Reference(claim.id(), path, "ro.rentzlab.core." + test[0], test[1]));
         }
+        TestVerification.requireAll(references);
     }
 
     private static String text(JsonNode node,String name){var value=node.required(name);if(!value.isTextual())throw new IllegalArgumentException("Text required: "+name);return value.textValue();}
