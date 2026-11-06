@@ -15,7 +15,7 @@
   "publication": {
     "state": "PUBLISHED",
     "sourceCommit": "705d73ab82dcbe9cea6707e072cf812a94476552",
-    "evidenceCommit": null,
+    "evidenceCommit": "36dbb606358f7eb88ffb1c284a70843acebc9d9c",
     "releaseId": 436972046,
     "publishedAt": "2026-11-06T20:26:56Z"
   },
@@ -168,8 +168,8 @@
       },
       {
         "path": "release-notes.md",
-        "bytes": 635,
-        "sha256": "1a6adae981c79811d7929c980c6ac42d4abb3f22aebe09813d6113e769f6aed4"
+        "bytes": 659,
+        "sha256": "9cff1bdb6ac4476fbc016d14f5684685874153bdb5e512532ffa7a355945d735"
       },
       {
         "path": "RentzLab-0.1.1.apk",
