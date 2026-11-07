@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>atf.api</groupId>
@@ -18,7 +18,7 @@
     <jackson.version>2.17.2</jackson.version>
     <atf.consumer.profile>android</atf.consumer.profile>
     <atf.core.version>1.0.0-c4</atf.core.version>
-    <atf.reporting.version>1.0.0-j22</atf.reporting.version>
+    <atf.reporting.version>1.0.0-j23</atf.reporting.version>
     <atf.console.version>1.0.0-c2</atf.console.version>
     <atf.mock.version>1.0.0-m2</atf.mock.version>
     <atf.testkit.version>1.0.0-k1</atf.testkit.version>

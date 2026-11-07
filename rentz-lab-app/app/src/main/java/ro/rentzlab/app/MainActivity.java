@@ -191,9 +191,10 @@ public final class MainActivity extends Activity {
         } else if (automaticTurn && !controller.isBusy()) {
             Runnable move = forcedPass ? () -> command(permit,
                     () -> new GameSession.Command(GameSession.Action.PASS, 0, null, null, false)) : controller::resume;
-            afterFirstFrame(panel, frame, () -> TurnPacing.afterVisibleFrame(automaticTurn,
+            TurnPacing.afterVisibleFrame(automaticTurn,
                     preview.remaining(SystemClock.uptimeMillis()) > 0,
-                    () -> gameFrame(frame) && !controller.isBusy(), display::postDelayed, move));
+                    action -> afterFirstFrame(panel, frame, action),
+                    () -> gameFrame(frame) && !controller.isBusy(), display::postDelayed, move);
         }
     }
     private void afterFirstFrame(RentzTablePanel panel, long frame, Runnable action) {

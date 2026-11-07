@@ -40,6 +40,6 @@ Rendererul trimite identitatea selectată. Adaptorul o rezolvă în legalitatea 
 - După ultima levată, ecranul de punctaj folosește rândul confirmat din istoric. Jucătorul poate continua, reveni la masă sau deschide istoricul.
 - [Sugestia AI](screens/ContractAdvice.java) folosește numai observația mâinii dezvăluite și opțiunile legale ale jucătorului. Dialogul anulează calculul dacă alegerea se închide sau ecranul se schimbă.
 - Tabla Rentz folosește rangul de deschidere real al motorului pentru fiecare număr de locuri. Slotul gol și ancora nu sunt cărți depuse.
-- Calculul AI rămâne în lot; păstrarea mesei și a levatei nu califică o animație individuală pentru fiecare mutare adversă.
+- UI-ul afișează locul activ după primul cadru și așteaptă 550 ms înaintea fiecărei mutări automate; pasa forțată folosește aceeași pauză. Calculul rămâne în worker, iar animația de zbor pentru fiecare carte adversă este o calificare separată.
 
 [Contractul aplicației](../../../../../../../README.md)

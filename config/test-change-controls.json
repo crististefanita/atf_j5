@@ -15,11 +15,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/TurnPacingTest.java",
       "owner": "Rentz consumer",
-      "reason": "Pin the visible-seat delay, collection boundary and invalidation with a manual timer.",
-      "criterion": "A visible automated turn waits 550 ms. Human play, collection and invalidated frames cannot start a scheduled move.",
-      "proof": "../../rentz_back/ui-review/turn-pacing-j5/README.md",
+      "reason": "0.3.0 P1: pin first-visible-frame pacing and stale-turn cancellation before publishing the updated Rentz UI.",
+      "criterion": "No timer before the first frame; exactly one move follows 550 ms. Human turns, collection and invalidated frames never schedule or deliver a move.",
+      "proof": "../../rentz_back/ui-review/turn-pacing-review-20261107/README.md",
       "expires": "2026-11-20",
-      "sha256": "b4e759012c486f772ba6bda39e3f8e11ff136cae357b2af191ffab2120cdeafd",
+      "sha256": "b3855a4555517dda860995e6f1955704326ecb2103112313127d2e244d70161f",
       "allowDelete": false
     },
     {
@@ -615,11 +615,11 @@
     {
       "path": "config/infrastructure-workspaces.json",
       "owner": "Rentz release",
-      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Register the actual release, signing, UI and qualification paths while retaining physical and TEMP boundary checks.",
-      "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
+      "reason": "0.3.0 P1: register the distribution archive used to retain the prior published release and its evidence.",
+      "criterion": "The distribution root is an allowed external artifact directory; physical-path, workspace and system-TEMP boundary checks still pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-rentz-0.3.0/README.md",
       "expires": "2026-11-20",
-      "sha256": "fe05969fee3a774c630eea97e785742b53da3099a4f9bc13296844c17630c7b3",
+      "sha256": "1da205cfe817697b93a2ff78e8551203126c5536e1358ec3135b8f3c3ee37c01",
       "allowDelete": false
     },
     {
@@ -645,11 +645,11 @@
     {
       "path": "pom.xml",
       "owner": "Rentz consumer",
-      "reason": "Incoming Reporting J22 binary adoption retained; reactor membership and declared test scope preserved.",
-      "criterion": "Declared JAR/POM identity, CodeSource and consumer behavior qualify separately.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "reason": "0.3.0 release candidate retains the parallel Reporting J23 artifact update.",
+      "criterion": "J23 JAR/POM and provenance hashes agree; regression validates the actual consumer classpath and selected test population with zero errors or skips.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-rentz-0.3.0/README.md",
       "expires": "2026-11-20",
-      "sha256": "e082b10e208c987e0358cf01c4b1668e84d24ea0f9aad7080b469879f52f8da4",
+      "sha256": "5c7fc09f3240c655ba0fd889051868bd7b077b3dfd135b0eba4f7f7bb70b80ca",
       "allowDelete": false
     },
     {

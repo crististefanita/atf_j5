@@ -1,9 +1,0 @@
-{
-  "version": "0.2.0",
-  "bytes": 848204,
-  "sha256": "8a514b0acf5576226acb0d5407471a25d58cb987b83dc1fa0d4e0747fdfde8a1",
-  "authenticatedApi": "PASS",
-  "anonymousHttpStatus": 404,
-  "anonymousComplete": false,
-  "assetUrl": "https://github.com/crististefanita/atf_j5/releases/download/v0.2.0/RentzLab-0.2.0.apk"
-}

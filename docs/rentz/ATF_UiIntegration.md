@@ -137,7 +137,7 @@ J4 oferă reperul pentru lățimile măsurate, subcoloanele aliniate și antetul
 | Masa comună | Levada păstrează `BoardLayout`, `PlayedCardsView` și ancorele `TableSeatLayout` folosite în Whist. |
 | Secvențe | Adaptorul păstrează chenarele Rentz dacă între rânduri încape grila. Pe ecranele scurte, poate folosi ancorele comune pentru joc cu centru lat. |
 | Cărțile din secvențe | Cele patru rânduri sunt centrate între chenare și folosesc lățimea mesei. Textul și spațiul dintre cărți depind de dimensiunea slotului. |
-| Tura la secvențe | Cărțile legale din mâna activă au o nuanță discretă. Dacă motorul nu oferă o mutare, masa afișează „Pasează” și execută pasul după aceeași pauză de tură. |
+| Tura la secvențe | Cărțile legale din mâna activă au o nuanță discretă. Fiecare loc automat este afișat înainte de pauza de 550 ms; pasa forțată folosește aceeași pauză. Ordinea cadru → worker → checkpoint și anularea la lifecycle sunt definite în [contractul de lifecycle](ATF_Lifecycle.md). |
 
 [Componentele geometriei](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) verifică ordinea comună a numelor și cărților, centrajul și absența intersecțiilor. [Testul de adopție](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java) confruntă clasele încărcate cu AAR-ul comun. [Feedback-ul UI](../feedback/ATF_Rentz_UI_ToDo.md) păstrează verificările de făcut pe dispozitiv.
 

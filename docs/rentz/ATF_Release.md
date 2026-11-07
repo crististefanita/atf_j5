@@ -42,6 +42,7 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 
 - **Cache concurent:** folosiți `-MavenRepository <cache-dedicat>` la calificare când alte procese pot încărca aceleași JAR-uri; calea rămâne în `infrastructure/cache`. Nu opriți procesele altui proprietar și nu transformați eroarea de înlocuire într-un rezultat verde.
 - **Izolare:** staging-ul este workspace-ul temporar înregistrat de J5, în afara sursei și a TEMP-ului Windows. Rulările intermediare rămân în depozitul extern; numai dosarul selectat se copiază în `release/<versiune>`.
+- **Istoric:** înainte de înlocuirea dosarului ediției curente, arhivați-l în `distribution/archives` și verificați toate căile, dimensiunile și SHA-256 față de sursă. Tagurile și release-urile deja publicate rămân imuabile.
 - **Commit fixat:** pregătiți candidatul DRAFT într-un worktree `atf_j5` dintr-un workspace alocat de J5. Regresia refuză un worktree modificat și verifică din nou commit-ul, populația și hash-urile la final.
 - **Intrări Android:** build-ul Release preia automat sursa din receipt-ul regresiei. Confruntă întregul inventar Android JVM, inclusiv configurația Gradle, resursele și biblioteca UI. Opțiunea `-UiSanity` produce separat varianta izolată și comparațiile pentru Extent din același snapshot.
 - **Teste:** se păstrează populațiile Maven și Android JVM, fără FAIL, erori sau skip-uri; o selecție scurtă nu se redenumește regresie. Testele de guvernanță și controalele negative ale descărcării se execută offline înainte de publicare.
@@ -60,7 +61,7 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 
 | Fișier | Rol |
 |---|---|
-| release/index.json | Versiunea curentă și repository-ul; un singur dosar activ. |
+| release/index.json | Versiunea curentă și repository-ul; sursa păstrează numai dosarul ediției active. |
 | release-validation.json | Identitatea binarului, starea, calificarea și inventarul hash-urilor. |
 | README și release-notes | Descărcare și capabilități confirmate; testele se explică prin legătura către reports. |
 | reports/README | Scopul fiecărei selecții, proveniența, suprapunerile și limitele ei. |

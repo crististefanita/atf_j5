@@ -182,3 +182,17 @@ La limita lizibilității se alege un mod explicit de derulare sau o dispunere a
 4. Rularea păstrează extern identitatea APK-ului, configurația efectivă, expected/actual și capturile native originale inline base64 în stilul proiectului. O masă sau o rezoluție nu califică întreaga matrice.
 
 **Ordine de lucru:** U01 → refactorizarea UI în producător → U02–U05 și adaptoarele Rentz prin componente → U06–U07, R02–R05 și S01–S07 → calibrare nativă și E2E selectiv. R01 rămâne o modificare de regulă separată: condiționează opțiunea „Valet mereu”, fără să blocheze meniul sau geometria și fără să fie simulată prin desen. Închideți criteriile numai cu implementare identificată, probe relevante și reconfirmarea codului live.
+
+## P1 — livrarea 0.3.0 și turele Rentz vizibile
+
+**Prioritate:** blochează declararea noii interacțiuni ca livrată. APK-ul public verificat rămâne 0.2.0 până când toate criteriile de mai jos trec pentru aceiași octeți ai sursei și ai binarului. README-ul principal nu trebuie să indice drept descărcabil un candidat DRAFT/PREPARED.
+
+| Criteriu | Stare | Dovada necesară pentru închidere |
+|---|---|---|
+| Temporizarea turei automate | **IMPLEMENTAT · NEQUALIFICAT** | Testul de componentă demonstrează cadrul activ → pauză de 550 ms → exact o comandă; niciun timer înainte de cadrul efectiv; tura umană/colectarea excluse; invalidarea înainte și după cadru refuză mutarea. |
+| Integrarea Android a cadrului și lifecycle-ului | **P1 · DESCHIS** | Sanity pe APK 0.3.0 verifică indicatorul actorului înaintea mutării, o acțiune pe cadru, anularea la pauză/navigare și reluarea din checkpoint; capturile și jurnalul se leagă de SHA-ul APK-ului. Testul JVM singur nu închide acest criteriu. |
+| Pachetul funcțional 0.3.0 | **P1 · DRAFT** | Include schimbările Rentz din sursa fixată: spațiu adaptiv pentru 3–6 locuri, tablă de secvențe, evidențierea cărților legale, ture pas-cu-pas și protecțiile lifecycle. Regresia completă, Android JVM, buildul semnat, certificatul, manifestul și integritatea ZIP trebuie să treacă fără skip-uri. |
+| Disponibilitatea publică și README principal | **P1 · DRAFT** | Tagul v0.3.0 pointează exact la sursa calificată și commitul există pe branch-ul remote; release-ul și copia publică HTTPS conțin APK-ul și checksum-ul; descărcarea anonimă verifică HTTP 200, bytes și SHA-256. Abia apoi README-ul principal devine legătura către ultima ediție publicată. |
+| Bibliotecă de raportare J23 | **PARALEL · PĂSTRATĂ** | Proveniența J23, hash-urile fizice JAR/POM și regresia consumatorului trebuie să fie în aceeași calificare; biblioteca este pentru testare și nu este împachetată în APK. |
+
+README-ul aplicației diferențiază acum `advanceBotTurn()` pentru UI de `advanceBots()` pentru simularea offline. Contractul de lifecycle și integrarea descriu actorul vizibil înainte de tur și separarea acțiunilor automate. `TurnPacing` primește poarta primului cadru ca dependență; implementarea este prezentă, dar se închide numai cu rezultate verzi și sanity Android. Candidatul `release/0.3.0` este încă DRAFT; nu-l prezentați drept APK instalabil.

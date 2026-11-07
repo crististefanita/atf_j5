@@ -17,7 +17,7 @@ Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu tr
 | [SessionController](src/main/java/ro/rentzlab/app/lifecycle/SessionController.java) | Checkpoint pe proprietar, calcul pe copie separată și refuzul rezultatelor ori callback-urilor depășite. |
 | [SessionRepository](src/main/java/ro/rentzlab/app/lifecycle/SessionRepository.java) | Generația proprietarului și serializarea verificării identității cu scrierea sau callback-ul. |
 | [FileSessionStorage](src/main/java/ro/rentzlab/app/lifecycle/FileSessionStorage.java) | Înlocuire atomică din staging unic în cache; fișierele canonice și originale refuzate sunt păstrate. |
-| [GameSession](src/main/java/ro/rentzlab/app/GameSession.java) | Comenzi validate de motor, jurnal reproductibil și avansarea adversarilor până la următoarea decizie umană. |
+| [GameSession](src/main/java/ro/rentzlab/app/GameSession.java) | Comenzi validate de motor și jurnal reproductibil; UI-ul avansează câte o tură automatizată, iar simulările offline pot consuma turele până la următoarea decizie umană. |
 | [SessionJson](src/main/java/ro/rentzlab/app/SessionJson.java) | Serializare explicită; observația actorului și jurnalul privat sunt documente distincte. |
 | [SavedJson](src/main/java/ro/rentzlab/app/SavedJson.java) | Citire strictă a unui singur document și valori exacte înaintea restaurării. |
 | [Componente de sesiune](src/test/java/ro/rentzlab/app/GameSessionTest.java) | Refuz fără jurnalizare, restaurare, istoric și frontiera informației. |

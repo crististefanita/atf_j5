@@ -28,6 +28,7 @@
   "artifactDirectories": [
     "android-acceptance",
     "components",
+    "distribution",
     "infrastructure",
     "learning",
     "onboarding",
