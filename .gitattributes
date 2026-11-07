@@ -3,3 +3,9 @@ rentz-lab-app/** -text
 release/** -text
 lib/** -text
 docs/history/contract-whist/** -text
+
+# Governance hashes bind the reviewed bytes in these source trees.
+pom.xml -text
+atf-tests/** -text
+config/** -text
+scripts/** -text

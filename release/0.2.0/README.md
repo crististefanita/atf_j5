@@ -1,5 +1,7 @@
 # Rentz Lab 0.2.0
 
+## Pe scurt
+
 Candidat în calificare. Această pagină va primi legăturile APK și checksum după verificarea distribuției.
 
 - Punctajul mâinii detaliază sub-jocul, contribuțiile și totalurile.
