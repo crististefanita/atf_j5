@@ -8,3 +8,5 @@ Dovezile leagă APK-ul semnat de commit și de selecțiile executate.
 - [Probe Android](ui/collection-extent.html) · ambele trasee API 28 trecute cu pragurile existente. [Măsurători](ui/measurements.json)
 - [Guvernanță release](distribution/release-governance.html) · [Contract Git](distribution/release-git-policy.html) · [Componente descărcare](distribution/download-components.html).
 - [Identitatea APK-ului](qualification.json) · [Inventarul surselor APK](apk-inputs.json).
+
+- [Descărcare GitHub autentificată](distribution/download-api.html) · [Rezultatul descărcării](distribution/download.json).

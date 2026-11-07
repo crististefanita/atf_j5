@@ -4,8 +4,8 @@
 
 Ediția include punctajul mâinii, sugestia AI și reluarea ultimei levate.
 
-- [APK semnat](RentzLab-0.2.0.apk)
-- [Checksum SHA-256](RentzLab-0.2.0.apk.sha256)
+- [APK semnat](https://github.com/crististefanita/atf_j5/releases/download/v0.2.0/RentzLab-0.2.0.apk)
+- [Checksum SHA-256](https://github.com/crististefanita/atf_j5/releases/download/v0.2.0/RentzLab-0.2.0.apk.sha256)
 
 ## Schimbări
 

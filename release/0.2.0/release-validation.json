@@ -13,8 +13,11 @@
     "debuggable": false
   },
   "publication": {
-    "state": "PREPARED",
-    "sourceCommit": "3e759a021840ad72ce7c03f0520ddded2cc132c1"
+    "state": "PUBLISHED",
+    "sourceCommit": "3e759a021840ad72ce7c03f0520ddded2cc132c1",
+    "evidenceCommit": "14e6ba578915b7a82b930ac45659af5c0c8afe61",
+    "releaseId": 437642774,
+    "publishedAt": "11/07/2026 14:58:06"
   },
   "qualification": {
     "status": "PASS",
@@ -27,8 +30,8 @@
     "files": [
       {
         "path": "README.md",
-        "bytes": 550,
-        "sha256": "b8855096c424f32be5a93d4fcf4560d80ad7c67bd0802d0d6785b1c161b29d48"
+        "bytes": 684,
+        "sha256": "08f19c67a3e50566554a48dec8147102c537600b7fe54e4e76693100cdc2688d"
       },
       {
         "path": "release-notes.md",
@@ -56,9 +59,19 @@
         "sha256": "6afc7d9f44aa214cee5e69aa48f66d8f418d6c3ac35f3ee8a6bc8d4d0d614d11"
       },
       {
+        "path": "reports/distribution/download-api.html",
+        "bytes": 2411684,
+        "sha256": "56a019305a2a4072e68e9cf2d80c188787200fc2ff5ffd13736bff7f30c89a49"
+      },
+      {
         "path": "reports/distribution/download-components.html",
         "bytes": 2538425,
         "sha256": "9d2d3679d213d6a874533a8690ca9c1d57ae5c57df3de26d9ebd59cefcb21ebe"
+      },
+      {
+        "path": "reports/distribution/download.json",
+        "bytes": 326,
+        "sha256": "a6832cd8076fb6c2e4b39796f3aa7e0870c14d361aa00fb5acacd30895aa9273"
       },
       {
         "path": "reports/distribution/release-git-policy.html",
@@ -77,8 +90,8 @@
       },
       {
         "path": "reports/README.md",
-        "bytes": 630,
-        "sha256": "6fcd4e8fed8b3a80d08d6afd5c37e0272955e736e8d1ddc1b9187cf8d09df088"
+        "bytes": 762,
+        "sha256": "9e2e624be6745311d640af96b09ea9bb13295b5eeba10566e19a7c5902c9a829"
       },
       {
         "path": "reports/ui/collection-extent.html",

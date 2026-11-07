@@ -6,7 +6,7 @@ Catalogul tehnic reunește candidatul curent, identitatea livrării și dovezile
 
 ## Versiunea curentă
 
-- [Rentz Lab 0.2.0](0.2.0/README.md) · candidat semnat și calificat local.
+- [Rentz Lab 0.2.0](0.2.0/README.md) · ediție publicată.
 
 ## Organizare
 
