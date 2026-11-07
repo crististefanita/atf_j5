@@ -9,7 +9,7 @@ Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări 
 ## Jocul
 
 - [Detalii Rentz Lab 0.3.0](https://github.com/crististefanita/atf_j5/releases/tag/v0.3.0) · codul sursă și notele livrării.
-- [Descarcă APK-ul Rentz Lab 0.3.0](https://rentz-lab-apk.totaloatcake.chatgpt.site/v0.3.0/RentzLab-0.3.0.apk) · Android 8.0+ · SHA-256 `d63153edd9445cc2130a50bac7c3dfe87b1e1a9d36ee9145fc0494da5fa05e8c`.
+- [Descarcă APK-ul Rentz Lab 0.3.0](https://rentz-lab-apk.totaloatcake.chatgpt.site/v0.3.0/RentzLab-0.3.0.apk) · Android 8.0+.
 
 ## Module și responsabilități
 
