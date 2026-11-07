@@ -1,0 +1,13 @@
+{
+  "mavenCore": 111,
+  "mavenAtf": 231,
+  "androidJvm": 54,
+  "total": 396,
+  "isolatedUiChecks": 63,
+  "isolatedUiCheckpoints": 9,
+  "isolatedUiApkSha256": "73E3D0EF870AE9294E834051DBDCE1EA5D562229B303D7753226D5FD178854D3",
+  "api": "28",
+  "sourceCommit": "405caddc5124cb7e503de46d066e54f867eaa4b2",
+  "sourceDrift": [],
+  "populationChanges": []
+}

@@ -7,10 +7,104 @@
     "minSdk": 26,
     "targetSdk": 36,
     "apkName": "RentzLab-0.1.2.apk",
-    "apkBytes": null,
-    "sha256": null
+    "apkBytes": 825808,
+    "sha256": "507c9473302260a11961e2ce72f54b84efadef55e2a909604021a489ad9c0b1d",
+    "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+    "debuggable": false
   },
   "publication": {
-    "state": "DRAFT"
+    "state": "PREPARED",
+    "sourceCommit": "405caddc5124cb7e503de46d066e54f867eaa4b2"
+  },
+  "qualification": {
+    "status": "PASS",
+    "tests": 396,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "integrity": {
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 435,
+        "sha256": "ee625a0e24e8928f2bbf49dac516eb65c37f1fe1f4de068449886baff35420ca"
+      },
+      {
+        "path": "release-notes.md",
+        "bytes": 248,
+        "sha256": "8d2243fe4c046403bb15ad2b970a4369e9286efa9c1489969599b2885d3d3765"
+      },
+      {
+        "path": "RentzLab-0.1.2.apk",
+        "bytes": 825808,
+        "sha256": "507c9473302260a11961e2ce72f54b84efadef55e2a909604021a489ad9c0b1d"
+      },
+      {
+        "path": "RentzLab-0.1.2.apk.sha256",
+        "bytes": 86,
+        "sha256": "408a91c0d1f62dea69c73b80bcf194e99440ce36399c09497566ff571b182b51"
+      },
+      {
+        "path": "reports/apk-inputs.json",
+        "bytes": 17520,
+        "sha256": "fe11a7dec1672266345224190cb2a17bee41cf9459c324001e93719b9184e92e"
+      },
+      {
+        "path": "reports/component-rendering.json",
+        "bytes": 990,
+        "sha256": "684f0c63dc31c461780fa1dc1497dbcfa37a82a7d481b998aba648efdcde0371"
+      },
+      {
+        "path": "reports/component/rentz-rules.html",
+        "bytes": 2508317,
+        "sha256": "b2bbad77f61e5f309d78bf50ac63516ff93f3acf88e43b5851fd30acd2a7e9a4"
+      },
+      {
+        "path": "reports/distribution/download-components.html",
+        "bytes": 2538446,
+        "sha256": "ce70d8dc1df46b7f54b0d53e016a8981671c2ea6a4473f56de9bee1eac09a39e"
+      },
+      {
+        "path": "reports/distribution/release-git-policy.html",
+        "bytes": 2419539,
+        "sha256": "f0aae663ccdd66d7770b7b0e1792197ab9448547d35f0b42d6824cb268da04ba"
+      },
+      {
+        "path": "reports/distribution/release-governance.html",
+        "bytes": 2504691,
+        "sha256": "bf176b6c97f8add87570af681095cb087a028dbd263b3702e12fe5b8045305cc"
+      },
+      {
+        "path": "reports/git-build-identity.json",
+        "bytes": 195,
+        "sha256": "1aca833929790f868113ef6372fc6f8740b04fa1742762d80d588693be67d55e"
+      },
+      {
+        "path": "reports/qualification.json",
+        "bytes": 365,
+        "sha256": "256d354fd1e205750300de7a14c9080c42352699d775be9c6094f2dd35bed044"
+      },
+      {
+        "path": "reports/README.md",
+        "bytes": 1453,
+        "sha256": "72b9e6eda5c183b10ed2178c9871d20a1f20c9cb5e73f0c40f5e152714ae6791"
+      },
+      {
+        "path": "reports/source-controls.json",
+        "bytes": 459,
+        "sha256": "c1ff5d14cd68e68ee443bfa3c8e6245153405d78a48023a34298d9dd9bb4aeda"
+      },
+      {
+        "path": "reports/ui/history-extent.html",
+        "bytes": 5120150,
+        "sha256": "f8a39ab77601347c48bd13c9fb2f4474f00fcc97d7cfe3bdb4775d0959ea61af"
+      },
+      {
+        "path": "reports/ui/rendering.json",
+        "bytes": 2449,
+        "sha256": "bd9da10385532b6b21f801cc6f344bcd3c76b01830aec7e5d2d350abe13ba644"
+      }
+    ]
   }
 }

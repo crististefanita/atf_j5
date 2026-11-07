@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "commit": "405caddc5124cb7e503de46d066e54f867eaa4b2",
+  "registeredFixture": "C:\\work\\rentz_back\\infrastructure\\workspaces\\fixture-3a6cf0d8ebab44108cab4fd6d8c4b197",
+  "dirtyTrackedRefusal": "Release worktree must match its commit.",
+  "untrackedRefusal": "Release worktree must match its commit.",
+  "foreignRefusal": "Release source must be an atf_j5 worktree inside a registered workspace.",
+  "restoredClean": true
+}

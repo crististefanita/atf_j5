@@ -8,7 +8,8 @@ Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări 
 
 ## Jocul
 
-- [Rentz Lab 0.1.2](release/0.1.2/README.md) — candidat.
+- [Rentz Lab 0.1.2](release/0.1.2/README.md) — candidat semnat.
+- [APK 0.1.2](release/0.1.2/RentzLab-0.1.2.apk).
 
 ## Module și responsabilități
 

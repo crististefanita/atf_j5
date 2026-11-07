@@ -1,0 +1,29 @@
+{
+  "status" : "PASS",
+  "mode" : "Chromium offline, expanded assertions and final row",
+  "reports" : [ {
+    "scenarioEntries" : 13,
+    "assertionRows" : 63,
+    "report" : "rentz-rules-extent.html",
+    "disclosuresOpened" : 0,
+    "sha256" : "b2bbad77f61e5f309d78bf50ac63516ff93f3acf88e43b5851fd30acd2a7e9a4"
+  }, {
+    "scenarioEntries" : 19,
+    "assertionRows" : 54,
+    "report" : "download-components.html",
+    "disclosuresOpened" : 0,
+    "sha256" : "ce70d8dc1df46b7f54b0d53e016a8981671c2ea6a4473f56de9bee1eac09a39e"
+  }, {
+    "scenarioEntries" : 14,
+    "assertionRows" : 41,
+    "report" : "release-governance.html",
+    "disclosuresOpened" : 0,
+    "sha256" : "bf176b6c97f8add87570af681095cb087a028dbd263b3702e12fe5b8045305cc"
+  }, {
+    "scenarioEntries" : 2,
+    "assertionRows" : 7,
+    "report" : "release-git-policy.html",
+    "disclosuresOpened" : 0,
+    "sha256" : "f0aae663ccdd66d7770b7b0e1792197ab9448547d35f0b42d6824cb268da04ba"
+  } ]
+}
