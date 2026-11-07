@@ -9,6 +9,7 @@ Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări 
 ## Jocul
 
 - [Rentz Lab 0.2.0](release/0.2.0/README.md).
+- [Descarcă APK 0.2.0](release/0.2.0/RentzLab-0.2.0.apk).
 
 ## Module și responsabilități
 
