@@ -7,10 +7,101 @@
     "minSdk": 26,
     "targetSdk": 36,
     "apkName": "RentzLab-0.3.0.apk",
-    "apkBytes": null,
-    "sha256": null
+    "apkBytes": 852536,
+    "sha256": "d63153edd9445cc2130a50bac7c3dfe87b1e1a9d36ee9145fc0494da5fa05e8c",
+    "debuggable": false,
+    "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+    "sourceCommit": "f6e04ebb7b2d1c2c5903a24185746bb6bf0e353f"
+  },
+  "qualification": {
+    "status": "PASS",
+    "tests": 373,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "mavenSuites": 39,
+    "androidJvm": {
+      "status": "PASS",
+      "suites": 28,
+      "tests": 183,
+      "appTests": 72,
+      "gameCoreTests": 111,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "capturedUiComparisons": 1994,
+    "nativeUi": {
+      "status": "PASS",
+      "isolatedApplicationId": "ro.rentzlab.app.uisanity",
+      "isolatedApkSha256": "44741063e6f4f207ea2d8cbc02bccc81124dc3a0065c9bfc4178b33518a559e2",
+      "runs": 2,
+      "checkpoints": 29,
+      "assertions": 303,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "displayAndPackagesPreserved": true,
+      "leaseReleased": true,
+      "scope": "One complete Tricks hand, menu/profile/language, score history after restart, compact signed scores, and display geometry at 3/6 seats. The isolated package uses the exact release source snapshot.",
+      "nativeTimingAssertion": false,
+      "timingComponentTest": "TurnPacingTest"
+    }
   },
   "publication": {
-    "state": "DRAFT"
+    "state": "PUBLISHED",
+    "releaseId": 437798996,
+    "sourceCommit": "f6e04ebb7b2d1c2c5903a24185746bb6bf0e353f",
+    "publishedUtc": "2026-11-07T19:46:53Z",
+    "tag": "v0.3.0",
+    "githubReleaseUrl": "https://github.com/crististefanita/atf_j5/releases/tag/v0.3.0",
+    "githubAuthenticatedApiStatus": 200,
+    "githubAnonymousApiStatus": 404,
+    "githubLatestTag": "v0.3.0",
+    "apkAssetId": 721735381,
+    "checksumAssetId": 721735484,
+    "apkAssetDigest": "sha256:d63153edd9445cc2130a50bac7c3dfe87b1e1a9d36ee9145fc0494da5fa05e8c",
+    "checksumAssetDigest": "sha256:5e22a6cdef2c8074ab6341a1ef64b361433092cfb80fa83905aceb4823022dce"
+  },
+  "publicDownload": {
+    "url": "https://rentz-lab-apk.totaloatcake.chatgpt.site/v0.3.0/RentzLab-0.3.0.apk",
+    "httpStatus": 200,
+    "bytes": 852536,
+    "sha256": "d63153edd9445cc2130a50bac7c3dfe87b1e1a9d36ee9145fc0494da5fa05e8c",
+    "verifiedUtc": "2026-11-07T19:44:31.6899978Z",
+    "authenticated": false,
+    "checksumUrl": "https://rentz-lab-apk.totaloatcake.chatgpt.site/v0.3.0/RentzLab-0.3.0.apk.sha256",
+    "checksumHttpStatus": 200,
+    "siteCommit": "91e0e84dd7513ae30820274ed136f8ce843a4bea",
+    "deploymentId": "appgdep_6aef7f6ef4b88191a30cb389322b3515"
+  },
+  "integrity": {
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 3047,
+        "sha256": "706f90ded53800e1aa08d31d28e9bae7fe02bb964effef70b6c9995b496259b2"
+      },
+      {
+        "path": "release-notes.md",
+        "bytes": 600,
+        "sha256": "0a8739ae7ec91b1f40f47fbf19e333d038a22966f2e0433c11e3eca792c549b6"
+      },
+      {
+        "path": "reports/README.md",
+        "bytes": 2612,
+        "sha256": "38a19443f0c3f310a991e2de76b6315e7ff607a00be70e74909099efd4d099cc"
+      },
+      {
+        "path": "RentzLab-0.3.0.apk",
+        "bytes": 852536,
+        "sha256": "d63153edd9445cc2130a50bac7c3dfe87b1e1a9d36ee9145fc0494da5fa05e8c"
+      },
+      {
+        "path": "RentzLab-0.3.0.apk.sha256",
+        "bytes": 85,
+        "sha256": "5e22a6cdef2c8074ab6341a1ef64b361433092cfb80fa83905aceb4823022dce"
+      }
+    ]
   }
 }
