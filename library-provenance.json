@@ -841,9 +841,16 @@
             "owner": "atf_j0",
             "sameBinary": true,
             "evidence": "C:/Users/Cristi/AppData/Local/Temp/ATF_BROWSER_LIFECYCLE_ACTIVE_DO_NOT_CLEAN_d32b7955/browser-lifecycle-154-acceptance.json",
-            "consumerSanity": "C:/Users/Cristi/AppData/Local/Temp/ATF_BROWSER_LIFECYCLE_ACTIVE_DO_NOT_CLEAN_d32b7955/live-smoke-j5.log",
-            "nativeAcceptance": "OPEN: REPORT-BROWSER-LIFECYCLE-154",
-            "documentationSha256": "62da57d61d9b1aab3df4f4d1d9ef136c0634aacc456f147cc7af3fc56ec632d0"
+            "consumerSanity": "C:/Users/Cristi/AppData/Local/Temp/ATF_BROWSER_NATIVE_ACTIVE_DO_NOT_CLEAN_d9ef240b/live-smoke-j5.log",
+            "nativeAcceptance": "Owned Windows Chromium and driver exit verified on source and physical JAR",
+            "documentationSha256": "089d83300ae7b57bdfdffa6ace3b27f3f64f22d9555ea1c1b958f751f9032fe2",
+            "canonicalAcceptance": "OPEN: REPORT-BROWSER-LIFECYCLE-154",
+            "currentVerification": "C:/Users/Cristi/AppData/Local/Temp/ATF_BROWSER_NATIVE_ACTIVE_DO_NOT_CLEAN_d9ef240b/report-browser-native-155-acceptance.json",
+            "junitDiscovery": {
+              "status": "VERIFIED",
+              "sourceControls": 21,
+              "jarControls": 21
+            }
           }
         },
         "producerHead": "5e89e77064a1c57e340c101847f89998395f8197",

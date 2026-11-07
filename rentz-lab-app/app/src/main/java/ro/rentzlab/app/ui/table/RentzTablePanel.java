@@ -1,7 +1,10 @@
 package ro.rentzlab.app.ui.table;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.SystemClock;
+import android.provider.Settings;
 import android.view.*;
 import android.widget.*;
 import ro.cardtable.ui.animation.CollectionTarget;
@@ -23,9 +26,15 @@ public final class RentzTablePanel extends LinearLayout {
     private final RentzUiText copy;
     private final boolean paused;
     private final BoardLayout board;
+    private final View center;
+    private final boolean defaultCollectionScale;
+    private ViewTreeObserver.OnPreDrawListener collectionExpiry;
+    private RentzCollectionAnimation nativeCollection;
     public RentzTablePanel(Context context, RentzMatch.Observation view, RentzUiText copy, List<String> names,
             boolean paused, boolean holding, List<TrickRules.Play> visible, Actions actions) {
         super(context); this.context = context; this.copy = copy; this.paused = paused;
+        defaultCollectionScale = holding
+                && Settings.Global.getFloat(context.getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 1f;
         var viewport = new TableViewportPolicy(WindowContent.heightDp(context), getResources().getConfiguration().fontScale);
         setOrientation(VERTICAL); setGravity(Gravity.BOTTOM); setPadding(dp(8), 0, dp(8), 0); setClipChildren(false);
         int width = Math.min(760, Math.max(240, WindowContent.widthDp(context) - 40));
@@ -37,7 +46,7 @@ public final class RentzTablePanel extends LinearLayout {
             var frame = new PlayerSeatFrame(context, viewport.isCompact()).buildInlineFacts(seat, viewport.seatVerticalPaddingDp());
             board.addView(new PlayerSeatView(context, frame, copy.text("TO PLAY", "LA RÂND"), seat.active(), seat.seat(), viewport.isCompact()));
         }
-        View center = cards ? new PlayedCardsView(context, viewport.isCompact()).build(RentzTableContent.plays(visible, names), layout,
+        center = cards ? new PlayedCardsView(context, viewport.isCompact()).build(RentzTableContent.plays(visible, names), layout,
                 holding ? copy.text("Completed trick", "Levată încheiată") : copy.text("Current trick", "Levată curentă"))
                 : center(view, actions);
         board.addView(center);
@@ -53,8 +62,52 @@ public final class RentzTablePanel extends LinearLayout {
         hand.setTag("player-hand"); hand.setContentDescription(copy.text("Your hand", "Mâna ta") + ": " + handCards.size());
         addView(hand, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(HandLayoutMetrics.reservedHandHeightDp())));
     }
-    public void collect(CollectionTarget target, long remainingMillis, Runnable resized) {
-        TrickCollectionAnimator.attach(board, target, remainingMillis, resized);
+    public void collect(CollectionTarget target, long deadline, Runnable resized) {
+        if (defaultCollectionScale && center.isHardwareAccelerated() && ValueAnimator.areAnimatorsEnabled()) {
+            nativeCollection = RentzCollectionAnimation.start(board, center, target, deadline, resized);
+        }
+        if (nativeCollection == null) {
+            TrickCollectionAnimator.attach(board, target, deadline - SystemClock.uptimeMillis(), resized);
+        }
+    }
+    public void clearCollectionBeforeDraw(long deadline, Runnable advance) {
+        if (nativeCollection == null && defaultCollectionScale && center.isHardwareAccelerated()
+                && ValueAnimator.areAnimatorsEnabled()) {
+            // Let Android's render thread expire the whole trick even if the UI thread misses a frame.
+            center.animate().alpha(0f).setDuration(Math.max(0, deadline - SystemClock.uptimeMillis()))
+                    .setInterpolator(progress -> progress < 1f ? 0f : 1f).start();
+        }
+        collectionExpiry = () -> {
+            if (SystemClock.uptimeMillis() >= deadline) finishCollection(advance);
+            return true;
+        };
+        getViewTreeObserver().addOnPreDrawListener(collectionExpiry);
+    }
+    public void finishCollection(Runnable advance) {
+        removeCollectionExpiry();
+        if (center.getVisibility() != VISIBLE) return;
+        center.setVisibility(INVISIBLE);
+        center.animate().cancel();
+        cancelNativeCollection();
+        // Let this traversal clear the cards before rebuilding the screen.
+        postOnAnimation(() -> post(advance));
+    }
+    private void removeCollectionExpiry() {
+        if (collectionExpiry == null) return;
+        var observer = getViewTreeObserver();
+        if (observer.isAlive()) observer.removeOnPreDrawListener(collectionExpiry);
+        collectionExpiry = null;
+    }
+    @Override protected void onDetachedFromWindow() {
+        if (collectionExpiry != null) center.animate().cancel();
+        cancelNativeCollection();
+        removeCollectionExpiry();
+        super.onDetachedFromWindow();
+    }
+    private void cancelNativeCollection() {
+        if (nativeCollection == null) return;
+        nativeCollection.cancel();
+        nativeCollection = null;
     }
     private View center(RentzMatch.Observation view, Actions actions) {
         var box = new LinearLayout(context); box.setOrientation(VERTICAL); box.setGravity(Gravity.CENTER);

@@ -113,8 +113,9 @@ public final class MainActivity extends Activity {
         }
     }
     private void resume() {
-        if (controller.session() == null) return;
-        if (controller.resume()) { preparePreview(); route("GAME"); }
+        var session = controller.session();
+        if (session == null || controller.isBusy()) return;
+        if (!session.hasPendingBotTurn() || controller.resume()) { preparePreview(); route("GAME"); }
     }
     private void preparePreview() {
         var view = controller.session().view();
@@ -187,8 +188,15 @@ public final class MainActivity extends Activity {
     private void animateCollection(RentzTablePanel panel, long frame) {
         Runnable refresh = () -> { if (gameFrame(frame)) redraw(); };
         long attachedAt = SystemClock.uptimeMillis();
-        preview.collection(attachedAt).ifPresent(target -> panel.collect(target, preview.remaining(attachedAt), () -> display.post(refresh)));
-        display.postAtTime(refresh, attachedAt + preview.remaining(attachedAt));
+        long remaining = preview.remaining(attachedAt);
+        long deadline = attachedAt + remaining;
+        preview.collection(attachedAt).ifPresent(target -> panel.collect(target, deadline, () -> display.post(refresh)));
+        panel.clearCollectionBeforeDraw(deadline, refresh);
+        Message expiry = Message.obtain(display, () -> {
+            if (gameFrame(frame)) panel.finishCollection(refresh);
+        });
+        expiry.setAsynchronous(true);
+        display.sendMessageAtTime(expiry, deadline);
     }
     private void choose(InputPermit permit, long frame, boolean blind) {
         if (!gameFrame(frame) || controller.isBusy()) return;
@@ -238,7 +246,11 @@ public final class MainActivity extends Activity {
         super.onResume(); active = true;
         try {
             boolean changed = controller.activate();
-            if (screen.equals("GAME") && controller.session() != null) { preparePreview(); if (changed) controller.resume(); }
+            var session = controller.session();
+            if (screen.equals("GAME") && session != null) {
+                preparePreview();
+                if (changed && session.hasPendingBotTurn()) controller.resume();
+            }
             redraw();
             if (pendingProblem != null) showFailure(pendingProblem);
         } catch (Exception error) { showFailure(error); }

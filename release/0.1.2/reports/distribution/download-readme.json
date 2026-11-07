@@ -1,9 +1,0 @@
-{
-  "sha256" : "507c9473302260a11961e2ce72f54b84efadef55e2a909604021a489ad9c0b1d",
-  "version" : "0.1.2",
-  "status" : "PASS",
-  "bytes" : 825808,
-  "channel" : "Authenticated browser",
-  "zipCrc" : "PASS",
-  "url" : "https://github.com/crististefanita/atf_j5/releases/download/v0.1.2/RentzLab-0.1.2.apk"
-}

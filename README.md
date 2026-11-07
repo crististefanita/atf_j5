@@ -8,10 +8,7 @@ Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări 
 
 ## Jocul
 
-- [Release 0.1.2](https://github.com/crististefanita/atf_j5/releases/tag/v0.1.2) — prezentare și descărcare.
-- [Descarcă APK 0.1.2](https://github.com/crististefanita/atf_j5/releases/download/v0.1.2/RentzLab-0.1.2.apk).
-
-Autentifică-te în GitHub în același browser pentru descărcare.
+- [Rentz Lab 0.2.0](release/0.2.0/README.md).
 
 ## Module și responsabilități
 

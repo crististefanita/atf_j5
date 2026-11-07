@@ -97,7 +97,7 @@ Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; 
 | Q20–Q25 | [Identitatea distribuirii](../rentz/ATF_Learning.md#identitatea-distribuirii-și-expunerea) și [guvernanța](../rentz/ATF_Qualification.md) | [Q20](../../../../rentz_back/infrastructure/governance/20261107-q20/TDD.md) · [Q21–Q22](../../../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md) · [Q23–Q25](../../../../rentz_back/infrastructure/governance/20261107-q23-q25/TDD.md) |
 | Q26–Q28 | [Scor și expunere](../rentz/ATF_Learning.md) și [identitatea invocărilor](../rentz/ATF_Qualification.md#containere-jupiter-imbricate) | [Q26–Q28](../../../../rentz_back/infrastructure/governance/20261107-q26-q28/TDD.md) |
 | Q29–Q31 | [Deficitul adversarilor și expunerea nativă](../rentz/ATF_Learning.md), plus [structura XML](../rentz/ATF_Qualification.md#containere-jupiter-imbricate) | [Q29–Q31](../../../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md) |
-| Descărcarea din README | [Identitatea livrării și canalele de descărcare](../rentz/ATF_Release.md) | [Receipt de browser autentificat](../../release/0.1.2/reports/distribution/download-readme.json) |
+| Descărcarea din README | [Identitatea livrării și canalele de descărcare](../rentz/ATF_Release.md) | [Receipt de browser autentificat](https://github.com/crististefanita/atf_j5/blob/cf740288acbebd13b67a9f0d69f18e4d9f94518f/release/0.1.2/reports/distribution/download-readme.json) |
 
 ## Calificarea integrării UI pentru 0.1.2
 
@@ -105,5 +105,5 @@ Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; 
 - Controalele Git păstrează baza de revizuire, criteriul și hash-ul fiecărei căi protejate. Candidatul curat se confruntă din nou după regresie.
 - Build-ul compară întregul inventar Android calificat cu sursa și cu bloburile tagului. Descărcarea a pornit din README-ul GitHub autentificat și a fost confruntată cu manifestul.
 
-[Dovezile ediției 0.1.2](../../release/0.1.2/reports/README.md)
+[Dovezile ediției 0.1.2](https://github.com/crististefanita/atf_j5/blob/cf740288acbebd13b67a9f0d69f18e4d9f94518f/release/0.1.2/reports/README.md)
 

@@ -56,11 +56,16 @@ public final class GameSession {
     }
     public void advanceBots(){
         int actions=0;
-        while(match.observe(0).turn()!=0&&(match.observe(0).phase()==RentzMatch.Phase.CHOOSE||match.observe(0).phase()==RentzMatch.Phase.PLAY)){
+        while(hasPendingBotTurn()){
             if(++actions>512)throw new IllegalStateException("Bot action bound");int actor=match.observe(0).turn();
             if(match.observe(actor).phase()==RentzMatch.Phase.CHOOSE){apply(new Command(Action.REVEAL,actor,null,null,false));apply(new Command(Action.CHOOSE,actor,null,player.choose(match.observe(actor)).selected(),false));}
             else {var view=match.observe(actor);if(view.legal().isEmpty())apply(new Command(Action.PASS,actor,null,null,false));else apply(new Command(Action.PLAY,actor,player.card(view).selected(),null,false));}
         }
+    }
+    public boolean hasPendingBotTurn() {
+        var state = view();
+        return state.turn() != state.seat()
+                && (state.phase() == RentzMatch.Phase.CHOOSE || state.phase() == RentzMatch.Phase.PLAY);
     }
     public RentzMatch.Observation view(){return match.observe(0);}
     public boolean blindChoiceAvailable(){var view=view();return view.phase()==RentzMatch.Phase.CHOOSE&&view.turn()==0&&!view.revealed()&&view.available().size()>1;}

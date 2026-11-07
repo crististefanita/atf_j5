@@ -37,7 +37,7 @@ Componentele existente de sesiune, codec și lifecycle se păstrează. Cazurile 
 
 ### Admiterea nucleului comun
 
-**U08 — integrare realizată:** configurația live consumă `ro.cardtable:card-table-ui:0.1.5` și `ro.cardtable:card-table-names:0.1.0` din repository-ul local fixat prin hash. Proiecțiile și comenzile sunt ale motorului Rentz.
+**U08 — integrare realizată:** configurația live consumă `ro.cardtable:card-table-ui:0.1.6` și `ro.cardtable:card-table-names:0.1.0` din repository-ul local fixat prin hash. Proiecțiile și comenzile sunt ale motorului Rentz.
 
 - [Contractul integrării](../rentz/ATF_UiIntegration.md) și [atlasul UI](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/README.md) identifică implementarea.
 - Dosarul integrării inițiale păstrează rezultatele, domeniul și încercările originale. [Dovezile integrării J4 → J5](../../../../rentz_back/ui-review/shared-ui-cb695c1461/README.md)
@@ -77,8 +77,8 @@ Păstrați dimensiunile și scalele de mai jos pentru componente. E2E minim veri
 |---|---|
 | U10 · VERIFICAT | **Scorul din chenar.** Numele și cele două rânduri rămân întregi. Matricea Android acoperă 36 de combinații cu font până la 2× și verifică lățimea glifelor, geometria chenarelor, diacriticele și valorile negative lungi. |
 | U11 · VERIFICAT | **Numele adversarilor.** J5 folosește selecția din J4. Componentele acoperă 3–6 locuri, numele uman rezervat și jurnalul vechi. Proba nativă confirmă păstrarea locurilor și numelor la restart. |
-| U12 · COLECTARE ȘI RESTART | **Colectarea levatei.** Componentele califică cele 1.500 ms, destinația și anularea. Pornirea rece afișează din nou ultima levată confirmată când checkpoint-ul este la finalul ei. [Proba cadrelor](../../../../rentz_back/ui-review/restart-collection-j5/README.md) urmărește și salvarea la restart. |
-| U14 · SUGESTIE AI | Alegerea după dezvăluire oferă o sugestie calculată din observația jucătorului și nivelul AI al partidei. Selecția și jurnalul rămân în controlul jucătorului. |
+| U12 · TIMING NATIV DESCHIS | **Colectarea levatei.** La 1080×1920, varianta izolată cu programare anticipată numai în joc a măsurat 1.588 ms în joc și 1.343 ms după restart. Prima mișcare din joc a rămas la 1.225 ms, iar proba a urmărit separat trei cărți. Rămâne de corelat momentul primului cadru animat cu cadrele afișate și de calificat ambele trasee în aceeași rulare. [Măsurători și Extent](../../../../rentz_back/ui-review/restart-collection-j5/README.md) |
+| U14 · VERIFICAT | **Sugestie AI.** Alegerea după dezvăluire oferă o opțiune legală din observația jucătorului și nivelul AI al partidei. Sanity-ul confirmă că opțiunea lipsește din alegerea oarbă și că afișarea sugestiei lasă jurnalul identic. |
 | U13 · VERIFICAT | **Ordinea mâinii.** Cărțile vizibile urmează ♠ ♥ ♣ ♦ și rangul crescător. Proiecția păstrează identitatea și legalitatea, iar proba Android verifică ordinea fizică și centrajul ultimei cărți. |
 
 Ordinea livrării este contractul producătorului, componentele, consumul pe artefacte cu hash, apoi sanity Android și Extent. Notați pentru fiecare punct dovezile și limitele rămase.

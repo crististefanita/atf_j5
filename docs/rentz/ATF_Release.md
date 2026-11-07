@@ -12,6 +12,8 @@ O livrare identifică exact APK-ul semnat, sursele construirii, selecțiile trec
 | PREPARED | Regresie offline și Android JVM trecute, build Release semnat, integritate verificată și dosar coerent. |
 | PUBLISHED | Tag fixat pe sursele calificate, assets confruntate și descărcare integrală verificată în canalul declarat. |
 
+Un APK semnat pentru verificare locală, construit înainte de calificarea completă a commit-ului, rămâne în dosarul extern al probei. Păstrați acolo manifestul surselor, semnătura și checksum-ul. Versiunea publicată din README se schimbă după verificarea descărcării noului asset.
+
 ```mermaid
 flowchart LR
     SOURCE[Snapshot identificat] -->|testează fără dispozitiv| CHECK[Componente și guvernanță]

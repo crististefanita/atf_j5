@@ -20,7 +20,7 @@ Manifestul Rentz adoptă `CardTableTheme`; J4 păstrează aliasul echivalent `Ap
 
 ## Admiterea bibliotecilor de produs
 
-1. Identificați coordonatele `ro.cardtable:card-table-ui:0.1.5` și `ro.cardtable:card-table-names:0.1.0`, plus repository-ul extern al producătorului.
+1. Identificați coordonatele `ro.cardtable:card-table-ui:0.1.6` și `ro.cardtable:card-table-names:0.1.0`, plus repository-ul extern al producătorului.
 2. Confruntați AAR, JAR, POM, metadata, surse și SHA-256. Păstrați dependențele declarate și compatibilitatea bibliotecii `minSdk 24` cu aplicația `minSdk 26`.
 3. Folosiți o copie în [workspace-ul înregistrat](ATF_Infrastructure.md), fără build sau probe în sursa activă ori TEMP-ul Windows.
 4. În copia tehnică, declarați repository-ul și dependența de mai jos; rulați componentele JVM și construiți APK-ul pentru verificarea D8/manifest.
@@ -38,7 +38,7 @@ exclusiveContent {
 Dependența se declară în modulul aplicației, după admitere:
 
 ```groovy
-implementation 'ro.cardtable:card-table-ui:0.1.5'
+implementation 'ro.cardtable:card-table-ui:0.1.6'
 implementation 'ro.cardtable:card-table-names:0.1.0'
 ```
 
@@ -129,5 +129,14 @@ J4 oferă reperul pentru lățimile măsurate, subcoloanele aliniate și antetul
 | Probe | Componentele confruntă categoriile cu mutările observate. Sanity-ul deschide o mână de levate dublată și o mână Rentz din jurnalul restaurat. |
 
 [README-ul grilei și al detaliului](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md) · [Dovezile S05/S06](../../../../rentz_back/ui-review/settlement-details-j5/README.md)
+
+### De la ultima levată la următorul sub-joc
+
+- Bugetul începe la primul desen al mesei: 1.000 ms pentru cărțile nemișcate și 500 ms pentru deplasare și estompare la câștigător. La o pornire rece, checkpoint-ul aflat exact la final de levată permite o singură reluare vizuală. O levată nouă începută păstrează cărțile ei; jurnalul nu primește comenzi pentru animație.
+- Un checkpoint deja punctat se deschide direct, fără o sarcină AI care să redeseneze masa. Termenul absolut este verificat și înainte de desen. Cărțile expirate dispar din masa curentă înainte de construirea paginii de punctaj.
+- Pe ferestre accelerate hardware cu scara de animație implicită, Rentz programează și expirarea opacității grupului de cărți. Aceasta folosește același termen absolut. Proba API 28 a trecut după restart la 1.509 ms, iar traseul din joc rămâne deschis la 1.713 ms. [Cadre și verificări](../../../../rentz_back/ui-review/restart-collection-j5/README.md)
+- După colectarea ultimei levate, ecranul „Punctajul mâinii” preia contractul, multiplicatorul, contribuțiile, **Δ** și **Σ** din același rezultat confirmat ca istoricul. Jocul așteaptă acțiunea „Mâna următoare”; masa și istoricul rămân accesibile.
+- În alegerea normală, după dezvăluirea cărților, jucătorul poate cere o sugestie AI calculată pe opțiunile legale, cu profilul și dificultatea partidei. Alegerea oarbă nu afișează sugestii. O recomandare nu selectează și nu confirmă automat sub-jocul.
+- Separăm termenul exact verificat în componente de intervalul observabil în înregistrarea emulatorului. Extent păstrează și măsurătorile care ies din toleranță. [Dovezi și limita instrumentării](../../../../rentz_back/ui-review/restart-collection-j5/README.md)
 
 [Dovezile integrării curente](../../../../rentz_back/ui-review/shared-ui-cb695c1461/README.md) păstrează selecțiile, limitele și încercările originale; strategia de aici se aplică și versiunilor următoare.

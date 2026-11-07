@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "coordinate": "ro.cardtable:card-table-ui:0.1.5",
+  "coordinate": "ro.cardtable:card-table-ui:0.1.6",
   "namesCoordinate": "ro.cardtable:card-table-names:0.1.0",
   "producer": "atf_j4",
   "qualification": "C:/work/whist_back/ui-extraction/restart-collection-j4/handoff.json",
   "files": [
     {
-      "sha256": "059bb541098183566b9751662973ce63b4c788e1d75b4bab4bc62001341975df",
-      "path": "ro/cardtable/card-table-ui/0.1.5/card-table-ui-0.1.5.aar"
+      "sha256": "ab1c5d1f9754a9b4b19d02bb2619c8074450864bccffe535de85def4b43737e9",
+      "path": "ro/cardtable/card-table-ui/0.1.6/card-table-ui-0.1.6.aar"
     },
     {
-      "sha256": "67e99014ad80e42b371accc61caa4bed842020bbcac86c9cbf13cb85c8ec5c51",
-      "path": "ro/cardtable/card-table-ui/0.1.5/card-table-ui-0.1.5.pom"
+      "sha256": "862dc42fb2b8f439b0a1d2304992b9d719b250d68eb817d0d59fcf33e23c82a5",
+      "path": "ro/cardtable/card-table-ui/0.1.6/card-table-ui-0.1.6.pom"
     },
     {
-      "sha256": "651e311750b76d69c76da60cf47a10679f1e9c50c6f182ec3ec35c5e09ad36eb",
-      "path": "ro/cardtable/card-table-ui/0.1.5/card-table-ui-0.1.5.module"
+      "sha256": "41676de349e02392041557fbc1baaf964501235e432d5aa719574f01075eb83b",
+      "path": "ro/cardtable/card-table-ui/0.1.6/card-table-ui-0.1.6.module"
     },
     {
-      "sha256": "b17a93567c14d60892794ac75d1fae5066d219b064146c30246ad46b5ceadc3f",
-      "path": "ro/cardtable/card-table-ui/0.1.5/card-table-ui-0.1.5-sources.jar"
+      "sha256": "ca1be8ef831bd31a0c461f6684ea4d4937eaf68f131c33b058071411cfe6f857",
+      "path": "ro/cardtable/card-table-ui/0.1.6/card-table-ui-0.1.6-sources.jar"
     },
     {
       "path": "ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar",

@@ -9,6 +9,7 @@ $ErrorActionPreference='Stop'
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $project 'rentz-reference/tools/RentzAndroid.psm1') -Force
+Assert-AtfInfrastructure -ProjectRoot $project
 Assert-AtfArtifactPath -ProjectRoot $project -Path $RunRoot
 if(Test-Path -LiteralPath $RunRoot){throw 'A fresh capture directory is required.'}
 $apkPath=(Resolve-Path -LiteralPath $Apk).Path
@@ -27,6 +28,10 @@ $leaseId=[guid]::NewGuid().ToString('N')
 $lease=[ordered]@{active=$true;leaseId=$leaseId;serial='127.0.0.1:5555';owner="Collection frames: $Mode";run=$RunRoot;acquiredUtc=[datetime]::UtcNow.ToString('o')}
 $package=switch($Mode){'Whist'{'ro.whistlab.app.motioncheck'}'Rentz'{'ro.rentzlab.app.uisanity'}'Seats'{'ro.cardtable.ui.test'}}
 $component=switch($Mode){'Whist'{'ro.whistlab.app.MainActivity'}'Rentz'{'ro.rentzlab.app.MainActivity'}}
+$badging=& 'C:\tools\whist-android-sdk\build-tools\36.0.0\aapt2.exe' dump badging $apkPath
+if($LASTEXITCODE-or($badging -join "`n")-notmatch("(?m)^package: name='"+[regex]::Escape($package)+"'")){
+    throw 'APK manifest does not name the isolated package.'
+}
 $remote="/data/local/tmp/atf-collection-$leaseId"
 $captures=[Collections.Generic.List[object]]::new()
 $features=[Collections.Generic.List[object]]::new()
@@ -38,12 +43,13 @@ function Adb([string[]]$Arguments,[string]$Label,[switch]$Binary,[int]$Timeout=4
 }
 function Ui {
     $remoteXml="$remote.xml"
-    for($attempt=0;$attempt-lt3;$attempt++){
+    for($attempt=0;$attempt-lt6;$attempt++){
         $dump=Adb @('shell','uiautomator','dump',$remoteXml) 'dump'
         if(($dump.Output+$dump.Error)-notmatch'ERROR|Exception' -and $dump.Output.Contains($remoteXml)){
             $tree=Adb @('exec-out','cat',$remoteXml) 'hierarchy'
             return [pscustomobject]@{file=$tree.File;nodes=@(([xml]$tree.Output).SelectNodes('//node'))}
         }
+        Start-Sleep -Milliseconds 500
     }
     throw 'Fresh Android hierarchy unavailable.'
 }

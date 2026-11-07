@@ -719,7 +719,7 @@
       "criterion": "Verify both Maven coordinates, all eight artifact hashes and the classes loaded from the AAR and JAR.",
       "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "6d72c367ace1b6f1d12b7fea47196069507ed1b785cc3de30688655189decd92",
+      "sha256": "62e26606f8fa7286495518e0b780c2887fc15598bdd933420f44c7eff6670240",
       "allowDelete": false
     },
     {
@@ -796,10 +796,10 @@
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/TrickPreviewTest.java",
       "owner": "Rentz UI",
       "reason": "S05 and U10–U13 · Qualify the common table presentation and effective score help.",
-      "criterion": "Keep the 1500 ms deadline, the winner destination and the no-replay boundary after restore or a partial trick.",
+      "criterion": "Keep the 1500 ms deadline and winner destination. Verify the first movement, fade and no-replay boundary.",
       "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "bc9693ddd22c9cfbc868ec6ba2846824582b53815f34bcdf0d80185ea10346d3",
+      "sha256": "7e15978aab7a2afe4ded0025fe13d172c39f4d6003f17b112319aa232fc8cf14",
       "allowDelete": false
     },
     {

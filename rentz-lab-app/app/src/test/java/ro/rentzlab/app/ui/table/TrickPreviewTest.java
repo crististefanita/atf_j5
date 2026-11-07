@@ -15,6 +15,16 @@ import ro.cardtable.ui.animation.TrickCollectionMotion;
 @AndroidComponentLayer
 public final class TrickPreviewTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
+    @Test public void rendererStartsAtTheExistingMotionBoundaryAndFadesOnlyAtTheEnd() {
+        var timing = new RentzCollectionAnimation.Timeline(1500);
+        audit.equal("Cards remain stationary at the end of the hold", 0f, timing.distance(1000f / 1500f));
+        float firstMovement = timing.distance(1100f / 1500f);
+        audit.truth("The first movement keeps neighboring faces distinguishable", firstMovement > .035f && firstMovement < .2f);
+        audit.equal("Cards reach the seat before fading", 1f, timing.distance(1380f / 1500f));
+        audit.equal("Cards are opaque through the first 400 ms of motion", 0f, timing.fade(1400f / 1500f));
+        audit.equal("Cards reach the winning seat by the deadline", 1f, timing.distance(1f));
+        audit.equal("The group disappears at the deadline", 1f, timing.fade(1f));
+    }
     @Test public void completedTrickRemainsVisibleForExactlyTheOriginalDeadlineWithoutReplayingCommands() {
         var session = game(); var preview = new TrickPreview(); preview.reset(session.view());
         session.apply(new GameSession.Command(GameSession.Action.PLAY, 0, session.view().legal().get(0), null, false)); session.advanceBots();
@@ -55,6 +65,7 @@ public final class TrickPreviewTest {
         var journal = SessionJson.saved(session).toString();
         var restored = SessionJson.restore(journal);
         var view = restored.view();
+        audit.truth("A settled checkpoint needs no bot turn on cold resume", !restored.hasPendingBotTurn());
         var preview = new TrickPreview();
         preview.restoreLast(view);
         var last = preview.display(view, 100);

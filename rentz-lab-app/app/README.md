@@ -26,6 +26,8 @@ Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu tr
 | [Componente ale salvării](src/test/java/ro/rentzlab/app/SessionJsonValidationTest.java) | Intrări invalide, limite numerice, compatibilitate explicită și vecini valizi. |
 | [Componente de lifecycle](src/test/java/ro/rentzlab/app/lifecycle/) | Intercalări deterministe, proprietar înlocuit, anulare ignorată, refuz IO și livrări întârziate, fără emulator. |
 
+La reluarea unei mâini punctate, masa prezintă ultima levată din salvare. Cărțile dispar la termenul vizual înainte de trecerea la pagina de scor. Pentru ambele trasee, raportul distinge primul cadru animat, durata totală și direcția fiecărei cărți. [Dovezile cadrelor Android](../../../../rentz_back/ui-review/restart-collection-j5/README.md)
+
 [Contractul de lifecycle](../../docs/rentz/ATF_Lifecycle.md) explică ordinea checkpoint-urilor, reluarea și limita calificării JVM. Politica AI primește numai observația permisă, chiar dacă motorul de fundal reconstruiește privat partida din seed și jurnal.
 
 ## Salvare și reluare

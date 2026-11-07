@@ -163,15 +163,19 @@ for (const capture of receipt.captures) {
     const settled = firstMove && frames.find((frame, index) => frame.index > firstMove.index
         && frames[index + 1] && nearFinal(frame, frames.at(-1)) && nearFinal(frames[index + 1], frames.at(-1)));
     const start = frames[originsIndex];
+    const emptyTable = settled && frames.slice(firstMove.index, settled.index)
+        .findLast(frame => frame.felt && frame.shapes.length === 0);
     const winnerFrames = settled ? frames.slice(firstMove.index, settled.index)
-        .filter(frame => frame.felt && winnerInk(frame, start) >= 8) : [];
+        .filter(frame => frame.felt && winnerInk(frame, emptyTable || start) >= 8) : [];
     const lastVisible = settled && frames.slice(firstMove.index, settled.index).findLast(frame =>
         frame.felt && (winnerFrames.includes(frame)
             || tracks.some(track => track.some(point => point.frame === frame.index && point.progress > 0.035))));
     const end = lastVisible && frames[lastVisible.index + 1];
     const holdMs = firstMove && start ? Math.round((firstMove.time - start.time) * 1000) : -1;
-    const durationMs = end && start ? Math.round((end.time - start.time) * 1000) : -1;
-    const movementMs = end && firstMove ? Math.round((end.time - firstMove.time) * 1000) : -1;
+    const lastVisibleMs = lastVisible && start ? Math.round((lastVisible.time - start.time) * 1000) : -1;
+    const firstHiddenMs = end && start ? Math.round((end.time - start.time) * 1000) : -1;
+    const durationMs = firstHiddenMs >= 0 ? Math.round((lastVisibleMs + firstHiddenMs) / 2) : -1;
+    const movementMs = durationMs >= 0 && holdMs >= 0 ? durationMs - holdMs : -1;
     const progressiveTracks = tracks.filter((track, origin) => {
         const length = distance(target, origins[origin]);
         return track.some(point => point.frame >= (firstMove?.index ?? Infinity)
@@ -181,7 +185,9 @@ for (const capture of receipt.captures) {
         check('Four stationary public faces at the start', 4, origins.length, origins.length === 4),
         check('Static exposure around 1000 ms', '850–1150 ms', holdMs + ' ms', holdMs >= 850 && holdMs <= 1150),
         check('Collection around 500 ms', '350–650 ms', movementMs + ' ms', movementMs >= 350 && movementMs <= 650),
-        check('Total visible interval around 1500 ms', '1350–1650 ms', durationMs + ' ms', durationMs >= 1350 && durationMs <= 1650),
+        check('Total visible interval around 1500 ms', '1350–1650 ms estimated from adjacent frames',
+            durationMs + ' ms (' + lastVisibleMs + '–' + firstHiddenMs + ' ms)',
+            durationMs >= 1350 && durationMs <= 1650),
         check('Four separately detected faces move toward the independently identified winner', '4 faces',
             progressiveTracks + ' faces', progressiveTracks === 4),
         check('The overlapping faces reach the winning frame before fading', 'visible at the winning seat',
@@ -199,7 +205,8 @@ for (const capture of receipt.captures) {
         writeFrame(capture.video, capture.name + '-motion', winnerFrames[0]?.index ?? Math.min(firstMove.index + 3, end.index - 1))
     ] : [];
     const frameGapAtEndMs = lastVisible && end ? Math.round((end.time - lastVisible.time) * 1000) : -1;
-    runs.push({ ...capture, checks, frameCount: frames.length, timing: { holdMs, movementMs, durationMs, frameGapAtEndMs },
+    runs.push({ ...capture, checks, frameCount: frames.length,
+        timing: { holdMs, movementMs, durationMs, lastVisibleMs, firstHiddenMs, frameGapAtEndMs },
         trace: trackFile, traceSha256: sha(trackFile), frameImages: evidence });
 }
 const passed = runs.every(run => run.checks.every(item => item.passed));
