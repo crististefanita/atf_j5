@@ -106,6 +106,15 @@ public final class MainActivity extends Activity {
                 });
     }
     private void start() {
+        try {
+            if (controller.activate() && controller.session() != null) {
+                redraw();
+                return;
+            }
+        } catch (Exception error) {
+            showFailure(error);
+            return;
+        }
         String name = copy().humanName(profile.preferredName());
         if (controller.newGame(setup.players(), System.currentTimeMillis(), setup.difficulty(), name)) {
             restorePreviewPending = false;
@@ -115,7 +124,7 @@ public final class MainActivity extends Activity {
     private void resume() {
         var session = controller.session();
         if (session == null || controller.isBusy()) return;
-        if (!session.hasPendingBotTurn() || controller.resume()) { preparePreview(); route("GAME"); }
+        preparePreview(); route("GAME");
     }
     private void preparePreview() {
         var view = controller.session().view();
@@ -127,6 +136,8 @@ public final class MainActivity extends Activity {
         var session = controller.session();
         if (session == null) { route("MENU"); return; }
         var view = session.view(); var copy = copy();
+        boolean forcedPass = session.hasForcedHumanPass();
+        boolean automaticTurn = session.hasPendingBotTurn() || forcedPass;
         long now = SystemClock.uptimeMillis();
         var visible = preview.display(view, now); boolean holding = preview.remaining(now) > 0;
         var permit = new InputPermit(session.save().commands().size(), frame);
@@ -145,8 +156,9 @@ public final class MainActivity extends Activity {
         var header = new LinearLayout(this); header.setGravity(Gravity.CENTER_VERTICAL);
         var options = new Button(this); options.setText("☰"); options.setTextSize(20); options.setAllCaps(false);
         options.setBackgroundColor(android.graphics.Color.TRANSPARENT); options.setTextColor(android.graphics.Color.WHITE);
-        options.setContentDescription(copy.text("Options", "Opțiuni")); options.setEnabled(!controller.isBusy());
+        options.setContentDescription(copy.text("Options", "Opțiuni")); options.setEnabled(!automaticTurn && !controller.isBusy());
         options.setOnClickListener(ignored -> {
+            if (!gameFrame(frame) || controller.isBusy()) return;
             var menu = new PopupMenu(this, options);
             if (settlement.isPresent()) menu.getMenu().add(copy.text("Hand score", "Punctajul mâinii"))
                     .setOnMenuItemClickListener(item -> { showSettledTable = false; redraw(); return true; });
@@ -159,30 +171,40 @@ public final class MainActivity extends Activity {
                 + (view.contract() == null ? "" : " · " + copy.contract(view.contract()) + (view.blind() ? " ×2" : ""));
         var heading = views.text(title, 16, android.graphics.Color.WHITE, true);
         heading.setSingleLine(true); heading.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        heading.setContentDescription(title + (controller.isBusy() ? copy.text(". Opponents playing", ". Adversarii joacă") : ""));
-        header.addView(heading, new LinearLayout.LayoutParams(0, views.dp(48), 1f)); page.addView(header);
+        heading.setContentDescription(title);
+        header.addView(heading, new LinearLayout.LayoutParams(0, views.dp(48), 1f));
+        page.addView(header);
         var actions = new RentzTablePanel.Actions(
                 () -> command(permit, () -> new GameSession.Command(GameSession.Action.REVEAL, 0, null, null, false)),
                 () -> choose(permit, frame, false), () -> choose(permit, frame, true),
-                () -> command(permit, () -> new GameSession.Command(GameSession.Action.PASS, 0, null, null, false)),
                 next,
                 id -> command(permit, () -> new GameSession.Command(GameSession.Action.PLAY, 0, RentzTableContent.selected(controller.session().view(), id), null, false)));
-        var panel = new RentzTablePanel(this, view, copy, names, controller.isBusy() || holding, holding, visible, actions);
+        var panel = new RentzTablePanel(this, view, copy, names, automaticTurn || controller.isBusy() || holding,
+                holding, forcedPass, visible, actions);
         page.addView(panel, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        if (!holding) return;
-        if (preview.awaitingFirstFrame()) {
-            var observer = panel.getViewTreeObserver();
-            observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override public boolean onPreDraw() {
-                    (observer.isAlive() ? observer : panel.getViewTreeObserver()).removeOnPreDrawListener(this);
-                    if (gameFrame(frame)) {
-                        preview.markVisible(SystemClock.uptimeMillis());
-                        animateCollection(panel, frame);
-                    }
-                    return true;
-                }
+        if (holding) {
+            if (preview.awaitingFirstFrame()) afterFirstFrame(panel, frame, () -> {
+                preview.markVisible(SystemClock.uptimeMillis());
+                animateCollection(panel, frame);
             });
-        } else animateCollection(panel, frame);
+            else animateCollection(panel, frame);
+        } else if (automaticTurn && !controller.isBusy()) {
+            Runnable move = forcedPass ? () -> command(permit,
+                    () -> new GameSession.Command(GameSession.Action.PASS, 0, null, null, false)) : controller::resume;
+            afterFirstFrame(panel, frame, () -> TurnPacing.afterVisibleFrame(automaticTurn,
+                    preview.remaining(SystemClock.uptimeMillis()) > 0,
+                    () -> gameFrame(frame) && !controller.isBusy(), display::postDelayed, move));
+        }
+    }
+    private void afterFirstFrame(RentzTablePanel panel, long frame, Runnable action) {
+        var observer = panel.getViewTreeObserver();
+        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override public boolean onPreDraw() {
+                (observer.isAlive() ? observer : panel.getViewTreeObserver()).removeOnPreDrawListener(this);
+                if (gameFrame(frame)) action.run();
+                return true;
+            }
+        });
     }
     private boolean gameFrame(long frame) { return active && generation == frame && screen.equals("GAME"); }
     private void animateCollection(RentzTablePanel panel, long frame) {
@@ -242,15 +264,16 @@ public final class MainActivity extends Activity {
         }
         return super.onKeyUp(keyCode, event);
     }
+    @Override public void onConfigurationChanged(android.content.res.Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+        if (screen.equals("GAME")) redraw();
+    }
     @Override protected void onResume() {
         super.onResume(); active = true;
         try {
-            boolean changed = controller.activate();
+            controller.activate();
             var session = controller.session();
-            if (screen.equals("GAME") && session != null) {
-                preparePreview();
-                if (changed && session.hasPendingBotTurn()) controller.resume();
-            }
+            if (screen.equals("GAME") && session != null) preparePreview();
             redraw();
             if (pendingProblem != null) showFailure(pendingProblem);
         } catch (Exception error) { showFailure(error); }

@@ -24,17 +24,29 @@ public final class SessionController implements AutoCloseable {
     private boolean active,closed;
 
     public SessionController(SessionRepository repository,ExecutorService worker,Executor delivery,Listener listener){
-        this(repository,worker,delivery,listener,GameSession::advanceBots);
+        this(repository,worker,delivery,listener,GameSession::advanceBotTurn);
     }
     public SessionController(SessionRepository repository,ExecutorService worker,Executor delivery,Listener listener,Advance advance){
         this.repository=Objects.requireNonNull(repository);this.worker=Objects.requireNonNull(worker);
         this.delivery=Objects.requireNonNull(delivery);this.listener=Objects.requireNonNull(listener);this.advance=Objects.requireNonNull(advance);
     }
     public synchronized boolean activate() throws Exception {
-        if(closed)throw new IllegalStateException("Closed session controller");
-        if(active&&owner.isCurrent())return false;
-        invalidate();if(owner!=null)owner.close();
-        owner=repository.claim();active=true;session=null;session=owner.load();return true;
+        if (closed) throw new IllegalStateException("Closed session controller");
+        if (active && owner.isCurrent()) return false;
+        deactivate();
+        owner = null;
+        session = null;
+
+        var claimed = repository.claim();
+        try {
+            session = claimed.load();
+        } catch (Exception error) {
+            claimed.close();
+            throw error;
+        }
+        owner = claimed;
+        active = true;
+        return true;
     }
     public synchronized void deactivate(){active=false;invalidate();if(owner!=null)owner.close();}
     private void invalidate(){generation++;if(pending!=null)pending.cancel(true);pending=null;}
@@ -44,21 +56,30 @@ public final class SessionController implements AutoCloseable {
         return newGame(players,seed,difficulty,ro.cardtable.names.PlayerNames.DEFAULT_HUMAN);
     }
     public synchronized boolean newGame(int players,long seed,RentzPlayer.Difficulty difficulty,String rosterName){
-        return begin(()->new GameSession(players,seed,difficulty,rosterName),true);
+        return checkpoint(()->new GameSession(players,seed,difficulty,rosterName));
     }
     public synchronized boolean apply(GameSession.Command command){
-        return begin(()->{var candidate=GameSession.restore(requireSession().save());candidate.apply(command);return candidate;},true);
+        return checkpoint(()->{var candidate=GameSession.restore(requireSession().save());candidate.apply(command);return candidate;});
     }
-    public synchronized boolean resume(){return begin(this::requireSession,false);}
     private GameSession requireSession(){if(session==null)throw new IllegalStateException("No active game");return session;}
-    private boolean begin(Preparation preparation,boolean checkpoint){
+    private void requireActive(){
         if(closed||!active||!owner.isCurrent())throw new IllegalStateException("Inactive session owner");
+    }
+    private boolean checkpoint(Preparation preparation){
+        requireActive();
         if(pending!=null)return false;
-        GameSession prepared;
-        try{prepared=preparation.prepare();if(checkpoint)owner.commit(prepared);}
+        try{
+            var prepared=preparation.prepare();
+            owner.commit(prepared);
+            session=prepared;
+            return true;
+        }
         catch(Exception error){owner.runIfCurrent(()->listener.failed(error));return false;}
-        session=prepared;
-        var input=prepared.save();var origin=prepared;long ticket=++generation;
+    }
+    public synchronized boolean resume(){
+        requireActive();
+        if(pending!=null)return false;
+        var origin=requireSession();var input=origin.save();long ticket=++generation;
         var task=new FutureTask<Void>(()->{
             try{var candidate=GameSession.restore(input);advance.bots(candidate);dispatch(ticket,origin,input,candidate,null);}
             catch(Exception error){dispatch(ticket,origin,input,null,error);}
@@ -88,7 +109,10 @@ public final class SessionController implements AutoCloseable {
         });
     }
     public synchronized void publish(String screen) throws Exception {
-        if(active&&!closed&&session!=null)owner.publishIfCurrent(session,screen,isBusy());
+        if(active&&!closed&&session!=null){
+            boolean waitingForAutomaticTurn=screen.equals("GAME")&&(session.hasPendingBotTurn()||session.hasForcedHumanPass());
+            owner.publishIfCurrent(session,screen,isBusy()||waitingForAutomaticTurn);
+        }
     }
     @Override public synchronized void close(){if(closed)return;deactivate();closed=true;worker.shutdownNow();}
 }

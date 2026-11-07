@@ -18,12 +18,18 @@ final class LifecycleFixture implements AutoCloseable {
     LifecycleFixture() throws Exception {this(s->{});}
     LifecycleFixture(SessionController.Advance advance) throws Exception {
         storage.saved=SessionJson.saved(new GameSession(4,31,RentzPlayer.Difficulty.NORMAL)).toString();
-        controller=new SessionController(repository,worker,delivery,events,advance);controller.activate();
+        controller=advance==null
+                ? new SessionController(repository,worker,delivery,events)
+                : new SessionController(repository,worker,delivery,events,advance);
+        controller.activate();
     }
     @Override public void close(){controller.close();Thread.interrupted();}
     static final class Memory implements SessionStorage {
-        String saved,actor;boolean fail;int writes;
-        @Override public String read(){return saved;}
+        String saved,actor;boolean fail,failRead;int writes;
+        @Override public String read() throws IOException {
+            if(failRead)throw new IOException("injected read failure");
+            return saved;
+        }
         @Override public void write(String name,String text) throws IOException {
             if(fail)throw new IOException("injected persistence failure");
             if(name.equals("session.json"))saved=text;else actor=text;writes++;

@@ -3,8 +3,11 @@ package atf.rentz.distribution;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -49,7 +52,8 @@ public final class ReleaseCatalog {
             require(children.filter(Files::isDirectory).map(p->p.getFileName().toString()).toList().equals(List.of(version)),"RELEASE-POPULATION");
         }
         require(Files.readString(root.resolve("release/README.md")).contains("("+version+"/README.md)"),"RELEASE-CATALOG-LINK");
-        verifyMainGuide(Files.readString(root.resolve("README.md")),repository,version,state);
+        String publicUrl = publicDownloadUrl(manifest.path("publicDownload"), identity, version, state);
+        verifyMainGuide(Files.readString(root.resolve("README.md")),repository,version,state,publicUrl);
         for(String retired:List.of("dist","artifacts","releases"))require(!Files.exists(root.resolve(retired)),"RELEASE-RETIRED: "+retired);
         if(state.equals("DRAFT")) {
             require(!requireDelivery,"RELEASE-NOT-QUALIFIED");
@@ -70,21 +74,44 @@ public final class ReleaseCatalog {
         return new Edition(folder,manifest,target,state);
     }
     public static void verifyMainGuide(String guide,String repository,String version,String state) throws IOException {
+        verifyMainGuide(guide, repository, version, state, null);
+    }
+    public static void verifyMainGuide(String guide,String repository,String version,String state,String publicUrl) throws IOException {
         String normalized=guide.replace("\r\n","\n");int start=normalized.indexOf("\n## Jocul\n");
         require(start>=0,"RELEASE-MAIN-SECTION");int end=normalized.indexOf("\n## ",start+1);
         String section=normalized.substring(start,end<0?normalized.length():end);
-        var links=Pattern.compile("\\]\\((https://github\\.com/[^)]+/releases/[^)]+|release/[^)]+)\\)")
+        var links=Pattern.compile("\\]\\(([^)\\s]+)\\)")
                 .matcher(section).results().map(match->match.group(1)).toList();
         String local="release/"+version+"/";
         List<String> expected=switch(state) {
             case "DRAFT" -> List.of(local+"README.md");
             case "PREPARED" -> List.of(local+"README.md",local+"RentzLab-"+version+".apk");
             case "PUBLISHED" -> List.of("https://github.com/"+repository+"/releases/tag/v"+version,
-                    "https://github.com/"+repository+"/releases/download/v"+version+"/RentzLab-"+version+".apk");
+                    publicUrl != null ? publicUrl : "https://github.com/"+repository+"/releases/download/v"+version+"/RentzLab-"+version+".apk");
             default -> throw new IOException("RELEASE-STATE");
         };
         require(links.equals(expected),"RELEASE-MAIN-LINKS");
         require(normalized.contains("(release/README.md)"),"RELEASE-MAIN-CATALOG");
+    }
+    private static String publicDownloadUrl(JsonNode proof, JsonNode identity, String version, String state) throws IOException {
+        if (proof.isMissingNode()) return null;
+        require(proof.isObject() && state.equals("PUBLISHED"), "RELEASE-PUBLIC-DOWNLOAD-STATE");
+        String value = proof.path("url").asText();
+        URI uri;
+        try {
+            uri = URI.create(value);
+            Instant.parse(proof.path("verifiedUtc").asText());
+        } catch (IllegalArgumentException | DateTimeParseException malformed) {
+            throw new IOException("RELEASE-PUBLIC-DOWNLOAD-METADATA", malformed);
+        }
+        require("https".equals(uri.getScheme()) && uri.getHost() != null && uri.getRawUserInfo() == null
+                && uri.getPort() == -1 && uri.getRawQuery() == null && uri.getRawFragment() == null
+                && ("/v" + version + "/" + identity.path("apkName").asText()).equals(uri.getRawPath()),
+                "RELEASE-PUBLIC-DOWNLOAD-URL");
+        require(number(proof,"httpStatus") == 200 && number(proof,"bytes") == number(identity,"apkBytes")
+                && proof.path("sha256").asText().equals(identity.path("sha256").asText()),
+                "RELEASE-PUBLIC-DOWNLOAD-IDENTITY");
+        return value;
     }
     private static void verifyPayload(Path folder,JsonNode manifest) throws IOException {
         var expected=new HashSet<String>();

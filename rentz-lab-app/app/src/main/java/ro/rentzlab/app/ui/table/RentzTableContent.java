@@ -29,6 +29,9 @@ public final class RentzTableContent {
                 card.suit() == Card.Suit.HEARTS || card.suit() == Card.Suit.DIAMONDS);
     }
     public static List<SeatContent> seats(RentzMatch.Observation view, RentzUiText copy, List<String> names, boolean paused) {
+        return seats(view, copy, names, paused, false);
+    }
+    static List<SeatContent> seats(RentzMatch.Observation view, RentzUiText copy, List<String> names, boolean paused, boolean passing) {
         return IntStream.range(0, view.players()).mapToObj(seat -> {
             boolean active = !paused && (view.phase() == RentzMatch.Phase.PLAY || view.phase() == RentzMatch.Phase.CHOOSE) && view.turn() == seat;
             String points = view.dealPoints().get(seat).toString();
@@ -37,7 +40,8 @@ public final class RentzTableContent {
                     new SeatContent.Fact(RentzScoreContent.TOTAL_MARK, total));
             String who = names.get(seat);
             return new SeatContent(seat, who, facts, active, who + ". " + copy.points() + " " + points
-                    + ". " + copy.total() + " " + total + (active ? copy.text(". To play", ". La rând") : ""));
+                    + ". " + copy.total() + " " + total
+                    + (active ? ". " + turnLabel(view, copy, passing) : ""));
         }).collect(immutable());
     }
     public static List<HandCard> hand(RentzMatch.Observation view, RentzUiText copy, boolean paused) {
@@ -51,6 +55,13 @@ public final class RentzTableContent {
         if (view.phase() != RentzMatch.Phase.PLAY || view.turn() != view.seat()) throw new IllegalStateException("Not the actor's play phase");
         return view.legal().stream().filter(card -> id(card).equals(id)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Card is not currently legal"));
+    }
+    static String turnLabel(RentzMatch.Observation view, RentzUiText copy, boolean passing) {
+        return passing ? copy.text("Passing", "Pasează") : copy.seatTurn(view.phase() == RentzMatch.Phase.CHOOSE);
+    }
+    static java.util.OptionalInt handTint(Contract contract, HandCard card) {
+        return contract == Contract.RENTZ && card.playable()
+                ? java.util.OptionalInt.of(0xfff1f8ec) : java.util.OptionalInt.empty();
     }
     public static List<PlayedCardContent> plays(List<TrickRules.Play> plays, List<String> names) {
         return plays.stream().map(play -> new PlayedCardContent(play.seat(), play.card().label(), face(play.card()).red(),

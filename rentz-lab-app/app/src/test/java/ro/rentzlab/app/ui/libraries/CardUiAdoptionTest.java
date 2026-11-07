@@ -22,24 +22,31 @@ public final class CardUiAdoptionTest {
         Path aar = root.resolve("ro/cardtable/card-table-ui/0.1.6/card-table-ui-0.1.6.aar");
         byte[] classes;
         try (var zip = new ZipFile(aar.toFile())) { classes = zip.getInputStream(zip.getEntry("classes.jar")).readAllBytes(); }
-        verifyClassBytes(classes, ro.cardtable.ui.seat.SeatContent.class);
-        verifyClassBytes(classes, ro.cardtable.ui.animation.TrickCollectionRun.class);
+        verifyClassBytes(classes, ro.cardtable.ui.seat.SeatContent.class, ro.cardtable.ui.animation.TrickCollectionRun.class,
+                ro.cardtable.ui.table.BoardLayout.class, ro.cardtable.ui.table.TableGeometry.class,
+                ro.cardtable.ui.table.TableSeatLayout.class, ro.cardtable.ui.table.TableSizing.class,
+                ro.cardtable.ui.table.PlayedCardMetrics.class, ro.cardtable.ui.table.PlayedCardsView.class,
+                ro.cardtable.ui.table.TableViewportPolicy.class);
         verifyClassBytes(Files.readAllBytes(root.resolve("ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar")),
                 ro.cardtable.names.PlayerNames.class);
         audit.rejects("No Whist engine on Android JVM classpath", ClassNotFoundException.class, () -> Class.forName("ro.whistlab.core.session.GameSession"));
     }
-    private void verifyClassBytes(byte[] classes, Class<?> type) throws Exception {
-        String marker = type.getName().replace('.', '/') + ".class";
-        byte[] qualified = null;
+    private void verifyClassBytes(byte[] classes, Class<?>... types) throws Exception {
+        var markers = new java.util.LinkedHashMap<String, Class<?>>();
+        for (Class<?> type : types) markers.put(type.getName().replace('.', '/') + ".class", type);
+        var qualified = new java.util.HashMap<String, byte[]>();
         try (var zip = new ZipInputStream(new ByteArrayInputStream(classes))) {
             for (var entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
                 audit.truth("UI owns its class namespace " + entry.getName(), !entry.getName().startsWith("ro/whistlab/") && !entry.getName().startsWith("ro/rentzlab/") && !entry.getName().startsWith("atf/"));
-                if (entry.getName().equals(marker)) qualified = zip.readAllBytes();
+                if (markers.containsKey(entry.getName())) qualified.put(entry.getName(), zip.readAllBytes());
             }
         }
-        audit.truth("Qualified marker present", qualified != null);
-        try (var stream = type.getClassLoader().getResourceAsStream(marker)) {
-            audit.equal("Loaded marker equals qualified binary " + marker, hash(qualified), hash(stream.readAllBytes()));
+        for (var entry : markers.entrySet()) {
+            String marker = entry.getKey();
+            audit.truth("Qualified marker present " + marker, qualified.containsKey(marker));
+            try (var stream = entry.getValue().getClassLoader().getResourceAsStream(marker)) {
+                audit.equal("Loaded marker equals qualified binary " + marker, hash(qualified.get(marker)), hash(stream.readAllBytes()));
+            }
         }
     }
     private String hash(byte[] bytes) throws Exception {

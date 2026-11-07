@@ -57,15 +57,32 @@ public final class GameSession {
     public void advanceBots(){
         int actions=0;
         while(hasPendingBotTurn()){
-            if(++actions>512)throw new IllegalStateException("Bot action bound");int actor=match.observe(0).turn();
-            if(match.observe(actor).phase()==RentzMatch.Phase.CHOOSE){apply(new Command(Action.REVEAL,actor,null,null,false));apply(new Command(Action.CHOOSE,actor,null,player.choose(match.observe(actor)).selected(),false));}
-            else {var view=match.observe(actor);if(view.legal().isEmpty())apply(new Command(Action.PASS,actor,null,null,false));else apply(new Command(Action.PLAY,actor,player.card(view).selected(),null,false));}
+            if(++actions>512)throw new IllegalStateException("Bot action bound");
+            advanceBotTurn();
+        }
+    }
+    public void advanceBotTurn() {
+        if (!hasPendingBotTurn()) return;
+        int actor = view().turn();
+        var observation = match.observe(actor);
+        if (observation.phase() == RentzMatch.Phase.CHOOSE) {
+            if (!observation.revealed()) apply(new Command(Action.REVEAL, actor, null, null, false));
+            apply(new Command(Action.CHOOSE, actor, null, player.choose(match.observe(actor)).selected(), false));
+        } else if (observation.legal().isEmpty()) {
+            apply(new Command(Action.PASS, actor, null, null, false));
+        } else {
+            apply(new Command(Action.PLAY, actor, player.card(observation).selected(), null, false));
         }
     }
     public boolean hasPendingBotTurn() {
         var state = view();
         return state.turn() != state.seat()
                 && (state.phase() == RentzMatch.Phase.CHOOSE || state.phase() == RentzMatch.Phase.PLAY);
+    }
+    public boolean hasForcedHumanPass() {
+        var state = view();
+        return state.contract() == Contract.RENTZ && state.phase() == RentzMatch.Phase.PLAY
+                && state.turn() == state.seat() && state.legal().isEmpty();
     }
     public RentzMatch.Observation view(){return match.observe(0);}
     public boolean blindChoiceAvailable(){var view=view();return view.phase()==RentzMatch.Phase.CHOOSE&&view.turn()==0&&!view.revealed()&&view.available().size()>1;}

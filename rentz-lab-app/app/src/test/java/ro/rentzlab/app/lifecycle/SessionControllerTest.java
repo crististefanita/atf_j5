@@ -7,7 +7,11 @@ import ro.rentzlab.ai.*;
 import org.junit.Test;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.SessionJson;
+import ro.rentzlab.app.ui.copy.RentzUiText;
+import ro.rentzlab.app.ui.table.RentzTableContent;
+import ro.rentzlab.app.ui.table.TrickPreview;
 import ro.rentzlab.core.*;
+import java.io.IOException;
 import static org.junit.Assert.*;
 
 @AndroidComponentLayer
@@ -19,6 +23,7 @@ public class SessionControllerTest {
             assertTrue(f.controller.session().view().revealed());
             assertEquals(1,f.storage.restored().save().commands().size());
             assertEquals(0,f.events.ready);
+            assertTrue(f.worker.tasks.isEmpty());
         }
     }
     @Test public void callbackQueuedBeforeCloseCannotReachTheDestroyedOwner() throws Exception {
@@ -46,19 +51,46 @@ public class SessionControllerTest {
         try(var f=new LifecycleFixture(s->s.apply(LifecycleFixture.REVEAL))){
             f.controller.resume();var worker=new LifecycleFixture.Worker();var queue=new LifecycleFixture.Queue();var events=new LifecycleFixture.Events();
             try(var replacement=new SessionController(f.repository,worker,queue,events,s->{})){
-                replacement.activate();replacement.newGame(4,99,RentzPlayer.Difficulty.NORMAL);worker.next();queue.all();
+                replacement.activate();assertTrue(replacement.newGame(4,99,RentzPlayer.Difficulty.NORMAL));
+                assertTrue(worker.tasks.isEmpty());
                 f.worker.next();f.delivery.all();assertEquals(99,f.storage.restored().save().seed());assertEquals(0,f.events.ready);
                 f.controller.publish("GAME");assertNull(f.storage.actor);
             }
         }
     }
+    @Test public void activationRetriesTheSavedGameAfterATransientReadFailure() throws Exception {
+        try (var f = new LifecycleFixture()) {
+            assertTrue(f.controller.apply(LifecycleFixture.REVEAL));
+            var checkpoint = f.controller.session().save();
+            String saved = f.storage.saved;
+            int writes = f.storage.writes;
+            f.controller.deactivate();
+            f.storage.failRead = true;
+
+            assertThrows(IOException.class, f.controller::activate);
+            assertNull(f.controller.session());
+            assertFalse(f.controller.isBusy());
+            assertThrows(IllegalStateException.class,
+                    () -> f.controller.newGame(4, 99, RentzPlayer.Difficulty.NORMAL));
+            f.storage.failRead = false;
+
+            assertTrue(f.controller.activate());
+            assertEquals(checkpoint, f.controller.session().save());
+            assertFalse(f.controller.activate());
+            assertEquals(saved, f.storage.saved);
+            assertEquals(writes, f.storage.writes);
+        }
+    }
+
     @Test public void pausedControllerReloadsTheLatestCheckpointAndAcceptsNewWork() throws Exception {
         try(var f=new LifecycleFixture()){
             f.controller.resume();f.worker.next();f.controller.deactivate();
             f.storage.saved=SessionJson.saved(new GameSession(4,99,RentzPlayer.Difficulty.NORMAL)).toString();
             f.controller.activate();assertTrue(f.controller.apply(LifecycleFixture.REVEAL));
             f.delivery.all();assertEquals(0,f.events.ready);assertEquals(99,f.controller.session().save().seed());
-            f.worker.next();f.delivery.all();assertEquals(1,f.events.ready);assertTrue(f.storage.restored().view().revealed());
+            assertTrue(f.worker.tasks.isEmpty());
+            f.controller.resume();f.worker.next();f.delivery.all();
+            assertEquals(1,f.events.ready);assertTrue(f.storage.restored().view().revealed());
         }
     }
     @Test public void changedRevisionInvalidatesAnAlreadyCalculatedResult() throws Exception {
@@ -101,15 +133,75 @@ public class SessionControllerTest {
             try{f.controller.activate();fail("A closed controller was reactivated");}catch(IllegalStateException expected){}
         }
     }
-    @Test public void realBotProgressIsIsolatedUntilAuthorizedDeliveryAndSurvivesReload() throws Exception {
-        try(var f=new LifecycleFixture(GameSession::advanceBots)){
-            var game=new GameSession(4,31,RentzPlayer.Difficulty.NORMAL);
-            game.apply(LifecycleFixture.REVEAL);game.apply(new GameSession.Command(GameSession.Action.CHOOSE,0,null,Contract.WHIST,false));
-            game.apply(new GameSession.Command(GameSession.Action.PLAY,0,game.view().legal().get(0),null,false));
-            f.controller.deactivate();f.storage.saved=SessionJson.saved(game).toString();f.controller.activate();var before=f.controller.session().save();
-            f.controller.resume();f.worker.next();assertEquals(before,f.controller.session().save());
-            f.delivery.all();assertTrue(f.controller.session().save().commands().size()>before.commands().size());
-            assertEquals(f.controller.session().view(),f.storage.restored().view());assertEquals(1,f.events.ready);
+    @Test public void realBotsCommitOneCardPerTurnAndExposeEachSeatBeforeCollection() throws Exception {
+        try(var f=new LifecycleFixture(null)){
+            assertTrue(f.controller.apply(LifecycleFixture.REVEAL));
+            assertTrue(f.controller.apply(new GameSession.Command(GameSession.Action.CHOOSE,0,null,Contract.WHIST,false)));
+            var preview=new TrickPreview();
+            var initial=f.controller.session().view();
+            preview.reset(initial);
+            assertTrue(f.controller.apply(new GameSession.Command(GameSession.Action.PLAY,0,initial.legal().get(0),null,false)));
+            var copy=new RentzUiText(RentzUiText.Language.RO);
+            var names=f.controller.session().displayNames("Tu");
+            for(int actor=1;actor<=3;actor++){
+                var view=f.controller.session().view();
+                assertEquals(actor,view.turn());
+                assertEquals(actor,preview.display(view,1000).size());
+                assertEquals(0L,preview.remaining(1000));
+                var active=RentzTableContent.seats(view,copy,names,false).stream().filter(seat->seat.active()).toList();
+                assertEquals(1,active.size());
+                assertEquals(actor,active.get(0).seat());
+                assertTrue(active.get(0).description().endsWith("Joacă"));
+                var before=f.controller.session().save();
+                assertTrue(f.worker.tasks.isEmpty());
+                assertTrue(f.controller.resume());
+                assertFalse(f.controller.resume());
+                f.worker.next();
+                assertEquals(before,f.controller.session().save());
+                f.delivery.all();
+                var after=f.storage.restored().save();
+                assertEquals(before.commands().size()+1,after.commands().size());
+                var move=after.commands().get(before.commands().size());
+                assertEquals(GameSession.Action.PLAY,move.action());
+                assertEquals(actor,move.seat());
+                assertEquals(f.controller.session().view(),f.storage.restored().view());
+            }
+            var completed=f.controller.session().view();
+            assertEquals(4,preview.display(completed,1000).size());
+            assertTrue(RentzTableContent.seats(completed,copy,names,true).stream().noneMatch(seat->seat.active()));
+            assertEquals(3,f.events.ready);
         }
+    }
+
+    @Test public void sequenceBotPassAndPlayAreSeparatePublicTurns() {
+        var game=new GameSession(4,31,RentzPlayer.Difficulty.NORMAL);
+        game.apply(new GameSession.Command(GameSession.Action.CHOOSE,0,null,Contract.RENTZ,true));
+        var preview=new TrickPreview();
+        preview.reset(game.view());
+        boolean sawPlay=false, sawPass=false;
+        for(int turn=0;turn<48&&game.view().phase()==RentzMatch.Phase.PLAY;turn++){
+            var before=game.view();
+            if(!game.hasPendingBotTurn()){
+                var card=before.legal().isEmpty()?null:before.legal().get(0);
+                game.apply(new GameSession.Command(card==null?GameSession.Action.PASS:GameSession.Action.PLAY,0,card,null,false));
+                continue;
+            }
+            int revision=game.save().commands().size();
+            game.advanceBotTurn();
+            var after=game.view();
+            var commands=game.save().commands();
+            assertEquals(revision+1,commands.size());
+            var move=commands.get(revision);
+            assertEquals(before.turn(),move.seat());
+            boolean played=move.action()==GameSession.Action.PLAY;
+            assertTrue(played||move.action()==GameSession.Action.PASS);
+            assertEquals(before.board().size()+(played?1:0),after.board().size());
+            assertTrue(preview.display(after,1000).isEmpty());
+            assertEquals(0L,preview.remaining(1000));
+            sawPlay|=played;
+            sawPass|=!played;
+            if(sawPlay&&sawPass)break;
+        }
+        assertTrue("Fixture must exercise both a play and a pass",sawPlay&&sawPass);
     }
 }

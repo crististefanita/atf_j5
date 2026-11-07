@@ -130,6 +130,17 @@ J4 oferă reperul pentru lățimile măsurate, subcoloanele aliniate și antetul
 
 [README-ul grilei și al detaliului](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md) · [Dovezile S05/S06](../../../../rentz_back/ui-review/settlement-details-j5/README.md)
 
+### Spațiul dintre chenare
+
+| Parte | Responsabilitate |
+|---|---|
+| Masa comună | Levada păstrează `BoardLayout`, `PlayedCardsView` și ancorele `TableSeatLayout` folosite în Whist. |
+| Secvențe | Adaptorul păstrează chenarele Rentz dacă între rânduri încape grila. Pe ecranele scurte, poate folosi ancorele comune pentru joc cu centru lat. |
+| Cărțile din secvențe | Cele patru rânduri sunt centrate între chenare și folosesc lățimea mesei. Textul și spațiul dintre cărți depind de dimensiunea slotului. |
+| Tura la secvențe | Cărțile legale din mâna activă au o nuanță discretă. Dacă motorul nu oferă o mutare, masa afișează „Pasează” și execută pasul după aceeași pauză de tură. |
+
+[Componentele geometriei](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) verifică ordinea comună a numelor și cărților, centrajul și absența intersecțiilor. [Testul de adopție](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java) confruntă clasele încărcate cu AAR-ul comun. [Feedback-ul UI](../feedback/ATF_Rentz_UI_ToDo.md) păstrează verificările de făcut pe dispozitiv.
+
 ### De la ultima levată la următorul sub-joc
 
 - Bugetul începe la primul desen al mesei: 1.000 ms pentru cărțile nemișcate și 500 ms pentru deplasare și estompare la câștigător. La o pornire rece, checkpoint-ul aflat exact la final de levată permite o singură reluare vizuală. O levată nouă începută păstrează cărțile ei; jurnalul nu primește comenzi pentru animație.

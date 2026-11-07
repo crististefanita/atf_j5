@@ -8,7 +8,7 @@ O activitate poate fi suspendată sau înlocuită în timp ce AI-ul calculează.
 |---|---|
 | `RentzApplication` | Deține un repository pentru procesul aplicației; activitățile nu creează magazine independente pentru același fișier. |
 | `SessionRepository.Owner` | Identitate revocabilă; un proprietar nou invalidează scrierile, publicarea și callback-urile celui vechi. |
-| `SessionController` | Capturează starea, salvează checkpoint-ul și programează continuarea pe o copie separată. |
+| `SessionController` | Salvează comanda acceptată și execută, la cererea mesei, o singură tură AI pe o copie separată. |
 | `FileSessionStorage` | Scrie și sincronizează un staging unic înaintea înlocuirii atomice; nu decide proprietarul. |
 | `MainActivity` | Conectează evenimentele Android și afișajul la aceste contracte, fără calcul AI sau scriere directă. |
 
@@ -17,7 +17,8 @@ O activitate poate fi suspendată sau înlocuită în timp ce AI-ul calculează.
 ```mermaid
 flowchart LR
     HUMAN[Comandă umană] -->|validează pe copie| CHECKPOINT[Checkpoint durabil]
-    CHECKPOINT -->|capturează jurnal imuabil| WORK[Continuare separată]
+    CHECKPOINT -->|afișează actorul| FRAME[Cadru de masă]
+    FRAME -->|după pauza de tură| WORK[O tură AI pe copie]
     WORK -->|livrează candidat| GUARD[Proprietar și revizie]
     GUARD -->|acceptă numai dacă actual| STORE[Înlocuire atomică]
     STORE -->|precede| ADOPT[Adoptare și afișare]
@@ -26,13 +27,14 @@ flowchart LR
 <details>
 <summary>Legendă: worker-ul nu salvează și nu mută sesiunea activă</summary>
 
-Comanda umană se salvează înaintea lucrului lung. Worker-ul reconstruiește o copie din `GameSession.Saved`; numai livrarea autorizată poate salva continuarea și adopta rezultatul. Seed-ul și jurnalul privat permit reconstruirea motorului, dar politicile Normal/Hard primesc în continuare numai observația actorului.
+Comanda umană se salvează înaintea următorului cadru. Worker-ul reconstruiește o copie din `GameSession.Saved`, iar livrarea autorizată salvează o singură tură și adoptă rezultatul. Politicile Normal/Hard primesc numai observația actorului.
 
 </details>
 
 | Moment | Invariantă |
 |---|---|
 | Acceptarea comenzii | Refuzul regulii sau al scrierii păstrează sesiunea anterioară; un checkpoint acceptat precede calculul adversarilor. |
+| Prezentarea turei | Cadrul marchează actorul curent, apoi așteaptă 550 ms înainte de o mutare AI. Colectarea levatei se încheie înaintea cadrului următorului actor. |
 | Calcul | Nu există scrieri sau acces la controalele Android; modificările aparțin numai copiei. |
 | Livrare | Generația, sesiunea capturată și jurnalul ei trebuie să fie încă actuale. |
 | Salvarea continuării | Verificarea proprietarului și IO sunt în aceeași secțiune serializată; un eșec nu adoptă candidatul. |
@@ -42,8 +44,8 @@ Comanda umană se salvează înaintea lucrului lung. Worker-ul reconstruiește o
 
 | Eveniment | Comportament |
 |---|---|
-| Activare | Revendică proprietatea și citește checkpoint-ul curent; nu reînvie copia veche păstrată în memorie. |
-| Pauză sau oprire | Invalidează generația, anulează cererea și retrage dreptul de scriere; apelurile repetate sunt sigure. |
+| Activare | Revendică proprietatea și citește checkpoint-ul curent. Activează sesiunea după încărcare. Dacă citirea eșuează, eliberează proprietatea și permite reîncercarea pe același controller. |
+| Pauză sau oprire | Invalidează cadrul și generația, anulează temporizatorul și cererea, apoi retrage dreptul de scriere. La reluare, masa pornește de la ultima mutare salvată. |
 | Distrugere | Închide controller-ul și executorul; un controller închis nu se reactivează. |
 | Activitate nouă | Revocă proprietarul anterior prin repository-ul comun; închiderea vechiului handle nu îl poate revoca pe cel nou. |
 | Rejecție de executor | Eliberează starea ocupată; candidatul nesalvat nu devine sesiune curentă. |

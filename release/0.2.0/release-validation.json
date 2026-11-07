@@ -19,6 +19,13 @@
     "releaseId": 437642774,
     "publishedAt": "11/07/2026 14:58:06"
   },
+  "publicDownload": {
+    "url": "https://rentz-lab-apk.totaloatcake.chatgpt.site/v0.2.0/RentzLab-0.2.0.apk",
+    "verifiedUtc": "2026-11-07T16:48:54.6250461Z",
+    "httpStatus": 200,
+    "bytes": 848204,
+    "sha256": "8a514b0acf5576226acb0d5407471a25d58cb987b83dc1fa0d4e0747fdfde8a1"
+  },
   "qualification": {
     "status": "PASS",
     "tests": 434,

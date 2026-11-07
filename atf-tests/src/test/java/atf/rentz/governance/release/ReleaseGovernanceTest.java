@@ -32,6 +32,19 @@ class ReleaseGovernanceTest {
         assertDoesNotThrow(()->ReleaseCatalog.verifyMainGuide(guide("PREPARED"),"example/game","1.2.0","PREPARED"));
         assertDoesNotThrow(()->ReleaseCatalog.verifyMainGuide(guide("DRAFT"),"example/game","1.2.0","DRAFT"));
     }
+    @Test void aVerifiedPublicCopyIsTheOnlyDirectDownloadInTheMainGuide() throws Exception {
+        String github = "https://github.com/example/game/releases/download/v1.2.0/RentzLab-1.2.0.apk";
+        String mirror = "https://download.example.test/v1.2.0/RentzLab-1.2.0.apk";
+        String original = guide("PUBLISHED");
+        String published = original.replace(github, mirror);
+        assertDoesNotThrow(() -> ReleaseCatalog.verifyMainGuide(published, "example/game", "1.2.0", "PUBLISHED", mirror));
+        for (String invalid : java.util.List.of(original, published.replace(mirror, mirror + "?redirect=1"),
+                published.replace("\n## Documentație", "\n[Alt APK](" + github + ")\n\n## Documentație"))) {
+            var failure = assertThrows(IOException.class,
+                    () -> ReleaseCatalog.verifyMainGuide(invalid, "example/game", "1.2.0", "PUBLISHED", mirror));
+            assertEquals("RELEASE-MAIN-LINKS", failure.getMessage(), "Only the exact qualified download is linked");
+        }
+    }
     @ParameterizedTest @ValueSource(strings={"duplicate","folder","old","latest","raw","missing","reversed"})
     void staleOrRedundantDownloadRoutesAreRejected(String defect) throws Exception {
         String original=guide("PUBLISHED"),candidate=switch(defect) {

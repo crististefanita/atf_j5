@@ -21,6 +21,7 @@ public final class RentzUiText {
     public String points() { return text("Points:", "Puncte:"); }
     public String total() { return text("Total:", "Total:"); }
     public String play(String label) { return text("Play ", "Joacă ") + label; }
+    public String seatTurn(boolean choosing) { return choosing ? text("Choosing", "Alege") : text("Playing", "Joacă"); }
     public String trickScoring(ScoreProfile scoring) {
         return String.format(java.util.Locale.ROOT,
                 text("Trick %s · queen %s · diamond %s · K♥ %s. Whist %s · 10♣ %s.",
