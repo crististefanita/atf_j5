@@ -74,6 +74,16 @@
         "sha256": "ce70d8dc1df46b7f54b0d53e016a8981671c2ea6a4473f56de9bee1eac09a39e"
       },
       {
+        "path": "reports/distribution/download-readme.html",
+        "bytes": 2411378,
+        "sha256": "7b353208eae4c74916d22e1968f5ade51cf644e8f5a7fb5060df19cfb7b4513c"
+      },
+      {
+        "path": "reports/distribution/download-readme.json",
+        "bytes": 314,
+        "sha256": "2ad1541445d1959a823979f605c84d8748f5eff8a8168f6aad3498caea1b3df3"
+      },
+      {
         "path": "reports/distribution/release-git-policy.html",
         "bytes": 2419539,
         "sha256": "f0aae663ccdd66d7770b7b0e1792197ab9448547d35f0b42d6824cb268da04ba"
@@ -100,8 +110,8 @@
       },
       {
         "path": "reports/README.md",
-        "bytes": 1692,
-        "sha256": "a13dba2ccbf998fb28d901ac0f20ff7f182652ff70de6548d7c94c4db5e1cfba"
+        "bytes": 1868,
+        "sha256": "146c363603b17cbd61e655862da9d680e826b717182b1e40cd38124eb762d108"
       },
       {
         "path": "reports/source-controls.json",

@@ -136,13 +136,11 @@ Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; 
 - [Poarta populației](../../scripts/TestCollections.psm1) refuză contoarele contradictorii, cazurile fără nume și proprietarii străini în suitele simple. Grupurile imbricate păstrează atribuirea prin inventar când Surefire consolidează cazurile.
 - Lansatorul păstrează raportul brut și diagnosticul de populație la refuz. Regresiile acoperă atât invocări multiple valide, cât și lipsa cazurilor sau a proprietarului corect. [Probe roșu–verde](../../../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md)
 
-## Coordonarea porților în timpul integrării UI
+## Calificarea integrării UI pentru 0.1.2
 
-Integrarea paralelă a introdus teste noi și un UiAuditRule bazat pe org.junit.rules.TestRule. Proprietarul integrării trebuie să reconcilieze inventarul sursei, metadatele de nivel, frontiera externă JUnit 4 și controalele exacte ale testelor înaintea unei calificări globale. O interfață aprobată nominal cere și probă pe dependența build-ului care o folosește; nu relaxați rezolvarea necunoscutului pentru a obține verde.
+- Maven reflectă asupra interfeței TestRule din JUnit 4 în scope de test. Populația Maven folosește Jupiter, iar testele Android rămân în colecția lor.
+- Controalele Git păstrează baza de revizuire, criteriul și hash-ul fiecărei căi protejate. Candidatul curat se confruntă din nou după regresie.
+- Build-ul compară întregul inventar Android calificat cu sursa și cu bloburile tagului. Descărcarea a pornit din README-ul GitHub autentificat și a fost confruntată cu manifestul.
 
-- Păstrați modificările UI și README-urile sale la proprietarul lor; reviewerul nu aprobă automat octeți pe care nu i-a verificat.
-- Registrul declară TestRule, iar verificarea reflectivă Maven nu găsește clasa. Legați aprobarea de classpath-ul build-ului care consumă interfața și verificați acolo proveniența și absența metodelor de test. [Proba Maven](../../../../rentz_back/infrastructure/governance/20261107-q17-q18/red-maven.log)
-- După încheierea integrării, fixați un snapshot nou și rulați infrastructura fără drift ori schimbare de populație. Calificarea unei selecții de documente nu înlocuiește această poartă.
-- Revizia după Q19 păstrează refuzurile de control Git, structură README de scor și classpath Maven la ownerul integrării. [Verdictul infrastructurii](../../../../rentz_back/components/20261107-post-q19-review/result.json)
-- S05/S06 a corectat structura README-ului de scor și a înregistrat hash-ul testului propriu. Regresia de livrare a rămas refuzată la frontiera JUnit 4 și la controalele Git ale schimbărilor paralele. Reluați regresia din surse stabilizate înainte de a schimba release-ul curent. [Rularea de livrare](../../../../rentz_back/components/settlement-release-retry-j5/result.json) · [Reverificarea README](../../../../rentz_back/ui-review/settlement-details-j5/documentation-structure.log)
-- [Rezultatul inițial](../../../../rentz_back/components/20261107-live-review-governance/result.json) și [preflight-ul live](../../../../rentz_back/infrastructure/governance/20261107-live-review-3ee0e439/live-preflight.json) rămân refuzate; nu sunt corectate retrospectiv în PASS.
+[Dovezile ediției 0.1.2](../../release/0.1.2/reports/README.md)
+

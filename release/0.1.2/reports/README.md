@@ -26,3 +26,4 @@ Dosarul leagă APK-ul Release semnat de commit-ul calificat și de verificările
 
 - [Extent API](distribution/download-api.html) verifică statusul HTTP, dimensiunea, SHA-256 și toate CRC-urile APK-ului complet.
 - [Recepția GitHub](github-release.json) leagă cele două fișiere de tag și de commit.
+- [Extent browser](distribution/download-readme.html) verifică descărcarea completă pornită din README-ul GitHub autentificat. [Receipt](distribution/download-readme.json)
