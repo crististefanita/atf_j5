@@ -85,13 +85,21 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 
 ### Rută publică de rezervă
 
-Pentru o livrare publică, verificați fără sesiune pagina proiectului, pagina release-ului și descărcarea efectivă. Dacă GitHub răspunde cu 404 anonim și API-ul autentificat confirmă asset-ul, publicați o copie a APK-ului semnat și a checksum-ului pe o gazdă HTTPS controlată de proiect. Adresa directă are forma `/v<versionName>/RentzLab-<versionName>.apk`, fără query sau fragment. O pagină publică de descărcare oferă linkul, versiunea și checksum-ul chiar dacă README-ul GitHub este inaccesibil anonim.
+- Verificați fără sesiune pagina proiectului, pagina release-ului și descărcarea efectivă.
+- Dacă GitHub răspunde cu 404 anonim, confruntați întâi asset-ul prin API autentificat; apoi copiați APK-ul semnat și checksum-ul pe gazda HTTPS controlată de proiect.
+- Adresa directă are forma `/v<versionName>/RentzLab-<versionName>.apk`, fără query sau fragment.
+- Pagina publică de descărcare afișează versiunea și checksum-ul și rămâne accesibilă fără sesiune GitHub.
 
-Descărcați copia fără token sau cookies și verificați HTTP 200, numărul de octeți, SHA-256 și integritatea arhivei. Consemnați în `publicDownload` din manifest adresa, momentul UTC, statusul HTTP și identitatea copiei. Actualizați apoi linkul direct din `Jocul`. Păstrați separat proba GitHub autentificată și rezultatul anonim al fiecărui canal. Schimbarea rutei poate fi publicată cu același APK, hash, tag și versiune.
+- Descărcați copia fără token sau cookies și verificați HTTP 200, octeții, SHA-256 și integritatea arhivei.
+- Consemnați în `publicDownload` URL-ul, momentul UTC, statusul și identitatea copiei.
+- Actualizați linkul direct din `Jocul` numai după confirmarea copiilor publice.
+- Păstrați separat rezultatul autentificat GitHub și descărcarea anonimă. O schimbare de rută nu cere reconstruirea APK-ului.
 
 ### Proba Android a APK-ului livrat
 
-Identificați distinct APK-ul folosit de fiecare probă nativă. Dacă măsurătorile folosesc un APK de test, precizați asta și consemnați hash-ul său. Pentru acceptanța binarului livrat, instalați APK-ul semnat cu hash-ul din manifest, verificați identitatea instalată și executați o probă scurtă de pornire și de reluare. La un upgrade, porniți din versiunea publicată anterior și comparați salvarea înainte și după instalare.
+- Identificați APK-ul folosit de fiecare probă nativă. Dacă măsurătorile folosesc un APK de test, notați-i hash-ul separat.
+- Pentru acceptanța binarului livrat, instalați APK-ul semnat cu hash-ul din manifest și verificați identitatea instalată.
+- Executați o probă scurtă de pornire și reluare. La upgrade, comparați salvarea înainte și după instalare pornind din versiunea publicată anterior.
 
 ## Acceptanța live a descărcării
 

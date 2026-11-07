@@ -195,4 +195,7 @@ La limita lizibilității se alege un mod explicit de derulare sau o dispunere a
 | Disponibilitatea publică și README principal | **P1 · DRAFT** | Tagul v0.3.0 pointează exact la sursa calificată și commitul există pe branch-ul remote; release-ul și copia publică HTTPS conțin APK-ul și checksum-ul; descărcarea anonimă verifică HTTP 200, bytes și SHA-256. Abia apoi README-ul principal devine legătura către ultima ediție publicată. |
 | Bibliotecă de raportare J23 | **PARALEL · PĂSTRATĂ** | Proveniența J23, hash-urile fizice JAR/POM și regresia consumatorului trebuie să fie în aceeași calificare; biblioteca este pentru testare și nu este împachetată în APK. |
 
-README-ul aplicației diferențiază acum `advanceBotTurn()` pentru UI de `advanceBots()` pentru simularea offline. Contractul de lifecycle și integrarea descriu actorul vizibil înainte de tur și separarea acțiunilor automate. `TurnPacing` primește poarta primului cadru ca dependență; implementarea este prezentă, dar se închide numai cu rezultate verzi și sanity Android. Candidatul `release/0.3.0` este încă DRAFT; nu-l prezentați drept APK instalabil.
+- README-ul aplicației diferențiază `advanceBotTurn()` pentru UI de `advanceBots()` pentru simularea offline.
+- Contractul de lifecycle și integrarea descriu actorul vizibil înainte de tur și separarea acțiunilor automate.
+- `TurnPacing` primește poarta primului cadru ca dependență. Implementarea se închide numai cu teste verzi și sanity Android.
+- `release/0.3.0` este DRAFT până la calificarea buildului și a descărcării; nu este APK instalabil.

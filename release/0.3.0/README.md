@@ -1,5 +1,9 @@
 # Rentz Lab 0.3.0
 
+## Pe scurt
+
+Acest dosar descrie candidatul Android Rentz Lab 0.3.0 și limitele calificării lui. Cât timp starea este DRAFT, nu există un APK de descărcat.
+
 ## Stare
 
 **Candidat DRAFT. APK-ul nu a fost încă construit și calificat.** Pagina de descărcare publică rămâne pe ultima ediție publicată până când binarul semnat și copia publică trec verificarea completă.

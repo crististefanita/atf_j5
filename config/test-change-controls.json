@@ -375,9 +375,9 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGitPolicyTest.java",
       "owner": "Rentz consumer",
-      "reason": "Reviewed incoming parallel strengthening: Git byte preservation for library pairs and retained evidence bodies.",
-      "criterion": "Keep existing release assertions; preserve raw JAR/POM bytes and reject truncated or empty retained observation bodies while accepting the full neighboring body.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-live-review-36d30d18/REVIEW.md",
+      "reason": "0.3.0 P1: preserve the release catalog, byte identity and complete retained evidence while promoting the active edition.",
+      "criterion": "Retain exact DRAFT/PREPARED/PUBLISHED navigation and release identities; preserve raw JAR/POM bytes; reject truncated or empty evidence bodies while accepting the complete neighboring body.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-rentz-0.3.0/README.md",
       "expires": "2026-11-20",
       "sha256": "568f7c644ad54942639748d4d1c987bd983b3e8b234df083743ad5446b2c45cc",
       "allowDelete": false
@@ -389,7 +389,7 @@
       "criterion": "Keep existing release assertions; preserve raw JAR/POM bytes and reject truncated or empty retained observation bodies while accepting the full neighboring body.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-live-review-36d30d18/REVIEW.md",
       "expires": "2026-11-20",
-      "sha256": "bdd23aa6980915efd536c1176008a7897818c4314ca3c601832ba76ac56f5b61",
+      "sha256": "cf8e14d97eabcc26b2d455015f578e069eafdc75817fefc1297c728148311d2c",
       "allowDelete": false
     },
     {
