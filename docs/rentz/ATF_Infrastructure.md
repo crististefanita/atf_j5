@@ -71,3 +71,11 @@ Copiile istorice indicate de receipt-uri nu se rebotează și nu se șterg în m
 ## Dosarul selectat al livrării
 
 Directorul sursă `release` este catalogul documentar și copia selectată a livrării, nu o destinație pentru rulările curente. [Procesul APK](ATF_Release.md) permite numai promovarea explicită a dovezilor calificate; toate rulările și build-urile intermediare folosesc în continuare colecțiile externe înregistrate.
+
+## Bootstrap și calificare executabilă
+
+| Mecanism | Contract |
+|---|---|
+| Parser de sursă | Modulul de testare compilează parserul separat în workspace de guvernanță, cu JDK 21 și proces finit. Sursele aplicației sunt doar analizate, fără procesare de adnotări sau execuție; temporarele compilatorului aparțin aceluiași workspace. |
+| [Planul colecției](../../scripts/TestCollections.psm1) | Se derivă din snapshot-ul copiat. Sursele și octeții compilați identifică bootstrap-ul; o schimbare a cache-ului este refuzată, fără recapturarea așteptării. |
+| [Calificarea runtime-ului](ATF_Qualification.md#identitatea-runtime-ului-calificat) | Fixează separat inventarul binarelor și resurselor de pe classpath. Controalele folosesc fixture-uri proprii și nu rezervă dispozitive sau date de antrenare. |

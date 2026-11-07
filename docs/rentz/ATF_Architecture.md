@@ -56,6 +56,21 @@ Pachetul `ro.rentzlab.core` deține modelul și regulile, iar `ro.rentzlab.ai` d
 | Eveniment | Actorul, acțiunea, cartea și dimensiunea tablei înaintea acțiunii. |
 | Pas | Descrie frontiera curentă; alte mutări pot deschide continuări, deci nu dovedește imposibilitatea permanentă de a juca. |
 
+### Admiterea scorurilor din registru
+
+[PublicProgress](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/progress/PublicProgress.java) verifică programul, fondul, intervalele, cumulul și alocarea pe locuri înainte de construirea unei continuări. La alegerea pe nevăzute se aplică multiplicatorul și unităților, și premiilor.
+
+| Contract | Condiție suplimentară pentru alocare |
+|---|---|
+| Levate, Dame, Carouri și Whist | Fiecare scor este multiplu al unității contractului. Un fond nul permite numai zero pe toate locurile. |
+| Regele de cupă și Zece de treflă | Întreaga valoare nenulă revine unui singur loc. |
+| Rentz | Valorile pe locuri formează o permutare a premiilor primelor poziții din profil, câte una pentru fiecare jucător. Egalitățile și zerourile își păstrează multiplicitatea. |
+| Totale | Trebuie să existe o alocare a celor opt levate și a cărților cu penalizare care produce vectorul. Dama de caro contribuie la ambele categorii la același loc, iar o levată are exact câte o carte de la fiecare jucător. |
+
+[Alocarea pentru Totale](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/progress/TotalsAllocation.java) caută pe numerele de capturi rămase și memorează stările refuzate. Limita pe loc depinde de dimensiunea pachetului, cu cel mult 1.728 de combinații de numărători la șase jucători.
+
+Un registru admis certifică o alocare aritmetică compatibilă cu scorul și programul. Legalitatea ordinii de joc, a câștigătorilor și a distribuirii efective se stabilește prin auditul tranzițiilor pe cărți.
+
 ## Configurație și trasabilitate
 
 | Intrare | Consumator | Contract |

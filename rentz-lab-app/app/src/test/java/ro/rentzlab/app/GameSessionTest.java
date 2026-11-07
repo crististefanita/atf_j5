@@ -1,9 +1,12 @@
 package ro.rentzlab.app;
 
+import ro.rentzlab.app.testing.AndroidComponentLayer;
+
 import ro.rentzlab.ai.*;
 import org.junit.Test;
 import ro.rentzlab.core.*;
 import static org.junit.Assert.*;
+@AndroidComponentLayer
 public class GameSessionTest {
     @Test public void incompatibleSavedIdentitiesAreRejected()throws Exception{
         var session=new GameSession(4,31,RentzPlayer.Difficulty.NORMAL);

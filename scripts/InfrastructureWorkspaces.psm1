@@ -204,4 +204,26 @@ function Assert-AtfInfrastructure {
     if($findings.Count){throw ('Infrastructure governance refused execution: '+(($findings|ForEach-Object{$_.code+' '+$_.path})-join'; '))}
 }
 
-Export-ModuleMember -Function Get-AtfWorkspacePolicy,Get-AtfDataRoot,Assert-AtfPhysicalPath,Assert-AtfArtifactPath,Get-AtfInfrastructurePath,New-AtfWorkspace,Get-AtfWorkspaceFindings,Assert-AtfInfrastructure
+function Get-AtfReleaseSourceCommit {
+    param([Parameter(Mandatory)][string]$SourceRoot,[Parameter(Mandatory)][string]$ProjectRoot)
+    $source=[IO.Path]::GetFullPath($SourceRoot)
+    Assert-AtfPhysicalPath -Path $source
+    $workspace=Split-Path -Parent $source
+    $base=Get-AtfInfrastructurePath -Area workspaces -ProjectRoot $ProjectRoot
+    if((Split-Path -Parent $workspace)-ne$base-or(Split-Path -Leaf $source)-ne'atf_j5'){
+        throw 'Release source must be an atf_j5 worktree inside a registered workspace.'
+    }
+    $descriptor=Get-Content -Raw -LiteralPath (Join-Path $workspace '.atf-workspace.json')|ConvertFrom-Json
+    if($descriptor.sourceRoot-ne$ProjectRoot-or(Split-Path -Leaf $workspace)-ne("$($descriptor.kind)-$($descriptor.id)")){
+        throw 'Release workspace identity differs from the registered project.'
+    }
+    $top=git -C $source rev-parse --show-toplevel
+    if($LASTEXITCODE-ne0-or[IO.Path]::GetFullPath($top)-ne$source){throw 'Explicit release Git worktree required.'}
+    $commit=git -C $source rev-parse --verify HEAD
+    if($LASTEXITCODE-ne0-or$commit-notmatch'^[a-f0-9]{40}$'){throw 'Release source commit unavailable.'}
+    $changes=git -C $source status --porcelain=v1 --untracked-files=all
+    if($LASTEXITCODE-ne0-or$changes){throw 'Release worktree must match its commit.'}
+    return $commit
+}
+
+Export-ModuleMember -Function Get-AtfWorkspacePolicy,Get-AtfDataRoot,Assert-AtfPhysicalPath,Assert-AtfArtifactPath,Get-AtfInfrastructurePath,New-AtfWorkspace,Get-AtfWorkspaceFindings,Assert-AtfInfrastructure,Get-AtfReleaseSourceCommit

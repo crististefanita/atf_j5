@@ -2,13 +2,17 @@
 
 ## Pe scurt
 
-Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu trei până la șase locuri, adversari Normal/Hard, cărți proprii, alegerea sub-jocului și istoricul punctelor. Este un prototip local cu profil de laborator, separat de aplicația originală și de calificarea fidelității regulilor ei.
+Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu trei până la șase locuri, adversari Normal/Hard, cărți proprii, alegerea sub-jocului și istoricul punctelor. Interfața consumă nucleul vizual comun, cu profil de laborator și reguli Rentz proprii; calificarea fidelității față de aplicația originală rămâne distinctă.
+
+[Nucleul UI](../../docs/rentz/ATF_UiIntegration.md) este consumat în configurația live: meniu, editor de nume, temă, chenare, geometrie, mână și depuneri. [Atlasul prezentării](src/main/java/ro/rentzlab/app/ui/README.md) delimitează adaptoarele Rentz, iar [feedback-ul](../../docs/feedback/ATF_Rentz_UI_ToDo.md) păstrează diferențele încă necalificate.
 
 ## Responsabilități
 
 | Componentă | Contract |
 |---|---|
-| [MainActivity](src/main/java/ro/rentzlab/app/MainActivity.java) | Controale native, afișare și traducerea evenimentelor Android în activare, suspendare și închidere. |
+| [MainActivity](src/main/java/ro/rentzlab/app/MainActivity.java) | Rute, lifecycle și emiterea unei comenzi pentru cadrul UI curent; compoziția este delegată. |
+| [Prezentare Rentz](src/main/java/ro/rentzlab/app/ui/README.md) | Texte, profil, proiecții publice, secvențe, istoric și prezentarea levatei timp de 1,5 secunde. |
+| [AAR fixat](../ui-library/README.md) | Componentele vizuale J4 fără motor Whist sau ATF în APK; hash-uri și origine verificate. |
 | [RentzApplication](src/main/java/ro/rentzlab/app/RentzApplication.java) | Un singur repository al sesiunii în proces, partajat între instanțele activității. |
 | [SessionController](src/main/java/ro/rentzlab/app/lifecycle/SessionController.java) | Checkpoint pe proprietar, calcul pe copie separată și refuzul rezultatelor ori callback-urilor depășite. |
 | [SessionRepository](src/main/java/ro/rentzlab/app/lifecycle/SessionRepository.java) | Generația proprietarului și serializarea verificării identității cu scrierea sau callback-ul. |
@@ -17,6 +21,8 @@ Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu tr
 | [SessionJson](src/main/java/ro/rentzlab/app/SessionJson.java) | Serializare explicită; observația actorului și jurnalul privat sunt documente distincte. |
 | [SavedJson](src/main/java/ro/rentzlab/app/SavedJson.java) | Citire strictă a unui singur document și valori exacte înaintea restaurării. |
 | [Componente de sesiune](src/test/java/ro/rentzlab/app/GameSessionTest.java) | Refuz fără jurnalizare, restaurare, istoric și frontiera informației. |
+| [Componente UI proprii](src/test/java/ro/rentzlab/app/ui/) | Contracte Rentz reale, proiecții publice, profil, permis de cadru, scor și AAR; comparații capturate la evaluare. |
+| [Istoric adaptiv](src/main/java/ro/rentzlab/app/ui/score/README.md) | Antet fix vertical și coloană fixă orizontal. Δ și Σ sunt aliniate și preluate din mâinile confirmate. |
 | [Componente ale salvării](src/test/java/ro/rentzlab/app/SessionJsonValidationTest.java) | Intrări invalide, limite numerice, compatibilitate explicită și vecini valizi. |
 | [Componente de lifecycle](src/test/java/ro/rentzlab/app/lifecycle/) | Intercalări deterministe, proprietar înlocuit, anulare ignorată, refuz IO și livrări întârziate, fără emulator. |
 
@@ -68,4 +74,4 @@ Lansatorul pregătește [workspace-ul înregistrat](../../docs/rentz/ATF_Infrast
 |---|---|
 | Componente JVM | Sesiunea, validarea JSON și intercalările modelului de lifecycle; fără APK sau controlul dispozitivului. |
 | [Acceptanță Android](../../docs/rentz/ATF_Android.md) | Instalarea, controalele efective, afișarea și repornirea procesului pe configurația folosită; o mână nu califică o partidă completă. |
-| Prezentare extinsă | Localizarea, preferințele, accesibilitatea și matricea de dimensiuni cer calificare separată; prototipul nu reproduce grafica produsului original. |
+| Prezentare extinsă | RO/EN și profilul au componente și sanity focalizat; accesibilitatea completă, matricea afișajului și paritatea cu referința cer probe distincte. |

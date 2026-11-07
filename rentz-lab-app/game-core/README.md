@@ -9,6 +9,7 @@ Model Java fără dependențe Android sau ATF în producție. Deține distribuir
 | Pachet | Responsabilitate |
 |---|---|
 | [`ro.rentzlab.core`](src/main/java/ro/rentzlab/core/) | Vocabularul, starea partidei, legalitatea, secvențele și scorul; nu depinde de politicile AI. |
+| [`ro.rentzlab.core.progress`](src/main/java/ro/rentzlab/core/progress/) | Validarea registrului public și reconstrucția portofoliului; fără politică sau informație privată. |
 | [`ro.rentzlab.ai`](src/main/java/ro/rentzlab/ai/) | Portul jucătorului, tactica, inferența și căutarea; consumă observațiile și API-ul motorului. |
 | [`ro.rentzlab.ai.search`](src/main/java/ro/rentzlab/ai/search/) | Evaluarea pe loturi comune și bugetul determinist de tranziții; nu primește starea reală privată a mesei. |
 | [`ro.rentzlab.ai.tactics`](src/main/java/ro/rentzlab/ai/tactics/) | Dovezi publice pentru ținte și reguli locale de cost; distincte de oracolul scorului. |
@@ -17,7 +18,7 @@ Aliasurile regulilor din YAML se rezolvă prin registrul tipizat al claselor pub
 
 ## Contracte
 
-| API | Responsabilitate |
+| API și mecanism | Responsabilitate |
 |---|---|
 | `Card.deck` | Pachet distinct cu opt cărți pentru fiecare loc. |
 | `OpeningDeal`, `RentzMatch.fromOpeningDeal` | Primă distribuire controlată, validată și imuabilă; continuarea folosește seed separat. |
@@ -32,6 +33,7 @@ Aliasurile regulilor din YAML se rezolvă prin registrul tipizat al claselor pub
 | `KnowledgeSampler` | Cărți necunoscute, culori absente, pasuri și distribuiri fezabile. |
 | `SearchPolicy`, `PolicySettings` | Lumi comune, obiectiv declarat, orizont de mână sau partidă și buget/ponderi explicite. |
 | `MatchUtility`, `FullMatchRollout` | Utilități finale separate și continuare ipotetică pe istoricul public; candidat offline, fără schimbarea implicită a produsului. |
+| `DecisionMoments` | Helper intern pentru loturi complete, risc și departajare stabilă; fără generare de lumi, I/O sau expunere în portul jucătorului. |
 | `DecisionEvaluator`, `RolloutBudget` | Numai lumi complet evaluate pentru toate alternativele; oprire simetrică și fallback public explicit. |
 | `TargetTactics` | Captură demonstrabilă a țintei și penalitatea propriei cărți; continuarea adversă păstrează modelul legacy declarat. |
 

@@ -97,7 +97,7 @@ flowchart LR
 <details>
 <summary>Legendă: alegerea consumă o resursă viitoare, fără acces la viitorul real</summary>
 
-`fromPublicProgress` validează rotația, unicitatea sub-jocurilor, fondul punctelor și cumulul din registrul public. `FullMatchRollout.restore` confruntă totalurile și rejucarea mâinii curente; lipsa istoricului complet refuză obiectivul de partidă.
+`fromPublicProgress` validează rotația, portofoliul, fondul, alocarea pe locuri și cumulul din registrul public. `FullMatchRollout.restore` confruntă totalurile și rejucarea mâinii curente. Lipsa istoricului complet refuză obiectivul de partidă. [Contractul registrului](ATF_Architecture.md#admiterea-scorurilor-din-registru)
 
 </details>
 
@@ -164,12 +164,24 @@ Documentul registrului are schemă închisă: cheile duplicate, documentele supl
 |---|---|
 | Comparare pereche | Pentru Hard, controlul înlocuiește numai actorul evaluat cu Hard legacy la aceeași poziție; aceiași adversari și aceeași distribuire. Familia Normal desemnează adversarii, nu un control complet Normal. |
 | Corectitudinea jocului | `OfflineGameAudit` recalculează legalitatea publică, capturatorul, punctele și terminarea, separat de politica evaluată. |
-| Identitatea datelor | Namespace-ul jocului, versiunea generatorului, numărul de jucători și seed-ul; sursa candidatului are identitate separată. |
+| Identitatea datelor | Namespace-ul jocului, versiunea generatorului, numărul de jucători și starea efectivă a generatorului. Protocolul păstrează seed-ul original pentru reproducere, iar sursa candidatului are identitate separată. |
 | Promovare | Protocol `FRESH_EVALUATION`, familiile Normal și Hard păstrat, limită inferioară pozitivă pe obiectivul primar și credit de victorie fără regresie în fiecare familie. Bugetele inegale, familia lipsă sau datele insuficiente refuză promovarea. |
 | Retenție | Rezumatul păstrează toate comparațiile; numai pierderi reprezentative și un câștig de contrast păstrează jurnalul complet. |
 | Diagnostic | O pierdere nu etichetează automat mutarea drept greșită; regresia cere o regulă, o invariantă sau o comparație independentă. |
 
-Rotațiile aceleiași distribuiri sunt corelate. `ClusteredEvaluation` agregă mai întâi toate locurile unui seed, apoi reeșantionează seed-urile pereche, cu minimum opt clustere și corecție pentru numărul familiilor declarate.
+### Identitatea distribuirii și expunerea
+
+[DealSeed](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/deal/DealSeed.java) definește identitatea pentru generatorul `jvm-shuffle-eight-cards-v1`. Cei 48 de biți inferiori ai seed-ului identifică starea efectivă la inițializarea generatorului. Aceeași stare și același număr de jucători repetă fluxul distribuirilor.
+
+| Frontieră | Regulă |
+|---|---|
+| Protocol și lot | Două valori cu aceeași stare efectivă refuză lotul înainte de simulare. Aceeași verificare protejează intrarea directă în registru. |
+| Istoric | Registrul citește schema v1 și compară stările efective derivate din etichetele deja păstrate. Un refuz păstrează octeții vechi, inclusiv când un fișier istoric conține mai multe etichete ale aceleiași stări. |
+| Dezvoltare | Reluarea intenționată este permisă pentru același seed original când toate expunerile care corespund stării sunt de dezvoltare și au aceeași etichetă. |
+| Evaluare rezervată | O stare expusă anterior pentru aceeași masă refuză evaluarea nouă. O stare deja rezervată refuză și reutilizarea ulterioară în dezvoltare. |
+| Agregare | `ClusteredEvaluation` refuză aliasurile înainte de bootstrap și grupează toate rotațiile aceleiași stări. Pragul este de opt clustere, cu o corecție pentru numărul familiilor declarate. |
+
+La schimbarea generatorului, definiți întâi echivalența distribuirilor și tratamentul istoricului. Versiunea generatorului permite păstrarea și compararea expunerilor în spațiul în care au fost produse.
 
 | Interpretare | Regulă |
 |---|---|
@@ -179,6 +191,61 @@ Rotațiile aceleiași distribuiri sunt corelate. `ClusteredEvaluation` agregă m
 | Reper păstrat | Tactica și ponderile reperului rămân fixe; `matchedReferenceSettings` aliniază numărul de lumi, riscul și plafonul de tranziții cu candidatul. Profilul de comparație nu este un nivel nou în meniu. |
 | Ne-promovare | Un raport poate refuza progresul strategic chiar dacă toate tranzițiile sunt legale și componentele trec. Reperul produsului rămâne neschimbat. |
 | Identitate | Rezumatul păstrează politica, setările efective, sursa înghețată și classpath-ul; o evaluare JVM nu inventează identitatea unui APK nou. |
+
+## Admiterea rezultatelor reluate
+
+```mermaid
+flowchart LR
+    EXPECTED[Context de încredere] -->|confruntă| ID[Identitatea declarației]
+    RESULT[Rezultat primit] -->|furnizează| ID
+    ID -->|admite| PAIRS[Populație completă de perechi]
+    PAIRS -->|recalculează| AGG[Clustere, costuri și evaluare]
+    AGG -->|separă| VERDICT[Coerență și promovare]
+```
+
+<details>
+<summary>Legendă: identitatea așteptată nu se recapturează din rezultat</summary>
+
+[PromotionAdmission](../../atf-tests/src/main/java/atf/rentz/arena/PromotionAdmission.java) primește protocolul, identitatea SHA-256 a sursei și politica citită din intrările de încredere. Rezultatul nu furnizează propriul reper de acceptare. Producătorul CLI verifică această frontieră înaintea publicării și păstrează verdictul în admission.json.
+
+```text
+Profil solicitat + protocol → setări cu bugetul experimentului
+                             ├→ obiectiv → metrică pe distribuiri
+                             └→ politici efective → actori → jocuri pereche
+Intrări de încredere → aceeași rezolvare → confruntare cu rezumatul și costul
+```
+
+| Actor | Configurație folosită la joc |
+|---|---|
+| HARD | Profilul solicitat, cu numărul de lumi al protocolului. |
+| HARD_REFERENCE | Tactică legacy, obiectiv de căutare HAND_MARGIN și ponderile reperului. Numărul de lumi, riscul și plafonul de tranziții sunt potrivite cu profilul solicitat. |
+| NORMAL | Politică euristică, fără căutare pe lumi. |
+| BASELINE | Alegerile deterministe ale LabPolicy, fără căutare pe lumi. |
+
+Pentru un candidat cu căutare, controlul folosește HARD_REFERENCE la locul evaluat. Pentru ceilalți candidați, controlul folosește politica familiei la întreaga masă. Raportul Extent afișează profilul cerut separat de actorii efectivi și compară plafoanele când ambii actori evaluați folosesc căutare.
+
+</details>
+
+| Intrare sau etapă | Contract |
+|---|---|
+| Context independent | Protocolul și sursa calificată provin din receipt-urile verificate. Politica și profilul de scor se citesc din snapshot-ul fixat. Contextul Expected se construiește din aceste intrări. |
+| Declarație completă | declaredProtocol păstrează inclusiv candidat, ordine, seed-uri, jucători, lumi, retenție și fișier de politică. Un rezumat istoric fără această declarație rămâne lizibil, fără admitere retrospectivă. |
+| Configurație și politică efectivă | Protocolul suprascrie numărul de lumi. [ArenaPolicies](../../atf-tests/src/main/java/atf/rentz/arena/ArenaPolicies.java) leagă obiectivul evaluării de actorul candidat și, pentru fiecare familie, de adversari și control. Rezumatele fără această declarație rămân lizibile și sunt refuzate la admitere. |
+| Profilul de scor executat | Rezumatul, partidele reținute și Extent păstrează profilul tipizat folosit pentru ambele brațe. Admiterea compară penalizările, recompensele și ordinea premiilor cu profilul de încredere. Un rezumat istoric fără profil poate fi citit și este refuzat la admitere. |
+| Lansare CLI | Manifestul cu amprente verificate trebuie să includă fișierul de scor. Profilul citit din snapshot configurează rularea și furnizează așteptarea la admitere. |
+| Perechi | Exact o pereche pentru fiecare familie, seed și loc. Identitatea candidatului, delta, creditul și măsurătorile finite trebuie să fie coerente; lipsurile, duplicatele și costurile imposibile sunt refuzate. |
+| Recalculare | [FamilyAnalysis](../../atf-tests/src/main/java/atf/rentz/arena/FamilyAnalysis.java) reface agregările, costurile, clusterele și bootstrap-ul din perechi. Comparația include întregul rezultat, nu doar flag-ul promotes primit. |
+| Retenție | Numele jurnalelor trebuie să corespundă selecției declarate de protocol. Validarea numelor nu verifică octeții fișierelor externe. |
+
+| Verdict | Interpretare |
+|---|---|
+| Incoerent | Refuz înaintea interpretării progresului; diagnosticul identifică frontiera încălcată. |
+| Coerent, fără promovare | Date complete, dar etapă de dezvoltare, insuficiență ori criteriu strategic neîndeplinit. Pierderea nu este o eroare de infrastructură. |
+| Coerent, eligibil | Numai evaluarea nouă care trece criteriile strategice existente în toate familiile; pragurile și profilul produsului nu se schimbă prin admitere. |
+
+[Componentele de admitere](../../atf-tests/src/test/java/atf/rentz/ArenaAdmissionTest.java) păstrează vecinul complet și coruperi independente ale identității, populației, bugetului și agregărilor. API-ul public de promovare cere context explicit; forma fără Expected nu mai este disponibilă.
+
+Admiterea verifică structura și coerența perechilor declarate. Nu autentifică un fișier primit și nu rejucă fiecare carte; proveniența artefactului, inventarul runtime-ului și auditul tranzițiilor au contracte separate. Un expeditor care fabrică întregul set de date nu devine de încredere prin simpla coerență aritmetică.
 
 ## Trecerea către produs și interfață
 
@@ -190,3 +257,31 @@ Rotațiile aceleiași distribuiri sunt corelate. `ClusteredEvaluation` agregă m
 | E2E | Scenarii pornite și parcurse prin interfață, rezervare exclusivă, date și afișaj păstrate, capturi native și scor confruntat cu oracolul. |
 
 O partidă offline sau un rezultat injectat nu se raportează ca joc prin interfață. [Transferul](ATF_Transfer.md) păstrează lecțiile reutilizabile; [componentele](ATF_Components.md) și [feedback-ul](../feedback/ATF_Rentz.md) dețin verificarea și lacunele active.
+
+## Separarea mecanismelor și refactorizarea sigură
+
+```mermaid
+flowchart LR
+    LEDGER[Registru public] -->|validează| RESTORE[Progres restaurat]
+    RESTORE -->|alimentează| MATCH[Tranziții de joc]
+    MATCH -->|simulează| WORLDS[Lumi comune]
+    WORLDS -->|agregă atomic| MOMENTS[Estimări]
+    MOMENTS -->|alimentează| FAMILY[Evaluare pereche]
+```
+
+<details>
+<summary>Legendă: fiecare etapă deține un motiv distinct de schimbare</summary>
+
+| Responsabilitate | Implementare și invariantă |
+|---|---|
+| Progres public | [PublicProgress](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/progress/PublicProgress.java) admite numai alocările compatibile cu programul și profilul. Rezultatul copiază datele publice în structuri imuabile. |
+| Tranziție | [RentzMatch](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/RentzMatch.java) păstrează fațada; traseele pentru secvențe și levate rămân distincte. |
+| Evaluare | [DecisionEvaluator](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/ai/search/DecisionEvaluator.java) păstrează ordinea lume–alternativă, seed-ul ipotetic și consumul plafonului. |
+| Estimări | [DecisionMoments](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/ai/search/DecisionMoments.java) admite numai loturi complete; ordinea stabilă, riscul și criteriul de departajare rămân explicite. |
+| Experiment | [FamilyAnalysis](../../atf-tests/src/main/java/atf/rentz/arena/FamilyAnalysis.java) agregă rotațiile, metrica și costurile fără simulare sau I/O. OfflineArena deține execuția, registrul expunerii și retenția. |
+
+</details>
+
+Refactorizarea păstrează un reper compilat înaintea schimbării și compară observațiile publice, mutările, estimările, scorurile, lumile complete, fallback-urile și tranzițiile efective. Timpul este măsurat separat: variația duratei nu dovedește schimbarea strategiei, iar o partidă identică nu înlocuiește regresiile situaționale.
+
+Protocolul, sursa și rezultatele comparației rămân în depozitul extern. Separarea responsabilităților permite schimbarea agregării sau a infrastructurii fără promovarea tacită a unui profil YAML; [transferul către alt joc](ATF_Transfer.md) păstrează această limită.

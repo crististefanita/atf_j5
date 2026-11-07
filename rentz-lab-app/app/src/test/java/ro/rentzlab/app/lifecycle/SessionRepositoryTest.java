@@ -1,11 +1,14 @@
 package ro.rentzlab.app.lifecycle;
 
+import ro.rentzlab.app.testing.AndroidComponentLayer;
+
 import org.junit.Test;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.SessionJson;
 import ro.rentzlab.ai.RentzPlayer;
 import static org.junit.Assert.*;
 
+@AndroidComponentLayer
 public class SessionRepositoryTest {
     @Test public void claimingNewOwnershipRevokesEveryOldWriteAndCallback() throws Exception {
         var storage=new LifecycleFixture.Memory();var repository=new SessionRepository(storage);

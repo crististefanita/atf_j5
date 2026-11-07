@@ -1,11 +1,14 @@
 package ro.rentzlab.core;
 
+import ro.rentzlab.testing.RentzComponentLayer;
+
 import ro.rentzlab.ai.*;
 import org.junit.jupiter.api.Test;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static ro.rentzlab.core.AiFixtures.*;
 
+@RentzComponentLayer
 class RentzHardRefinementTest {
     static PolicySettings aware(int worlds,int limit){return new PolicySettings(worlds,.05,3,.3,2,PolicySettings.Objective.HAND_MARGIN,PolicySettings.Tactic.PUBLIC_TARGET_AWARE,limit);}
     static RentzMatch queenPosition(){

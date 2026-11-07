@@ -5,6 +5,8 @@ import java.util.List;
 /** Configurable laboratory profile; no claim that these defaults match the reference presets. */
 public record ScoreProfile(int trickPenalty, int queenPenalty, int diamondPenalty, int kingPenalty,
                            int trickReward, int tenReward, List<Integer> finishRewards) {
+    private static final List<Contract> TOTALS_CATEGORIES = Card.immutable(
+            java.util.Arrays.asList(Contract.TRICKS, Contract.QUEENS, Contract.DIAMONDS, Contract.KING_HEARTS));
     public ScoreProfile {
         finishRewards = Card.immutable(finishRewards);
         if (trickPenalty < 0 || queenPenalty < 0 || diamondPenalty < 0 || kingPenalty < 0
@@ -21,19 +23,42 @@ public record ScoreProfile(int trickPenalty, int queenPenalty, int diamondPenalt
             throw new IllegalArgumentException("Scoring profile can exceed the match integer range");
     }
     public int trickPoints(Contract contract, List<Card> captured, boolean blind) {
+        return trickPoints(contract, captured, blind, null);
+    }
+
+    int trickPoints(Contract contract, List<Card> captured, boolean blind, int[] counts) {
         if (captured.size() < 3 || captured.size() > 6 || captured.stream().distinct().count() != captured.size())
             throw new IllegalArgumentException("A trick has one distinct card per player");
-        int points = switch(contract) {
+        int points = 0;
+        for (var category : trickCategories(contract)) {
+            int count = switch (category) {
+                case TRICKS, WHIST -> 1;
+                case QUEENS -> (int) captured.stream().filter(card -> card.rank() == 12).count();
+                case DIAMONDS -> (int) captured.stream().filter(card -> card.suit() == Card.Suit.DIAMONDS).count();
+                case KING_HEARTS -> captured.contains(new Card(Card.Suit.HEARTS, 13)) ? 1 : 0;
+                case TEN_CLUBS -> captured.contains(new Card(Card.Suit.CLUBS, 10)) ? 1 : 0;
+                default -> throw new IllegalArgumentException("Expected a trick category");
+            };
+            points = Math.addExact(points, contribution(category, count, blind));
+            if (counts != null) counts[category.ordinal()] += count;
+        }
+        return points;
+    }
+
+    static List<Contract> trickCategories(Contract contract) {
+        return contract == Contract.TOTALS ? TOTALS_CATEGORIES : java.util.Collections.singletonList(contract);
+    }
+
+    int contribution(Contract category, int count, boolean blind) {
+        int unit = switch (category) {
             case TRICKS -> -trickPenalty;
-            case QUEENS -> -Math.multiplyExact(queenPenalty,(int)captured.stream().filter(c -> c.rank() == 12).count());
-            case DIAMONDS -> -Math.multiplyExact(diamondPenalty,(int)captured.stream().filter(c -> c.suit() == Card.Suit.DIAMONDS).count());
-            case KING_HEARTS -> captured.contains(new Card(Card.Suit.HEARTS,13)) ? -kingPenalty : 0;
+            case QUEENS -> -queenPenalty;
+            case DIAMONDS -> -diamondPenalty;
+            case KING_HEARTS -> -kingPenalty;
             case WHIST -> trickReward;
-            case TEN_CLUBS -> captured.contains(new Card(Card.Suit.CLUBS,10)) ? tenReward : 0;
-            case TOTALS -> Math.addExact(Math.addExact(trickPoints(Contract.TRICKS,captured,false),trickPoints(Contract.QUEENS,captured,false)),
-                    Math.addExact(trickPoints(Contract.DIAMONDS,captured,false),trickPoints(Contract.KING_HEARTS,captured,false)));
-            case RENTZ -> throw new IllegalArgumentException("Rentz has finishing places, not tricks");
+            case TEN_CLUBS -> tenReward;
+            default -> throw new IllegalArgumentException("Expected a trick category");
         };
-        return Math.multiplyExact(points, blind ? 2 : 1);
+        return Math.multiplyExact(Math.multiplyExact(unit, count), blind ? 2 : 1);
     }
 }

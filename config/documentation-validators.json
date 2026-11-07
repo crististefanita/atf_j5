@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "sourceContract": "documentation-governance-source-adapter-v1",
+  "owner": "atf_j0",
+  "adaptations": [
+    "package names and explicit project root",
+    "configured active inventory; retained history is checked separately",
+    "all named library guides join the same active inventory",
+    "external local links resolve only via the explicit original source and byte-identical staged document"
+  ],
+  "sources": [
+    {
+      "path": "DocumentationDiagramGovernanceTest.java",
+      "sha256": "c284267e8898084c1c31503695ecc211df02a3fa037db08fd651d2b5e5ada40a",
+      "adaptedSha256": "8d57e19c246e3f3ad06b97f265d8735b414530b1259d1693e7ccce94c2b6e342"
+    },
+    {
+      "path": "DocumentationStyleGovernanceTest.java",
+      "sha256": "f2ce0118235e661ca629aa3a452d3345b3669f6b635225618abaf28c2655d1e0",
+      "adaptedSha256": "fec30aad72fa2a026c1a4d2e39de98d76944fcae326119039614afcd1caeee3d"
+    },
+    {
+      "path": "DocumentationProseGovernanceTest.java",
+      "sha256": "a3523b9adb40be89614ad9bbbb099637ff93b8f16b5f5387cfaa9f3e3c38967d",
+      "adaptedSha256": "742e295ff1dae140fda54acebf7c45379d5192b24add931d07fc061dd260c264"
+    },
+    {
+      "path": "DynamicPathDocumentationArchitectureTest.java",
+      "sha256": "59abf27dc9d8e0cf018f7b4877cb5a336862409f272fe69b833d068e45dd5d89",
+      "adaptedSha256": "5b5570e72ae785bf48bb6cd50eeb07019d23cff438281c65f8f1ae6991dd9c67"
+    },
+    {
+      "path": "DocumentationReadmeStructureGovernanceTest.java",
+      "sha256": "5fbef4e689b8b4e7c4c1c4348c748a324014ea18ea6f6431d5ef9a473d5726b9",
+      "adaptedSha256": "2b731e6468af4db25c958b07af03ab2391e6a408141cf41aff5c3eca48beac75"
+    },
+    {
+      "path": "DocumentationGovernanceSupport.java",
+      "sha256": "81448d7fe3269bdbadbc21a975ed937e1c87c8e9668b6b57f6c2d9e0332992fc",
+      "adaptedSha256": "21bba45d299538028fbba71a7a41a962ed045adb3f9c9fbd784e8f2c648e8d88"
+    },
+    {
+      "path": "links/DocumentationLinkGovernanceTest.java",
+      "sha256": "c8e5e08c9affc36041f7f507b5311e3073b9787846a7ebf73e87e50229268186",
+      "adaptedSha256": "159d5f53c0fe6b081ac33d5e46943823fceeab9e199be655d16220be0bc5c963"
+    },
+    {
+      "path": "links/DocumentationLocalLinks.java",
+      "sha256": "b2164a28761f69658009cdd93b99041937f51474d526d73be21831529797c2ea",
+      "adaptedSha256": "5724ced816393c478623c423eb1c6c20619203f7211d5a28ff83b598e115c7ad"
+    },
+    {
+      "path": "links/MarkdownAnchorIndex.java",
+      "sha256": "d0a0e1439481821740c0d7124cc81450cc344b54574000d47a975450385ae84a",
+      "adaptedSha256": "567cc87932152d0fa1dd2986b84cca458914c1b4ca3e40b29df194cb5d3b54b2"
+    }
+  ]
+}

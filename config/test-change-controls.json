@@ -1,0 +1,916 @@
+{
+  "schemaVersion": 1,
+  "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
+  "controls": [
+    {
+      "path": "atf-tests/pom.xml",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Maven reflects on the real Android JUnit 4 TestRule from a test-scoped artifact; Jupiter remains the execution engine.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "6e8441b8c1aff76966c18f0f5fe92c57cbc0d72f1b1ff763175c9243033e6456",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/arena/ArenaPolicies.java",
+      "owner": "Rentz consumer",
+      "reason": "Q17–Q18 · Nested discovery and XML ownership, effective arena actors and independent admission.",
+      "criterion": "Jupiter and Surefire establish the selected Nested population; invalid or ambiguous ownership fails. Trusted context verifies the effective candidate, control, opponents and objective before promotion.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "694861eb12b11cd36ca09aecf3d01f209580e425ee9bc98926f1d2272d64975a",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/arena/FamilyAnalysis.java",
+      "owner": "Rentz consumer",
+      "reason": "Q15–Q16: inherited executable-source inventory, independent Jupiter probes and complete external evaluation admission; preserve parallel UI and library changes.",
+      "criterion": "Before/after tests retain a healthy full neighbor; overrides, generic signatures, cross-package visibility and annotation inheritance match Jupiter. Every protocol/source/budget/population/aggregate corruption refuses admission without changing strategic thresholds.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q15-q16-8e2c2092/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "898f2ddf53faa955641fd4bb8ed734f519bd0d4188a5a8f6fd289e0963532c3e",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/arena/PromotionAdmission.java",
+      "owner": "Rentz consumer",
+      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
+      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "8fc32d57c1ea989c6096ad1fddd9be923c57c15082a736e3db0a42f7ce9a344c",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/arena/PromotionEvidence.java",
+      "owner": "Rentz consumer",
+      "reason": "Q17–Q18 · Nested discovery and XML ownership, effective arena actors and independent admission.",
+      "criterion": "Jupiter and Surefire establish the selected Nested population; invalid or ambiguous ownership fails. Trusted context verifies the effective candidate, control, opponents and objective before promotion.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "c6770e83eef4e88cdc22bb3ffe49a609734548a9bbcbdd6e31519ab620f85fdb",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/discovery/AnnotationGraph.java",
+      "owner": "Rentz consumer",
+      "reason": "Q15–Q16: inherited executable-source inventory, independent Jupiter probes and complete external evaluation admission; preserve parallel UI and library changes.",
+      "criterion": "Before/after tests retain a healthy full neighbor; overrides, generic signatures, cross-package visibility and annotation inheritance match Jupiter. Every protocol/source/budget/population/aggregate corruption refuses admission without changing strategic thresholds.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q15-q16-8e2c2092/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "cd4c1dc2e08b09728122e30a84e7b4ec28df7263007cfda7f96e3f7ce39e8c1e",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/discovery/InheritedMethods.java",
+      "owner": "Rentz consumer",
+      "reason": "Q15–Q16: inherited executable-source inventory, independent Jupiter probes and complete external evaluation admission; preserve parallel UI and library changes.",
+      "criterion": "Before/after tests retain a healthy full neighbor; overrides, generic signatures, cross-package visibility and annotation inheritance match Jupiter. Every protocol/source/budget/population/aggregate corruption refuses admission without changing strategic thresholds.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q15-q16-8e2c2092/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "7bf56709cd3d9720eb8df9fdb948a00f8197a820dfff8210823d49c8d1411784",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/discovery/JavaTestDeclarations.java",
+      "owner": "Rentz consumer",
+      "reason": "Q15–Q16: inherited executable-source inventory, independent Jupiter probes and complete external evaluation admission; preserve parallel UI and library changes.",
+      "criterion": "Before/after tests retain a healthy full neighbor; overrides, generic signatures, cross-package visibility and annotation inheritance match Jupiter. Every protocol/source/budget/population/aggregate corruption refuses admission without changing strategic thresholds.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q15-q16-8e2c2092/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "b8a170c7e05564aa4bdf972c146315451a1b744d4dd66b37f08d0b2c3e94aee4",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/discovery/TestHierarchy.java",
+      "owner": "Rentz consumer",
+      "reason": "Q17–Q18 · Nested discovery and XML ownership, effective arena actors and independent admission.",
+      "criterion": "Jupiter and Surefire establish the selected Nested population; invalid or ambiguous ownership fails. Trusted context verifies the effective candidate, control, opponents and objective before promotion.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "ba24c999fab23f0607c3de04a24033302c2bfe7372517d71d6cfacae01f5405a",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/discovery/TestLayers.java",
+      "owner": "Rentz consumer",
+      "reason": "Q17–Q18 · Nested discovery and XML ownership, effective arena actors and independent admission.",
+      "criterion": "Jupiter and Surefire establish the selected Nested population; invalid or ambiguous ownership fails. Trusted context verifies the effective candidate, control, opponents and objective before promotion.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "00030e00bfa2d2cbf55064fff843d2441e109fee458eab830de8a9b6930fd256",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/discovery/TestSourceInventory.java",
+      "owner": "Rentz consumer",
+      "reason": "Q17–Q18 · Nested discovery and XML ownership, effective arena actors and independent admission.",
+      "criterion": "Jupiter and Surefire establish the selected Nested population; invalid or ambiguous ownership fails. Trusted context verifies the effective candidate, control, opponents and objective before promotion.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "a32e8ac46b2c32f6e0620c9eab0be45ebc6224cdd366690f1f487957ed1b2f21",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/OfflineArena.java",
+      "owner": "Rentz consumer",
+      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
+      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "262159f3fe0a9c0ad1e3e45c00ca87ea7bd18e9ee192a30500ef0771de1edd7b",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/runtime/ClasspathInventory.java",
+      "owner": "Rentz consumer",
+      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
+      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "f7d82a741eb1d61e824b14de6de608f10b17d0dae87c27ea85ea39b6110635dc",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/android/reporting/RentzUiIntegrationReport.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Publish only evaluated comparisons, native action records, hierarchy and original screenshots; enforce explicit PASS/FAIL.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "571fc1c0c57a47e3cc7c6b198ea884f6787cbbda0dab1fb606fee88c0f41137f",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/ArenaAdmissionTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
+      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "d667da302ac16caa414dfaf55854da23110218dc8fbe5aaa1447f8f12f4d53f9",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/evaluation/ClusteredEvaluationTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q20 · Bind evaluation seed identity to the actual v1 generator and protect the learning collection.",
+      "criterion": "In-batch aliases, historical aliases and false cluster sufficiency are refused; exact development replay, signed seeds, distinct tables, old rows and adjacent arena contracts remain covered.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q20/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "f6ac9cc623d5c35b45fe4a46bbec6e406c1582b10ee092f828791ec7f977c2b0",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/EvaluationRegistryValidationTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q20 · Bind evaluation seed identity to the actual v1 generator and protect the learning collection.",
+      "criterion": "In-batch aliases, historical aliases and false cluster sufficiency are refused; exact development replay, signed seeds, distinct tables, old rows and adjacent arena contracts remain covered.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q20/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "138a1724e93eab0b59081a51878576a5195ea377487e6a057407313c1a6763d1",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/changes/GitTestChanges.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "25571ac3caffa95d3c2395f3b151bbecd18c53e6dc6293d896bb55ddfe86e273",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/changes/TestChangeGovernanceTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q15–Q16: inherited executable-source inventory, independent Jupiter probes and complete external evaluation admission; preserve parallel UI and library changes.",
+      "criterion": "Before/after tests retain a healthy full neighbor; overrides, generic signatures, cross-package visibility and annotation inheritance match Jupiter. Every protocol/source/budget/population/aggregate corruption refuses admission without changing strategic thresholds.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q15-q16-8e2c2092/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "a0e6dd6f56f66228f5f8acd2857b743ce3bc1b569f65dd6716b9a6fe0d1ab276",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationControlsTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "2f04271f40151160dac5403012e0945f1f08cc73e0f7182081baf6ab6bb34f2d",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationDiagramGovernanceTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "8d57e19c246e3f3ad06b97f265d8735b414530b1259d1693e7ccce94c2b6e342",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationGovernanceSupport.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "21bba45d299538028fbba71a7a41a962ed045adb3f9c9fbd784e8f2c648e8d88",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationProseGovernanceTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "742e295ff1dae140fda54acebf7c45379d5192b24add931d07fc061dd260c264",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationReadmeStructureGovernanceTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "2b731e6468af4db25c958b07af03ab2391e6a408141cf41aff5c3eca48beac75",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationStyleGovernanceTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "fec30aad72fa2a026c1a4d2e39de98d76944fcae326119039614afcd1caeee3d",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DynamicPathDocumentationArchitectureTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "5b5570e72ae785bf48bb6cd50eeb07019d23cff438281c65f8f1ae6991dd9c67",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/links/DocumentationLinkGovernanceTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "159d5f53c0fe6b081ac33d5e46943823fceeab9e199be655d16220be0bc5c963",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/links/DocumentationLocalLinks.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Check the immutable document bytes against their source, then resolve external relative links against the project layout.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "5724ced816393c478623c423eb1c6c20619203f7211d5a28ff83b598e115c7ad",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/links/MarkdownAnchorIndex.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "567cc87932152d0fa1dd2986b84cca458914c1b4ca3e40b29df194cb5d3b54b2",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/DocumentationContractTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "38db0d8216120c2def4d86a09c69c6d6fd2084a531b58eb041b425c3270deda4",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseDownloadComponentTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Incoming release adapter tests retained; exact current bytes reviewed without attributing browser or Android acceptance.",
+      "criterion": "Mock transport/Git/catalog contracts and independent refusal cases remain; real distribution acceptance is separate.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "b3fa42d6192c9542add4f9931c6ab4645de907899234b8fecc278cbf011653f5",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGitPolicyTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Reviewed incoming parallel strengthening: Git byte preservation for library pairs and retained evidence bodies.",
+      "criterion": "Keep existing release assertions; preserve raw JAR/POM bytes and reject truncated or empty retained observation bodies while accepting the full neighboring body.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-live-review-36d30d18/REVIEW.md",
+      "expires": "2026-11-20",
+      "sha256": "568f7c644ad54942639748d4d1c987bd983b3e8b234df083743ad5446b2c45cc",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Reviewed incoming parallel strengthening: Git byte preservation for library pairs and retained evidence bodies.",
+      "criterion": "Keep existing release assertions; preserve raw JAR/POM bytes and reject truncated or empty retained observation bodies while accepting the full neighboring body.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-live-review-36d30d18/REVIEW.md",
+      "expires": "2026-11-20",
+      "sha256": "bdd23aa6980915efd536c1176008a7897818c4314ca3c601832ba76ac56f5b61",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/RuleBindingGovernanceTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "0cfb79c8a171f11982af19c4d6a49c3ee0addee91d132fc9a181ed99e38599e2",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/runtime/ClasspathInventoryTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
+      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "97f6e65acd089f138d6f421001c4e47df6a41375f8e24d5ae198cecc3dc4379c",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/runtime/QualifiedRuntimeListener.java",
+      "owner": "Rentz consumer",
+      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
+      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "eb02a75e40d4d6068900f3612b04bd268c8e66dadb84db93b6344922055064c2",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/runtime/RuntimeAttestationTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
+      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "5f390353063b38f9c779bd0cf7947efd27b86a5fb3271530d9f02bdcfe20ac5e",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/source/GovernanceProject.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "7bf19bdae23e75920c89a00932e983e0626f2447f3bf81d9704aca1e2a5ab26c",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/source/InheritedTestInventoryTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q17–Q18 · Nested discovery and XML ownership, effective arena actors and independent admission.",
+      "criterion": "Jupiter and Surefire establish the selected Nested population; invalid or ambiguous ownership fails. Trusted context verifies the effective candidate, control, opponents and objective before promotion.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "a8986299c7c47ebb3e226d0df9d05c56551ffec3f55875d652e7c369e17bf36a",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/source/ReadableFacadesTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "938b59bcfd1e265355ee9ace50b46309f741078a7f9cf754a23ee8b6503e4715",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/source/TestLayerGovernanceTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q15–Q16: inherited executable-source inventory, independent Jupiter probes and complete external evaluation admission; preserve parallel UI and library changes.",
+      "criterion": "Before/after tests retain a healthy full neighbor; overrides, generic signatures, cross-package visibility and annotation inheritance match Jupiter. Every protocol/source/budget/population/aggregate corruption refuses admission without changing strategic thresholds.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q15-q16-8e2c2092/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "16669a48dd76eb7e011ba74c618c1702844439a79b07560c824ff95866827891",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/source/TestSourceInventoryTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
+      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "77f921ec0ad537cfa6105018860c537bd1c3a0ff399ed1e9abec35bcbc3815bd",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/libraries/LibraryAdoptionTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "a96e2b707da8769b0fd77300e21eda638bb681bf244ba2c772d5863848685d1a",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/libraries/LibraryUsageTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "9ddfae3737390ce0223e6a9ea5fb30f1b43af5cd147ebf2b582a7f956872c190",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/OfflineArenaComponentTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
+      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "3a475429c0a0af5b912649e64c245bd067428d2ad870e59e2ca254833b24f140",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/RentzRulePublication.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "5e3298074a79d1cd53441ebed688d13da3b25f2da1aa0f98c28f7f15d3a49cbe",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/RentzRulePublicationLifecycleTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "11231d1d0955ea183d86c3350f2593d412d5789f4480bb9abe770338f7399d64",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/RentzRulePublicationTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "ed8716cee6241da607ace69735da5517080e4be8ac51eac1d01c5893ac330ea5",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/resources/META-INF/services/org.junit.platform.launcher.TestExecutionListener",
+      "owner": "Rentz consumer",
+      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
+      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "86c5baea75efc02c0a51022c5238575922fde632ab6661054d85dc575b7cc1f6",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/tools/run-android-sanity.ps1",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Refuse the incompatible shared UI before ADB and attest the native classpath at each Java handoff.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "a6c71fb68091f4780b3a2316a5176986853c9d5b17727336519d729f4070733f",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/tools/run-arena.ps1",
+      "owner": "Rentz consumer",
+      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
+      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "4a8f44f4268fc0acc2893bce842034f7e43a5dbb1aca12179ce4c6190c60f28a",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/tools/test-qualified-runtime.ps1",
+      "owner": "Rentz consumer",
+      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
+      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "fe203f906248c1e968bc4e16274a7646e546c86394c4693b5fd3671cb5813f8c",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/tools/test-runtime-controls.ps1",
+      "owner": "Rentz consumer",
+      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
+      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "4043e8e9f127aecb4a13477dd95ac2f41b005a362700e1448cb43f5202fa00cd",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/tools/test-test-discovery.ps1",
+      "owner": "Rentz consumer",
+      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
+      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "4b68f1e8494c79a983b62a08ea468ab98cf91d3dbfebe8d882bf07d0bd99a967",
+      "allowDelete": false
+    },
+    {
+      "path": "config/documentation-validators.json",
+      "owner": "Rentz consumer",
+      "reason": "0.1.2 · Bind the adapted external link resolver to its reviewed bytes.",
+      "criterion": "Immutable document bytes are checked before relative external references resolve against the live layout.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "774f4e497bfdc2782b543dec47a65a1e0671be7192d519ef184b72d477149be8",
+      "allowDelete": false
+    },
+    {
+      "path": "config/infrastructure-workspaces.json",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Register the actual release, signing, UI and qualification paths while retaining physical and TEMP boundary checks.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "e648d07928139fe6ff66d8358efd62c2742fc4e991b67d369c5d44aef34a25ef",
+      "allowDelete": false
+    },
+    {
+      "path": "config/java-source-layout.json",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Separate production and test markers; verify all reviewed external interfaces on the actual Maven test classpath.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "c51938609ec7f8bbe268aed823c34258ee5c731e15dbc12876e90abac1b285aa",
+      "allowDelete": false
+    },
+    {
+      "path": "config/test-collections.json",
+      "owner": "Rentz consumer",
+      "reason": "Q20 · Bind evaluation seed identity to the actual v1 generator and protect the learning collection.",
+      "criterion": "In-batch aliases, historical aliases and false cluster sufficiency are refused; exact development replay, signed seeds, distinct tables, old rows and adjacent arena contracts remain covered.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q20/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "5660e017bd0f3daef550964266bb063519b0d20670dfdab2220f94b5f0185f8b",
+      "allowDelete": false
+    },
+    {
+      "path": "pom.xml",
+      "owner": "Rentz consumer",
+      "reason": "Incoming Reporting J22 binary adoption retained; reactor membership and declared test scope preserved.",
+      "criterion": "Declared JAR/POM identity, CodeSource and consumer behavior qualify separately.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "e082b10e208c987e0358cf01c4b1668e84d24ea0f9aad7080b469879f52f8da4",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/GameSessionTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "74b83d7c8620ff33c5a64691bc7cfae636d7f08bc472312043cd1a9e0e0c753e",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/FileSessionStorageTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "cfe8a8105c01c59ac732af9b83f324db92b4926f1f27fc7789f37d6552b67c72",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/SessionControllerTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "ae3b2e942a354a1c0ed7747cafcb86b486146560e407190c1e1118d49ace4d2f",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/SessionRepositoryTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "c67a2205929b9d7e484d625e7baae74d8ea21c9b5cf283609db359ea0469620f",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/SessionJsonValidationTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "f8c964d2f6dbf0391a1144e3f6f5f76c6f79d3f2762bccb3aa1e43936f4c9ed3",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/testing/AndroidComponentLayer.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "d290491c457378d1639ae52ab01c1f043b5a42d41bcda3d3d9ee6dcdafd767e5",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/testing/UiAuditRule.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Evaluate comparisons when invoked, retain a failed comparison before the JUnit error, and write evidence only under the explicit external property.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "b11a7362792705764f084484640074da7d7618ae1034318cadf33b85d1279585",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/collection/UiListsTest.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Keep encounter order, null behavior and immutability across the Android-compatible collector.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "1b9e8f84ede47f12650c3a33a7cfd8f7c9b1c6a66ad338a681c471a0712a51a9",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/copy/RentzMenuContentTest.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Exercise both localized menus and persisted selection without starting a new game.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "1ef0f1fba0e552719c6d21c660e5a28d0a78bc854ecce43e13debc138da0864b",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Bind the admitted shared AAR by hash and ensure it contains neither engine nor ATF classes.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "5874214a5c43fab31ad0d13233fa6c154984faa293a4690257d820fbcd402668",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/navigation/InputPermitTest.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Refuse stale, busy and consumed input frames, including a failed first command.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "f237e19f5853a11b4e2ea4ec328526b6a4b9fb1c17f2b9ee3e180f11561ace70",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/profile/ProfileSettingsTest.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Preserve stable seat identity, valid Unicode names and durability on write failure.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "7f72866def2bc00ba13dc32a823cda87205773a518fe633a0a9c6545d3955964",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/HistoryGridMetricsTest.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Check complete signed numbers, player group alignment and transfer of vertical scrolling in the compact window.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "be14ad16c3c238cf97b32250c8f7c96fb19eb9729056afad94aa8cb089d2c60c",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzHistoryReplayTest.java",
+      "owner": "Rentz UI",
+      "reason": "S05/S06 · Qualify the actual categories and finish order for confirmed hands.",
+      "criterion": "Derive the per-seat breakdown from observed plays. Distinguish equal awards and preserve every result after restoring current and compatible legacy journals.",
+      "proof": "../../rentz_back/ui-review/settlement-details-j5/README.md",
+      "expires": "2026-11-20",
+      "sha256": "74e76412dbbea03b74a1c8bcf8071091038713b18b3ad7c962da85bac35720c8",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Keep seat order and signed confirmed totals after restore, with no Whist columns.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "9f37fca949bf9174e019e2cccf2e88d3b46da24b22166a592f27234bb84b44c9",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzSequenceContentTest.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Bind 3–6 player anchors and public board slots to actual legal Rentz cards.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "5766a8f6f07e7e6ce77059aea3bb411d45dc5fceb5d9065e594066049432f9ea",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Check active actor, exact score and visibility across real contracts and hidden choices.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "a76b5882ad0b5d33402bddbd606fe7006edb2c1d2bc579d1893e99a85e5a54cf",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/TrickPreviewTest.java",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Preserve the 1500 ms hold without replay or a deadline extension.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "3843d8f1d343aa7cb96ed7fd963661010a0f0375db12597d6c828e28b11195c3",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/ai/search/DecisionMomentsTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "390ada4fdd34a022b08bf479325f6f28856c842cf388ecb976c0e0a0fc10a2e5",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/progress/PublicProgressTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q19 · Validate the public score allocation before rebuilding a continuation.",
+      "criterion": "Equal-fund impossible vectors fail before repair and are rejected after repair. Legal neighbors, every contract and table size, and an independent Totals allocation oracle pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q19/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "9baa5f1436d502fe00c3ed672342f2e4aa2159b7ddde24c1847ed88a4ebe47cd",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzAiTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "97c7a45fe794db32f94523913f8229d854bbc14b31fd9ff18395fdb9579e6350",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzBoundaryTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "b348f294562942e43fc763f3217db5bf45fd3ed26a39b1dd08b5d1ad1bd527fe",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzHardRefinementTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "b22ef2fc0c27da3ad8d1e6751791d07a3eaff95298898aca5b99bc87edb069a4",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzMatchStrategyTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "246dfc5a4f79894888427839d9c1df90b547998f6bb3f87c4348c91fada47c88",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzRulesTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "130d6d7b1a4099364aab0ce3845857e01d1d04fcfb439d16a223c1a897741d8c",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzSequenceTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "44e8c80810b4236e12e0eb30fe8223c9fc2b8d6a6edd42d5546b4449d84ee331",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzSettlementTest.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "ed497d434a0181251ce8268399aaf8168f279db5d58840ec8a43937e20e7065a",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/testing/RentzComponentLayer.java",
+      "owner": "Rentz consumer",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "a3cc493e07983bbc934219e24af822fa1e61970e327c8eb5dc33db648a99b84b",
+      "allowDelete": false
+    },
+    {
+      "path": "scripts/run-rentz-components.ps1",
+      "owner": "Rentz release",
+      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
+      "criterion": "Qualify the clean registered Git snapshot and reject altered commit, byte drift and population drift.",
+      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "expires": "2026-11-20",
+      "sha256": "61bcaff020b8ff49eac4b00df6ab9dceff7047d3fdfc31b0a80f6d33395f2e0c",
+      "allowDelete": false
+    },
+    {
+      "path": "scripts/RuntimeQualification.psm1",
+      "owner": "Rentz consumer",
+      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
+      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "f587516cbbc97745c1edf790e9b16c5feb3cdee858896a4e333c06ea2c40c320",
+      "allowDelete": false
+    },
+    {
+      "path": "scripts/TestCollections.psm1",
+      "owner": "Rentz consumer",
+      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
+      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "73a8cab1aa47171132137fe1aa93c1ed29d5c0d17f6e0bd2c2d15a35ef0648a6",
+      "allowDelete": false
+    },
+    {
+      "path": "scripts/TestSourceInventory.psm1",
+      "owner": "Rentz consumer",
+      "reason": "Q17–Q18 · Nested discovery and XML ownership, effective arena actors and independent admission.",
+      "criterion": "Jupiter and Surefire establish the selected Nested population; invalid or ambiguous ownership fails. Trusted context verifies the effective candidate, control, opponents and objective before promotion.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "a54963673ab98d05dd3c7188ba2df08f4cc499014ddaa91f6634c94491598535",
+      "allowDelete": false
+    }
+  ]
+}

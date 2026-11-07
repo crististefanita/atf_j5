@@ -29,6 +29,7 @@ Test Kit păstrează rezultatul comparației efective. Publicatorul mapează faz
 | [RuleCatalog](src/main/java/atf/rentz/RuleCatalog.java) | Valori parțiale și legături la implementare și declarații JUnit eligibile; [analiza sintactică](../docs/rentz/ATF_Qualification.md#legăturile-manifestelor-către-teste) rămâne distinctă de execuție. |
 | [YamlDocuments](src/main/java/atf/rentz/YamlDocuments.java) | Un singur document, fără chei duplicate sau ignorarea unui document suplimentar. |
 | [PolicyInputs](src/main/java/atf/rentz/PolicyInputs.java) | Buget, ponderi finite și legături ale regulilor tactice la cod și componente. |
+| [FamilyAnalysis](src/main/java/atf/rentz/arena/FamilyAnalysis.java) | Agregarea pură a rotațiilor, metricei și costurilor; independentă de simulare și I/O. |
 | [OfflineArena](src/main/java/atf/rentz/OfflineArena.java) | Partide complete CPU, control pereche, locuri rotite și selecția jurnalelor. |
 | [OfflineGameAudit](src/main/java/atf/rentz/OfflineGameAudit.java) | Tranziții, legalitate, câștigător și scor recalculate separat de politică. |
 | [EvaluationRegistry](src/main/java/atf/rentz/EvaluationRegistry.java) | Expunere atomică și refuzul reutilizării datelor rezervate. |
@@ -71,7 +72,7 @@ Comenzile pornesc din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven
 
 Componentele și arena rezervă exclusiv cache-ul Maven comun pe durata utilizării. Bootstrap-ul nu poate rescrie JAR-uri încă deschise de un proces Java; concurența este refuzată înaintea execuției, iar rezervarea se eliberează și la eroare.
 
-[Componenta rezervării](tools/test-cache-lease.ps1) verifică refuzul concurent și reutilizarea după eliberare, fără Maven sau emulator. Classpath-ul arenei elimină intrările goale și păstrează identitatea JAR-urilor folosite.
+[Componenta rezervării](tools/test-cache-lease.ps1) verifică refuzul concurent și reutilizarea după eliberare, fără Maven sau emulator. Classpath-ul arenei este explicit și legat de inventarul complet al JAR-urilor, claselor și resurselor observate înainte și după planul JUnit. [Atestarea runtime-ului](../docs/rentz/ATF_Qualification.md#identitatea-runtime-ului-calificat) este confruntată independent înaintea comenzii și după rulare.
 
 ## Guvernanța directoarelor
 
@@ -86,7 +87,7 @@ Rezultatul roșu se păstrează înaintea curățării, iar aceleași criterii s
 
 ## Acceptanța Android locală
 
-[Build-ul izolat](../scripts/build-rentz-android.ps1) cere o rulare de componente trecută, confruntă sursa motorului, execută testele Gradle și păstrează identitatea APK-ului. [Lansatorul nativ](tools/run-android-sanity.ps1) cere acest receipt înaintea rezervării dispozitivului.
+[Build-ul izolat](../scripts/build-rentz-android.ps1) cere o rulare de componente trecută, confruntă sursa motorului, execută testele Gradle și păstrează identitatea APK-ului. [Sanity-ul UI comun](tools/run-shared-ui-sanity.ps1) cere calificarea APK-ului izolat; [lansatorul prototipului](tools/run-android-sanity.ps1) refuză noul contract UI înaintea comenzilor de dispozitiv.
 
 | Mecanism | Contract |
 |---|---|

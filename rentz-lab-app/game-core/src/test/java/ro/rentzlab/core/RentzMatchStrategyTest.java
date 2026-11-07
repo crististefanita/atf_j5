@@ -1,10 +1,13 @@
 package ro.rentzlab.core;
 
+import ro.rentzlab.testing.RentzComponentLayer;
+
 import ro.rentzlab.ai.*;
 import org.junit.jupiter.api.Test;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@RentzComponentLayer
 class RentzMatchStrategyTest {
     @Test void matchWinUtilitySharesTiesAndNeverConfusesMarginWithVictory(){
         assertEquals(0.5,MatchUtility.value(List.of(7,7,0),0,PolicySettings.Objective.MATCH_WIN_SHARE));

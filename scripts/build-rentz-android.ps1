@@ -3,7 +3,8 @@ param(
     [Parameter(Mandatory)][string]$ComponentRun,
     [string]$JavaHome='C:\tools\Java21\jdk-21.0.12.1+1',
     [string]$Sdk='C:\tools\whist-android-sdk',
-    [ValidateSet('Debug','Release')][string]$Configuration='Debug'
+    [ValidateSet('Debug','Release')][string]$Configuration='Debug',
+    [switch]$UiSanity
 )
 $ErrorActionPreference='Stop'
 $root=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
@@ -15,7 +16,29 @@ if($RunRoot.StartsWith($root+'\',[StringComparison]::OrdinalIgnoreCase)-or$RunRo
 $component=Get-Content -Raw -LiteralPath (Join-Path $ComponentRun 'result.json')|ConvertFrom-Json
 if($component.status-ne'PASS'){throw 'Qualified offline component source required.'}
 if($component.collection.name-ne'regression'-or-not$component.androidJvm){throw 'Full offline regression including Android JVM is required before assembling an APK.'}
-$lab=Join-Path $root 'rentz-lab-app'
+$source=$root
+$sourceCommit=''
+if($Configuration-eq'Release'){
+    if(-not$component.sourceCommit){throw 'Release requires regression from a pinned source worktree.'}
+    $source=[IO.Path]::GetFullPath($component.source)
+    $sourceCommit=Get-AtfReleaseSourceCommit -SourceRoot $source -ProjectRoot $root
+    if($sourceCommit-cne$component.sourceCommit){throw 'Release source differs from the qualified commit.'}
+}
+$componentManifest=Join-Path $ComponentRun 'source-identity.json'
+if($component.sourceManifestSha256-and(Get-FileHash -LiteralPath $componentManifest).Hash-cne$component.sourceManifestSha256){
+    throw 'Component source manifest differs from the receipt.'
+}
+$androidReceipt=Get-Content -Raw -LiteralPath (Join-Path $component.androidJvm 'result.json')|ConvertFrom-Json
+if($androidReceipt.status-ne'PASS'){throw 'Passing Android JVM receipt required.'}
+$qualified=@{}
+foreach($row in Get-Content -Raw -LiteralPath (Join-Path $component.androidJvm 'source.json')|ConvertFrom-Json){
+    $qualified.Add($row.path,$row.sha256)
+}
+$regressionInputs=@{}
+foreach($row in Get-Content -Raw -LiteralPath $componentManifest|ConvertFrom-Json){
+    $regressionInputs.Add($row.path,$row.sha256)
+}
+$lab=Join-Path $source 'rentz-lab-app'
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 $stage=New-AtfWorkspace -Kind android -ProjectRoot $root
 New-Item -ItemType Directory -Path $RunRoot|Out-Null
@@ -25,19 +48,22 @@ $manifest=@(foreach($file in Get-ChildItem -LiteralPath $lab -Recurse -File|Wher
     New-Item -ItemType Directory -Force -Path (Split-Path $target)|Out-Null;Copy-Item -LiteralPath $file.FullName -Destination $target
     $hash=(Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash
     if($hash-ne(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash){throw 'Source changed during Android snapshot'}
-    if($relative.Replace('\','/').StartsWith('game-core/src/main/')){
-        $qualified=Join-Path $component.stage ('rentz-lab-app/'+$relative)
-        if($hash-ne(Get-FileHash -LiteralPath $qualified -Algorithm SHA256).Hash){throw 'Android core differs from qualified offline production source'}
+    $path=$relative.Replace('\','/')
+    if($qualified[$path]-cne$hash-or$regressionInputs["rentz-lab-app/$path"]-cne$hash){
+        throw "Android build input differs from qualified source: $path"
     }
-    [pscustomobject]@{path=$relative.Replace('\','/');sha256=$hash}
+    [pscustomobject]@{path=$path;sha256=$hash}
 })
+if($manifest.Count-ne$qualified.Count){throw 'Android build input population differs from qualified source.'}
 ConvertTo-Json -InputObject $manifest -Depth 4|Set-Content -LiteralPath (Join-Path $RunRoot 'source-identity.json') -Encoding utf8NoBOM
 ('sdk.dir='+$Sdk.Replace('\','/'))|Set-Content -LiteralPath (Join-Path $stage 'local.properties') -Encoding ascii
 Import-Module (Join-Path $PSScriptRoot 'AtfMavenCache.psm1') -Force
 $cacheLease=Enter-AtfJ5CacheLease -Repository $component.repository
-$savedJava=$env:JAVA_HOME;$savedStore=$env:RENTZ_STORE_FILE;$savedPassword=$env:RENTZ_STORE_PASSWORD;$exit=1
+$savedJava=$env:JAVA_HOME;$savedOptions=$env:JAVA_TOOL_OPTIONS;$savedStore=$env:RENTZ_STORE_FILE;$savedPassword=$env:RENTZ_STORE_PASSWORD;$exit=1
 try{
     $env:JAVA_HOME=$JavaHome
+    $runtime=New-Item -ItemType Directory -Path (Join-Path $stage 'runtime')
+    $env:JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=$($runtime.FullName)"
     if($Configuration-eq'Release'){
         $signing=Get-AtfInfrastructurePath -Area signing -ProjectRoot $root
         $identity=Get-Content -Raw -LiteralPath (Join-Path $signing 'identity.json')|ConvertFrom-Json
@@ -45,9 +71,11 @@ try{
         $env:RENTZ_STORE_PASSWORD=[Net.NetworkCredential]::new('rentz',$secure).Password
         $env:RENTZ_STORE_FILE=$identity.store
     }
-    & (Join-Path $stage 'gradlew.bat') -p $stage --offline --no-daemon ("-Prentz.mavenRepository="+$component.repository.Replace('\','/')) :game-core:test :app:testDebugUnitTest (':app:assemble'+$Configuration) *> (Join-Path $RunRoot 'build.log')
+    $tasks=@(':game-core:test',':app:testDebugUnitTest',(':app:assemble'+$Configuration))
+    if($UiSanity){$tasks+=@("-Prentz.uiEvidence=$RunRoot/assertions",':app:lintDebug',':app:assembleUiSanity')}
+    & (Join-Path $stage 'gradlew.bat') -p $stage --offline --no-daemon ("-Prentz.mavenRepository="+$component.repository.Replace('\','/')) @tasks *> (Join-Path $RunRoot 'build.log')
     $exit=$LASTEXITCODE
-}finally{$env:JAVA_HOME=$savedJava;$env:RENTZ_STORE_FILE=$savedStore;$env:RENTZ_STORE_PASSWORD=$savedPassword;$secure=$null;$cacheLease.Dispose()}
+}finally{$env:JAVA_HOME=$savedJava;$env:JAVA_TOOL_OPTIONS=$savedOptions;$env:RENTZ_STORE_FILE=$savedStore;$env:RENTZ_STORE_PASSWORD=$savedPassword;$secure=$null;$cacheLease.Dispose()}
 $results=@(foreach($module in @('game-core','app')){
     foreach($file in Get-ChildItem -LiteralPath (Join-Path $stage "$module/build/test-results") -Filter 'TEST-*.xml' -Recurse -ErrorAction SilentlyContinue){
         $destination=Join-Path $RunRoot ("tests/$module/"+$file.Name);New-Item -ItemType Directory -Force -Path (Split-Path $destination)|Out-Null;Copy-Item -LiteralPath $file.FullName -Destination $destination
@@ -58,6 +86,10 @@ $results=@(foreach($module in @('game-core','app')){
 $drift=@(foreach($row in $manifest){if((Get-FileHash -LiteralPath (Join-Path $lab $row.path) -Algorithm SHA256).Hash-ne$row.sha256){$row.path}})
 $after=@(Get-ChildItem -LiteralPath $lab -Recurse -File|Where-Object{[IO.Path]::GetRelativePath($lab,$_.FullName)-notmatch'(^|[\\/])(build|target|\.gradle|\.git)([\\/]|$)'-and$_.Name-ne'local.properties'}|ForEach-Object{[IO.Path]::GetRelativePath($lab,$_.FullName).Replace('\','/')})
 $population=@(Compare-Object @($manifest.path|Sort-Object) @($after|Sort-Object))
+if($sourceCommit){
+    try{if((Get-AtfReleaseSourceCommit -SourceRoot $source -ProjectRoot $root)-cne$sourceCommit){$drift+='Release source commit changed'}}
+    catch{$drift+=$_.Exception.Message}
+}
 $passed=$exit-eq0-and$results.Count-ge2-and@($results|Where-Object{$_.failures-or$_.errors-or$_.skipped-or$_.tests-lt1}).Count-eq0-and@($results|Where-Object{$_.module-eq'app'}).Count-gt0-and$drift.Count-eq0-and$population.Count-eq0
 $apk=Join-Path $RunRoot 'rentz-lab-debug.apk';$hash='';$certificate=@();$version=$null;$debuggable=$null
 if($passed){
@@ -78,6 +110,6 @@ if($passed){
         $passed=$passed-and-not$debuggable-and$actual-eq$identity.certificateSha256
     }elseif($Configuration-eq'Release'){$passed=$false}
 }
-[ordered]@{status=$(if($passed){'PASS'}else{'FAIL'});configuration=$Configuration;debuggable=$debuggable;stage=$stage;componentRun=$ComponentRun;qualifiedCoreMatches=$true;builderSha256=(Get-FileHash -LiteralPath $PSCommandPath).Hash;sourceManifestSha256=(Get-FileHash -LiteralPath (Join-Path $RunRoot 'source-identity.json')).Hash;apkFile=[IO.Path]::GetFileName($apk);apkSha256=$hash;versionName=$version.versionName;versionCode=$version.versionCode;certificate=$certificate;signing=$(if($Configuration-eq'Release'){'Dedicated Rentz release identity; external DPAPI credential'}else{'Local Android debug certificate; not an original-app release'});tests=$results;drift=$drift;populationChanges=$population}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath (Join-Path $RunRoot 'build-qualification.json') -Encoding utf8NoBOM
+[ordered]@{status=$(if($passed){'PASS'}else{'FAIL'});uiContract=$(if(Test-Path -LiteralPath (Join-Path $stage 'app/src/main/java/ro/rentzlab/app/ui/table/RentzTableContent.java')){'card-table-ui-v1'}else{'prototype-v1'});configuration=$Configuration;debuggable=$debuggable;stage=$stage;sourceCommit=$sourceCommit;componentRun=$ComponentRun;qualifiedCoreMatches=$true;builderSha256=(Get-FileHash -LiteralPath $PSCommandPath).Hash;sourceManifestSha256=(Get-FileHash -LiteralPath (Join-Path $RunRoot 'source-identity.json')).Hash;apkFile=[IO.Path]::GetFileName($apk);apkSha256=$hash;versionName=$version.versionName;versionCode=$version.versionCode;certificate=$certificate;signing=$(if($Configuration-eq'Release'){'Dedicated Rentz release identity; external DPAPI credential'}else{'Local Android debug certificate; not an original-app release'});tests=$results;drift=$drift;populationChanges=$population}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath (Join-Path $RunRoot 'build-qualification.json') -Encoding utf8NoBOM
 if(-not$passed){throw "Android build not qualified: $RunRoot"}
 Write-Output $RunRoot

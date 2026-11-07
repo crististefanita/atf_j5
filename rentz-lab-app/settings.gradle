@@ -2,6 +2,10 @@ pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal()
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        exclusiveContent {
+            forRepository { maven { url=uri('ui-library') } }
+            filter { includeGroup 'ro.cardtable' }
+        }
         def localRepository=providers.gradleProperty('rentz.mavenRepository').orNull
         if(localRepository) { maven { url=uri(localRepository) } }
         google(); mavenCentral()

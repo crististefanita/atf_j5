@@ -1,0 +1,96 @@
+package atf.rentz.governance.documentation;
+
+import atf.testkit.AtfComponentTest;
+import atf.rentz.governance.documentation.links.DocumentationLinkGovernanceTest;
+import atf.rentz.governance.source.GovernanceProject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import static org.junit.jupiter.api.Assertions.*;
+
+@AtfComponentTest
+class DocumentationControlsTest {
+    @TempDir Path root;
+    private List<DocumentationGovernanceSupport.Violation> inspect(String text) throws Exception {
+        Path file = root.resolve("README.md");
+        Files.writeString(file, text);
+        var result = new ArrayList<DocumentationGovernanceSupport.Violation>();
+        DocumentationReadmeStructureGovernanceTest.validate(file, root, result);
+        DocumentationStyleGovernanceTest.validate(file, root, result);
+        DocumentationProseGovernanceTest.validate(file, root, result);
+        DocumentationDiagramGovernanceTest.validate(file, root, result);
+        DynamicPathDocumentationArchitectureTest.validatePaths(file, root, result);
+        DocumentationLinkGovernanceTest.validate(file, root, result);
+        return result;
+    }
+    @Test void independentDefectsFailAndTheHealthyDocumentStaysValid() throws Exception {
+        String good = "# Contract\n\n## Pe scurt\n\nMecanism stabil.\n";
+        String fence = String.valueOf((char)96).repeat(3);
+        assertEquals(List.of(), inspect(good));
+        for (String defect : List.of(
+                "# Alt titlu\n", "#### Salt\n",
+                "<span>Text</span>\n",
+                "Una. Două. Trei. Patru.\n",
+                "[Link](absent.md#inexistent)\n",
+                fence + "mermaid\nflowchart LR\nA --> B\n" + fence + "\n",
+                "C:" + (char)92 + "Users" + (char)92 + "local\n")) {
+            assertFalse(inspect(good + "\n" + defect).isEmpty(), defect);
+            assertEquals(List.of(), inspect(good));
+        }
+    }
+    @Test void adaptedValidatorsKeepTheirDeclaredSourceIdentity() throws Exception {
+        Path project = GovernanceProject.root();
+        var manifest = new ObjectMapper().readTree(project.resolve("config/documentation-validators.json").toFile());
+        assertEquals("documentation-governance-source-adapter-v1", manifest.required("sourceContract").asText());
+        var paths = new java.util.HashSet<String>();
+        for (var row : manifest.required("sources")) {
+            String relative = row.required("path").asText();
+            assertTrue(paths.add(relative));
+            assertFalse(relative.contains(".."));
+            assertTrue(row.required("sha256").asText().matches("[a-f0-9]{64}"));
+            Path file = project.resolve("atf-tests/src/test/java/atf/rentz/governance/documentation").resolve(relative);
+            String actual = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file)));
+            assertEquals(row.required("adaptedSha256").asText(), actual, relative);
+        }
+        assertEquals(java.util.Set.of("DocumentationDiagramGovernanceTest.java", "DocumentationStyleGovernanceTest.java",
+                "DocumentationProseGovernanceTest.java", "DynamicPathDocumentationArchitectureTest.java",
+                "DocumentationReadmeStructureGovernanceTest.java", "DocumentationGovernanceSupport.java",
+                "links/DocumentationLinkGovernanceTest.java", "links/DocumentationLocalLinks.java",
+                "links/MarkdownAnchorIndex.java"), paths);
+    }
+    @Test void configuredInventoryIncludesEveryActiveGuideAndKeepsRetentionSeparate() throws Exception {
+        Path project = GovernanceProject.root();
+        var policy = new ObjectMapper().readTree(project.resolve("config/documentation-policy.json").toFile());
+        var expected = new java.util.TreeSet<Path>();
+        var actual = new java.util.TreeSet<Path>();
+        var layout = new ObjectMapper().readTree(project.resolve("config/java-source-layout.json").toFile());
+        try (var walk = Files.walk(project)) {
+            for (var file : walk.filter(Files::isRegularFile).toList()) {
+                if (DocumentationGovernanceSupport.isGovernedMarkdown(project, file)) actual.add(file);
+                String relative = project.relativize(file).toString().replace('\\', '/');
+                boolean excluded = false;
+                for (var entry : layout.required("excludedTrees")) {
+                    if (relative.equals(entry.asText()) || relative.startsWith(entry.asText() + "/")) excluded = true;
+                }
+                for (var row : policy.required("historical")) {
+                    if (relative.equals(row.required("path").asText())) excluded = true;
+                }
+                boolean active = file.getFileName().toString().equalsIgnoreCase("README.md")
+                        || relative.startsWith("docs/") && relative.endsWith(".md")
+                        || relative.startsWith("lib/README.") && relative.endsWith(".md");
+                if (active && !excluded) expected.add(file);
+            }
+        }
+        assertFalse(expected.isEmpty());
+        assertEquals(expected, actual, "All active guides must enter the permanent validators");
+        for (var row : policy.required("historical")) {
+            assertFalse(DocumentationGovernanceSupport.isGovernedMarkdown(project, project.resolve(row.required("path").asText())));
+        }
+        assertTrue(DocumentationGovernanceSupport.isGovernedMarkdown(project, project.resolve("lib/README.TestKit.md")));
+        assertTrue(DocumentationGovernanceSupport.isGovernedMarkdown(project, project.resolve("docs/rentz/ATF_Learning.md")));
+    }
+}

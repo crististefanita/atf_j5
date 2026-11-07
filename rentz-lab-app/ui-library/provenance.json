@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "coordinate": "ro.cardtable:card-table-ui:0.1.1",
+  "producer": "atf_j4",
+  "qualification": "C:/work/whist_back/ui-extraction/a4c96eeb71/handoff.json",
+  "files": [
+    {
+      "path": "ro/cardtable/card-table-ui/0.1.1/card-table-ui-0.1.1-sources.jar",
+      "sha256": "cdad8e1e5e1f2b9ae4360c6c0cc9103161675c5321a9aa892b9f726af939ec26"
+    },
+    {
+      "path": "ro/cardtable/card-table-ui/0.1.1/card-table-ui-0.1.1.aar",
+      "sha256": "bbce53729bc3e9581d0480be208f1ee57b87cd62bff8565a42eccc94fe7be337"
+    },
+    {
+      "path": "ro/cardtable/card-table-ui/0.1.1/card-table-ui-0.1.1.module",
+      "sha256": "0a30550b15aa4ffbeb63577a465dd79df5f613e66a8d86ba1b3df05f34e285f3"
+    },
+    {
+      "path": "ro/cardtable/card-table-ui/0.1.1/card-table-ui-0.1.1.pom",
+      "sha256": "6cda61d0b334492427250419870add816cf64a0351e6cae9d0071ef3d4f1945e"
+    }
+  ]
+}

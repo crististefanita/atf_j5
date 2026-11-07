@@ -1,35 +1,93 @@
-# ToDo: tabla Rentz și scorul general
+# ToDo: interfața Rentz aliniată cu Whist Lab
 
-## Scop și statut
+## Pe scurt
 
-**De implementat.** Documentul stabilește cerințele de prezentare și probele care le închid. Prototipul funcțional și un sanity trecut nu califică lizibilitatea tablei sau utilitatea istoricului complet.
+**P1 · integrare și istoric adaptiv verificate.** Meniul, profilul, limbile, chenarele și cărțile folosesc nucleul vizual J4. Pe API 28, istoricul Rentz a ajuns la ultimul jucător și la mâna 48 în ambele ferestre, cu font 1,5. [Matricea istoricului](../../../../rentz_back/ui-review/history-native-matrix-j5/README.md)
 
 | Prioritate | Semnificație |
 |---|---|
 | P1 | Necesar înainte de a prezenta interfața drept finisată și complet calificată. |
 | P2 | Rafinare după corectitudinea informației, geometrie și accesibilitate. |
 
-## Probleme constatate în cod și capturi
+## Diferențele față de reperul Whist Lab
 
-| Constatare | Sursă verificată | Efect pentru jucător |
+Registrul este confruntat cu sursele, componentele și încercările native identificate în dosarul integrării. [Refactorizarea cerută producătorului UI](../../../atf_j4/docs/feedback/ATF_CardUi_Extraction.md) trebuie să păstreze comportamentul Whist; acest registru deține adaptarea Rentz.
+
+| Suprafață | Reper verificabil în Whist Lab | Lacună Rentz și efect |
 |---|---|---|
-| Tabla este construită din șiruri de text, ordonate după rang; nu există poziții stabile în jurul valetului. | [MainActivity](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/MainActivity.java), `render`; [tabla nativă](../../../../rentz_back/android-acceptance/20261106-003/native/checkpoint-04.png). | Cărțile se deplasează vizual când apar ranguri mici; frontierele și spațiile libere sunt greu de urmărit. |
-| La calculul adversarilor se înlocuiește întregul ecran; la încheiere nu se mai desenează tabla. | `act` și `render`; [închiderea mâinii](../../../../rentz_back/android-acceptance/20261106-003/native/checkpoint-05.png). | Se pierde contextul mutărilor și nu se poate inspecta tabla finală înaintea distribuirii următoare. |
-| Rezultatul mâinii este afișat prin reprezentarea unei liste de numere. | `render`, ramura terminală. | Punctele nu au nume sau locuri de sosire atașate explicit. |
-| Istoricul repetă antete lungi și pune delta și totalul într-un singur text; nu fixează antetul sau prima coloană. | `history` și `cell`; [istoricul nativ](../../../../rentz_back/android-acceptance/20261106-003/native/checkpoint-06.png). | Se văd doar unele coloane; derularea nu oferă context suficient și comparația între jucători este greoaie. |
-| UI omite alegătorul; `HandResult` nu păstrează locurile de sosire sau descompunerea punctajului. | [RentzMatch](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/RentzMatch.java): există `chooser`, dar UI îl omite; lipsesc sosirile și contribuțiile în înregistrarea istorică. | UI nu poate explica retrospectiv toate rezultatele; premiile egale nu identifică ordinea sosirilor. |
+| Pornire | [MenuScreens](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/screens/MenuScreens.java), [SetupScreen](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/screens/SetupScreen.java): pagini separate, dropdown RO/EN, profil, reluare și scoruri. | Integrat prin `HomeMenu` și `RentzMenus`: configurare separată, RO/EN, profil și reluare vizibilă. Rămân verificările native ale rutelor negative și ale textului mărit. |
+| Nume și preferințe | [PlayerSettingsDialog](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/profile/PlayerSettingsDialog.java), [PlayerPreferences](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/profile/PlayerPreferences.java). | Editor comun și preferințe Rentz durabile, fără schimbarea identității locului. Filtrul Android UTF-16 și politica de puncte de cod cer reconciliere în producătorul comun. |
+| Masă și navigare | [GameScreen](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/screens/GameScreen.java), [AppNavigation](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/navigation/AppNavigation.java). | Masa folosește `BoardLayout`, chenarele comune și meniul discret. Inițializarea 3/6 locuri a trecut pe același viewport API 28; fontul mărit și profilul compact cer probe distincte. |
+| Mână și depunere | [CenteredHandView](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/hand/CenteredHandView.java), [GameTablePanel](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/table/GameTablePanel.java). | `HandFan` și `PlayedCardsView` sunt comune; `RentzTableContent` păstrează reveal și legalitatea. Indicii, o carte și mâna goală trebuie urmărite pe probele native, separat de datele JVM. |
+| Continuitate | Modelele de navigare, reafișare și colectare păstrează masa și invalidează evenimentele depășite. | Masa rămâne afișată, iar `TrickPreview` păstrează levata nouă 1500 ms fără replay. Controllerul livrează încă lotul AI; nu sunt calificate cadre individuale pentru toate mutările adverse. |
+| Scor | [Proiecția istoricului](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/score/ScoreHistoryColumn.java) este distinctă de geometrie și randare. | J5 măsoară textul, aliniază Δ și Σ și păstrează antetul și identitatea mâinii în timpul derulării. |
 
-Capturile sunt dovezi ale build-ului identificat în [receipt-ul extern](../../../../rentz_back/android-acceptance/20261106-003/native/ui-result.json). Observațiile din sursă se reconfirmă pe codul live înaintea implementării; modificările paralele se păstrează.
+Componentele existente de sesiune, codec și lifecycle se păstrează. Cazurile UI noi folosesc motorul Rentz real și comparații capturate în execuție; selectorii nativi au probe separate pentru item AdapterView, vecin dezactivat și ambiguitate.
+
+## Dovezi pe increment
+
+- Cele 33 de teste JVM inițiale sunt păstrate, cu sursele neschimbate; 16 cazuri noi verifică proiecțiile, cele opt contracte, scorul negativ/pozitiv, blind-ul, restaurarea și refuzul comenzilor depășite.
+- API 28: profil, RO/EN, configurare, revenire, o mână de levate, o carte centrată, istoric și restart au trecut. Inițializarea cu 3/6 locuri este probă de afișaj pe același viewport.
+- Extent păstrează comparațiile evaluate, acțiunile native și capturile originale; XML-ul celor 33 de teste vechi rămâne dovadă de execuție, fără expected/actual reconstruite ulterior.
+- Matricea istoricului adaptiv cuprinde 53 de teste JVM și 10 puncte native de verificare pe jurnalul de 48 de mâini. [Dosarul istoricului](../../../../rentz_back/ui-review/history-native-matrix-j5/README.md)
+- Detaliul punctajului adaugă comparații pe cele 48 de mâini și verifică nativ două detalii după restaurare. Pe API 28, locurile cu premiu egal rămân distincte și revenirea păstrează grila. [Dosarul S05/S06](../../../../rentz_back/ui-review/settlement-details-j5/README.md)
+
+## P1: paritatea vizuală și de interacțiune
+
+### Admiterea nucleului comun
+
+**U08 — integrare realizată:** configurația live consumă `ro.cardtable:card-table-ui:0.1.1` din repository-ul local fixat prin hash. Tema comună este activă; proiecțiile și comenzile rămân Rentz, fără motor Whist sau ATF în APK.
+
+- [Contractul integrării](../rentz/ATF_UiIntegration.md) și [atlasul UI](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/README.md) identifică implementarea.
+- Dosarul integrării inițiale păstrează rezultatele, domeniul și încercările originale. [Dovezile integrării J4 → J5](../../../../rentz_back/ui-review/shared-ui-cb695c1461/README.md)
+- Compatibilitatea API 28 a expus un apel `Stream.toList()` în adaptor; colectorul portabil păstrează ordinea și imutabilitatea. Lint și proba nativă sunt porți distincte.
+
+| ID și stare | Schimbare cerută și criteriu de închidere |
+|---|---|
+| **U01 · PARȚIAL** | **Fixați reperul înainte de portare.** Identificați sursele Whist, configurația, geometria și capturile disponibile pentru aceleași intrări. Codul live și ultimul APK calificat pot diferi; orice diferență rămâne explicită. Nu comparați Rentz cu o captură sau un mock vechi prezentat ca interfață live. |
+| **U02 · PARȚIAL** | **Același meniu și editor de nume.** Același aranjament, controale, stil și flux pornire → configurare → masă; reluarea fără sesiune păstrează comportamentul butonului din reper. Dropdown RO/EN, implicit EN la prima pornire, titluri și ajutor Rentz localizate, salvare/resetare/anulare a numelui și erori IO vizibile. Contractul de nume al reperului este NFC, 1–10 puncte de cod și caracterele admise; confruntați separat filtrul Android și validatorul. Preferințele și salvările rămân proprii aplicației Rentz. |
+| **U03 · PARȚIAL** | **Aceleași principii la configurare și scoruri personale.** Limba și revenirea păstrează alegerile valide; o partidă nouă cere confirmare când înlocuiește sesiunea. Selectorul jocului, regulile și opțiunile afișează numai capabilități Rentz reale. Intrările de scor din meniul comun cer un conținut Rentz funcțional și o stare goală explicită; nu se copiază clasamentul Whist sau un buton fără efect. |
+| **U04 · PARȚIAL** | **Aceeași compoziție a mesei.** Omul rămâne jos, chenarele și cărțile depuse păstrează identitatea locului și ordinea motorului la 3–6 jucători. Indicatorul marchează actorul efectiv; asul, săritura și jucătorul terminat din secvențe interzic deducerea turei numai prin incrementarea locului. Fără spatele cărților adverse, etichete redundante sau scroll vertical al mesei în profilurile declarate. |
+| **U05 · PARȚIAL** | **Același desen al cărții și aceeași mână centrată.** Proporție, dimensiune la același viewport, suprapunere, indici lizibili și reacție la atingere conforme reperului. Opt cărți Rentz pe un rând, o carte centrată și mână goală reprezentată corect; cartea ridicată nu mută chenarul și nu ascunde indicii vecinilor. Legalitatea și comanda aparțin motorului, cu o singură aplicare. În alegerea pe nevăzute nu se dezvăluie mâna înainte de `REVEAL`. |
+| **U06 · PARȚIAL** | **Depunere și continuitate inspectabile.** Cartea publică apare în dreptul actorului, iar levata completă rămâne inspectabilă potrivit politicii de timp a reperului înainte de colectare. Masa nu dispare în timpul AI; fluxul de prezentare folosește evenimente publice identificate, fără repetarea calculului sau a comenzii. Pauza, istoricul, meniul și callback-urile întârziate nu avansează încă o dată jocul. |
+| **U07 · PARȚIAL** | **Grila, derularea și detaliul mâinii sunt implementate.** S02 și S03 au componente și sanity nativ cu șase jucători. Clasamentul și rezumatul de final rămân la S01 și S07. |
+
+**Distribuire și depunere sunt criterii separate.** Reperul consultat compune mâna din snapshot; animatorul `TrickCollection` colectează levata și nu demonstrează o animație de distribuire. Copiați comportamentul vizual demonstrat, iar o animație nouă se tratează ca funcționalitate distinctă, fără a o introduce în refactorizarea Whist.
+
+## Matricea parității prin componente
+
+Reutilizarea testelor înseamnă aceleași invariante și oracole independente, adaptate la intrările Rentz. Clasele Whist care construiesc direct `GameSession` sau `GameConfig` păstrează și o verificare de integrare în jocul lor.
+
+| Familie și reper | Componente de introdus în Rentz |
+|---|---|
+| Meniu, profil și [MatchSetup](../../../atf_j4/whist-lab-app/app/src/test/java/ro/whistlab/app/screens/MatchSetupComponentTest.java) | RO/EN, limbă schimbată pe fiecare rută, alegeri reținute, nume valid/invalid/resetat, eșec de salvare și reluare. Separat, binding Android: dropdown, tastatură, buton și semantica accesibilă. |
+| [Ordinea locurilor](../../../atf_j4/whist-lab-app/app/src/test/java/ro/whistlab/app/table/TableSeatOrderComponentTest.java) | Aceeași mapare loc → chenar → carte la 3–6 jucători; secvențe cu as, săritură, pas și actor terminat, comparate cu motorul Rentz real. |
+| Mână, carte, viewport și fereastră | Opt, una și zero cărți; indici, ridicare, z-order, centrare, insets și text mărit. Cele 13 cărți pot verifica rendererul comun pentru Whist, dar nu devin o distribuire legală Rentz: [OpeningDeal](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/OpeningDeal.java) cere opt cărți per loc. |
+| Evenimente și lifecycle | Lot de mutări AI, levată completă, calcul anulat, reluare, dialoguri suprapuse și rezultat depășit. Ceas și coadă controlate; publicarea unui cadru nu execută motorul din nou. |
+| Scor și raster | Zero, negativ, egalități, 3–6 locuri și istoric până la 48 de mâini; sumă independentă a deltelor, text, clipping și primul/ultimul rând după restaurare. Rasterul JVM nu substituie fontul Android. |
+
+Păstrați dimensiunile și scalele de mai jos pentru componente. E2E minim verifică meniul/profilul și revenirea, apoi un traseu legal cu depunere și scor; profilurile suplimentare disting numai riscul de afișaj, fără repetarea partidei complete.
+
+Înregistrați selecția UI în colecțiile testabile, cu clase și invocări așteptate, astfel încât filtrul Gradle sau adaptorul ATF să nu piardă cazuri. Raportul Extent al componentelor păstrează comparațiile capturate în execuția lor; XML-ul JVM și auditul randării rămân probe distincte, fără aserțiuni inventate la publicare.
+
+## Lacune active după integrare
+
+| Prioritate | Lacună și consecință | Închidere necesară |
+|---|---|---|
+| P1 | Controllerul avansează adversarii într-un lot; UI păstrează contextul și ultima levată, dar nu arată fiecare eveniment intermediar. | U06: proiecție secvențială numai din evenimente publice, cu timp și anulare controlate; fără recalcul sau replay de comandă. |
+| P2 | Politica numelui este pe puncte de cod, iar filtrul dialogului comun este UTF-16. | U02, proprietar J4: port de filtrare compatibil cu politica consumatorului, păstrând comportamentul Whist cerut. |
+| P2 | Proba nativă minimă acoperă 3/4/6 locuri pe un singur afișaj. | U01/U04/U05: font mărit și viewport compact, folosind componentele înaintea capturilor native focalizate; fără repetarea mâinii complete la fiecare rezoluție. |
+| P2 | Lansatorul prototipului folosește alte etichete și altă navigare. | U09: noul receipt identifică `uiContract`; lansatorul vechi refuză noul UI înainte de ADB. Migrați decizia și oracolul independent în traseul nou înainte de a declara înlocuită suita veche. |
 
 ## P1: Rentz organizat în jurul lui J
 
 | ID și stare | Cerință și criteriu de acceptanță |
 |---|---|
 | **R01 · TODO** | **J trebuie să fie regula și ancora reală a modului cerut.** La patru jucători, motorul actual deschide deja din J. Pentru celelalte mese, opțiunea explicită „Valet mereu” trebuie propagată prin configurație, motor, observație, simulare, oracol și salvare; varianta existentă „Mijlocul pachetului” rămâne identificată distinct. Este interzis ca UI să arate J în timp ce motorul așteaptă Q, 10 sau 9. |
-| **R02 · TODO** | **Patru rânduri stabile, câte unul pentru fiecare culoare.** J-urile se aliniază pe aceeași coloană; rangurile inferioare cresc către J, iar Q/K/A continuă după el. Fiecare carte depusă are loc determinist, independent de ordinea în care au fost jucate culorile. Nu afișați șiruri text care se rearanjează sau rup rândul arbitrar. |
-| **R03 · TODO** | **Stări vizuale distincte.** Carte depusă, loc încă liber, culoare nedeschisă, ultima mutare și continuare legală au reprezentări explicabile. Slotul orientativ nu este carte jucată; indiciul de mutare folosește numai mâna proprie și legalitatea furnizată de motor. Nu dezvăluiți deținătorul cărților necunoscute. |
-| **R04 · TODO** | **Tabla rămâne vizibilă și stabilă.** La calcul se blochează comenzile și se indică actorul, păstrând masa. La încheiere rămân tabla finală, sosirile și punctajul; abia comanda explicită de continuare distribuie următoarea mână. „Pas”, tura suplimentară și săritura au explicație scurtă, fără schimbarea ordinii rândurilor. |
-| **R05 · TODO** | **Nu falsificați completarea tablei.** Afișați toate cărțile efectiv depuse și contorul lor. Modelul actual determină ultimul loc când ceilalți au terminat; pot rămâne cărți nejucate. Acestea nu se umplu automat în sloturi pentru o imagine „completă”. Orice schimbare a terminării este regulă separată, cu sursă și componente. |
+| **R02 · PARȚIAL** | **Patru rânduri stabile există.** `RentzSequenceContent` păstrează rangul real și sloturile 3–6 locuri. Alinierea opțiunii J depinde de R01; rămân calificarea rasterului compact și probele independente de ordinea culorilor. |
+| **R03 · PARȚIAL** | **Slotul gol nu este carte jucată.** Proiecția distinge ancora și cărțile publice, iar legalitatea vine din motor. Rămân marcarea ultimei mutări și indicii explicabili pentru continuare, fără dezvăluirea deținătorilor necunoscuți. |
+| **R04 · PARȚIAL** | **Tabla și comanda explicită de continuare există.** Calculul blochează comenzile și păstrează masa; la încheiere rămâne tabla publică. Rămân sosirile, explicațiile pentru pas/săritură și calificarea nativă a închiderii secvențelor. |
+| **R05 · PARȚIAL** | **Cărțile publice sunt proiectate exact.** Componentele confruntă tabla reală fără umplerea fictivă a sloturilor. Adăugați cazul terminal independent și contorul lizibil; modelul poate încheia cu cărți nejucate, iar orice schimbare a terminării rămâne regulă separată. |
 
 Schema stabilește relația rangurilor, fără a reprezenta o distribuire de antrenament:
 
@@ -47,11 +105,11 @@ Schema stabilește relația rangurilor, fără a reprezenta o distribuire de ant
 | ID și stare | Cerință și criteriu de acceptanță |
 |---|---|
 | **S01 · TODO** | **Clasament general lizibil pentru toți jucătorii.** Nume, total confirmat și poziție, cu egalități tratate explicit. Scorurile negative se ordonează numeric; zero nu este lipsă de date. Ordinea locurilor la masă rămâne stabilă în istoric, chiar dacă ordinea clasamentului se schimbă. |
-| **S02 · TODO** | **Istoric complet, compact și navigabil.** O linie pentru fiecare mână încheiată; prima zonă arată numărul, sub-jocul, alegătorul și marcajul ×2. Fiecare jucător are un grup compact cu două valori: **Δ** pentru mâna respectivă și **Σ** pentru totalul cumulativ. Explicați simbolurile o singură dată. Rentz nu primește coloane de licitație sau obiective importate din alt joc. |
-| **S03 · TODO** | **Antete și context păstrate la derulare.** Antetul jucătorilor rămâne vizibil vertical, iar identificarea mâinii rămâne vizibilă orizontal. Separatoare discrete între jucători, cifre aliniate la dreapta și spațiere măsurată după conținut; antetul nu ocupă lățimea prin repetarea „puncte / total”. Derularea orizontală este evidentă și ajunge până la ultimul jucător, fără celule inaccesibile sau suprapuse. |
-| **S04 · TODO** | **Total confirmat versus mână în curs.** Punctele provizorii nu se adaugă încă o dată la total. O mână incompletă nu apare ca rezultat final; în Rentz, sosirea poate fi vizibilă înaintea decontării premiilor. La închidere, tabelul primește o singură linie, iar revenirea sau reluarea nu o dublează. |
-| **S05 · TODO** | **Explicarea rezultatului.** Detaliul unei linii arată profilul, alegătorul, dublarea și contribuțiile relevante: levate, dame, carouri, K♥, 10♣ sau premiu de sosire. Q♦ în Totale este explicată în ambele categorii. Valoarea finală coincide cu înregistrarea motorului; UI nu inventează sau recalculează regulile de punctare. Rezumatul premiilor din meniu corespunde mesei de 3–6 jucători și profilului efectiv, fără o listă fixă pentru patru locuri. |
-| **S06 · TODO** | **Date suficiente pentru istoric.** Păstrați public și imuabil ordinea sosirilor Rentz și contribuțiile necesare explicației. Nu deduceți locul din puncte: două locuri pot avea premii egale. Nu introduceți mâinile private sau seed-ul în modelul de prezentare; calificați restaurarea și compatibilitatea jurnalelor existente. |
+| **S02 · VERIFICAT** | **Istoric de până la 48 de mâini confirmate.** Fiecare rând arată sub-jocul, alegătorul și marcajul ×2, urmate de Δ și Σ. Componentele confruntă toate locurile după restaurare și probează excluderea unei mâini în curs. |
+| **S03 · VERIFICAT** | **Acces la capetele istoricului, inclusiv cu font mărit.** Pe API 28, EN, 360 dpi și font 1,5, ultimul grup complet și mâna 48 sunt accesibile la 720 × 1280 și 720 × 740. Fereastra scundă derulează întregul conținut până la legenda completă. La mărire, antetul și legenda revin în pozițiile fixe. |
+| **S04 · PARȚIAL** | **Delta și totalul confirmat sunt separate.** Componentele verifică o mână în curs și totalurile tuturor locurilor. Sanity-ul confruntă totalurile finale și revizia după derulare. Rămâne proba cu sosire în Rentz înaintea decontării. |
+| **S05 · PARȚIAL** | **Detaliul mâinii este verificat.** Profilul, alegătorul, dublarea și contribuțiile punctate apar în detaliu. Componentele verifică Q♦ în ambele categorii la Totale. Ajutorul din meniu mai are nevoie de grila premiilor pentru mesele de 3–6 jucători, derivată din profilul efectiv. |
+| **S06 · VERIFICAT** | **Date publice și imuabile.** Motorul fixează contribuțiile și ordinea la decontare. Componentele reconstruiesc rezultatele pentru jurnale compatibile. Pe API 28, mâna 48 păstrează ordinea locurilor cu premiu zero după reluare. |
 | **S07 · TODO** | **Închidere cu identități, nu cu liste brute.** Rezumatul mâinii folosește nume, rezultat, delta și total pentru fiecare loc. Finalul partidei separă câștigătorii la egalitate de ordinea de afișare; scorul maxim câștigă și când toate totalurile sunt negative. |
 
 ## Arhitectură de prezentare și refolosire
@@ -70,7 +128,7 @@ flowchart LR
 <details>
 <summary>Legendă: desenul nu decide legalitatea sau scorul</summary>
 
-Numele componentelor viitoare se stabilesc la implementare; diagrama nu afirmă că extragerea există deja. Proiecția poate formata date publice, iar geometria poate măsura spațiul, însă comanda rămâne validată de motor.
+Proiecțiile și adaptoarele existente sunt identificate în atlasul UI. Diagrama delimitează și extensiile rămase: proiecția formatează date publice, geometria măsoară spațiul, iar comanda rămâne validată de motor.
 
 </details>
 
@@ -111,4 +169,4 @@ La limita lizibilității se alege un mod explicit de derulare sau o dispunere a
 3. O probă de istoric derulează vertical și până la ultimul jucător, confruntă toate valorile vizibile și verifică revenirea și reluarea, fără linii duplicate.
 4. Rularea păstrează extern identitatea APK-ului, configurația efectivă, expected/actual și capturile native originale inline base64 în stilul proiectului. O masă sau o rezoluție nu califică întreaga matrice.
 
-**Ordine de lucru:** R01 și datele necesare → R02–R05 și S01–S07 prin componente → calibrare nativă → E2E selectiv → P2 pentru animații și finisaje. Bifați fiecare TODO numai cu implementare identificată, probe relevante și o verificare actuală a codului live.
+**Ordine de lucru:** U01 → refactorizarea UI în producător → U02–U05 și adaptoarele Rentz prin componente → U06–U07, R02–R05 și S01–S07 → calibrare nativă și E2E selectiv. R01 rămâne o modificare de regulă separată: condiționează opțiunea „Valet mereu”, fără să blocheze meniul sau geometria și fără să fie simulată prin desen. Închideți criteriile numai cu implementare identificată, probe relevante și reconfirmarea codului live.

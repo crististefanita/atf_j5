@@ -24,6 +24,9 @@ O regulă se verifică prin API-ul minim care îi observă efectul. Partida virt
 | Evaluare offline | Refuzul datelor expuse, registru corupt sau concurent, oracol negativ și jurnale private numai pentru rolul evaluat. | [OfflineArenaComponentTest](../../atf-tests/src/test/java/atf/rentz/OfflineArenaComponentTest.java) |
 | Registru strict | Proprietăți duplicate la orice nivel, tipuri coercibile, câmpuri incompatibile și conținut suplimentar; refuz fără schimbarea octeților și păstrarea expunerii în vecinul valid. | [EvaluationRegistryValidationTest](../../atf-tests/src/test/java/atf/rentz/EvaluationRegistryValidationTest.java) |
 | Partidă virtuală | Conservare, epuizarea alegerilor, rotație, scor și limită de acțiuni. | Cazurile generate din `RentzRulesTest`. |
+| UI Rentz fără dispozitiv | Meniu RO/EN, profil, reveal, selecție legală, actor, secvențe, scor, restaurare și callback-uri depășite; comparații capturate în execuție. | [Componente UI](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/) și [atlas](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/README.md). |
+| Istoric adaptiv fără dispozitiv | Dimensiuni pe 3–6 locuri, valori cu semn, legendă pe mai multe rânduri și 288 de perechi Δ/Σ din 48 de mâini. Codec-ul reface jurnalul folosit de sanity. | [Componentele istoricului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/) și [contractul grilei](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md). |
+| Selectori nativi fără dispozitiv | Item AdapterView neclickabil, vecin dezactivat, text pasiv și ținte ambigue. | [Probele selectorilor](../../atf-tests/tools/test-ui-selectors.ps1). |
 | Sesiune Android fără dispozitiv | Refuz fără jurnalizare, proiecție proprie, reluare deterministă, identități incompatibile și eligibilitatea pe nevăzute la ultima alegere. | [GameSessionTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/GameSessionTest.java), executat prin Gradle. |
 | Codec fără dispozitiv | Document unic strict, tipuri și domenii numerice exacte, payload de comandă, format vechi explicit și restaurare validă. | [SessionJsonValidationTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/SessionJsonValidationTest.java), executat prin Gradle. |
 | Infrastructură fără dispozitiv | Descoperirea scripturilor, citiri TEMP cu domeniu explicit, API-uri alternative și linkuri refuzate fără urmărire. | [Controale PowerShell](../../atf-tests/tools/test-workspace-governance.ps1), incluse de lansator înaintea Maven. |
@@ -80,6 +83,6 @@ XML-urile păstrează întreaga populație executată. Raportul narativ publică
 |---|---|---|
 | Componentă verde | Contractul modelat în domeniul ei. | Nu confirmă preset-ul original, grafica, funcțiile comerciale sau nivelul expert. |
 | Distribuiri generate | Regresia proprietăților motorului. | Nu sunt loturi rezervate de antrenare; învățarea cere identități și partiții proprii. |
-| Auditul manifestului | Clasă, metodă publică și declarație de test existente, cu mutanți negativi. | Nu dovedește execuția testului, independența oracolului sau adevărul sursei. |
+| Auditul manifestului | Clasă deținătoare și declarație de test eligibilă, cu mutanți negativi. | Nu dovedește execuția testului, independența oracolului sau adevărul sursei. |
 
 Statutul din [manifest](../../config/rentz-rules.yaml) se schimbă numai cu probă nouă. [Arhitectura](ATF_Architecture.md) separă sursa, configurația, observația și evaluarea jucătorilor.

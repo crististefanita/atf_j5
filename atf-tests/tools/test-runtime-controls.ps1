@@ -78,8 +78,8 @@ function PlanFixture([string]$Name){
     $folder=Join-Path $fixture $Name;New-Item -ItemType Directory -Path "$folder/config"|Out-Null
     Copy-Item -LiteralPath "$project/config/test-collections.json","$project/config/java-source-layout.json" -Destination "$folder/config"
     $layout=Get-Content -Raw "$folder/config/java-source-layout.json"|ConvertFrom-Json
-    foreach($entry in $layout.roots|Where-Object role -EQ 'test'){New-Item -ItemType Directory -Path (Join-Path $folder $entry.path) -Force|Out-Null}
-    $test=Join-Path $folder 'atf-tests/src/test/java/FutureTest.java';'package future; class FutureTest {}'|Set-Content -LiteralPath $test
+    foreach($entry in $layout.roots|Where-Object{$_.role-in@('main','test')}){New-Item -ItemType Directory -Path (Join-Path $folder $entry.path) -Force|Out-Null}
+    $test=Join-Path $folder 'atf-tests/src/test/java/FutureTest.java';'package future; class FutureTest { @org.junit.jupiter.api.Test void futureCase() {} }'|Set-Content -LiteralPath $test
     return $folder
 }
 Case 'All five collections are resolvable and regression includes all offline gates' {
@@ -101,7 +101,7 @@ Case 'Collection schema uses an integer token rather than coercible values' {
     }
 }
 Case 'Nonconventional test sources cannot silently escape selection' {
-    $folder=PlanFixture 'hidden-plan';"package future;`nclass Unselected {`n @Test void ignored(){} }"|Set-Content -LiteralPath "$folder/atf-tests/src/test/java/Unselected.java"
+    $folder=PlanFixture 'hidden-plan';"package future;`nclass Unselected {`n @org.junit.jupiter.api.Test void ignored(){} }"|Set-Content -LiteralPath "$folder/atf-tests/src/test/java/Unselected.java"
     $failed=$false;try{Get-RentzTestPlan -ProjectRoot $folder|Out-Null}catch{$failed=$_.Exception.Message-match'Unselected'};Require $failed 'A test outside the naming contract was hidden'
 }
 Case 'Missing extra duplicate skipped and empty XML populations are refused' {

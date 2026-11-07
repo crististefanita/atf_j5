@@ -1,5 +1,7 @@
 package ro.rentzlab.app.lifecycle;
 
+import ro.rentzlab.app.testing.AndroidComponentLayer;
+
 import ro.rentzlab.ai.*;
 
 import org.junit.Test;
@@ -8,6 +10,7 @@ import ro.rentzlab.app.SessionJson;
 import ro.rentzlab.core.*;
 import static org.junit.Assert.*;
 
+@AndroidComponentLayer
 public class SessionControllerTest {
     @Test public void acceptedHumanCommandIsDurableBeforeBotWorkStarts() throws Exception {
         try(var f=new LifecycleFixture()){

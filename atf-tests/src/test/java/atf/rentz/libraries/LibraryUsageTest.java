@@ -1,5 +1,7 @@
 package atf.rentz.libraries;
 
+import atf.testkit.AtfIntegrationTest;
+
 import atf.core.http.request.*;
 import atf.core.json.JsonDocuments;
 import atf.console.*;
@@ -12,6 +14,7 @@ import java.nio.file.*;
 import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.*;
 
+@AtfIntegrationTest
 class LibraryUsageTest {
     @Test void physicalCoreKeepsExactJsonAndRejectsAmbiguousDocuments()throws Exception{
         assertEquals("https://example.test/api/orders/42",new ApiUrlBuilder(URI.create("https://example.test/api")).build(ApiRequest.of("GET","/orders/42")).toString());

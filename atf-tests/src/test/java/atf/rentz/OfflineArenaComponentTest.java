@@ -5,10 +5,13 @@ import ro.rentzlab.ai.*;
 import atf.testkit.AtfComponentTest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import ro.rentzlab.core.*;
 import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.util.*;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -87,25 +90,174 @@ class OfflineArenaComponentTest {
         assertNotNull(project);var settings=PolicyInputs.read(project.resolve("config/rentz-match-policy.yaml"),project);
         assertEquals(PolicySettings.Objective.MATCH_WIN_SHARE,settings.objective());assertNotEquals(settings,PolicySettings.defaults());
     }
-    @Test void promotionRejectsEmptyMissingDuplicateOrWrongObjectiveFamilies(){
-        var seeds=java.util.stream.LongStream.range(0,8).boxed().toList();
-        var fresh=new OfflineArena.Protocol("fresh","FRESH_EVALUATION",4,seeds,List.of(OfflineArena.Kind.NORMAL,OfflineArena.Kind.HARD_REFERENCE),OfflineArena.Kind.HARD,1,0);
-        var samples=new ArrayList<atf.rentz.evaluation.ClusteredEvaluation.Sample>();for(int seed=0;seed<8;seed++)for(int seat=0;seat<4;seat++)samples.add(new atf.rentz.evaluation.ClusteredEvaluation.Sample(seed,seat,1,1,1));
-        var win=atf.rentz.evaluation.ClusteredEvaluation.assess(samples,4,atf.rentz.evaluation.ClusteredEvaluation.Metric.WIN_SHARE,2);
-        var margin=atf.rentz.evaluation.ClusteredEvaluation.assess(samples,4,atf.rentz.evaluation.ClusteredEvaluation.Metric.MARGIN,2);
-        var normal=new OfflineArena.FamilySummary(OfflineArena.Kind.NORMAL,32,8,1,1,1,1,0,1,win);
-        var reference=new OfflineArena.FamilySummary(OfflineArena.Kind.HARD_REFERENCE,32,8,1,1,1,1,0,1,win);
-        var wrong=new OfflineArena.FamilySummary(OfflineArena.Kind.HARD_REFERENCE,32,8,1,1,1,1,0,1,margin);
-        var settings=new PolicySettings(1,0,3,.3,2,PolicySettings.Objective.MATCH_WIN_SHARE);
-        for(var families:List.of(List.<OfflineArena.FamilySummary>of(),List.of(normal),List.of(normal,normal),List.of(normal,wrong))){
-            var summary=new OfflineArena.Summary("fresh","FRESH_EVALUATION","fixture","UNCONFIRMED","MEASURED",families,List.of(),List.of(),"rentz-match-policy.yaml",settings,OfflineArena.matchedReferenceSettings(settings));
-            assertFalse(OfflineArena.promotable(summary,fresh));
+
+    @ParameterizedTest
+    @CsvSource({
+            "123, 281474976710779",
+            "0, -9223372036854775808",
+            "-1, 9223372036854775807"
+    })
+    void protocolRejectsGeneratorAliasesAndKeepsDistinctSignedSeeds(long seed, long alias) throws Exception {
+        var profile = ScoreProfile.laboratory();
+        var original = new RentzMatch(4, seed, profile);
+        var aliased = new RentzMatch(4, alias, profile);
+        original.reveal(0);
+        aliased.reveal(0);
+        assertEquals(original.observe(0).hand(), aliased.observe(0).hand(), "The engine deals the same hand");
+
+        Path file = directory.resolve("protocol.json");
+        var template = """
+                {"id":"seeds","phase":"FRESH_EVALUATION","players":4,"seeds":[%d,%d],
+                 "opponents":["NORMAL"],"candidate":"HARD","worlds":1,"retainPerFamily":0}
+                """;
+        Files.writeString(file, template.formatted(seed, alias));
+        var refusal = assertThrows(JsonMappingException.class, () -> OfflineArena.readProtocol(file));
+        assertInstanceOf(IllegalArgumentException.class, refusal.getCause());
+        Files.writeString(file, template.formatted(seed, seed + 1));
+        assertEquals(List.of(seed, seed + 1), OfflineArena.readProtocol(file).seeds());
+    }
+
+    @Test void arenaRefusesAReplayedDistributionBeforeProducingGameEvidence() throws Exception {
+        Path registry = directory.resolve("exposure.json");
+        EvaluationRegistry.expose(registry, 3, List.of(123L), "DEVELOPMENT", "first", "source-a");
+        byte[] before = Files.readAllBytes(registry);
+        var protocol = new OfflineArena.Protocol("alias-fresh", "FRESH_EVALUATION", 3, List.of(123L + (1L << 48)),
+                List.of(OfflineArena.Kind.BASELINE), OfflineArena.Kind.NORMAL, 1, 1);
+        Path output = directory.resolve("arena");
+        assertThrows(IllegalArgumentException.class, () -> OfflineArena.run(protocol, ScoreProfile.laboratory(),
+                new PolicySettings(1, .05, 3, .3, 2), output, registry, "source-b"));
+        assertArrayEquals(before, Files.readAllBytes(registry));
+        if (Files.isDirectory(output)) {
+            try (var files = Files.list(output)) {
+                assertTrue(files.allMatch(path -> path.getFileName().toString().equals("protocol.json")));
+            }
         }
-        var valid=new OfflineArena.Summary("fresh","FRESH_EVALUATION","fixture","UNCONFIRMED","MEASURED",List.of(normal,reference),List.of(),List.of(),"rentz-match-policy.yaml",settings,OfflineArena.matchedReferenceSettings(settings));
-        assertTrue(OfflineArena.promotable(valid,fresh));
-        var unmatched=new OfflineArena.Summary("fresh","FRESH_EVALUATION","fixture","UNCONFIRMED","MEASURED",valid.families(),List.of(),List.of(),"rentz-match-policy.yaml",settings,PolicySettings.handMarginReference());
-        assertFalse(OfflineArena.promotable(unmatched,fresh),"A larger reference budget cannot silently qualify the comparison");
-        assertFalse(OfflineArena.promotable(valid,new OfflineArena.Protocol("fresh","FRESH_EVALUATION",4,List.of(1L),fresh.opponents(),OfflineArena.Kind.HARD,1,0)),"An unrelated assessment cannot qualify the declared data");
-        assertFalse(OfflineArena.promotable(valid,new OfflineArena.Protocol("other","DEVELOPMENT",4,List.of(1L),fresh.opponents(),OfflineArena.Kind.HARD,1,0)));
+    }
+    @Test void promotionRefusesAGenuineRunWithDifferentScoring() throws Exception {
+        var settings = new PolicySettings(1, .05, 3, .3, 2);
+        var expectedScoring = ScoreProfile.laboratory();
+        var otherScoring = new ScoreProfile(10, 25, 20, 100, 11, 100, expectedScoring.finishRewards());
+        var protocol = new OfflineArena.Protocol("score-identity", "DEVELOPMENT", 3, List.of(64L),
+                List.of(OfflineArena.Kind.BASELINE), OfflineArena.Kind.NORMAL, 1, 1);
+        var expected = new atf.rentz.arena.PromotionAdmission.Expected(ArenaAdmissionTest.SOURCE, settings, expectedScoring);
+        var trusted = OfflineArena.run(protocol, expectedScoring, settings, directory.resolve("trusted"),
+                directory.resolve("trusted-exposure.json"), ArenaAdmissionTest.SOURCE);
+        var other = OfflineArena.run(protocol, otherScoring, settings, directory.resolve("other"),
+                directory.resolve("other-exposure.json"), ArenaAdmissionTest.SOURCE);
+        assertTrue(atf.rentz.arena.PromotionAdmission.inspect(trusted, protocol, expected).coherent());
+        var refusal = atf.rentz.arena.PromotionAdmission.inspect(other, protocol, expected);
+        assertFalse(refusal.coherent());
+        assertFalse(refusal.promotes());
+        assertTrue(refusal.findings().stream().anyMatch(finding -> finding.contains("score profile")));
+        var otherExpected = new atf.rentz.arena.PromotionAdmission.Expected(ArenaAdmissionTest.SOURCE, settings, otherScoring);
+        var json = new ObjectMapper();
+        Path output = directory.resolve("other");
+        var replayed = json.readValue(output.resolve("summary.json").toFile(), OfflineArena.Summary.class);
+        assertEquals(otherScoring, replayed.scoreProfile());
+        assertTrue(atf.rentz.arena.PromotionAdmission.inspect(replayed, protocol, otherExpected).coherent());
+        assertFalse(replayed.retained().isEmpty());
+        for (String name : replayed.retained()) {
+            var recorded = json.readTree(output.resolve(name).toFile()).required("scoreProfile");
+            assertEquals(otherScoring, json.treeToValue(recorded, ScoreProfile.class));
+        }
+        Path report = output.resolve("arena-extent.html");
+        OfflineArenaReport.publish(replayed, protocol, report);
+        assertTrue(Files.readString(report).contains("trickReward=11"));
+    }
+
+    @Test void cliRequiresTheScoreProfileInTheFrozenManifest() throws Exception {
+        Path project = Files.createDirectory(directory.resolve("frozen"));
+        Path sentinel = Files.writeString(project.resolve("sentinel"), "source");
+        String digest = HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                .digest(Files.readAllBytes(sentinel)));
+        var json = new ObjectMapper();
+        Path manifest = directory.resolve("manifest.json");
+        json.writeValue(manifest.toFile(), List.of(Map.of("path", "sentinel", "sha256", digest)));
+        Path protocolFile = directory.resolve("protocol.json");
+        var protocol = new OfflineArena.Protocol("scoring-manifest", "DEVELOPMENT", 3, List.of(65L),
+                List.of(OfflineArena.Kind.BASELINE), OfflineArena.Kind.NORMAL, 1, 0);
+        json.writeValue(protocolFile.toFile(), protocol);
+        Path output = directory.resolve("run");
+        var refusal = assertThrows(IllegalArgumentException.class, () -> OfflineArena.main(new String[] {
+                project.toString(), protocolFile.toString(), output.toString(),
+                directory.resolve("registry.json").toString(), manifest.toString()}));
+        assertTrue(refusal.getMessage().contains("Frozen score profile"));
+        assertFalse(Files.exists(output));
+    }
+
+    @Test void referenceCandidatePublishesTheLegacyPolicyItActuallyPlays() throws Exception {
+        var protocol = new OfflineArena.Protocol("reference-identity", "DEVELOPMENT", 3, List.of(73L),
+                List.of(OfflineArena.Kind.NORMAL), OfflineArena.Kind.HARD_REFERENCE, 1, 0);
+        var requested = new PolicySettings(8, .05, 3, .3, 2, PolicySettings.Objective.MATCH_POINTS,
+                PolicySettings.Tactic.PUBLIC_TARGET_AWARE, 1);
+        var output = directory.resolve("reference-identity");
+        var result = OfflineArena.run(protocol, ScoreProfile.laboratory(), requested, output,
+                directory.resolve("reference-identity-registry.json"), ArenaAdmissionTest.SOURCE);
+        var json = new ObjectMapper().valueToTree(result);
+        assertEquals("LEGACY", json.at("/effectivePolicies/candidate/search/tactic").asText(),
+                "The arena played Hard legacy even though the requested profile uses the public tactic");
+        assertEquals("MATCH_POINTS", json.at("/effectivePolicies/evaluationObjective").asText());
+        assertEquals("PUBLIC_TARGET_AWARE", json.at("/candidateSettings/tactic").asText());
+        var report = output.resolve("arena-extent.html");
+        OfflineArenaReport.publish(result, protocol, report);
+        String html = Files.readString(report);
+        assertTrue(html.contains("Candidat efectiv Actor[kind=HARD_REFERENCE"));
+        assertTrue(html.contains("tactic=LEGACY"));
+        assertTrue(html.contains("Obiectiv de evaluare MATCH_POINTS"));
+    }
+    @Test void allArenaKindsBindTheEffectiveCandidateOpponentAndControl() throws Exception {
+        var requested = new PolicySettings(8, .05, 8, .3, 2, PolicySettings.Objective.MATCH_POINTS,
+                PolicySettings.Tactic.PUBLIC_TARGET_AWARE, 1);
+        for (var kind : OfflineArena.Kind.values()) {
+            var opponents = List.of(OfflineArena.Kind.HARD, OfflineArena.Kind.NORMAL, OfflineArena.Kind.HARD_REFERENCE);
+            var protocol = new OfflineArena.Protocol("actor-" + kind, "DEVELOPMENT", 3, List.of(61L),
+                    opponents, kind, 1, 0);
+            var result = OfflineArena.run(protocol, ScoreProfile.laboratory(), requested, directory.resolve(kind.name()),
+                    directory.resolve(kind + ".json"), ArenaAdmissionTest.SOURCE);
+            var policies = result.effectivePolicies();
+            var expectedSearch = switch (kind) {
+                case HARD -> OfflineArena.settingsFor(protocol, requested);
+                case HARD_REFERENCE -> OfflineArena.matchedReferenceSettings(OfflineArena.settingsFor(protocol, requested));
+                case NORMAL, BASELINE -> null;
+            };
+            assertEquals(kind, policies.candidate().kind());
+            assertEquals(expectedSearch, policies.candidate().search());
+            assertEquals(PolicySettings.Objective.MATCH_POINTS, policies.evaluationObjective());
+            assertEquals(PolicySettings.Tactic.PUBLIC_TARGET_AWARE,
+                    policies.families().get(OfflineArena.Kind.HARD).opponent().search().tactic());
+            assertEquals(PolicySettings.Tactic.LEGACY,
+                    policies.families().get(OfflineArena.Kind.HARD_REFERENCE).opponent().search().tactic());
+            assertNull(policies.families().get(OfflineArena.Kind.NORMAL).opponent().search());
+            for (var family : opponents) {
+                var matchup = policies.families().get(family);
+                assertEquals(expectedSearch == null ? family : OfflineArena.Kind.HARD_REFERENCE, matchup.control().kind());
+                var work = result.games().stream().filter(row -> row.family() == family).toList();
+                assertEquals(expectedSearch != null, work.stream().anyMatch(row -> row.candidateWork().searches() > 0));
+                assertEquals(matchup.control().search() != null, work.stream().anyMatch(row -> row.controlWork().searches() > 0));
+            }
+            var verdict = atf.rentz.arena.PromotionAdmission.inspect(result, protocol,
+                    new atf.rentz.arena.PromotionAdmission.Expected(ArenaAdmissionTest.SOURCE, requested, ScoreProfile.laboratory()));
+            assertTrue(verdict.coherent(), () -> kind + " " + verdict.findings());
+            assertFalse(verdict.promotes());
+        }
+    }
+    @Test void promotionRejectsEmptyMissingDuplicateOrWrongObjectiveFamilies() throws Exception {
+        var valid=ArenaAdmissionTest.neighbor();
+        var fresh=ArenaAdmissionTest.PROTOCOL;
+        var settings=ArenaAdmissionTest.SETTINGS;
+        var expected=new atf.rentz.arena.PromotionAdmission.Expected(ArenaAdmissionTest.SOURCE,settings,valid.scoreProfile());
+        var normal=valid.families().get(0);var reference=valid.families().get(1);
+        var altered=new ObjectMapper().valueToTree(reference);
+        ((com.fasterxml.jackson.databind.node.ObjectNode)altered.get("assessment")).put("metric","MARGIN");
+        var wrong=new ObjectMapper().treeToValue(altered,OfflineArena.FamilySummary.class);
+        for(var families:List.of(List.<OfflineArena.FamilySummary>of(),List.of(normal),List.of(normal,normal),List.of(normal,wrong))){
+            var summary=new OfflineArena.Summary(fresh.id(),fresh.phase(),valid.sourceIdentity(),valid.referenceParity(),valid.state(),families,valid.games(),valid.retained(),fresh.policy(),settings,valid.referenceSettings(),fresh,valid.effectivePolicies(),valid.scoreProfile());
+            assertFalse(OfflineArena.promotable(summary,fresh,expected));
+        }
+        assertTrue(OfflineArena.promotable(valid,fresh,expected));
+        var unmatched=new OfflineArena.Summary(fresh.id(),fresh.phase(),valid.sourceIdentity(),valid.referenceParity(),valid.state(),valid.families(),valid.games(),valid.retained(),fresh.policy(),settings,PolicySettings.handMarginReference(),fresh,valid.effectivePolicies(),valid.scoreProfile());
+        assertFalse(OfflineArena.promotable(unmatched,fresh,expected),"A larger reference budget cannot silently qualify the comparison");
+        assertFalse(OfflineArena.promotable(valid,new OfflineArena.Protocol(fresh.id(),fresh.phase(),4,List.of(1L),fresh.opponents(),OfflineArena.Kind.HARD,1,0),expected),"An unrelated assessment cannot qualify the declared data");
+        assertFalse(OfflineArena.promotable(valid,new OfflineArena.Protocol("other","DEVELOPMENT",4,List.of(1L),fresh.opponents(),OfflineArena.Kind.HARD,1,0),expected));
     }
 }

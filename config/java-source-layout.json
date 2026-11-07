@@ -25,7 +25,9 @@
         "ro.rentzlab.app",
         "org.junit",
         "atf.testkit",
-        "atf.reporting"
+        "atf.reporting",
+        "ro.rentzlab.testing",
+        "ro.rentzlab.app.testing"
       ]
     },
     {
@@ -39,7 +41,9 @@
       "forbidden": [
         "org.junit",
         "atf.testkit",
-        "atf.reporting"
+        "atf.reporting",
+        "ro.rentzlab.testing",
+        "ro.rentzlab.app.testing"
       ]
     },
     {
@@ -72,5 +76,10 @@
         "ro.rentzlab.ai"
       ]
     }
+  ],
+  "externalNonTestBases": [
+    "atf.testkit.assertions.ComponentAuditExtension.Publication",
+    "org.junit.platform.launcher.TestExecutionListener",
+    "org.junit.rules.TestRule"
   ]
 }

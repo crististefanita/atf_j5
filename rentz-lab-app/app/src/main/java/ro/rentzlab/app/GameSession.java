@@ -7,6 +7,7 @@ import java.util.*;
 
 /** Transport/lifecycle boundary. The dealing seed and journal never enter a player decision. */
 public final class GameSession {
+    public static final String SCORE_PROFILE = "LABORATORY_V1";
     public enum Action { REVEAL, CHOOSE, PLAY, PASS, NEXT_HAND }
     public record Command(Action action,int seat,Card card,Contract contract,boolean blind) { }
     public record Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands) {

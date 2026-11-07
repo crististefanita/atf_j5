@@ -1,5 +1,7 @@
 package ro.rentzlab.core;
 
+import ro.rentzlab.testing.RentzComponentLayer;
+
 import ro.rentzlab.ai.*;
 
 import org.junit.jupiter.api.Test;
@@ -8,6 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@RentzComponentLayer
 class RentzRulesTest {
     private Card c(Card.Suit suit,int rank){return new Card(suit,rank);}
     @ParameterizedTest @ValueSource(ints={3,4,5,6}) void deckAndOpeningRankFitTheTable(int players){

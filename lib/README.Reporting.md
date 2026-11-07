@@ -9,6 +9,7 @@ Reporting publică datele, comparațiile și verdictul callerului în Extent/fal
 | Rulare individuală/clasă/suită | `AssertionAuditRun` |
 | Invocare | `run.open(Identity)` → `AssertionAuditReport` |
 | Ports / fallback | `AtfReportPorts` / `HtmlReportSession` |
+| HTTP observat | `request.execution(ReportExecutionEvidence)`, cu `ReportResponse` |
 | Capturi | `UiExtentReportSession`; PNG integral |
 
 ## Exemplu minim
@@ -55,8 +56,9 @@ public static void publish(AssertionAuditRun run, String actual) {
 - Aceleași settings/redactor în run și renderer; preview implicit **240**, citit prin assertionMaxDisplayCharacters(). Valorile complete preced preview-ul.
 - Exemplul urmează thread-ul sesiunii; AssertionAuditRun.extent(...) serializează publicarea pentru apelanți concurenți.
 - Kit colectează comparația JUnit evaluată o dată; Reporting publică. Callerul păstrează verdictul, cauza și timing-ul prin phase(..., timing).
-- PNG-ul păstrează întregul viewport/display; captura și zoom-ul aparțin adaptorului.
-- După close, ReportArtifactInspector.inspect(path, profile) califică inventarul și resursele embedded; diagnosticul localizează dependențele externe. Căile text rămân valide.
+- PNG-ul păstrează întregul viewport/display; captura și zoom-ul aparțin adaptorului. Capturile identice din același pas păstrează o singură dovadă și primul caption.
+- După close, ReportArtifactInspector.inspect(path, profile) califică inventarul și resursele embedded; diagnosticul localizează dependențele externe. Căile text rămân valide. Inspectorul este static; randarea și interacțiunile se verifică separat în browser.
+- Browserul aparține callerului: termene distincte pentru setup/cleanup, context înaintea browserului și cauza inițială păstrată împreună cu erorile de cleanup.
 
 ## Verificarea utilizării
 
@@ -67,6 +69,8 @@ public static void publish(AssertionAuditRun run, String actual) {
 | Sursa exemplului este compilată pe alt JAR. | Orice incompatibilitate a constructorilor ori metodelor trebuie detectată înaintea publicării. |
 
 Exemplul verifică folosirea API-ului și propagarea verdictului. Autonomia HTML, expandarea interactivă și capturile native au acceptanțe proprii; existența fișierului nu le demonstrează singură.
+
+Durata HTTP provine din `ReportResponse.duration()`; `detail(...)` păstrează textul callerului, fără să îl transforme într-o măsurătoare de transport.
 
 ---
 

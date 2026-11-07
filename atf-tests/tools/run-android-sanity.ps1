@@ -15,6 +15,9 @@ $run=Join-Path $BuildRun $RunName
 if(Test-Path -LiteralPath $run){throw 'Fresh native run required.'}
 New-Item -ItemType Directory -Path $run|Out-Null
 $qualification=Get-Content -Raw -LiteralPath (Join-Path $BuildRun 'build-qualification.json')|ConvertFrom-Json
+if($qualification.uiLibrary-or$qualification.uiContract-eq'card-table-ui-v1'){
+    throw 'The prototype native driver cannot accept card-table-ui-v1. Use run-shared-ui-sanity.ps1 with its isolated APK qualification; no device command was sent.'
+}
 $apk=Join-Path $BuildRun $(if($qualification.apkFile){$qualification.apkFile}else{'rentz-lab-0.1.0-debug.apk'})
 $apkHash=(Get-FileHash -LiteralPath $apk -Algorithm SHA256).Hash
 if($qualification.status-ne'PASS'-or$qualification.apkSha256-ne$apkHash){throw 'APK identity and Android unit qualification required.'}
@@ -24,7 +27,8 @@ $component=Get-Content -Raw -LiteralPath (Join-Path $ComponentRun 'result.json')
 if($component.status-ne'PASS'){throw 'Qualified offline component source required.'}
 if(-not$component.nativeRuntime){throw 'A freshly qualified compiled native adapter is required.'}
 if(-not$component.nativeRuntimeSha256-or(Get-FileHash -LiteralPath $component.nativeRuntime -Algorithm SHA256).Hash-ne$component.nativeRuntimeSha256){throw 'Native runtime descriptor changed after qualification.'}
-$runtime=Get-Content -Raw -LiteralPath $component.nativeRuntime|ConvertFrom-Json
+Import-Module (Join-Path $project 'scripts/RuntimeQualification.psm1') -Force
+$runtime=Assert-RentzQualifiedRuntime -Descriptor $component.nativeRuntime -DescriptorSha256 $component.nativeRuntimeSha256 -MainClass 'atf.rentz.android.RentzNativeFlow' -Stage $component.stage
 $mainClass='atf.rentz.android.RentzNativeFlow'
 $expectedSource=Join-Path $component.stage 'atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java'
 $expectedClass=Join-Path $component.stage 'atf-tests/target/test-classes/atf/rentz/android/RentzNativeFlow.class'
@@ -89,6 +93,7 @@ function State([long]$After=-1,[string]$Screen='GAME'){
 function Audit {
     $private=Adb @('exec-out','run-as','ro.rentzlab.app','cat','files/session.json') 'private-journal'
     $private.Output|Set-Content -LiteralPath (Join-Path $run 'journal.json') -Encoding utf8NoBOM
+    Assert-RentzQualifiedRuntime -Descriptor $component.nativeRuntime -DescriptorSha256 $component.nativeRuntimeSha256 -MainClass 'atf.rentz.android.RentzNativeFlow' -Stage $component.stage|Out-Null
     $result=& $Java -Xmx256m -XX:ActiveProcessorCount=2 -cp $classpath $mainClass audit (Join-Path $run 'journal.json') (Join-Path $run 'actor.json')
     if($LASTEXITCODE-ne0){throw 'Native journal or independent score audit failed.'}
     $script:lastAudit=$result|ConvertFrom-Json
@@ -139,9 +144,11 @@ try{
     Tap 'Partidă nouă';$dialog=NodeText (DumpUi);if($dialog.Contains('Începi o partidă nouă?')){Tap 'Începe'};$state=State
     Capture 'Partidă pornită din interfață' @((Check 'Jucători' 4 $state.view.players),(Check 'Adversari' 'HARD' $state.difficulty),(Check 'Mâna inițial ascunsă' 0 @($state.view.hand).Count))|Out-Null
     $private=Adb @('exec-out','run-as','ro.rentzlab.app','cat','files/session.json') 'initial-private-journal';$private.Output|Set-Content -LiteralPath (Join-Path $run 'journal.json') -Encoding utf8NoBOM
+    Assert-RentzQualifiedRuntime -Descriptor $component.nativeRuntime -DescriptorSha256 $component.nativeRuntimeSha256 -MainClass 'atf.rentz.android.RentzNativeFlow' -Stage $component.stage|Out-Null
     & $Java -Xmx128m -cp $classpath $mainClass expose (Join-Path $run 'journal.json') 'C:\work\rentz_back\learning\exposure.json'|Out-Null;if($LASTEXITCODE-ne0){throw 'Native data exposure could not be recorded'}
     $humanActions=0;$firstPlay=$false
     while($state.view.phase-in@('CHOOSE','PLAY')){
+        Assert-RentzQualifiedRuntime -Descriptor $component.nativeRuntime -DescriptorSha256 $component.nativeRuntimeSha256 -MainClass 'atf.rentz.android.RentzNativeFlow' -Stage $component.stage|Out-Null
         $decision=& $Java -Xmx256m -XX:ActiveProcessorCount=2 -cp $classpath $mainClass decide (Join-Path $run 'actor.json');if($LASTEXITCODE-ne0){throw 'Public-information player failed'};$choice=$decision|ConvertFrom-Json
         [ordered]@{actor=$state.view;decision=$choice}|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $run ('decision-{0:d4}.json'-f$humanActions)) -Encoding utf8NoBOM
         $previousRevision=[long]$state.revision;Tap $choice.label;$state=State -After $previousRevision
@@ -182,12 +189,29 @@ finally{
     }
     $cacheLease.Dispose()
 }
+$qualifiedRuntimeFailure=''
+try{Assert-RentzQualifiedRuntime -Descriptor $component.nativeRuntime -DescriptorSha256 $component.nativeRuntimeSha256 -MainClass 'atf.rentz.android.RentzNativeFlow' -Stage $component.stage|Out-Null}catch{$qualifiedRuntimeFailure=$_.Exception.Message;$failure+=' Qualified runtime changed: '+$qualifiedRuntimeFailure}
 $classpathDrift=@(foreach($identity in $classpathIdentity){if($identity.sha256-ne(Get-FileHash -LiteralPath $identity.path -Algorithm SHA256).Hash){$identity.path}})
 if($classpathDrift.Count){$failure+=' Runtime classpath changed.'}
 ConvertTo-Json -InputObject @($uiActions.ToArray()) -Depth 6|Set-Content -LiteralPath (Join-Path $run 'actions.json') -Encoding utf8NoBOM
 ConvertTo-Json -InputObject @($checks.ToArray()) -Depth 8|Set-Content -LiteralPath (Join-Path $run 'checkpoints.json') -Encoding utf8NoBOM
-[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});package='ro.rentzlab.app';apkSha256=$apkHash;versionName=$qualification.versionName;serial='127.0.0.1:5555';api=$api;scope='Native local-app sanity: one complete deal, menu, history and process restart; not a complete match or original-app parity';failure=$failure;checkpointCount=$checks.Count;actionCount=$uiActions.Count;oracle=$lastAudit;existingPackageBefore=$installedBefore;knownPredecessorUpgraded=$needsUpgrade;displayPreserved=($wmSize-and$wmSize-eq$finalSize-and$wmDensity-eq$finalDensity-and$fontScale-eq$finalFont);priorData=$(if($installedBefore){'Known APK verified; existing files backed up and restoration checked'}else{'No prior local package; original application and other packages not reset'});backupVerified=$backupVerified;backupSha256=$backupHash;backupRestored=$backupRestored;leaseReleased=$released;classpathDrift=$classpathDrift;buildQualification=$qualification}|ConvertTo-Json -Depth 10|Set-Content -LiteralPath (Join-Path $run 'ui-result.json') -Encoding utf8NoBOM
+[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});package='ro.rentzlab.app';apkSha256=$apkHash;versionName=$qualification.versionName;serial='127.0.0.1:5555';api=$api;scope='Native local-app sanity: one complete deal, menu, history and process restart; not a complete match or original-app parity';failure=$failure;checkpointCount=$checks.Count;actionCount=$uiActions.Count;oracle=$lastAudit;existingPackageBefore=$installedBefore;knownPredecessorUpgraded=$needsUpgrade;displayPreserved=($wmSize-and$wmSize-eq$finalSize-and$wmDensity-eq$finalDensity-and$fontScale-eq$finalFont);priorData=$(if($installedBefore){'Known APK verified; existing files backed up and restoration checked'}else{'No prior local package; original application and other packages not reset'});backupVerified=$backupVerified;backupSha256=$backupHash;backupRestored=$backupRestored;leaseReleased=$released;classpathDrift=$classpathDrift;qualifiedRuntimeFailure=$qualifiedRuntimeFailure;buildQualification=$qualification}|ConvertTo-Json -Depth 10|Set-Content -LiteralPath (Join-Path $run 'ui-result.json') -Encoding utf8NoBOM
 $publishLease=Enter-AtfJ5CacheLease -Repository $component.repository
-try{& $Java -Xmx256m -cp $classpath $mainClass report $run;if($LASTEXITCODE-ne0){throw 'Native report publication failed'}}finally{$publishLease.Dispose()}
+try{
+    Assert-RentzQualifiedRuntime -Descriptor $component.nativeRuntime -DescriptorSha256 $component.nativeRuntimeSha256 -MainClass 'atf.rentz.android.RentzNativeFlow' -Stage $component.stage|Out-Null
+    & $Java -Xmx256m -cp $classpath $mainClass report $run
+    if($LASTEXITCODE-ne0){throw 'Native report publication failed'}
+    Assert-RentzQualifiedRuntime -Descriptor $component.nativeRuntime -DescriptorSha256 $component.nativeRuntimeSha256 -MainClass 'atf.rentz.android.RentzNativeFlow' -Stage $component.stage|Out-Null
+}catch{
+    $publicationError=$_
+    try{
+        $resultPath=Join-Path $run 'ui-result.json'
+        $invalidated=Get-Content -Raw -LiteralPath $resultPath|ConvertFrom-Json
+        $invalidated.status='FAIL'
+        $invalidated.failure+=' Runtime/report publication failed: '+$publicationError.Exception.Message
+        $invalidated|ConvertTo-Json -Depth 10|Set-Content -LiteralPath $resultPath -Encoding utf8NoBOM
+    }catch{Write-Warning ('Could not record publication invalidation: '+$_.Exception.Message)}
+    throw $publicationError
+}finally{$publishLease.Dispose()}
 if($failure){throw "Native sanity failed: $failure"}
 Write-Output $run

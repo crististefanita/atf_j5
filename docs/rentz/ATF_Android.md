@@ -41,11 +41,17 @@ Fișierul debug este numai citit pentru sincronizare și decizie. Adaptorul nu i
 
 ## Livrabile și limite
 
-[Lansatorul nativ](../../atf-tests/tools/run-android-sanity.ps1) cere calificarea componentelor și a APK-ului, apoi verifică o distribuire completă, istoricul și reluarea după repornirea procesului. [Adaptorul Java](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) separă modurile de decizie, audit și publicare prin biblioteca declarată în `lib`.
+- Sanity-ul UI comun instalează varianta izolată `ro.rentzlab.app.uisanity` și verifică meniul, profilul, limbile, o mână, istoricul și restart-ul. Opțiunea `-SeatExtremes` adaugă probele de afișaj la 3 și 6 locuri. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1) · [Protocolul integrării](ATF_UiIntegration.md)
+- Opțiunea `-HistoryOnly` verifică istoricul gol și încărcarea unui jurnal de 48 de mâini produs de componente. Gesturile ating ultimul jucător și ultima mână, cu verificări de aliniere și de conservare a reviziei. Android califică gesturile și afișarea pe profilul executat, iar jocul din jurnal provine din execuția de componentă. [Contractul istoricului](ATF_UiIntegration.md#istoricul-adaptiv-rentz)
+- `-HistoryOnly -HistoryMatrix` folosește fontul 1,5 la 360 dpi. Proba scurtează dialogul deschis, verifică schimbarea containerului derulabil și readuce fereastra la înălțimea inițială. Lansatorul salvează și restaurează dimensiunea, densitatea și fontul emulatorului în cadrul aceleiași rezervări. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
+- `-HistoryOnly -HistoryDetails` deschide două mâini din jurnalul restaurat. Verifică dublarea la levate, locurile Rentz cu premii egale și revenirea la poziția din grilă. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
+
+[Lansatorul prototipului](../../atf-tests/tools/run-android-sanity.ps1) păstrează contractul UI anterior și refuză receipt-ul `card-table-ui-v1` înainte de ADB. [Adaptorul Java](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) păstrează decizia și oracolul independent; migrarea lor în noua navigare rămâne explicită în U09, fără a declara executată suita veche pe noul UI.
 
 | Livrabil sau limită | Contract |
 |---|---|
 | Compilare Maven | Adaptorul aparține source-set-ului de test; nu se compilează manual o copie Java din `tools`. |
+| [Publicatorul UI](../../atf-tests/src/test/java/atf/rentz/android/reporting/RentzUiIntegrationReport.java) | Comparațiile componentelor sunt capturate când se evaluează. Pașii nativi includ acțiuni măsurate, assert-uri, PNG original și ierarhie inline; eticheta generică UI nu atribuie controlul Android către Playwright. |
 | Descriptorul `native-runtime.json` | Numele complet al clasei, classpath explicit și identitatea sursei și clasei compilate; lansatorul verifică descriptorul și păstrează snapshot-ul calificat. |
 | [Lifecycle](ATF_Lifecycle.md) | Checkpoint, proprietate și calcul de fundal; probele JVM preced calibrarea nativă pentru pauză, relansare și erori de filesystem. |
 | Calificare | Compilarea și testarea CLI nu constituie execuție pe dispozitiv. |

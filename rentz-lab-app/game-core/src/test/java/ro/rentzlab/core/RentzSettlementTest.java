@@ -1,5 +1,7 @@
 package ro.rentzlab.core;
 
+import ro.rentzlab.testing.RentzComponentLayer;
+
 import ro.rentzlab.ai.*;
 
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /** Oracle formulas deliberately do not call TrickRules or ScoreProfile settlement methods. */
+@RentzComponentLayer
 class RentzSettlementTest {
     private static final ScoreProfile DISTINCT = new ScoreProfile(3, 7, 11, 29, 13, 31,
             List.of(101, 67, 43, 29, 17, 11));

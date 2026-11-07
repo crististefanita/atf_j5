@@ -1,5 +1,7 @@
 package atf.rentz.libraries;
 
+import atf.testkit.AtfIntegrationTest;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import java.nio.file.*;
@@ -9,6 +11,7 @@ import java.util.jar.*;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@AtfIntegrationTest
 class LibraryAdoptionTest {
     @TempDir Path fixtures;
     private Path fixture()throws Exception{

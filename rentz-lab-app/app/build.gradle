@@ -2,7 +2,7 @@ plugins { id 'com.android.application' }
 android {
     namespace 'ro.rentzlab.app'
     compileSdk 36
-    defaultConfig { applicationId 'ro.rentzlab.app'; minSdk 26; targetSdk 36; versionCode 2; versionName '0.1.1' }
+    defaultConfig { applicationId 'ro.rentzlab.app'; minSdk 26; targetSdk 36; versionCode 3; versionName '0.1.2' }
     buildFeatures { buildConfig true }
     signingConfigs {
         release {
@@ -16,6 +16,12 @@ android {
         }
     }
     buildTypes {
+        uiSanity {
+            initWith debug
+            applicationIdSuffix '.uisanity'
+            versionNameSuffix '-ui-sanity'
+            matchingFallbacks = ['debug']
+        }
         release {
             debuggable false
             minifyEnabled false
@@ -23,6 +29,11 @@ android {
         }
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    testOptions.unitTests.all {
+        systemProperty 'rentz.uiRepository', rootProject.file('ui-library').absolutePath
+        def evidence = providers.gradleProperty('rentz.uiEvidence').orNull
+        if (evidence) systemProperty 'rentz.uiEvidence', rootProject.file(evidence).absolutePath
+    }
 }
 tasks.register('validateReleaseSigning') {
     doLast {
@@ -36,6 +47,7 @@ tasks.configureEach {
 }
 dependencies {
     implementation project(':game-core')
+    implementation 'ro.cardtable:card-table-ui:0.1.1'
     implementation 'com.google.code.gson:gson:2.11.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.json:json:20240205'

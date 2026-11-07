@@ -1,5 +1,7 @@
 package ro.rentzlab.core;
 
+import ro.rentzlab.testing.RentzComponentLayer;
+
 import ro.rentzlab.ai.*;
 
 import java.util.*;
@@ -9,6 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 import static ro.rentzlab.core.AiFixtures.*;
 
+@RentzComponentLayer
 class RentzAiTest {
     private final ScoreProfile scoring=ScoreProfile.laboratory();
     private final PolicySettings settings=new PolicySettings(2,0.05,3,0.3,2);

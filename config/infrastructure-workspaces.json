@@ -64,7 +64,13 @@
     "atf-tests/tools/run-arena.ps1",
     "atf-tests/tools/run-android-sanity.ps1",
     "rentz-reference/tools/RentzAndroid.psm1",
-    "scripts/Initialize-RentzSigning.ps1"
+    "scripts/Initialize-RentzSigning.ps1",
+    "atf-tests/tools/test-test-discovery.ps1",
+    "atf-tests/tools/test-qualified-runtime.ps1",
+    "scripts/TestSourceInventory.psm1",
+    "scripts/RuntimeQualification.psm1",
+    "atf-tests/tools/run-shared-ui-sanity.ps1",
+    "atf-tests/tools/test-ui-selectors.ps1"
   ],
   "reviewedTempReaders": [
     {

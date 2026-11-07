@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.channels.*;
 import java.nio.file.*;
 import java.util.*;
+import ro.rentzlab.core.deal.DealSeed;
 
 /** Exposure belongs to the distribution namespace, never to a candidate or a renamed folder. */
 public final class EvaluationRegistry {
@@ -17,8 +18,10 @@ public final class EvaluationRegistry {
     private static final Set<String> ENTRY_FIELDS=Set.of("players","seed","phase","batch","sourceIdentity","state");
     private EvaluationRegistry() { }
     public static void expose(Path registry,int players,List<Long> seeds,String phase,String batch,String sourceIdentity) throws IOException {
-        if(players<3||players>6||seeds.isEmpty()||new HashSet<>(seeds).size()!=seeds.size()||seeds.stream().anyMatch(Objects::isNull)
+        var batchSeeds = new ArrayList<>(seeds);
+        if(players<3||players>6||batchSeeds.isEmpty()
                 ||!Set.of("DEVELOPMENT","FRESH_EVALUATION").contains(phase)||batch.isBlank()||sourceIdentity.isBlank())throw new IllegalArgumentException("Exposure identity");
+        var requested = DealSeed.requireDistinct(batchSeeds);
         registry=registry.toAbsolutePath().normalize();Files.createDirectories(registry.getParent());
         Path lockPath=registry.resolveSibling(registry.getFileName()+".lock");
         try(var channel=FileChannel.open(lockPath,StandardOpenOption.CREATE,StandardOpenOption.WRITE)) {
@@ -31,11 +34,11 @@ public final class EvaluationRegistry {
                     var parsed=JSON.readTree(registry.toFile());
                     requireFields(parsed,ROOT_FIELDS);
                     if(!parsed.path("schemaVersion").isInt()||parsed.path("schemaVersion").intValue()!=1
-                            ||!text(parsed,"domain").equals("rentz")||!text(parsed,"generator").equals("jvm-shuffle-eight-cards-v1")
+                            ||!text(parsed,"domain").equals("rentz")||!text(parsed,"generator").equals(DealSeed.GENERATOR)
                             ||!parsed.path("exposures").isArray())throw new IllegalArgumentException("Invalid exposure registry; do not reset it");
                     root=(ObjectNode)parsed;
                 } else {
-                    root=JSON.createObjectNode().put("schemaVersion",1).put("domain","rentz").put("generator","jvm-shuffle-eight-cards-v1");root.putArray("exposures");
+                    root=JSON.createObjectNode().put("schemaVersion",1).put("domain","rentz").put("generator",DealSeed.GENERATOR);root.putArray("exposures");
                 }
                 var exposed=(ArrayNode)root.required("exposures");
                 for(var prior:exposed){
@@ -45,9 +48,17 @@ public final class EvaluationRegistry {
                         ||text(prior,"batch").isBlank()||text(prior,"sourceIdentity").isBlank()
                         ||!text(prior,"state").equals("EXPOSED_BEFORE_EXECUTION"))throw new IllegalArgumentException("Corrupt exposure entry; preserve registry");
                 }
-                for(var prior:exposed)if(prior.path("players").asInt()==players&&seeds.contains(prior.path("seed").longValue())
-                        &&(phase.equals("FRESH_EVALUATION")||prior.path("phase").asText().equals("FRESH_EVALUATION")))throw new IllegalArgumentException("Distribution already exposed: "+prior.path("seed"));
-                for(long seed:seeds)exposed.addObject().put("players",players).put("seed",seed).put("phase",phase).put("batch",batch).put("sourceIdentity",sourceIdentity).put("state","EXPOSED_BEFORE_EXECUTION");
+                for (var prior : exposed) {
+                    if (prior.path("players").intValue() != players) continue;
+                    long previousSeed = prior.path("seed").longValue();
+                    Long seed = requested.get(DealSeed.effective(previousSeed));
+                    if (seed != null && (seed != previousSeed || phase.equals("FRESH_EVALUATION")
+                            || prior.path("phase").asText().equals("FRESH_EVALUATION"))) {
+                        throw new IllegalArgumentException("Distribution already exposed: " + previousSeed
+                                + " (requested seed " + seed + ")");
+                    }
+                }
+                for(long seed:batchSeeds)exposed.addObject().put("players",players).put("seed",seed).put("phase",phase).put("batch",batch).put("sourceIdentity",sourceIdentity).put("state","EXPOSED_BEFORE_EXECUTION");
                 Path temporary=Files.createTempFile(registry.getParent(),"rentz-exposure-",".tmp");JSON.writerWithDefaultPrettyPrinter().writeValue(temporary.toFile(),root);
                 Files.move(temporary,registry,StandardCopyOption.ATOMIC_MOVE,StandardCopyOption.REPLACE_EXISTING);
             }

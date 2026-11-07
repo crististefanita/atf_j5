@@ -1,5 +1,7 @@
 package atf.rentz.governance;
 
+import atf.testkit.AtfComponentTest;
+
 import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -9,6 +11,7 @@ import java.security.MessageDigest;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@AtfComponentTest
 class DocumentationContractTest {
     static Path root(){Path p=Path.of(System.getProperty("user.dir")).toAbsolutePath();while(p!=null&&!Files.isDirectory(p.resolve("config")))p=p.getParent();if(p==null)throw new IllegalStateException("Project root absent");return p;}
     @Test void obsoleteGameDocumentsCannotRemainInTheActiveDocumentationRoots(){

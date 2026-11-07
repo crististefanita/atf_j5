@@ -1,5 +1,7 @@
 package atf.rentz;
 
+import atf.testkit.AtfComponentTest;
+
 import atf.testkit.assertions.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -8,6 +10,7 @@ import org.junit.platform.launcher.listeners.*;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.jupiter.api.Assertions.*;
 
+@AtfComponentTest
 class RentzRulePublicationLifecycleTest {
     static RentzRulePublicationTest.Probe probe;
     static IllegalStateException primary;

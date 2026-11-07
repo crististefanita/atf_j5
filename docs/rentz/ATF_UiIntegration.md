@@ -1,0 +1,125 @@
+# Integrarea nucleului Android comun
+
+## Pe scurt
+
+Nucleul vizual produs de Whist oferă componente neutre pentru meniul de pornire, profil, widgeturi, cărți, temă și geometria mâinii. Configurația live consumă AAR-ul fixat în repository-ul local, iar adaptoarele Rentz furnizează datele și comenzile proprii. Calificarea componentelor, controlul Android și release-ul publicat păstrează dovezi distincte.
+
+## Frontiera consumatorului
+
+| Intrare comună | Responsabilitatea Rentz |
+|---|---|
+| `HomeMenuContent` și `HomeMenu` | Texte RO/EN, starea reluării și callback-uri către rutele reale; primul profil și preferințele sunt ale aplicației. |
+| `PlayerNameDialog` și `NameEdit` | Politica numelui, identitatea locului și salvarea; erorile și resetarea păstrează semantica declarată. |
+| `ScreenViews` | Etichetele selectorilor și protecția ferestrei, furnizate explicit; aceeași geometrie și aceleași stiluri ale widgeturilor. |
+| `CardFace` și `CardFaceDrawable` | Proiecție numai după dezvăluirea permisă; fără obiecte Whist, mâini adverse sau seed. |
+| `HandLayoutMetrics` | Opt cărți per loc în modelul curent, o carte centrată și tratamentul explicit al mâinii goale. |
+
+Masa, secvențele, alegerea sub-jocului și scorul folosesc adaptoarele proprii din atlasul prezentării. Biblioteca de produs nu introduce Core/Reporting/Kit ATF în APK.
+
+Manifestul Rentz adoptă `CardTableTheme`; J4 păstrează aliasul echivalent `AppTheme`. Fereastra, rutele și preferințele aparțin consumatorului.
+
+## Admiterea AAR-ului
+
+1. Identificați coordonata `ro.cardtable:card-table-ui:0.1.1` și repository-ul extern al producătorului, fără referință la checkout-ul surselor vecine.
+2. Confruntați AAR, POM, metadata, surse și SHA-256; păstrați dependențele declarate și compatibilitatea bibliotecii `minSdk 24` cu aplicația `minSdk 26`.
+3. Folosiți o copie în [workspace-ul înregistrat](ATF_Infrastructure.md), fără build sau probe în sursa activă ori TEMP-ul Windows.
+4. În copia tehnică, declarați repository-ul și dependența de mai jos; rulați componentele JVM și construiți APK-ul pentru verificarea D8/manifest.
+5. Păstrați separat dovada admiterii de acceptanța meniului și mesei reale; un tip disponibil în classpath nu demonstrează randarea widgetului.
+
+Fragmentul activ pentru `dependencyResolutionManagement.repositories` izolează dependența de produs:
+
+```groovy
+exclusiveContent {
+    forRepository { maven { url = uri('ui-library') } }
+    filter { includeGroup 'ro.cardtable' }
+}
+```
+
+Dependența se declară în modulul aplicației, după admitere:
+
+```groovy
+implementation 'ro.cardtable:card-table-ui:0.1.1'
+```
+
+Aceste intrări sunt active în configurația live. [Repository-ul admis](../../rentz-lab-app/ui-library/README.md) păstrează artefactele și hash-urile; testele refuză dependența de motorul Whist.
+
+## Componente și acceptanță
+
+- Verificați proiecțiile pe date Rentz reale, callback-uri unice, limbă și nume, legalitatea comenzii și tratamentul refuzului.
+- Păstrați componentele lifecycle-ului, codec-ului și sesiunii; adaptarea UI nu le înlocuiește și nu schimbă salvarea privatului în date de prezentare.
+- Comparați geometria și textele cu reperul comun, cu fixture-uri și oracole independente; declanșarea unui callback în JVM nu este tap Android.
+- Adăugați numai sanity-ul nativ necesar pentru meniu/profil, mâna și scorul efectiv, după trecerea componentelor. Rezultatele, APK-urile tehnice și logurile rămân externe.
+
+[Backlog-ul UI](../feedback/ATF_Rentz_UI_ToDo.md) deține criteriile U01–U08. [Calificarea offline](ATF_Qualification.md) și [acceptanța Android](ATF_Android.md) păstrează identitățile și limitele execuției; un release existent nu este înlocuit cu binarul probei de admitere.
+
+## Componente comune și oracole Rentz
+
+| Comun, fără reguli | Rămâne în consumator |
+|---|---|
+| `HomeMenuContent`, dropdown și editor prin porturi | Texte, preferințe, reguli de nume, rute și salvări Rentz. |
+| `SeatContent`, `PlayerSeatFrame`, `BoardLayout` | Nume, actor efectiv, puncte/delte și mapare loc motor → loc vizual. |
+| `HandCard`, `HandFan`, `CenteredHandView` | Vizibilitate înainte de reveal, legalitate, pas și aplicarea unică a comenzii Rentz. |
+| `PlayedCardContent`, `PlayedCardsView` | Levata publică și momentul colectării; tabla de secvențe este altă compoziție a centrului. |
+
+Testele de licitație, atu și punctaj Whist rămân exclusiv în J4. J5 implementează propriile componente pe observații și comenzi Rentz reale; opt cărți pe loc, faza nevăzută, pasul, secvențele și scorul nu se testează prin redenumirea fixture-urilor Whist.
+
+J6 rămâne momentan JVM/console, fără dependență Android. Modelele UI păstrează date vizibile neutre, dar layout-ul calificat actual acoperă 3–6 locuri; suportul altor mese și al cărților comunitare cere o extensie verificată distinct.
+
+## Traseul minim de calificare
+
+1. Rulați componentele aplicației prin `scripts/test-rentz-android-jvm.ps1`, cu workspace și cache externe înregistrate.
+2. În snapshot-ul calificat, executați `:app:testDebugUnitTest`, `:app:lintDebug` și `:app:assembleUiSanity`; pentru comparațiile UI furnizați `-Prentz.uiEvidence=<director-extern>`.
+3. Verificați semnătura, pachetul `ro.rentzlab.app.uisanity`, SHA-256 și identitatea surselor. Varianta izolată nu înlocuiește aplicația utilizatorului sau APK-ul de release.
+4. Rulați `atf-tests/tools/run-shared-ui-sanity.ps1` cu `-BuildQualification` și un `-RunRoot` nou. Rezervarea atomică precede ADB; traseul acoperă un profil de afișaj și o singură mână, apoi cleanup-ul propriu.
+5. Publicați comparațiile capturate, acțiunile native, ierarhiile și PNG-urile prin `RentzUiIntegrationReport`, compilat în source-set-ul Maven de test. Verificați expandarea raportului și integritatea imaginilor.
+
+Un JDK nou și compileSdk 36 nu garantează disponibilitatea API-ului Java pe Android 28. [API-urile Java și desugaring](https://developer.android.com/studio/write/java8-support) au un contract separat; adaptorul folosește colectorul portabil imutabil, iar Lint și proba nativă protejează această frontieră.
+
+Receipt-ul probei UI este distinct de cel al release-ului și se produce numai după verificarea rezultatelor efective:
+
+| Câmp | Sursă verificată |
+|---|---|
+| `status`, `appTests`, `newAuditedCases` | XML Gradle fără eșec/skip și inventarul cazurilor auditate. |
+| `apk`, `applicationId`, `apkSha256`, `apkBytes` | APK-ul `assembleUiSanity`, manifestul binar, semnătura și hash-ul fișierului complet. |
+| `stage`, `sourceManifestSha256` | Snapshot extern înregistrat și inventar confruntat înainte/după build. |
+| `assertionDirectory`, `capturedComparisons` | JSON-urile comparațiilor capturate în execuția finală, fără populație goală. |
+| `uiLibrary`, `lintErrors`, `lintWarnings` | Proveniența AAR-ului și rezultatul Lint al acelorași intrări. |
+
+Nu utilizați receipt-ul `Debug` sau `Release` ca substitut pentru varianta izolată. Lansatorul prototipului refuză noul contract; migrarea deciziei independente și unificarea producătorului de receipt rămân U09.
+
+## Auditul cititorului Extent
+
+- Spark grupează metodele sub clasă: confruntați atât populația metodelor, cât și suma comparațiilor; numărul intrărilor din stânga nu este numărul testelor.
+- Folosiți controlul standard de expandare, apoi disclosure-urile acțiunilor, aserțiunilor și corpurilor. Toate rândurile trebuie desfăcute, iar ultimul trebuie accesibil prin derulare reală.
+- Captura este un link către viewer, nu un `<img>` permanent în tabel. Capturile identice pot folosi referințe; verificați PNG-ul rezolvat față de original, decodarea, încadrarea și închiderea completă a viewer-ului înaintea următorului click.
+- Verificarea cititorului poate utiliza Chromium offline; acest lucru nu schimbă proveniența acțiunilor Android, executate prin ADB și UI Automator.
+
+## Istoricul adaptiv Rentz
+
+J4 oferă reperul pentru lățimile măsurate, subcoloanele aliniate și antetul fix deasupra rândurilor. J5 folosește numărul mâinii, sub-jocul și alegătorul în coloana fixă, iar grupurile de scor arată **Δ** pentru mâna respectivă și **Σ** pentru totalul confirmat. [Reperul J4](../../../atf_j4/docs/game/ATF_ScoreHistory.md)
+
+| Situație | Comportament |
+|---|---|
+| Lățime disponibilă | Textul se măsoară cu fontul Android activ. Coloana mâinii ocupă cel mult 40% din grilă, iar numele și descrierea mâinii se pot împărți pe rânduri. |
+| Mai mulți jucători decât încap | Antetul și scorurile derulează la aceeași poziție orizontală. Coloana mâinii rămâne vizibilă. |
+| Istoric înalt | Un singur viewport vertical mută simultan descrierile mâinilor și scorurile. Antetul și legenda păstrează poziția. |
+| Înălțime foarte mică | Când antetul și legenda nu lasă loc pentru primul rând complet, conținutul dialogului derulează vertical în întregime. |
+| Istoric gol sau mână în curs | Se afișează numai rezultatele confirmate. Istoricul gol are un mesaj explicit. |
+
+- Testele de componentă confruntă lățimile și înălțimile și reconstruiesc toate cele 48 de mâini ale unei mese de șase din jurnalul canonic. Punctele provin din motor, iar oracolul adună separat deltele pe fiecare loc. [Componentele istoricului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/)
+- Sanity-ul `-HistoryOnly` citește `historyFixture` și `historyFixtureSha256` din receipt. Fixture-ul identifică jurnalul și valorile publice de la cele două capete ale istoricului. Traseul nativ deschide dialogul, derulează pe ambele axe și confruntă revizia și totalurile la întoarcerea în meniu. [Lansatorul Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
+- Adaugă `-HistoryMatrix` pentru profilul J4 de 720 × 1280 și fereastra scundă de 720 × 740, ambele la 360 dpi, font 1,5 și interfață EN. Proba API 28 măsoară ultimul grup de scor și rândul 48, verifică legenda la capăt și mărește din nou dialogul deschis. [Matricea nativă și lecțiile](../../../../rentz_back/ui-review/history-native-matrix-j5/README.md)
+- Reperul de bază păstrează rularea inițială. Invariantele grilei și capcanele la extinderea testelor sunt lângă cod. [Rularea de bază](../../../../rentz_back/ui-review/adaptive-history-j5/README.md) · [README-ul grilei](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md)
+
+### Detaliul unei mâini
+
+| Responsabilitate | Contract |
+|---|---|
+| Motor | Închide rezultatul cu deltele, totalurile, contribuțiile pe categorii și locurile de sosire. La Totale, dama de caro este numărată în ambele categorii. |
+| Jurnal | Salvează aceleași comenzi și același profil. Rezultatul public se reconstruiește la reluare, inclusiv pentru un jurnal vechi compatibil. |
+| Interfață | Atingerea etichetei subliniate deschide detaliul. Locurile Rentz urmează ordinea motorului, iar ultima poziție explică atribuirea la închiderea mâinii. |
+| Probe | Componentele confruntă categoriile cu mutările observate. Sanity-ul deschide o mână de levate dublată și o mână Rentz din jurnalul restaurat. |
+
+[README-ul grilei și al detaliului](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md) · [Dovezile S05/S06](../../../../rentz_back/ui-review/settlement-details-j5/README.md)
+
+[Dovezile integrării curente](../../../../rentz_back/ui-review/shared-ui-cb695c1461/README.md) păstrează selecțiile, limitele și încercările originale; strategia de aici se aplică și versiunilor următoare.

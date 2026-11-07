@@ -1,5 +1,7 @@
 package ro.rentzlab.core;
 
+import ro.rentzlab.testing.RentzComponentLayer;
+
 import ro.rentzlab.ai.*;
 
 import java.util.*;
@@ -8,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 
+@RentzComponentLayer
 class RentzSequenceTest {
     @ParameterizedTest @ValueSource(ints={3,4,5,6}) void acesRepeatAndLowestCardsSkipExactlyOneEligiblePlayer(int players){
         boolean aceSeen=false,skipSeen=false,passSeen=false;

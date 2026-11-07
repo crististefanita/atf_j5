@@ -1,0 +1,7 @@
+<resources>
+    <item name="history_content" type="id" />
+    <item name="history_headings" type="id" />
+    <item name="history_details" type="id" />
+    <item name="history_body" type="id" />
+    <item name="history_scores" type="id" />
+</resources>

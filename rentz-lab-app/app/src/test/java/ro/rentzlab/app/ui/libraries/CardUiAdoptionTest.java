@@ -1,0 +1,42 @@
+package ro.rentzlab.app.ui.libraries;
+
+import org.junit.*;
+import ro.rentzlab.app.testing.*;
+import com.google.gson.JsonParser;
+import java.nio.file.*;
+import java.util.zip.*;
+import java.io.*;
+import java.security.MessageDigest;
+
+@AndroidComponentLayer
+public final class CardUiAdoptionTest {
+    @Rule public final UiAuditRule audit = new UiAuditRule();
+    @Test public void pinnedArchiveAndLoadedPresentationTypesHaveTheQualifiedBytesWithoutGameOrAtfClasses() throws Exception {
+        Path root = Path.of(System.getProperty("rentz.uiRepository"));
+        var provenance = JsonParser.parseString(new String(Files.readAllBytes(root.resolve("provenance.json")), java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+        audit.equal("Adopted coordinate", "ro.cardtable:card-table-ui:0.1.1", provenance.get("coordinate").getAsString());
+        for (var file : provenance.getAsJsonArray("files")) {
+            var value = file.getAsJsonObject(); audit.equal("Pinned " + value.get("path").getAsString(), value.get("sha256").getAsString(), hash(Files.readAllBytes(root.resolve(value.get("path").getAsString()))));
+        }
+        Path aar = root.resolve("ro/cardtable/card-table-ui/0.1.1/card-table-ui-0.1.1.aar");
+        byte[] classes;
+        try (var zip = new ZipFile(aar.toFile())) { classes = zip.getInputStream(zip.getEntry("classes.jar")).readAllBytes(); }
+        String marker = "ro/cardtable/ui/seat/SeatContent.class"; byte[] qualified = null;
+        try (var zip = new ZipInputStream(new ByteArrayInputStream(classes))) {
+            for (var entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+                audit.truth("UI owns its class namespace " + entry.getName(), !entry.getName().startsWith("ro/whistlab/") && !entry.getName().startsWith("ro/rentzlab/") && !entry.getName().startsWith("atf/"));
+                if (entry.getName().equals(marker)) qualified = zip.readAllBytes();
+            }
+        }
+        audit.truth("Qualified marker present", qualified != null);
+        try (var stream = ro.cardtable.ui.seat.SeatContent.class.getClassLoader().getResourceAsStream(marker)) {
+            audit.equal("Loaded marker equals qualified AAR", hash(qualified), hash(stream.readAllBytes()));
+        }
+        audit.rejects("No Whist engine on Android JVM classpath", ClassNotFoundException.class, () -> Class.forName("ro.whistlab.core.session.GameSession"));
+    }
+    private String hash(byte[] bytes) throws Exception {
+        StringBuilder value = new StringBuilder();
+        for (byte part : MessageDigest.getInstance("SHA-256").digest(bytes)) value.append(String.format("%02x", part & 255));
+        return value.toString();
+    }
+}

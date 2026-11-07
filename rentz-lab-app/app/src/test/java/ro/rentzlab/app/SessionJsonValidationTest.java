@@ -1,5 +1,7 @@
 package ro.rentzlab.app;
 
+import ro.rentzlab.app.testing.AndroidComponentLayer;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -10,6 +12,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
+@AndroidComponentLayer
 public class SessionJsonValidationTest {
     private static String saved(long seed) throws Exception {
         return SessionJson.saved(new GameSession(4, seed, RentzPlayer.Difficulty.NORMAL)).toString();

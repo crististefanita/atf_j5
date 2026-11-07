@@ -1,5 +1,7 @@
 package atf.rentz;
 
+import atf.testkit.AtfComponentTest;
+
 import atf.reporting.contract.*;
 import atf.reporting.model.timing.ReportPhaseTiming;
 import atf.testkit.assertions.*;
@@ -16,6 +18,7 @@ import atf.reporting.html.HtmlReportSession;
 import atf.reporting.artifact.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@AtfComponentTest
 class RentzRulePublicationTest {
     static final class Probe {
         final List<String> events=new ArrayList<>();

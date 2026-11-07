@@ -25,12 +25,12 @@ public final class SessionJson {
     }
     public static JSONObject saved(GameSession session)throws JSONException{
         var saved=session.save();var commands=new JSONArray();for(var command:saved.commands())commands.put(new JSONObject().put("action",command.action().name()).put("seat",command.seat()).put("card",card(command.card())).put("contract",command.contract()==null?JSONObject.NULL:command.contract().name()).put("blind",command.blind()));
-        return new JSONObject().put("schema",saved.schema()).put("players",saved.players()).put("seed",saved.seed()).put("difficulty",saved.difficulty().name()).put("profile","LABORATORY_V1").put("policy","RENTZ_PUBLIC_LOOKAHEAD_V1").put("rules","RENTZ_RULES_V2").put("commands",commands);
+        return new JSONObject().put("schema",saved.schema()).put("players",saved.players()).put("seed",saved.seed()).put("difficulty",saved.difficulty().name()).put("profile",GameSession.SCORE_PROFILE).put("policy","RENTZ_PUBLIC_LOOKAHEAD_V1").put("rules","RENTZ_RULES_V2").put("commands",commands);
     }
     public static GameSession restore(String text)throws JSONException{
         var json=SavedJson.read(text);
         SavedJson.fields(json,Set.of("schema","players","seed","difficulty","profile","policy","commands"),Set.of("rules"));
-        if(!SavedJson.text(json,"profile").equals("LABORATORY_V1")||!SavedJson.text(json,"policy").equals("RENTZ_PUBLIC_LOOKAHEAD_V1")){
+        if(!SavedJson.text(json,"profile").equals(GameSession.SCORE_PROFILE)||!SavedJson.text(json,"policy").equals("RENTZ_PUBLIC_LOOKAHEAD_V1")){
             throw new IllegalArgumentException("Saved profile identity");
         }
         String rules=json.has("rules")?SavedJson.text(json,"rules"):"RENTZ_RULES_V1";

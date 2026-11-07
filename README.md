@@ -8,15 +8,14 @@ Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări 
 
 ## Jocul
 
-- [Release 0.1.1](https://github.com/crististefanita/atf_j5/releases/tag/v0.1.1) — prezentare și descărcare.
-- [Descarcă APK 0.1.1](https://github.com/crististefanita/atf_j5/releases/download/v0.1.1/RentzLab-0.1.1.apk).
+- [Rentz Lab 0.1.2](release/0.1.2/README.md) — candidat.
 
 ## Module și responsabilități
 
 | Zonă | Responsabilitate |
 |---|---|
 | [Motor Rentz](rentz-lab-app/game-core/README.md) | Cărți, levate fără atu, opt sub-jocuri, secvențe, rotație, scor și jucători Normal/Hard. |
-| [Aplicație locală](rentz-lab-app/app/README.md) | Prototip Android nativ, sesiune salvată, istoric și reluare. |
+| [Aplicație locală](rentz-lab-app/app/README.md) | Interfață nativă pe UI-ul comun, adaptoare Rentz, sesiune salvată, istoric și reluare. |
 | [Testare și integrare](atf-tests/README.md) | Profil YAML tipizat, componente, arenă offline și acceptanța bibliotecilor comune. |
 | [Kit](lib/README.TestKit.md#scope-și-integrare) | Clasificare, lifecycle JUnit și păstrarea comparațiilor evaluate. |
 | [Observarea referinței](rentz-reference/README.md) | Identitatea aplicației originale și capturi Android cu rezervare exclusivă. |
@@ -41,11 +40,13 @@ Un rezultat al modelului verifică regula implementată și profilul său. Echiv
 
 ## Pornire
 
-Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven și dependențele locale pregătite:
+Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și cache-urile Gradle/Maven pregătite:
 
 ```powershell
 .\scripts\run-rentz-components.ps1
 ```
+
+Intrarea implicită este colecția regression: componente Maven și Android JVM, fără dispozitiv. Pentru reguli fără SDK Android, selectați explicit quick prin parametrul -Collection.
 
 Lansatorul execută o copie temporară și păstrează rezultatele în afara surselor. Profilul activ este de laborator; valorile originale „Classic” și „Traditional” rămân neconfirmate până la calificarea lor.
 

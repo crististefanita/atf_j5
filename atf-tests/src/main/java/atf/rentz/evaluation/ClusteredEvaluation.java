@@ -1,6 +1,7 @@
 package atf.rentz.evaluation;
 
 import java.util.*;
+import ro.rentzlab.core.deal.DealSeed;
 
 /** Paired bootstrap over independent seed clusters; rotations remain inside their cluster. */
 public final class ClusteredEvaluation {
@@ -14,6 +15,7 @@ public final class ClusteredEvaluation {
     public static Assessment assess(List<Sample> samples,int players,Metric metric,int families){
         if(samples.isEmpty()||players<3||players>6||metric==null||families<1||families>3)throw new IllegalArgumentException("Cluster protocol");
         var grouped=new TreeMap<Long,List<Sample>>();for(var sample:samples){if(sample.seat()>=players)throw new IllegalArgumentException("Seat outside table");grouped.computeIfAbsent(sample.seed(),s->new ArrayList<>()).add(sample);}
+        DealSeed.requireDistinct(grouped.keySet());
         var clusters=new ArrayList<Cluster>();
         for(var entry:grouped.entrySet()){
             var rows=entry.getValue();if(rows.size()!=players||rows.stream().map(Sample::seat).distinct().count()!=players)throw new IllegalArgumentException("Exactly one result for every rotated seat required");

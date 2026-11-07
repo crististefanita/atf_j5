@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "versionName": "0.1.2",
+    "versionCode": 3,
+    "applicationId": "ro.rentzlab.app",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "apkName": "RentzLab-0.1.2.apk",
+    "apkBytes": null,
+    "sha256": null
+  },
+  "publication": {
+    "state": "DRAFT"
+  }
+}

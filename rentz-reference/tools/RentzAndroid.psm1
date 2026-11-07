@@ -93,8 +93,21 @@ function Save-RentzObservation {
     if($bytes.Length-lt8-or[Convert]::ToHexString($bytes[0..7])-ne'89504E470D0A1A0A'){throw 'Native PNG signature required'}
     Move-Item -LiteralPath $png.File -Destination (Join-Path $RunRoot "$Name.png")
     @($document.SelectNodes('//node') | Where-Object { $_.text -or $_.'content-desc' } | ForEach-Object {
-        [pscustomobject]@{text=$_.text;description=$_.'content-desc';id=$_.'resource-id';clickable=$_.clickable;bounds=$_.bounds}
+        [pscustomobject]@{text=$_.text;description=$_.'content-desc';id=$_.'resource-id';class=$_.class;enabled=$_.enabled;scrollable=$_.scrollable;focusable=$_.focusable;clickable=$_.clickable;bounds=$_.bounds}
     })
 }
 
-Export-ModuleMember -Function Invoke-RentzAdb,Save-RentzObservation
+function Get-RentzTapTarget {
+    param([Parameter(Mandatory)][System.Xml.XmlElement[]]$Nodes,[Parameter(Mandatory)][string]$Label,[string]$Class='')
+    $matches=@(foreach($node in $Nodes){
+        $listItem=$node.class-in@('android.widget.CheckedTextView','android.widget.TextView')-and
+            $null-ne$node.SelectSingleNode("ancestor::node[@class='android.widget.ListView']")
+        if(($node.text-ieq$Label-or$node.'content-desc'-ceq$Label)-and$node.enabled-eq'true'-and
+           ($node.clickable-eq'true'-or$listItem)-and(-not$Class-or$node.class-eq$Class)){$node}
+    })
+    if($matches.Count-gt1){throw "Ambiguous native control: $Label"}
+    if($matches.Count-eq1){return $matches[0]}
+    return $null
+}
+
+Export-ModuleMember -Function Invoke-RentzAdb,Save-RentzObservation,Get-RentzTapTarget

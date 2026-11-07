@@ -1,5 +1,7 @@
 package ro.rentzlab.app.lifecycle;
 
+import ro.rentzlab.app.testing.AndroidComponentLayer;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -8,6 +10,7 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import static org.junit.Assert.*;
 
+@AndroidComponentLayer
 public class FileSessionStorageTest {
     @Rule public TemporaryFolder folder=new TemporaryFolder();
     @Test public void everyWriteUsesADifferentStagingFileOutsideCanonicalData() throws Exception {
