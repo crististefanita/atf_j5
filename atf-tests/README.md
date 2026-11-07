@@ -54,6 +54,16 @@ Test Kit păstrează rezultatul comparației efective. Publicatorul mapează faz
 
 [Protocolul învățării](../docs/rentz/ATF_Learning.md) separă dezvoltarea, admiterea datelor noi, progresul observat și calificarea E2E. XML-ul componentelor, rezultatul strategic și raportul narativ sunt populații și livrabile distincte.
 
+### Inițializarea registrului
+
+Arena folosește registrul comun din rădăcina datelor. Pentru prima evaluare rezervată, inițializați registrul cu istoricul v1 revizuit, responsabilul și referința reviziei.
+
+```powershell
+.\atf-tests\tools\run-arena.ps1 -ComponentRun $env:RENTZ_COMPONENT_RUN -ReviewedHistory $env:RENTZ_REVIEWED_HISTORY -Reviewer $env:RENTZ_REVIEWER -ReviewReference $env:RENTZ_REVIEW_REFERENCE
+```
+
+Pentru migrarea în loc, indicați chiar registrul v1 existent. Păstrați referința reviziei împreună cu documentele care atestă expunerile. [Contractul registrului](../docs/rentz/ATF_Learning.md#identitatea-distribuirii-și-expunerea)
+
 ## Colecții și porți offline
 
 [Calificarea consumatorului](../docs/rentz/ATF_Qualification.md) deține contractele binare, selecțiile și probele de eșec. [Registrul colecțiilor](../config/test-collections.json) selectează etapele, iar lansatorul confruntă populația executată cu sursele înghețate.

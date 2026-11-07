@@ -11,6 +11,7 @@ Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din st
 | Randarea și gesturile | [RentzHistoryGrid](RentzHistoryGrid.java) măsoară cu fontul Android activ, aliniază celulele și sincronizează pozițiile de derulare. |
 | Dialogul | [RentzHistoryView](../screens/RentzHistoryView.java) rezolvă numele afișate, mesajul pentru istoricul gol și dimensiunea ferestrei. |
 | Detaliul mâinii | [RentzHandDetails](RentzHandDetails.java) afișează profilul, alegătorul, multiplicatorul din titlu, contribuțiile și scorurile confirmate. |
+| Ajutorul din meniu | [RentzAwardGrid](RentzAwardGrid.java) afișează premiile profilului efectiv, în ordinea sosirii, pentru mesele de 3–6 jucători. |
 
 ## Cum se păstrează contextul
 
@@ -38,6 +39,7 @@ Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din st
 - Atinge eticheta subliniată a unei mâini pentru a deschide detaliul. Întoarcerea păstrează aceeași grilă și poziția de derulare.
 - La Totale, Q♦ contribuie atât la dame, cât și la carouri. Numărul contribuțiilor rămâne brut, iar punctele afișate includ deja dublarea.
 - La Rentz, locurile urmează ordinea înregistrată de motor. Ultimul loc îi revine jucătorului cu cărți rămase. Mai multe locuri pot avea același premiu.
+- În ajutor, un loc existent cu premiu zero afișează `0`, iar un loc care nu există la acea masă are marcajul `—`. Prețurile levatelor din același ecran vin din același profil.
 - Reluarea reexecută jurnalul canonic și reconstruiește rezultatele publice. Un sumar sintetic fără detalii arată explicit lipsa lor.
 
 Modelul de măsurare și stilul de grilă urmează reperul Whist J4. Contractul de scor și pașii pentru build, fixture și raport sunt documentați în ghidul de integrare. [Istoricul adaptiv în ATF](../../../../../../../../../../docs/rentz/ATF_UiIntegration.md#istoricul-adaptiv-rentz)

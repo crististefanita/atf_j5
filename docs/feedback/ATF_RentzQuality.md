@@ -13,8 +13,10 @@ Registrul separă mecanismele implementate de promovarea strategică și de inte
 
 | ID | Prioritate | Statut și impact | Responsabil |
 |---|---|---|---|
+| Q32 | P1 | Recuperarea poate debloca un lot rezervat fără a înregistra distribuirea din jurnalul capturat. | Adaptorul și registrul expunerilor. |
+| Q33 | P2 | Admiterea poate promova un rezultat cu scor final imposibil pentru profilul declarat. | Poarta evaluării și profilul de scor. |
 | Q08 | P2 | Obiective și continuare completă implementate offline; promovarea produsului cere progres independent și integrare proprie. | Politicile și protocolul AI. |
-| Q09 | P2 | Rute înregistrate, proveniență diferențiată și arhivă inventariată; contractul permanent protejează retenția și comenzile. | Documentația consumatorului. |
+
 
 ## Q08: forța AI se măsoară la obiectivul declarat
 
@@ -38,22 +40,11 @@ Registrul separă mecanismele implementate de promovarea strategică și de inte
 - Profilul contextual rămâne separat de candidatul cu dovadă publică. Reguli locale plauzibile sau componente verzi nu justifică păstrarea lor într-un candidat care pierde comparația pereche.
 - Integrarea Android trebuie să transporte registrul public complet și să alinieze codec-ul, identitatea politicii și APK-ul înaintea calificării native. Componentele JVM nu închid această frontieră.
 
-## Q09: documentația trebuie să arate mecanismul complet
-
-| Contract implementat | Protecție permanentă |
-|---|---|
-| Pornire | README-urile modulelor indică rădăcina, PowerShell, JDK, condiția SDK și colecția lansatorului înregistrat. |
-| Proveniență | [Observarea referinței](../../rentz-reference/README.md) distinge declarația publicată, resursa APK, observația de runtime și interpretarea laboratorului. |
-| Istoric | [Arhiva Contract Whist](../history/contract-whist/README.md) are inventar, hash-uri și retenție; dovezile externe rămân la destinațiile originale. |
-| Corpus complet | [Guvernanța documentară](../../atf-tests/src/test/java/atf/rentz/governance/DocumentationContractTest.java) verifică traseele și controlează negativ omisiunea, alterarea arhivei și lansatorul neînregistrat. |
-
-Rezultatele, identitățile și pașii RED/GREEN rămân în [auditul extern](../../../../rentz_back/infrastructure/governance/20261106-q08-q09-ff1d7846/TDD.md). README-urile explică mecanismele; nu copiază scoruri de audit sau rezultate de partide.
-
-[Auditul bugetelor egale](../../../../rentz_back/infrastructure/governance/20261106-hard-equal-24c98bb8/TDD.md) separă reproducerea reperului, ablațiile de dezvoltare, corecția controlului și verdictul pe lot nou. Nu atribuiți un câștig împotriva unei mese uniform Normal progresului față de versiunea Hard păstrată.
-
 ## Ordine de rezolvare
 
-Păstrați Q09 prin colecția `infrastructure` și regresia standard. Calificați separat progresul strategic Q08, integrarea nativă și prezentarea; un raport verde al componentelor nu demonstrează superioritate de joc.
+Calificați separat progresul strategic Q08, integrarea nativă și prezentarea. [Regresia standard](../rentz/ATF_Qualification.md) păstrează verificarea mecanismelor stabilizate.
+
+[Auditul bugetelor egale](../../../../rentz_back/infrastructure/governance/20261106-hard-equal-24c98bb8/TDD.md) păstrează comparațiile și verdictul pe lotul nou.
 
 ## Guvernanță și coeziune
 
@@ -65,7 +56,7 @@ Nivelurile testelor, corpusul documentar și revizuirea diferențelor Git au con
 
 | Prioritate | Lacună delimitată | Criteriu de închidere |
 |---|---|---|
-| P1 | Traseul personal README → GitHub Release → fișier salvat în browser cere dovadă distinctă față de API și transferul nativ. | Versiune curentă, sesiune autentificată, bytes, SHA-256 și CRC; orice blocare a clientului rămâne diagnostic, fără substituirea cu un PASS API. |
+
 | P2 | Contractele de transport și arhivă sunt adaptoare locale pentru distribuția produsului; reutilizarea printr-o bibliotecă comună nu este încă împachetată. | Prin ownerul comun, promovați un API generic cu nume de produs configurabil și oracole negative independente. Păstrați în consumator selecția versiunii, regulile Rentz și acceptanța consumatorului. |
 
 [Procesul livrării](../rentz/ATF_Release.md) separă DRAFT, PREPARED și PUBLISHED; o pregătire validă nu este un APK calificat.
@@ -73,7 +64,7 @@ Nivelurile testelor, corpusul documentar și revizuirea diferențelor Git au con
 ## Proveniența livrării și populația testelor
 
 - **P2:** unele invocări Gradle parametrizate au același display name în aceeași clasă. Introduceți identități XML neambigue; păstrați toate invocările originale și nu deduceți metode unice din etichete.
-- **Contract permanent:** release-ul 0.1.1 califică snapshot-ul J21 identificat în dosar. Refactorizările live și Reporting J22 cer calificare proprie și versiune nouă; nu înlocuiți asset-ul publicat.
+
 - **P2:** formalizați reconcilierea diferențelor exclusiv documentare într-un compositor versionat, cu controale negative. Receipt-ul original FAIL se păstrează, iar calificarea compusă identifică explicit execuțiile și diferența acceptată.
 
 ## Inventar executabil și admitere a evaluării
@@ -88,53 +79,25 @@ Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; 
 - Admiterea unui rezumat coerent nu autentifică expeditorul și nu înlocuiește auditul tranzițiilor sau verificarea fișierelor jurnal.
 - Progresul strategic și integrarea nativă păstrează criteriile separate de mai sus; remedierea porților nu promovează profilul AI.
 
-## Constatări din revizia curentă
+## Constatări deschise
 
-| ID | Prioritate și statut | Proprietar și limită |
+| ID | Reproducere și impact | Criteriu de închidere |
 |---|---|---|
-| Q17 | P2 · remediat în inventar și selector | Containerele Nested moștenite au proprietari binari verificabili în XML. |
-| Q18 | P2 · remediat în arenă și admitere | Obiectivul, profilul cerut și politicile efective au identități distincte. |
-| Q19 | P2 · remediat în registrul public | Restaurarea cere o alocare posibilă a scorului pentru contractul și profilul declarate. |
-| Q20 | P1 · remediat | Protocolul, registrul și agregarea refuză aliasurile aceleiași stări efective. |
-| Q21 | P2 · remediat | Profilul de scor executat este declarat și confruntat cu profilul de încredere. |
-| Q22 | P2 · remediat | Poarta Surefire confruntă cazurile, proprietarul și contoarele suitelor simple. |
+| Q32 | [Adaptorul](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) acceptă un jurnal valid din altă rulare la prima completare cu tokenul corect. Registrul înregistrează distribuirea străină, iar un alias al distribuirii capturate poate intra în lotul rezervat. Proba offline acoperă recuperarea, nu traseul normal din interfață. | Legați marcajul de identitatea rulării și de dovada capturii înainte de a permite prima completare. Cu două jurnale valide, cel străin trebuie refuzat fără ștergerea marcajului; cel corect trebuie să blocheze toate aliasurile. Păstrați reluarea idempotentă după scriere. |
+| Q33 | [Admiterea](../../atf-tests/src/main/java/atf/rentz/arena/PromotionEvidence.java) acceptă un scor compatibil cu unitatea profilului și cu marja, dar mai mare decât limita conservatoare a unei partide. Rezumatul modificat rămâne eligibil pentru promovare chiar după recalcularea agregatelor. | Derivați limitele din profilul de încredere și programul partidei, în aritmetică sigură. Respingeți depășirile pentru candidat și control, inclusiv la suma adversarilor; păstrați un control pozitiv dintr-o partidă reală. Această verificare nu înlocuiește replay-ul. |
 
-### Q17 · Descoperirea containerelor și atribuirea cazurilor
+[Reproducerea offline](../../../../rentz_back/infrastructure/governance/20261107-post-q31-review/findings.log) folosește registre temporare și nu modifică loturile active. Închideți întâi Q32: integritatea lotului este precondiție pentru orice rezultat de forță.
 
-- Regresiile confruntă moștenirea directă și tranzitivă cu Jupiter, inclusiv o clasă interioară omonimă și containere statice. Selectorul refuză numele neconvențional.
-- Poarta verifică proprietarii cazurilor din XML și refuză clasele binare comune mai multor rădăcini. Păstrați refuzul până când există o probă de atribuire per rădăcină. [Contractul selectorului](../rentz/ATF_Qualification.md#containere-jupiter-imbricate)
+## Închideri și documente responsabile
 
-### Q18 · Identitatea actorilor de evaluare
-
-- Aceleași descrieri ale actorilor construiesc jucătorii și alimentează rezumatul, admiterea și raportul.
-- Reperul Hard este legacy chiar dacă profilul solicitat este contextual. Normal și Baseline au identități distincte, fără setări de căutare.
-- Admiterea refuză o identitate lipsă sau schimbată pe oricare rol, chiar cu același buget. [Contractul evaluării](../rentz/ATF_Learning.md)
-
-[Auditul extern Q17–Q18](../../../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md) leagă probele roșii, verificarea XML și rulările de calificare.
-
-### Q19 · Fezabilitatea scorurilor în registrul public
-
-- Poarta refuză un fond distribuit în unități imposibile, împărțirea premiului pentru o carte unică și premiile de sosire incompatibile cu profilul. Refuzul intervine înainte de construirea continuării.
-- Pentru Totale, alocarea trebuie să păstreze suprapunerea damei de caro și capacitatea levatelor. Un oracol independent confruntă această condiție, iar jocurile motorului oferă vecini legali pe toate dimensiunile mesei.
-- Păstrați validarea aritmetică separată de auditul mutărilor. Dacă apar reguli de punctaj noi, adăugați atât vectorul imposibil cu fond corect, cât și vecinul legal pentru profilul respectiv. [Contractul registrului](../rentz/ATF_Architecture.md#admiterea-scorurilor-din-registru)
-
-[Auditul extern Q19](../../../../rentz_back/infrastructure/governance/20261107-q19/TDD.md) păstrează probele roșii și verzi și verdictul de guvernanță.
-
-### Q20 · Identitatea distribuirii depinde de generator
-
-- [Identitatea generatorului](../rentz/ATF_Learning.md#identitatea-distribuirii-și-expunerea) este comună motorului, protocolului, registrului și agregării. Etichetele originale și schema registrului rămân disponibile pentru reproducere.
-- Regresiile acoperă aliasurile din lot și din istoricul v1, toate combinațiile de faze și refuzul înainte de a produce dovezi de partidă. Vecinii păstrează reluarea explicită în dezvoltare, masele diferite și stările realmente distincte.
-- Păstrați criteriul la o schimbare de generator. Demonstrați identitatea efectivă și conservarea istoricului înainte de a redeschide evaluarea rezervată. [Probe roșu–verde](../../../../rentz_back/infrastructure/governance/20261107-q20/TDD.md)
-
-### Q21 · Admiterea cere identitatea profilului de scor
-
-- [Admiterea](../../atf-tests/src/main/java/atf/rentz/arena/PromotionAdmission.java) cere profilul executat în rezultat și profilul de încredere în context. Extent și partidele reținute păstrează valorile efective.
-- Regresiile confruntă două rulări reale, un rezumat istoric fără profil și mutații ale profilului declarat. Manifestul CLI trebuie să acopere fișierul de scor. [Probe roșu–verde](../../../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md)
-
-### Q22 · Populația Surefire se verifică din cazurile raportate
-
-- [Poarta populației](../../scripts/TestCollections.psm1) refuză contoarele contradictorii, cazurile fără nume și proprietarii străini în suitele simple. Grupurile imbricate păstrează atribuirea prin inventar când Surefire consolidează cazurile.
-- Lansatorul păstrează raportul brut și diagnosticul de populație la refuz. Regresiile acoperă atât invocări multiple valide, cât și lipsa cazurilor sau a proprietarului corect. [Probe roșu–verde](../../../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md)
+| Cerințe | Mecanism permanent | Dovezi |
+|---|---|---|
+| Q09 | [Infrastructură](../rentz/ATF_Infrastructure.md), [calificare](../rentz/ATF_Qualification.md) și [arhivă](../history/contract-whist/README.md) | [Audit Q09](../../../../rentz_back/infrastructure/governance/20261106-q08-q09-ff1d7846/TDD.md) |
+| Q17–Q19 | [Containere Jupiter](../rentz/ATF_Qualification.md#containere-jupiter-imbricate), [evaluare](../rentz/ATF_Learning.md#admiterea-rezultatelor-reluate) și [scoruri în registru](../rentz/ATF_Architecture.md#admiterea-scorurilor-din-registru) | [Q17–Q18](../../../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md) · [Q19](../../../../rentz_back/infrastructure/governance/20261107-q19/TDD.md) |
+| Q20–Q25 | [Identitatea distribuirii](../rentz/ATF_Learning.md#identitatea-distribuirii-și-expunerea) și [guvernanța](../rentz/ATF_Qualification.md) | [Q20](../../../../rentz_back/infrastructure/governance/20261107-q20/TDD.md) · [Q21–Q22](../../../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md) · [Q23–Q25](../../../../rentz_back/infrastructure/governance/20261107-q23-q25/TDD.md) |
+| Q26–Q28 | [Scor și expunere](../rentz/ATF_Learning.md) și [identitatea invocărilor](../rentz/ATF_Qualification.md#containere-jupiter-imbricate) | [Q26–Q28](../../../../rentz_back/infrastructure/governance/20261107-q26-q28/TDD.md) |
+| Q29–Q31 | [Deficitul adversarilor și expunerea nativă](../rentz/ATF_Learning.md), plus [structura XML](../rentz/ATF_Qualification.md#containere-jupiter-imbricate) | [Q29–Q31](../../../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md) |
+| Descărcarea din README | [Identitatea livrării și canalele de descărcare](../rentz/ATF_Release.md) | [Receipt de browser autentificat](../../release/0.1.2/reports/distribution/download-readme.json) |
 
 ## Calificarea integrării UI pentru 0.1.2
 

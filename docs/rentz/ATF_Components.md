@@ -86,3 +86,5 @@ XML-urile păstrează întreaga populație executată. Raportul narativ publică
 | Auditul manifestului | Clasă deținătoare și declarație de test eligibilă, cu mutanți negativi. | Nu dovedește execuția testului, independența oracolului sau adevărul sursei. |
 
 Statutul din [manifest](../../config/rentz-rules.yaml) se schimbă numai cu probă nouă. [Arhitectura](ATF_Architecture.md) separă sursa, configurația, observația și evaluarea jucătorilor.
+
+Pentru alt joc, păstrați forma verificării: precondiție minimă, acțiune, rezultat calculat separat și un control negativ care arată ce respinge oracolul. [Planul de transfer](ATF_Transfer.md#aplicare-la-holdem) arată cum se aplică această formă la Hold’em.

@@ -4,6 +4,12 @@ import ro.rentzlab.app.testing.*;
 import ro.rentzlab.app.ui.copy.RentzUiText.Language;
 import org.junit.*;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import org.json.JSONArray;
+import ro.rentzlab.ai.RentzPlayer;
+import ro.rentzlab.app.GameSession;
+import ro.rentzlab.app.SessionJson;
 
 @AndroidComponentLayer
 public final class ProfileSettingsTest {
@@ -29,6 +35,31 @@ public final class ProfileSettingsTest {
         audit.equal("Previous durable name", "Ana", profile.preferredName());
         audit.rejects("Language write rejection", IllegalStateException.class, () -> profile.language(Language.RO));
         audit.equal("Previous effective language", Language.EN, profile.language());
+    }
+    @Test public void opponentNamesKeepTheirSeatsAndDoNotSaveTheHumanName() throws Exception {
+        for (int seats = 3; seats <= 6; seats++) {
+            var baseline = new GameSession(seats, 31, RentzPlayer.Difficulty.NORMAL);
+            String reserved = baseline.opponentNames().get(0);
+            var session = new GameSession(seats, 31, RentzPlayer.Difficulty.NORMAL, reserved);
+            audit.equal("One unique opponent per seat " + seats, seats - 1, new HashSet<>(session.opponentNames()).size());
+            audit.truth("Reserve the chosen human name " + seats, session.opponentNames().stream().noneMatch(reserved::equalsIgnoreCase));
+            var legacy = SessionJson.saved(baseline);
+            audit.truth("Original journal schema remains readable " + seats, !legacy.has("opponents"));
+            audit.equal("Legacy session reconstructs the seed roster " + seats, baseline.opponentNames(),
+                    SessionJson.restore(legacy.toString()).opponentNames());
+            var saved = SessionJson.saved(session);
+            var restored = SessionJson.restore(saved.toString());
+            audit.equal("Persist the opponents by seat " + seats, session.opponentNames(), restored.opponentNames());
+            audit.truth("Reservation persists only opponent labels " + seats, !saved.toString().contains("\"" + reserved + "\""));
+            audit.equal("Changing the displayed human name keeps opponents " + seats, session.opponentNames(),
+                    restored.displayNames("Alt nume").subList(1, seats));
+            audit.equal("Roster leaves the deal unchanged " + seats, baseline.view(), restored.view());
+        }
+        var invalid = SessionJson.saved(new GameSession(3, 31, RentzPlayer.Difficulty.NORMAL));
+        invalid.put("opponents", new JSONArray(List.of("Ana", "ANA")));
+        audit.rejects("Reject duplicate saved names", IllegalArgumentException.class, () -> SessionJson.restore(invalid.toString()));
+        invalid.put("opponents", new JSONArray(List.of("Ana", 42)));
+        audit.rejects("Reject nontext saved names", IllegalArgumentException.class, () -> SessionJson.restore(invalid.toString()));
     }
     private ProfileSettings.Store store(HashMap<String, String> data, boolean fail) {
         return new ProfileSettings.Store() {

@@ -145,7 +145,7 @@ try{
     Capture 'Partidă pornită din interfață' @((Check 'Jucători' 4 $state.view.players),(Check 'Adversari' 'HARD' $state.difficulty),(Check 'Mâna inițial ascunsă' 0 @($state.view.hand).Count))|Out-Null
     $private=Adb @('exec-out','run-as','ro.rentzlab.app','cat','files/session.json') 'initial-private-journal';$private.Output|Set-Content -LiteralPath (Join-Path $run 'journal.json') -Encoding utf8NoBOM
     Assert-RentzQualifiedRuntime -Descriptor $component.nativeRuntime -DescriptorSha256 $component.nativeRuntimeSha256 -MainClass 'atf.rentz.android.RentzNativeFlow' -Stage $component.stage|Out-Null
-    & $Java -Xmx128m -cp $classpath $mainClass expose (Join-Path $run 'journal.json') 'C:\work\rentz_back\learning\exposure.json'|Out-Null;if($LASTEXITCODE-ne0){throw 'Native data exposure could not be recorded'}
+    & $Java -Xmx128m -cp $classpath $mainClass expose (Join-Path $run 'journal.json') (Join-Path (Get-AtfDataRoot -ProjectRoot $project) 'learning/exposure.json')|Out-Null;if($LASTEXITCODE-ne0){throw 'Native data exposure could not be recorded'}
     $humanActions=0;$firstPlay=$false
     while($state.view.phase-in@('CHOOSE','PLAY')){
         Assert-RentzQualifiedRuntime -Descriptor $component.nativeRuntime -DescriptorSha256 $component.nativeRuntimeSha256 -MainClass 'atf.rentz.android.RentzNativeFlow' -Stage $component.stage|Out-Null

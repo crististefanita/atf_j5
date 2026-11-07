@@ -176,12 +176,30 @@ Documentul registrului are schemă închisă: cheile duplicate, documentele supl
 | Frontieră | Regulă |
 |---|---|
 | Protocol și lot | Două valori cu aceeași stare efectivă refuză lotul înainte de simulare. Aceeași verificare protejează intrarea directă în registru. |
-| Istoric | Registrul citește schema v1 și compară stările efective derivate din etichetele deja păstrate. Un refuz păstrează octeții vechi, inclusiv când un fișier istoric conține mai multe etichete ale aceleiași stări. |
+| Istoric | Registrul citește istoricul v1 și păstrează ordinea intrărilor la trecerea în v2. Un refuz păstrează octeții vechi, inclusiv când istoricul conține mai multe etichete ale aceleiași stări. |
 | Dezvoltare | Reluarea intenționată este permisă pentru același seed original când toate expunerile care corespund stării sunt de dezvoltare și au aceeași etichetă. |
-| Evaluare rezervată | O stare expusă anterior pentru aceeași masă refuză evaluarea nouă. O stare deja rezervată refuză și reutilizarea ulterioară în dezvoltare. |
+| Evaluare rezervată | Arena cere registrul v2 revizuit și asociat căii comune. O stare expusă anterior pentru aceeași masă refuză evaluarea nouă. O stare rezervată refuză reutilizarea ulterioară în dezvoltare. |
 | Agregare | `ClusteredEvaluation` refuză aliasurile înainte de bootstrap și grupează toate rotațiile aceleiași stări. Pragul este de opt clustere, cu o corecție pentru numărul familiilor declarate. |
 
-La schimbarea generatorului, definiți întâi echivalența distribuirilor și tratamentul istoricului. Versiunea generatorului permite păstrarea și compararea expunerilor în spațiul în care au fost produse.
+Arena și lansatoarele native folosesc registrul comun din rădăcina de date a instalării. Lansatorul arenei și punctul de intrare Java refuză o cale alternativă. Copierea registrului v2 păstrează asocierea cu destinația originală.
+
+- **Revizie.** Proprietarul verifică expunerile, declară responsabilul și păstrează referința deciziei. Un istoric gol cere o revizie explicită pentru o instalare curată.
+- **Migrare.** Inițializarea atomică păstrează ordinea intrărilor existente. Revizia poate adăuga expuneri la finalul istoricului. [Comanda de inițializare](../../atf-tests/README.md#inițializarea-registrului)
+
+La schimbarea generatorului, definiți întâi echivalența distribuirilor și tratamentul istoricului.
+
+#### Expunerea în calificarea nativă
+
+| Etapă | Contract |
+|---|---|
+| Înaintea distribuirii | Lansatorul obține un marcaj în registrul comun, sub același lock. O evaluare rezervată refuză pornirea cât timp există o expunere nativă nerezolvată. |
+| Jurnal disponibil | Adaptorul înregistrează seed-ul și numărul de jucători. După scrierea atomică a registrului, eliberează marcajul. Jurnalul de istoric cunoscut este înregistrat înainte de încărcare. |
+| Publicare | Receipt-ul păstrează numele, SHA-256 și tokenul jurnalului. Raportorul verifică dovezile și păstrează accesul la receipt-urile istorice. |
+
+Pentru un traseu care pornește o partidă sau încarcă un jurnal, folosiți un rezultat de componente care califică adaptorul nativ. Indicați directorul prin ComponentRun dacă build-ul nu îl declară. Traseul de ajutor rămâne fără expunere de distribuiri.
+
+- **Reluare.** Pentru un jurnal verificat, reexecutați comanda adaptorului complete-exposure cu jurnalul, registrul și tokenul original, prin classpath-ul calificat. O scriere deja confirmată pentru același token este recunoscută.
+- **Întrerupere.** Dacă jurnalul lipsește sau proveniența lui nu poate fi verificată, păstrați marcajul. Adaptorul respinge un token străin și, după prima scriere, un seed care contrazice înregistrarea aceluiași token. Înaintea primei scrieri, asocierea cu jurnalul rulării trebuie verificată separat; [feedback-ul tehnic](../feedback/ATF_RentzQuality.md#constatări-deschise) urmărește automatizarea acestei verificări.
 
 | Interpretare | Regulă |
 |---|---|
@@ -233,7 +251,10 @@ Pentru un candidat cu căutare, controlul folosește HARD_REFERENCE la locul eva
 | Configurație și politică efectivă | Protocolul suprascrie numărul de lumi. [ArenaPolicies](../../atf-tests/src/main/java/atf/rentz/arena/ArenaPolicies.java) leagă obiectivul evaluării de actorul candidat și, pentru fiecare familie, de adversari și control. Rezumatele fără această declarație rămân lizibile și sunt refuzate la admitere. |
 | Profilul de scor executat | Rezumatul, partidele reținute și Extent păstrează profilul tipizat folosit pentru ambele brațe. Admiterea compară penalizările, recompensele și ordinea premiilor cu profilul de încredere. Un rezumat istoric fără profil poate fi citit și este refuzat la admitere. |
 | Lansare CLI | Manifestul cu amprente verificate trebuie să includă fișierul de scor. Profilul citit din snapshot configurează rularea și furnizează așteptarea la admitere. |
-| Perechi | Exact o pereche pentru fiecare familie, seed și loc. Identitatea candidatului, delta, creditul și măsurătorile finite trebuie să fie coerente; lipsurile, duplicatele și costurile imposibile sunt refuzate. |
+| Perechi | Exact o pereche pentru fiecare familie, seed și loc. Se verifică actorii, diferența de marjă, creditul și costurile înaintea agregării. |
+| Marjă și credit | Marja este scorul locului minus media adversarilor. Creditul este zero la înfrângere și 1/k când k jucători împart primul loc. O marjă pozitivă permite și înfrângerea. Creditul pozitiv la marjă zero cere egalitatea întregii mese. |
+| Filtre numerice pentru scor | În fiecare braț, scorul final și suma adversarilor implicată de marjă sunt multipli ai divizorului comun al contribuțiilor profilului de încredere. Suma adversarilor trebuie să fie întreagă. Profilul cu contribuții zero impune egalitatea întregii mese. |
+| Deficitul adversarilor | Pentru un lider cu credit pozitiv, fiecare loc aflat sub primul loc contribuie cu minimum un pas de scor la deficitul total. Admiterea calculează deficitul din suma întreagă verificată. |
 | Recalculare | [FamilyAnalysis](../../atf-tests/src/main/java/atf/rentz/arena/FamilyAnalysis.java) reface agregările, costurile, clusterele și bootstrap-ul din perechi. Comparația include întregul rezultat, nu doar flag-ul promotes primit. |
 | Retenție | Numele jurnalelor trebuie să corespundă selecției declarate de protocol. Validarea numelor nu verifică octeții fișierelor externe. |
 

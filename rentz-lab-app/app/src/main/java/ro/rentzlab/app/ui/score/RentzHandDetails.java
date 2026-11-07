@@ -15,6 +15,11 @@ import ro.rentzlab.core.Contract;
 /** Renders public settlement facts. A single scroll contains the profile and every player. */
 public final class RentzHandDetails extends ScrollView {
     public RentzHandDetails(Context context, RentzScoreContent.Row hand, List<String> players, RentzUiText copy) {
+        this(context, hand, players, copy, true);
+    }
+
+    public RentzHandDetails(Context context, RentzScoreContent.Row hand, List<String> players, RentzUiText copy,
+            boolean showProfile) {
         super(context);
         setId(ro.rentzlab.app.R.id.history_details);
         var content = new LinearLayout(context);
@@ -22,8 +27,9 @@ public final class RentzHandDetails extends ScrollView {
         int padding = dp(16);
         content.setPadding(padding, dp(8), padding, dp(8));
         addView(content);
-        line(content, copy.text("Chosen by ", "Ales de ") + players.get(hand.chooser()) + "\n"
-                + copy.text("Scoring profile · ", "Profil de punctaj · ") + GameSession.SCORE_PROFILE, false);
+        String chooser = copy.text("Chosen by ", "Ales de ") + players.get(hand.chooser());
+        if (showProfile) chooser += "\n" + copy.text("Scoring profile · ", "Profil de punctaj · ") + GameSession.SCORE_PROFILE;
+        line(content, chooser, false);
         var details = RentzScoreContent.details(hand);
         if (details.isEmpty()) line(content, copy.text("Scoring details unavailable", "Detaliul punctajului este indisponibil"), false);
         for (var player : details) {

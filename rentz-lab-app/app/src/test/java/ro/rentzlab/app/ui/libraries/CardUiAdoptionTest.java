@@ -14,14 +14,23 @@ public final class CardUiAdoptionTest {
     @Test public void pinnedArchiveAndLoadedPresentationTypesHaveTheQualifiedBytesWithoutGameOrAtfClasses() throws Exception {
         Path root = Path.of(System.getProperty("rentz.uiRepository"));
         var provenance = JsonParser.parseString(new String(Files.readAllBytes(root.resolve("provenance.json")), java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
-        audit.equal("Adopted coordinate", "ro.cardtable:card-table-ui:0.1.1", provenance.get("coordinate").getAsString());
+        audit.equal("Adopted UI coordinate", "ro.cardtable:card-table-ui:0.1.5", provenance.get("coordinate").getAsString());
+        audit.equal("Adopted Java coordinate", "ro.cardtable:card-table-names:0.1.0", provenance.get("namesCoordinate").getAsString());
         for (var file : provenance.getAsJsonArray("files")) {
             var value = file.getAsJsonObject(); audit.equal("Pinned " + value.get("path").getAsString(), value.get("sha256").getAsString(), hash(Files.readAllBytes(root.resolve(value.get("path").getAsString()))));
         }
-        Path aar = root.resolve("ro/cardtable/card-table-ui/0.1.1/card-table-ui-0.1.1.aar");
+        Path aar = root.resolve("ro/cardtable/card-table-ui/0.1.5/card-table-ui-0.1.5.aar");
         byte[] classes;
         try (var zip = new ZipFile(aar.toFile())) { classes = zip.getInputStream(zip.getEntry("classes.jar")).readAllBytes(); }
-        String marker = "ro/cardtable/ui/seat/SeatContent.class"; byte[] qualified = null;
+        verifyClassBytes(classes, ro.cardtable.ui.seat.SeatContent.class);
+        verifyClassBytes(classes, ro.cardtable.ui.animation.TrickCollectionRun.class);
+        verifyClassBytes(Files.readAllBytes(root.resolve("ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar")),
+                ro.cardtable.names.PlayerNames.class);
+        audit.rejects("No Whist engine on Android JVM classpath", ClassNotFoundException.class, () -> Class.forName("ro.whistlab.core.session.GameSession"));
+    }
+    private void verifyClassBytes(byte[] classes, Class<?> type) throws Exception {
+        String marker = type.getName().replace('.', '/') + ".class";
+        byte[] qualified = null;
         try (var zip = new ZipInputStream(new ByteArrayInputStream(classes))) {
             for (var entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
                 audit.truth("UI owns its class namespace " + entry.getName(), !entry.getName().startsWith("ro/whistlab/") && !entry.getName().startsWith("ro/rentzlab/") && !entry.getName().startsWith("atf/"));
@@ -29,10 +38,9 @@ public final class CardUiAdoptionTest {
             }
         }
         audit.truth("Qualified marker present", qualified != null);
-        try (var stream = ro.cardtable.ui.seat.SeatContent.class.getClassLoader().getResourceAsStream(marker)) {
-            audit.equal("Loaded marker equals qualified AAR", hash(qualified), hash(stream.readAllBytes()));
+        try (var stream = type.getClassLoader().getResourceAsStream(marker)) {
+            audit.equal("Loaded marker equals qualified binary " + marker, hash(qualified), hash(stream.readAllBytes()));
         }
-        audit.rejects("No Whist engine on Android JVM classpath", ClassNotFoundException.class, () -> Class.forName("ro.whistlab.core.session.GameSession"));
     }
     private String hash(byte[] bytes) throws Exception {
         StringBuilder value = new StringBuilder();

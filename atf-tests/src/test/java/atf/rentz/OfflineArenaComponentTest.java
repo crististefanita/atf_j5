@@ -120,19 +120,116 @@ class OfflineArenaComponentTest {
     @Test void arenaRefusesAReplayedDistributionBeforeProducingGameEvidence() throws Exception {
         Path registry = directory.resolve("exposure.json");
         EvaluationRegistry.expose(registry, 3, List.of(123L), "DEVELOPMENT", "first", "source-a");
+        EvaluationRegistry.initialize(registry, registry, "fixture-reviewer", "fixture-history");
         byte[] before = Files.readAllBytes(registry);
         var protocol = new OfflineArena.Protocol("alias-fresh", "FRESH_EVALUATION", 3, List.of(123L + (1L << 48)),
                 List.of(OfflineArena.Kind.BASELINE), OfflineArena.Kind.NORMAL, 1, 1);
         Path output = directory.resolve("arena");
-        assertThrows(IllegalArgumentException.class, () -> OfflineArena.run(protocol, ScoreProfile.laboratory(),
+        var refusal = assertThrows(IllegalArgumentException.class, () -> OfflineArena.run(protocol, ScoreProfile.laboratory(),
                 new PolicySettings(1, .05, 3, .3, 2), output, registry, "source-b"));
+        assertTrue(refusal.getMessage().contains("Distribution already exposed"));
         assertArrayEquals(before, Files.readAllBytes(registry));
-        if (Files.isDirectory(output)) {
-            try (var files = Files.list(output)) {
-                assertTrue(files.allMatch(path -> path.getFileName().toString().equals("protocol.json")));
-            }
-        }
+        assertFalse(Files.exists(output));
     }
+    @Test void freshArenaCannotReplaceAnExposedRegistryWithAnUnusedPath() throws Exception {
+        Path existing = directory.resolve("established.json");
+        Path replacement = directory.resolve("unused.json");
+        EvaluationRegistry.expose(existing, 3, List.of(487L), "DEVELOPMENT", "first", "source-a");
+        byte[] before = Files.readAllBytes(existing);
+        var protocol = new OfflineArena.Protocol("fresh", "FRESH_EVALUATION", 3, List.of(487L + (1L << 48)),
+                List.of(OfflineArena.Kind.BASELINE), OfflineArena.Kind.NORMAL, 1, 0);
+        Path output = directory.resolve("substitution");
+        assertThrows(IllegalArgumentException.class, () -> OfflineArena.run(protocol, ScoreProfile.laboratory(),
+                new PolicySettings(1, .05, 3, .3, 2), output, replacement, "source-b"));
+        assertArrayEquals(before, Files.readAllBytes(existing));
+        assertFalse(Files.exists(replacement));
+        assertFalse(Files.exists(output));
+    }
+
+    @Test void freshArenaUsesReviewedHistoryAndRefusesACopyAtAnotherPath() throws Exception {
+        Path registry = directory.resolve("shared.json");
+        Path copy = directory.resolve("copied.json");
+        EvaluationRegistry.expose(registry, 3, List.of(487L), "DEVELOPMENT", "prior", "source-a");
+        var settings = new PolicySettings(1, .05, 3, .3, 2);
+        var protocol = new OfflineArena.Protocol("fresh", "FRESH_EVALUATION", 3, List.of(488L),
+                List.of(OfflineArena.Kind.BASELINE), OfflineArena.Kind.NORMAL, 1, 0);
+        Path output = directory.resolve("fresh");
+        assertThrows(IllegalArgumentException.class, () ->
+                OfflineArena.run(protocol, ScoreProfile.laboratory(), settings, output, registry, "source-b"));
+        assertFalse(Files.exists(output));
+        var json = new ObjectMapper();
+        var unreviewed = (com.fasterxml.jackson.databind.node.ObjectNode) json.readTree(registry.toFile());
+        var original = unreviewed.withArray("exposures").get(0);
+        unreviewed.withArray("exposures").removeAll();
+        Path incompleteHistory = directory.resolve("incomplete.json");
+        json.writeValue(incompleteHistory.toFile(), unreviewed);
+        byte[] before = Files.readAllBytes(registry);
+        assertThrows(IllegalArgumentException.class, () ->
+                EvaluationRegistry.initialize(registry, incompleteHistory, "fixture-reviewer", "missing-history"));
+        assertArrayEquals(before, Files.readAllBytes(registry));
+        EvaluationRegistry.initialize(registry, registry, "fixture-reviewer", "fixture-history");
+        Files.copy(registry, copy);
+        var refusal = assertThrows(IllegalArgumentException.class, () ->
+                OfflineArena.run(protocol, ScoreProfile.laboratory(), settings, output, copy, "source-b"));
+        assertTrue(refusal.getMessage().contains("bound to another path"));
+        assertFalse(Files.exists(output));
+        assertThrows(IllegalArgumentException.class, () ->
+                EvaluationRegistry.initialize(registry, registry, "fixture-reviewer", "second-review"));
+        var result = OfflineArena.run(protocol, ScoreProfile.laboratory(), settings, output, registry, "source-b");
+        assertEquals(3, result.games().size());
+        var updated = json.readTree(registry.toFile());
+        assertEquals("fixture-history", updated.required("review").required("reference").textValue());
+        var exposures = updated.required("exposures");
+        assertEquals(2, exposures.size());
+        assertEquals(original, exposures.get(0));
+        assertEquals(488L, exposures.get(1).required("seed").longValue());
+    }
+
+    @Test void nativeExposureBlocksFreshUntilCapturedAndSurvivesWithoutAReport() throws Exception {
+        Path registry = directory.resolve("native-exposure.json");
+        Path empty = Files.writeString(directory.resolve("history.json"),
+                "{\"schemaVersion\":1,\"domain\":\"rentz\",\"generator\":\"jvm-shuffle-eight-cards-v1\",\"exposures\":[]}");
+        EvaluationRegistry.initialize(registry, empty, "fixture", "reviewed empty history");
+        String token = "a".repeat(32);
+        String otherToken = "b".repeat(32);
+        var scoring = ScoreProfile.laboratory();
+        var settings = new PolicySettings(1, .05, 3, .3, 2);
+        var alias = new OfflineArena.Protocol("alias", "FRESH_EVALUATION", 3, List.of(487L + (1L << 48)),
+                List.of(OfflineArena.Kind.BASELINE), OfflineArena.Kind.NORMAL, 1, 0);
+        Path output = directory.resolve("alias");
+        Path journal = Files.writeString(directory.resolve("development-journal.json"), "{\"players\":3,\"seed\":487}");
+        atf.rentz.android.RentzNativeFlow.main(new String[]{"begin-exposure", registry.toString(), token});
+        assertThrows(IllegalStateException.class, () -> EvaluationRegistry.beginNativeExposure(registry, otherToken));
+        var pending = assertThrows(IllegalStateException.class, () ->
+                OfflineArena.run(alias, scoring, settings, output, registry, "source-a"));
+        assertTrue(pending.getMessage().contains("unresolved native exposure"));
+        assertFalse(Files.exists(output));
+
+        byte[] before = Files.readAllBytes(registry);
+        assertThrows(IllegalArgumentException.class, () -> atf.rentz.android.RentzNativeFlow.main(
+                new String[]{"complete-exposure", journal.toString(), registry.toString(), otherToken}));
+        assertArrayEquals(before, Files.readAllBytes(registry));
+        atf.rentz.android.RentzNativeFlow.main(new String[]{"complete-exposure", journal.toString(), registry.toString(), token});
+        var refused = assertThrows(IllegalArgumentException.class, () ->
+                OfflineArena.run(alias, scoring, settings, output, registry, "source-a"));
+        assertTrue(refused.getMessage().contains("Distribution already exposed"));
+        assertFalse(Files.exists(output));
+
+        // Reproduce an interruption after the ledger write, while the same marker remains.
+        byte[] committed = Files.readAllBytes(registry);
+        EvaluationRegistry.beginNativeExposure(registry, token);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                EvaluationRegistry.completeNativeExposure(registry, token, 3, 488L));
+        assertArrayEquals(committed, Files.readAllBytes(registry));
+        atf.rentz.android.RentzNativeFlow.main(new String[]{"complete-exposure", journal.toString(), registry.toString(), token});
+        assertArrayEquals(committed, Files.readAllBytes(registry));
+        var distinct = new OfflineArena.Protocol("distinct", "FRESH_EVALUATION", 3, List.of(488L),
+                List.of(OfflineArena.Kind.BASELINE), OfflineArena.Kind.NORMAL, 1, 0);
+        assertEquals(3, OfflineArena.run(distinct, scoring, settings, directory.resolve("distinct"), registry, "source-a")
+                .games().size());
+    }
+
     @Test void promotionRefusesAGenuineRunWithDifferentScoring() throws Exception {
         var settings = new PolicySettings(1, .05, 3, .3, 2);
         var expectedScoring = ScoreProfile.laboratory();
@@ -166,7 +263,8 @@ class OfflineArenaComponentTest {
     }
 
     @Test void cliRequiresTheScoreProfileInTheFrozenManifest() throws Exception {
-        Path project = Files.createDirectory(directory.resolve("frozen"));
+        Path project = Files.createDirectories(directory.resolve("infrastructure/workspaces/frozen"));
+        Path registry = directory.resolve("learning/exposure.json");
         Path sentinel = Files.writeString(project.resolve("sentinel"), "source");
         String digest = HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
                 .digest(Files.readAllBytes(sentinel)));
@@ -180,7 +278,7 @@ class OfflineArenaComponentTest {
         Path output = directory.resolve("run");
         var refusal = assertThrows(IllegalArgumentException.class, () -> OfflineArena.main(new String[] {
                 project.toString(), protocolFile.toString(), output.toString(),
-                directory.resolve("registry.json").toString(), manifest.toString()}));
+                registry.toString(), manifest.toString()}));
         assertTrue(refusal.getMessage().contains("Frozen score profile"));
         assertFalse(Files.exists(output));
     }

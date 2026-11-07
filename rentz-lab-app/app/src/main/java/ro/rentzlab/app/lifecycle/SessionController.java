@@ -41,7 +41,10 @@ public final class SessionController implements AutoCloseable {
     public synchronized GameSession session(){return session;}
     public synchronized boolean isBusy(){return pending!=null;}
     public synchronized boolean newGame(int players,long seed,RentzPlayer.Difficulty difficulty){
-        return begin(()->new GameSession(players,seed,difficulty),true);
+        return newGame(players,seed,difficulty,ro.cardtable.names.PlayerNames.DEFAULT_HUMAN);
+    }
+    public synchronized boolean newGame(int players,long seed,RentzPlayer.Difficulty difficulty,String rosterName){
+        return begin(()->new GameSession(players,seed,difficulty,rosterName),true);
     }
     public synchronized boolean apply(GameSession.Command command){
         return begin(()->{var candidate=GameSession.restore(requireSession().save());candidate.apply(command);return candidate;},true);

@@ -38,14 +38,22 @@ function Context([string]$Name){
     @('@echo off',('echo invoked > "'+$root+'\invoked.txt"'),('mkdir "'+$run+'"'),'exit /b 0')|Set-Content $spy -Encoding ascii
     return [pscustomobject]@{root=$root;stage=$stage;classes=$classes;component=$component;inventory=$inventory;attestation=$attestation;descriptor=$descriptor;run=$run;spy=$spy}
 }
-function Launch($c){
+function Launch($c, [string]$Registry){
     $failed=$false
-    try{& (Join-Path $project 'atf-tests/tools/run-arena.ps1') -ComponentRun $c.component -Protocol "$($c.root)/protocol.json" -RunRoot $c.run -Registry (Join-Path $product 'registry.json') -Java $c.spy *> "$($c.root)/launcher.log"}catch{$failed=$true;$_.Exception.Message|Add-Content "$($c.root)/launcher.log"}
+    $registryOption=@{}
+    if($Registry){$registryOption.Registry=$Registry}
+    try{& (Join-Path $project 'atf-tests/tools/run-arena.ps1') -ComponentRun $c.component -Protocol "$($c.root)/protocol.json" -RunRoot $c.run -Java $c.spy @registryOption *> "$($c.root)/launcher.log"}catch{$failed=$true;$_.Exception.Message|Add-Content "$($c.root)/launcher.log"}
     return [pscustomobject]@{failed=$failed;invoked=(Test-Path -LiteralPath "$($c.root)/invoked.txt")}
 }
 Case 'Unchanged qualified runtime reaches only the injected recorder' {
     $c=Context valid;$r=Launch $c
     Require (-not$r.failed-and$r.invoked) 'Valid neighboring runtime was rejected'
+}
+Case 'Another exposure registry is refused before Java' {
+    $c=Context wrongRegistry
+    $r=Launch $c (Join-Path $product 'registry.json')
+    Require ($r.failed-and-not$r.invoked) 'An alternate registry reached the JVM'
+    Require ((Get-Content "$($c.root)/launcher.log" -Raw).Contains('installation exposure registry')) 'Wrong refusal cause'
 }
 foreach($kind in @('helper','resource','jar','addition','deletion','order','empty-entry','manifest','attestation')){
     $mutation=$kind
@@ -93,10 +101,64 @@ Case 'A recorded linked subtree is refused without traversing its target' {
         Remove-Item -LiteralPath $link
     }
 }
+Case 'Shared native exposure completes at capture without starting a report' {
+    $tokens=$null;$errors=$null
+    $shared=Join-Path $project 'atf-tests/tools/run-shared-ui-sanity.ps1'
+    $ast=[Management.Automation.Language.Parser]::ParseFile($shared,[ref]$tokens,[ref]$errors)
+    Require (-not $errors) 'Shared launcher does not parse'
+    $names=@('Start-DevelopmentExposure','Complete-DevelopmentExposure')
+    $functions=@($ast.FindAll({
+        param($node)
+        $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -in $names
+    },$true))
+    Require ($functions.Count -eq 2) 'Expected the shared exposure helpers'
+    $calls=@($ast.FindAll({
+        param($node)
+        $node -is [Management.Automation.Language.CommandAst] -and $node.GetCommandName() -in $names
+    },$true))
+    Require (($calls.GetCommandName() -join ',') -ceq (($names+$names+$names) -join ',')) 'Each native journal path must have its own begin and completion'
+    $requests=[Collections.Generic.List[object]]::new()
+    $developmentExposures=[Collections.Generic.List[object]]::new()
+    $developmentLedger=Join-Path $fixture 'shared-exposure/learning/exposure.json'
+    function Invoke-DevelopmentExposure([string[]]$Arguments){$requests.Add($Arguments)}
+    foreach($helper in $functions){. ([scriptblock]::Create($helper.Extent.Text))}
+    $token=Start-DevelopmentExposure
+    Require ($requests.Count -eq 1 -and $requests[0][0] -ceq 'begin-exposure' -and $developmentExposures.Count -eq 0) 'An interrupted capture must remain pending'
+    $journal=Join-Path $fixture 'shared-development-journal.json'
+    '{"players":3,"seed":487}'|Set-Content -LiteralPath $journal -Encoding utf8NoBOM
+    Complete-DevelopmentExposure $journal $token
+    Require ($requests.Count -eq 2 -and $requests[1][0] -ceq 'complete-exposure' -and $requests[1][2] -eq $developmentLedger) 'Capture must commit to the shared ledger'
+    Require ($requests[1][3] -ceq $token -and $developmentExposures.Count -eq 1 -and $developmentExposures[0].sha256 -eq (Hash $journal)) 'Captured journal evidence differs'
+}
 if(-not$NativePublicationScript){$NativePublicationScript=Join-Path $project 'atf-tests/tools/run-android-sanity.ps1'}
 $publicationTokens=$null;$publicationErrors=$null
 $nativeAst=[Management.Automation.Language.Parser]::ParseFile($NativePublicationScript,[ref]$publicationTokens,[ref]$publicationErrors)
 if($publicationErrors){throw 'Native publication source has invalid syntax'}
+Case 'Native exposure uses the configured installation ledger' {
+    $commands=@($nativeAst.FindAll({
+        param($node)
+        $node -is [Management.Automation.Language.CommandAst] -and $node.Extent.Text.Contains('$mainClass expose')
+    },$true))
+    Require ($commands.Count -eq 1) 'Expected one native exposure command'
+    $expose=[scriptblock]::Create($commands[0].Extent.Text)
+    $previousRoot=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT','Process')
+    $configuredRoot=Join-Path $fixture 'configured-data'
+    $run=Join-Path $fixture 'native-exposure'
+    $classpath='injected'
+    $mainClass='atf.rentz.android.RentzNativeFlow'
+    $invocations=[Collections.Generic.List[object]]::new()
+    $Java={ $invocations.Add([string[]]$args) }.GetNewClosure()
+    try {
+        [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$configuredRoot,'Process')
+        & $expose | Out-Null
+        $expected=Join-Path $configuredRoot 'learning/exposure.json'
+        Require ($invocations.Count -eq 1) 'Expected one call to the injected Java adapter'
+        $actual=$invocations[0][-1]
+        Require ($actual -eq $expected) "Exposure registry mismatch. Expected $expected, received $actual"
+    } finally {
+        [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$previousRoot,'Process')
+    }
+}
 $publicationTry=@($nativeAst.FindAll({param($node) $node-is[Management.Automation.Language.TryStatementAst]-and$node.Extent.Text.Contains('Native report publication failed')},$true))
 if($publicationTry.Count-ne1){throw 'One native publication boundary expected'}
 $publication=[scriptblock]::Create($publicationTry[0].Extent.Text)

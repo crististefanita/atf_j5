@@ -124,13 +124,49 @@ Case 'Indirect Nested suite with a nonconventional name is refused' {
     $r=NestedContext nestedLost LostSpec
     Require (Rejected $r) 'Indirect Nested suite was silently omitted'
 }
+foreach($duplicateLocation in @('same report','across reports')){
+    Case ("Nested duplicate invocation "+$duplicateLocation) {
+        $plan=[pscustomobject]@{
+            expected=@('p.OuterTest'); reports=@('p.OuterTest','p.OuterTest$Inner')
+            nestedReports=@('p.OuterTest','p.OuterTest$Inner'); nestedCaseClasses=@('p.OuterTest','p.OuterTest$Inner')
+        }
+        $xml=Join-Path $fixture 'nested-identities.xml'
+        function Read-NestedRow([string]$Suite,[string]$Cases){
+            ('<testsuite name="'+$Suite+'" tests="0" failures="0" errors="0" skipped="0">'+$Cases+'</testsuite>')|Set-Content $xml
+            Read-RentzSurefireResult -Path $xml -Module module -Plan $plan
+        }
+        $parentCase='<testcase classname="p.OuterTest" name="runs()[1]"/>'
+        $innerCase='<testcase classname="p.OuterTest$Inner" name="runs()[1]"/>'
+        $outer=Read-NestedRow 'p.OuterTest' ''
+        $inner=Read-NestedRow 'p.OuterTest$Inner' ($parentCase+$innerCase)
+        Assert-RentzTestPopulation -Plan $plan -Results @($outer,$inner)
+        $refused=$false
+        try {
+            if($duplicateLocation -eq 'same report'){
+                $inner=Read-NestedRow 'p.OuterTest$Inner' ($parentCase+$innerCase+$innerCase)
+            }else{
+                $outer=Read-NestedRow 'p.OuterTest' $innerCase
+            }
+            Assert-RentzTestPopulation -Plan $plan -Results @($outer,$inner)
+        }catch{
+            $refused=$_.Exception.Message -like 'Duplicate*testcase invocation*'
+        }
+        Require $refused 'A duplicated Nested invocation was accepted'
+    }
+}
 $surefirePlan=[pscustomobject]@{expected=@('p.CaseTest');nestedReports=@()}
 $ordinaryCases=[ordered]@{
     'parameterized and dynamic testcase names'=@(2,'<testcase classname="p.CaseTest" name="cases(int)[1]"/><testcase classname="p.CaseTest" name="generated()[1]"/>',$true)
+    'duplicate testcase with matching suite count'=@(2,'<testcase classname="p.CaseTest" name="cases(int)[1]"/><testcase classname="p.CaseTest" name="cases(int)[1]"/>',$false)
     'positive count without cases'=@(17,'',$false)
     'positive count exceeding the cases'=@(2,'<testcase classname="p.CaseTest" name="runs"/>',$false)
     'case assigned to another class'=@(1,'<testcase classname="p.OtherTest" name="runs"/>',$false)
     'case with empty name'=@(1,'<testcase classname="p.CaseTest" name=""/>',$false)
+    'namespaced failure with zero counter'=@(1,'<testcase classname="p.CaseTest" name="runs"><failure xmlns="urn:probe"/></testcase>',$false)
+    'prefixed error with zero counter'=@(1,'<testcase classname="p.CaseTest" name="runs"><p:error xmlns:p="urn:probe"/></testcase>',$false)
+    'namespaced skip with zero counter'=@(1,'<testcase classname="p.CaseTest" name="runs"><skipped xmlns="urn:probe"/></testcase>',$false)
+    'misplaced failure with zero counter'=@(1,'<testcase classname="p.CaseTest" name="runs"><system-out><failure/></system-out></testcase>',$false)
+    'unknown testcase outcome'=@(1,'<testcase classname="p.CaseTest" name="runs"><unknown/></testcase>',$false)
     'negative failure counter'=@(1,'<testcase classname="p.CaseTest" name="runs"/>',$false)
     'failure node with zero declared failures'=@(1,'<testcase classname="p.CaseTest" name="runs"><failure/></testcase>',$false)
 }

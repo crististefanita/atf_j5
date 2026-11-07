@@ -31,12 +31,13 @@ Componentele existente de sesiune, codec și lifecycle se păstrează. Cazurile 
 - Extent păstrează comparațiile evaluate, acțiunile native și capturile originale; XML-ul celor 33 de teste vechi rămâne dovadă de execuție, fără expected/actual reconstruite ulterior.
 - Matricea istoricului adaptiv cuprinde 53 de teste JVM și 10 puncte native de verificare pe jurnalul de 48 de mâini. [Dosarul istoricului](../../../../rentz_back/ui-review/history-native-matrix-j5/README.md)
 - Detaliul punctajului adaugă comparații pe cele 48 de mâini și verifică nativ două detalii după restaurare. Pe API 28, locurile cu premiu egal rămân distincte și revenirea păstrează grila. [Dosarul S05/S06](../../../../rentz_back/ui-review/settlement-details-j5/README.md)
+- Incrementul comun verifică ajutorul RO/EN, ordinea mâinii pe ecran și continuitatea numelor AI după restart. Pe profilul logic 720×1280, cu font 1,5, fiecare chenar păstrează două rânduri complete de scor sub nume. [Dovezile S05 și U10–U13](../../../../rentz_back/ui-review/shared-seats-collection-j5/README.md)
 
 ## P1: paritatea vizuală și de interacțiune
 
 ### Admiterea nucleului comun
 
-**U08 — integrare realizată:** configurația live consumă `ro.cardtable:card-table-ui:0.1.1` din repository-ul local fixat prin hash. Tema comună este activă; proiecțiile și comenzile rămân Rentz, fără motor Whist sau ATF în APK.
+**U08 — integrare realizată:** configurația live consumă `ro.cardtable:card-table-ui:0.1.5` și `ro.cardtable:card-table-names:0.1.0` din repository-ul local fixat prin hash. Proiecțiile și comenzile sunt ale motorului Rentz.
 
 - [Contractul integrării](../rentz/ATF_UiIntegration.md) și [atlasul UI](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/README.md) identifică implementarea.
 - Dosarul integrării inițiale păstrează rezultatele, domeniul și încercările originale. [Dovezile integrării J4 → J5](../../../../rentz_back/ui-review/shared-ui-cb695c1461/README.md)
@@ -71,6 +72,16 @@ Păstrați dimensiunile și scalele de mai jos pentru componente. E2E minim veri
 Înregistrați selecția UI în colecțiile testabile, cu clase și invocări așteptate, astfel încât filtrul Gradle sau adaptorul ATF să nu piardă cazuri. Raportul Extent al componentelor păstrează comparațiile capturate în execuția lor; XML-ul JVM și auditul randării rămân probe distincte, fără aserțiuni inventate la publicare.
 
 ## Lacune active după integrare
+
+| ID | Increment comun și criteriu de acceptanță |
+|---|---|
+| U10 · VERIFICAT | **Scorul din chenar.** Numele și cele două rânduri rămân întregi. Matricea Android acoperă 36 de combinații cu font până la 2× și verifică lățimea glifelor, geometria chenarelor, diacriticele și valorile negative lungi. |
+| U11 · VERIFICAT | **Numele adversarilor.** J5 folosește selecția din J4. Componentele acoperă 3–6 locuri, numele uman rezervat și jurnalul vechi. Proba nativă confirmă păstrarea locurilor și numelor la restart. |
+| U12 · COLECTARE ȘI RESTART | **Colectarea levatei.** Componentele califică cele 1.500 ms, destinația și anularea. Pornirea rece afișează din nou ultima levată confirmată când checkpoint-ul este la finalul ei. [Proba cadrelor](../../../../rentz_back/ui-review/restart-collection-j5/README.md) urmărește și salvarea la restart. |
+| U14 · SUGESTIE AI | Alegerea după dezvăluire oferă o sugestie calculată din observația jucătorului și nivelul AI al partidei. Selecția și jurnalul rămân în controlul jucătorului. |
+| U13 · VERIFICAT | **Ordinea mâinii.** Cărțile vizibile urmează ♠ ♥ ♣ ♦ și rangul crescător. Proiecția păstrează identitatea și legalitatea, iar proba Android verifică ordinea fizică și centrajul ultimei cărți. |
+
+Ordinea livrării este contractul producătorului, componentele, consumul pe artefacte cu hash, apoi sanity Android și Extent. Notați pentru fiecare punct dovezile și limitele rămase.
 
 | Prioritate | Lacună și consecință | Închidere necesară |
 |---|---|---|
@@ -108,9 +119,9 @@ Schema stabilește relația rangurilor, fără a reprezenta o distribuire de ant
 | **S02 · VERIFICAT** | **Istoric de până la 48 de mâini confirmate.** Fiecare rând arată sub-jocul, alegătorul și marcajul ×2, urmate de Δ și Σ. Componentele confruntă toate locurile după restaurare și probează excluderea unei mâini în curs. |
 | **S03 · VERIFICAT** | **Acces la capetele istoricului, inclusiv cu font mărit.** Pe API 28, EN, 360 dpi și font 1,5, ultimul grup complet și mâna 48 sunt accesibile la 720 × 1280 și 720 × 740. Fereastra scundă derulează întregul conținut până la legenda completă. La mărire, antetul și legenda revin în pozițiile fixe. |
 | **S04 · PARȚIAL** | **Delta și totalul confirmat sunt separate.** Componentele verifică o mână în curs și totalurile tuturor locurilor. Sanity-ul confruntă totalurile finale și revizia după derulare. Rămâne proba cu sosire în Rentz înaintea decontării. |
-| **S05 · PARȚIAL** | **Detaliul mâinii este verificat.** Profilul, alegătorul, dublarea și contribuțiile punctate apar în detaliu. Componentele verifică Q♦ în ambele categorii la Totale. Ajutorul din meniu mai are nevoie de grila premiilor pentru mesele de 3–6 jucători, derivată din profilul efectiv. |
+| **S05 · VERIFICAT** | **Detaliul și ajutorul folosesc profilul efectiv.** Detaliul păstrează alegătorul, dublarea și contribuțiile, inclusiv Q♦ în ambele categorii la Totale. Ajutorul prezintă grila pentru 3–6 jucători, cu verificare pentru profil alternativ și probă Android în engleză și română. |
 | **S06 · VERIFICAT** | **Date publice și imuabile.** Motorul fixează contribuțiile și ordinea la decontare. Componentele reconstruiesc rezultatele pentru jurnale compatibile. Pe API 28, mâna 48 păstrează ordinea locurilor cu premiu zero după reluare. |
-| **S07 · TODO** | **Închidere cu identități, nu cu liste brute.** Rezumatul mâinii folosește nume, rezultat, delta și total pentru fiecare loc. Finalul partidei separă câștigătorii la egalitate de ordinea de afișare; scorul maxim câștigă și când toate totalurile sunt negative. |
+| **S07 · PARȚIAL** | **Punctajul mâinii are ecran propriu.** După colectare apar contractul, dublarea, contribuțiile, Δ și Σ. Rămâne clasamentul de final cu egalități, separat de ordinea locurilor și de rezultatul mâinii. |
 
 ## Arhitectură de prezentare și refolosire
 

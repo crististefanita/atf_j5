@@ -3,6 +3,7 @@ package ro.rentzlab.app.ui.copy;
 import ro.cardtable.ui.menu.HomeMenuContent;
 import ro.cardtable.ui.profile.PlayerNameDialog;
 import ro.rentzlab.core.Contract;
+import ro.rentzlab.core.ScoreProfile;
 
 /** Product copy and contract names belong to Rentz, outside the neutral renderers. */
 public final class RentzUiText {
@@ -12,7 +13,7 @@ public final class RentzUiText {
     public Language language() { return language; }
     public String text(String en, String ro) { return language == Language.RO ? ro : en; }
     public String you() { return text("You", "Tu"); }
-    public String name(int seat, String preferred) { return seat == 0 ? (preferred.isBlank() ? you() : preferred) : "AI " + seat; }
+    public String humanName(String preferred) { return preferred.isBlank() ? you() : preferred; }
     public String mainMenu() { return text("Main menu", "Meniu principal"); }
     public String history() { return text("Score history", "Istoricul scorului"); }
     public String close() { return text("Close", "Închide"); }
@@ -20,6 +21,14 @@ public final class RentzUiText {
     public String points() { return text("Points:", "Puncte:"); }
     public String total() { return text("Total:", "Total:"); }
     public String play(String label) { return text("Play ", "Joacă ") + label; }
+    public String trickScoring(ScoreProfile scoring) {
+        return String.format(java.util.Locale.ROOT,
+                text("Trick %s · queen %s · diamond %s · K♥ %s. Whist %s · 10♣ %s.",
+                        "Levată %s · damă %s · caro %s · K♥ %s. Whist %s · 10♣ %s."),
+                points(-scoring.trickPenalty()), points(-scoring.queenPenalty()), points(-scoring.diamondPenalty()),
+                points(-scoring.kingPenalty()), points(scoring.trickReward()), points(scoring.tenReward()));
+    }
+    private static String points(int value) { return value > 0 ? "+" + value : Integer.toString(value).replace('-', '−'); }
     public String contract(Contract contract) {
         if (language == Language.RO) return contract.label();
         return switch (contract) {

@@ -56,7 +56,7 @@ public final class RentzHistoryGrid extends ScrollView {
             var name = text(player, true, Gravity.CENTER_HORIZONTAL);
             heading(name);
             names.add(name);
-            var captions = scores("Δ", "Σ", null);
+            var captions = scores(RentzScoreContent.HAND_POINTS_MARK, RentzScoreContent.TOTAL_MARK, null);
             var group = column();
             group.addView(name);
             group.addView(captions);

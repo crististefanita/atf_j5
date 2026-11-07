@@ -271,16 +271,17 @@ public final class OfflineArena {
             throws IOException {
         if (Files.exists(output))
             throw new IllegalArgumentException("Fresh arena directory required");
-        Files.createDirectories(output);
-        JSON.writerWithDefaultPrettyPrinter()
-                .writeValue(output.resolve("protocol.json").toFile(), protocol);
-        EvaluationRegistry.expose(
+        EvaluationRegistry.exposeForArena(
                 registry,
                 protocol.players(),
                 protocol.seeds(),
                 protocol.phase(),
                 protocol.id(),
                 sourceIdentity);
+        Files.createDirectories(output.toAbsolutePath().getParent());
+        Files.createDirectory(output);
+        JSON.writerWithDefaultPrettyPrinter()
+                .writeValue(output.resolve("protocol.json").toFile(), protocol);
         var settings = settingsFor(protocol, configured);
         var policies = ArenaPolicies.resolve(protocol, settings);
         var pairs = new ArrayList<Paired>();
@@ -614,12 +615,19 @@ public final class OfflineArena {
     }
 
     public static void main(String[] args) throws Exception {
+        if (args.length == 6 && args[0].equals("initialize-registry")) {
+            Path registry = EvaluationRegistry.installationRegistry(Path.of(args[1]).toRealPath(), Path.of(args[2]));
+            EvaluationRegistry.initialize(registry, Path.of(args[3]), args[4], args[5]);
+            System.out.println(registry);
+            return;
+        }
         if (args.length != 5)
             throw new IllegalArgumentException("project protocol output registry source-manifest");
         Path project = Path.of(args[0]).toRealPath(),
                 output = Path.of(args[2]).toAbsolutePath().normalize();
         if (output.startsWith(project))
             throw new IllegalArgumentException("Arena artifacts belong outside the project");
+        Path registry = EvaluationRegistry.installationRegistry(project, Path.of(args[3]));
         var protocol = readProtocol(Path.of(args[1]));
         var identity = JSON.readTree(Path.of(args[4]).toFile());
         if (!identity.isArray() || identity.isEmpty())
@@ -651,7 +659,7 @@ public final class OfflineArena {
                         scoring,
                         configured,
                         output,
-                        Path.of(args[3]),
+                        registry,
                         sourceIdentity);
         var admission = PromotionAdmission.inspect(result, protocol, new PromotionAdmission.Expected(sourceIdentity, configured, scoring));
         JSON.writerWithDefaultPrettyPrinter().writeValue(output.resolve("admission.json").toFile(), admission);

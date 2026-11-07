@@ -18,10 +18,10 @@ Masa, secvențele, alegerea sub-jocului și scorul folosesc adaptoarele proprii 
 
 Manifestul Rentz adoptă `CardTableTheme`; J4 păstrează aliasul echivalent `AppTheme`. Fereastra, rutele și preferințele aparțin consumatorului.
 
-## Admiterea AAR-ului
+## Admiterea bibliotecilor de produs
 
-1. Identificați coordonata `ro.cardtable:card-table-ui:0.1.1` și repository-ul extern al producătorului, fără referință la checkout-ul surselor vecine.
-2. Confruntați AAR, POM, metadata, surse și SHA-256; păstrați dependențele declarate și compatibilitatea bibliotecii `minSdk 24` cu aplicația `minSdk 26`.
+1. Identificați coordonatele `ro.cardtable:card-table-ui:0.1.5` și `ro.cardtable:card-table-names:0.1.0`, plus repository-ul extern al producătorului.
+2. Confruntați AAR, JAR, POM, metadata, surse și SHA-256. Păstrați dependențele declarate și compatibilitatea bibliotecii `minSdk 24` cu aplicația `minSdk 26`.
 3. Folosiți o copie în [workspace-ul înregistrat](ATF_Infrastructure.md), fără build sau probe în sursa activă ori TEMP-ul Windows.
 4. În copia tehnică, declarați repository-ul și dependența de mai jos; rulați componentele JVM și construiți APK-ul pentru verificarea D8/manifest.
 5. Păstrați separat dovada admiterii de acceptanța meniului și mesei reale; un tip disponibil în classpath nu demonstrează randarea widgetului.
@@ -38,7 +38,8 @@ exclusiveContent {
 Dependența se declară în modulul aplicației, după admitere:
 
 ```groovy
-implementation 'ro.cardtable:card-table-ui:0.1.1'
+implementation 'ro.cardtable:card-table-ui:0.1.5'
+implementation 'ro.cardtable:card-table-names:0.1.0'
 ```
 
 Aceste intrări sunt active în configurația live. [Repository-ul admis](../../rentz-lab-app/ui-library/README.md) păstrează artefactele și hash-urile; testele refuză dependența de motorul Whist.
@@ -50,7 +51,7 @@ Aceste intrări sunt active în configurația live. [Repository-ul admis](../../
 - Comparați geometria și textele cu reperul comun, cu fixture-uri și oracole independente; declanșarea unui callback în JVM nu este tap Android.
 - Adăugați numai sanity-ul nativ necesar pentru meniu/profil, mâna și scorul efectiv, după trecerea componentelor. Rezultatele, APK-urile tehnice și logurile rămân externe.
 
-[Backlog-ul UI](../feedback/ATF_Rentz_UI_ToDo.md) deține criteriile U01–U08. [Calificarea offline](ATF_Qualification.md) și [acceptanța Android](ATF_Android.md) păstrează identitățile și limitele execuției; un release existent nu este înlocuit cu binarul probei de admitere.
+[Backlog-ul UI](../feedback/ATF_Rentz_UI_ToDo.md) deține criteriile și starea fiecărui increment. [Calificarea offline](ATF_Qualification.md) și [acceptanța Android](ATF_Android.md) păstrează identitățile și limitele execuției.
 
 ## Componente comune și oracole Rentz
 
@@ -60,6 +61,8 @@ Aceste intrări sunt active în configurația live. [Repository-ul admis](../../
 | `SeatContent`, `PlayerSeatFrame`, `BoardLayout` | Nume, actor efectiv, puncte/delte și mapare loc motor → loc vizual. |
 | `HandCard`, `HandFan`, `CenteredHandView` | Vizibilitate înainte de reveal, legalitate, pas și aplicarea unică a comenzii Rentz. |
 | `PlayedCardContent`, `PlayedCardsView` | Levata publică și momentul colectării; tabla de secvențe este altă compoziție a centrului. |
+| `CollectionTarget` și animatorul comun | Adaptorul Rentz identifică o levată nouă din evenimentele publice, rezolvă câștigătorul și păstrează termenul la redimensionare. |
+| `PlayerNames` Java | Sesiunea exclude numele uman la pornire și proiectează numele AI după loc. Jurnalele vechi reconstruiesc lista din seed. O excludere diferită poate salva lista AI. |
 
 Testele de licitație, atu și punctaj Whist rămân exclusiv în J4. J5 implementează propriile componente pe observații și comenzi Rentz reale; opt cărți pe loc, faza nevăzută, pasul, secvențele și scorul nu se testează prin redenumirea fixture-urilor Whist.
 
@@ -88,6 +91,11 @@ Receipt-ul probei UI este distinct de cel al release-ului și se produce numai d
 Nu utilizați receipt-ul `Debug` sau `Release` ca substitut pentru varianta izolată. Lansatorul prototipului refuză noul contract; migrarea deciziei independente și unificarea producătorului de receipt rămân U09.
 
 ## Auditul cititorului Extent
+
+- [Driverul focalizat](../../atf-tests/tools/run-trick-collection-sanity.ps1) execută ultima mutare legală și reia mâna după oprirea procesului. Înregistrați fixture-ul de dezvoltare înainte de a-l expune emulatorului.
+- [Analiza cadrelor](../../atf-tests/tools/analyze-trick-collection.mjs) măsoară timestamp-urile, centrele cărților și apropierea de chenarul câștigător. Extent include cadrele și hash-urile înregistrărilor. [Dosarul de verificare](../../../../rentz_back/ui-review/restart-collection-j5/README.md)
+
+Pentru acest increment, `-HelpAwardsOnly` parcurge ajutorul în ambele limbi. `-CompactScores` adaugă verificarea chenarului în română la font 1,5, folosind aceeași mână din traseul de masă. Ordinea cărților vizibile se confruntă de la stânga la dreapta cu observația motorului.
 
 - Spark grupează metodele sub clasă: confruntați atât populația metodelor, cât și suma comparațiilor; numărul intrărilor din stânga nu este numărul testelor.
 - Folosiți controlul standard de expandare, apoi disclosure-urile acțiunilor, aserțiunilor și corpurilor. Toate rândurile trebuie desfăcute, iar ultimul trebuie accesibil prin derulare reală.

@@ -155,4 +155,4 @@ Invarianta este `cărți rămase în mâini + cărți jucate = pachet activ`. O 
 
 Profilul de bază nu implementează Totale plus, sub-jocuri dezactivate, refuzul distribuirii sau o alegere finală obligatoriu pe nevăzute. [Feedback-ul](../feedback/ATF_Rentz.md) păstrează aceste diferențe, fără import implicit din altă variantă.
 
-[Componente](ATF_Components.md) · [Surse](ATF_RuleSources.md) · [Motor](../../rentz-lab-app/game-core/README.md)
+[Componente](ATF_Components.md) · [Surse](ATF_RuleSources.md) · [Motor](../../rentz-lab-app/game-core/README.md) · [Transferul mecanismului](ATF_Transfer.md#aplicare-la-holdem)

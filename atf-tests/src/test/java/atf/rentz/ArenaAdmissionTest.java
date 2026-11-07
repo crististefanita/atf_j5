@@ -125,6 +125,138 @@ class ArenaAdmissionTest {
             assertFalse(PromotionAdmission.inspect(neighbor(), changed, new PromotionAdmission.Expected(SOURCE, SETTINGS, SCORING)).coherent());
         }
     }
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+            "-5, 1, -10, 0, false",
+            "5, 1, -10, 0.5, false",
+            "5, 1, 0, 0.5, false",
+            "5, 0.25, -10, 0, false",
+            "5, 0.3, -10, 0, false",
+            "5, 1, -10, 0, true",
+            "5, 0.5, 0, 0.25, true",
+            "5, 0, 5, 0.3333333333333333, true",
+            "0, 0.25, 0, 0, true"
+    })
+    void admissionChecksMarginAndCreditEvenWhenAggregatesAgree(double candidateMargin, double candidateCredit,
+            double controlMargin, double controlCredit, boolean possible) {
+        var original = neighbor();
+        var games = original.games().stream().map(p -> new OfflineArena.Paired(p.seed(), p.seat(), p.family(), p.candidate(),
+                controlMargin, candidateMargin, candidateMargin - controlMargin, candidateCredit, p.rootScore(),
+                p.elapsedMillis(), p.maxDecisionNanos(), p.searchedDecisions(), p.exactShortcuts(), controlCredit,
+                p.controlScore(), p.candidateWork(), p.controlWork())).toList();
+        var families = PROTOCOL.opponents().stream().map(f -> FamilyAnalysis.summarize(f,
+                games.stream().filter(p -> p.family() == f).toList(), PROTOCOL.seeds(), 4,
+                ClusteredEvaluation.Metric.WIN_SHARE, 2)).toList();
+        var result = new OfflineArena.Summary(original.protocol(), original.phase(), SOURCE, original.referenceParity(),
+                original.state(), families, games, List.of(), original.policyFile(), SETTINGS, original.referenceSettings(),
+                PROTOCOL, original.effectivePolicies(), SCORING);
+        var verdict = PromotionAdmission.inspect(result, PROTOCOL, new PromotionAdmission.Expected(SOURCE, SETTINGS, SCORING));
+        assertEquals(possible, verdict.coherent(), verdict.findings().toString());
+        if (!possible) {
+            assertFalse(verdict.promotes());
+            assertTrue(verdict.findings().getFirst().contains("win credit"));
+        }
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+            "LAB, 101, 10, 1, 90, 0, 0, false",
+            "LAB, 100, 10, 1, 91, 0, 0, false",
+            "LAB, 100, 9, 1, 90, 0, 0, false",
+            "UNIT, 101, 10.1, 1, 90, 0, 0, false",
+            "UNIT, 101, 10, 1, 90, 0, 0, true",
+            "LAB, 100, 100.0, 1, 90, 0, 0, true",
+            "LAB, 100, 8.333333333333329, 1, 90, 0, 0, true",
+            "ZERO, 0, 0, 0.25, 0, 0, 0.25, true",
+            "ZERO, 0, 0, 0, 0, 0, 0.25, false",
+            "ZERO, 0, 0, 0.25, 1, 0, 0.25, false"
+    })
+    void admissionChecksScoresAndOpponentSumsAgainstTrustedProfile(String profile, int candidateScore,
+            double candidateMargin, double candidateCredit, int controlScore, double controlMargin,
+            double controlCredit, boolean possible) {
+        var scoring = switch (profile) {
+            case "LAB" -> SCORING;
+            case "UNIT" -> new ScoreProfile(10, 25, 20, 100, 1, 100, SCORING.finishRewards());
+            case "ZERO" -> new ScoreProfile(0, 0, 0, 0, 0, 0, List.of(0, 0, 0, 0, 0, 0));
+            default -> throw new AssertionError(profile);
+        };
+        var original = neighbor();
+        var games = original.games().stream().map(p -> new OfflineArena.Paired(p.seed(), p.seat(), p.family(), p.candidate(),
+                controlMargin, candidateMargin, candidateMargin - controlMargin, candidateCredit, candidateScore,
+                p.elapsedMillis(), p.maxDecisionNanos(), p.searchedDecisions(), p.exactShortcuts(), controlCredit,
+                controlScore, p.candidateWork(), p.controlWork())).toList();
+        var verdict = PromotionAdmission.inspect(summarize(original, games, scoring), PROTOCOL,
+                new PromotionAdmission.Expected(SOURCE, SETTINGS, scoring));
+        assertEquals(possible, verdict.coherent(), verdict.findings().toString());
+        if (!possible) {
+            assertFalse(verdict.promotes());
+            assertTrue(verdict.findings().getFirst().contains("score profile"));
+        }
+    }
+
+    @Test void onePointMutationOfARealMatchIsRefusedWithRecalculatedAggregates(
+            @org.junit.jupiter.api.io.TempDir java.nio.file.Path directory) throws Exception {
+        var protocol = new OfflineArena.Protocol("score-feasibility", "DEVELOPMENT", 3, List.of(487L),
+                List.of(OfflineArena.Kind.BASELINE), OfflineArena.Kind.NORMAL, 1, 0);
+        var original = OfflineArena.run(protocol, SCORING, SETTINGS, directory.resolve("arena"),
+                directory.resolve("exposure.json"), SOURCE);
+        var expected = new PromotionAdmission.Expected(SOURCE, SETTINGS, SCORING);
+        assertTrue(PromotionAdmission.inspect(original, protocol, expected).coherent());
+        var games = new ArrayList<>(original.games());
+        var p = games.getFirst();
+        games.set(0, new OfflineArena.Paired(p.seed(), p.seat(), p.family(), p.candidate(), p.controlMargin(),
+                p.candidateMargin(), p.delta(), p.winCredit(), p.rootScore() + 1, p.elapsedMillis(),
+                p.maxDecisionNanos(), p.searchedDecisions(), p.exactShortcuts(), p.controlWinCredit(),
+                p.controlScore(), p.candidateWork(), p.controlWork()));
+        var verdict = PromotionAdmission.inspect(summarize(original, games, SCORING), protocol, expected);
+        assertFalse(verdict.coherent());
+        assertTrue(verdict.findings().getFirst().contains("candidate"));
+    }
+
+    private static OfflineArena.Summary summarize(OfflineArena.Summary original, List<OfflineArena.Paired> games,
+                                                   ScoreProfile scoring) {
+        var protocol = original.declaredProtocol();
+        var families = protocol.opponents().stream().map(f -> FamilyAnalysis.summarize(f,
+                games.stream().filter(p -> p.family() == f).toList(), protocol.seeds(), protocol.players(),
+                original.effectivePolicies().metric(), protocol.opponents().size())).toList();
+        return new OfflineArena.Summary(original.protocol(), original.phase(), original.sourceIdentity(),
+                original.referenceParity(), original.state(), families, games, original.retained(), original.policyFile(),
+                original.candidateSettings(), original.referenceSettings(), protocol, original.effectivePolicies(), scoring);
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+            "CANDIDATE, 295, 1, false",
+            "CONTROL, 295, 1, false",
+            "CANDIDATE, 295, 0.3333333333333333, true",
+            "CANDIDATE, 285, 1, true",
+            "CONTROL, 290, 0.5, true",
+            "CANDIDATE, 300, 0.25, true",
+            "CANDIDATE, 300, 0, true"
+    })
+    void winnerCreditRequiresEnoughPointsBelowTheLeaders(String arm, int opponentsSum, double credit,
+                                                          boolean possible) {
+        var original = neighbor();
+        boolean candidate = arm.equals("CANDIDATE");
+        double margin = 100 - opponentsSum / 3.0;
+        var rows = original.games().stream().map(p -> {
+            double candidateMargin = candidate ? margin : p.candidateMargin();
+            double controlMargin = candidate ? p.controlMargin() : margin;
+            return new OfflineArena.Paired(p.seed(), p.seat(), p.family(), p.candidate(), controlMargin, candidateMargin,
+                    candidateMargin - controlMargin, candidate ? credit : p.winCredit(), p.rootScore(),
+                    p.elapsedMillis(), p.maxDecisionNanos(), p.searchedDecisions(), p.exactShortcuts(),
+                    candidate ? p.controlWinCredit() : credit, candidate ? p.controlScore() : 100,
+                    p.candidateWork(), p.controlWork());
+        }).toList();
+        var verdict = PromotionAdmission.inspect(summarize(original, rows, SCORING), PROTOCOL,
+                new PromotionAdmission.Expected(SOURCE, SETTINGS, SCORING));
+        assertEquals(possible, verdict.coherent(), verdict.findings().toString());
+        if (!possible) {
+            assertFalse(verdict.promotes());
+            assertTrue(verdict.findings().getFirst().contains(arm.toLowerCase(java.util.Locale.ROOT) + " win credit"));
+        }
+    }
+
     @Test void completeNegativeEvidenceCanBeCoherentWithoutPromoting() {
         var original = neighbor();
         var games = original.games().stream().map(p -> new OfflineArena.Paired(p.seed(),p.seat(),p.family(),p.candidate(),

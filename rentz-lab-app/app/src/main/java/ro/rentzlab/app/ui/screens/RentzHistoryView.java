@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import java.util.ArrayList;
 import ro.cardtable.ui.theme.TablePalette;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.ui.copy.RentzUiText;
@@ -28,8 +27,7 @@ public final class RentzHistoryView {
                 : RentzScoreContent.rows(session.history(), copy);
         if (history.isEmpty()) container.addView(empty(context, copy));
         else {
-            var players = new ArrayList<String>();
-            for (int seat = 0; seat < history.get(0).values().size(); seat++) players.add(copy.name(seat, name));
+            var players = session.displayNames(copy.humanName(name));
             var grid = new RentzHistoryGrid(context, history, players, copy, hand -> {
                 if (container.getChildCount() != 1) return;
                 container.getChildAt(0).setVisibility(View.GONE);

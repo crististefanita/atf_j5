@@ -20,14 +20,12 @@ public final class RentzUiIntegrationReport {
     public static void main(String[] args) throws Exception {
         Path root = Path.of(args[0]); Path nativeReceipt = Path.of(args[1]);
         var nativeRun = JSON.readTree(nativeReceipt.toFile());
+        boolean help = nativeRun.path("helpAwardsOnly").asBoolean();
         try (var journals = Files.list(Path.of(nativeRun.required("rawRoot").asText()))) {
             var captured = journals.filter(file -> file.getFileName().toString().matches("development-journal(?:-[36])?\\.json")).toList();
-            if (captured.isEmpty() && nativeRun.required("status").asText().equals("PASS")) throw new IllegalArgumentException("Native development exposure journal missing");
-            for (Path privateJournal : captured) {
-                var saved = JSON.readTree(privateJournal.toFile());
-                atf.rentz.EvaluationRegistry.expose(Path.of(nativeRun.required("developmentLedger").asText()), saved.required("players").asInt(),
-                        List.of(saved.required("seed").asLong()), "DEVELOPMENT", "native-shared-ui-sanity", "android-native-laboratory-v1");
-            }
+            if (help && !captured.isEmpty()) throw new IllegalArgumentException("Help-only sanity must not start a match");
+            if (!help && captured.isEmpty() && nativeRun.required("status").asText().equals("PASS")) throw new IllegalArgumentException("Native development exposure journal missing");
+            if (nativeRun.has("developmentExposures")) verifyExposures(nativeRun, captured);
         }
         try (var session = new ExtentReportSession(root.resolve("integration-extent.html"), new ReportingSettings(240, 0))) {
             String comparisons = JSON.readTree(root.resolve("build-qualification.json").toFile()).path("assertionDirectory").asText("components/assertions");
@@ -46,7 +44,9 @@ public final class RentzUiIntegrationReport {
                     bodies.add(new ReportObservation.Body("Original attempt " + attempt, Files.readString(root.resolve(attempt)), ReportObservation.Format.JSON));
                 bodies.add(new ReportObservation.Body("Current native receipt", JSON.writerWithDefaultPrettyPrinter().writeValueAsString(nativeRun), ReportObservation.Format.JSON));
                 Path stage = Path.of(JSON.readTree(root.resolve("build-qualification.json").toFile()).required("stage").asText());
-                var sources = nativeRun.path("historyOnly").asBoolean()
+                var sources = help
+                        ? List.of("ui/screens/RentzMenus.java", "ui/score/RentzAwardGrid.java", "ui/score/RentzScoreContent.java", "GameSession.java")
+                        : nativeRun.path("historyOnly").asBoolean()
                         ? List.of("ui/screens/RentzHistoryView.java", "ui/score/RentzHistoryGrid.java", "ui/score/HistoryGridMetrics.java", "ui/score/RentzScoreContent.java")
                         : List.of("ui/table/RentzTableContent.java", "ui/table/TrickPreview.java", "ui/navigation/InputPermit.java", "ui/score/RentzScoreContent.java");
                 for (String file : sources)
@@ -56,13 +56,33 @@ public final class RentzUiIntegrationReport {
                     bodies.add(new ReportObservation.Body("Confirmed history fixture", Files.readString(fixture), ReportObservation.Format.JSON));
                 }
                 phase.observation(new ReportObservation("Qualification scope", List.of(
-                        new ReportField("UI library", "ro.cardtable:card-table-ui:0.1.1"),
+                        new ReportField("UI library", nativeRun.path("build").path("uiLibrary").asText("ro.cardtable:card-table-ui:0.1.1")),
                         new ReportField("Driver", "ADB + UI Automator; native Android elements"),
                         new ReportField("Component evidence", "Comparisons captured at evaluation time; existing XML retained as outcomes")), bodies, List.of()));
                 phase.complete(AtfReportStatus.INFO); scenario.complete(AtfReportStatus.INFO);
             }
         }
     }
+    private static void verifyExposures(JsonNode nativeRun, List<Path> captured) throws Exception {
+        var evidence = nativeRun.required("developmentExposures");
+        if (!evidence.isArray()) throw new IllegalArgumentException("Invalid development exposure evidence");
+        var journals = new HashMap<String, Path>();
+        for (var file : captured) journals.put(file.getFileName().toString(), file);
+        var tokens = new HashSet<String>();
+        for (var row : evidence) {
+            var file = journals.remove(row.required("journal").asText());
+            String token = row.required("token").asText();
+            if (file == null || !token.matches("[a-f0-9]{32}") || !tokens.add(token))
+                throw new IllegalArgumentException("Unexpected or repeated development exposure evidence");
+            String sha256 = HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(Files.readAllBytes(file)));
+            if (!sha256.equalsIgnoreCase(row.required("sha256").asText()))
+                throw new IllegalArgumentException("Development exposure journal differs from its evidence");
+        }
+        if (!journals.isEmpty() && nativeRun.required("status").asText().equals("PASS"))
+            throw new IllegalArgumentException("Development exposure evidence missing");
+    }
+
     private static List<AtfAssertion> checks(JsonNode values) {
         if (!values.isArray() || values.isEmpty()) throw new IllegalArgumentException("An audited step needs captured checks");
         var result = new ArrayList<AtfAssertion>();
@@ -87,7 +107,9 @@ public final class RentzUiIntegrationReport {
         boolean all = run.required("status").asText().equals("PASS");
         Path rawRoot = Path.of(run.required("rawRoot").asText()).toAbsolutePath().normalize();
         boolean history = run.path("historyOnly").asBoolean();
-        var raw = session.startScenario(history ? "RentzHistorySanity" : "RentzSharedUiSanity", run.required("scope").asText(), List.of("e2e", "android", "shared-ui"));
+        boolean help = run.path("helpAwardsOnly").asBoolean();
+        String name = help ? "RentzHelpAwardsSanity" : history ? "RentzHistorySanity" : "RentzSharedUiSanity";
+        var raw = session.startScenario(name, run.required("scope").asText(), List.of("e2e", "android", "shared-ui"));
         try (var ui = UiExtentReportSession.adaptScenario(raw,
                 ReportEvidenceProfile.forScreenshotPolicy(ReportScreenshotPolicy.EACH_CHECKPOINT), "Android native PNG")) {
             try (var phase = ui.startPhase("TEST BODY")) {
@@ -104,7 +126,7 @@ public final class RentzUiIntegrationReport {
                     Path image = contained(rawRoot, point.required("image").asText());
                     byte[] png = Files.readAllBytes(image);
                     if (png.length < 8 || png[0] != (byte) 137 || png[1] != 80 || png[2] != 78 || png[3] != 71) throw new IllegalArgumentException("Native PNG required");
-                    boolean outcome = history ? pointIndex == run.required("checkpoints").size() - 1
+                    boolean outcome = history || help ? pointIndex == run.required("checkpoints").size() - 1
                             : point.required("title").asText().startsWith("One hand completed");
                     var keyword = pointIndex == 0 ? AtfGherkinKeyword.GIVEN : pointIndex == 1 ? AtfGherkinKeyword.WHEN
                             : outcome ? AtfGherkinKeyword.THEN : AtfGherkinKeyword.AND;

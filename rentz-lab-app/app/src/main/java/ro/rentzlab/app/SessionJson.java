@@ -21,15 +21,18 @@ public final class SessionJson {
         var available=new JSONArray();for(var contract:Contract.values())if(v.available().contains(contract))available.put(contract.name());
         var view=new JSONObject().put("seat",v.seat()).put("players",v.players()).put("turn",v.turn()).put("chooser",v.chooser()).put("handNumber",v.handNumber()).put("phase",v.phase().name()).put("contract",v.contract()==null?JSONObject.NULL:v.contract().name()).put("blind",v.blind()).put("revealed",v.revealed())
                 .put("hand",cards(v.hand())).put("legal",cards(v.legal())).put("handSizes",new JSONArray(v.handSizes())).put("dealPoints",new JSONArray(v.dealPoints())).put("totals",new JSONArray(v.totals())).put("finishOrder",new JSONArray(v.finishOrder())).put("trick",trick).put("seen",cards(v.seen())).put("events",events).put("board",cards(v.board())).put("available",available);
-        return new JSONObject().put("schema",1).put("screen",screen).put("busy",busy).put("revision",session.save().commands().size()).put("difficulty",session.difficulty().name()).put("view",view);
+        return new JSONObject().put("schema",1).put("screen",screen).put("busy",busy).put("revision",session.save().commands().size()).put("difficulty",session.difficulty().name())
+                .put("opponents",new JSONArray(session.opponentNames())).put("view",view);
     }
     public static JSONObject saved(GameSession session)throws JSONException{
         var saved=session.save();var commands=new JSONArray();for(var command:saved.commands())commands.put(new JSONObject().put("action",command.action().name()).put("seat",command.seat()).put("card",card(command.card())).put("contract",command.contract()==null?JSONObject.NULL:command.contract().name()).put("blind",command.blind()));
-        return new JSONObject().put("schema",saved.schema()).put("players",saved.players()).put("seed",saved.seed()).put("difficulty",saved.difficulty().name()).put("profile",GameSession.SCORE_PROFILE).put("policy","RENTZ_PUBLIC_LOOKAHEAD_V1").put("rules","RENTZ_RULES_V2").put("commands",commands);
+        var json = new JSONObject().put("schema",saved.schema()).put("players",saved.players()).put("seed",saved.seed()).put("difficulty",saved.difficulty().name()).put("profile",GameSession.SCORE_PROFILE).put("policy","RENTZ_PUBLIC_LOOKAHEAD_V1").put("rules","RENTZ_RULES_V2").put("commands",commands);
+        if (!saved.opponents().equals(GameSession.defaultOpponents(saved.players(),saved.seed()))) json.put("opponents",new JSONArray(saved.opponents()));
+        return json;
     }
     public static GameSession restore(String text)throws JSONException{
         var json=SavedJson.read(text);
-        SavedJson.fields(json,Set.of("schema","players","seed","difficulty","profile","policy","commands"),Set.of("rules"));
+        SavedJson.fields(json,Set.of("schema","players","seed","difficulty","profile","policy","commands"),Set.of("rules","opponents"));
         if(!SavedJson.text(json,"profile").equals(GameSession.SCORE_PROFILE)||!SavedJson.text(json,"policy").equals("RENTZ_PUBLIC_LOOKAHEAD_V1")){
             throw new IllegalArgumentException("Saved profile identity");
         }
@@ -40,8 +43,17 @@ public final class SessionJson {
         var commands=new ArrayList<GameSession.Command>();
         var rows=json.getJSONArray("commands");
         for(int n=0;n<rows.length();n++)commands.add(command(rows.getJSONObject(n),players));
+        var opponents=new ArrayList<String>();
+        if(json.has("opponents")){
+            var names=json.getJSONArray("opponents");
+            if(names.length()!=players-1)throw new IllegalArgumentException("Saved opponents");
+            for(int n=0;n<names.length();n++){
+                if(!(names.get(n) instanceof String name))throw new IllegalArgumentException("Saved opponent name");
+                opponents.add(name);
+            }
+        }
         return GameSession.restore(new GameSession.Saved(SavedJson.intValue(json,"schema"),players,SavedJson.integer(json,"seed"),
-                RentzPlayer.Difficulty.valueOf(SavedJson.text(json,"difficulty")),commands));
+                RentzPlayer.Difficulty.valueOf(SavedJson.text(json,"difficulty")),commands,opponents));
     }
 
     private static GameSession.Command command(JSONObject json,int players)throws JSONException{

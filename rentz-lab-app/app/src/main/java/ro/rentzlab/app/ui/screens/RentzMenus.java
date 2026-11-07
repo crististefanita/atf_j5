@@ -6,7 +6,10 @@ import ro.cardtable.ui.menu.*;
 import ro.cardtable.ui.screens.ScreenViews;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.app.ui.navigation.SetupSelection;
+import ro.rentzlab.app.ui.score.RentzAwardGrid;
+import ro.rentzlab.app.ui.score.RentzScoreContent;
 import ro.rentzlab.ai.RentzPlayer;
+import ro.rentzlab.core.ScoreProfile;
 import java.util.List;
 import java.util.function.IntConsumer;
 
@@ -46,13 +49,17 @@ public final class RentzMenus {
             public void onNothingSelected(android.widget.AdapterView<?> parent) { }
         };
     }
-    public void help(RentzUiText copy, Runnable back) {
+    public void help(RentzUiText copy, ScoreProfile scoring, Runnable back) {
         views.applyStandardWindowChrome();
         var page = views.page("Rentz", copy.text("How to play", "Cum se joacă"));
         views.addRule(page, copy.text("Eight cards", "Opt cărți"), copy.text("Each player chooses each sub-game once. The chooser leads the hand.", "Fiecare jucător alege fiecare sub-joc o dată. Alegătorul deschide mâna."));
-        views.addRule(page, copy.text("Tricks without trump", "Levate fără atu"), copy.text("Follow suit when possible. The highest card of the led suit wins.", "Urmezi culoarea cerută când poți. Cea mai mare carte a culorii cerute câștigă."));
-        views.addRule(page, copy.text("Laboratory scoring", "Punctaj de laborator"), copy.text("Trick −10 · queen −25 · diamond −20 · K♥ −100. Whist +10 · 10♣ +100. The Rentz finishing awards depend on table size.", "Levată −10 · damă −25 · caro −20 · K♥ −100. Whist +10 · 10♣ +100. Premiile de sosire Rentz depind de numărul jucătorilor."));
         views.addRule(page, "Rentz", copy.text("Open at Q / J / 10 / 9 for 3 / 4 / 5 / 6 players. Extend with a neighbouring rank. Ace: another turn; lowest rank: skip. Pass only with no legal card.", "Deschizi din Q / J / 10 / 9 la 3 / 4 / 5 / 6 jucători. Extinzi cu rang vecin. As: încă o tură; rang minim: săritură. Pas numai fără carte legală."));
+        views.addRule(page, copy.text("Rentz finishing awards", "Premii de sosire Rentz"),
+                copy.text("Base points by place. A dash marks an unavailable place.",
+                        "Puncte de bază pe loc. Linia marchează un loc inexistent."));
+        page.addView(RentzAwardGrid.create(views, copy, RentzScoreContent.finishingAwards(scoring)), views.matchWrap());
+        views.addRule(page, copy.text("Tricks without trump", "Levate fără atu"), copy.text("Follow suit when possible. The highest card of the led suit wins.", "Urmezi culoarea cerută când poți. Cea mai mare carte a culorii cerute câștigă."));
+        views.addRule(page, copy.text("Laboratory scoring", "Punctaj de laborator"), copy.trickScoring(scoring));
         views.addRule(page, copy.text("Blind choice", "Pe nevăzute"), copy.text("Choose before revealing the hand to double the hand points for everyone. Unavailable for the last remaining sub-game.", "Alegi înainte să vezi mâna și dublezi punctele mâinii pentru toți. Indisponibil la ultimul sub-joc rămas."));
         views.addQuietButton(page, copy.back(), back);
     }

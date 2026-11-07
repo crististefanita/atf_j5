@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.view.*;
 import android.widget.*;
+import ro.cardtable.ui.animation.CollectionTarget;
+import ro.cardtable.ui.animation.TrickCollectionAnimator;
 import ro.cardtable.ui.hand.*;
 import ro.cardtable.ui.seat.*;
 import ro.cardtable.ui.table.*;
@@ -20,7 +22,8 @@ public final class RentzTablePanel extends LinearLayout {
     private final Context context;
     private final RentzUiText copy;
     private final boolean paused;
-    public RentzTablePanel(Context context, RentzMatch.Observation view, RentzUiText copy, String name,
+    private final BoardLayout board;
+    public RentzTablePanel(Context context, RentzMatch.Observation view, RentzUiText copy, List<String> names,
             boolean paused, boolean holding, List<TrickRules.Play> visible, Actions actions) {
         super(context); this.context = context; this.copy = copy; this.paused = paused;
         var viewport = new TableViewportPolicy(WindowContent.heightDp(context), getResources().getConfiguration().fontScale);
@@ -28,13 +31,13 @@ public final class RentzTablePanel extends LinearLayout {
         int width = Math.min(760, Math.max(240, WindowContent.widthDp(context) - 40));
         boolean cards = view.phase() == RentzMatch.Phase.PLAY && view.contract() != Contract.RENTZ || holding;
         var layout = PlayedCardMetrics.forTable(view.players(), width, getResources().getConfiguration().fontScale, viewport);
-        var board = new BoardLayout(context, view.players(), cards ? width : Math.min(width, 220), viewport, cards, TableGeometry.CenterAlignment.BALANCED);
+        board = new BoardLayout(context, view.players(), cards ? width : Math.min(width, 220), viewport, cards, TableGeometry.CenterAlignment.BALANCED);
         board.setTag("game-board"); board.setContentDescription(copy.text("Rentz table", "Masa Rentz"));
-        for (var seat : RentzTableContent.seats(view, copy, name, holding)) {
-            var frame = new PlayerSeatFrame(context, viewport.isCompact()).build(seat, viewport.seatVerticalPaddingDp());
+        for (var seat : RentzTableContent.seats(view, copy, names, holding)) {
+            var frame = new PlayerSeatFrame(context, viewport.isCompact()).buildInlineFacts(seat, viewport.seatVerticalPaddingDp());
             board.addView(new PlayerSeatView(context, frame, copy.text("TO PLAY", "LA RÂND"), seat.active(), seat.seat(), viewport.isCompact()));
         }
-        View center = cards ? new PlayedCardsView(context, viewport.isCompact()).build(RentzTableContent.plays(visible, copy, name), layout,
+        View center = cards ? new PlayedCardsView(context, viewport.isCompact()).build(RentzTableContent.plays(visible, names), layout,
                 holding ? copy.text("Completed trick", "Levată încheiată") : copy.text("Current trick", "Levată curentă"))
                 : center(view, actions);
         board.addView(center);
@@ -44,10 +47,14 @@ public final class RentzTablePanel extends LinearLayout {
             var pass = button(copy.text("Pass", "Pas"), actions.pass());
             var params = new LayoutParams(dp(132), dp(48)); params.gravity = Gravity.CENTER_HORIZONTAL; addView(pass, params);
         }
+        var handCards = RentzTableContent.hand(view, copy, paused);
         var hand = new CenteredHandView(context, dp(HandLayoutMetrics.maxViewportWidthDp()),
-                new HandFan(context, RentzTableContent.hand(view, copy, paused), viewport.handClearanceDp(false), viewport.isCompact(), actions.card())::build);
-        hand.setTag("player-hand"); hand.setContentDescription(copy.text("Your hand", "Mâna ta") + ": " + RentzTableContent.hand(view, copy, paused).size());
+                new HandFan(context, handCards, viewport.handClearanceDp(false), viewport.isCompact(), actions.card())::build);
+        hand.setTag("player-hand"); hand.setContentDescription(copy.text("Your hand", "Mâna ta") + ": " + handCards.size());
         addView(hand, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(HandLayoutMetrics.reservedHandHeightDp())));
+    }
+    public void collect(CollectionTarget target, long remainingMillis, Runnable resized) {
+        TrickCollectionAnimator.attach(board, target, remainingMillis, resized);
     }
     private View center(RentzMatch.Observation view, Actions actions) {
         var box = new LinearLayout(context); box.setOrientation(VERTICAL); box.setGravity(Gravity.CENTER);

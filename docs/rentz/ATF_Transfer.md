@@ -1,4 +1,6 @@
-# Transferul mecanismelor către Rentz
+# Transferul mecanismelor de testare și învățare
+
+Ghidul explică ce a preluat Rentz și ce poate reutiliza un joc nou. Echipa jocului deține regulile, oracolele și promovarea politicilor; bibliotecile comune oferă infrastructura de verificare și publicare.
 
 ## Ce reutilizăm
 
@@ -8,7 +10,7 @@
 | Test Kit | Clasificare, comparații evaluate, lifecycle și port de publicare. | Așteptarea și semantica domeniului aparțin testului Rentz. |
 | Publicare | Același API și stil Extent. | Publicator nou, fără tipuri de licitație sau scor Whist. |
 | Izolare | Copie temporară, cache și rezultate externe. | Identități și spațiu de date Rentz proprii. |
-| Prezentare | Coordonare, accesibilitate și separarea modelului de controale. | Prototipul nativ are tabla și alegerea Rentz; geometria produsului nu este încă transferată integral. |
+| Prezentare | Coordonare, accesibilitate și separarea modelului de controale. | Un consumator validează separat modelul ecranului și dispozitivele sale. |
 
 Proiectul nu copiază motorul Whist, algoritmul aplicației originale sau activele ei. Cartela de punctaj, atuul, licitația și seriile sunt concepte ale altui domeniu și nu intră implicit în modelul Rentz.
 
@@ -68,6 +70,41 @@ Definiți pachetul, regulile, rolurile, observația, acțiunile, terminarea și 
 | Primă distribuire explicită | Identitatea fixture-ului și seed-ul continuării se păstrează separat; comparația politicilor nu editează rezultatele. |
 | Evaluare rezervată | O partidă văzută nu devine rezervată prin schimbarea numelui directorului. |
 | Progres strategic | O stare controlată permite comparație reproductibilă; calificarea cere și evaluare pe date noi. |
+
+## Aplicare la Hold’em
+
+[Contractul Hold’em](../../../atf_j6/docs/requirements/README.md) stabilește ordinea de lucru. Punctele de intrare permit verificări mici înainte de motorul complet, evaluator și meciurile pereche:
+
+- [Observația actorului](../../../atf_j6/holdem-core/src/main/java/ro/atf/holdem/core/HoldemObservation.java) expune mâna proprie, masa, stivele, acțiunile și istoricul textual.
+- [Arena locală](../../../atf_j6/holdem-arena/src/main/java/ro/atf/holdem/arena/ArenaRun.java) apelează o singură politică.
+
+```mermaid
+flowchart LR
+    RULES[Reguli confirmate] -->|definesc| ENGINE[Motor și oracol independent]
+    ENGINE -->|proiectează| VIEW[Observația actorului]
+    VIEW -->|alimentează| POLICY[Politică și buget]
+    POLICY -->|se compară în| ARENA[Arena cu loturi separate]
+    ARENA -->|decide| GATE[Promovare sau păstrarea reperului]
+```
+
+<details>
+<summary>Legendă: fiecare frontieră are un contract propriu</summary>
+
+Motorul aplică regula; oracolul confruntă rezultatul. Arena poate vedea distribuirea pentru replay, dar politica vede numai observația. Lotul de reglaj permite reluare și ajustări; lotul de evaluare califică un candidat înghețat.
+
+</details>
+
+| Ordine | Preluăm mecanismul | Definim și verificăm în Hold’em |
+|---|---|---|
+| 1. Reguli și oracol | [Statutul regulii](ATF_Rules.md#domeniu-și-statut), profil separat de strategie, comandă refuzată fără efect. | Stive, blinduri și ordine heads-up, sumă de call și unitatea de raise. Distingeți all-in sub minim de redeschiderea acțiunii. La decontare verificați eligibilitatea pe fiecare pot, egalitățile și regula jetonului impar. Confirmați variantele înainte de implementare. |
+| 2. Observație și replay | [Proiecție proprie și jurnal separat](ATF_Learning.md#informația-permisă), aceleași acțiuni acceptate la reluare. | Copiați colecțiile din observație și tipizați actorul, strada, acțiunea, suma și convenția sumei. Schimbați numai cărțile adverse, pachetul ascuns sau seed-ul dealerului: aceeași vedere și același seed separat al politicii trebuie să dea aceeași decizie. |
+| 3. Componente | [Fixture mic și control negativ](ATF_Components.md#oracol-și-control-negativ), proprietăți și evaluator separat de AI. | Verificați conservarea jetoanelor la fiecare tranziție, refuzul fără schimbarea stării, clasarea celor mai bune cinci cărți cu un oracol independent și decontarea poturilor. Verificați invarianța la redenumirea culorilor și digestul replay-ului. |
+| 4. Politică | [Ponderi contextualizate](ATF_Learning.md#reguli-tactice-și-ponderi), limite explicite, rezervă legală și reper fix. | Porniți de la decizii legale și deterministe. Separați clasificarea mâinii, pot odds, textură și poziție de estimarea equity și de distribuția ponderată a mâinilor adverse. Pe stări mici, confruntați samplingul cu enumerarea exactă. |
+| 5. Evaluare | [Separarea distribuirilor](ATF_Learning.md#identitatea-distribuirii-și-expunerea), comparație pereche și refuz înainte de execuție. | Înghețați regulile, generatorul, politica, bugetul și metrica. Rejucați aceeași distribuire la poziții echivalente cu aceiași adversari; agregați întâi la nivelul distribuirii sau al sesiunii dacă stivele trec între mâini. Raportați big blinds la 100 de mâini, incertitudinea, drawdown-ul și costul. |
+
+[Cerințele domeniului](../../../atf_j6/docs/requirements/DOMAIN_REQUIREMENTS.md), [criteriile AI](../../../atf_j6/docs/requirements/AI_REQUIREMENTS.md) și [strategia testelor](../../../atf_j6/docs/testing/TEST_STRATEGY.md) dețin contractele Hold’em.
+
+Transferați prin bibliotecile comune și adaptoare locale. Pragurile, ponderile, scorurile, seed-urile, replay-urile, codul Android și regulile Rentz rămân în jocul lor. Începeți local; eventualul transport se verifică separat cu mock-uri.
 
 ## Responsabilități rămase
 

@@ -3,6 +3,26 @@
   "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
   "controls": [
     {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/screens/ContractAdviceTest.java",
+      "owner": "Rentz UI",
+      "reason": "Native collection, score page and human contract advice.",
+      "criterion": "Keep captured Android comparisons and presentation-only choices independently reproducible.",
+      "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
+      "expires": "2026-11-20",
+      "sha256": "7fb5ea3727630e748ca75aa37c4715f47018303eb8729c0ecc067261e0983a82",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/android/reporting/RentzCollectionMotionReport.java",
+      "owner": "Rentz UI",
+      "reason": "Native collection, score page and human contract advice.",
+      "criterion": "Keep captured Android comparisons and presentation-only choices independently reproducible.",
+      "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
+      "expires": "2026-11-20",
+      "sha256": "7ac533db47ca9e46a8692a58818b923c5334487709b756c0d639f834521b7571",
+      "allowDelete": false
+    },
+    {
       "path": "atf-tests/pom.xml",
       "owner": "Rentz release",
       "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
@@ -35,21 +55,21 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/arena/PromotionAdmission.java",
       "owner": "Rentz consumer",
-      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
-      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "reason": "Q26 · Validate paired score feasibility against the trusted scoring profile.",
+      "criterion": "Refuse impossible seat scores or opponent sums in both arms. Preserve real games, integral opponent sums and zero-profile ties.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q26-q28/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "8fc32d57c1ea989c6096ad1fddd9be923c57c15082a736e3db0a42f7ce9a344c",
+      "sha256": "c12426d87173d2821a539f421c238b54c474887b6cd513bec8ed7f334593f6dd",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/main/java/atf/rentz/arena/PromotionEvidence.java",
       "owner": "Rentz consumer",
-      "reason": "Q17–Q18 · Nested discovery and XML ownership, effective arena actors and independent admission.",
-      "criterion": "Jupiter and Surefire establish the selected Nested population; invalid or ambiguous ownership fails. Trusted context verifies the effective candidate, control, opponents and objective before promotion.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md",
+      "reason": "Q29 · Verify that a positive winner credit fits the integer deficit below the leaders.",
+      "criterion": "Refuse impossible sole wins in both arms. Preserve exact bounds, split winners and losses.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "c6770e83eef4e88cdc22bb3ffe49a609734548a9bbcbdd6e31519ab620f85fdb",
+      "sha256": "b56dbcff7890d322298ee36eedb0f9cf199f6cf1aaed854335321e581fb80b17",
       "allowDelete": false
     },
     {
@@ -115,11 +135,11 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/OfflineArena.java",
       "owner": "Rentz consumer",
-      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
-      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "reason": "Q23 · Bind reserved evaluation to reviewed installation history and preserve existing exposures.",
+      "criterion": "Refuse another path, missing review, alias and incomplete history. Preserve v1 history and accept a distinct distribution.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q23-q25/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "262159f3fe0a9c0ad1e3e45c00ca87ea7bd18e9ee192a30500ef0771de1edd7b",
+      "sha256": "a7b8a72d3e49c402c00e83e65851eb0eb64fd3a0f2bfffecf52f3cf87ade1f81",
       "allowDelete": false
     },
     {
@@ -133,23 +153,33 @@
       "allowDelete": false
     },
     {
-      "path": "atf-tests/src/test/java/atf/rentz/android/reporting/RentzUiIntegrationReport.java",
-      "owner": "Rentz release",
-      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Publish only evaluated comparisons, native action records, hierarchy and original screenshots; enforce explicit PASS/FAIL.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java",
+      "owner": "Rentz consumer",
+      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting.",
+      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "571fc1c0c57a47e3cc7c6b198ea884f6787cbbda0dab1fb606fee88c0f41137f",
+      "sha256": "3f51a25a1e22e3c5cafd464d523e832efd268f49b05b36149cb44f8139fce28f",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/android/reporting/RentzUiIntegrationReport.java",
+      "owner": "Rentz UI",
+      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting.",
+      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "8901305c534b84c266165981e864774ccc0cc45d51d501bf5bdbb047e43df12b",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/ArenaAdmissionTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
-      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "reason": "Q29 · Verify that a positive winner credit fits the integer deficit below the leaders.",
+      "criterion": "Refuse impossible sole wins in both arms. Preserve exact bounds, split winners and losses.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "d667da302ac16caa414dfaf55854da23110218dc8fbe5aaa1447f8f12f4d53f9",
+      "sha256": "30f391504476ef39300ad560039a1f9af726160caf5f39533ec4d637d41c00ea",
       "allowDelete": false
     },
     {
@@ -445,11 +475,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/OfflineArenaComponentTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
-      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting.",
+      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "3a475429c0a0af5b912649e64c245bd067428d2ad870e59e2ca254833b24f140",
+      "sha256": "d90851db2fa74ebed0c428e4b4c9edef17e77880377575222eacbd0968d20e5d",
       "allowDelete": false
     },
     {
@@ -495,31 +525,31 @@
     {
       "path": "atf-tests/tools/run-android-sanity.ps1",
       "owner": "Rentz release",
-      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Refuse the incompatible shared UI before ADB and attest the native classpath at each Java handoff.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "reason": "Q28 · Resolve native exposure from the same configured data root as the arena.",
+      "criterion": "An injected native adapter receives the configured installation ledger. An exposed deal and its alias are refused from that ledger.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q26-q28/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a6c71fb68091f4780b3a2316a5176986853c9d5b17727336519d729f4070733f",
+      "sha256": "9585aeaffa6e535aa2400dfcef26b1f0ef58dd51c90fb5437685512540ca5afc",
       "allowDelete": false
     },
     {
       "path": "atf-tests/tools/run-arena.ps1",
       "owner": "Rentz consumer",
-      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
-      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "reason": "Q23 · Bind reserved evaluation to reviewed installation history and preserve existing exposures.",
+      "criterion": "Refuse another path, missing review, alias and incomplete history. Preserve v1 history and accept a distinct distribution.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q23-q25/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "4a8f44f4268fc0acc2893bce842034f7e43a5dbb1aca12179ce4c6190c60f28a",
+      "sha256": "ecd24f25f486567ec9438195a31f5c791a9b3eb1da725aec74eb4c3a0089c328",
       "allowDelete": false
     },
     {
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz consumer",
-      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
-      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
+      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting.",
+      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "fe203f906248c1e968bc4e16274a7646e546c86394c4693b5fd3671cb5813f8c",
+      "sha256": "6cbb071be689a127b6fb761faa8dfade60840a409db89961a4573bdd7f22e99c",
       "allowDelete": false
     },
     {
@@ -535,11 +565,11 @@
     {
       "path": "atf-tests/tools/test-test-discovery.ps1",
       "owner": "Rentz consumer",
-      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
-      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "reason": "Q30 · Reject hidden or unknown Surefire result markup before counting testcases.",
+      "criterion": "Refuse namespaced, misplaced and unknown outcomes. Preserve real Surefire reports and Nested consolidation.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "4b68f1e8494c79a983b62a08ea468ab98cf91d3dbfebe8d882bf07d0bd99a967",
+      "sha256": "81df4574b3b1cec18b0499950e869931de1058acb82285ccb312f3f0d6cac2d3",
       "allowDelete": false
     },
     {
@@ -557,9 +587,9 @@
       "owner": "Rentz release",
       "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
       "criterion": "Register the actual release, signing, UI and qualification paths while retaining physical and TEMP boundary checks.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "e648d07928139fe6ff66d8358efd62c2742fc4e991b67d369c5d44aef34a25ef",
+      "sha256": "fe05969fee3a774c630eea97e785742b53da3099a4f9bc13296844c17630c7b3",
       "allowDelete": false
     },
     {
@@ -684,12 +714,12 @@
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java",
-      "owner": "Rentz release",
-      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Bind the admitted shared AAR by hash and ensure it contains neither engine nor ATF classes.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "owner": "Rentz UI",
+      "reason": "S05 and U10–U13 · Qualify the common table presentation and effective score help.",
+      "criterion": "Verify both Maven coordinates, all eight artifact hashes and the classes loaded from the AAR and JAR.",
+      "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "5874214a5c43fab31ad0d13233fa6c154984faa293a4690257d820fbcd402668",
+      "sha256": "6d72c367ace1b6f1d12b7fea47196069507ed1b785cc3de30688655189decd92",
       "allowDelete": false
     },
     {
@@ -704,12 +734,12 @@
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/profile/ProfileSettingsTest.java",
-      "owner": "Rentz release",
-      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Preserve stable seat identity, valid Unicode names and durability on write failure.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "owner": "Rentz UI",
+      "reason": "S05 and U10–U13 · Qualify the common table presentation and effective score help.",
+      "criterion": "Keep preference validation, reserve the human name, recover the same opponent seats and reject invalid saved labels.",
+      "proof": "../../rentz_back/ui-review/shared-seats-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "7f72866def2bc00ba13dc32a823cda87205773a518fe633a0a9c6545d3955964",
+      "sha256": "375e8fc7f6027ccdb5f8f5a83cdabaa9cca03a89c57061bd61b12c3367c5899b",
       "allowDelete": false
     },
     {
@@ -734,12 +764,12 @@
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java",
-      "owner": "Rentz release",
-      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Keep seat order and signed confirmed totals after restore, with no Whist columns.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "owner": "Rentz UI",
+      "reason": "S05 and U10–U13 · Qualify the common table presentation and effective score help.",
+      "criterion": "Verify every 3–6 player award row and an alternate profile, preserving explicit zero rewards and absent places.",
+      "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "9f37fca949bf9174e019e2cccf2e88d3b46da24b22166a592f27234bb84b44c9",
+      "sha256": "40d25feaabd29d65dacdcaff457bec6c079483ccd3cb1e0a217bb41898a2e41b",
       "allowDelete": false
     },
     {
@@ -754,22 +784,22 @@
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java",
-      "owner": "Rentz release",
-      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Check active actor, exact score and visibility across real contracts and hidden choices.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "owner": "Rentz UI",
+      "reason": "S05 and U10–U13 · Qualify the common table presentation and effective score help.",
+      "criterion": "Preserve legal card identity, validate physical hand order and verify two complete localized score rows on restored seats.",
+      "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "a76b5882ad0b5d33402bddbd606fe7006edb2c1d2bc579d1893e99a85e5a54cf",
+      "sha256": "49c8d54e3aa2c3d75289bb436d23a1ac21b0d61e27b13f07d968fbb87fadecd0",
       "allowDelete": false
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/TrickPreviewTest.java",
-      "owner": "Rentz release",
-      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Preserve the 1500 ms hold without replay or a deadline extension.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "owner": "Rentz UI",
+      "reason": "S05 and U10–U13 · Qualify the common table presentation and effective score help.",
+      "criterion": "Keep the 1500 ms deadline, the winner destination and the no-replay boundary after restore or a partial trick.",
+      "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "3843d8f1d343aa7cb96ed7fd963661010a0f0375db12597d6c828e28b11195c3",
+      "sha256": "bc9693ddd22c9cfbc868ec6ba2846824582b53815f34bcdf0d80185ea10346d3",
       "allowDelete": false
     },
     {
@@ -895,11 +925,11 @@
     {
       "path": "scripts/TestCollections.psm1",
       "owner": "Rentz consumer",
-      "reason": "Q21–Q22 · Bind scoring evidence and reconcile ordinary Surefire reports with their testcases.",
-      "criterion": "Refuse missing or different scoring and inconsistent case populations. Preserve matched scoring, legacy readability, nested ownership and valid multi-invocation cases.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md",
+      "reason": "Q30 · Reject hidden or unknown Surefire result markup before counting testcases.",
+      "criterion": "Refuse namespaced, misplaced and unknown outcomes. Preserve real Surefire reports and Nested consolidation.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "73a8cab1aa47171132137fe1aa93c1ed29d5c0d17f6e0bd2c2d15a35ef0648a6",
+      "sha256": "2be051da3587104c0f003691d724a5a1b4046ab3dbb673a250a864780ecd38ca",
       "allowDelete": false
     },
     {

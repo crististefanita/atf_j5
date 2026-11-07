@@ -42,7 +42,7 @@ public final class PromotionAdmission {
             var policies = ArenaPolicies.resolve(protocol, settings);
             PromotionEvidence.require(policies.equals(result.effectivePolicies()),
                     "effective candidate, opponent, control or evaluation objective differs");
-            var population = PromotionEvidence.population(result.games(), protocol, policies);
+            var population = PromotionEvidence.population(result.games(), protocol, policies, expected.scoreProfile());
             var families = new ArrayList<OfflineArena.FamilySummary>();
             var retained = new ArrayList<String>();
             for (var family : protocol.opponents()) {

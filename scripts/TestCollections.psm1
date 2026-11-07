@@ -74,6 +74,15 @@ function Read-RentzSurefireResult {
     $name=$suite.GetAttribute('name')
     if([string]::IsNullOrWhiteSpace($name)){throw 'Missing Surefire suite name'}
     $nested=$name -cin $Plan.nestedReports
+    if($xml.SelectSingleNode('//*[namespace-uri() != ""]')){throw "Unexpected namespace in Surefire elements for $name"}
+    foreach($child in $suite.SelectNodes('*')){
+        if($child.get_Name() -cnotin @('properties','testcase','system-out','system-err')){
+            throw "Unexpected Surefire suite element $($child.get_Name()) in $name"
+        }
+    }
+    if($xml.SelectSingleNode('//*[self::failure or self::error or self::skipped][not(parent::testcase)]')){
+        throw "Misplaced testcase outcome in $name"
+    }
     $cases=$xml.SelectNodes('/testsuite/testcase')
     if($xml.SelectNodes('//testcase').Count -ne $cases.Count){throw "Misplaced testcase in $name"}
     $reported=@{}
@@ -88,13 +97,24 @@ function Read-RentzSurefireResult {
     $observed=@{tests=$cases.Count;failures=0;errors=0;skipped=0}
     $outcomeCounters=@{failure='failures';error='errors';skipped='skipped'}
     $owners=[Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $invocations=[Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $nestedInvocations=[Collections.Generic.List[object]]::new()
     foreach($case in $cases){
         $owner=$case.GetAttribute('classname')
-        if([string]::IsNullOrWhiteSpace($case.GetAttribute('name')) -or [string]::IsNullOrWhiteSpace($owner)){
+        $invocation=$case.GetAttribute('name')
+        if([string]::IsNullOrWhiteSpace($invocation) -or [string]::IsNullOrWhiteSpace($owner)){
             throw "Missing testcase identity in $name"
         }
         if(-not $nested -and $owner -cne $name){throw "Unexpected testcase owner $owner in $name"}
+        $identity=$owner+[char]0+$invocation
+        if(-not $invocations.Add($identity)){throw "Duplicate testcase invocation $owner#$invocation in $name"}
+        if($nested){$nestedInvocations.Add([pscustomobject]@{owner=$owner;name=$invocation})}
         [void]$owners.Add($owner)
+        foreach($child in $case.SelectNodes('*')){
+            if($child.get_Name() -cnotin @('failure','error','skipped','properties','system-out','system-err')){
+                throw "Unexpected testcase element $($child.get_Name()) in $name"
+            }
+        }
         $outcomes=$case.SelectNodes('failure | error | skipped')
         if($outcomes.Count -gt 1){throw "Multiple outcomes for one testcase in $name"}
         if($outcomes.Count){$observed[$outcomeCounters[$outcomes[0].get_Name()]]++}
@@ -114,6 +134,7 @@ function Read-RentzSurefireResult {
         skipped=[Math]::Max($reported.skipped,$observed.skipped)
         caseFailure=($observed.failures -or $observed.errors -or $observed.skipped)
         caseClasses=@($owners|Sort-Object -CaseSensitive)
+        caseInvocations=$nestedInvocations.ToArray()
     }
 }
 function Assert-RentzTestPopulation {
@@ -126,7 +147,17 @@ function Assert-RentzTestPopulation {
     }
     if($Plan.nestedReports.Count){
         # Surefire 3.5.2 may place the root and inner cases together in the deepest suite XML.
-        $actualCases=@($Results|Where-Object {$_.name -cin $Plan.nestedReports}|ForEach-Object {$_.caseClasses}|Sort-Object -Unique -CaseSensitive)
+        $nestedRows=@($Results|Where-Object {$_.name -cin $Plan.nestedReports})
+        $actualCases=@($nestedRows|ForEach-Object {$_.caseClasses}|Sort-Object -Unique -CaseSensitive)
+        $seenInvocations=[Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+        foreach($row in $nestedRows){
+            if($row.caseInvocations.Count -ne $row.tests){throw "Missing Nested invocation evidence in $($row.name)"}
+            foreach($case in $row.caseInvocations){
+                if(-not $seenInvocations.Add($case.owner+[char]0+$case.name)){
+                    throw "Duplicate Nested testcase invocation $($case.owner)#$($case.name) across reports"
+                }
+            }
+        }
         if(@(Compare-Object @($Plan.nestedCaseClasses) $actualCases -CaseSensitive).Count){
             throw 'Selected Nested case classes and executed Maven case classes differ'
         }

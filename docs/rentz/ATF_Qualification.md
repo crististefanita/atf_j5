@@ -210,6 +210,7 @@ Clasă selectată → lanțul superclaselor → containere Nested executabile
 
 | Raport | Validare |
 |---|---|
-| Suită simplă | Poarta numără nodurile testcase, confruntă contoarele și cere ca fiecare caz să aparțină clasei din antet. Numele cazului poate include identificatorul unei invocări parametrizate sau dinamice. |
-| Grup imbricat | Inventarul stabilește clasele permise. Poarta numără cazurile observate chiar când Surefire le consolidează într-un singur fișier. |
+| Suită simplă | Poarta confruntă contoarele și atribuie cazurile clasei din antet. Numele complet al fiecărei invocări trebuie să fie unic în clasă. Surefire distinge cazurile parametrizate, repetate și dinamice prin identificatori de invocare. |
+| Grup imbricat | Inventarul stabilește clasele permise. Poarta confruntă identitatea formată din clasă și numele complet al invocării, inclusiv între rapoarte. Surefire poate consolida cazurile într-un container și poate lăsa celelalte rapoarte fără noduri. |
+| Structură XML | Poarta acceptă elementele Surefire cunoscute, fără namespace de element. Un rezultat de caz trebuie să fie copilul direct al cazului. Declarațiile de schemă ale raportului autentic rămân valide. |
 | Raport refuzat | Lansatorul păstrează XML-ul original și diagnosticul la fișier ilizibil, nume inconsecvent sau caz invalid. Atestarea runtime-ului eligibil continuă după validarea populației. |

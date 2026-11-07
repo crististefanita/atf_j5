@@ -20,7 +20,30 @@ import java.util.*;
 public final class RentzNativeFlow {
     private static final ObjectMapper JSON=new ObjectMapper().configure(com.fasterxml.jackson.core.json.JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature(),true);
     public static void main(String[] args)throws Exception{
-        switch(args[0]){case "decide"->decide(Path.of(args[1]));case "audit"->audit(Path.of(args[1]),Path.of(args[2]));case "expose"->{var saved=JSON.readTree(Path.of(args[1]).toFile());atf.rentz.EvaluationRegistry.expose(Path.of(args[2]),saved.required("players").intValue(),List.of(saved.required("seed").longValue()),"DEVELOPMENT","native-rentz-sanity","android-native-laboratory-v1");System.out.println("{\"exposure\":\"DEVELOPMENT_RECORDED\"}");}case "report"->report(Path.of(args[1]));default->throw new IllegalArgumentException("decide, audit, expose or report");}
+        switch (args[0]) {
+            case "decide" -> decide(Path.of(args[1]));
+            case "audit" -> audit(Path.of(args[1]), Path.of(args[2]));
+            case "begin-exposure" -> atf.rentz.EvaluationRegistry.beginNativeExposure(Path.of(args[1]), args[2]);
+            case "expose", "complete-exposure" -> recordExposure(args);
+            case "report" -> report(Path.of(args[1]));
+            default -> throw new IllegalArgumentException("decide, audit, begin-exposure, expose, complete-exposure or report");
+        }
+    }
+
+    private static void recordExposure(String[] args) throws Exception {
+        var saved = JSON.readTree(Path.of(args[1]).toFile());
+        var players = saved.required("players");
+        var seed = saved.required("seed");
+        if (!players.isInt() || !seed.isIntegralNumber() || !seed.canConvertToLong())
+            throw new IllegalArgumentException("Native journal exposure needs exact players and seed");
+        Path registry = Path.of(args[2]);
+        if (args[0].equals("complete-exposure")) {
+            atf.rentz.EvaluationRegistry.completeNativeExposure(registry, args[3], players.intValue(), seed.longValue());
+        } else {
+            atf.rentz.EvaluationRegistry.expose(registry, players.intValue(), List.of(seed.longValue()),
+                    "DEVELOPMENT", "native-rentz-sanity", "android-native-laboratory-v1");
+        }
+        System.out.println("{\"exposure\":\"DEVELOPMENT_RECORDED\"}");
     }
     private static RentzMatch.Observation view(Path file)throws Exception{return JSON.treeToValue(JSON.readTree(file.toFile()).required("view"),RentzMatch.Observation.class);}
     private static void decide(Path file)throws Exception{

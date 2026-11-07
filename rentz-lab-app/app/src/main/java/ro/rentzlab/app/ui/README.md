@@ -11,7 +11,7 @@ Aplicația proiectează observația publică Rentz în renderer-ele `card-table-
 | [navigation](navigation/InputPermit.java) | Alegeri păstrate și o singură comandă pentru revizia și ruta cadrului curent. |
 | [table](table/RentzTableContent.java) | Numai mâna dezvăluită, legalitatea curentă, actorul motorului, depuneri publice și sloturile reale de secvențe. |
 | [score](score/README.md) | Proiecția confirmată în ordinea locurilor, măsurarea lățimilor și grila adaptivă a istoricului. |
-| [screens](screens/RentzMenus.java) | Meniu și configurare separate, dialoguri, tabelă și revenire; masa nu este pusă într-un ScrollView vertical. |
+| [screens](screens/RentzMenus.java) | Meniu, configurare, alegerea sub-jocului și [punctajul mâinii](screens/RentzHandScoreScreen.java). Masa păstrează viewportul fix, iar detaliile de scor pot derula. |
 | [window](window/WindowContent.java) | Spațiul util și insets furnizate explicit widgeturilor comune. |
 | [collection](collection/UiLists.java) | Liste ordonate și imutabile prin API-uri Java 8 disponibile pe Android-ul minim. |
 
@@ -32,8 +32,13 @@ Rendererul trimite identitatea selectată. Adaptorul o rezolvă în legalitatea 
 
 ## Continuitate și limite
 
-- `TrickPreview` observă evenimente publice noi și păstrează levata completă 1500 ms, fără extinderea termenului la redraw și fără replay de comandă.
-- Reluarea initializează cursorul la evenimentele existente; o levată istorică nu este animată din nou.
+- `TrickPreview` observă evenimente publice noi și furnizează cărțile și locul câștigător către animatorul comun. Fereastra este 1500 ms, cu deplasare, micșorare și estompare în ultimele 500 ms.
+- Prima reluare după pornirea rece arată din jurnal ultima levată confirmată, dacă partida este încă la limita acelei levate. Bugetul începe la primul cadru pregătit pentru desen. Redesenarea folosește termenul existent, iar reluările din același proces continuă de la masa curentă.
+- O levată parțială și sub-jocul Rentz păstrează afișarea lor curentă. Colectarea din checkpoint este o operație de prezentare și lasă jurnalul și punctajul neschimbate.
+- Mâna vizibilă urmează ordinea ♠ ♥ ♣ ♦ și rangul crescător din J4. Selecția se rezolvă prin identitatea cărții în legalitatea curentă.
+- Același loc primește același nume de adversar la masă, pe depuneri și în istoric. Chenarul afișează Δ și Σ, iar descrierea accesibilă citește complet punctele și totalul.
+- După ultima levată, ecranul de punctaj folosește rândul confirmat din istoric. Jucătorul poate continua, reveni la masă sau deschide istoricul.
+- [Sugestia AI](screens/ContractAdvice.java) folosește numai observația mâinii dezvăluite și opțiunile legale ale jucătorului. Dialogul anulează calculul dacă alegerea se închide sau ecranul se schimbă.
 - Tabla Rentz folosește rangul de deschidere real al motorului pentru fiecare număr de locuri. Slotul gol și ancora nu sunt cărți depuse.
 - Calculul AI rămâne în lot; păstrarea mesei și a levatei nu califică o animație individuală pentru fiecare mutare adversă.
 

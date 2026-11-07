@@ -6,6 +6,8 @@ import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.ai.RentzPlayer;
 import ro.rentzlab.core.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @AndroidComponentLayer
@@ -25,8 +27,16 @@ public final class RentzTableContentTest {
         for (int count = 3; count <= 6; count++) {
             var session = ready(count, Contract.WHIST); var view = session.view();
             var cards = RentzTableContent.hand(view, copy, false);
-            audit.equal("Own hand order " + count, view.hand().stream().map(RentzTableContent::id).toList(), cards.stream().map(card -> card.id()).toList());
-            audit.equal("Legal projection " + count, view.legal().stream().map(RentzTableContent::id).toList(), cards.stream().filter(card -> card.playable()).map(card -> card.id()).toList());
+            var expected = new ArrayList<String>();
+            for (String suit : List.of("SPADES", "HEARTS", "CLUBS", "DIAMONDS")) {
+                for (int rank = 2; rank <= 14; rank++) {
+                    String id = suit + ":" + rank;
+                    if (view.hand().stream().map(RentzTableContent::id).anyMatch(id::equals)) expected.add(id);
+                }
+            }
+            audit.equal("Cards grouped ♠ ♥ ♣ ♦ then increasing rank " + count, expected, cards.stream().map(card -> card.id()).toList());
+            audit.equal("Legal projection " + count, new HashSet<>(view.legal().stream().map(RentzTableContent::id).toList()),
+                    new HashSet<>(cards.stream().filter(card -> card.playable()).map(card -> card.id()).toList()));
             var selected = view.legal().get(0);
             audit.truth("Original legal card identity " + count, selected == RentzTableContent.selected(view, RentzTableContent.id(selected)));
             audit.truth("Paused input " + count, RentzTableContent.hand(view, copy, true).stream().noneMatch(card -> card.playable()));
@@ -37,10 +47,10 @@ public final class RentzTableContentTest {
         for (Contract contract : Contract.values()) {
             var session = ready(4, contract); int actions = 0;
             while (session.view().phase() == RentzMatch.Phase.PLAY) {
-                var view = session.view(); var seats = RentzTableContent.seats(view, copy, "Ana", false);
+                var view = session.view(); var seats = RentzTableContent.seats(view, copy, session.displayNames("Ana"), false);
                 audit.equal("Active actor " + contract + "/" + actions, List.of(view.turn()), seats.stream().filter(seat -> seat.active()).map(seat -> seat.seat()).toList());
                 for (var seat : seats) {
-                    audit.equal("Own stats " + contract + "/" + actions + "/" + seat.seat(), List.of("Points:", "Total:"), seat.facts().stream().map(f -> f.label()).toList());
+                    audit.equal("Own stats " + contract + "/" + actions + "/" + seat.seat(), List.of("Δ", "Σ"), seat.facts().stream().map(f -> f.label()).toList());
                     audit.equal("Exact confirmed total " + contract + "/" + actions + "/" + seat.seat(), view.totals().get(seat.seat()).toString(), seat.facts().get(1).value());
                 }
                 if (view.legal().isEmpty()) session.apply(new GameSession.Command(GameSession.Action.PASS, 0, null, null, false));
@@ -49,7 +59,28 @@ public final class RentzTableContentTest {
                 if (++actions > 80) throw new AssertionError("Rentz hand did not terminate");
             }
             audit.equal("Single completed hand " + contract, 1, session.history().size());
-            audit.truth("No active actor after completion " + contract, RentzTableContent.seats(session.view(), copy, "Ana", false).stream().noneMatch(seat -> seat.active()));
+            audit.truth("No active actor after completion " + contract,
+                    RentzTableContent.seats(session.view(), copy, session.displayNames("Ana"), false).stream().noneMatch(seat -> seat.active()));
+        }
+    }
+    @Test public void signedScoresAndNamesUseTwoLocalizedFactsOnTheSameSeatsAfterRestore() throws Exception {
+        var session = ready(4, Contract.TRICKS);
+        while (session.view().phase() == RentzMatch.Phase.PLAY) {
+            session.apply(new GameSession.Command(GameSession.Action.PLAY, 0, session.view().legal().get(0), null, false));
+            session.advanceBots();
+        }
+        var restored = GameSession.restore(session.save());
+        var view = restored.view();
+        var names = restored.displayNames("Ana");
+        var seats = RentzTableContent.seats(view, new RentzUiText(RentzUiText.Language.RO), names, false);
+        audit.truth("The fixture has a negative seat score", view.dealPoints().stream().anyMatch(points -> points < 0));
+        for (var seat : seats) {
+            var points = "Puncte: " + view.dealPoints().get(seat.seat());
+            var total = "Total: " + view.totals().get(seat.seat());
+            audit.equal("Same two score markers as in history for seat " + seat.seat(),
+                    List.of("Δ " + view.dealPoints().get(seat.seat()), "Σ " + view.totals().get(seat.seat())),
+                    seat.facts().stream().map(fact -> fact.inlineText()).toList());
+            audit.equal("Seat reading order " + seat.seat(), names.get(seat.seat()) + ". " + points + ". " + total, seat.description());
         }
     }
     private GameSession ready(int count, Contract contract) {
