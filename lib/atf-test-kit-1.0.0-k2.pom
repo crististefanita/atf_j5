@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>atf.api</groupId>
     <artifactId>atf-test-kit</artifactId>
-    <version>1.0.0-k1</version>
+    <version>1.0.0-k2</version>
     <name>ATF Test Kit</name>
     <description>Renderer-neutral JUnit audit, classification and test lifecycle support.</description>
     <properties>
