@@ -269,7 +269,7 @@
       "criterion": "Only external fresh report roots and source-bound component/build/UI receipts are accepted; publishAllowed remains false.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "4db1135a5e1b4b1a7ca68ca3b52acda49155931b5bf4532fda13795d82957e50",
+      "sha256": "2bbad5e82d5a6bfdcb67ff2c05f864d72e62f7f231db74095abba163693a6609",
       "allowDelete": false
     },
     {
@@ -419,7 +419,7 @@
       "criterion": "RAG evidence is source-bound; report corruption blocks report readiness; the UI outcome remains separately truthful.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "f8be810cff0c6f15c0c3ca10783d877b91ae0c81dbbc17ba50baae8b128e8ebe",
+      "sha256": "7feffbd28cab28e0cf42104ebf4290b3c5ef9e12a377d19bf38e87bb2711ef11",
       "allowDelete": false
     },
     {
@@ -679,7 +679,7 @@
       "criterion": "The reactor builds required production and ATF modules offline and preserves the selected Surefire population.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "d298236453e79e1c6faad2ee559dbb469697584ba4a484d5d955da8ea40a5aa0",
+      "sha256": "0d084472ab6f4273863bb900d6ace02c637de5d2e00ac25cbfd4bcf574e33e6f",
       "allowDelete": false
     },
     {
@@ -1079,7 +1079,7 @@
       "criterion": "A same-project registered worktree passes; missing, malformed, mismatched, or foreign owner descriptors fail.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "f4d6b6e6c0123b819c41c8e3b815e8cf7fdac5c789b3028a12594dbd2d058b3e",
+      "sha256": "ceb0e5804a21557774024e171feea3311802559ef69fc38bc1320da9461fd814",
       "allowDelete": false
     },
     {
