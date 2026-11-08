@@ -249,7 +249,7 @@
       "criterion": "Mutated source, numeric count, PNG, receipt, or report hash blocks only the affected gate and never authorizes publication.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "c46095e3c998f500d31caca1462afe5f8af21ef1cdaf8305c5a78ca2def85742",
+      "sha256": "f9e9032fa8963ce02a630675968f8d7da9ddbc1920c5485a4b027e0f0d964ba4",
       "allowDelete": false
     },
     {
@@ -419,7 +419,7 @@
       "criterion": "RAG evidence is source-bound; report corruption blocks report readiness; the UI outcome remains separately truthful.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "7feffbd28cab28e0cf42104ebf4290b3c5ef9e12a377d19bf38e87bb2711ef11",
+      "sha256": "fd061f42576107e47c1311fe19c5637fda6448d906ac536335b097419ecc8b42",
       "allowDelete": false
     },
     {

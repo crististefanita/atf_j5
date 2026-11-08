@@ -8,10 +8,12 @@ RAG-ul este un asistent local, determinist și read-only. Porțile și receiptel
 |---|---|
 | Corpus și citări | Allowlist local, filtre exacte, maximum cinci fragmente; citatele au cale, linii, commit și SHA-256. |
 | Componente și Extent | Receipt-ul regression include Extent produs prin `atf-reporting` ales din `atf.reporting.version`; JAR/POM, XML-urile și hash-ul HTML sunt verificate. |
-| Android JVM și APK | Adaptoare locale verifică receipt-urile de build și sanity nativ legate de aceeași sursă. Extent UI include capturile originale inline Base64, verificate de RAG. |
+| Workspace de staging | Runner-ul alocă `components-<id>` în zona externă de workspace și scrie descriptor cu owner, tip, ID și `sourceRoot`; RAG validează fiecare câmp înainte să accepte receipt-ul Android JVM. |
+| Android JVM și APK | Adaptoarele locale verifică receipte de build și sanity nativ legate de aceeași sursă. Extent UI conține capturi originale inline Base64, verificate de RAG. |
 | Catalog local | `ReleaseCatalog` verifică manifestul, APK-ul publicat local și pasul candidat de versiune/cod Android. Aceasta nu dovedește existența release-ului remote. |
 | Publicare și descărcări | Adaptoarele RAG pentru remote, autentificat și anonim lipsesc; porțile rămân `NOT_RUN`. `publishAllowed` nu devine `true`. |
 | Promovare | `READY_FOR_MAIN_PROMOTION_REVIEW` este o etapă locală de candidat, cu decizie umană; nu este `PUBLISHED`. |
+
 ## Pe scurt
 
 RAG-ul găsește cerința și dovada relevante pentru sursa curentă. El explică blocajele, fără să modifice sursele sau să declare un release calificat.

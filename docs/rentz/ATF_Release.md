@@ -45,6 +45,7 @@ RAG-ul aplică domeniul declarat: pentru o ediție numai pentru Android, iOS est
 - `release/index.json` separă `currentVersion` de `candidate.version` și `candidate.versionCode`; pregătirea candidatului nu schimbă linkul produsului.
 - O schimbare care cere release, inclusiv o refactorizare, primește următorul minor; o ruptură de compatibilitate justifică majorul. `versionCode` crește și corespunde valorilor Gradle.
 - Candidatele și rezultatele se pregătesc în workspace-ul J5 alocat, în afara checkout-ului. Rapoartele și APK-urile rămân sub rădăcina de date configurată prin `RENTZ_DATA_ROOT`, niciodată în TEMP arbitrar.
+- Runner-ele folosesc workspace-uri externe înregistrate `components-<id>`, cu descriptor pentru proprietar, tip, ID și `sourceRoot`; RAG acceptă stagingul Android JVM numai când toate valorile corespund politicii și candidatului fixat.
 - Promovarea în `main` păstrează același commit, manifest, rapoarte, APK și checksum. Orice schimbare de octeți cere o nouă calificare.
 - `currentVersion` și linkul README se actualizează după publicare și verificarea accesului autentificat și anonim.
 ```mermaid

@@ -382,7 +382,8 @@ public final class ReleaseReadinessRag {
             boolean androidPass = hasAndroidSuites, androidFail = mobileReceipt.path("status").asText().equals("FAIL");
             Path expectedStage = Path.of(result.path("stage").asText()).toRealPath();
             if (!Path.of(mobileReceipt.path("source").asText()).toRealPath().equals(expectedStage)) throw new IOException("RAG-ANDROID-SOURCE");
-            if (!expectedStage.startsWith(run) || exactCount(mobileReceipt.path("exitCode")) != 0
+            boolean stageIsRunLocal = expectedStage.startsWith(run);
+            if ((!stageIsRunLocal && !registeredComponentsWorkspace(root, expectedStage)) || exactCount(mobileReceipt.path("exitCode")) != 0
                     || !mobileReceipt.path("drift").isArray() || !mobileReceipt.path("populationChanges").isArray()
                     || mobileReceipt.path("drift").size() != 0 || mobileReceipt.path("populationChanges").size() != 0)
                 throw new IOException("RAG-ANDROID-QUALIFICATION");
@@ -607,6 +608,32 @@ public final class ReleaseReadinessRag {
         Path run = supplied.toRealPath();
         if (run.startsWith(root) || !Files.isDirectory(run, LinkOption.NOFOLLOW_LINKS)) throw new IOException("RAG-RECEIPT-BOUNDARY");
         return run;
+    }
+
+    private static boolean registeredComponentsWorkspace(Path root, Path stage) throws IOException {
+        String configured = System.getProperty("rentz.data.root");
+        if (configured == null || configured.isBlank()) configured = System.getenv("RENTZ_DATA_ROOT");
+        if (configured == null || configured.isBlank()) return false;
+        Path dataRoot = Path.of(configured).toAbsolutePath().normalize();
+        assertNoSymlinkPath(dataRoot);
+        Path workspaceRoot = dataRoot.resolve("infrastructure/workspaces");
+        assertNoSymlinkPath(workspaceRoot);
+        if (!Files.isDirectory(workspaceRoot, LinkOption.NOFOLLOW_LINKS)) return false;
+        Path realWorkspaceRoot = workspaceRoot.toRealPath();
+        Path realStage = stage.toRealPath();
+        if (!realStage.getParent().equals(realWorkspaceRoot)) return false;
+
+        JsonNode policy = readSafeJson(root, "config/infrastructure-workspaces.json", 65_536);
+        Path descriptor = realStage.resolve(".atf-workspace.json");
+        byte[] bytes = readExternalFile(descriptor, 65_536);
+        JsonNode workspace = JSON.readTree(bytes);
+        String id = workspace.path("id").asText();
+        return workspace.path("schemaVersion").asInt(-1) == 1
+                && workspace.path("owner").asText().equals(policy.path("owner").asText())
+                && workspace.path("kind").asText().equals("components")
+                && workspace.path("sourceRoot").asText().equals(root.toRealPath().toString())
+                && id.matches("[a-fA-F0-9]{32}")
+                && realStage.getFileName().toString().equals("components-" + id);
     }
 
     private static byte[] readExternalFile(Path file, long maxBytes) throws IOException {

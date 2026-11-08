@@ -303,6 +303,45 @@ class ReleaseGovernanceTest {
         assertEquals("BLOCKED",gate(wrongCandidate,"android-jvm").path("status").asText());
     }
 
+    @Test void androidJvmAcceptsOnlyARegisteredComponentsWorkspaceForTheSameCheckout() throws Exception {
+        Path root=ragProject();
+        Path dataRoot=Files.createDirectories(temporary.resolve("rag external data"));
+        Path workspaceRoot=Files.createDirectories(dataRoot.resolve("infrastructure/workspaces"));
+        String previous=System.getProperty("rentz.data.root");
+        try {
+            System.setProperty("rentz.data.root",dataRoot.toString());
+            Path run=passingComponentRun(root,"registered-android-jvm-workspace");
+            Path stage=workspaceRoot.resolve("components-"+java.util.UUID.randomUUID().toString().replace("-",""));
+            Files.createDirectories(stage);
+            writeWorkspaceDescriptor(stage,root,"atf_j5");
+            pointReceiptsAtStage(run,stage);
+
+            var accepted=ReleaseReadinessRag.evaluate(root,"APK build release",run);
+            assertEquals("PASS",gate(accepted,"android-jvm").path("status").asText(),
+                    "A source-bound component workspace registered by J5 is the real runner layout.");
+
+            writeWorkspaceDescriptor(stage,root,"another-owner");
+            var rejected=ReleaseReadinessRag.evaluate(root,"APK build release",run);
+            assertEquals("BLOCKED",gate(rejected,"android-jvm").path("status").asText(),
+                    "A workspace descriptor owned by another project cannot qualify Android JVM results.");
+
+            writeWorkspaceDescriptor(stage,root,"atf_j5",root.resolveSibling("other-checkout").toString());
+            var wrongSource=ReleaseReadinessRag.evaluate(root,"APK build release",run);
+            assertEquals("BLOCKED",gate(wrongSource,"android-jvm").path("status").asText(),
+                    "A workspace bound to another checkout cannot qualify Android JVM results.");
+
+            Path unregistered=dataRoot.resolve("infrastructure/unregistered/components-"+java.util.UUID.randomUUID().toString().replace("-",""));
+            Files.createDirectories(unregistered);
+            writeWorkspaceDescriptor(unregistered,root,"atf_j5");
+            pointReceiptsAtStage(run,unregistered);
+            var wrongParent=ReleaseReadinessRag.evaluate(root,"APK build release",run);
+            assertEquals("BLOCKED",gate(wrongParent,"android-jvm").path("status").asText(),
+                    "A valid-looking descriptor outside the registered workspace root is insufficient.");
+        } finally {
+            if(previous==null)System.clearProperty("rentz.data.root");else System.setProperty("rentz.data.root",previous);
+        }
+    }
+
     @Test void releaseBuildAndNativeUiGatesRequireBoundToolsArtifactsAndExtentEvidence() throws Exception {
         Path root=ragProject();
         Path component=passingComponentRun(root,"release-ui-components");
@@ -454,6 +493,7 @@ class ReleaseGovernanceTest {
         Files.createDirectories(root.resolve("scripts"));Files.createDirectories(root.resolve("release/1.2.0"));
         Files.createDirectories(root.resolve("atf-tests/tools"));Files.createDirectories(root.resolve("lib"));
         Files.createDirectories(root.resolve("rentz-lab-app/app"));
+        Files.writeString(root.resolve("config/infrastructure-workspaces.json"),"{\"schemaVersion\":1,\"owner\":\"atf_j5\"}");
         Files.writeString(root.resolve("pom.xml"),"<project xmlns=\"http://maven.apache.org/POM/4.0.0\"><properties><atf.reporting.version>1.0.0-j24</atf.reporting.version></properties></project>");
         Files.writeString(root.resolve("README.md"),"# Rentz\n\n## Jocul\n\nAPK-ul local se pregătește numai după verificări.\n");
         Files.writeString(root.resolve("docs/ATF_Release.md"),"# Release\n\nRegresia și Android JVM preced APK-ul Release semnat și checksum-ul.\n\nReceiptul pentru download anonim este distinct de API autentificat.\n");
@@ -479,6 +519,27 @@ class ReleaseGovernanceTest {
         git(root,"init","-b","main");git(root,"add",".");
         git(root,"-c","user.name=RAG Test","-c","user.email=rag@example.test","commit","-m","fixture");
         return root;
+    }
+
+    private static void writeWorkspaceDescriptor(Path stage,Path root,String owner) throws Exception {
+        writeWorkspaceDescriptor(stage,root,owner,root.toRealPath().toString());
+    }
+
+    private static void writeWorkspaceDescriptor(Path stage,Path root,String owner,String sourceRoot) throws Exception {
+        String id=stage.getFileName().toString().substring("components-".length());
+        JSON().writeValue(stage.resolve(".atf-workspace.json").toFile(),java.util.Map.of(
+                "schemaVersion",1,"owner",owner,"id",id,"kind","components","sourceRoot",sourceRoot));
+    }
+
+    private static void pointReceiptsAtStage(Path run,Path stage) throws Exception {
+        Path receipt=run.resolve("result.json");
+        var component=(com.fasterxml.jackson.databind.node.ObjectNode)JSON().readTree(receipt.toFile());
+        component.put("stage",stage.toString());
+        JSON().writerWithDefaultPrettyPrinter().writeValue(receipt.toFile(),component);
+        Path android=Path.of(component.path("androidJvm").asText()).resolve("result.json");
+        var mobile=(com.fasterxml.jackson.databind.node.ObjectNode)JSON().readTree(android.toFile());
+        mobile.put("source",stage.toString());
+        JSON().writerWithDefaultPrettyPrinter().writeValue(android.toFile(),mobile);
     }
 
     private static com.fasterxml.jackson.databind.node.ObjectNode gate(com.fasterxml.jackson.databind.JsonNode report,String id) {
