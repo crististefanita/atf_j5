@@ -219,6 +219,17 @@ public final class ReleaseReadinessRag {
                 && git.available() && git.dirtyFiles() == 0;
         workflow.put("stage", candidateReady ? "READY_FOR_MAIN_PROMOTION_REVIEW" : localTestsPass ? "COMPONENTS_QUALIFIED" : "DRAFT_OR_BLOCKED");
         workflow.put("readyForMainPromotionReview", candidateReady);
+        workflow.put("nativeUiRequiredForPromotion", true);
+        ObjectNode nativeAcceptance = workflow.putObject("nativeUiAcceptance");
+        String nativeUiStatus = status(gates, "native-ui");
+        String nativeReportStatus = status(gates, "native-ui-report");
+        nativeAcceptance.put("status", nativeUiStatus.equals("FAIL") || nativeReportStatus.equals("FAIL") ? "FAIL"
+                : nativeUiStatus.equals("PASS") && nativeReportStatus.equals("PASS") ? "PASS" : "BLOCKED");
+        nativeAcceptance.put("requiredCompleteGames", 3);
+        nativeAcceptance.put("requiredSequence", "one complete Rentz game followed by two complete non-Rentz games");
+        nativeAcceptance.put("requiredDisplayEvidence", "stable four-seat geometry, completed-game checkpoints and inline native screenshots");
+        nativeAcceptance.put("receiptGate", "native-ui + native-ui-report");
+        workflow.put("artifactDisposition", candidateReady ? "ELIGIBLE_FOR_PROMOTION_REVIEW" : "STAGED_CANDIDATE_ONLY");
         workflow.put("publishAllowed", false);
         workflow.put("artifactSha256", gate(gates, "release-build").path("artifactSha256").asText(""));
         workflow.put("nextAction", candidateReady
@@ -517,6 +528,17 @@ public final class ReleaseReadinessRag {
         }
     }
 
+    private static void requireUiCheckpoint(JsonNode checkpoints, String title, String assertion) throws IOException {
+        for (JsonNode checkpoint : checkpoints) {
+            if (!checkpoint.path("title").asText().equals(title)) continue;
+            for (JsonNode check : checkpoint.path("checks"))
+                if (check.path("name").asText().equals(assertion) && check.path("passed").asBoolean(false)
+                        && check.path("expected").asText().equals(check.path("actual").asText())) return;
+            throw new IOException("RAG-UI-CHECKPOINT-EVIDENCE: " + title);
+        }
+        throw new IOException("RAG-UI-CHECKPOINT-MISSING: " + title);
+    }
+
     private static void attachNativeUiReceipt(Path root, GitIdentity git, ArrayNode gates, Path componentRun, Path suppliedBuildRun, Path suppliedUiRun) {
         ObjectNode uiGate = gate(gates, "native-ui"), reportGate = gate(gates, "native-ui-report");
         if (suppliedBuildRun == null) { uiGate.put("status", "BLOCKED"); uiGate.put("actual", "A source-bound UI-sanity build receipt is required."); return; }
@@ -550,6 +572,20 @@ public final class ReleaseReadinessRag {
             run = externalRun(root, suppliedUiRun);
             byte[] bytes = readExternalFile(run.resolve("result.json"), 8L * 1024 * 1024);
             receiptHash = sha256(bytes); ui = JSON.readTree(bytes);
+            if (!ui.path("developmentLedgerScope").asText().equals("RUN_ISOLATED_COPY"))
+                throw new IOException("RAG-UI-LEARNING-ISOLATION");
+            Path learningLedger = Path.of(ui.path("developmentLedger").asText()).toAbsolutePath().normalize();
+            if (!learningLedger.startsWith(run) || !Files.isRegularFile(learningLedger, LinkOption.NOFOLLOW_LINKS)
+                    || Files.exists(learningLedger.resolveSibling(learningLedger.getFileName() + ".native-pending"), LinkOption.NOFOLLOW_LINKS)
+                    || !ui.path("sharedDevelopmentLedgerUnchanged").asBoolean(false)
+                    || !ui.path("sharedDevelopmentLedgerSha256Before").asText().matches("[a-f0-9]{64}")
+                    || !ui.path("sharedDevelopmentLedgerSha256Before").asText().equals(ui.path("sharedDevelopmentLedgerSha256After").asText()))
+                throw new IOException("RAG-UI-LEARNING-ISOLATION");
+            byte[] learningBytes = readExternalFile(learningLedger, 8L * 1024 * 1024);
+            if (!sha256(learningBytes).equalsIgnoreCase(ui.path("isolatedDevelopmentLedgerSha256After").asText())
+                    || !ui.path("isolatedDevelopmentLedgerSha256Before").asText().matches("[a-f0-9]{64}")
+                    || !ui.path("isolatedDevelopmentLedgerSha256Before").asText().equals(ui.path("sharedDevelopmentLedgerSha256Before").asText()))
+                throw new IOException("RAG-UI-LEARNING-ISOLATION");
             if (!sha256(Files.readAllBytes(runner)).equalsIgnoreCase(ui.path("runnerSha256").asText()))
                 throw new IOException("RAG-UI-TOOL-IDENTITY");
             AtfReportingLibrary reporting = AtfReportingLibrary.resolve(root);
@@ -577,10 +613,56 @@ public final class ReleaseReadinessRag {
                 throw new IOException("RAG-UI-SUBGAMES");
             JsonNode audit = ui.path("gameAudit");
             if (!audit.path("status").asText().equals("PASS") || exactCount(audit.path("completedDeals")) != 3
-                    || !audit.path("phase").asText().equals("DEAL_END")) throw new IOException("RAG-UI-ORACLE");
+                    || exactCount(audit.path("auditedTransitions")) < 1 || !audit.path("phase").asText().equals("DEAL_END"))
+                throw new IOException("RAG-UI-ORACLE");
+            JsonNode display = ui.path("display"), before = display.path("before"), after = display.path("after");
+            if (!before.path("size").asText().matches("Physical size: [1-9][0-9]*x[1-9][0-9]*")
+                    || !before.path("density").asText().matches("Physical density: [1-9][0-9]*")
+                    || !before.path("font").asText().matches("[0-9]+(?:\\.[0-9]+)?")
+                    || !before.equals(after)) throw new IOException("RAG-UI-DISPLAY-PRESERVATION");
             JsonNode checkpoints = ui.path("checkpoints");
             if (!checkpoints.isArray() || checkpoints.size() < 16) throw new IOException("RAG-UI-CHECKPOINTS");
-            uiGate.put("status", "PASS"); uiGate.put("actual", "Three native subgames completed from the UI: Rentz plus two non-Rentz games; independent journal replay and closeout passed.");
+            for (JsonNode checkpoint : checkpoints) {
+                if (checkpoint.path("title").asText().isBlank() || !checkpoint.path("image").asText().endsWith(".png")
+                        || !checkpoint.path("hierarchy").asText().endsWith(".txt") || !checkpoint.path("checks").isArray()
+                        || checkpoint.path("checks").isEmpty()) throw new IOException("RAG-UI-CHECKPOINT-SCHEMA");
+                for (JsonNode check : checkpoint.path("checks"))
+                    if (check.path("name").asText().isBlank() || !check.path("passed").asBoolean(false)
+                            || !check.path("expected").isTextual() || !check.path("actual").isTextual())
+                        throw new IOException("RAG-UI-CHECKPOINT-FAILED");
+            }
+            JsonNode completedGames = ui.path("completedGames");
+            JsonNode auditHistory = audit.path("history");
+            if (!completedGames.isArray() || completedGames.size() != 3 || !auditHistory.isArray() || auditHistory.size() != 3)
+                throw new IOException("RAG-UI-COMPLETE-GAMES");
+            for (int i = 0; i < 3; i++) {
+                String contract = contracts.get(i).asText();
+                JsonNode game = completedGames.get(i), history = auditHistory.get(i);
+                if (exactCount(game.path("number")) != i + 1 || !game.path("contract").asText().equals(contract)
+                        || !game.path("phase").asText().equals("DEAL_END") || exactCount(game.path("handNumber")) != i + 1
+                        || exactCount(game.path("scoreCount")) != 4 || !game.path("seatGeometryVerified").asBoolean(false)
+                        || !game.path("firstHumanMoveVerified").asBoolean(false) || !game.path("completionVerified").asBoolean(false)
+                        || !history.path("contract").asText().equals(contract) || exactCount(history.path("number")) != i + 1
+                        || !history.path("points").isArray() || history.path("points").size() != 4)
+                    throw new IOException("RAG-UI-COMPLETE-GAME-IDENTITY");
+                requireUiCheckpoint(checkpoints, "Consecutive subgame " + (i + 1) + " starts: " + contract,
+                        "Four-player table uses the same seat rectangles in this viewport");
+                requireUiCheckpoint(checkpoints, "Subgame " + (i + 1) + " first human move remains visible",
+                        "The same seat geometry survives a card play");
+                requireUiCheckpoint(checkpoints, "Subgame " + (i + 1) + " completed: " + contract,
+                        "One score value per player");
+                if (i == 0) {
+                    if (!contract.equals("RENTZ") || !game.path("rentzFinishOrderVerified").asBoolean(false))
+                        throw new IOException("RAG-UI-RENTZ-COMPLETE");
+                    requireUiCheckpoint(checkpoints, "Subgame 1 completed: RENTZ", "Rentz finishing order contains each player");
+                }
+                if (i > 0 && contract.equals("RENTZ")) throw new IOException("RAG-UI-NON-RENTZ-CONTRAST");
+            }
+            requireUiCheckpoint(checkpoints, "Score history contains the three consecutive subgames", "Three completed history rows are visible");
+            requireUiCheckpoint(checkpoints, "The match with three subgames remains resumable", "Resume remains enabled");
+            requireUiCheckpoint(checkpoints, "Three-deal match restores its final contract and scores", "Restored seat geometry");
+            requireUiCheckpoint(checkpoints, "The three confirmed rows remain after process restart", "Restarted history retains all three completed subgames");
+            uiGate.put("status", "PASS"); uiGate.put("actual", "Three complete native games reached DEAL_END: Rentz plus two non-Rentz games; independent replay, seat geometry, history and restart passed.");
             uiGate.put("receipt", "result.json"); uiGate.put("receiptSha256", receiptHash);
 
             Path extent = Path.of(ui.path("extentReport").asText()).toAbsolutePath().normalize();

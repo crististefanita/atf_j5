@@ -164,6 +164,11 @@ class ReleaseGovernanceTest {
         }
         assertEquals("BLOCKED",report.path("aggregate").asText(),"Retrieval cannot replace release receipts");
         assertFalse(report.path("mayPublish").asBoolean());
+        assertEquals("BLOCKED", report.path("releaseWorkflow").path("nativeUiAcceptance").path("status").asText(),
+                "The APK remains staged until the complete Rentz plus two other games UI acceptance passes.");
+        assertEquals(3, report.path("releaseWorkflow").path("nativeUiAcceptance").path("requiredCompleteGames").asInt(),
+                "The required native acceptance includes three complete games.");
+        assertEquals("STAGED_CANDIDATE_ONLY", report.path("releaseWorkflow").path("artifactDisposition").asText());
         assertEquals("BLOCKED",gate(report,"local-catalog").path("status").asText(),"An incomplete local fixture is not a valid release catalog");
         for(var row:report.path("gates"))if(!row.path("id").asText().equals("local-catalog"))
             assertEquals("NOT_RUN",row.path("status").asText());
@@ -373,18 +378,50 @@ class ReleaseGovernanceTest {
 
         Path ui=Files.createDirectories(temporary.resolve("release-ui-native"));
         Path raw=Files.createDirectories(ui.resolve("raw"));
+        Path learningLedger=ui.resolve("learning-exposure.json");
+        Files.writeString(learningLedger,"{\"schemaVersion\":1,\"exposures\":[]}",StandardCharsets.UTF_8);
         Path extent=ui.resolve("android-extent.html");
         String shot=pngDataUri();
         Files.writeString(extent,"<html><body>atf-reporting Extent report "+inlineImages(shot,16)+"</body></html>",StandardCharsets.UTF_8);
         var uiReceipt=JSON().createObjectNode().put("status","PASS").put("consecutiveSubgames",true)
                 .put("package","ro.rentzlab.app.uisanity").put("apkSha256",sha(isolated)).put("displayAndPackagesPreserved",true)
                 .put("leaseReleased",true).put("rawRoot",raw.toString()).put("extentReport",extent.toString())
+                .put("developmentLedgerScope","RUN_ISOLATED_COPY").put("developmentLedger",learningLedger.toString())
+                .put("isolatedDevelopmentLedgerSha256Before",sha(learningLedger)).put("isolatedDevelopmentLedgerSha256After",sha(learningLedger))
+                .put("sharedDevelopmentLedgerUnchanged",true).put("sharedDevelopmentLedgerSha256Before",sha(learningLedger))
+                .put("sharedDevelopmentLedgerSha256After",sha(learningLedger))
                 .put("extentReportSha256",sha(extent)).put("runnerSha256",sha(root.resolve("atf-tests/tools/run-shared-ui-sanity.ps1")))
                 .put("reportingLibrary","atf-reporting-1.0.0-j24").put("reportingLibrarySha256",sha(root.resolve("lib/atf-reporting-1.0.0-j24.jar")));
         uiReceipt.putArray("cleanupFailures");
         uiReceipt.putArray("subgames").add("RENTZ").add("TRICKS").add("DIAMONDS");
-        uiReceipt.putObject("gameAudit").put("status","PASS").put("completedDeals",3).put("phase","DEAL_END");
-        var checkpoints=uiReceipt.putArray("checkpoints");for(int i=0;i<16;i++)checkpoints.addObject().put("title","checkpoint-"+i);
+        var display=uiReceipt.putObject("display");
+        display.putObject("before").put("size","Physical size: 1080x1920").put("density","Physical density: 440").put("font","1.0");
+        display.putObject("after").put("size","Physical size: 1080x1920").put("density","Physical density: 440").put("font","1.0");
+        var completed=uiReceipt.putArray("completedGames");
+        completed.addObject().put("number",1).put("contract","RENTZ").put("phase","DEAL_END").put("handNumber",1).put("scoreCount",4)
+                .put("seatGeometryVerified",true).put("firstHumanMoveVerified",true).put("completionVerified",true).put("rentzFinishOrderVerified",true);
+        completed.addObject().put("number",2).put("contract","TRICKS").put("phase","DEAL_END").put("handNumber",2).put("scoreCount",4)
+                .put("seatGeometryVerified",true).put("firstHumanMoveVerified",true).put("completionVerified",true).put("rentzFinishOrderVerified",false);
+        completed.addObject().put("number",3).put("contract","DIAMONDS").put("phase","DEAL_END").put("handNumber",3).put("scoreCount",4)
+                .put("seatGeometryVerified",true).put("firstHumanMoveVerified",true).put("completionVerified",true).put("rentzFinishOrderVerified",false);
+        var audit=uiReceipt.putObject("gameAudit").put("status","PASS").put("auditedTransitions",24).put("completedDeals",3).put("phase","DEAL_END");
+        var auditHistory=audit.putArray("history");
+        for(int i=0;i<3;i++)auditHistory.addObject().put("number",i+1).put("contract",List.of("RENTZ","TRICKS","DIAMONDS").get(i)).putArray("points").add(0).add(0).add(0).add(0);
+        var checkpoints=uiReceipt.putArray("checkpoints");
+        addUiCheckpoint(checkpoints,"Consecutive subgame 1 starts: RENTZ","Four-player table uses the same seat rectangles in this viewport");
+        addUiCheckpoint(checkpoints,"Subgame 1 first human move remains visible","The same seat geometry survives a card play");
+        addUiCheckpoint(checkpoints,"Subgame 1 completed: RENTZ","One score value per player","Rentz finishing order contains each player");
+        addUiCheckpoint(checkpoints,"Consecutive subgame 2 starts: TRICKS","Four-player table uses the same seat rectangles in this viewport");
+        addUiCheckpoint(checkpoints,"Subgame 2 first human move remains visible","The same seat geometry survives a card play");
+        addUiCheckpoint(checkpoints,"Subgame 2 completed: TRICKS","One score value per player");
+        addUiCheckpoint(checkpoints,"Consecutive subgame 3 starts: DIAMONDS","Four-player table uses the same seat rectangles in this viewport");
+        addUiCheckpoint(checkpoints,"Subgame 3 first human move remains visible","The same seat geometry survives a card play");
+        addUiCheckpoint(checkpoints,"Subgame 3 completed: DIAMONDS","One score value per player");
+        addUiCheckpoint(checkpoints,"Score history contains the three consecutive subgames","Three completed history rows are visible");
+        addUiCheckpoint(checkpoints,"The match with three subgames remains resumable","Resume remains enabled");
+        addUiCheckpoint(checkpoints,"Three-deal match restores its final contract and scores","Restored seat geometry");
+        addUiCheckpoint(checkpoints,"The three confirmed rows remain after process restart","Restarted history retains all three completed subgames");
+        for(int i=13;i<16;i++)addUiCheckpoint(checkpoints,"Supporting native checkpoint "+i,"Native viewport remains valid");
         uiReceipt.putObject("build").put("sourceCommit",git(root,"rev-parse","HEAD").strip()).put("apkSha256",sha(isolated));
         Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
 
@@ -395,7 +432,25 @@ class ReleaseGovernanceTest {
         assertEquals("PASS / "+uiActual,gate(report,"native-ui").path("status").asText()+" / "+uiActual);
         assertEquals("PASS",gate(report,"native-ui-report").path("status").asText());
         assertTrue(report.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
+        assertEquals("PASS", report.path("releaseWorkflow").path("nativeUiAcceptance").path("status").asText());
+        assertEquals("ELIGIBLE_FOR_PROMOTION_REVIEW", report.path("releaseWorkflow").path("artifactDisposition").asText());
         assertFalse(report.path("releaseWorkflow").path("publishAllowed").asBoolean());
+
+        var incompleteUi=uiReceipt.deepCopy();
+        incompleteUi.withArray("completedGames").remove(2);
+        Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(incompleteUi));
+        var incompleteGameReceipt=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
+        assertEquals("BLOCKED",gate(incompleteGameReceipt,"native-ui").path("status").asText(),"Two complete games do not satisfy the three-game APK gate");
+        assertFalse(incompleteGameReceipt.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
+        assertEquals("STAGED_CANDIDATE_ONLY",incompleteGameReceipt.path("releaseWorkflow").path("artifactDisposition").asText());
+
+        var missingGeometry=uiReceipt.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode)missingGeometry.withArray("checkpoints").get(0)).put("title","Unrelated native checkpoint");
+        Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(missingGeometry));
+        var missingGeometryEvidence=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
+        assertEquals("BLOCKED",gate(missingGeometryEvidence,"native-ui").path("status").asText(),"A complete-deal receipt without seat-layout evidence is insufficient");
+        assertFalse(missingGeometryEvidence.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
+        Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
 
         uiReceipt.put("extentReportSha256","0".repeat(64));
         Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
@@ -556,6 +611,12 @@ class ReleaseGovernanceTest {
     private static com.fasterxml.jackson.databind.node.ObjectNode gate(com.fasterxml.jackson.databind.JsonNode report,String id) {
         for(var row:report.path("gates"))if(row.path("id").asText().equals(id))return (com.fasterxml.jackson.databind.node.ObjectNode)row;
         throw new AssertionError("Missing gate: "+id);
+    }
+
+    private static void addUiCheckpoint(com.fasterxml.jackson.databind.node.ArrayNode checkpoints,String title,String... checks) {
+        var checkpoint=checkpoints.addObject().put("title",title).put("image",title.hashCode()+".png").put("hierarchy",title.hashCode()+".txt");
+        var evidence=checkpoint.putArray("checks");
+        for(String name:checks)evidence.addObject().put("name",name).put("expected","true").put("actual","true").put("passed",true);
     }
 
     private static com.fasterxml.jackson.databind.ObjectMapper JSON() { return new com.fasterxml.jackson.databind.ObjectMapper(); }

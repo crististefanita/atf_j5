@@ -52,7 +52,9 @@ RAG-ul aplică domeniul declarat: pentru o ediție numai pentru Android, iOS est
 flowchart LR
     SOURCE[Snapshot identificat] -->|testează fără dispozitiv| CHECK[Componente și guvernanță]
     CHECK -->|permite build izolat| ARTIFACT[Artefacte semnate pe platformă]
-    ARTIFACT -->|verifică identitatea| READY[Dosar calificat]
+    ARTIFACT -->|rulează pe varianta UI legată de aceeași sursă| UIE2E[3 jocuri complete și Extent nativ]
+    UIE2E -->|sursă, jocuri, geometrie și raport verificate| READY[Dosar calificat]
+    UIE2E -->|FAIL, lipsă sau neconcordanță| BLOCKED[APK păstrat în staging]
     READY -->|publică draftul confruntat| RELEASE[GitHub Release]
     RELEASE -->|descarcă și confruntă octeții| FILE[Copie completă]
 ```
@@ -72,12 +74,17 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 .\scripts\run-rentz-components.ps1 -Collection regression -SourceRoot <worktree-J5-inregistrat>
 .\scripts\run-release-rag.ps1 -Question 'gate:release-build version:current APK semnat' -ComponentRun <regresie-trecuta> -RunRoot <director-RAG-extern-nou>
 .\scripts\Initialize-RentzSigning.ps1
-.\scripts\build-rentz-android.ps1 -RunRoot <director-extern-nou> -ComponentRun <regresie-trecuta> -Configuration Release
+.\scripts\build-rentz-android.ps1 -RunRoot <director-build-extern-nou> -ComponentRun <regresie-trecuta> -Configuration Release -UiSanity
+.\atf-tests\tools\run-shared-ui-sanity.ps1 -BuildQualification <director-build-extern-nou>\ui-sanity-build-qualification.json -ComponentRun <regresie-trecuta> -ConsecutiveSubgames -RunRoot <director-UI-extern-nou>
+.\scripts\run-release-rag.ps1 -Question 'gate:release-build versiunea candidat jocuri complete Rentz display' -ComponentRun <regresie-trecuta> -BuildRun <director-build-extern-nou> -NativeUiRun <director-UI-extern-nou> -RunRoot <director-RAG-final-extern-nou>
 ```
 
 RAG-ul este un consumator read-only de receipte. Starea live a porților este:
 
-- **Calificare locală:** regresie, Extent, Android JVM, build și sanity nativ trebuie legate de același commit.
+- **Calificare locală:** regresie, Extent, Android JVM, build și acceptanța nativă obligatorie trebuie legate de același commit.
+- **Jocuri și display:** pentru fiecare APK candidat, varianta `ro.rentzlab.app.uisanity` execută prin interfață trei deal-uri complete: Rentz până la `DEAL_END`, apoi două jocuri non-Rentz până la `DEAL_END`. Raportul verifică locurile la fiecare joc și după reluare, scorurile și istoricul, replay-ul independent și capturile native inline Base64. Sunt trei jocuri/deal-uri complete; această probă nu pretinde încheierea întregii serii multi-contract.
+- **Legătura cu produsul:** RAG confruntă commitul și manifestul sursei, APK-ul de produs, APK-ul UI-sanity, raportul Extent și runnerul. Varianta UI-sanity este pachet de test distinct; hash-ul ei nu este raportat drept hash-ul APK-ului produs.
+- **Promovare:** lipsa, FAIL-ul sau o captură fără verificare păstrează candidatul în `STAGED_CANDIDATE_ONLY`. Numai trecerea porților `native-ui` și `native-ui-report`, alături de regresie și build, permite `READY_FOR_MAIN_PROMOTION_REVIEW`; publicarea remote rămâne o etapă separată.
 - **Staging:** `ReleaseCatalog` verifică separat ediția publicată local și pasul de versiune al candidatului.
 - **Revizuire:** după trecerea porților locale, RAG poate raporta `READY_FOR_MAIN_PROMOTION_REVIEW`; operatorul decide promovarea.
 - **Publicare:** adaptoarele pentru remote, descărcarea autentificată și cea anonimă lipsesc. Aceste porți rămân `NOT_RUN`, agregatul e `BLOCKED`, iar `publishAllowed=false`.
@@ -93,7 +100,7 @@ RAG-ul este un consumator read-only de receipte. Starea live a porților este:
 - **Intrări Android:** build-ul Release preia automat sursa din receipt-ul regresiei. Confruntă întregul inventar Android JVM, inclusiv configurația Gradle, resursele și biblioteca UI. Opțiunea `-UiSanity` produce separat varianta izolată și comparațiile pentru Extent din același snapshot.
 - **Teste:** se păstrează populațiile Maven și Android JVM, fără FAIL, erori sau skip-uri; o selecție scurtă nu se redenumește regresie. Testele de guvernanță și controalele negative ale descărcării se execută offline înainte de publicare.
 - **Build:** verifică sursa calificată, pachetul, versiunea, SDK-urile, caracterul nedebuggable, certificatul și alinierea. Numele final este `RentzLab-<versiune>.apk`.
-- **Produs:** o regresie E2E completă nu se repetă la fiecare publicare. Sanity-ul nativ se selectează numai pentru comportamentul Android modificat și are propria rezervare și dovadă; lipsa lui nu devine PASS.
+- **Produs:** acceptanța nativă cu trei jocuri complete este obligatorie pentru fiecare APK candidat, inclusiv pentru refactorizări. Are rezervare proprie, registru de expuneri izolat și Extent auditat; registrul comun de învățare rămâne nemodificat. Lipsa ei nu devine PASS.
 - **Date:** primul APK semnat are o identitate de cheie separată de prototipurile Debug. Nu dezinstalați automat un prototip cu date pentru a forța instalarea release-ului; migrarea datelor este o operație distinctă.
 
 ## Semnare și păstrarea cheii

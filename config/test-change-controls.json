@@ -97,7 +97,7 @@
       "owner": "Rentz consumer",
       "reason": "Q29 · Verify that a positive winner credit fits the integer deficit below the leaders.",
       "criterion": "Refuse impossible sole wins in both arms. Preserve exact bounds, split winners and losses.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
       "sha256": "b56dbcff7890d322298ee36eedb0f9cf199f6cf1aaed854335321e581fb80b17",
       "allowDelete": false
@@ -185,11 +185,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java",
       "owner": "Rentz consumer",
-      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting.",
-      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
+      "reason": "Rentz release · Require the three-game Android acceptance to be explicit in the native report.",
+      "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "3f51a25a1e22e3c5cafd464d523e832efd268f49b05b36149cb44f8139fce28f",
+      "sha256": "c62e7aef52ae12be0288ce824ace9d5c9790a4b77696c1f404ec089a8c199240",
       "allowDelete": false
     },
     {
@@ -245,11 +245,11 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java",
       "owner": "Rentz release",
-      "reason": "Bind release readiness gates to source, Extent and native UI receipts; validate inline screenshot payloads.",
-      "criterion": "Mutated source, numeric count, PNG, receipt, or report hash blocks only the affected gate and never authorizes publication.",
+      "reason": "Make three-game native acceptance a mandatory candidate-promotion gate; bind complete deals, display evidence, learning isolation and Extent to the pinned APK source.",
+      "criterion": "A missing or partial Rentz-plus-two-games receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "f9e9032fa8963ce02a630675968f8d7da9ddbc1920c5485a4b027e0f0d964ba4",
+      "sha256": "a92f9639f8c23a1cee4673af1071b2c8bb6c3fce25903c24ee082e99d48a3994",
       "allowDelete": false
     },
     {
@@ -415,11 +415,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz release",
-      "reason": "Govern release-state, receipt, screenshot, and component report behavior.",
-      "criterion": "RAG evidence is source-bound; report corruption blocks report readiness; the UI outcome remains separately truthful.",
+      "reason": "Govern release-state, three complete game deals, display layout, learning isolation, source identity and Extent evidence.",
+      "criterion": "Two deals or missing required geometry cannot qualify an APK; receipt mutations remain BLOCKED, while a valid Rentz-plus-two-games receipt is source-bound and report corruption blocks promotion.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "f4497c55fdd83517efb267fbdfe62b96c8cbaa244df2611225ebd22ca973295b",
+      "sha256": "b8c16b9b7f307b0b9beb5d843ac9fc47d856569b66fdba44387e450f509c9a90",
       "allowDelete": false
     },
     {
@@ -1065,11 +1065,11 @@
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz release",
-      "reason": "Bind the UI sanity receipt to the APK, reporting library, original screenshots, and run identity.",
-      "criterion": "Native execution and Extent evidence remain separate; invalid report integrity blocks promotion.",
+      "reason": "Run three complete native games per APK candidate and bind deal/display checkpoints to the same UI-sanity build.",
+      "criterion": "Rentz and two standard deals reach DEAL_END; seat geometry, first human move, score history and restart are observed; the learning registry is isolated and unchanged; Extent keeps each original screenshot inline.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "3a11f66bd403de9e9bd9e4f41098549abd26a139ab80223f76794c32113802b9",
+      "sha256": "81cc5a566ef776fbf0d2e6fc56b64af7de7b8b2aa7e72d5a054986ceb72b858e",
       "allowDelete": false
     },
     {
