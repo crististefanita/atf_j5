@@ -3,6 +3,7 @@ package ro.rentzlab.app.ui.table;
 import org.junit.Test;
 import ro.cardtable.ui.table.PlayedCardMetrics;
 import ro.cardtable.ui.table.TableGeometry;
+import ro.cardtable.ui.table.TableSeatLayout;
 import ro.cardtable.ui.table.TableSizing;
 import ro.cardtable.ui.table.TableViewportPolicy;
 import ro.rentzlab.ai.RentzPlayer;
@@ -40,6 +41,25 @@ public final class RentzCardSpaceTest {
 
     @Test public void sixSeatsKeepTwelveRanksReadableWithoutCoveringTheLowerFlanks() {
         assertWindows(6, new int[]{2, 3, 4}, new int[]{0, 1, 5});
+    }
+
+    @Test public void fourSeatRentzBandIsComparedWithTheSharedTrickBandAtCompactAndTallSizes() {
+        for (var window : List.of(COMPACT, TALL)) {
+            var viewport = new TableViewportPolicy(window.height(), window.fontScale());
+            int gap = viewport.regionGapDp();
+            int width = Math.min(760, Math.max(240, window.width() - 40));
+            int seatWidth = TableSizing.seatWidthDp(width, viewport.isCompact());
+            var rentz = RentzCardSpace.plan(width, window.boardHeight(), 4, seatWidth,
+                    window.seatHeight(), gap, 220, 128, 72);
+            var trick = PlayedCardMetrics.forTable(4, width, window.fontScale(), viewport);
+            var shared = TableGeometry.arrangeDisplay(width, window.boardHeight(), 4, seatWidth,
+                    window.seatHeight(), width, trick.centerHeightDp(), gap, true,
+                    TableGeometry.CenterAlignment.BALANCED);
+            int sharedBand = centerBand(shared.seats(), 4, gap);
+            assertEquals("Same four-player seat population", 4, shared.seats().size());
+            assertTrue("Rentz sequence never gains room by changing the shared seat reference",
+                    rentz.band().height() <= sharedBand);
+        }
     }
 
     @Test public void namesAndTrickCardsRetainTheWhistClockwiseOrderAtTheReferenceWidths() {
@@ -153,5 +173,20 @@ public final class RentzCardSpaceTest {
         double below = (rectangle.top() + rectangle.bottom() - height) / 2.0;
         double angle = Math.atan2(Math.abs(left) <= 1 ? 0 : left, Math.abs(below) <= 1 ? 0 : below);
         return angle < 0 ? angle + 2 * Math.PI : angle;
+    }
+
+    private static int centerBand(List<TableGeometry.Rect> seats, int players, int gap) {
+        var anchors = TableSeatLayout.positions(players);
+        int upperBottom = 0;
+        int lowerTop = seats.get(0).top();
+        for (int index = 0; index < anchors.length; index++) {
+            var seat = seats.get(index);
+            switch (anchors[index]) {
+                case NORTH, NORTH_WEST, NORTH_EAST -> upperBottom = Math.max(upperBottom, seat.bottom());
+                case SOUTH, SOUTH_WEST, SOUTH_EAST -> lowerTop = Math.min(lowerTop, seat.top());
+                default -> throw new IllegalArgumentException("Unexpected table anchor");
+            }
+        }
+        return lowerTop - upperBottom - 2 * gap;
     }
 }

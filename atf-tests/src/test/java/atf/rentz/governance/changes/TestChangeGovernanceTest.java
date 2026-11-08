@@ -78,6 +78,8 @@ class TestChangeGovernanceTest {
                 || path.equals("scripts/run-rentz-components.ps1") || path.equals("scripts/TestCollections.psm1")
                 || path.equals("scripts/TestSourceInventory.psm1") || path.equals("scripts/RuntimeQualification.psm1")
                 || path.equals("config/infrastructure-workspaces.json")
+                || path.equals("config/release-rag-corpus.json") || path.equals("scripts/run-release-rag.ps1")
+                || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java")
                 || path.equals("atf-tests/tools/run-arena.ps1") || path.equals("atf-tests/tools/run-android-sanity.ps1")
                 || path.equals("atf-tests/tools/test-runtime-controls.ps1")
                 || path.equals("atf-tests/tools/test-test-discovery.ps1")
@@ -86,6 +88,12 @@ class TestChangeGovernanceTest {
                 || path.equals("atf-tests/src/main/java/atf/rentz/OfflineArena.java")
                 || path.startsWith("atf-tests/src/main/java/atf/rentz/arena/")
                 || path.startsWith("atf-tests/src/main/java/atf/rentz/runtime/");
+    }
+
+    @Test void releaseRagPolicyRunnerAndRetrieverAreProtectedByExactChangeControls() {
+        assertTrue(protectedPath("config/release-rag-corpus.json"));
+        assertTrue(protectedPath("scripts/run-release-rag.ps1"));
+        assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java"));
     }
 
     private static String sha(Path file) throws Exception {

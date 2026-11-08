@@ -20,6 +20,18 @@
 | P1 | Referința: pornirea poate produce WebView negru pe configurația Android inspectată. | Identificați runtime-ul și cauza prin probe delimitate; un ecran utilizabil și instrucțiuni lizibile preced calificarea regulilor. Instalarea sau PID-ul procesului nu constituie succes funcțional. |
 | P1 | Android local: tabla Rentz, contextul mutărilor și tabela de scor sunt încă prezentări de prototip. | Închideți [ToDo-urile de interfață](ATF_Rentz_UI_ToDo.md): deschidere J reală, geometrie stabilă, scor explicabil și toate coloanele accesibile, prin componente și acceptanță nativă selectivă. |
 | P2 | Persistență: versiunea regulilor este explicită; compatibilitatea veche este limitată la reluarea validată a comenzilor, fără migrarea scorului sau a opțiunilor noi. | Calificați migrări reprezentative și refuzul sesiunilor incompatibile, cu păstrarea fișierului original. Orice schimbare de profil sau candidat cere identitate și strategie explicită. |
+| P1 | iOS: cererea de suport iPhone nu are încă țintă, build sau calificare proprie în J5. | Închideți criteriile din [contractul de release iOS](../rentz/ATF_Release.md#calificarea-ios): decizie arhitecturală, paritate de reguli și persistență, teste de componente, simulator pe OS minim și pe versiunea stabilă curentă, apoi probă pe dispozitiv și distribuție semnată distinctă. |
+
+## Platforma iOS
+
+Acesta este un obiectiv deschis al produsului, nu o afirmație că J5 conține deja o aplicație iOS. Documentația și artefactele Android rămân valabile pentru Android; ele nu închid criteriul iOS. Până când există țintă nativă și receipte separate, RAG-ul raportează cerința ca neimplementată/necalificată, fără să transforme APK-ul sau testele Android în dovadă iOS.
+
+Păstrați contractele de domeniu și calificați separat implementarea nativă.
+
+- **Reguli:** păstrați aceleași contracte de reguli, scor, Normal/Hard, configurare și reluare.
+- **Motor:** decideți înaintea portării între un motor comun portabil și o reimplementare verificată prin aceiași vectori de conformitate.
+- **Aplicație:** UI-ul, ciclul de viață și stocarea nativă au teste și identitate de release proprii.
+- **Suport declarat:** fixați matricea versiunilor stabile, treceți testele offline/componente și verificați instalarea pe un dispozitiv fizic.
 
 ## Transferul generic
 

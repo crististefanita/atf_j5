@@ -54,6 +54,7 @@
   ],
   "producerScripts": [
     "scripts/run-rentz-components.ps1",
+    "scripts/run-release-rag.ps1",
     "scripts/build-rentz-android.ps1",
     "scripts/run-original-romanian-hard.ps1",
     "scripts/run-reference-match.ps1",

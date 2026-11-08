@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "topK": 5,
+  "maxSourceBytes": 262144,
+  "sources": [
+    {"path": "docs/feedback/ATF_Release_RAG.md", "class": "contract", "owner": "release-review", "gate": "policy"},
+    {"path": "docs/feedback/ATF_Rentz.md", "class": "feedback", "owner": "rentz-product", "gate": "policy"},
+    {"path": "docs/rentz/ATF_Release.md", "class": "normative", "owner": "release", "gate": "policy"},
+    {"path": "scripts/run-rentz-components.ps1", "class": "gate", "owner": "test-runner", "gate": "offline-regression"},
+    {"path": "scripts/run-release-rag.ps1", "class": "gate", "owner": "release-review", "gate": "retrieval"},
+    {"path": "atf-tests/tools/run-shared-ui-sanity.ps1", "class": "gate", "owner": "android-e2e", "gate": "native-ui"},
+    {"path": "scripts/build-rentz-android.ps1", "class": "gate", "owner": "android-builder", "gate": "release-build"},
+    {"path": "config/test-collections.json", "class": "registry", "owner": "test-governance", "gate": "offline-regression"},
+    {"path": "config/release-rag-corpus.json", "class": "allowlist", "owner": "release-review", "gate": "retrieval"},
+    {"path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java", "class": "gate", "owner": "release-catalog", "gate": "local-catalog"},
+    {"path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseDownloadAcceptance.java", "class": "gate", "owner": "download-acceptance", "gate": "authenticated-download"},
+    {"path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseDownloadComponentTest.java", "class": "test", "owner": "download-governance", "gate": "download-components"},
+    {"path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java", "class": "retrieval", "owner": "release-review", "gate": "retrieval"},
+    {"path": "README.md", "class": "product-entry", "owner": "product-documentation", "gate": "product-navigation"},
+    {"path": "release/index.json", "class": "release-index", "owner": "release-catalog", "gate": "local-catalog"},
+    {"path": "release/{currentVersion}/release-validation.json", "class": "candidate-manifest", "owner": "release-catalog", "gate": "local-catalog"}
+  ]
+}

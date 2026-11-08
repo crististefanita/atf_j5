@@ -105,3 +105,5 @@ Rezultatul roșu se păstrează înaintea curățării, iar aceleași criterii s
 | Descriptorul `native-runtime.json` | Identifică sursa, clasa compilată și classpath-ul explicit al rulării calificate; lansatorul verifică hash-urile înaintea utilizării. |
 | [Guvernanța sursei](src/test/java/atf/rentz/governance/SourceLayoutTest.java) | Verifică [inventarul declarat](../config/java-source-layout.json): source-set-uri mixte, acoperirea fișierelor active, coeziune și limite de import. |
 | [Protocolul Android](../docs/rentz/ATF_Android.md) | Delimitează distribuirea completă, istoricul și reluarea față de o partidă completă sau echivalența cu aplicația originală. |
+
+Pentru comparația unei secvențe Rentz cu jocurile de levate, rulați lansatorul calificat cu `-ConsecutiveSubgames`. Această populație pornește sub-jocul Rentz din interfață, apoi joacă două sub-jocuri standard prin selectorul vizibil sau alegerea automată a actorului AI. Păstrează geometria chenarelor, matricea Rentz, istoricul și replay-ul jurnalului în raportul Extent.

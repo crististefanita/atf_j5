@@ -58,6 +58,7 @@ Nivelurile testelor, corpusul documentar și revizuirea diferențelor Git au con
 |---|---|---|
 
 | P2 | Contractele de transport și arhivă sunt adaptoare locale pentru distribuția produsului; reutilizarea printr-o bibliotecă comună nu este încă împachetată. | Prin ownerul comun, promovați un API generic cu nume de produs configurabil și oracole negative independente. Păstrați în consumator selecția versiunii, regulile Rentz și acceptanța consumatorului. |
+| P1 · înaintea folosirii RAG | Asistența generativă poate confunda politica, metadatele declarate și dovada live dacă nu fixează sursa și nu se abține la conflict. | [Cerințele RAG](ATF_Release_RAG.md): citate versionate, porți deterministe, separarea canalelor și teste negative; fără PASS dedus sau publicare autonomă. |
 
 [Procesul livrării](../rentz/ATF_Release.md) separă DRAFT, PREPARED și PUBLISHED; o pregătire validă nu este un APK calificat.
 

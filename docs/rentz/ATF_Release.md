@@ -2,23 +2,51 @@
 
 ## Pe scurt
 
-O livrare identifică exact APK-ul semnat, sursele construirii, selecțiile trecute și copia primită de utilizator. Publicarea GitHub și folderul documentar sunt suprafețe distincte.
+O livrare identifică artefactele semnate ale platformelor declarate (în prezent Android/APK), sursele construirii, porțile trecute și copia primită de utilizator. Publicarea GitHub și dosarul documentar sunt suprafețe distincte.
 
 ## Stări și responsabilități
 
 | Stare | Criteriu |
 |---|---|
 | DRAFT | Metadate și documente inspectabile; fără binar sau descărcare calificată. |
-| PREPARED | Regresie offline și Android JVM trecute, build Release semnat, integritate verificată și dosar coerent. |
-| PUBLISHED | Tag fixat pe sursele calificate, assets confruntate și descărcare integrală verificată în canalul declarat. |
+| PREPARED | Porțile comune și cele specifice fiecărei platforme declarate au trecut; artefactele semnate și integritatea lor sunt verificate în dosarul candidatului. |
+| PUBLISHED | Tag fixat pe sursele calificate, artefactele tuturor platformelor declarate confruntate și descărcarea fiecăruia verificată în canalul anunțat. |
+
+## Calificarea iOS
+
+Livrarea curentă este Android. Orice extindere iOS are contract și probe proprii.
+
+| Decizie iOS | Cerință |
+|---|---|
+| Platforme declarate | Candidatele noi numesc explicit platformele. Un manifest istoric numai cu APK înseamnă livrare Android; lipsa câmpului nu implică iOS. |
+| Motor | Înainte de implementare, documentați motorul portabil comun sau motorul iOS separat. Ambele folosesc aceiași vectori pentru reguli, scor, Normal/Hard, salvare și reluare. |
+| Aplicație | Interfața, ciclul de viață și persistența native au calificare distinctă. |
+| Diferențe | Orice abatere de la Android este deliberată, vizibilă în contract și verificată cu aceleași așteptări de domeniu. |
+
+| Cerință | Dovadă minimă pentru o afirmație de suport iOS |
+|---|---|
+| Versiuni OS | Politica de suport declară versiunea minimă și califică cea mai nouă versiune stabilă publică iOS disponibilă la momentul release-ului. Versiunile intermediare incluse în politica produsului rămân în matrice; versiunile beta nu înlocuiesc calificarea stabilă. |
+| Build și simulator | Țintă Xcode reală, scheme identificabile, versiune Xcode/SDK fixată în receipt și teste pe simulatorul versiunii minime și pe simulatorul stabil curent. Numele plutitor `macos-latest` fără versiunea Xcode/runtime observată nu este identitate de build suficientă. |
+| Reguli și componente | Suitele iOS verifică aceiași vectori de reguli și scor ai motorului de referință; testele componente rămân principala acoperire. Un rezultat JVM Android nu substituie testul adapterului sau al persistenței iOS. |
+| Dispozitiv fizic | Înaintea unei afirmații de distribuție către utilizatori, cel puțin o instalare pe un iPhone fizic verifică pornirea, o partidă, salvarea și reluarea. Simulatorul nu certifică performanța sau capabilitățile hardware ale dispozitivului. |
+| Distribuție | IPA/Archive-ul, Bundle ID, versiunea/build number, echipa și identitatea semnării sunt distincte de APK. TestFlight/App Store au receipt-uri și fluxuri de distribuție proprii; niciun link Android nu este reutilizat pentru iOS. |
+
+Planificați infrastructura macOS separat de semnarea și distribuția iOS.
+
+- Un simulator iOS poate fi construit și exercitat într-un job macOS; dezvoltatorul nu are nevoie de un Mac local.
+- Conform politicii curente, runner-ele GitHub standard sunt gratuite pentru repository-urile publice, iar runner-ele mai mari sunt taxate. Verificați politica, eticheta runnerului și versiunea Xcode înaintea fiecărui release.
+- Semnarea și distribuția iOS cer configurarea protejată a certificatelor, profilurilor și accesului Apple.
+- Surse oficiale: [facturarea Actions](https://docs.github.com/en/actions/concepts/billing-and-usage), [runner-ele găzduite](https://docs.github.com/en/actions/reference/runners/github-hosted-runners), [versiunile stabile Apple](https://developer.apple.com/news/releases/), [testarea pe simulator sau dispozitiv](https://developer.apple.com/documentation/Xcode/running-your-app-on-simulated-or-physical-devices), [certificate Apple](https://developer.apple.com/help/account/certificates/certificates-overview), [distribuirea prin Xcode](https://developer.apple.com/documentation/Xcode/distributing-your-app-for-beta-testing-and-releases).
+
+RAG-ul aplică domeniul declarat: pentru o ediție numai pentru Android, iOS este în afara livrării și nu se deduce PASS; pentru o ediție care declară iOS, lipsa țintei, a buildului Xcode, a receipt-urilor sau a probei cerute blochează afirmația iOS independent de rezultatul Android. Ghidul de produs și criteriile deschise sunt în [feedback-ul iOS](../feedback/ATF_Rentz.md#platforma-ios).
 
 Un APK semnat pentru verificare locală, construit înainte de calificarea completă a commit-ului, rămâne în dosarul extern al probei. Păstrați acolo manifestul surselor, semnătura și checksum-ul. Versiunea publicată din README se schimbă după verificarea descărcării noului asset.
 
 ```mermaid
 flowchart LR
     SOURCE[Snapshot identificat] -->|testează fără dispozitiv| CHECK[Componente și guvernanță]
-    CHECK -->|permite build izolat| APK[APK Release semnat]
-    APK -->|verifică identitatea| READY[Dosar calificat]
+    CHECK -->|permite build izolat| ARTIFACT[Artefacte semnate pe platformă]
+    ARTIFACT -->|verifică identitatea| READY[Dosar calificat]
     READY -->|publică draftul confruntat| RELEASE[GitHub Release]
     RELEASE -->|descarcă și confruntă octeții| FILE[Copie completă]
 ```
@@ -26,19 +54,22 @@ flowchart LR
 <details>
 <summary>Legendă: surse, dovezi și publicare</summary>
 
-Tagul identifică sursele APK-ului. Commit-ul dovezilor poate fi ulterior; corecția unei prezentări nu mută tagul și nu înlocuiește binarul publicat. O descărcare API sau nativă nu califică automat navigarea vizuală din browser.
+Tagul identifică sursa comună a artefactelor declarate. Fiecare artefact își păstrează identitatea și receipt-ul platformei. Commit-ul dovezilor poate fi ulterior; corecția unei prezentări nu mută tagul și nu înlocuiește binarul publicat. O descărcare API sau nativă nu califică automat navigarea vizuală din browser.
 
 </details>
 
-## Ordinea calificării
+## Ordinea calificării Android curente
 
 Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și cache-urile pregătite:
 
 ```powershell
 .\scripts\run-rentz-components.ps1 -Collection regression -SourceRoot <worktree-J5-inregistrat>
+.\scripts\run-release-rag.ps1 -Question 'gate:release-build version:current APK semnat' -ComponentRun <regresie-trecuta> -RunRoot <director-RAG-extern-nou>
 .\scripts\Initialize-RentzSigning.ps1
 .\scripts\build-rentz-android.ps1 -RunRoot <director-extern-nou> -ComponentRun <regresie-trecuta> -Configuration Release
 ```
+
+Raportul RAG este consultativ și păstrează porțile fără adaptor de receipt la `NOT_RUN`; nu înlocuiește verificarea manifestului, testele, buildul sau acceptanța distribuției. Buildul APK-ului continuă prin scriptul de mai sus, numai după porțile existente și pe aceeași sursă fixată. Vezi [contractul RAG și limitele v1](../feedback/ATF_Release_RAG.md).
 
 - **Cache concurent:** folosiți `-MavenRepository <cache-dedicat>` la calificare când alte procese pot încărca aceleași JAR-uri; calea rămâne în `infrastructure/cache`. Nu opriți procesele altui proprietar și nu transformați eroarea de înlocuire într-un rezultat verde.
 - **Izolare:** staging-ul este workspace-ul temporar înregistrat de J5, în afara sursei și a TEMP-ului Windows. Rulările intermediare rămân în depozitul extern; numai dosarul selectat se copiază în `release/<versiune>`.

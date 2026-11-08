@@ -6,10 +6,10 @@
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java",
       "owner": "Rentz UI",
       "reason": "Qualify the measured card regions and the clockwise Whist play order.",
-      "criterion": "Verify the centered grid, forced pass and legal card tint at 3 through 6 seats. Preserve the Whist order at all reference widths.",
+      "criterion": "Verify the centered grid, Rentz card band against the shared trick band at compact and tall four-seat sizes, forced pass and legal card tint at 3 through 6 seats. Preserve the Whist order at all reference widths.",
       "proof": "../../rentz_back/ui-review/turn-pacing-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "756f61bd52b2990416dff2767602dfc6364ede834a4a561ee82c0983ace1d315",
+      "sha256": "c3a989a898433af606642368ef347144b9bf2e887835b78039993eaccf61ffb7",
       "allowDelete": false
     },
     {
@@ -243,13 +243,43 @@
       "allowDelete": false
     },
     {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java",
+      "owner": "Rentz release",
+      "reason": "Introduce a local, deterministic, read-only retrieval adapter for release evidence.",
+      "criterion": "Only allowlisted bounded sources are read; lexical queries extract normalized tokens and unsupported queries abstain; top-five results diversify by source; citations bind source bytes and lines; exact metadata filters are applied; mismatched receipts, secret-like paths and output paths outside the external artifact root fail closed. RAG never publishes.",
+      "proof": "docs/feedback/ATF_Release_RAG.md",
+      "expires": "2026-11-30",
+      "sha256": "09ca64f22564f084c0db8bec8b5d3416333cae69815f84f8825c467e7997af41",
+      "allowDelete": false
+    },
+    {
+      "path": "config/release-rag-corpus.json",
+      "owner": "Rentz release",
+      "reason": "Define the bounded source allowlist and metadata taxonomy for release review retrieval.",
+      "criterion": "Every source declares exactly one class, owner and known gate; the retriever rejects path traversal, secret-like names, generated output and unsupported file types.",
+      "proof": "docs/feedback/ATF_Release_RAG.md",
+      "expires": "2026-11-30",
+      "sha256": "1d57515859acea2bab9bb0365828096be6e191ad663ef6ac30c81c64b58652ed",
+      "allowDelete": false
+    },
+    {
+      "path": "scripts/run-release-rag.ps1",
+      "owner": "Rentz release",
+      "reason": "Add the governed read-only entry point for a previously qualified release regression receipt.",
+      "criterion": "The wrapper enforces infrastructure/runtime and external artifact policies, validates a full existing regression receipt, launches only the local retriever and never starts tests, builds, ADB or publication.",
+      "proof": "docs/feedback/ATF_Release_RAG.md",
+      "expires": "2026-11-30",
+      "sha256": "8d11bc8255a77d5f9c9b3ad2b8bbd3b2f8ced9fb5ceb3c759cd681206626e369",
+      "allowDelete": false
+    },
+    {
       "path": "atf-tests/src/test/java/atf/rentz/governance/changes/TestChangeGovernanceTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q15–Q16: inherited executable-source inventory, independent Jupiter probes and complete external evaluation admission; preserve parallel UI and library changes.",
-      "criterion": "Before/after tests retain a healthy full neighbor; overrides, generic signatures, cross-package visibility and annotation inheritance match Jupiter. Every protocol/source/budget/population/aggregate corruption refuses admission without changing strategic thresholds.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q15-q16-8e2c2092/TDD.md",
+      "reason": "Retain the existing test-change guard while protecting the local release RAG's allowlist, read-only runner and retrieval implementation.",
+      "criterion": "Existing discovery and admission negatives remain intact; RAG policy, runner and retriever require exact reviewed hashes. Component mutants reject conflicting metadata filters, stale candidates, secret-like paths/content/questions and unsupported retrieval without producing a gate PASS.",
+      "proof": "docs/feedback/ATF_Release_RAG.md",
       "expires": "2026-11-20",
-      "sha256": "a0e6dd6f56f66228f5f8acd2857b743ce3bc1b569f65dd6716b9a6fe0d1ab276",
+      "sha256": "b94b4ae367417b88bc11a595da2647360d3fe777916a72a9c1345fefe348b706",
       "allowDelete": false
     },
     {
@@ -385,11 +415,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz consumer",
-      "reason": "Reviewed incoming parallel strengthening: Git byte preservation for library pairs and retained evidence bodies.",
-      "criterion": "Keep existing release assertions; preserve raw JAR/POM bytes and reject truncated or empty retained observation bodies while accepting the full neighboring body.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-live-review-36d30d18/REVIEW.md",
+      "reason": "Preserve the incoming Git byte and retained-evidence coverage while adding focused RAG regressions, receipt checks and metadata-filter tests.",
+      "criterion": "Existing release assertions remain; raw library bytes and complete evidence bodies stay protected. RAG cites exact source hashes/lines, abstains without support, returns distinct source paths in the top-five retrieval, excludes secret-like source/query material, treats retrieved injection as data, enforces gate/class/version filters and never passes unreceipted gates.",
+      "proof": "docs/feedback/ATF_Release_RAG.md",
       "expires": "2026-11-20",
-      "sha256": "cf8e14d97eabcc26b2d455015f578e069eafdc75817fefc1297c728148311d2c",
+      "sha256": "8d4bd9300a4571089b19304ec25354fcdd3e89f82fc2c0106cb7ff82f5413300",
       "allowDelete": false
     },
     {
@@ -615,11 +645,11 @@
     {
       "path": "config/infrastructure-workspaces.json",
       "owner": "Rentz release",
-      "reason": "0.3.0 P1: register the distribution archive used to retain the prior published release and its evidence.",
-      "criterion": "The distribution root is an allowed external artifact directory; physical-path, workspace and system-TEMP boundary checks still pass.",
+      "reason": "Preserve the registered release artifact layout and admit the read-only local RAG runner to the governed producer inventory.",
+      "criterion": "The archive stays in its registered external collection; the RAG runner is explicitly registered and its component entry still enforces physical-path, workspace and system-TEMP boundaries.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-rentz-0.3.0/README.md",
       "expires": "2026-11-20",
-      "sha256": "1da205cfe817697b93a2ff78e8551203126c5536e1358ec3135b8f3c3ee37c01",
+      "sha256": "2f996303fef80e4d960634e376546c742f3c07d47e2a2e16e917817504406b1c",
       "allowDelete": false
     },
     {
@@ -745,11 +775,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java",
       "owner": "Rentz UI",
-      "reason": "Extend the existing common presentation adoption check to the exact Whist layout classes.",
-      "criterion": "Retain both coordinates and all artifact hashes. Verify loaded board, geometry, seating, viewport and card renderer bytecode against the pinned AAR.",
+      "reason": "Extend the common presentation adoption check to the qualified Whist layout and turn-pacing classes from the pinned UI library update.",
+      "criterion": "Retain both coordinates and all artifact hashes. Verify loaded board, geometry, seating, viewport, card renderer and TurnPacing bytecode against the pinned AAR.",
       "proof": "../../rentz_back/ui-review/turn-pacing-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "1fd74f05f45569f6f342bdf6d0d9be83a32e21debb561a0433c83d481b34ddd0",
+      "sha256": "063805ded1282ef2f850a3ecc85f37d14d6ffbb4e80b6a1ea4a805e3d543a219",
       "allowDelete": false
     },
     {

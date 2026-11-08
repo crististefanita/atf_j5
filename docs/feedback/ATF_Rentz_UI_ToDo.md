@@ -199,3 +199,30 @@ La limita lizibilității se alege un mod explicit de derulare sau o dispunere a
 - Contractul de lifecycle și integrarea descriu actorul vizibil înainte de tur și separarea acțiunilor automate.
 - `TurnPacing` primește poarta primului cadru ca dependență. Implementarea se închide numai cu teste verzi și sanity Android.
 - `release/0.3.0` este DRAFT până la calificarea buildului și a descărcării; nu este APK instalabil.
+
+## P1 — Geometria mesei Rentz și sub-jocuri consecutive
+
+### Constatare din codul live
+
+- `RentzTablePanel` alege `RentzCardBoard` pentru contractul Rentz și `BoardLayout` pentru celelalte șapte contracte. În modurile cu levate, tabela comună este construită cu `fullWidthCardRows=true`; planul inițial Rentz cheamă `RentzCardSpace.plan` cu `false` și o lățime de referință de 220 dp. Comentariul `RentzCardBoard` spune că păstrează geometria comună, însă parametrii trimiși către planificator diferă de cei ai `BoardLayout`; comportamentul trebuie aliniat sau comentariul trebuie corectat explicit.
+- În `TableGeometry`, diferența dintre centre influențează decalarea colțurilor. La 3, 5 și 6 jucători, `fullWidthCardRows` produce alte ancore verticale; la 4, chiar dacă flag-ul nu schimbă formula, Rentz folosește un centru de 128 dp, iar celelalte contracte folosesc înălțimea din `PlayedCardMetrics`, deci decalarea colțurilor se schimbă și ea. Planul Rentz poate apropia colțurile de centru și micșora banda verticală disponibilă. Fallback-ul Rentz folosește ancorele pe lățime completă doar dacă banda inițială scade sub pragul de 72 dp; egalitatea nu este garantată în toate viewporturile.
+- Tabla secvenței este o grilă cu patru rânduri de etichete, nu fețe de carte: fiecare rând are `2 × jucători` sloturi, înălțimea rândului este limitată la 40 dp, iar textul la 15 sp. Sloturile sunt așezate egal, fără suprapunere. Mărirea benzii centrale singură nu crește cardurile peste aceste plafoane.
+
+Constatarea este dedusă din parametrii reali ai celor două planuri și din formula comună pentru colțuri; nu este o afirmație că toate rezoluțiile au fost validate pe Android.
+
+### Schimbare de testare introdusă
+
+`atf-tests/tools/run-shared-ui-sanity.ps1 -ConsecutiveSubgames` adaugă un traseu nativ de trei mâini în aceeași partidă: primul sub-joc Rentz, apoi două sub-jocuri standard selectate prin interfață când omul este la rând sau automat de AI. Verifică sloturile și cărțile publice ale secvenței, păstrează geometria chenarelor la începutul și după mutări, verifică cele trei rânduri de istoric și restart-ul, apoi compară sesiunea cu replay-ul independent al jurnalului. Capturile sunt folosite de Extent-ul proiectului ca PNG original inline base64.
+
+`RentzCardSpaceTest` compară acum banda Rentz cu banda comună a jocurilor de levate la patru jucători, în viewport compact și înalt; verificarea nouă cere ca Rentz să nu primească mai mult spațiu central doar prin schimbarea reperului. Acoperirea existentă la 3–6 jucători verifică banda și evitarea suprapunerilor, dar încă nu impune paritatea ancorelor cu cele șapte moduri comune.
+
+### Închidere solicitată
+
+| Prioritate | Criteriu verificabil |
+|---|---|
+| P1 | Comparați chenarele Rentz și levată la 3, 4, 5 și 6 jucători, cu aceleași dimensiuni, insets, font și viewport. Dacă jocul nu cere intenționat altă distanțare, folosiți aceleași ancore pentru toate contractele; apoi măsurați banda centrală rămasă, nu doar centrul teoretic. |
+| P1 | În Rentz, păstrați rangul și culoarea pentru toate sloturile publice, inclusiv sloturile goale și cele jucate. Testați o reprezentare suprapusă/etajată care mărește fața fără să ascundă rangul, legalitatea sau ținta tactilă; accesibilitatea trebuie să expună fiecare carte o singură dată. |
+| P1 | Rulați `-ConsecutiveSubgames` pe APK-ul izolat calificat. Raportul trebuie să arate trei sub-jocuri distincte în istoric, măsurătorile native ale chenarelor, grila Rentz înainte/după depuneri, identitatea APK-ului și replay-ul jurnalului cu aceeași stare finală. |
+| P2 | Componentele trebuie să confrunte ancorele comune și Rentz în toate cele patru numere de jucători și în profiluri compacte, înalte, cu text mărit și fereastră scundă. Testul nativ de patru locuri rămâne o verificare focalizată, nu substituie matricea. |
+
+**Stare:** traseul și aserțiunea focalizată sunt adăugate, dar nu sunt încă executate. Nu modificați UI-ul în baza unei presupuneri despre distanță; măsurați comparația nativă după ce porțile de guvernanță permit build-ul și rularea.
