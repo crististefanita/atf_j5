@@ -20,7 +20,7 @@ Manifestul Rentz adoptă `CardTableTheme`; J4 păstrează aliasul echivalent `Ap
 
 ## Admiterea bibliotecilor de produs
 
-1. Identificați coordonatele `ro.cardtable:card-table-ui:0.1.6` și `ro.cardtable:card-table-names:0.1.0`, plus repository-ul extern al producătorului.
+1. Citiți coordonatele și amprentele din [proveniența bibliotecilor UI](../../rentz-lab-app/ui-library/provenance.json) și confruntați-le cu [declarațiile Gradle](../../rentz-lab-app/app/build.gradle).
 2. Confruntați AAR, JAR, POM, metadata, surse și SHA-256. Păstrați dependențele declarate și compatibilitatea bibliotecii `minSdk 24` cu aplicația `minSdk 26`.
 3. Folosiți o copie în [workspace-ul înregistrat](ATF_Infrastructure.md), fără build sau probe în sursa activă ori TEMP-ul Windows.
 4. În copia tehnică, declarați repository-ul și dependența de mai jos; rulați componentele JVM și construiți APK-ul pentru verificarea D8/manifest.
@@ -38,7 +38,7 @@ exclusiveContent {
 Dependența se declară în modulul aplicației, după admitere:
 
 ```groovy
-implementation 'ro.cardtable:card-table-ui:0.1.6'
+implementation 'ro.cardtable:card-table-ui:0.1.7'
 implementation 'ro.cardtable:card-table-names:0.1.0'
 ```
 
@@ -51,7 +51,7 @@ Aceste intrări sunt active în configurația live. [Repository-ul admis](../../
 - Comparați geometria și textele cu reperul comun, cu fixture-uri și oracole independente; declanșarea unui callback în JVM nu este tap Android.
 - Adăugați numai sanity-ul nativ necesar pentru meniu/profil, mâna și scorul efectiv, după trecerea componentelor. Rezultatele, APK-urile tehnice și logurile rămân externe.
 
-[Backlog-ul UI](../feedback/ATF_Rentz_UI_ToDo.md) deține criteriile și starea fiecărui increment. [Calificarea offline](ATF_Qualification.md) și [acceptanța Android](ATF_Android.md) păstrează identitățile și limitele execuției.
+[Backlog-ul UI](../feedback/ATF_Rentz_UI_ToDo.md) deține criteriile rămase. [Calificarea offline](ATF_Qualification.md) și [acceptanța Android](ATF_Android.md) păstrează identitățile și limitele execuției.
 
 ## Componente comune și oracole Rentz
 
@@ -67,6 +67,16 @@ Aceste intrări sunt active în configurația live. [Repository-ul admis](../../
 Testele de licitație, atu și punctaj Whist rămân exclusiv în J4. J5 implementează propriile componente pe observații și comenzi Rentz reale; opt cărți pe loc, faza nevăzută, pasul, secvențele și scorul nu se testează prin redenumirea fixture-urilor Whist.
 
 J6 rămâne momentan JVM/console, fără dependență Android. Modelele UI păstrează date vizibile neutre, dar layout-ul calificat actual acoperă 3–6 locuri; suportul altor mese și al cărților comunitare cere o extensie verificată distinct.
+
+### Nume, scoruri și ordinea mâinii
+
+| Contract | Oracol |
+|---|---|
+| Chenar jucător | Numele și cele două rânduri de scor rămân întregi. Matricea acoperă font până la 2×, diacritice, geometrie și valori negative lungi. |
+| Nume adversari | Pentru 3–6 locuri, selecția comună rezervă numele uman, iar restaurarea păstrează ordinea locurilor și a numelor. Jurnalul vechi folosește seed-ul. |
+| Mână vizibilă | Ordinea este ♠ ♥ ♣ ♦, apoi rang crescător. Proiecția păstrează identitatea și legalitatea; proba nativă verifică ordinea fizică și centrajul ultimei cărți. |
+
+[Componentele mâinii](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java) · [Dovezile native pentru chenare, nume și mână](../../../../rentz_back/ui-review/shared-seats-collection-j5/README.md)
 
 ## Traseul minim de calificare
 
@@ -104,7 +114,7 @@ Pentru acest increment, `-HelpAwardsOnly` parcurge ajutorul în ambele limbi. `-
 
 ## Istoricul adaptiv Rentz
 
-J4 oferă reperul pentru lățimile măsurate, subcoloanele aliniate și antetul fix deasupra rândurilor. J5 folosește numărul mâinii, sub-jocul și alegătorul în coloana fixă, iar grupurile de scor arată **Δ** pentru mâna respectivă și **Σ** pentru totalul confirmat. [Reperul J4](../../../atf_j4/docs/game/ATF_ScoreHistory.md)
+J4 oferă reperul pentru lățimile măsurate, subcoloanele aliniate și antetul fix. J5 arată numărul mâinii, sub-jocul, alegătorul și marcajul ×2 în coloana fixă. Grupurile de scor arată **Δ** pentru mână și **Σ** pentru totalul confirmat. [Reperul J4](../../../atf_j4/docs/game/ATF_ScoreHistory.md)
 
 | Situație | Comportament |
 |---|---|
@@ -127,6 +137,8 @@ J4 oferă reperul pentru lățimile măsurate, subcoloanele aliniate și antetul
 | Jurnal | Salvează aceleași comenzi și același profil. Rezultatul public se reconstruiește la reluare, inclusiv pentru un jurnal vechi compatibil. |
 | Interfață | Atingerea etichetei subliniate deschide detaliul. Locurile Rentz urmează ordinea motorului, iar ultima poziție explică atribuirea la închiderea mâinii. |
 | Probe | Componentele confruntă categoriile cu mutările observate. Sanity-ul deschide o mână de levate dublată și o mână Rentz din jurnalul restaurat. |
+
+Ajutorul afișează grila pentru 3–6 jucători din profilul efectiv, verificat și cu profil alternativ. Probele Android în RO/EN confruntă ajutorul și ordinea locurilor cu premiu zero după reluare.
 
 [README-ul grilei și al detaliului](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md) · [Dovezile S05/S06](../../../../rentz_back/ui-review/settlement-details-j5/README.md)
 

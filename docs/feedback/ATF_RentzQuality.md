@@ -91,6 +91,9 @@ Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; 
 
 ## Închideri și documente responsabile
 
+<details>
+<summary>Urme de audit pentru criteriile închise</summary>
+
 | Cerințe | Mecanism permanent | Dovezi |
 |---|---|---|
 | Q09 | [Infrastructură](../rentz/ATF_Infrastructure.md), [calificare](../rentz/ATF_Qualification.md) și [arhivă](../history/contract-whist/README.md) | [Audit Q09](../../../../rentz_back/infrastructure/governance/20261106-q08-q09-ff1d7846/TDD.md) |
@@ -100,11 +103,9 @@ Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; 
 | Q29–Q31 | [Deficitul adversarilor și expunerea nativă](../rentz/ATF_Learning.md), plus [structura XML](../rentz/ATF_Qualification.md#containere-jupiter-imbricate) | [Q29–Q31](../../../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md) |
 | Descărcarea din README | [Identitatea livrării și canalele de descărcare](../rentz/ATF_Release.md) | [Receipt de browser autentificat](https://github.com/crististefanita/atf_j5/blob/cf740288acbebd13b67a9f0d69f18e4d9f94518f/release/0.1.2/reports/distribution/download-readme.json) |
 
-## Calificarea integrării UI pentru 0.1.2
+<a id="calificarea-integrării-ui-pentru-012"></a>
 
-- Maven reflectă asupra interfeței TestRule din JUnit 4 în scope de test. Populația Maven folosește Jupiter, iar testele Android rămân în colecția lor.
-- Controalele Git păstrează baza de revizuire, criteriul și hash-ul fiecărei căi protejate. Candidatul curat se confruntă din nou după regresie.
-- Build-ul compară întregul inventar Android calificat cu sursa și cu bloburile tagului. Descărcarea a pornit din README-ul GitHub autentificat și a fost confruntată cu manifestul.
+[Dovezile istorice ale calificării UI 0.1.2](https://github.com/crististefanita/atf_j5/blob/cf740288acbebd13b67a9f0d69f18e4d9f94518f/release/0.1.2/reports/README.md) · [Calificarea curentă](../rentz/ATF_Qualification.md)
 
-[Dovezile ediției 0.1.2](https://github.com/crististefanita/atf_j5/blob/cf740288acbebd13b67a9f0d69f18e4d9f94518f/release/0.1.2/reports/README.md)
+</details>
 

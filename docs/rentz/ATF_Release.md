@@ -69,7 +69,13 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 .\scripts\build-rentz-android.ps1 -RunRoot <director-extern-nou> -ComponentRun <regresie-trecuta> -Configuration Release
 ```
 
-Raportul RAG este consultativ și păstrează porțile fără adaptor de receipt la `NOT_RUN`; nu înlocuiește verificarea manifestului, testele, buildul sau acceptanța distribuției. Buildul APK-ului continuă prin scriptul de mai sus, numai după porțile existente și pe aceeași sursă fixată. Vezi [contractul RAG și limitele v1](../feedback/ATF_Release_RAG.md).
+Raportul RAG este consultativ. Adaptorul v1 citește regresia și receipt-ul Android JVM din aceeași sursă. Porțile fără adaptor, inclusiv buildul, calificarea APK-ului, catalogul, publicarea și descărcarea, rămân `NOT_RUN`. Agregatul rămâne `BLOCKED`.
+
+Lansatorul verifică workspace-ul și regresia completă, apoi scrie indexul și raportul într-un director extern nou. Interogarea locală are filtre exacte `gate:`, `class:` și `version:`, cu cel mult cinci citări și un fragment per sursă. Citările fixează commitul, calea, liniile și SHA-256.
+
+Corpusul este limitat și verificat înainte de indexare. Fragmentele recuperate rămân date, fără autoritate de execuție sau de verdict. Regresiile locale acoperă interogările fără sursă, fragmentele ostile și datele sensibile.
+
+Buildul continuă prin porțile deterministe ale sursei fixate. [Criteriile RAG rămase](../feedback/ATF_Release_RAG.md)
 
 - **Cache concurent:** folosiți `-MavenRepository <cache-dedicat>` la calificare când alte procese pot încărca aceleași JAR-uri; calea rămâne în `infrastructure/cache`. Nu opriți procesele altui proprietar și nu transformați eroarea de înlocuire într-un rezultat verde.
 - **Izolare:** staging-ul este workspace-ul temporar înregistrat de J5, în afara sursei și a TEMP-ului Windows. Rulările intermediare rămân în depozitul extern; numai dosarul selectat se copiază în `release/<versiune>`.
@@ -98,6 +104,8 @@ Raportul RAG este consultativ și păstrează porțile fără adaptor de receipt
 | reports/README | Scopul fiecărei selecții, proveniența, suprapunerile și limitele ei. |
 | HTML Extent | Comparații capturate, diagnostice originale și corpuri inline; folderele cu copii redundante nu sunt livrabilul de audit. |
 | XML și receipt | Numărare independentă și identitatea intrărilor; nu substituie expected/actual necapturat. |
+
+Reporting este o dependență a modulului Maven `atf-tests`. Calificarea sa leagă perechea JAR/POM din `lib` și hash-urile din [proveniența consumerului](../../library-provenance.json) de regresia de raportare. Dosarul APK păstrează separat identitatea binarului Android și probele native.
 
 [Atributele Git](https://git-scm.com/docs/gitattributes) dezactivează conversia text pentru intrările APK și dosarul release. Înainte de push se confruntă octeții din Git cu inventarul, separat de copia din workspace.
 

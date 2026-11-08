@@ -2,7 +2,7 @@
 
 ## Pe scurt
 
-**P1 · integrare și istoric adaptiv verificate.** Meniul, profilul, limbile, chenarele și cărțile folosesc nucleul vizual J4. Pe API 28, istoricul Rentz a ajuns la ultimul jucător și la mâna 48 în ambele ferestre, cu font 1,5. [Matricea istoricului](../../../../rentz_back/ui-review/history-native-matrix-j5/README.md)
+**P1 · paritate și acceptanță pe candidat.** Rămân verificările de interacțiune, geometrie și timing, plus clasamentul final. Contractele livrate și dovezile istorice sunt în [ghidul integrării UI](../rentz/ATF_UiIntegration.md).
 
 | Prioritate | Semnificație |
 |---|---|
@@ -24,24 +24,13 @@ Registrul este confruntat cu sursele, componentele și încercările native iden
 
 Componentele existente de sesiune, codec și lifecycle se păstrează. Cazurile UI noi folosesc motorul Rentz real și comparații capturate în execuție; selectorii nativi au probe separate pentru item AdapterView, vecin dezactivat și ambiguitate.
 
-## Dovezi pe increment
-
-- Cele 33 de teste JVM inițiale sunt păstrate, cu sursele neschimbate; 16 cazuri noi verifică proiecțiile, cele opt contracte, scorul negativ/pozitiv, blind-ul, restaurarea și refuzul comenzilor depășite.
-- API 28: profil, RO/EN, configurare, revenire, o mână de levate, o carte centrată, istoric și restart au trecut. Inițializarea cu 3/6 locuri este probă de afișaj pe același viewport.
-- Extent păstrează comparațiile evaluate, acțiunile native și capturile originale; XML-ul celor 33 de teste vechi rămâne dovadă de execuție, fără expected/actual reconstruite ulterior.
-- Matricea istoricului adaptiv cuprinde 53 de teste JVM și 10 puncte native de verificare pe jurnalul de 48 de mâini. [Dosarul istoricului](../../../../rentz_back/ui-review/history-native-matrix-j5/README.md)
-- Detaliul punctajului adaugă comparații pe cele 48 de mâini și verifică nativ două detalii după restaurare. Pe API 28, locurile cu premiu egal rămân distincte și revenirea păstrează grila. [Dosarul S05/S06](../../../../rentz_back/ui-review/settlement-details-j5/README.md)
-- Incrementul comun verifică ajutorul RO/EN, ordinea mâinii pe ecran și continuitatea numelor AI după restart. Pe profilul logic 720×1280, cu font 1,5, fiecare chenar păstrează două rânduri complete de scor sub nume. [Dovezile S05 și U10–U13](../../../../rentz_back/ui-review/shared-seats-collection-j5/README.md)
+<a id="dovezi-pe-increment"></a>
 
 ## P1: paritatea vizuală și de interacțiune
 
-### Admiterea nucleului comun
+<a id="admiterea-nucleului-comun"></a>
 
-**U08 — integrare realizată:** configurația live consumă `ro.cardtable:card-table-ui:0.1.6` și `ro.cardtable:card-table-names:0.1.0` din repository-ul local fixat prin hash. Proiecțiile și comenzile sunt ale motorului Rentz.
-
-- [Contractul integrării](../rentz/ATF_UiIntegration.md) și [atlasul UI](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/README.md) identifică implementarea.
-- Dosarul integrării inițiale păstrează rezultatele, domeniul și încercările originale. [Dovezile integrării J4 → J5](../../../../rentz_back/ui-review/shared-ui-cb695c1461/README.md)
-- Compatibilitatea API 28 a expus un apel `Stream.toList()` în adaptor; colectorul portabil păstrează ordinea și imutabilitatea. Lint și proba nativă sunt porți distincte.
+Admiterea U08 este documentată în [contractul bibliotecilor UI](../rentz/ATF_UiIntegration.md#admiterea-bibliotecilor-de-produs).
 
 | ID și stare | Schimbare cerută și criteriu de închidere |
 |---|---|
@@ -51,7 +40,7 @@ Componentele existente de sesiune, codec și lifecycle se păstrează. Cazurile 
 | **U04 · PARȚIAL** | **Aceeași compoziție a mesei.** Omul rămâne jos, chenarele și cărțile depuse păstrează identitatea locului și ordinea motorului la 3–6 jucători. Indicatorul marchează actorul efectiv; asul, săritura și jucătorul terminat din secvențe interzic deducerea turei numai prin incrementarea locului. Fără spatele cărților adverse, etichete redundante sau scroll vertical al mesei în profilurile declarate. |
 | **U05 · PARȚIAL** | **Același desen al cărții și aceeași mână centrată.** Proporție, dimensiune la același viewport, suprapunere, indici lizibili și reacție la atingere conforme reperului. Opt cărți Rentz pe un rând, o carte centrată și mână goală reprezentată corect; cartea ridicată nu mută chenarul și nu ascunde indicii vecinilor. Legalitatea și comanda aparțin motorului, cu o singură aplicare. În alegerea pe nevăzute nu se dezvăluie mâna înainte de `REVEAL`. |
 | **U06 · PARȚIAL** | **Depunere și continuitate inspectabile.** Cartea publică apare în dreptul actorului, iar levata completă rămâne inspectabilă potrivit politicii de timp a reperului înainte de colectare. Masa nu dispare în timpul AI; fluxul de prezentare folosește evenimente publice identificate, fără repetarea calculului sau a comenzii. Pauza, istoricul, meniul și callback-urile întârziate nu avansează încă o dată jocul. |
-| **U07 · PARȚIAL** | **Grila, derularea și detaliul mâinii sunt implementate.** S02 și S03 au componente și sanity nativ cu șase jucători. Clasamentul și rezumatul de final rămân la S01 și S07. |
+| **U07 · PARȚIAL** | **Clasamentul și rezumatul de final.** S01 și S07 completează [istoricul adaptiv](../rentz/ATF_UiIntegration.md#istoricul-adaptiv-rentz). |
 
 **Distribuire și depunere sunt criterii separate.** Reperul consultat compune mâna din snapshot; animatorul `TrickCollection` colectează levata și nu demonstrează o animație de distribuire. Copiați comportamentul vizual demonstrat, iar o animație nouă se tratează ca funcționalitate distinctă, fără a o introduce în refactorizarea Whist.
 
@@ -72,14 +61,6 @@ Păstrați dimensiunile și scalele de mai jos pentru componente. E2E minim veri
 Înregistrați selecția UI în colecțiile testabile, cu clase și invocări așteptate, astfel încât filtrul Gradle sau adaptorul ATF să nu piardă cazuri. Raportul Extent al componentelor păstrează comparațiile capturate în execuția lor; XML-ul JVM și auditul randării rămân probe distincte, fără aserțiuni inventate la publicare.
 
 ## Lacune active după integrare
-
-| ID | Increment comun și criteriu de acceptanță |
-|---|---|
-| U10 · VERIFICAT | **Scorul din chenar.** Numele și cele două rânduri rămân întregi. Matricea Android acoperă 36 de combinații cu font până la 2× și verifică lățimea glifelor, geometria chenarelor, diacriticele și valorile negative lungi. |
-| U11 · VERIFICAT | **Numele adversarilor.** J5 folosește selecția din J4. Componentele acoperă 3–6 locuri, numele uman rezervat și jurnalul vechi. Proba nativă confirmă păstrarea locurilor și numelor la restart. |
-| U12 · VERIFICAT PE API 28 | **Colectarea levatei.** Pe rendererul Android, confirmarea la 1080×1920 a trecut în joc la 1.491 ms și după restart la 1.433 ms. Au fost urmărite patru cărți în fiecare traseu, cu jurnal identic. Prima rulare cu același APK a depășit cu 20 ms pragul pentru prima mișcare din joc. [Măsurători și Extent](../../../../rentz_back/ui-review/restart-collection-j5/README.md) |
-| U14 · VERIFICAT | **Sugestie AI.** Alegerea după dezvăluire oferă o opțiune legală din observația jucătorului și nivelul AI al partidei. Sanity-ul confirmă că opțiunea lipsește din alegerea oarbă și că afișarea sugestiei lasă jurnalul identic. |
-| U13 · VERIFICAT | **Ordinea mâinii.** Cărțile vizibile urmează ♠ ♥ ♣ ♦ și rangul crescător. Proiecția păstrează identitatea și legalitatea, iar proba Android verifică ordinea fizică și centrajul ultimei cărți. |
 
 Ordinea livrării este contractul producătorului, componentele, consumul pe artefacte cu hash, apoi sanity Android și Extent. Notați pentru fiecare punct dovezile și limitele rămase.
 
@@ -117,11 +98,7 @@ Schema stabilește relația rangurilor, fără a reprezenta o distribuire de ant
 | ID și stare | Cerință și criteriu de acceptanță |
 |---|---|
 | **S01 · TODO** | **Clasament general lizibil pentru toți jucătorii.** Nume, total confirmat și poziție, cu egalități tratate explicit. Scorurile negative se ordonează numeric; zero nu este lipsă de date. Ordinea locurilor la masă rămâne stabilă în istoric, chiar dacă ordinea clasamentului se schimbă. |
-| **S02 · VERIFICAT** | **Istoric de până la 48 de mâini confirmate.** Fiecare rând arată sub-jocul, alegătorul și marcajul ×2, urmate de Δ și Σ. Componentele confruntă toate locurile după restaurare și probează excluderea unei mâini în curs. |
-| **S03 · VERIFICAT** | **Acces la capetele istoricului, inclusiv cu font mărit.** Pe API 28, EN, 360 dpi și font 1,5, ultimul grup complet și mâna 48 sunt accesibile la 720 × 1280 și 720 × 740. Fereastra scundă derulează întregul conținut până la legenda completă. La mărire, antetul și legenda revin în pozițiile fixe. |
 | **S04 · PARȚIAL** | **Delta și totalul confirmat sunt separate.** Componentele verifică o mână în curs și totalurile tuturor locurilor. Sanity-ul confruntă totalurile finale și revizia după derulare. Rămâne proba cu sosire în Rentz înaintea decontării. |
-| **S05 · VERIFICAT** | **Detaliul și ajutorul folosesc profilul efectiv.** Detaliul păstrează alegătorul, dublarea și contribuțiile, inclusiv Q♦ în ambele categorii la Totale. Ajutorul prezintă grila pentru 3–6 jucători, cu verificare pentru profil alternativ și probă Android în engleză și română. |
-| **S06 · VERIFICAT** | **Date publice și imuabile.** Motorul fixează contribuțiile și ordinea la decontare. Componentele reconstruiesc rezultatele pentru jurnale compatibile. Pe API 28, mâna 48 păstrează ordinea locurilor cu premiu zero după reluare. |
 | **S07 · PARȚIAL** | **Punctajul mâinii are ecran propriu.** După colectare apar contractul, dublarea, contribuțiile, Δ și Σ. Rămâne clasamentul de final cu egalități, separat de ordinea locurilor și de rezultatul mâinii. |
 
 ## Arhitectură de prezentare și refolosire
@@ -181,24 +158,13 @@ La limita lizibilității se alege un mod explicit de derulare sau o dispunere a
 3. O probă de istoric derulează vertical și până la ultimul jucător, confruntă toate valorile vizibile și verifică revenirea și reluarea, fără linii duplicate.
 4. Rularea păstrează extern identitatea APK-ului, configurația efectivă, expected/actual și capturile native originale inline base64 în stilul proiectului. O masă sau o rezoluție nu califică întreaga matrice.
 
-**Ordine de lucru:** U01 → refactorizarea UI în producător → U02–U05 și adaptoarele Rentz prin componente → U06–U07, R02–R05 și S01–S07 → calibrare nativă și E2E selectiv. R01 rămâne o modificare de regulă separată: condiționează opțiunea „Valet mereu”, fără să blocheze meniul sau geometria și fără să fie simulată prin desen. Închideți criteriile numai cu implementare identificată, probe relevante și reconfirmarea codului live.
+**Ordine de lucru.** U01 → refactorizarea UI în producător → U02–U05 și adaptoarele Rentz prin componente → U06–U07, R02–R05 și S01/S04/S07 → calibrare nativă și E2E selectiv. R01 rămâne regula separată pentru disponibilitatea opțiunii „Valet mereu”. Închideți criteriile cu implementare identificată și probă relevantă.
 
-## P1 — livrarea 0.3.0 și turele Rentz vizibile
+## Tura automată — probă nativă rămasă
 
-**Prioritate:** blochează declararea noii interacțiuni ca livrată. APK-ul public verificat rămâne 0.2.0 până când toate criteriile de mai jos trec pentru aceiași octeți ai sursei și ai binarului. README-ul principal nu trebuie să indice drept descărcabil un candidat DRAFT/PREPARED.
+[Contractul de lifecycle](../rentz/ATF_Lifecycle.md) descrie ordinea cadru, mutare și checkpoint. [Dosarul Rentz 0.3.0](../../release/0.3.0/README.md#calificare) păstrează calificarea publicării și acoperirea probei native cu pachet izolat. `TurnPacingTest` verifică separat intervalul de 550 ms și invalidarea cadrului.
 
-| Criteriu | Stare | Dovada necesară pentru închidere |
-|---|---|---|
-| Temporizarea turei automate | **IMPLEMENTAT · NEQUALIFICAT** | Testul de componentă demonstrează cadrul activ → pauză de 550 ms → exact o comandă; niciun timer înainte de cadrul efectiv; tura umană/colectarea excluse; invalidarea înainte și după cadru refuză mutarea. |
-| Integrarea Android a cadrului și lifecycle-ului | **P1 · DESCHIS** | Sanity pe APK 0.3.0 verifică indicatorul actorului înaintea mutării, o acțiune pe cadru, anularea la pauză/navigare și reluarea din checkpoint; capturile și jurnalul se leagă de SHA-ul APK-ului. Testul JVM singur nu închide acest criteriu. |
-| Pachetul funcțional 0.3.0 | **P1 · DRAFT** | Include schimbările Rentz din sursa fixată: spațiu adaptiv pentru 3–6 locuri, tablă de secvențe, evidențierea cărților legale, ture pas-cu-pas și protecțiile lifecycle. Regresia completă, Android JVM, buildul semnat, certificatul, manifestul și integritatea ZIP trebuie să treacă fără skip-uri. |
-| Disponibilitatea publică și README principal | **P1 · DRAFT** | Tagul v0.3.0 pointează exact la sursa calificată și commitul există pe branch-ul remote; release-ul și copia publică HTTPS conțin APK-ul și checksum-ul; descărcarea anonimă verifică HTTP 200, bytes și SHA-256. Abia apoi README-ul principal devine legătura către ultima ediție publicată. |
-| Bibliotecă de raportare J23 | **PARALEL · PĂSTRATĂ** | Proveniența J23, hash-urile fizice JAR/POM și regresia consumatorului trebuie să fie în aceeași calificare; biblioteca este pentru testare și nu este împachetată în APK. |
-
-- README-ul aplicației diferențiază `advanceBotTurn()` pentru UI de `advanceBots()` pentru simularea offline.
-- Contractul de lifecycle și integrarea descriu actorul vizibil înainte de tur și separarea acțiunilor automate.
-- `TurnPacing` primește poarta primului cadru ca dependență. Implementarea se închide numai cu teste verzi și sanity Android.
-- `release/0.3.0` este DRAFT până la calificarea buildului și a descărcării; nu este APK instalabil.
+- [ ] În următoarea probă nativă focalizată pe tură, măsurați intervalul dintre cadrul actorului și mutare și verificați o singură mutare per cadru, anularea la pauză sau navigare și reluarea din checkpoint. Asociați jurnalul și capturile cu SHA-ul APK-ului verificat.
 
 ## P1 — Geometria mesei Rentz și sub-jocuri consecutive
 

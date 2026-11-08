@@ -18,7 +18,7 @@
 | Prioritate | Responsabil și diferență | Criteriu de închidere |
 |---|---|---|
 | P1 | Referința: pornirea poate produce WebView negru pe configurația Android inspectată. | Identificați runtime-ul și cauza prin probe delimitate; un ecran utilizabil și instrucțiuni lizibile preced calificarea regulilor. Instalarea sau PID-ul procesului nu constituie succes funcțional. |
-| P1 | Android local: tabla Rentz, contextul mutărilor și tabela de scor sunt încă prezentări de prototip. | Închideți [ToDo-urile de interfață](ATF_Rentz_UI_ToDo.md): deschidere J reală, geometrie stabilă, scor explicabil și toate coloanele accesibile, prin componente și acceptanță nativă selectivă. |
+| P1 | Android local: integrarea mesei și a istoricului este livrată. Mai rămân opțiunea „Valet mereu”, geometria compactă, ritmul actorilor și clasamentul final. | Închideți probele de componentă și de acceptanță nativă selectivă din [backlog-ul UI](ATF_Rentz_UI_ToDo.md). Contractele livrate sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md). |
 | P2 | Persistență: versiunea regulilor este explicită; compatibilitatea veche este limitată la reluarea validată a comenzilor, fără migrarea scorului sau a opțiunilor noi. | Calificați migrări reprezentative și refuzul sesiunilor incompatibile, cu păstrarea fișierului original. Orice schimbare de profil sau candidat cere identitate și strategie explicită. |
 | P1 | iOS: cererea de suport iPhone nu are încă țintă, build sau calificare proprie în J5. | Închideți criteriile din [contractul de release iOS](../rentz/ATF_Release.md#calificarea-ios): decizie arhitecturală, paritate de reguli și persistență, teste de componente, simulator pe OS minim și pe versiunea stabilă curentă, apoi probă pe dispozitiv și distribuție semnată distinctă. |
 
@@ -47,7 +47,7 @@ Kitul și JAR-urile au responsabilități comune, iar legalitatea și scorul apa
 
 ## Prezentare și tabelă de scor
 
-[Backlog-ul UI](ATF_Rentz_UI_ToDo.md) centralizează constatările, capturile și criteriile de închidere. Accesul la istoric și acordul stării cu oracolul nu califică singure lizibilitatea, toate coloanele după derulare sau păstrarea tablei terminale.
+[Ghidul integrării](../rentz/ATF_UiIntegration.md#istoricul-adaptiv-rentz) păstrează dovada accesului la coloane după derulare. [Backlog-ul UI](ATF_Rentz_UI_ToDo.md) păstrează criteriile deschise pentru clasament, lizibilitatea mesei și tabla terminală.
 
 [Contractul regulilor](../rentz/ATF_Rules.md) · [Lecțiile transferului](../rentz/ATF_Transfer.md) · [Rutarea bibliotecilor](README.md)
 

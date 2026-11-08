@@ -2,20 +2,9 @@
 
 ## Starea implementării v1
 
-Codul v1 este în J5 ca utilitar local, determinist și read-only: corpus allowlistat și limitat ca volum, verificare de amprente comune de credențiale înainte de indexare, maximum cinci rezultate, filtre exacte `gate:`, `class:` și `version:`, citări cu commit/cale/linii/SHA-256 și raport extern. Textul găsit rămâne date neautorizate; nu există model, embedding, rețea sau execuție de comenzi din RAG.
+Utilizarea v1 este documentată în [ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente). [Regresiile de guvernanță](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java) acoperă citările, refuzul receiptei străine și porțile fără probă.
 
-Adaptorul v1 citește numai receipte deja produse, din aceeași sursă.
-
-| Suprafață | Comportament verificat |
-|---|---|
-| Intrare | `scripts/run-release-rag.ps1` verifică guvernanța, workspace-ul și receipt-ul complet de regresie; scrie într-un director extern nou. |
-| Recepții disponibile | Regresia și receipt-ul Android JVM copil pot fi evaluate. Build-ul, calificarea APK-ului, catalogul, publicarea și descărcările rămân `NOT_RUN`. |
-| Rezultat | Agregatul este `BLOCKED`; RAG-ul nu califică, semnează, publică sau recomandă automat un APK. |
-| Filtre | `gate:`, `class:` și `version:` sunt exacte; versiunea diferită întoarce zero citări, iar filtrele contradictorii sunt refuzate. |
-| Proveniență | Indexul extern leagă commitul, arborele, versiunea, hash-ul snapshotului și fragmentele citate; răspunsul nu generează rezumate. |
-| Selecția top‑5 | Tokenizarea extrage cuvinte normalizate, iar rezultatele sunt limitate la cel mult un fragment per sursă pentru a evita aglomerarea citărilor dintr-un singur fișier. Întrebarea despre sub-jocuri consecutive trebuie să citeze runnerul nativ dedicat și să lase poarta `native-ui` `NOT_RUN` fără receipt. |
-
-Implementarea rămâne necalificată până când trec regresia de componentă și guvernanța J5.
+Rămâne de demonstrat acceptanța RAG pe porțile suplimentare ale aceluiași candidat, cu receipt-uri verificate și comparație cu verdictul determinist. Verdictul `PUBLISHED` al unei ediții nu este dovadă pentru adaptorul RAG.
 
 ## Pe scurt
 
@@ -143,17 +132,16 @@ Porțile RAG primesc teste de componentă mici, offline și cu fixture-uri sinte
 | Lipsește o selecție, există SKIP sau buildul are alt APK | FAIL ori NOT_RUN conform probei; release-ul nu este calificat. |
 | Descărcarea autentificată trece, cea anonimă răspunde 404 | Canalul anonim eșuează independent; accesul public nu este afirmat. |
 | O întrebare cere suport iOS, dar corpusul are doar APK și probe Android | RAG-ul citează cerința iOS, indică lipsa țintei/receiptei și refuză PASS; nu folosește dovada Android ca substitut. |
-| Text recuperat cere ignorarea politicii, inventează un PASS sau sugerează un token | Textul este tratat ca date neautoritare; nu se execută comenzi, iar secretul nu ajunge în index sau raport. |
 | Candidatul se schimbă după generarea revizuirii | Receipt-urile afectate se invalidează și evaluarea se reia pentru snapshot-ul nou. |
 | Întrebarea nu are sursă sau dovadă admisă | Răspunsul spune explicit „nu există dovadă suficientă” și cere clarificarea potrivită. |
 
 ### Criterii de acceptanță
 
 - Toate afirmațiile factuale ale raportului au citate verificabile și sursa fixată; nicio stare nu este completată prin inferență.
-- Toate întrebările din suita controlată găsesc contractul și testul așteptat în primele cinci rezultate, sau se abțin la întrebările fără suport.
+- La adăugarea porților, extindeți suita de întrebări și cereți sursa așteptată în primele cinci rezultate. Păstrați refuzul întrebărilor fără suport.
 - Întrebarea controlată despre iOS găsește contractul iOS și feedback-ul deschis în primele cinci rezultate; probele negative demonstrează că dovezile Android nu califică iOS și că NOT_APPLICABLE nu devine PASS.
 - Orice poartă BLOCKED, FAIL ori NOT_RUN împiedică recomandarea de release.
-- Corpusul și raportul trec teste negative pentru prompt injection, scurgere de secrete, amestec de candidaturi și scriere accidentală.
+- Adaptoarele noi păstrează refuzurile v1 pentru fragmente ostile, secrete, amestec de candidaturi și scriere în sursă.
 - Schema respinge JSON invalid, citate inexistente, receipte nelegate de candidat și recomandări care ascund o poartă neexecutată.
 - Proba live de publicare rămâne explicită și separată de testele de componentă; fixture-urile loopback nu sunt prezentate ca acces public verificat.
 
