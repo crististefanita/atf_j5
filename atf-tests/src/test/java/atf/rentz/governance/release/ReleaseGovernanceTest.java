@@ -427,6 +427,17 @@ class ReleaseGovernanceTest {
         assertFalse(changedTool.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
     }
 
+    @Test void releaseBuilderNormalizesReceiptSha256HexBeforeComparing() throws Exception {
+        String builder=Files.readString(ReleaseCatalog.root().resolve("scripts/build-rentz-android.ps1"),StandardCharsets.UTF_8);
+        assertTrue(builder.contains("$componentManifestDigest=(Get-FileHash")
+                        && builder.contains("$receiptManifestDigest=([string]$component.sourceManifestSha256).ToLowerInvariant()")
+                        && builder.contains("$componentManifestDigest-cne$receiptManifestDigest"),
+                "The manifest receipt is lowercase hex while Get-FileHash returns uppercase hex; compare normalized values.");
+        assertTrue(builder.contains("$qualified[$path]-ine$hash")
+                        && builder.contains("$regressionInputs[\"rentz-lab-app/$path\"]-ine$hash"),
+                "Android source and regression input digests must use case-insensitive hex comparison.");
+    }
+
     @Test void componentExtentRunnerUsesTheAtfModuleClasspathForTheCombinedSurefireReport() throws Exception {
         String runner=Files.readString(ReleaseCatalog.root().resolve("scripts/run-rentz-components.ps1"));
         String selector="$reportRows=@($results|Where-Object module -EQ 'atf-tests')";

@@ -26,7 +26,9 @@ if($Configuration-eq'Release'){
 }
 $reportingLibrary=Get-AtfReportingLibrary -ProjectRoot $source
 $componentManifest=Join-Path $ComponentRun 'source-identity.json'
-if($component.sourceManifestSha256-and(Get-FileHash -LiteralPath $componentManifest).Hash-cne$component.sourceManifestSha256){
+$componentManifestDigest=(Get-FileHash -LiteralPath $componentManifest -Algorithm SHA256).Hash.ToLowerInvariant()
+$receiptManifestDigest=([string]$component.sourceManifestSha256).ToLowerInvariant()
+if($receiptManifestDigest-notmatch'^[0-9a-f]{64}$'-or$componentManifestDigest-cne$receiptManifestDigest){
     throw 'Component source manifest differs from the receipt.'
 }
 $androidReceipt=Get-Content -Raw -LiteralPath (Join-Path $component.androidJvm 'result.json')|ConvertFrom-Json
@@ -50,7 +52,7 @@ $manifest=@(foreach($file in Get-ChildItem -LiteralPath $lab -Recurse -File|Wher
     $hash=(Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash
     if($hash-ne(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash){throw 'Source changed during Android snapshot'}
     $path=$relative.Replace('\','/')
-    if($qualified[$path]-cne$hash-or$regressionInputs["rentz-lab-app/$path"]-cne$hash){
+    if($qualified[$path]-ine$hash-or$regressionInputs["rentz-lab-app/$path"]-ine$hash){
         throw "Android build input differs from qualified source: $path"
     }
     [pscustomobject]@{path=$path;sha256=$hash}

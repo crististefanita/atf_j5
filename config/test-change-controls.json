@@ -419,7 +419,7 @@
       "criterion": "RAG evidence is source-bound; report corruption blocks report readiness; the UI outcome remains separately truthful.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "fd061f42576107e47c1311fe19c5637fda6448d906ac536335b097419ecc8b42",
+      "sha256": "f4497c55fdd83517efb267fbdfe62b96c8cbaa244df2611225ebd22ca973295b",
       "allowDelete": false
     },
     {
@@ -1099,7 +1099,7 @@
       "criterion": "Commit, source manifest, package, version, signing certificate, APK bytes, and reporting tools match receipts.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "2ebdebc8607391342d28518b5df051c9e82e8cb3c5000e34a9ea0a19ef508194",
+      "sha256": "5f070733ebfcfe32ab83bdde2765853925e0b9aaac780ea99ba1301194f327f8",
       "allowDelete": false
     },
     {
