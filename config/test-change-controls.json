@@ -184,12 +184,22 @@
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java",
-      "owner": "Rentz consumer",
+      "owner": "Rentz release",
       "reason": "Rentz release · Require the three-game Android acceptance to be explicit in the native report.",
       "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "c62e7aef52ae12be0288ce824ace9d5c9790a4b77696c1f404ec089a8c199240",
+      "sha256": "4aaa92c049fa1928f28faea210bf449ca702a8ee1184702e1d1a417742cce8ed",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlowTest.java",
+      "owner": "Rentz release",
+      "reason": "Keep the native Extent title and scope truthful for each UI sanity mode.",
+      "criterion": "The three-game acceptance identifies Rentz plus two other complete games, while narrower sanity reports state only their measured scope.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "3709d98097dca9bf52354c5c67a2503926f3ba772ec3b406d2d82b6cae99889f",
       "allowDelete": false
     },
     {

@@ -17,6 +17,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class RentzNativeFlowTest {
     private static final ObjectMapper JSON=new ObjectMapper();
     @TempDir Path directory;
+    @Test void nativeReportNamesOnlyTheGameScopeThatActuallyRan(){
+        var acceptance=RentzNativeFlow.reportScope("0.4.0",true,"one Rentz deal plus two non-Rentz deals");
+        assertTrue(acceptance.title().contains("trei jocuri complete"));
+        assertTrue(acceptance.description().contains("one Rentz deal plus two non-Rentz deals"));
+        assertTrue(acceptance.description().contains("nu pentru întreaga serie de concurs"));
+
+        var narrow=RentzNativeFlow.reportScope("0.4.0",false,"one trick hand and menu navigation");
+        assertFalse(narrow.title().contains("trei jocuri"));
+        assertTrue(narrow.description().contains("one trick hand and menu navigation"));
+        assertTrue(narrow.description().contains("nu pretinde acceptanța cu trei jocuri complete"));
+    }
     record Execution(int exit,String output,String error){}
     private Execution invoke(String...args)throws Exception{
         Path run=Files.createDirectory(directory.resolve(UUID.randomUUID().toString()));
