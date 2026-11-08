@@ -505,7 +505,7 @@ function SeatGeometry($nodes,$state){
     $names=@('Ana')+@($state.opponents);$rectangles=[Collections.Generic.List[string]]::new()
     for($seat=0;$seat-lt$state.view.players;$seat++){
         $name=[string]$names[$seat]
-        $frames=@($nodes|Where-Object{$_.description.StartsWith($name+'. Points:')})
+        $frames=@($nodes|Where-Object{([string]$_.description).StartsWith($name+'. Points:',[StringComparison]::Ordinal)})
         if($frames.Count-ne1){throw "One visible frame required for seat $seat ($name)."}
         $rectangles.Add("$seat=$($frames[0].bounds)")
     }
@@ -800,7 +800,7 @@ try{
     }
     }
 }catch{
-    $failure=$_.Exception.ToString()
+    $failure=$_.Exception.ToString()+"`r`nInvocation: "+$_.InvocationInfo.PositionMessage+"`r`nScriptStackTrace: "+$_.ScriptStackTrace
     if($owned){try{Adb @('shell','logcat','-d','-t','150','-s','AndroidRuntime:E') 'failure-logcat'|Out-Null}catch{$cleanup.Add($_.Exception.ToString())}}
 }finally{
     if($owned){
