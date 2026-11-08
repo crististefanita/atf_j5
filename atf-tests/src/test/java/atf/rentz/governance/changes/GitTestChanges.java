@@ -41,8 +41,9 @@ final class GitTestChanges {
         }
         command(root, "merge-base", "--is-ancestor", base, "HEAD");
         var changes = new LinkedHashSet<Change>();
+        // Comparing the merge base directly to the final worktree already includes staged and unstaged bytes.
+        // Unioning a second index-only diff can resurrect an addition that the final worktree deleted.
         changes.addAll(trackedChanges(root, base));
-        changes.addAll(trackedChanges(root, base, "--cached"));
         for (String path : command(root, "ls-files", "--others", "--exclude-standard", "-z", "--", ".")
                 .split("\u0000")) {
             if (!path.isEmpty()) changes.add(new Change("A", path));

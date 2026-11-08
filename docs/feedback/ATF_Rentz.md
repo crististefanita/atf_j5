@@ -20,7 +20,7 @@
 | P1 | Referința: pornirea poate produce WebView negru pe configurația Android inspectată. | Identificați runtime-ul și cauza prin probe delimitate; un ecran utilizabil și instrucțiuni lizibile preced calificarea regulilor. Instalarea sau PID-ul procesului nu constituie succes funcțional. |
 | P1 | Android local: tabla Rentz, contextul mutărilor și tabela de scor sunt încă prezentări de prototip. | Închideți [ToDo-urile de interfață](ATF_Rentz_UI_ToDo.md): deschidere J reală, geometrie stabilă, scor explicabil și toate coloanele accesibile, prin componente și acceptanță nativă selectivă. |
 | P2 | Persistență: versiunea regulilor este explicită; compatibilitatea veche este limitată la reluarea validată a comenzilor, fără migrarea scorului sau a opțiunilor noi. | Calificați migrări reprezentative și refuzul sesiunilor incompatibile, cu păstrarea fișierului original. Orice schimbare de profil sau candidat cere identitate și strategie explicită. |
-| P1 | iOS: cererea de suport iPhone nu are încă țintă, build sau calificare proprie în J5. | Închideți criteriile din [contractul de release iOS](../rentz/ATF_Release.md#calificarea-ios): decizie arhitecturală, paritate de reguli și persistență, teste de componente, simulator pe OS minim și pe versiunea stabilă curentă, apoi probă pe dispozitiv și distribuție semnată distinctă. |
+| P1 | iOS: cererea de suport iPhone nu are încă țintă, build sau calificare proprie în J5. | Contractul actual [descrie livrarea Android](../rentz/ATF_Release.md). Dacă iOS rămâne în scop, adăugați criterii și receipte de release proprii; APK-ul și testele Android nu îl califică. |
 
 ## Platforma iOS
 

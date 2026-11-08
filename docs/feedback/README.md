@@ -6,7 +6,7 @@
 
 - [Paritatea interfeței cu Whist Lab](ATF_Rentz_UI_ToDo.md) deține meniul, profilul, masa, cărțile și scorul Rentz, cu priorități și acceptanță prin componente și E2E selectiv. [Producătorul UI](../../../atf_j4/docs/feedback/ATF_CardUi_Extraction.md) deține extragerea prin refactorizare; adaptarea nu importă motorul sau regulile Whist.
 - [Integritate și calitate](ATF_RentzQuality.md) deține criteriile strategice și documentare încă deschise. Validarea, lifecycle-ul, guvernanța sursei și [calificarea consumatorului](../rentz/ATF_Qualification.md) au contracte și probe proprii; calificarea nativă rămâne separată.
-- [Cerințe RAG pentru release](ATF_Release_RAG.md) descrie asistența read-only cu proveniență, fără verdict autonom și fără efecte de publicare.
+- [Criteriile RAG rămase](ATF_Release_RAG.md) urmăresc probele de acceptanță suplimentare. [Ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) descrie fluxul curent și porțile deschise.
 
 ## Închidere și transfer
 
@@ -30,9 +30,7 @@ API-ul comun trebuie să primească rădăcina explicită, inventarul activ și 
 
 ## Claritatea exemplelor de adopție
 
-**P3 · responsabil: ghidurile bibliotecilor comune.** Exemplul pentru un consumator nou din ghidul lib trebuie să declare repository-ul Maven și zona de lucru selectate, inclusiv rolul izolării. O instrucțiune generică despre TMP nu trebuie interpretată ca autorizare a cache-ului implicit sau a unei copii neînregistrate.
-
-Criteriul este un fragment autonom, cu precondiții și repository explicit, verificat prin consumatorul său. Păstrați distincte portabilitatea exemplului, blocarea cache-ului în ATF și acceptanța binarului; nu introduceți un helper local ascuns ca precondiție a ghidului comun.
+**P3 · probă de portabilitate.** [Ghidul J5](../../lib/README.md#integrare) indică acum zona de lucru și repository-ul Maven explicit. Rămâne verificarea fragmentului într-un consumator autonom, cu cache dedicat, apoi importul IntelliJ din același cache. Acceptanța binarelor J5 are propria poartă.
 
 ## Inventar executabil și runtime comun
 

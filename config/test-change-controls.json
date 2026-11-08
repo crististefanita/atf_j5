@@ -239,17 +239,17 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "25571ac3caffa95d3c2395f3b151bbecd18c53e6dc6293d896bb55ddfe86e273",
+      "sha256": "e16bcd026dc5eb93dbe0359157401be8f73a704f9aa0cfe67c5e890c067d3495",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java",
       "owner": "Rentz release",
-      "reason": "Introduce a local, deterministic, read-only retrieval adapter for release evidence.",
-      "criterion": "Only allowlisted bounded sources are read; lexical queries extract normalized tokens and unsupported queries abstain; top-five results diversify by source; citations bind source bytes and lines; exact metadata filters are applied; mismatched receipts, secret-like paths and output paths outside the external artifact root fail closed. RAG never publishes.",
-      "proof": "docs/feedback/ATF_Release_RAG.md",
-      "expires": "2026-11-30",
-      "sha256": "09ca64f22564f084c0db8bec8b5d3416333cae69815f84f8825c467e7997af41",
+      "reason": "Bind release readiness gates to source, Extent and native UI receipts; validate inline screenshot payloads.",
+      "criterion": "Mutated source, numeric count, PNG, receipt, or report hash blocks only the affected gate and never authorizes publication.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "c46095e3c998f500d31caca1462afe5f8af21ef1cdaf8305c5a78ca2def85742",
       "allowDelete": false
     },
     {
@@ -265,21 +265,21 @@
     {
       "path": "scripts/run-release-rag.ps1",
       "owner": "Rentz release",
-      "reason": "Add the governed read-only entry point for a previously qualified release regression receipt.",
-      "criterion": "The wrapper enforces infrastructure/runtime and external artifact policies, validates a full existing regression receipt, launches only the local retriever and never starts tests, builds, ADB or publication.",
-      "proof": "docs/feedback/ATF_Release_RAG.md",
-      "expires": "2026-11-30",
-      "sha256": "8d11bc8255a77d5f9c9b3ad2b8bbd3b2f8ced9fb5ceb3c759cd681206626e369",
+      "reason": "Consume release receipts without executing, promoting, or publishing gates.",
+      "criterion": "Only external fresh report roots and source-bound component/build/UI receipts are accepted; publishAllowed remains false.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "4db1135a5e1b4b1a7ca68ca3b52acda49155931b5bf4532fda13795d82957e50",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/changes/TestChangeGovernanceTest.java",
-      "owner": "Rentz consumer",
-      "reason": "Retain the existing test-change guard while protecting the local release RAG's allowlist, read-only runner and retrieval implementation.",
-      "criterion": "Existing discovery and admission negatives remain intact; RAG policy, runner and retriever require exact reviewed hashes. Component mutants reject conflicting metadata filters, stale candidates, secret-like paths/content/questions and unsupported retrieval without producing a gate PASS.",
-      "proof": "docs/feedback/ATF_Release_RAG.md",
+      "owner": "Rentz release",
+      "reason": "Protect release pipeline, workspace boundaries, and reporting tools with exact change controls.",
+      "criterion": "New protected paths are asserted; the actual Git diff must have one current review control per protected change.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "b94b4ae367417b88bc11a595da2647360d3fe777916a72a9c1345fefe348b706",
+      "sha256": "7acde0ca22be535828cc147b898bda09eb5aaa821cb6a385e1868b4ccf51e66e",
       "allowDelete": false
     },
     {
@@ -414,12 +414,12 @@
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
-      "owner": "Rentz consumer",
-      "reason": "Preserve the incoming Git byte and retained-evidence coverage while adding focused RAG regressions, receipt checks and metadata-filter tests.",
-      "criterion": "Existing release assertions remain; raw library bytes and complete evidence bodies stay protected. RAG cites exact source hashes/lines, abstains without support, returns distinct source paths in the top-five retrieval, excludes secret-like source/query material, treats retrieved injection as data, enforces gate/class/version filters and never passes unreceipted gates.",
-      "proof": "docs/feedback/ATF_Release_RAG.md",
+      "owner": "Rentz release",
+      "reason": "Govern release-state, receipt, screenshot, and component report behavior.",
+      "criterion": "RAG evidence is source-bound; report corruption blocks report readiness; the UI outcome remains separately truthful.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "8d4bd9300a4571089b19304ec25354fcdd3e89f82fc2c0106cb7ff82f5413300",
+      "sha256": "f8be810cff0c6f15c0c3ca10783d877b91ae0c81dbbc17ba50baae8b128e8ebe",
       "allowDelete": false
     },
     {
@@ -519,7 +519,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a96e2b707da8769b0fd77300e21eda638bb681bf244ba2c772d5863848685d1a",
+      "sha256": "10041a70da544aea93d1a29683e00832bb405e7afddb4cec55c0f421170498dd",
       "allowDelete": false
     },
     {
@@ -674,12 +674,12 @@
     },
     {
       "path": "pom.xml",
-      "owner": "Rentz consumer",
-      "reason": "0.3.0 release candidate retains the parallel Reporting J23 artifact update.",
-      "criterion": "J23 JAR/POM and provenance hashes agree; regression validates the actual consumer classpath and selected test population with zero errors or skips.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-rentz-0.3.0/README.md",
+      "owner": "Rentz release",
+      "reason": "Keep the module and test collection configuration aligned with the release component report.",
+      "criterion": "The reactor builds required production and ATF modules offline and preserves the selected Surefire population.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "5c7fc09f3240c655ba0fd889051868bd7b077b3dfd135b0eba4f7f7bb70b80ca",
+      "sha256": "d298236453e79e1c6faad2ee559dbb469697584ba4a484d5d955da8ea40a5aa0",
       "allowDelete": false
     },
     {
@@ -965,11 +965,11 @@
     {
       "path": "scripts/run-rentz-components.ps1",
       "owner": "Rentz release",
-      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Qualify the clean registered Git snapshot and reject altered commit, byte drift and population drift.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "reason": "Generate an auditable atf-reporting Extent for the full selected component suite.",
+      "criterion": "All selected Surefire XML is hashed and reconciled; the publisher uses the atf-tests runtime classpath; failed or empty runs remain FAIL.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "61bcaff020b8ff49eac4b00df6ab9dceff7047d3fdfc31b0a80f6d33395f2e0c",
+      "sha256": "006ddaa9125ebe7705fa697bbaacf1cfcbfcf52e6705daf4dff4b94bc8a55663",
       "allowDelete": false
     },
     {
@@ -1001,6 +1001,214 @@
       "expires": "2026-11-20",
       "sha256": "a54963673ab98d05dd3c7188ba2df08f4cc499014ddaa91f6634c94491598535",
       "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java",
+      "owner": "Rentz release",
+      "reason": "Release 0.4.0 candidate version boundary and catalog identity.",
+      "criterion": "Published version remains separate; candidate advances one minor or major boundary and Android versionCode increases.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "9dbf34eb498897450c1d7ed0ee8a76e9bb054b5cb2bdb6886543f7798db19e08",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/reporting/ComponentSuiteExtentReport.java",
+      "owner": "Rentz release",
+      "reason": "Publish the selected Maven and Android JVM component population through the pinned reporting library.",
+      "criterion": "Every testcase and suite is reconciled against original Surefire XML, totals, source identity and report artifact inspector.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "4f814b56c548135f394ec59cafde011082fd511d0b666e88605e30cb5a06b255",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/ReleaseCatalogCandidateVersionTest.java",
+      "owner": "Rentz release",
+      "reason": "Add component coverage for semantic minor/major release candidate progression.",
+      "criterion": "One valid boundary passes; patch-only, skipped, backward, and invalid transitions fail.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "b097179daba522308644153f8b1ae01a5b451e68d27170c940204339cce23b23",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/ReleaseReadinessRagNumericReceiptTest.java",
+      "owner": "Rentz release",
+      "reason": "Add component coverage for exact receipt counts.",
+      "criterion": "Only exact integral values within supported bounds are accepted; fractions, strings, and overflow fail.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "0c0e06d599927dcd707a7fc6ecedbc7d77558462bec94940527fed627c7c66df",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/ReleaseReadinessRagPngTest.java",
+      "owner": "Rentz release",
+      "reason": "Add component coverage for original inline PNG evidence.",
+      "criterion": "Valid PNG chunks, CRC, size, and completion pass; malformed or truncated payloads block.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "d072826d67bc330a41445fd7240c33a19eeef72eaacb66a2302f0342d790cbc9",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/reporting/ComponentSuiteExtentReportTest.java",
+      "owner": "Rentz release",
+      "reason": "Add component coverage for auditable Extent publication and empty failure artifacts.",
+      "criterion": "Extent lists original testcases, reconciles totals and hashes, and does not qualify empty or failed populations.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "9eab1f5b6008951f9f8e33ba5a69e321ea807ea2e2692e1653cff86352a15410",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
+      "owner": "Rentz release",
+      "reason": "Bind the UI sanity receipt to the APK, reporting library, original screenshots, and run identity.",
+      "criterion": "Native execution and Extent evidence remain separate; invalid report integrity blocks promotion.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "3a11f66bd403de9e9bd9e4f41098549abd26a139ab80223f76794c32113802b9",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/tools/test-workspace-governance.ps1",
+      "owner": "Rentz release",
+      "reason": "Cover worktree source identity variation without weakening workspace owner checks.",
+      "criterion": "A same-project registered worktree passes; missing, malformed, mismatched, or foreign owner descriptors fail.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "f4d6b6e6c0123b819c41c8e3b815e8cf7fdac5c789b3028a12594dbd2d058b3e",
+      "allowDelete": false
+    },
+    {
+      "path": "scripts/InfrastructureWorkspaces.psm1",
+      "owner": "Rentz release",
+      "reason": "Allow multiple registered worktrees for the same J5 repository while retaining strict workspace identity.",
+      "criterion": "Descriptor owner, ID, source-root identity, physical path, and Git common directory are validated; another repository fails.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "0bb8e4c9a5ec9d8c51786e3037c5f7afb9caa63b3211f5d5b41e236e6652bf4c",
+      "allowDelete": false
+    },
+    {
+      "path": "scripts/build-rentz-android.ps1",
+      "owner": "Rentz release",
+      "reason": "Bind signed Android release and UI sanity APKs to the passing component receipt.",
+      "criterion": "Commit, source manifest, package, version, signing certificate, APK bytes, and reporting tools match receipts.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "2ebdebc8607391342d28518b5df051c9e82e8cb3c5000e34a9ea0a19ef508194",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/build.gradle",
+      "owner": "Rentz release",
+      "reason": "Advance the candidate Android version while preserving the published release identity.",
+      "criterion": "Gradle versionName and monotonically increasing versionCode match the release catalog candidate.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "971ab1ab7e4023e5a2ea973067f1cc770a0338eb516563ec710e5cdc6448ec09",
+      "allowDelete": false
+    },
+    {
+      "path": "release/index.json",
+      "owner": "Rentz release",
+      "reason": "Separate the published version from the next minor/major release candidate.",
+      "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "ec82e6d4633eff9231ecfbadaf9cffbb4bc719f282ed23f002df69407aa36132",
+      "allowDelete": false
+    },
+    {
+      "path": "lib/atf-reporting-1.0.0-j23.jar",
+      "owner": "Rentz release",
+      "reason": "Remove the superseded reporting artifact after consumers migrate to the declared current library.",
+      "criterion": "The declared Maven version, provenance, component Extent, Android build and UI runner resolve the current artifact; governance rejects missing or stale identities.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "2378ea9d410690d2424b4bc58e1ed203e55ce2b7f60be8e8cc8a1847e2e5b756",
+      "allowDelete": true
+    },
+    {
+      "path": "lib/atf-reporting-1.0.0-j23.pom",
+      "owner": "Rentz release",
+      "reason": "Remove the superseded reporting artifact after consumers migrate to the declared current library.",
+      "criterion": "The declared Maven version, provenance, component Extent, Android build and UI runner resolve the current artifact; governance rejects missing or stale identities.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "523feac2c69ac62771cd24d88a86a7a6082b5379ca158bbd991e2f0beb44f827",
+      "allowDelete": true
+    },
+    {
+      "path": "library-provenance.json",
+      "owner": "Rentz release",
+      "reason": "Pin the reporting-library migration and source-bound adapters.",
+      "criterion": "The declared Maven version selects exactly one matching JAR/POM; component, release and UI receipts record the same artifact and SHA-256; malformed identities fail closed.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "43cc14d6ee142079f862b5fb0f95dad7ce3123b18853e32a5f6cc9fdc30d989c",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/AtfReportingLibrary.java",
+      "owner": "Rentz release",
+      "reason": "Pin the reporting-library migration and source-bound adapters.",
+      "criterion": "The declared Maven version selects exactly one matching JAR/POM; component, release and UI receipts record the same artifact and SHA-256; malformed identities fail closed.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "37c7d168cf758374bd95fce4b47cde0f7869ad084afdb7396a9445f8c116c2d0",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/AtfReportingLibraryTest.java",
+      "owner": "Rentz release",
+      "reason": "Pin the reporting-library migration and source-bound adapters.",
+      "criterion": "The declared Maven version selects exactly one matching JAR/POM; component, release and UI receipts record the same artifact and SHA-256; malformed identities fail closed.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "04676c602061ea32aa3203a7e6908858bf0e60eb5d6a244dc7180e98b1e40bed",
+      "allowDelete": false
+    },
+    {
+      "path": "lib/atf-reporting-1.0.0-j24.jar",
+      "owner": "Rentz release",
+      "reason": "Pin the reporting-library migration and source-bound adapters.",
+      "criterion": "The declared Maven version selects exactly one matching JAR/POM; component, release and UI receipts record the same artifact and SHA-256; malformed identities fail closed.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "8dd71735de004853210a91169297d8965691f6c4bf6781195594be50f70b69ef",
+      "allowDelete": false
+    },
+    {
+      "path": "lib/atf-reporting-1.0.0-j24.pom",
+      "owner": "Rentz release",
+      "reason": "Pin the reporting-library migration and source-bound adapters.",
+      "criterion": "The declared Maven version selects exactly one matching JAR/POM; component, release and UI receipts record the same artifact and SHA-256; malformed identities fail closed.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "sha256": "2d18f1d8f3b68e17788baeea60cc011be4d5f1a8c0c0709a2f7801297d2c60da",
+      "allowDelete": false
+    },
+    {
+      "path": "lib/atf-reporting-1.0.0-j21.jar",
+      "owner": "Rentz release",
+      "reason": "Remove the superseded J21 reporting artifact from the active flat library set.",
+      "criterion": "The current declared reporting artifact is J24; no J21 JAR or POM is shipped in lib and library adoption passes.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "allowDelete": true
+    },
+    {
+      "path": "lib/atf-reporting-1.0.0-j21.pom",
+      "owner": "Rentz release",
+      "reason": "Remove the superseded J21 reporting artifact from the active flat library set.",
+      "criterion": "The current declared reporting artifact is J24; no J21 JAR or POM is shipped in lib and library adoption passes.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "expires": "2026-11-20",
+      "allowDelete": true
     }
   ]
 }

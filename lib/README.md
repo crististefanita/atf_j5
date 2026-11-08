@@ -21,16 +21,17 @@ Java 21 și Maven; cinci JAR-uri thin, cu tranzitivele din POM. Ghidurile sunt a
 <details>
 <summary>Consumer nou, fără reactor ATF</summary>
 
-Copiați perechile JAR/POM în lib; din proiectul nou, în TMP:
+Copiați perechile JAR/POM în `lib` în proiectul nou. Din rădăcina copiei de lucru temporare, setați un repository Maven dedicat cu o cale absolută. Pentru rulări J5, folosiți workspace-ul și cache-ul înregistrate conform [infrastructurii proiectului](../docs/rentz/ATF_Infrastructure.md).
 
 ```powershell
+$consumerMavenRepo = '<cale-absoluta-catre-cache-ul-Maven-dedicat>'
 Get-ChildItem lib\*.pom | ForEach-Object {
-    mvn org.apache.maven.plugins:maven-install-plugin:3.2.0:install-file "-Dfile=$([IO.Path]::ChangeExtension($_.FullName,'jar'))" "-DpomFile=$($_.FullName)" -DgeneratePom=false
+    mvn "-Dmaven.repo.local=$consumerMavenRepo" org.apache.maven.plugins:maven-install-plugin:3.2.0:install-file "-Dfile=$([IO.Path]::ChangeExtension($_.FullName,'jar'))" "-DpomFile=$($_.FullName)" -DgeneratePom=false
     if ($LASTEXITCODE) { throw "Instalare eșuată: $($_.Name)" }
 }
 ```
 
-Declarați, de exemplu, `atf.api:atf-reporting:<versiunea din POM>` în dependențe. Folosiți scope `compile` pentru support în src/main și `test` doar în src/test; Maven rezolvă tranzitivele.
+Declarați, de exemplu, `atf.api:atf-reporting:<versiunea din POM>` în dependențe. Folosiți scope `compile` pentru suport în `src/main` și `test` pentru `src/test`. Selectați același repository la comenzile Maven ulterioare și la importul IntelliJ.
 
 </details>
 

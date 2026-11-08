@@ -102,6 +102,14 @@ function Get-AtfDataRoot {
     return $data
 }
 
+function Get-AtfGitCommonDirectory {
+    param([Parameter(Mandatory)][string]$RepositoryRoot)
+    $value=git -C $RepositoryRoot rev-parse --git-common-dir
+    if($LASTEXITCODE-ne0-or-not$value){throw 'Git common directory unavailable.'}
+    $path=if([IO.Path]::IsPathRooted($value)){[string]$value}else{Join-Path $RepositoryRoot ([string]$value)}
+    return [IO.Path]::GetFullPath($path)
+}
+
 function Assert-AtfPhysicalPath {
     param([Parameter(Mandatory)][string]$Path)
     $cursor=[IO.Path]::GetFullPath($Path)
@@ -165,7 +173,11 @@ function Get-AtfWorkspaceFindings {
             try{
                 if($directory.Attributes-band[IO.FileAttributes]::ReparsePoint){throw 'Linked workspace'}
                 $descriptor=Get-Content -Raw -LiteralPath (Join-Path $directory.FullName '.atf-workspace.json') -ErrorAction Stop|ConvertFrom-Json
-                if($descriptor.schemaVersion-ne1-or$descriptor.owner-ne$Policy.owner-or$descriptor.kind-notin$Policy.workspaceKinds-or$descriptor.id-notmatch'^[a-f0-9]{32}$'-or$directory.Name-ne($descriptor.kind+'-'+$descriptor.id)-or[IO.Path]::GetFullPath($descriptor.sourceRoot)-ne[IO.Path]::GetFullPath($ProjectRoot)){throw 'Workspace identity mismatch'}
+                $declaredRoot=[string]$descriptor.sourceRoot
+                if(-not[IO.Path]::IsPathRooted($declaredRoot)){throw 'Relative source root'}
+                $declaredRoot=[IO.Path]::GetFullPath($declaredRoot)
+                if($descriptor.schemaVersion-ne1-or$descriptor.owner-ne$Policy.owner-or$descriptor.kind-notin$Policy.workspaceKinds-or$descriptor.id-notmatch'^[a-f0-9]{32}$'-or$directory.Name-ne($descriptor.kind+'-'+$descriptor.id)-or(Split-Path -Leaf $declaredRoot)-ne$Policy.owner-or-not(Test-Path -LiteralPath $declaredRoot -PathType Container)){throw 'Workspace identity mismatch'}
+                Assert-AtfPhysicalPath -Path $declaredRoot
             }catch{Add-Finding 'INFRA-UNREGISTERED-WORKSPACE' $directory.FullName 'Workspace descriptor is missing, malformed or does not match the directory and owner.'}
         }
     }
@@ -214,8 +226,17 @@ function Get-AtfReleaseSourceCommit {
         throw 'Release source must be an atf_j5 worktree inside a registered workspace.'
     }
     $descriptor=Get-Content -Raw -LiteralPath (Join-Path $workspace '.atf-workspace.json')|ConvertFrom-Json
-    if($descriptor.sourceRoot-ne$ProjectRoot-or(Split-Path -Leaf $workspace)-ne("$($descriptor.kind)-$($descriptor.id)")){
+    $declaredRoot=[string]$descriptor.sourceRoot
+    if(-not[IO.Path]::IsPathRooted($declaredRoot)-or(Split-Path -Leaf $workspace)-ne("$($descriptor.kind)-$($descriptor.id)")){
         throw 'Release workspace identity differs from the registered project.'
+    }
+    $declaredRoot=[IO.Path]::GetFullPath($declaredRoot)
+    if((Split-Path -Leaf $declaredRoot)-ne'atf_j5'-or-not(Test-Path -LiteralPath $declaredRoot -PathType Container)){
+        throw 'Release workspace source root is unavailable.'
+    }
+    Assert-AtfPhysicalPath -Path $declaredRoot
+    if((Get-AtfGitCommonDirectory -RepositoryRoot $declaredRoot)-cne(Get-AtfGitCommonDirectory -RepositoryRoot $ProjectRoot)){
+        throw 'Release workspace belongs to another Git repository.'
     }
     $top=git -C $source rev-parse --show-toplevel
     if($LASTEXITCODE-ne0-or[IO.Path]::GetFullPath($top)-ne$source){throw 'Explicit release Git worktree required.'}
@@ -226,4 +247,57 @@ function Get-AtfReleaseSourceCommit {
     return $commit
 }
 
-Export-ModuleMember -Function Get-AtfWorkspacePolicy,Get-AtfDataRoot,Assert-AtfPhysicalPath,Assert-AtfArtifactPath,Get-AtfInfrastructurePath,New-AtfWorkspace,Get-AtfWorkspaceFindings,Assert-AtfInfrastructure,Get-AtfReleaseSourceCommit
+function Get-AtfCheckoutLayoutRoot {
+    param([Parameter(Mandatory)][string]$ProjectRoot)
+    $project=[IO.Path]::GetFullPath($ProjectRoot)
+    Assert-AtfPhysicalPath -Path $project
+    $workspace=Split-Path -Parent $project
+    $workspaceBase=Get-AtfInfrastructurePath -Area workspaces -ProjectRoot $project
+    if(-not$workspace.StartsWith($workspaceBase+'\',[StringComparison]::OrdinalIgnoreCase)){
+        return $project
+    }
+    $descriptorPath=Join-Path $workspace '.atf-workspace.json'
+    if(-not(Test-Path -LiteralPath $descriptorPath -PathType Leaf)){
+        throw 'Registered workspace checkout layout descriptor is missing.'
+    }
+    $descriptor=Get-Content -Raw -LiteralPath $descriptorPath|ConvertFrom-Json
+    $declaredRoot=[string]$descriptor.sourceRoot
+    if($descriptor.schemaVersion-ne1-or$descriptor.owner-cne'atf_j5'-or
+        -not[IO.Path]::IsPathRooted($declaredRoot)-or
+        (Split-Path -Leaf $workspace)-cne("$($descriptor.kind)-$($descriptor.id)")){
+        throw 'Registered workspace checkout layout identity is invalid.'
+    }
+    $declaredRoot=[IO.Path]::GetFullPath($declaredRoot)
+    if((Split-Path -Leaf $declaredRoot)-cne'atf_j5'-or-not(Test-Path -LiteralPath $declaredRoot -PathType Container)){
+        throw 'Registered workspace checkout layout source is unavailable.'
+    }
+    Assert-AtfPhysicalPath -Path $declaredRoot
+    if((Get-AtfGitCommonDirectory -RepositoryRoot $declaredRoot)-cne(Get-AtfGitCommonDirectory -RepositoryRoot $project)){
+        throw 'Registered workspace checkout layout belongs to another Git repository.'
+    }
+    return $declaredRoot
+}
+
+function Get-AtfReportingLibrary {
+    param([Parameter(Mandatory)][string]$ProjectRoot)
+    $project=[IO.Path]::GetFullPath($ProjectRoot)
+    $pomPath=Join-Path $project 'pom.xml'
+    Assert-AtfPhysicalPath -Path $pomPath
+    if(-not(Test-Path -LiteralPath $pomPath -PathType Leaf)){throw 'Root Maven POM is missing.'}
+    [xml]$pom=Get-Content -Raw -LiteralPath $pomPath
+    $nodes=@($pom.SelectNodes("/*[local-name()='project']/*[local-name()='properties']/*[local-name()='atf.reporting.version']"))
+    if($nodes.Count-ne1){throw 'Root Maven POM must declare exactly one atf.reporting.version.'}
+    $version=$nodes[0].InnerText.Trim()
+    if($version-notmatch'^\d+\.\d+\.\d+-j\d+$'){throw 'ATF reporting version has an invalid artifact form.'}
+    $name='atf-reporting-'+$version
+    $jar=Join-Path $project ('lib/'+$name+'.jar')
+    $artifactPom=Join-Path $project ('lib/'+$name+'.pom')
+    Assert-AtfPhysicalPath -Path $jar
+    Assert-AtfPhysicalPath -Path $artifactPom
+    if(-not(Test-Path -LiteralPath $jar -PathType Leaf)-or-not(Test-Path -LiteralPath $artifactPom -PathType Leaf)){
+        throw 'The POM-selected ATF reporting JAR and POM must both be present.'
+    }
+    return [pscustomobject]@{version=$version;name=$name;jar=$jar;sha256=(Get-FileHash -LiteralPath $jar -Algorithm SHA256).Hash.ToLowerInvariant();pom=$artifactPom;pomSha256=(Get-FileHash -LiteralPath $artifactPom -Algorithm SHA256).Hash.ToLowerInvariant()}
+}
+
+Export-ModuleMember -Function Get-AtfWorkspacePolicy,Get-AtfDataRoot,Assert-AtfPhysicalPath,Assert-AtfArtifactPath,Get-AtfInfrastructurePath,New-AtfWorkspace,Get-AtfWorkspaceFindings,Assert-AtfInfrastructure,Get-AtfReleaseSourceCommit,Get-AtfCheckoutLayoutRoot,Get-AtfReportingLibrary

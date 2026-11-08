@@ -29,9 +29,27 @@ class ReleaseGovernanceTest {
     @Test void currentReleaseMatchesGradleAndHasOneUnambiguousProductEntry() throws Exception {
         var edition=ReleaseCatalog.verify(ReleaseCatalog.root(),false);
         assertNotNull(edition,"Catalog verification returns an explicit edition");
+        var index=ReleaseCatalog.read(ReleaseCatalog.root().resolve("release/index.json"));
+        assertEquals("0.3.0",index.path("currentVersion").asText(),"Published entry stays stable until the candidate is accepted");
+        assertEquals("0.4.0",index.path("candidate").path("version").asText(),"Refactor and feature batch advances the candidate minor version");
+        assertEquals(7,index.path("candidate").path("versionCode").asInt());
         assertTrue(java.util.List.of("DRAFT","PREPARED","PUBLISHED").contains(edition.state()),"Actual release state remains explicit");
         if(edition.state().equals("DRAFT"))assertNull(edition.target(),"A draft cannot invent a downloadable APK");
         else assertNotNull(edition.target(),"A qualified edition has a complete expected identity");
+    }
+    @Test void releaseRagRunnerInitializesItsFreshExternalOutputDirectoryExactlyOnce() throws Exception {
+        List<String> lines=Files.readAllLines(ReleaseCatalog.root().resolve("scripts/run-release-rag.ps1"));
+        long initializers=lines.stream().map(String::strip)
+                .filter(line->line.contains("New-Item -ItemType Directory -Path $RunRoot"))
+                .count();
+        assertEquals(1,initializers,"The PASS branch must not attempt a second non-idempotent creation");
+        int initializeAt=-1,passBranchAt=-1;
+        for(int index=0;index<lines.size();index++){
+            String line=lines.get(index).strip();
+            if(initializeAt<0&&line.startsWith("$null=New-Item -ItemType Directory -Path $RunRoot"))initializeAt=index;
+            if(passBranchAt<0&&line.startsWith("if($component.status-eq'PASS')"))passBranchAt=index;
+        }
+        assertTrue(initializeAt>=0&&passBranchAt>initializeAt,"One output folder is created before PASS and FAIL branches diverge");
     }
     @Test void personalPublishedRouteHasOnlyTheReleaseAndItsDirectAsset() throws Exception {
         assertDoesNotThrow(()->ReleaseCatalog.verifyMainGuide(guide("PUBLISHED"),"example/game","1.2.0","PUBLISHED"));
@@ -146,7 +164,25 @@ class ReleaseGovernanceTest {
         }
         assertEquals("BLOCKED",report.path("aggregate").asText(),"Retrieval cannot replace release receipts");
         assertFalse(report.path("mayPublish").asBoolean());
-        for(var gate:report.path("gates"))assertEquals("NOT_RUN",gate.path("status").asText());
+        assertEquals("BLOCKED",gate(report,"local-catalog").path("status").asText(),"An incomplete local fixture is not a valid release catalog");
+        for(var row:report.path("gates"))if(!row.path("id").asText().equals("local-catalog"))
+            assertEquals("NOT_RUN",row.path("status").asText());
+    }
+
+    @Test void ragQualifiesTheLocalPublishedCatalogWithoutPromotingRemoteGates() throws Exception {
+        Path root=ReleaseCatalog.root();
+        var report=ReleaseReadinessRag.evaluate(root,"gate:local-catalog version:0.4.0 APK candidate");
+        var catalog=gate(report,"local-catalog");
+        assertEquals("PASS",catalog.path("status").asText());
+        assertTrue(catalog.path("actual").asText().contains("candidate 0.4.0"));
+        assertTrue(catalog.path("artifactSha256").asText().matches("[a-f0-9]{64}"));
+        assertTrue(catalog.path("indexSha256").asText().matches("[a-f0-9]{64}"));
+        assertTrue(catalog.path("manifestSha256").asText().matches("[a-f0-9]{64}"));
+        assertEquals("NOT_RUN",gate(report,"remote-publication").path("status").asText());
+        assertEquals("NOT_RUN",gate(report,"authenticated-download").path("status").asText());
+        assertEquals("NOT_RUN",gate(report,"anonymous-download").path("status").asText());
+        assertEquals("BLOCKED",report.path("aggregate").asText());
+        assertFalse(report.path("releaseWorkflow").path("publishAllowed").asBoolean());
     }
 
     @Test void anUnsupportedQuestionAbstainsAndRetrievedInjectionRemainsUntrustedData() throws Exception {
@@ -175,7 +211,9 @@ class ReleaseGovernanceTest {
         var sourceClass=ReleaseReadinessRag.evaluate(root,"class:normative version:current regresia precede APK");
         assertTrue(sourceClass.path("retrieval").size()>0);
         for(var hit:sourceClass.path("retrieval"))assertEquals("normative",hit.path("citation").path("sourceClass").asText());
-        assertEquals("1.2.0",sourceClass.path("retrievalFilters").path("version").asText());
+        assertEquals("1.3.0",sourceClass.path("retrievalFilters").path("version").asText());
+        assertEquals("1.2.0",sourceClass.path("candidate").path("lastPublishedVersion").asText());
+        assertEquals("1.3.0",sourceClass.path("candidate").path("candidateVersion").asText());
 
         var stale=ReleaseReadinessRag.evaluate(root,"gate:policy version:9.9.9 release states");
         assertTrue(stale.path("abstained").asBoolean(),"A different release version cannot contribute evidence");
@@ -212,12 +250,20 @@ class ReleaseGovernanceTest {
         Path android=Files.createDirectories(run.resolve("android-jvm"));
         var rows=new com.fasterxml.jackson.databind.node.ArrayNode(new com.fasterxml.jackson.databind.node.JsonNodeFactory(false));
         for(String relative:List.of("README.md","config/release-rag-corpus.json","docs/ATF_Release.md","release/index.json",
-                "release/1.2.0/release-validation.json","scripts/build.ps1")) {
+                "release/1.2.0/release-validation.json","scripts/build.ps1","pom.xml","lib/atf-reporting-1.0.0-j24.jar")) {
             rows.addObject().put("path",relative).put("sha256",sha(root.resolve(relative)));
         }
         byte[] manifest=JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(rows);
         Files.write(run.resolve("source-identity.json"),manifest);
         Path stage=Files.createDirectories(run.resolve("stage"));
+        Path mavenReports=Files.createDirectories(run.resolve("atf-tests"));
+        Path componentXml=mavenReports.resolve("TEST-sample.ComponentTest.xml");
+        Files.writeString(componentXml,"<testsuite name=\"sample.ComponentTest\" tests=\"1\" failures=\"0\" errors=\"0\" skipped=\"0\"><testcase classname=\"sample.ComponentTest\" name=\"passes\"/></testsuite>");
+        Path componentExtent=run.resolve("component-suite-extent.html");
+        var extentSummary=atf.rentz.reporting.ComponentSuiteExtentReport.publish(componentExtent,
+                git(root,"rev-parse","HEAD").strip(),sha(run.resolve("source-identity.json")),"regression",0,
+                List.of(new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput("atf-tests","sample.ComponentTest",componentXml,
+                        sha(componentXml),1,0,0,0)));
         Files.writeString(android.resolve("result.json"),"""
                 {"status":"PASS","exitCode":0,"source":"%s","drift":[],"populationChanges":[],
                  "tests":[{"name":"app","tests":1,"failures":0,"errors":0,"skipped":0}]}
@@ -228,7 +274,11 @@ class ReleaseGovernanceTest {
                 .put("androidJvm",android.toString());
         component.putObject("collection").put("name","regression");
         component.putArray("drift");component.putArray("populationChanges");
-        component.putArray("results").addObject().put("tests",1).put("failures",0).put("errors",0).put("skipped",0);
+        component.putArray("results").addObject().put("tests",1).put("failed",0).put("errors",0).put("skipped",0);
+        component.put("componentExtentReport",componentExtent.toString()).put("componentExtentReportSha256",sha(componentExtent))
+                .put("componentExtentReportFailure","").put("componentExtentQualified",extentSummary.qualified())
+                .put("componentExtentReportingLibrary","atf-reporting-1.0.0-j24")
+                .put("componentExtentReportingLibrarySha256",sha(root.resolve("lib/atf-reporting-1.0.0-j24.jar")));
         Files.write(run.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(component));
 
         var report=ReleaseReadinessRag.evaluate(root,"APK build release",run);
@@ -238,11 +288,118 @@ class ReleaseGovernanceTest {
         assertEquals("NOT_RUN",gate(report,"release-build").path("status").asText());
         assertEquals("BLOCKED",report.path("aggregate").asText());
 
+        ((com.fasterxml.jackson.databind.node.ObjectNode)component.path("results").get(0)).put("tests",1.5);
+        Files.write(run.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(component));
+        var fractionalCount=ReleaseReadinessRag.evaluate(root,"APK build release",run);
+        assertEquals("BLOCKED",gate(fractionalCount,"offline-regression").path("status").asText(),
+                "A decimal receipt count cannot be truncated into a passing population");
+        assertEquals("RAG-RECEIPT-COUNT",gate(fractionalCount,"offline-regression").path("actual").asText());
+
+        ((com.fasterxml.jackson.databind.node.ObjectNode)component.path("results").get(0)).put("tests",1);
         component.put("sourceCommit","0000000000000000000000000000000000000000");
         Files.write(run.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(component));
         var wrongCandidate=ReleaseReadinessRag.evaluate(root,"APK build release",run);
         assertEquals("BLOCKED",gate(wrongCandidate,"offline-regression").path("status").asText());
         assertEquals("BLOCKED",gate(wrongCandidate,"android-jvm").path("status").asText());
+    }
+
+    @Test void releaseBuildAndNativeUiGatesRequireBoundToolsArtifactsAndExtentEvidence() throws Exception {
+        Path root=ragProject();
+        Path component=passingComponentRun(root,"release-ui-components");
+        Path build=Files.createDirectories(temporary.resolve("release-ui-build"));
+        byte[] releaseApk="synthetic signed release artifact".getBytes(StandardCharsets.UTF_8);
+        byte[] uiApk="synthetic isolated UI artifact".getBytes(StandardCharsets.UTF_8);
+        Path product=build.resolve("RentzLab-1.3.0.apk"),isolated=build.resolve("rentz-lab-ui-sanity.apk");
+        Files.write(product,releaseApk);Files.write(isolated,uiApk);
+        Path androidSource=build.resolve("source-identity.json");
+        Path appInput=root.resolve("rentz-lab-app/app/build.gradle");
+        Files.writeString(androidSource,"[{\"path\":\"app/build.gradle\",\"sha256\":\""+sha(appInput)+"\"}]",StandardCharsets.UTF_8);
+        var buildReceipt=JSON().createObjectNode().put("status","PASS").put("sourceCommit",git(root,"rev-parse","HEAD").strip())
+                .put("componentRun",component.toString()).put("configuration","Release").put("productDebuggable",false)
+                .put("qualifiedCoreMatches",true).put("productApplicationId","ro.rentzlab.app").put("productVersionName","1.3.0")
+                .put("sourceManifest",androidSource.toString()).put("sourceManifestSha256",sha(androidSource))
+                .put("productApk",product.toString()).put("productApkSha256",sha(product)).put("productApkBytes",releaseApk.length)
+                .put("uiSanity",true).put("applicationId","ro.rentzlab.app.uisanity").put("apk",isolated.toString())
+                .put("apkSha256",sha(isolated)).put("newAuditedCases",2)
+                .put("builderSha256",sha(root.resolve("scripts/build-rentz-android.ps1")));
+        buildReceipt.putArray("productCertificate").add("Signer #1 certificate SHA-256 digest: "+"a".repeat(64));
+        buildReceipt.putArray("tests").addObject().put("tests",1).put("failures",0).put("errors",0).put("skipped",0);
+        Files.write(build.resolve("build-qualification.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(buildReceipt));
+        var uiBuild=JSON().createObjectNode().put("status","PASS").put("sourceCommit",git(root,"rev-parse","HEAD").strip())
+                .put("uiSanity",true).put("applicationId","ro.rentzlab.app.uisanity").put("apk",isolated.toString())
+                .put("apkSha256",sha(isolated)).put("apkBytes",uiApk.length).put("newAuditedCases",2)
+                .put("builderSha256",sha(root.resolve("scripts/build-rentz-android.ps1"))).put("versionName","1.3.0")
+                .put("sourceManifestSha256",sha(androidSource)).put("componentRun",component.toString());
+        Files.write(build.resolve("ui-sanity-build-qualification.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiBuild));
+
+        Path ui=Files.createDirectories(temporary.resolve("release-ui-native"));
+        Path raw=Files.createDirectories(ui.resolve("raw"));
+        Path extent=ui.resolve("android-extent.html");
+        String shot=pngDataUri();
+        Files.writeString(extent,"<html><body>atf-reporting Extent report "+inlineImages(shot,16)+"</body></html>",StandardCharsets.UTF_8);
+        var uiReceipt=JSON().createObjectNode().put("status","PASS").put("consecutiveSubgames",true)
+                .put("package","ro.rentzlab.app.uisanity").put("apkSha256",sha(isolated)).put("displayAndPackagesPreserved",true)
+                .put("leaseReleased",true).put("rawRoot",raw.toString()).put("extentReport",extent.toString())
+                .put("extentReportSha256",sha(extent)).put("runnerSha256",sha(root.resolve("atf-tests/tools/run-shared-ui-sanity.ps1")))
+                .put("reportingLibrary","atf-reporting-1.0.0-j24").put("reportingLibrarySha256",sha(root.resolve("lib/atf-reporting-1.0.0-j24.jar")));
+        uiReceipt.putArray("cleanupFailures");
+        uiReceipt.putArray("subgames").add("RENTZ").add("TRICKS").add("DIAMONDS");
+        uiReceipt.putObject("gameAudit").put("status","PASS").put("completedDeals",3).put("phase","DEAL_END");
+        var checkpoints=uiReceipt.putArray("checkpoints");for(int i=0;i<16;i++)checkpoints.addObject().put("title","checkpoint-"+i);
+        uiReceipt.putObject("build").put("sourceCommit",git(root,"rev-parse","HEAD").strip()).put("apkSha256",sha(isolated));
+        Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
+
+        var report=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
+        String buildActual=gate(report,"release-build").path("actual").asText();
+        assertEquals("PASS / "+buildActual,gate(report,"release-build").path("status").asText()+" / "+buildActual);
+        String uiActual=gate(report,"native-ui").path("actual").asText();
+        assertEquals("PASS / "+uiActual,gate(report,"native-ui").path("status").asText()+" / "+uiActual);
+        assertEquals("PASS",gate(report,"native-ui-report").path("status").asText());
+        assertTrue(report.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
+        assertFalse(report.path("releaseWorkflow").path("publishAllowed").asBoolean());
+
+        uiReceipt.put("extentReportSha256","0".repeat(64));
+        Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
+        var alteredExtent=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
+        assertEquals("BLOCKED",gate(alteredExtent,"native-ui-report").path("status").asText(),"Extent hash mismatch blocks report qualification");
+        assertEquals("PASS",gate(alteredExtent,"native-ui").path("status").asText(),"A report-integrity defect does not rewrite the observed UI execution result");
+        uiReceipt.put("extentReportSha256",sha(extent));
+        Files.writeString(extent,"<html><body>atf-reporting Extent report "+inlineImages(shot,15)+"</body></html>",StandardCharsets.UTF_8);
+        uiReceipt.put("extentReportSha256",sha(extent));
+        Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
+        var missingScreenshots=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
+        assertEquals("BLOCKED",gate(missingScreenshots,"native-ui-report").path("status").asText(),"Each native checkpoint needs an inline source PNG");
+        assertEquals("PASS",gate(missingScreenshots,"native-ui").path("status").asText());
+        Files.writeString(extent,"<html><body>atf-reporting Extent report "+inlineImages("data:image/png;base64,AAAA",16)+"</body></html>",StandardCharsets.UTF_8);
+        uiReceipt.put("extentReportSha256",sha(extent));
+        Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
+        var malformedScreenshots=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
+        assertEquals("BLOCKED",gate(malformedScreenshots,"native-ui-report").path("status").asText(),"Image markers without a valid PNG payload cannot qualify the report");
+        assertEquals("PASS",gate(malformedScreenshots,"native-ui").path("status").asText());
+        Files.writeString(extent,"<html><body>atf-reporting Extent report "+inlineImages(shot,16)+"</body></html>",StandardCharsets.UTF_8);
+        uiReceipt.put("extentReportSha256",sha(extent));
+        Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
+
+        Files.writeString(root.resolve("scripts/build-rentz-android.ps1"),"# modified builder after receipt\n",StandardCharsets.UTF_8,
+                java.nio.file.StandardOpenOption.APPEND);
+        var changedTool=ReleaseReadinessRag.evaluate(root,"gate:release-build APK",component,build,ui);
+        assertEquals("BLOCKED",gate(changedTool,"release-build").path("status").asText(),
+                "A receipt created by a different builder cannot qualify the staged APK");
+        assertFalse(changedTool.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
+    }
+
+    @Test void componentExtentRunnerUsesTheAtfModuleClasspathForTheCombinedSurefireReport() throws Exception {
+        String runner=Files.readString(ReleaseCatalog.root().resolve("scripts/run-rentz-components.ps1"));
+        String selector="$reportRows=@($results|Where-Object module -EQ 'atf-tests')";
+        int start=runner.indexOf(selector);
+        assertTrue(start>=0,"The report publisher must run with the module that owns it");
+        int end=runner.indexOf("$sourceCommitForReport",start);
+        assertTrue(end>start,"The selected classpath block must be bounded");
+        String block=runner.substring(start,end);
+        assertTrue(block.contains("foreach($row in $reportRows)"));
+        assertFalse(block.contains("foreach($row in $results)"),
+                "game-core and atf-tests Surefire XML are both reported but their runtime classpaths differ");
+        assertTrue(runner.contains("component-suite-extent.html"));
     }
 
     @Test void corpusPathsAndReportDestinationCannotEscapeTheirDeclaredRoots() throws Exception {
@@ -279,7 +436,9 @@ class ReleaseGovernanceTest {
         assertTrue(Files.isRegularFile(output.resolve("release-rag-index.json")));
         var report=JSON().readTree(output.resolve("release-rag-report.json").toFile());
         var index=JSON().readTree(output.resolve("release-rag-index.json").toFile());
-        assertEquals("1.2.0",index.path("releaseVersion").asText());
+        assertEquals(2,index.path("schemaVersion").asInt());
+        assertEquals("1.2.0",index.path("publishedVersion").asText());
+        assertEquals("1.3.0",index.path("candidateVersion").asText());
         assertEquals(report.path("index").size(),index.path("entries").size());
         assertEquals("BLOCKED",report.path("aggregate").asText());
         assertFalse(report.path("mayPublish").asBoolean());
@@ -293,11 +452,18 @@ class ReleaseGovernanceTest {
         Path root=Files.createDirectories(temporary.resolve("rag-source-"+java.util.UUID.randomUUID()));
         Files.createDirectories(root.resolve("config"));Files.createDirectories(root.resolve("docs"));
         Files.createDirectories(root.resolve("scripts"));Files.createDirectories(root.resolve("release/1.2.0"));
+        Files.createDirectories(root.resolve("atf-tests/tools"));Files.createDirectories(root.resolve("lib"));
+        Files.createDirectories(root.resolve("rentz-lab-app/app"));
+        Files.writeString(root.resolve("pom.xml"),"<project xmlns=\"http://maven.apache.org/POM/4.0.0\"><properties><atf.reporting.version>1.0.0-j24</atf.reporting.version></properties></project>");
         Files.writeString(root.resolve("README.md"),"# Rentz\n\n## Jocul\n\nAPK-ul local se pregătește numai după verificări.\n");
         Files.writeString(root.resolve("docs/ATF_Release.md"),"# Release\n\nRegresia și Android JVM preced APK-ul Release semnat și checksum-ul.\n\nReceiptul pentru download anonim este distinct de API autentificat.\n");
         Files.writeString(root.resolve("scripts/build.ps1"),"# deterministic release builder\n");
+        Files.writeString(root.resolve("scripts/build-rentz-android.ps1"),"# deterministic Android release builder\n");
+        Files.writeString(root.resolve("atf-tests/tools/run-shared-ui-sanity.ps1"),"# native UI sanity runner\n");
+        Files.writeString(root.resolve("lib/atf-reporting-1.0.0-j24.jar"),"synthetic atf-reporting library\n");
+        Files.writeString(root.resolve("rentz-lab-app/app/build.gradle"),"android { applicationId 'ro.rentzlab.app' }\n");
         Files.writeString(root.resolve("release/index.json"),"""
-                {"schemaVersion":1,"repository":"example/rentz","currentVersion":"1.2.0","versions":["1.2.0"]}
+                {"schemaVersion":1,"repository":"example/rentz","currentVersion":"1.2.0","versions":["1.2.0"],"candidate":{"version":"1.3.0","versionCode":4}}
                 """);
         Files.writeString(root.resolve("release/1.2.0/release-validation.json"),"""
                 {"release":{"sourceCommit":"0000000000000000000000000000000000000000"},"publication":{"state":"DRAFT"}}
@@ -326,6 +492,36 @@ class ReleaseGovernanceTest {
         return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(path)));
     }
 
+    private Path passingComponentRun(Path root,String name) throws Exception {
+        Path run=Files.createDirectories(temporary.resolve(name));
+        Path stage=Files.createDirectories(run.resolve("stage"));Path android=Files.createDirectories(run.resolve("android-jvm"));
+        var rows=new com.fasterxml.jackson.databind.node.ArrayNode(new com.fasterxml.jackson.databind.node.JsonNodeFactory(false));
+        for(String relative:List.of("README.md","config/release-rag-corpus.json","docs/ATF_Release.md","release/index.json",
+                "release/1.2.0/release-validation.json","scripts/build.ps1","scripts/build-rentz-android.ps1",
+                "atf-tests/tools/run-shared-ui-sanity.ps1","pom.xml","lib/atf-reporting-1.0.0-j24.jar","rentz-lab-app/app/build.gradle"))
+            rows.addObject().put("path",relative).put("sha256",sha(root.resolve(relative)));
+        byte[] manifest=JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(rows);Files.write(run.resolve("source-identity.json"),manifest);
+        Path xml=run.resolve("atf-tests/TEST-sample.ComponentTest.xml");Files.createDirectories(xml.getParent());
+        Files.writeString(xml,"<testsuite name=\"sample.ComponentTest\" tests=\"1\" failures=\"0\" errors=\"0\" skipped=\"0\"><testcase classname=\"sample.ComponentTest\" name=\"passes\"/></testsuite>");
+        Path extent=run.resolve("component-suite-extent.html");
+        var extentSummary=atf.rentz.reporting.ComponentSuiteExtentReport.publish(extent,git(root,"rev-parse","HEAD").strip(),sha(run.resolve("source-identity.json")),
+                "regression",0,List.of(new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput("atf-tests","sample.ComponentTest",xml,sha(xml),1,0,0,0)));
+        Files.writeString(android.resolve("result.json"),"""
+                {\"status\":\"PASS\",\"exitCode\":0,\"source\":\"%s\",\"drift\":[],\"populationChanges\":[],\"tests\":[{\"name\":\"app\",\"tests\":1,\"failures\":0,\"errors\":0,\"skipped\":0}]}
+                """.formatted(stage.toString().replace("\\","\\\\")));
+        String commit=git(root,"rev-parse","HEAD").strip();
+        var receipt=JSON().createObjectNode().put("status","PASS").put("source",root.toString()).put("sourceCommit",commit)
+                .put("sourceManifestSha256",sha(run.resolve("source-identity.json"))).put("stage",stage.toString()).put("androidJvm",android.toString());
+        receipt.putObject("collection").put("name","regression");receipt.putArray("drift");receipt.putArray("populationChanges");
+        receipt.putArray("results").addObject().put("tests",1).put("failed",0).put("errors",0).put("skipped",0);
+        receipt.put("componentExtentReport",extent.toString()).put("componentExtentReportSha256",sha(extent))
+                .put("componentExtentReportFailure","").put("componentExtentQualified",extentSummary.qualified())
+                .put("componentExtentReportingLibrary","atf-reporting-1.0.0-j24")
+                .put("componentExtentReportingLibrarySha256",sha(root.resolve("lib/atf-reporting-1.0.0-j24.jar")));
+        Files.write(run.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(receipt));
+        return run;
+    }
+
     private static String git(Path root,String... arguments) throws Exception {
         var command=new java.util.ArrayList<String>(List.of("git","-C",root.toString()));command.addAll(List.of(arguments));
         var process=new ProcessBuilder(command).redirectErrorStream(true).start();
@@ -333,6 +529,26 @@ class ReleaseGovernanceTest {
         String output=new String(process.getInputStream().readAllBytes(),StandardCharsets.UTF_8);
         if(process.exitValue()!=0)throw new IOException("fixture Git command failed: "+output);
         return output;
+    }
+    private static String pngDataUri() throws IOException {
+        var png=new java.io.ByteArrayOutputStream();
+        png.write(new byte[]{(byte)0x89,'P','N','G','\r','\n',0x1a,'\n'});
+        byte[] ihdr={0,0,0,1,0,0,0,1,8,6,0,0,0};
+        writePngChunk(png,"IHDR",ihdr);
+        var pixels=new java.io.ByteArrayOutputStream();
+        try(var compressor=new java.util.zip.DeflaterOutputStream(pixels)){compressor.write(new byte[]{0,0,0,0,0});}
+        writePngChunk(png,"IDAT",pixels.toByteArray());
+        writePngChunk(png,"IEND",new byte[0]);
+        return "data:image/png;base64,"+java.util.Base64.getEncoder().encodeToString(png.toByteArray());
+    }
+    private static String inlineImages(String dataUri,int count) {
+        return ("<img src=\""+dataUri+"\"/>").repeat(count);
+    }
+    private static void writePngChunk(java.io.ByteArrayOutputStream png,String name,byte[] data) throws IOException {
+        byte[] type=name.getBytes(StandardCharsets.US_ASCII);
+        var chunk=new java.io.ByteArrayOutputStream();chunk.write(type);chunk.write(data);
+        var crc=new java.util.zip.CRC32();crc.update(chunk.toByteArray());
+        var output=new java.io.DataOutputStream(png);output.writeInt(data.length);output.write(type);output.write(data);output.writeInt((int)crc.getValue());
     }
     private static boolean hasFullBodies(String html) {
         var bodies=java.util.regex.Pattern.compile("(?s)<pre[^>]*class=\"[^\"]*atf-observation-body[^\"]*\"[^>]*>(.*?)</pre>")

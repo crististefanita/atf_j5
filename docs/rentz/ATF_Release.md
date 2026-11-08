@@ -40,8 +40,13 @@ Planificați infrastructura macOS separat de semnarea și distribuția iOS.
 
 RAG-ul aplică domeniul declarat: pentru o ediție numai pentru Android, iOS este în afara livrării și nu se deduce PASS; pentru o ediție care declară iOS, lipsa țintei, a buildului Xcode, a receipt-urilor sau a probei cerute blochează afirmația iOS independent de rezultatul Android. Ghidul de produs și criteriile deschise sunt în [feedback-ul iOS](../feedback/ATF_Rentz.md#platforma-ios).
 
-Un APK semnat pentru verificare locală, construit înainte de calificarea completă a commit-ului, rămâne în dosarul extern al probei. Păstrați acolo manifestul surselor, semnătura și checksum-ul. Versiunea publicată din README se schimbă după verificarea descărcării noului asset.
+## Versiunea candidatului și staging
 
+- `release/index.json` separă `currentVersion` de `candidate.version` și `candidate.versionCode`; pregătirea candidatului nu schimbă linkul produsului.
+- O schimbare care cere release, inclusiv o refactorizare, primește următorul minor; o ruptură de compatibilitate justifică majorul. `versionCode` crește și corespunde valorilor Gradle.
+- Candidatele și rezultatele se pregătesc în workspace-ul J5 alocat, în afara checkout-ului. Rapoartele și APK-urile rămân sub rădăcina de date configurată prin `RENTZ_DATA_ROOT`, niciodată în TEMP arbitrar.
+- Promovarea în `main` păstrează același commit, manifest, rapoarte, APK și checksum. Orice schimbare de octeți cere o nouă calificare.
+- `currentVersion` și linkul README se actualizează după publicare și verificarea accesului autentificat și anonim.
 ```mermaid
 flowchart LR
     SOURCE[Snapshot identificat] -->|testează fără dispozitiv| CHECK[Componente și guvernanță]
@@ -69,7 +74,16 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 .\scripts\build-rentz-android.ps1 -RunRoot <director-extern-nou> -ComponentRun <regresie-trecuta> -Configuration Release
 ```
 
-Raportul RAG este consultativ și păstrează porțile fără adaptor de receipt la `NOT_RUN`; nu înlocuiește verificarea manifestului, testele, buildul sau acceptanța distribuției. Buildul APK-ului continuă prin scriptul de mai sus, numai după porțile existente și pe aceeași sursă fixată. Vezi [contractul RAG și limitele v1](../feedback/ATF_Release_RAG.md).
+RAG-ul este un consumator read-only de receipte. Starea live a porților este:
+
+- **Calificare locală:** regresie, Extent, Android JVM, build și sanity nativ trebuie legate de același commit.
+- **Staging:** `ReleaseCatalog` verifică separat ediția publicată local și pasul de versiune al candidatului.
+- **Revizuire:** după trecerea porților locale, RAG poate raporta `READY_FOR_MAIN_PROMOTION_REVIEW`; operatorul decide promovarea.
+- **Publicare:** adaptoarele pentru remote, descărcarea autentificată și cea anonimă lipsesc. Aceste porți rămân `NOT_RUN`, agregatul e `BLOCKED`, iar `publishAllowed=false`.
+
+- Lansatorul verifică workspace-ul și colecția completă, apoi scrie indexul și raportul într-un director extern nou. Filtrele `gate:`, `class:` și `version:` sunt exacte; sunt returnate cel mult cinci citări cu commit, cale, linii și SHA-256.
+- Corpusul este allowlistat și verificat înainte de indexare. Testele negative acoperă lipsa sursei, fragmente ostile și date sensibile; textul recuperat nu are autoritate de execuție sau verdict.
+- Buildul folosește numai sursa fixată din receipt-ul regresiei. [Criteriile RAG rămase](../feedback/ATF_Release_RAG.md)
 
 - **Cache concurent:** folosiți `-MavenRepository <cache-dedicat>` la calificare când alte procese pot încărca aceleași JAR-uri; calea rămâne în `infrastructure/cache`. Nu opriți procesele altui proprietar și nu transformați eroarea de înlocuire într-un rezultat verde.
 - **Izolare:** staging-ul este workspace-ul temporar înregistrat de J5, în afara sursei și a TEMP-ului Windows. Rulările intermediare rămân în depozitul extern; numai dosarul selectat se copiază în `release/<versiune>`.
@@ -98,6 +112,11 @@ Raportul RAG este consultativ și păstrează porțile fără adaptor de receipt
 | reports/README | Scopul fiecărei selecții, proveniența, suprapunerile și limitele ei. |
 | HTML Extent | Comparații capturate, diagnostice originale și corpuri inline; folderele cu copii redundante nu sunt livrabilul de audit. |
 | XML și receipt | Numărare independentă și identitatea intrărilor; nu substituie expected/actual necapturat. |
+
+- `atf-reporting` este dependența modulului Maven `atf-tests`; versiunea vine din proprietatea `atf.reporting.version`, iar testul de adopție verifică perechea JAR/POM și SHA-256 din [proveniența consumerului](../../library-provenance.json).
+- Colecția de componente produce Extent din XML-urile Surefire originale și reconciliază fiecare suită, testcase și total. Raportul nu inventează aserțiuni de domeniu pe care XML-ul nu le păstrează.
+- Sanity-ul Android produce Extent prin aceeași bibliotecă; așteptările, observațiile și capturile PNG inline Base64 sunt colectate în timpul fiecărui checkpoint.
+- Receipt-ul păstrează versiunea și hash-ul JAR-ului, sursa, intrările, rezultatul și digestul HTML. APK-ul și raportul rămân artefacte externe.
 
 [Atributele Git](https://git-scm.com/docs/gitattributes) dezactivează conversia text pentru intrările APK și dosarul release. Înainte de push se confruntă octeții din Git cu inventarul, separat de copia din workspace.
 

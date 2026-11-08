@@ -40,8 +40,14 @@ public final class ReleaseCatalog {
         require(!Files.isSymbolicLink(folder) && folder.toRealPath().startsWith(root.toRealPath()),"RELEASE-PHYSICAL-PATH");
         JsonNode identity=manifest.path("release");
         require(identity.path("versionName").asText().equals(version) && identity.path("applicationId").asText().equals("ro.rentzlab.app"),"RELEASE-IDENTITY");
+        String buildVersion=version;long buildVersionCode=number(identity,"versionCode");
+        if(!index.path("candidate").isMissingNode()){
+            JsonNode candidate=index.path("candidate");buildVersion=candidate.path("version").asText();buildVersionCode=number(candidate,"versionCode");
+            require(candidate.isObject()&&candidate.size()==2&&buildVersion.matches("(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)"),"RELEASE-CANDIDATE-SCHEMA");
+            require(isMinorOrMajorStep(version,buildVersion)&&buildVersionCode>number(identity,"versionCode"),"RELEASE-CANDIDATE-VERSION-POLICY");
+        }
         String gradle=Files.readString(root.resolve("rentz-lab-app/app/build.gradle"));
-        require(gradle.contains("versionName '"+version+"'") && number(identity,"versionCode")==declared(gradle,"versionCode")
+        require(gradle.contains("versionName '"+buildVersion+"'") && buildVersionCode==declared(gradle,"versionCode")
                 && number(identity,"minSdk")==declared(gradle,"minSdk") && number(identity,"targetSdk")==declared(gradle,"targetSdk"),"RELEASE-GRADLE");
         String state=manifest.path("publication").path("state").asText();
         require(List.of("DRAFT","PREPARED","PUBLISHED").contains(state),"RELEASE-STATE");
@@ -137,6 +143,12 @@ public final class ReleaseCatalog {
     }
     private static long declared(String text,String name) throws IOException {
         var found=Pattern.compile("\\b"+name+"\\s+(\\d+)\\b").matcher(text);require(found.find(),"RELEASE-GRADLE-FIELD: "+name);return Long.parseLong(found.group(1));
+    }
+    static boolean isMinorOrMajorStep(String current,String candidate){
+        String[] from=current.split("\\."),to=candidate.split("\\.");
+        try{int major=Integer.parseInt(from[0]),minor=Integer.parseInt(from[1]);int nextMajor=Integer.parseInt(to[0]),nextMinor=Integer.parseInt(to[1]),patch=Integer.parseInt(to[2]);
+            return patch==0&&((nextMajor==major&&nextMinor==minor+1)||(nextMajor==major+1&&nextMinor==0));
+        }catch(RuntimeException invalid){return false;}
     }
     private static void require(boolean valid,String code) throws IOException { if(!valid)throw new IOException(code); }
     private ReleaseCatalog(){ }

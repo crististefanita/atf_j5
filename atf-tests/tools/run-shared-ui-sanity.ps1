@@ -5,6 +5,7 @@ $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $project 'rentz-reference/tools/RentzAndroid.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
+$reportingLibrary=Get-AtfReportingLibrary -ProjectRoot $project
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
 if(Test-Path -LiteralPath $RunRoot){throw 'A fresh sanity output directory is required.'}
 $build=Get-Content -LiteralPath $BuildQualification -Raw|ConvertFrom-Json
@@ -71,7 +72,7 @@ $raw=New-AtfWorkspace -Kind android -ProjectRoot $project
 New-Item -ItemType Directory -Path $RunRoot|Out-Null
 $leasePath='C:\work\whist_back\android-ui-lease.json';$leaseId=[guid]::NewGuid().ToString('N')
 $remoteJournal="/data/local/tmp/rentz-history-$leaseId.json";$journalPushed=$false
-$owned=$false;$installed=$false;$released=$false;$failure='';$ordinal=0;$initialActivity=''
+$owned=$false;$installed=$false;$released=$false;$failure='';$extentPath='';$ordinal=0;$initialActivity=''
 $points=[Collections.Generic.List[object]]::new();$actions=[Collections.Generic.List[object]]::new();$cleanup=[Collections.Generic.List[string]]::new()
 $initialSize='';$initialDensity='';$initialFont='';$finalSize='';$finalDensity='';$finalFont='';$packagesBefore='';$packagesAfter='';$api=''
 $wasAsleep=$false
@@ -820,15 +821,22 @@ $scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in Eng
 if($HistoryDetails){$scope+='; confirmed blind trick contributions and the actual Rentz finishing places after journal restore'}
 if($CompactScores){$scope+='; Romanian compact signed scores at font scale 1.5 and a 720x1280 logical viewport'}
 $display=[ordered]@{before=@{size=$initialSize.Trim();density=$initialDensity.Trim();font=$initialFont.Trim()};after=@{size=$finalSize.Trim();density=$finalDensity.Trim();font=$finalFont.Trim()}}
-$result=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;helpAwardsOnly=[bool]$HelpAwardsOnly;historyOnly=[bool]$HistoryOnly;historyMatrix=[bool]$HistoryMatrix;historyDetails=[bool]$HistoryDetails;seatExtremes=[bool]$SeatExtremes;consecutiveSubgames=[bool]$ConsecutiveSubgames;subgames=$threeSubgameContracts;gameAudit=$threeSubgameOracle;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;build=$build;rawRoot=$raw;developmentLedger=$developmentLedger;developmentExposures=$developmentExposures.ToArray();failure=$failure;cleanupFailures=$cleanup.ToArray();display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;checkpoints=$points.ToArray()}
-$result|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $RunRoot 'result.json') -Encoding utf8NoBOM
 if($component){
-    $result|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $raw 'ui-result.json') -Encoding utf8NoBOM
+    $reportInput=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;consecutiveSubgames=[bool]$ConsecutiveSubgames;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;failure=$failure;display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;checkpoints=$points.ToArray()}
+    $reportInput|ConvertTo-Json -Depth 16|Set-Content -LiteralPath (Join-Path $raw 'ui-result.json') -Encoding utf8NoBOM
     ConvertTo-Json -InputObject @($points.ToArray()) -Depth 16|Set-Content -LiteralPath (Join-Path $raw 'checkpoints.json') -Encoding utf8NoBOM
     if($points.Count){
-        Invoke-DevelopmentExposure @('report',$raw)
-        if(-not(Test-Path -LiteralPath (Join-Path $raw 'android-extent.html'))){throw 'Extent report was not created from the recorded native checkpoints.'}
+        try{
+            Invoke-DevelopmentExposure @('report',$raw)
+            $sourceExtent=Join-Path $raw 'android-extent.html'
+            if(-not(Test-Path -LiteralPath $sourceExtent -PathType Leaf)){throw 'atf-reporting did not create the native Extent artifact.'}
+            $extentPath=Join-Path $RunRoot 'android-extent.html'
+            Copy-Item -LiteralPath $sourceExtent -Destination $extentPath
+        }catch{if(-not$failure){$failure=$_.Exception.Message}}
     }
 }
+$extentHash='';if($extentPath-and(Test-Path -LiteralPath $extentPath -PathType Leaf)){$extentHash=(Get-FileHash -LiteralPath $extentPath -Algorithm SHA256).Hash.ToLowerInvariant()}
+$result=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;helpAwardsOnly=[bool]$HelpAwardsOnly;historyOnly=[bool]$HistoryOnly;historyMatrix=[bool]$HistoryMatrix;historyDetails=[bool]$HistoryDetails;seatExtremes=[bool]$SeatExtremes;consecutiveSubgames=[bool]$ConsecutiveSubgames;subgames=$threeSubgameContracts;gameAudit=$threeSubgameOracle;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;build=$build;rawRoot=$raw;extentReport=$extentPath;extentReportSha256=$extentHash;reportingLibrary=$reportingLibrary.name;reportingLibrarySha256=$reportingLibrary.sha256;runnerSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant();developmentLedger=$developmentLedger;developmentExposures=$developmentExposures.ToArray();failure=$failure;cleanupFailures=$cleanup.ToArray();display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;checkpoints=$points.ToArray()}
+$result|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $RunRoot 'result.json') -Encoding utf8NoBOM
 if($failure){throw "Shared UI sanity failed: $RunRoot"}
 Write-Output $RunRoot
