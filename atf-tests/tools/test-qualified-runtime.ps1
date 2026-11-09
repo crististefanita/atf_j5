@@ -213,6 +213,29 @@ Case 'Seat geometry agrees between raw UIAutomator nodes and normalized evidence
     catch { $rejected=$_.Exception.Message -like 'One visible frame required for seat 0*' }
     Require $rejected 'A duplicate seat frame must fail closed'
 }
+Case 'Hand order ignores played Rentz board cells but detects a reversed hand' {
+    $uiTokens=$null;$uiErrors=$null
+    $uiSource=Join-Path $project 'atf-tests/tools/run-shared-ui-sanity.ps1'
+    $uiAst=[Management.Automation.Language.Parser]::ParseFile($uiSource,[ref]$uiTokens,[ref]$uiErrors)
+    Require (-not$uiErrors) 'Shared UI runner does not parse'
+    $names=@('Bounds','Check','Text','TableChecks')
+    $functions=@($uiAst.FindAll({param($node) $node-is[Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-in$names},$true))
+    Require ($functions.Count-eq$names.Count) 'Expected the native table checks'
+    foreach($function in $functions){. ([scriptblock]::Create($function.Extent.Text))}
+    $state=[pscustomobject]@{opponents=@();view=[pscustomobject]@{players=1;hand=@(
+        [pscustomobject]@{rank=11;suit='HEARTS'},[pscustomobject]@{rank=13;suit='CLUBS'})}}
+    $nodes=@(
+        [pscustomobject]@{description='Ana. Points: 0. Total: 0';bounds='[0,0][20,10]'},
+        [pscustomobject]@{description='Your hand: 2';bounds='[0,30][60,50]'},
+        [pscustomobject]@{description='Play J♥';bounds='[0,30][20,50]'},
+        [pscustomobject]@{description='K♣. Unavailable';bounds='[20,30][40,50]'},
+        [pscustomobject]@{description='10♦';bounds='[10,15][30,25]'})
+    $checks=@(TableChecks $nodes $state)
+    Require (@($checks|Where-Object{-not$_.passed}).Count-eq0) 'A public board card polluted the hand order'
+    $nodes[2].bounds='[20,30][40,50]';$nodes[3].bounds='[0,30][20,50]'
+    $reversed=@(TableChecks $nodes $state|Where-Object name -CEQ 'Actual left-to-right hand order')
+    Require ($reversed.Count-eq1-and-not$reversed[0].passed) 'A reversed own hand must still fail'
+}
 $failed=@($results|Where-Object status -EQ FAIL)
 [ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;productFixtures=$product;scope='Byte fixtures, injected Java recorder and extracted publication block; no real JVM body, game, full native launcher or device';results=$results}|ConvertTo-Json -Depth 7|Set-Content "$RunRoot/controls.json" -Encoding utf8NoBOM
 $results|Format-Table name,status -AutoSize

@@ -496,7 +496,7 @@ function TableChecks($nodes,$state){
         $rank=switch($rankValue){11{'J'}12{'Q'}13{'K'}14{'A'}default{[string]$rankValue}}
         $rank+@{CLUBS='♣';DIAMONDS='♦';HEARTS='♥';SPADES='♠'}[[string]$_.suit]
     })
-    $visibleOrder=@($nodes|Where-Object{$_.description-match'^(?:Play )?((?:\d+|[JQKA])[♣♦♥♠])(?:\. Unavailable)?$'}|
+    $visibleOrder=@($nodes|Where-Object{$_.description-match'^(?:Play (?:\d+|[JQKA])[♣♦♥♠]|(?:\d+|[JQKA])[♣♦♥♠]\. Unavailable)$'}|
         Sort-Object @{Expression={(Bounds $_)[0]}}|ForEach-Object{$_.description-replace'^Play |\. Unavailable$',''})
     Check 'Actual left-to-right hand order' ($expectedOrder-join' ') ($visibleOrder-join' ')
     if($hand.Count-eq1){$handBox=Bounds $hand[0];foreach($seat in $seats){$box=Bounds $seat;Check ('Seat clears hand: '+$seat.description) $true ($box[3]-le$handBox[1])}}
