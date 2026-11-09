@@ -12,6 +12,7 @@ import atf.reporting.ui.UiExtentReportSession;
 import atf.reporting.ui.model.*;
 import atf.reporting.model.*;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import ro.rentzlab.core.*;
 import java.nio.file.*;
 import java.util.*;
@@ -81,8 +82,13 @@ public final class RentzNativeFlow {
                 default->throw new IllegalArgumentException("Unknown native command");
             }
         }
-        var actual=view(actorView);if(!game.observe(0).equals(actual))throw new IllegalStateException("Native public projection differs from replayed UI journal");
-        System.out.println(JSON.writeValueAsString(Map.of("status","PASS","auditedTransitions",audited,"completedDeals",game.history().size(),"phase",actual.phase(),"totals",actual.totals(),"points",actual.dealPoints(),"history",game.history())));
+        var replayed = game.observe(0);
+        var actual = JSON.readTree(actorView.toFile()).required("view");
+        ObjectNode expected = JSON.valueToTree(replayed);
+        // Android actor-view schema 1 publishes the current hand; the private journal supplies the history.
+        if (!actual.has("completedHands")) expected.remove("completedHands");
+        if (!expected.equals(actual)) throw new IllegalStateException("Native public projection differs from replayed UI journal");
+        System.out.println(JSON.writeValueAsString(Map.of("status","PASS","auditedTransitions",audited,"completedDeals",game.history().size(),"phase",replayed.phase(),"totals",replayed.totals(),"points",replayed.dealPoints(),"history",game.history())));
     }
     private static void report(Path directory)throws Exception{
         var receipt=JSON.readTree(directory.resolve("ui-result.json").toFile());var points=JSON.readTree(directory.resolve("checkpoints.json").toFile());

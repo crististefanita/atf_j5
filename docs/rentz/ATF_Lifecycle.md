@@ -71,7 +71,7 @@ Comenzile delegate folosesc același jurnal ca mutările manuale. Setarea rămâ
 
 ## Fișiere și erori
 
-- `session.json` este checkpoint-ul privat; `actor-view.json` este proiecția publică debug, fără seed sau mâini adverse.
+- `session.json` este checkpoint-ul privat. `actor-view.json` publică starea mâinii și scorurile locului observator în varianta debug, fără seed, mâini adverse sau lista mâinilor încheiate. Auditul reface lista din jurnal și o confruntă separat cu istoricul din interfață.
 - Staging-ul fiecărei scrieri este unic și se află în cache-ul aplicației, separat de datele canonice; nu se reutilizează un nume comun `.tmp`.
 - După eroare se elimină numai staging-ul propriei scrieri; fișierul original și alte fișiere din cache rămân intacte.
 - O scriere neatomică nu este fallback implicit; eroarea păstrează checkpoint-ul anterior și ajunge la proprietar.
