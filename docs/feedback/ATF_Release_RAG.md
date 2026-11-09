@@ -1,10 +1,21 @@
 # Cerințe pentru RAG de asistență la release
 
-## Starea implementării v1
+## Starea implementării live
 
-Utilizarea v1 este documentată în [ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente). [Regresiile de guvernanță](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java) acoperă citările, refuzul receiptei străine și porțile fără probă.
+RAG-ul este un asistent local, determinist și read-only. Porțile și receiptele originale dețin verdictul; recuperarea doar găsește și citează dovezi.
 
-Rămâne de demonstrat acceptanța RAG pe porțile suplimentare ale aceluiași candidat, cu receipt-uri verificate și comparație cu verdictul determinist. Verdictul `PUBLISHED` al unei ediții nu este dovadă pentru adaptorul RAG.
+Starea `PUBLISHED` a unei ediții și verdictul `PASS` al unei porți sunt afirmații distincte. Publicarea unei versiuni nu dovedește că adaptorul RAG a trecut acceptanța; fiecare verdict RAG trebuie susținut de receiptele porților legate de același candidat.
+
+| Suprafață | Stare live |
+|---|---|
+| Corpus și citări | Allowlist local, filtre exacte, maximum cinci fragmente; citatele au cale, linii, commit și SHA-256. |
+| Componente și Extent | Receipt-ul regression include Extent produs prin `atf-reporting` ales din `atf.reporting.version`; JAR/POM, XML-urile și hash-ul HTML sunt verificate. |
+| Workspace de staging | Runner-ul alocă `components-<id>` în zona externă de workspace și scrie descriptor cu owner, tip, ID și `sourceRoot`; RAG validează fiecare câmp înainte să accepte receipt-ul Android JVM. |
+| Android JVM și APK | Adaptoarele locale verifică receipte de build și sanity nativ legate de aceeași sursă. Extent UI conține capturi originale inline Base64, verificate de RAG. |
+| E2E obligatoriu pentru candidat APK | RAG cere trei jocuri/deal-uri native complete pe varianta UI-sanity legată de același commit: Rentz și două contracte non-Rentz, toate la `DEAL_END`. Receipt-ul validează fiecare joc în replay, geometriile locurilor, istoricul după restart, display-ul păstrat, izolarea registrului de învățare și capturile inline Extent. Fără ambele porți `native-ui` și `native-ui-report`, APK-ul rămâne `STAGED_CANDIDATE_ONLY`. |
+| Catalog local | `ReleaseCatalog` verifică manifestul, APK-ul publicat local și pasul candidat de versiune/cod Android. Aceasta nu dovedește existența release-ului remote. |
+| Publicare și descărcări | Adaptoarele RAG pentru remote, autentificat și anonim lipsesc; porțile rămân `NOT_RUN`. `publishAllowed` nu devine `true`. |
+| Promovare | `READY_FOR_MAIN_PROMOTION_REVIEW` este o etapă locală de candidat, cu decizie umană; nu este `PUBLISHED`. |
 
 ## Pe scurt
 
@@ -15,7 +26,7 @@ RAG-ul găsește cerința și dovada relevante pentru sursa curentă. El explic�
 | Cerințe și reguli | Politica de release versionată și testele care o aplică. |
 | Verdictul porții | Receipt-ul verificabil al porții desemnate, legat de candidatul curent. |
 | Starea ediției | `DRAFT`, `PREPARED` sau `PUBLISHED`, păstrate separat de `PASS`, `FAIL`, `BLOCKED` și `NOT_RUN`. |
-| Efectul RAG | Localizează și citează; nu schimbă verdictul, sursele sau starea ediției. |
+| Efectul RAG | Citește receipte și catalog, explică lipsurile; nu execută porți, nu schimbă verdictul ori starea ediției. |
 
 | Decizie | Contract |
 |---|---|
@@ -23,7 +34,7 @@ RAG-ul găsește cerința și dovada relevante pentru sursa curentă. El explic�
 | Sursa verdictului | Testele și verificările deterministe existente; RAG-ul le localizează și le explică. |
 | Efecte secundare | Citire și raportare; fără build, editare, commit, tag, upload sau publicare. |
 | Stare incertă | **BLOCKED** sau **NOT_RUN**, cu motiv și pas următor; niciodată PASS dedus din text. |
-| Rezumat agregat | Cel mult **READY_FOR_HUMAN_REVIEW** după trecerea porților; numai procesul existent și operatorul pot califica ori publica ediția. |
+| Rezumat agregat | Separă `releaseWorkflow.stage=READY_FOR_MAIN_PROMOTION_REVIEW` de agregatul porților; publicarea cere receipte remote și aprobarea operatorului. |
 
 ## Fluxul dorit
 
@@ -53,7 +64,7 @@ Inspecția actuală arată că RAG-ul nu trebuie să inventeze un al doilea rele
 |---|---|---|
 | [Politica de release](../rentz/ATF_Release.md) | DRAFT, PREPARED și PUBLISHED au condiții distincte; buildul Release cere regresie completă și sursă fixată. | Explică ordinea și condițiile; nu le reimplementează într-un prompt. |
 | [Calificarea iOS](../rentz/ATF_Release.md#calificarea-ios) și [feedback-ul de produs](ATF_Rentz.md#platforma-ios) | iOS este cerință deschisă; APK-ul și porțile Android nu califică un client Apple. | Recuperează domeniul declarat al platformei și cere separat ținta Xcode, matricea OS, receiptele iOS și identitatea artefactului; pentru o ediție numai pentru Android nu inventează suport iOS. |
-| [Implementarea RAG](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java), [lansatorul](../../scripts/run-release-rag.ps1) și [probele sale](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java) | Corpusul recuperează cerințe iOS, dar porțile sunt Android/APK, receipt-ul atașează numai regresia și Android JVM, iar lansatorul cere runtime-ul `RentzNativeFlow`. Manifestul curent nu are domeniu de platforme sau receipt-uri iOS. | **P1 deschis:** separați runtime-ul RAG de aplicația Android, adăugați domeniul și receiptele per platformă, stările de aplicabilitate/implementare și probele controlate Android→iOS. Nu activați afirmații iOS înaintea acestor porți și teste. |
+| [Implementarea RAG](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java), [lansatorul](../../scripts/run-release-rag.ps1) și [probele sale](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java) | Corpusul recuperează cerințe și porți cu citări. Implementarea atașează acum regresia, Extent, Android JVM, buildul și UI-ul nativ, dar publicarea și descărcările remote rămân fără adaptoare; lansatorul folosește runtime-ul calificat al testului nativ. Domeniul de platforme trebuie declarat în manifest. | **P1 deschis:** separați runtime-ul RAG de aplicația Android, adăugați domeniul și receiptele per platformă, stările de aplicabilitate/implementare și probele controlate Android→iOS. Nu activați afirmații iOS înaintea acestor porți și teste. |
 | [Lansatorul offline](../../scripts/run-rentz-components.ps1), [colecțiile](../../config/test-collections.json) și [scriptul de build](../../scripts/build-rentz-android.ps1) | Receipt-urile leagă selecția, sursa, manifestul și buildul de aceeași intrare. | Citește identitățile și receipt-urile; orice drift face probele anterioare neeligibile. |
 | [Catalogul](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java) și [guvernanța release](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java) | Manifestul local, fișierele și ruta README sunt verificate pentru ediția curentă. | Validarea locală nu este prezentată drept interogare remote sau confirmare de publicare. |
 | [Acceptanța API](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseDownloadAcceptance.java) și [fixture-urile loopback](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseDownloadComponentTest.java) | Acceptanța API live este explicită; testele offline folosesc un transport sintetic. | Separă API-ul autentificat, transportul de test și accesul anonim real. |
@@ -77,6 +88,15 @@ RAG-ul trebuie să cunoască tipul afirmației înainte să aleagă sursa. Simil
 | Cine poate descărca | probe distincte pentru API autentificat și canal anonim | Două receipte efective, fiecare legat de același URL, versiune, bytes și SHA-256. Un status declarat în manifest nu înlocuiește proba. |
 | Ce trebuie remediat | feedback-ul deschis și criteriul lui de închidere | Elementul rămâne avertisment/blocaj; închiderea cere dovadă și actualizarea ownerului. |
 
+## Contractul rapoartelor pentru fiecare candidat
+
+| Rulare | Raport obligatoriu | Dovada de audit |
+|---|---|---|
+| Componente | Extent emis prin JAR-ul `atf-reporting` selectat din POM | XML Surefire original, hash per XML, fiecare suită și testcase reconciliate, comparația expected/actual pentru totalurile suitei și verdict plus diagnostic pentru fiecare testcase, exit code, colecție, commit, hash-ul JAR-ului și hash-ul raportului. Nu inventează aserțiuni de domeniu absente din XML. |
+| UI/E2E | Extent emis de același `atf-reporting` | Așteptare și observație capturate la fiecare checkpoint, screenshot nativ inline Base64, hash APK/build, oracle independent, starea rezervării și hash raport. |
+| RAG | JSON de porți cu citări | Fiecare receipt leagă aceeași sursă și artefact; raportul RAG nu înlocuiește HTML-ul și nu convertește lipsa dovezii în PASS. |
+
+Candidatul este staging extern, nu `main`: executați componentele offline mai întâi, apoi buildul și numai E2E-ul care justifică valoare pentru schimbarea respectivă. După review, promovați exact snapshotul calificat; publicați doar după validarea din remote și două descărcări independente. O refactorizare nu sare peste regresia sau identitatea APK-ului și primește versiunea minoră conform politicii J5.
 ## Cerințe prioritare
 
 | ID | Prioritate | Cerință și criteriu de închidere |
@@ -93,6 +113,7 @@ RAG-ul trebuie să cunoască tipul afirmației înainte să aleagă sursa. Simil
 | RAG-10 | P2 | Întrebările rămase deschise se leagă de feedback-ul ownerului. La închidere se păstrează criteriul și referința dovezii, dar elementele închise și exemplele istorice nu intră implicit în contextul activ. |
 | RAG-11 | P1 | Domeniul platformelor este explicit în manifestul candidatului. Schema nouă declară `release.platforms` și receipte per țintă sub `qualification.platforms.<id>`; manifestele istorice cu APK sunt livrări numai pentru Android. Lipsa domeniului din schema nouă este BLOCKED pentru o afirmație de suport pe mai multe platforme. O țintă absentă primește NOT_IMPLEMENTED, dovada cerută și neexecutată primește NOT_RUN, proveniența neclară primește BLOCKED, iar NOT_APPLICABLE se admite numai când manifestul exclude explicit platforma. Aceste stări nu devin PASS și nici Android nu satisface o afirmație iOS. |
 | RAG-12 | P1 | Pentru iOS, manifestul și receiptele leagă aceeași sursă de ținta Xcode, versiunea minimă declarată, simulatorul OS-ului minim și al celei mai noi versiuni stabile curente, SDK și lanțul de instrumente, vectorii comuni de conformitate ai regulilor și scorului, testele adapterului/persistenței și artefactul semnat. IPA/Archive, Bundle ID, numărul buildului, semnarea și descărcarea au identitate distinctă de APK. Simulatorul nu substituie proba pe dispozitiv când se declară distribuție către utilizatori. Testele controlate demonstrează recuperarea cerinței iOS și refuzul substituției Android→iOS. |
+| RAG-13 | P1 · închis în cod | Orice APK candidat cere acceptanța nativă cu trei deal-uri complete: un Rentz și două contracte non-Rentz la `DEAL_END`. RAG compară fiecare contract cu istoricul replay-uit, cere checkpoint-uri de locuri/display, istoric după restart, display nemodificat, registru de expuneri izolat și capturi originale inline Base64. Un mutant cu numai două jocuri sau fără checkpoint-ul de geometrie rămâne `BLOCKED`; testul verifică și că APK-ul rămâne `STAGED_CANDIDATE_ONLY`. Cod: `ReleaseReadinessRag.attachNativeUiReceipt`; regresie: `releaseBuildAndNativeUiGatesRequireBoundToolsArtifactsAndExtentEvidence`. |
 
 ## Contractul minim al raportului
 

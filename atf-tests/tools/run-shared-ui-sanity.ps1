@@ -5,6 +5,7 @@ $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $project 'rentz-reference/tools/RentzAndroid.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
+$reportingLibrary=Get-AtfReportingLibrary -ProjectRoot $project
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
 if(Test-Path -LiteralPath $RunRoot){throw 'A fresh sanity output directory is required.'}
 $build=Get-Content -LiteralPath $BuildQualification -Raw|ConvertFrom-Json
@@ -26,6 +27,7 @@ if($HistoryOnly){
     if($HistoryDetails-and$fixture.last.finishOrder.Count-ne$fixture.players){throw 'Qualified Rentz finishing order required.'}
 }
 $developmentLedger=Join-Path (Get-AtfDataRoot -ProjectRoot $project) 'learning/exposure.json'
+$sharedDevelopmentLedger=$developmentLedger
 $developmentExposures=[Collections.Generic.List[object]]::new()
 if(-not $HelpAwardsOnly){
     if(-not $ComponentRun){$ComponentRun=$build.componentRun}
@@ -69,10 +71,20 @@ function Invoke-DevelopmentAudit([string]$Journal,[string]$ActorView){
 }
 $raw=New-AtfWorkspace -Kind android -ProjectRoot $project
 New-Item -ItemType Directory -Path $RunRoot|Out-Null
+if(-not $HelpAwardsOnly){
+    $developmentLedger=Join-Path $RunRoot 'learning-exposure.json'
+    $sharedDevelopmentLedgerSha256Before=(Get-FileHash -LiteralPath $sharedDevelopmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()
+    Copy-Item -LiteralPath $sharedDevelopmentLedger -Destination $developmentLedger
+    Assert-AtfArtifactPath -Path $developmentLedger -ProjectRoot $project
+    $copiedLedgerHash=(Get-FileHash -LiteralPath $developmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()
+    $sharedLedgerAfterCopy=(Get-FileHash -LiteralPath $sharedDevelopmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()
+    if($copiedLedgerHash-ne$sharedDevelopmentLedgerSha256Before-or$sharedLedgerAfterCopy-ne$sharedDevelopmentLedgerSha256Before){throw 'Shared learning ledger changed while the isolated test copy was created.'}
+    $isolatedDevelopmentLedgerSha256Before=$copiedLedgerHash
+}
 $leasePath='C:\work\whist_back\android-ui-lease.json';$leaseId=[guid]::NewGuid().ToString('N')
 $remoteJournal="/data/local/tmp/rentz-history-$leaseId.json";$journalPushed=$false
-$owned=$false;$installed=$false;$released=$false;$failure='';$ordinal=0;$initialActivity=''
-$points=[Collections.Generic.List[object]]::new();$actions=[Collections.Generic.List[object]]::new();$cleanup=[Collections.Generic.List[string]]::new()
+$owned=$false;$installed=$false;$released=$false;$failure='';$extentPath='';$ordinal=0;$initialActivity=''
+$points=[Collections.Generic.List[object]]::new();$actions=[Collections.Generic.List[object]]::new();$cleanup=[Collections.Generic.List[string]]::new();$completedGames=[Collections.Generic.List[object]]::new()
 $initialSize='';$initialDensity='';$initialFont='';$finalSize='';$finalDensity='';$finalFont='';$packagesBefore='';$packagesAfter='';$api=''
 $wasAsleep=$false
 $displayChanged=$false;$displayProfile='';$logicalProfile='';$restoreSize='';$restoreDensity='';$restoreFont=''
@@ -493,7 +505,7 @@ function SeatGeometry($nodes,$state){
     $names=@('Ana')+@($state.opponents);$rectangles=[Collections.Generic.List[string]]::new()
     for($seat=0;$seat-lt$state.view.players;$seat++){
         $name=[string]$names[$seat]
-        $frames=@($nodes|Where-Object{$_.description.StartsWith($name+'. Points:')})
+        $frames=@($nodes|Where-Object{([string]$_.'content-desc').StartsWith($name+'. Points:',[StringComparison]::Ordinal)})
         if($frames.Count-ne1){throw "One visible frame required for seat $seat ($name)."}
         $rectangles.Add("$seat=$($frames[0].bounds)")
     }
@@ -595,6 +607,17 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
                 RentzSequenceChecks $captured $terminal
             }
         }
+        $startTitle="Consecutive subgame $deal starts: $contract"
+        $moveTitle="Subgame $deal first human move remains visible"
+        $completeTitle="Subgame $deal completed: $contract"
+        if(@($points|Where-Object{$_.title-ceq$startTitle}).Count-ne1-or
+            @($points|Where-Object{$_.title-ceq$moveTitle}).Count-ne1-or
+            @($points|Where-Object{$_.title-ceq$completeTitle}).Count-ne1){
+            throw "Game $deal did not produce all required native display checkpoints."
+        }
+        $completedGames.Add([ordered]@{number=$deal;contract=$contract;phase=$terminal.view.phase;handNumber=$terminal.view.handNumber;scoreCount=$terminal.view.dealPoints.Count;
+            seatGeometryVerified=$true;firstHumanMoveVerified=$firstHumanMoveCaptured;completionVerified=($terminal.view.phase-eq'DEAL_END');
+            rentzFinishOrderVerified=($contract-eq'RENTZ'-and$terminal.view.finishOrder.Count-eq$terminal.view.players)})
     }
     if(-not$playedNormal){throw 'The three-subgame sample did not include a non-Rentz contract for visual comparison.'}
     $journal=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/session.json') 'three-subgame-journal'
@@ -728,7 +751,6 @@ try{
     $revision=$state.revision;Tap 'Show cards';$state=State -After $revision
     Observe 'Eight revealed cards on the shared table' {param($nodes) Check 'Eight own cards' 8 @($state.view.hand).Count;TableChecks $nodes $state}
     if($ConsecutiveSubgames){
-        Tap 'Choose game';$revision=$state.revision;Tap 'Rentz';$state=State -After $revision
         RunConsecutiveSubgames $state $journalFile
     }else{
     Tap 'Choose game';$revision=$state.revision;Tap 'Tricks';$state=State -After $revision
@@ -778,7 +800,7 @@ try{
     }
     }
 }catch{
-    $failure=$_.Exception.ToString()
+    $failure=$_.Exception.ToString()+"`r`nInvocation: "+$_.InvocationInfo.PositionMessage+"`r`nScriptStackTrace: "+$_.ScriptStackTrace
     if($owned){try{Adb @('shell','logcat','-d','-t','150','-s','AndroidRuntime:E') 'failure-logcat'|Out-Null}catch{$cleanup.Add($_.Exception.ToString())}}
 }finally{
     if($owned){
@@ -812,23 +834,37 @@ try{
     }
 }
 $preserved=$initialSize-and$initialSize-eq$finalSize-and$initialDensity-eq$finalDensity-and$initialFont-eq$finalFont-and$packagesBefore-ceq$packagesAfter
+$sharedDevelopmentLedgerSha256After='';$sharedDevelopmentLedgerUnchanged=$false;$isolatedDevelopmentLedgerSha256After=''
+if(-not $HelpAwardsOnly){
+    $sharedDevelopmentLedgerSha256After=(Get-FileHash -LiteralPath $sharedDevelopmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()
+    $sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerSha256Before-eq$sharedDevelopmentLedgerSha256After
+    if(Test-Path -LiteralPath $developmentLedger -PathType Leaf){$isolatedDevelopmentLedgerSha256After=(Get-FileHash -LiteralPath $developmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()}
+    if($ConsecutiveSubgames-and-not$sharedDevelopmentLedgerUnchanged-and-not$failure){$failure='Shared training ledger changed during isolated native acceptance.'}
+}
 $minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}elseif($ConsecutiveSubgames){16}else{10}
 if($HistoryDetails){$minimum+=4}
 if($CompactScores){$minimum++}
 if(-not$failure-and($cleanup.Count-or-not$released-or-not$preserved-or$points.Count-lt$minimum)){$failure='Native closeout failed or the declared checkpoint population is incomplete.'}
-$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive UI subgames in one match: Rentz sequence followed by two standard subgames selected through the human UI or AI chooser, native seat and sequence measurements, score history, restart, and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
+$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: full Rentz followed by two non-Rentz games, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
 if($HistoryDetails){$scope+='; confirmed blind trick contributions and the actual Rentz finishing places after journal restore'}
 if($CompactScores){$scope+='; Romanian compact signed scores at font scale 1.5 and a 720x1280 logical viewport'}
 $display=[ordered]@{before=@{size=$initialSize.Trim();density=$initialDensity.Trim();font=$initialFont.Trim()};after=@{size=$finalSize.Trim();density=$finalDensity.Trim();font=$finalFont.Trim()}}
-$result=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;helpAwardsOnly=[bool]$HelpAwardsOnly;historyOnly=[bool]$HistoryOnly;historyMatrix=[bool]$HistoryMatrix;historyDetails=[bool]$HistoryDetails;seatExtremes=[bool]$SeatExtremes;consecutiveSubgames=[bool]$ConsecutiveSubgames;subgames=$threeSubgameContracts;gameAudit=$threeSubgameOracle;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;build=$build;rawRoot=$raw;developmentLedger=$developmentLedger;developmentExposures=$developmentExposures.ToArray();failure=$failure;cleanupFailures=$cleanup.ToArray();display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;checkpoints=$points.ToArray()}
-$result|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $RunRoot 'result.json') -Encoding utf8NoBOM
 if($component){
-    $result|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $raw 'ui-result.json') -Encoding utf8NoBOM
+    $reportInput=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;consecutiveSubgames=[bool]$ConsecutiveSubgames;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;failure=$failure;display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;subgames=$threeSubgameContracts;completedGames=$completedGames.ToArray();gameAudit=$threeSubgameOracle;developmentLedger=$developmentLedger;developmentLedgerScope=$(if($HelpAwardsOnly){'NOT_USED'}else{'RUN_ISOLATED_COPY'});sharedDevelopmentLedgerSha256Before=$sharedDevelopmentLedgerSha256Before;sharedDevelopmentLedgerSha256After=$sharedDevelopmentLedgerSha256After;sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerUnchanged;isolatedDevelopmentLedgerSha256Before=$isolatedDevelopmentLedgerSha256Before;isolatedDevelopmentLedgerSha256After=$isolatedDevelopmentLedgerSha256After;checkpoints=$points.ToArray()}
+    $reportInput|ConvertTo-Json -Depth 16|Set-Content -LiteralPath (Join-Path $raw 'ui-result.json') -Encoding utf8NoBOM
     ConvertTo-Json -InputObject @($points.ToArray()) -Depth 16|Set-Content -LiteralPath (Join-Path $raw 'checkpoints.json') -Encoding utf8NoBOM
     if($points.Count){
-        Invoke-DevelopmentExposure @('report',$raw)
-        if(-not(Test-Path -LiteralPath (Join-Path $raw 'android-extent.html'))){throw 'Extent report was not created from the recorded native checkpoints.'}
+        try{
+            Invoke-DevelopmentExposure @('report',$raw)
+            $sourceExtent=Join-Path $raw 'android-extent.html'
+            if(-not(Test-Path -LiteralPath $sourceExtent -PathType Leaf)){throw 'atf-reporting did not create the native Extent artifact.'}
+            $extentPath=Join-Path $RunRoot 'android-extent.html'
+            Copy-Item -LiteralPath $sourceExtent -Destination $extentPath
+        }catch{if(-not$failure){$failure=$_.Exception.Message}}
     }
 }
+$extentHash='';if($extentPath-and(Test-Path -LiteralPath $extentPath -PathType Leaf)){$extentHash=(Get-FileHash -LiteralPath $extentPath -Algorithm SHA256).Hash.ToLowerInvariant()}
+$result=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;helpAwardsOnly=[bool]$HelpAwardsOnly;historyOnly=[bool]$HistoryOnly;historyMatrix=[bool]$HistoryMatrix;historyDetails=[bool]$HistoryDetails;seatExtremes=[bool]$SeatExtremes;consecutiveSubgames=[bool]$ConsecutiveSubgames;subgames=$threeSubgameContracts;completedGames=$completedGames.ToArray();gameAudit=$threeSubgameOracle;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;build=$build;rawRoot=$raw;extentReport=$extentPath;extentReportSha256=$extentHash;reportingLibrary=$reportingLibrary.name;reportingLibrarySha256=$reportingLibrary.sha256;runnerSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant();developmentLedger=$developmentLedger;developmentLedgerScope=$(if($HelpAwardsOnly){'NOT_USED'}else{'RUN_ISOLATED_COPY'});isolatedDevelopmentLedgerSha256Before=$isolatedDevelopmentLedgerSha256Before;isolatedDevelopmentLedgerSha256After=$isolatedDevelopmentLedgerSha256After;sharedDevelopmentLedger=$sharedDevelopmentLedger;sharedDevelopmentLedgerSha256Before=$sharedDevelopmentLedgerSha256Before;sharedDevelopmentLedgerSha256After=$sharedDevelopmentLedgerSha256After;sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerUnchanged;developmentExposures=$developmentExposures.ToArray();failure=$failure;cleanupFailures=$cleanup.ToArray();display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;checkpoints=$points.ToArray()}
+$result|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $RunRoot 'result.json') -Encoding utf8NoBOM
 if($failure){throw "Shared UI sanity failed: $RunRoot"}
 Write-Output $RunRoot

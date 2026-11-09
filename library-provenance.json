@@ -551,22 +551,22 @@
       ]
     },
     {
-      "artifact": "atf.api:atf-reporting:1.0.0-j23",
+      "artifact": "atf.api:atf-reporting:1.0.0-j24",
       "files": {
         "jar": {
-          "path": "lib/atf-reporting-1.0.0-j23.jar",
-          "sha256": "2378EA9D410690D2424B4BC58E1ED203E55CE2B7F60BE8E8CC8A1847E2E5B756"
+          "path": "lib/atf-reporting-1.0.0-j24.jar",
+          "sha256": "8DD71735DE004853210A91169297D8965691F6C4BF6781195594BE50F70B69EF"
         },
         "pom": {
-          "path": "lib/atf-reporting-1.0.0-j23.pom",
-          "sha256": "523FEAC2C69AC62771CD24D88A86A7A6082B5379CA158BBD991E2F0BEB44F827"
+          "path": "lib/atf-reporting-1.0.0-j24.pom",
+          "sha256": "2D18F1D8F3B68E17788BAEEA60CC011BE4D5F1A8C0C0709A2F7801297D2C60DA"
         }
       },
       "upstreamProducer": "atf_j0",
-      "copySource": "C:/Users/Cristi/AppData/Local/Temp/ATF_FAILS_156_4237e29c/publisher-budget-j23",
+      "copySource": "C:/Users/Cristi/AppData/Local/Temp/ATF_REPORTING_J24_20261108_192900/build-a",
       "producerInputs": {
         "files": 420,
-        "sha256": "6FC0000A5ECDEC5BD6798E5DB839CEE3E474E445A348BFAE87ADE9EB4D73032F",
+        "sha256": "D9C90C6E7D38A739C59D0A7DB424953F19CEE7A45E4CDECFB83BC9519B0F2966",
         "scope": "pom.xml, README.md and src/** raw source bytes; generated output excluded",
         "nativeTests": [
           {
@@ -642,6 +642,21 @@
             "sha256": "0360B39B331120D87C24D67AB391D9DBA6B480D9E6FE22DDDB241980190E4C96"
           }
         ]
+      },
+      "producerInputsSha256": "C1D5AE76AAD669E9FCEECEC35BD0A2FBFFD0FB473D9F76E2943CF7D967657A39",
+      "supersededArtifact": {
+        "coordinate": "atf.api:atf-reporting:1.0.0-j23",
+        "files": {
+          "jar": {
+            "path": "lib/atf-reporting-1.0.0-j23.jar",
+            "sha256": "2378EA9D410690D2424B4BC58E1ED203E55CE2B7F60BE8E8CC8A1847E2E5B756"
+          },
+          "pom": {
+            "path": "lib/atf-reporting-1.0.0-j23.pom",
+            "sha256": "523FEAC2C69AC62771CD24D88A86A7A6082B5379CA158BBD991E2F0BEB44F827"
+          }
+        },
+        "copySource": "C:/Users/Cristi/AppData/Local/Temp/ATF_FAILS_156_4237e29c/publisher-budget-j23"
       },
       "release": {
         "coordinate": "atf.api:atf-reporting:1.0.0-j24",
@@ -1250,7 +1265,7 @@
   ],
   "verificationRetention": {
     "policy": "Only current verification beside its matching producer in owned TMP; historical provenance retained",
-    "currentEvidence": "C:/Users/Cristi/AppData/Local/Temp/ATF_FAILS_156_4237e29c/publisher-budget-j23/ATF_Reporting_Verification.md"
+    "currentEvidence": "C:/Users/Cristi/AppData/Local/Temp/ATF_REPORTING_J24_20261108_192900/ATF_Reporting_Verification.md"
   },
   "archivedProvenance": {
     "path": "C:/work/whist_back/documentation-audits/20261104-200338-romanian-layers/historical-library-provenance.json",

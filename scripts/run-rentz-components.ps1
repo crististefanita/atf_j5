@@ -16,6 +16,8 @@ if($SourceRoot){
     $source=[IO.Path]::GetFullPath($SourceRoot)
     $sourceCommit=Get-AtfReleaseSourceCommit -SourceRoot $source -ProjectRoot $root
 }
+$checkoutLayout=Get-AtfCheckoutLayoutRoot -ProjectRoot $source
+$reportingLibrary=Get-AtfReportingLibrary -ProjectRoot $source
 Import-Module (Join-Path $PSScriptRoot 'TestCollections.psm1') -Force
 if (-not $RunRoot) { $RunRoot = Join-Path (Join-Path (Get-AtfDataRoot -ProjectRoot $root) 'components') ((Get-Date -Format yyyyMMdd-HHmmss)+'-'+[guid]::NewGuid().ToString('N').Substring(0,8)) }
 $RunRoot = [IO.Path]::GetFullPath($RunRoot)
@@ -68,7 +70,7 @@ try {
     Push-Location $stage
     try {
         New-Item -ItemType Directory -Path "$stage/runtime"|Out-Null
-        $arguments=@('-B','-o',"-Drentz.runtime.inventory=$runtimeInventory","-Drentz.runtime.attestation=$runtimeAttestation","-Drentz.runtime.token=$qualificationToken","-Drentz.governance.sourceRoot=$source","-Drentz.governance.checkoutLayout=$root","-Dmaven.repo.local=$repository","-Djava.io.tmpdir=$stage/runtime",'-Datf.test.heap.max=256m',"-Drentz.report.output=$RunRoot\rentz-rules-extent.html","-Drentz.release.report.directory=$RunRoot\release-contracts")
+        $arguments=@('-B','-o',"-Drentz.runtime.inventory=$runtimeInventory","-Drentz.runtime.attestation=$runtimeAttestation","-Drentz.runtime.token=$qualificationToken","-Drentz.governance.sourceRoot=$source","-Drentz.governance.checkoutLayout=$checkoutLayout","-Dmaven.repo.local=$repository","-Djava.io.tmpdir=$stage/runtime",'-Datf.test.heap.max=256m',"-Drentz.report.output=$RunRoot\rentz-rules-extent.html","-Drentz.release.report.directory=$RunRoot\release-contracts")
         if($plan.selectors.Count){$arguments+=@('-Dsurefire.failIfNoSpecifiedTests=false',('-Dtest='+($plan.selectors-join',')),'test')}else{$arguments+=@('-N','validate')}
         & $Maven @arguments *> "$RunRoot\maven.log"
         $exit=$LASTEXITCODE
@@ -151,6 +153,58 @@ if($healthy-and@($results|Where-Object name -EQ 'atf.rentz.OfflineArenaComponent
     [ordered]@{mainClass='atf.rentz.OfflineArena';classpath=$classpath;classFile=$arenaClass;classSha256=(Get-FileHash $arenaClass).Hash;inventory=$runtimeInventory;inventorySha256=(Get-FileHash $runtimeInventory).Hash;attestation=$runtimeAttestation;attestationSha256=(Get-FileHash $runtimeAttestation).Hash;qualificationToken=$qualificationToken}|ConvertTo-Json|Set-Content -LiteralPath $arenaRuntime -Encoding utf8NoBOM
     $arenaRuntimeSha256=(Get-FileHash $arenaRuntime).Hash
 }
-[ordered]@{status=$(if($healthy){'PASS'}else{'FAIL'});collection=$plan;source=$source;sourceCommit=$sourceCommit;sourceManifestSha256=(Get-FileHash -LiteralPath "$RunRoot\source-identity.json").Hash;stage=$stage;repository=$repository;infrastructureControls=$infrastructureControls;runtimeControls=$runtimeControls;discoveryControls=$discoveryControls;qualifiedRuntimeControls=$qualifiedRuntimeControls;runtimeQualificationFailure=$runtimeQualificationFailure;nativeRuntime=$nativeRuntime;nativeRuntimeSha256=$nativeRuntimeSha256;arenaRuntime=$arenaRuntime;arenaRuntimeSha256=$arenaRuntimeSha256;androidJvm=$androidRun;androidFailure=$androidFailure;selectedPopulationFailure=$populationFailure;results=$results;drift=$drift;populationChanges=$populationChanges;scope='Selected offline components; reference parity and Android E2E are not qualified.'} | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath "$RunRoot\result.json" -Encoding utf8NoBOM
+$sourceManifestSha256=(Get-FileHash -LiteralPath "$RunRoot\source-identity.json").Hash.ToLowerInvariant()
+$componentExtentReport=Join-Path $RunRoot 'component-suite-extent.html'
+$componentExtentReportSha256='';$componentExtentReportFailure='';$componentExtentQualified=$false
+$extentSuites=[Collections.Generic.List[object]]::new()
+$extentInputFailures=[Collections.Generic.List[string]]::new()
+foreach($row in $results){
+    $relativeModule=$row.module.Replace('/','-')
+    $xmlPath=Join-Path (Join-Path $RunRoot $relativeModule) ('TEST-'+$row.name+'.xml')
+    if(-not(Test-Path -LiteralPath $xmlPath -PathType Leaf)){$extentInputFailures.Add('Selected Surefire XML is missing: '+$row.name);continue}
+    $extentSuites.Add([ordered]@{module=$row.module;name=$row.name;xml=[IO.Path]::GetFullPath($xmlPath);sha256=(Get-FileHash -LiteralPath $xmlPath -Algorithm SHA256).Hash.ToLowerInvariant();tests=$row.tests;failures=$row.failed;errors=$row.errors;skipped=$row.skipped})
+}
+if($androidRun-and(Test-Path -LiteralPath (Join-Path $androidRun 'result.json') -PathType Leaf)){
+    $androidReceipt=Get-Content -Raw -LiteralPath (Join-Path $androidRun 'result.json')|ConvertFrom-Json
+    foreach($row in $androidReceipt.tests){
+        $xmlPath=Join-Path $androidRun ('TEST-'+$row.name+'.xml')
+        if(-not(Test-Path -LiteralPath $xmlPath -PathType Leaf)){$extentInputFailures.Add('Android JVM Surefire XML is missing: '+$row.name);continue}
+        $extentSuites.Add([ordered]@{module='android-jvm';name=$row.name;xml=[IO.Path]::GetFullPath($xmlPath);sha256=(Get-FileHash -LiteralPath $xmlPath -Algorithm SHA256).Hash.ToLowerInvariant();tests=$row.tests;failures=$row.failures;errors=$row.errors;skipped=$row.skipped})
+    }
+}
+if(-not$componentExtentReportFailure){
+    try{
+        $reportClasspath=''
+        $reportRows=@($results|Where-Object module -EQ 'atf-tests')
+        foreach($row in $reportRows){
+            $xmlPath=Join-Path (Join-Path $RunRoot $row.module.Replace('/','-')) ('TEST-'+$row.name+'.xml')
+            [xml]$xml=Get-Content -Raw -LiteralPath $xmlPath
+            $value=[string](($xml.testsuite.properties.property|Where-Object name -EQ 'java.class.path'|Select-Object -First 1).value)
+            if($value){if($reportClasspath-and$reportClasspath-cne$value){throw 'Surefire test classpaths disagree'};$reportClasspath=$value}
+        }
+        if(-not$reportRows.Count-or-not$reportClasspath){throw 'No ATF test-module classpath is present in Surefire XML'}
+        $sourceCommitForReport=$sourceCommit
+        if(-not$sourceCommitForReport){$sourceCommitForReport=[string](git -C $source rev-parse HEAD);if($LASTEXITCODE-ne0){throw 'Source commit unavailable for Extent report'}}
+        $executionDiagnostics=[Collections.Generic.List[string]]::new()
+        foreach($diagnostic in @($androidFailure,$runtimeQualificationFailure,$populationFailure)){if(-not[string]::IsNullOrWhiteSpace($diagnostic)){$executionDiagnostics.Add($diagnostic)}}
+        if($exit-ne0){$executionDiagnostics.Add("Maven exited with code $exit")}
+        foreach($diagnostic in $extentInputFailures){$executionDiagnostics.Add($diagnostic)}
+        $executionDiagnostic=$executionDiagnostics -join '; '
+        $reportExitCode=if($androidFailure-or$runtimeQualificationFailure-or$populationFailure-or$extentInputFailures.Count-or$exit-ne0){1}else{0}
+        $reportInput=Join-Path $RunRoot 'component-suite-input.json'
+        [ordered]@{schemaVersion=1;sourceCommit=$sourceCommitForReport.ToLowerInvariant();sourceManifestSha256=$sourceManifestSha256;collection=$plan.name;processExitCode=$reportExitCode;executionFailure=$executionDiagnostic;suites=@($extentSuites)}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath $reportInput -Encoding utf8NoBOM
+        $javaReport=Join-Path $JavaHome 'bin/java.exe'
+        & $javaReport -Xmx256m -cp $reportClasspath atf.rentz.reporting.ComponentSuiteExtentReport $reportInput $componentExtentReport *> (Join-Path $RunRoot 'component-suite-extent.log')
+        if($LASTEXITCODE-ne0){throw 'atf-reporting suite report publisher failed'}
+        $extentSummary=Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'component-suite-extent.log')|Select-Object -Last 1|ConvertFrom-Json
+        if(-not(Test-Path -LiteralPath $componentExtentReport -PathType Leaf)-or-not$extentSummary.reportSha256){throw 'Extent output or digest is missing'}
+        $componentExtentReportSha256=(Get-FileHash -LiteralPath $componentExtentReport -Algorithm SHA256).Hash.ToLowerInvariant()
+        if($componentExtentReportSha256-cne$extentSummary.reportSha256){throw 'Extent report digest differs from publisher receipt'}
+        $componentExtentQualified=[bool]$extentSummary.qualified
+    }catch{$componentExtentReportFailure=$_.Exception.Message}
+}
+if($componentExtentReportFailure){$healthy=$false}else{$healthy=$healthy-and$componentExtentQualified}
+$resultReceipt=[ordered]@{status=$(if($healthy){'PASS'}else{'FAIL'});collection=$plan;source=$source;sourceCommit=$sourceCommit;sourceManifestSha256=$sourceManifestSha256;checkoutLayout=$checkoutLayout;stage=$stage;repository=$repository;infrastructureControls=$infrastructureControls;runtimeControls=$runtimeControls;discoveryControls=$discoveryControls;qualifiedRuntimeControls=$qualifiedRuntimeControls;runtimeQualificationFailure=$runtimeQualificationFailure;nativeRuntime=$nativeRuntime;nativeRuntimeSha256=$nativeRuntimeSha256;arenaRuntime=$arenaRuntime;arenaRuntimeSha256=$arenaRuntimeSha256;androidJvm=$androidRun;androidFailure=$androidFailure;selectedPopulationFailure=$populationFailure;componentExtentReport=$componentExtentReport;componentExtentReportSha256=$componentExtentReportSha256;componentExtentReportFailure=$componentExtentReportFailure;componentExtentQualified=$componentExtentQualified;componentExtentReportingLibrary=$reportingLibrary.name;componentExtentReportingLibrarySha256=$reportingLibrary.sha256;results=$results;drift=$drift;populationChanges=$populationChanges;scope='Selected offline components; reference parity and Android E2E are not qualified.'}
+$resultReceipt | ConvertTo-Json -Depth 7 | Set-Content -LiteralPath "$RunRoot\result.json" -Encoding utf8NoBOM
 if (-not $healthy) { throw "Component run not qualified; inspect $RunRoot" }
 Write-Output $RunRoot

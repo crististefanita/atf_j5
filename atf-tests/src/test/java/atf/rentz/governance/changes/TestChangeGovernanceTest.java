@@ -79,7 +79,16 @@ class TestChangeGovernanceTest {
                 || path.equals("scripts/TestSourceInventory.psm1") || path.equals("scripts/RuntimeQualification.psm1")
                 || path.equals("config/infrastructure-workspaces.json")
                 || path.equals("config/release-rag-corpus.json") || path.equals("scripts/run-release-rag.ps1")
+                || path.equals("scripts/InfrastructureWorkspaces.psm1")
+                || path.equals("library-provenance.json") || path.startsWith("lib/atf-reporting-")
+                || path.equals("atf-tests/src/main/java/atf/rentz/distribution/AtfReportingLibrary.java")
+                || path.equals("scripts/build-rentz-android.ps1")
+                || path.equals("atf-tests/tools/run-shared-ui-sanity.ps1")
+                || path.equals("atf-tests/tools/test-workspace-governance.ps1")
+                || path.equals("rentz-lab-app/app/build.gradle") || path.equals("release/index.json")
+                || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java")
+                || path.startsWith("atf-tests/src/main/java/atf/rentz/reporting/")
                 || path.equals("atf-tests/tools/run-arena.ps1") || path.equals("atf-tests/tools/run-android-sanity.ps1")
                 || path.equals("atf-tests/tools/test-runtime-controls.ps1")
                 || path.equals("atf-tests/tools/test-test-discovery.ps1")
@@ -94,6 +103,20 @@ class TestChangeGovernanceTest {
         assertTrue(protectedPath("config/release-rag-corpus.json"));
         assertTrue(protectedPath("scripts/run-release-rag.ps1"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java"));
+    }
+
+    @Test void releaseArtifactsReportingAndWorkspaceBoundariesAreProtected() {
+        assertTrue(protectedPath("scripts/InfrastructureWorkspaces.psm1"));
+        assertTrue(protectedPath("scripts/build-rentz-android.ps1"));
+        assertTrue(protectedPath("atf-tests/tools/run-shared-ui-sanity.ps1"));
+        assertTrue(protectedPath("atf-tests/tools/test-workspace-governance.ps1"));
+        assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java"));
+        assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/AtfReportingLibrary.java"));
+        assertTrue(protectedPath("library-provenance.json"));
+        assertTrue(protectedPath("lib/atf-reporting-1.0.0-j24.jar"));
+        assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/reporting/ComponentSuiteExtentReport.java"));
+        assertTrue(protectedPath("rentz-lab-app/app/build.gradle"));
+        assertTrue(protectedPath("release/index.json"));
     }
 
     private static String sha(Path file) throws Exception {
@@ -148,5 +171,30 @@ class TestChangeGovernanceTest {
         assertEquals(List.of(), validate(root, deletion, policy, LocalDate.now()));
         policy.withArray("controls").add(row.deepCopy());
         assertFalse(validate(root, one, policy, LocalDate.now()).isEmpty());
+    }
+
+    @Test void finalWorktreeStateSupersedesCancelledStagedChanges(@TempDir Path root) throws Exception {
+        GitTestChanges.command(root, "init", "-b", "main");
+        Path tracked = root.resolve("config/reviewed.json");
+        Files.createDirectories(tracked.getParent());
+        Files.writeString(tracked, "base\n");
+        GitTestChanges.command(root, "add", ".");
+        GitTestChanges.command(root, "-c", "user.name=Governance fixture", "-c", "user.email=fixture@invalid",
+                "-c", "commit.gpgsign=false", "commit", "-m", "base files");
+        String base = GitTestChanges.command(root, "rev-parse", "HEAD").trim();
+
+        Path stagedThenRemoved = root.resolve("lib/atf-reporting-obsolete.jar");
+        Files.createDirectories(stagedThenRemoved.getParent());
+        Files.write(stagedThenRemoved, new byte[] { 1, 2, 3 });
+        GitTestChanges.command(root, "add", "lib/atf-reporting-obsolete.jar");
+        Files.delete(stagedThenRemoved);
+
+        Files.writeString(tracked, "staged\n");
+        GitTestChanges.command(root, "add", "config/reviewed.json");
+        Files.writeString(tracked, "base\n");
+
+        var changes = GitTestChanges.read(root, base).changes();
+        assertEquals(List.of(), changes,
+                "Change review describes final source bytes; cancelled index changes are not candidate inputs");
     }
 }

@@ -24,8 +24,11 @@ if($Configuration-eq'Release'){
     $sourceCommit=Get-AtfReleaseSourceCommit -SourceRoot $source -ProjectRoot $root
     if($sourceCommit-cne$component.sourceCommit){throw 'Release source differs from the qualified commit.'}
 }
+$reportingLibrary=Get-AtfReportingLibrary -ProjectRoot $source
 $componentManifest=Join-Path $ComponentRun 'source-identity.json'
-if($component.sourceManifestSha256-and(Get-FileHash -LiteralPath $componentManifest).Hash-cne$component.sourceManifestSha256){
+$componentManifestDigest=(Get-FileHash -LiteralPath $componentManifest -Algorithm SHA256).Hash.ToLowerInvariant()
+$receiptManifestDigest=([string]$component.sourceManifestSha256).ToLowerInvariant()
+if($receiptManifestDigest-notmatch'^[0-9a-f]{64}$'-or$componentManifestDigest-cne$receiptManifestDigest){
     throw 'Component source manifest differs from the receipt.'
 }
 $androidReceipt=Get-Content -Raw -LiteralPath (Join-Path $component.androidJvm 'result.json')|ConvertFrom-Json
@@ -49,7 +52,7 @@ $manifest=@(foreach($file in Get-ChildItem -LiteralPath $lab -Recurse -File|Wher
     $hash=(Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash
     if($hash-ne(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash){throw 'Source changed during Android snapshot'}
     $path=$relative.Replace('\','/')
-    if($qualified[$path]-cne$hash-or$regressionInputs["rentz-lab-app/$path"]-cne$hash){
+    if($qualified[$path]-ine$hash-or$regressionInputs["rentz-lab-app/$path"]-ine$hash){
         throw "Android build input differs from qualified source: $path"
     }
     [pscustomobject]@{path=$path;sha256=$hash}
@@ -91,7 +94,8 @@ if($sourceCommit){
     catch{$drift+=$_.Exception.Message}
 }
 $passed=$exit-eq0-and$results.Count-ge2-and@($results|Where-Object{$_.failures-or$_.errors-or$_.skipped-or$_.tests-lt1}).Count-eq0-and@($results|Where-Object{$_.module-eq'app'}).Count-gt0-and$drift.Count-eq0-and$population.Count-eq0
-$apk=Join-Path $RunRoot 'rentz-lab-debug.apk';$hash='';$certificate=@();$version=$null;$debuggable=$null
+$apk=Join-Path $RunRoot 'rentz-lab-debug.apk';$hash='';$certificate=@();$version=$null;$debuggable=$null;$applicationId='';$apkBytes=0
+$uiApk='';$uiApkHash='';$uiApplicationId='';$uiAuditedCases=0;$uiCertificate=@();$uiApkBytes=0
 if($passed){
     $variant=$Configuration.ToLowerInvariant()
     $version=(Get-Content -Raw -LiteralPath (Join-Path $stage "app/build/outputs/apk/$variant/output-metadata.json")|ConvertFrom-Json).elements[0]
@@ -100,16 +104,69 @@ if($passed){
     $hash=(Get-FileHash -LiteralPath $apk -Algorithm SHA256).Hash
     & (Join-Path $Sdk 'build-tools/36.0.0/apksigner.bat') verify --verbose --print-certs $apk *> (Join-Path $RunRoot 'apk-signature.txt');$signed=$LASTEXITCODE-eq0
     & (Join-Path $Sdk 'build-tools/36.0.0/aapt.exe') dump badging $apk *> (Join-Path $RunRoot 'apk-badging.txt');$identified=$LASTEXITCODE-eq0
+    $productPackage=[regex]::Match((Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'apk-badging.txt')),"(?m)^package: name='([^']+)'")
+    if($productPackage.Success){$applicationId=$productPackage.Groups[1].Value}else{$identified=$false}
     $certificate=@(Get-Content -LiteralPath (Join-Path $RunRoot 'apk-signature.txt')|Where-Object{$_-match'certificate SHA-256 digest:'})
-    $passed=$passed-and$signed-and$identified-and$certificate.Count-eq1
+    $passed=$passed-and$signed-and$identified-and$applicationId-eq'ro.rentzlab.app'-and$certificate.Count-eq1
     & (Join-Path $Sdk 'build-tools/36.0.0/zipalign.exe') -c -P 16 -v 4 $apk *> (Join-Path $RunRoot 'apk-alignment.txt')
     $passed=$passed-and$LASTEXITCODE-eq0
     $debuggable=[bool](@(Get-Content -LiteralPath (Join-Path $RunRoot 'apk-badging.txt')|Where-Object{$_-eq'application-debuggable'}).Count)
+    $apkBytes=(Get-Item -LiteralPath $apk).Length
     if($Configuration-eq'Release'-and$certificate.Count-eq1){
         $actual=($certificate[0]-split':\s*',2)[1].Trim().ToLowerInvariant()
         $passed=$passed-and-not$debuggable-and$actual-eq$identity.certificateSha256
     }elseif($Configuration-eq'Release'){$passed=$false}
+    if($UiSanity){
+        $uiMetadata=Get-Content -Raw -LiteralPath (Join-Path $stage 'app/build/outputs/apk/uiSanity/output-metadata.json')|ConvertFrom-Json
+        if(-not$uiMetadata.elements.Count){throw 'Isolated UI-sanity APK metadata is missing.'}
+        $uiSource=Join-Path $stage ('app/build/outputs/apk/uiSanity/'+$uiMetadata.elements[0].outputFile)
+        $uiApk=Join-Path $RunRoot 'rentz-lab-ui-sanity.apk';Copy-Item -LiteralPath $uiSource -Destination $uiApk
+        $uiApkHash=(Get-FileHash -LiteralPath $uiApk -Algorithm SHA256).Hash
+        & (Join-Path $Sdk 'build-tools/36.0.0/apksigner.bat') verify --verbose --print-certs $uiApk *> (Join-Path $RunRoot 'ui-apk-signature.txt');$uiSigned=$LASTEXITCODE-eq0
+        & (Join-Path $Sdk 'build-tools/36.0.0/aapt.exe') dump badging $uiApk *> (Join-Path $RunRoot 'ui-apk-badging.txt');$uiIdentified=$LASTEXITCODE-eq0
+        $uiPackage=[regex]::Match((Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'ui-apk-badging.txt')),"(?m)^package: name='([^']+)'")
+        if($uiPackage.Success){$uiApplicationId=$uiPackage.Groups[1].Value}else{$uiIdentified=$false}
+        $uiCertificate=@(Get-Content -LiteralPath (Join-Path $RunRoot 'ui-apk-signature.txt')|Where-Object{$_-match'certificate SHA-256 digest:'})
+        & (Join-Path $Sdk 'build-tools/36.0.0/zipalign.exe') -c -P 16 -v 4 $uiApk *> (Join-Path $RunRoot 'ui-apk-alignment.txt');$uiAligned=$LASTEXITCODE-eq0
+        $uiDebuggable=[bool](@(Get-Content -LiteralPath (Join-Path $RunRoot 'ui-apk-badging.txt')|Where-Object{$_-eq'application-debuggable'}).Count)
+        $auditDirectory=Join-Path $RunRoot 'assertions'
+        if(Test-Path -LiteralPath $auditDirectory -PathType Container){
+            foreach($auditFile in Get-ChildItem -LiteralPath $auditDirectory -Filter '*.json' -File){
+                $audit=Get-Content -Raw -LiteralPath $auditFile.FullName|ConvertFrom-Json
+                if($audit.status-ne'PASS'-or-not$audit.checks-or@($audit.checks|Where-Object{-not$_.passed}).Count){$passed=$false;throw "UI component audit did not pass: $($auditFile.Name)"}
+                $uiAuditedCases+=$audit.checks.Count
+            }
+        }
+        $passed=$passed-and$uiSigned-and$uiIdentified-and$uiAligned-and$uiApplicationId-eq'ro.rentzlab.app.uisanity'-and$uiDebuggable-and$uiCertificate.Count-eq1-and$uiAuditedCases-gt0
+        $uiApkBytes=(Get-Item -LiteralPath $uiApk).Length
+    }
 }
-[ordered]@{status=$(if($passed){'PASS'}else{'FAIL'});uiContract=$(if(Test-Path -LiteralPath (Join-Path $stage 'app/src/main/java/ro/rentzlab/app/ui/table/RentzTableContent.java')){'card-table-ui-v1'}else{'prototype-v1'});configuration=$Configuration;debuggable=$debuggable;stage=$stage;sourceCommit=$sourceCommit;componentRun=$ComponentRun;qualifiedCoreMatches=$true;builderSha256=(Get-FileHash -LiteralPath $PSCommandPath).Hash;sourceManifestSha256=(Get-FileHash -LiteralPath (Join-Path $RunRoot 'source-identity.json')).Hash;apkFile=[IO.Path]::GetFileName($apk);apkSha256=$hash;versionName=$version.versionName;versionCode=$version.versionCode;certificate=$certificate;signing=$(if($Configuration-eq'Release'){'Dedicated Rentz release identity; external DPAPI credential'}else{'Local Android debug certificate; not an original-app release'});tests=$results;drift=$drift;populationChanges=$population}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath (Join-Path $RunRoot 'build-qualification.json') -Encoding utf8NoBOM
+[ordered]@{
+    status=$(if($passed){'PASS'}else{'FAIL'})
+    uiContract=$(if(Test-Path -LiteralPath (Join-Path $stage 'app/src/main/java/ro/rentzlab/app/ui/table/RentzTableContent.java')){'card-table-ui-v1'}else{'prototype-v1'})
+    configuration=$Configuration;debuggable=$debuggable;stage=$stage;sourceCommit=$sourceCommit;componentRun=$ComponentRun
+    qualifiedCoreMatches=$true;builderSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    sourceManifest=(Join-Path $RunRoot 'source-identity.json');sourceManifestSha256=(Get-FileHash -LiteralPath (Join-Path $RunRoot 'source-identity.json') -Algorithm SHA256).Hash.ToLowerInvariant()
+    apkFile=[IO.Path]::GetFileName($apk);apk=$apk;apkSha256=$hash;apkBytes=$apkBytes;versionName=$version.versionName;versionCode=$version.versionCode
+    certificate=$certificate;applicationId=$applicationId
+    productApk=$apk;productApkSha256=$hash;productApkBytes=$apkBytes;productVersionName=$version.versionName
+    productApplicationId=$applicationId;productDebuggable=$debuggable;productCertificate=$certificate
+    uiSanity=[bool]$UiSanity;uiSanityApk=$uiApk;uiSanityApkSha256=$uiApkHash;uiSanityApkBytes=$uiApkBytes
+    uiSanityApplicationId=$uiApplicationId;uiSanityCertificate=$uiCertificate;newAuditedCases=$uiAuditedCases
+    reportingLibrary=$reportingLibrary.name;reportingLibrarySha256=$reportingLibrary.sha256
+    signing=$(if($Configuration-eq'Release'){'Dedicated Rentz release identity; external DPAPI credential'}else{'Local Android debug certificate; not an original-app release'})
+    tests=$results;drift=$drift;populationChanges=$population
+}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath (Join-Path $RunRoot 'build-qualification.json') -Encoding utf8NoBOM
+if($UiSanity){
+    [ordered]@{
+        status=$(if($passed){'PASS'}else{'FAIL'});uiSanity=$true;sourceCommit=$sourceCommit
+        applicationId=$uiApplicationId;apk=$uiApk;apkSha256=$uiApkHash;apkBytes=$uiApkBytes;versionName=$version.versionName
+        newAuditedCases=$uiAuditedCases;builderSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        sourceManifest=(Join-Path $RunRoot 'source-identity.json');sourceManifestSha256=(Get-FileHash -LiteralPath (Join-Path $RunRoot 'source-identity.json') -Algorithm SHA256).Hash.ToLowerInvariant()
+        componentRun=$ComponentRun;reportingLibrary=$reportingLibrary.name
+        reportingLibrarySha256=$reportingLibrary.sha256
+        certificate=$uiCertificate
+    }|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $RunRoot 'ui-sanity-build-qualification.json') -Encoding utf8NoBOM
+}
 if(-not$passed){throw "Android build not qualified: $RunRoot"}
 Write-Output $RunRoot
