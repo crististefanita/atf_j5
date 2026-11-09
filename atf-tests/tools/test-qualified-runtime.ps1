@@ -190,6 +190,20 @@ foreach($mode in @('stable','mutate')){
         }
     }
 }
+Case 'Seat geometry reads raw UIAutomator descriptions and skips unlabeled nodes' {
+    $uiTokens=$null;$uiErrors=$null
+    $uiSource=Join-Path $project 'atf-tests/tools/run-shared-ui-sanity.ps1'
+    $uiAst=[Management.Automation.Language.Parser]::ParseFile($uiSource,[ref]$uiTokens,[ref]$uiErrors)
+    Require (-not$uiErrors) 'Shared UI runner does not parse'
+    $names=@('Bounds','SeatGeometry')
+    $functions=@($uiAst.FindAll({param($node) $node-is[Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-in$names},$true))
+    Require ($functions.Count-eq2) 'Expected geometry functions in the native runner'
+    foreach($function in $functions){. ([scriptblock]::Create($function.Extent.Text))}
+    [xml]$document='<hierarchy><node content-desc="" bounds="[0,0][1,1]"/><node content-desc="Ana. Points: 0. Total: 0" bounds="[1,2][11,12]"/><node content-desc="Mara. Points: 0. Total: 0" bounds="[20,2][30,12]"/><node content-desc="Nora. Points: 0. Total: 0" bounds="[40,2][50,12]"/><node content-desc="Iris. Points: 0. Total: 0" bounds="[60,2][70,12]"/></hierarchy>'
+    $state=[pscustomobject]@{opponents=@('Mara','Nora','Iris');view=[pscustomobject]@{players=4}}
+    $actual=SeatGeometry $document.SelectNodes('//node') $state
+    Require ($actual-ceq'0=[1,2][11,12];1=[20,2][30,12];2=[40,2][50,12];3=[60,2][70,12]') 'Native seat rectangles differ or unlabeled nodes were not ignored'
+}
 $failed=@($results|Where-Object status -EQ FAIL)
 [ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;productFixtures=$product;scope='Byte fixtures, injected Java recorder and extracted publication block; no real JVM body, game, full native launcher or device';results=$results}|ConvertTo-Json -Depth 7|Set-Content "$RunRoot/controls.json" -Encoding utf8NoBOM
 $results|Format-Table name,status -AutoSize

@@ -619,7 +619,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "6cbb071be689a127b6fb761faa8dfade60840a409db89961a4573bdd7f22e99c",
+      "sha256": "7725092ca120728456b206138f2d7596b83868a15d33d2a097966c0745a465fb",
       "allowDelete": false
     },
     {
@@ -1079,7 +1079,7 @@
       "criterion": "Rentz and two standard deals reach DEAL_END; seat geometry, first human move, score history and restart are observed; the learning registry is isolated and unchanged; Extent keeps each original screenshot inline.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "b801bd0cacb2d442f2f0033bcdcfb7d5034552f2240e84a97f7182e0f8368e3e",
+      "sha256": "9fdb316fb3ea0abd6233013e3e4634886dab66b1591105dc79d89d27377879ed",
       "allowDelete": false
     },
     {
