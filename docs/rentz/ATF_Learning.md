@@ -10,7 +10,7 @@ Jucătorii urmăresc punctele profilului configurat, cu mâna proprie și inform
 | Normal, `RentzPlayer` | Reperul simplu de alegere, cu limita declarată. | Reguli tactice publice, fără lumi adverse simulate. |
 | Hard, `RentzPlayer` | Compară jocurile disponibile pe aceleași lumi ipotetice. | Mutare forțată, regulă publică a asului sau comparație prin continuarea mâinii. |
 
-Hard este un mod de joc cu buget explicit, nu o declarație de optimalitate. [Politica implicită](../../config/rentz-policy.yaml) păstrează reperul; profilurile offline separă dovada locală de euristici și de orizontul complet, fără înlocuirea fabricii produsului înaintea calificării.
+Hard folosește un buget explicit de lumi și tranziții. [Politica implicită](../../config/rentz-policy.yaml) declară tactica și bugetul aplicației. Profilurile offline păstrează separat reperul de comparație, dovezile locale, euristicile și evaluarea partidei complete.
 
 | Profil | Mecanism evaluat |
 |---|---|

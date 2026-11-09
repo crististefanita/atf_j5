@@ -1,5 +1,5 @@
-schemaVersion: 1
-id: RENTZ_PUBLIC_LOOKAHEAD_V1
+schemaVersion: 3
+id: RENTZ_CONTEXTUAL_SEARCH_V3
 status: EXPERIMENTAL_CANDIDATE
 information: OWN_HAND_AND_PUBLIC_EVENTS
 normal:
@@ -11,11 +11,26 @@ hard:
   ownChainWeight: 3.0
   releaseWeight: 0.3
   skipThreatWeight: 2.0
+  objective: HAND_MARGIN
+  tactic: PUBLIC_VOID_AWARE
+  maxTransitions: 65536
 rules:
   - id: NEGATIVE_VOID_TARGET
-    condition: Off suit, cannot win; dispose of the highest current penalty, then strength.
+    condition: Off suit, dispose of the highest direct penalty before weighing losing exits and suit length.
     implementation: TacticalPolicy.card
-    verification: RentzAiTest.negativeTargetIsDiscardedWhenOffSuitCannotWin
+    verification: RentzAiTest.avoidingTricksNeverKeepsTheKingOfHeartsOverAFreePenaltyDiscard
+  - id: NEGATIVE_KEEP_PUBLIC_MINIMUM
+    condition: Recompute the lowest remaining rank from public plays and protect it as a losing exit.
+    implementation: TacticalPolicy.card
+    verification: RentzAiTest.negativeDiscardProtectsTheNewPublicMinimumAfterTheSevenWasPlayed
+  - id: NEGATIVE_HIGHEST_FORCED_LOSER
+    condition: When every legal follow loses, play the highest one in both difficulties. Positive contracts retain their own tactics.
+    implementation: SearchPolicy.card
+    verification: RentzAiTest.bothDifficultiesSpendTheJackUnderAQueenWhenEveryFollowLoses
+  - id: NEGATIVE_SAFE_LEAD
+    condition: When leading, spend the highest card with unseen higher ranks and no unseen lower ranks.
+    implementation: TacticalPolicy.card
+    verification: RentzAiTest.aPubliclyLosingLeadSpendsTheHighestSafeCardAndKeepsTheLowest
   - id: SAFE_LOSER_AND_CHEAP_WINNER
     condition: Negative game sheds the highest safe loser; last seat in positive Whist spends the cheapest winner.
     implementation: TacticalPolicy.card
