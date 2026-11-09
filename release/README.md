@@ -6,7 +6,7 @@ Catalogul tehnic reunește candidatul curent, identitatea livrării și dovezile
 
 ## Versiunea curentă
 
-- [Rentz Lab 0.3.0](0.3.0/README.md) · publicat; descărcarea APK-ului este în README-ul principal.
+- [Rentz Lab 0.5.0](0.5.0/README.md) · publicat; descărcarea APK-ului este în README-ul principal.
 
 ## Organizare
 

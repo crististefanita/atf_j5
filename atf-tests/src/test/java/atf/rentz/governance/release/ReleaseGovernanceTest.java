@@ -30,9 +30,12 @@ class ReleaseGovernanceTest {
         var edition=ReleaseCatalog.verify(ReleaseCatalog.root(),false);
         assertNotNull(edition,"Catalog verification returns an explicit edition");
         var index=ReleaseCatalog.read(ReleaseCatalog.root().resolve("release/index.json"));
-        assertEquals("0.3.0",index.path("currentVersion").asText(),"Published entry stays stable until the candidate is accepted");
-        assertEquals("0.5.0",index.path("candidate").path("version").asText(),"Refactor and feature batch advances the candidate minor version");
-        assertEquals(8,index.path("candidate").path("versionCode").asInt());
+        var identity=edition.manifest().required("release");
+        assertEquals(index.path("currentVersion").asText(),identity.path("versionName").asText(),"Catalog and published identity agree");
+        if(index.has("candidate")){
+            assertTrue(index.path("candidate").path("versionCode").asInt()>identity.path("versionCode").asInt(),
+                    "The next candidate increases the Android version code");
+        }
         assertTrue(java.util.List.of("DRAFT","PREPARED","PUBLISHED").contains(edition.state()),"Actual release state remains explicit");
         if(edition.state().equals("DRAFT"))assertNull(edition.target(),"A draft cannot invent a downloadable APK");
         else assertNotNull(edition.target(),"A qualified edition has a complete expected identity");
@@ -176,10 +179,12 @@ class ReleaseGovernanceTest {
 
     @Test void ragQualifiesTheLocalPublishedCatalogWithoutPromotingRemoteGates() throws Exception {
         Path root=ReleaseCatalog.root();
-        var report=ReleaseReadinessRag.evaluate(root,"gate:local-catalog version:0.5.0 APK candidate");
+        var index=ReleaseCatalog.read(root.resolve("release/index.json"));
+        String current=index.required("currentVersion").asText();
+        var report=ReleaseReadinessRag.evaluate(root,"gate:local-catalog APK");
         var catalog=gate(report,"local-catalog");
         assertEquals("PASS",catalog.path("status").asText());
-        assertTrue(catalog.path("actual").asText().contains("candidate 0.5.0"));
+        assertTrue(catalog.path("actual").asText().contains("Current "+current+" is PUBLISHED"));
         assertTrue(catalog.path("artifactSha256").asText().matches("[a-f0-9]{64}"));
         assertTrue(catalog.path("indexSha256").asText().matches("[a-f0-9]{64}"));
         assertTrue(catalog.path("manifestSha256").asText().matches("[a-f0-9]{64}"));

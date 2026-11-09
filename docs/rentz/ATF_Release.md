@@ -146,6 +146,7 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 6. Păstrați distinct accesul autentificat, accesul fără sesiune și blocarea browserului. Tokenul API nu se transmite originilor CDN; o probă Android poate consuma numai redirectul temporar al asset-ului, fără expunerea lui în rapoarte.
 7. Rulați intrarea explicită de acceptanță a distribuției cu classpath-ul calificat și tokenul numai în mediu. Nu o includeți implicit în regresia offline.
 8. Actualizați starea, README-ul principal și legătura notelor către commit-ul dovezilor. Secțiunea Jocul are doar release-ul curent și descărcarea directă; catalogul tehnic rămâne în Documentație.
+9. După commit și push, rulați verificarea finală cu opțiunea `-PublicationEvidence` din lansatorul RAG. Pentru un raport RAG deja generat, folosiți `scripts/verify-release-readme.ps1` cu raportul calificat și directorul probelor de distribuție. Verificarea citește README-ul din commitul remote, confruntă cele două linkuri cu release-ul și copia publică, apoi scrie verdictul `readme-publication` în depozitul extern.
 
 [Calificarea componentelor](ATF_Qualification.md) · [Protocolul Android](ATF_Android.md) · [Catalogul livrării](../../release/README.md)
 

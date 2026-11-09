@@ -299,7 +299,7 @@
       "criterion": "Only external fresh report roots and source-bound component/build/UI receipts are accepted; publishAllowed remains false.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "f33e1733cbbd798c7c36f12c17bd9da77bf7d9618a3c8de8424faef6fef458b8",
+      "sha256": "cf63a6e80acedd53b320137b167faa033698874a206b8182b3966ffc3f2d64dd",
       "allowDelete": false
     },
     {
@@ -449,7 +449,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK; receipt mutations remain BLOCKED, while a valid Rentz-plus-two-games receipt is source-bound and report corruption blocks promotion.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "cffc16692f35a6f256a9e825aafade76340efd9956ed7d0f8bf6bf6093c4f3a8",
+      "sha256": "c01f8846485ade9fa5d48ed3e52afebd729f479fab725f8f4ef902c2b01a727f",
       "allowDelete": false
     },
     {
@@ -1149,7 +1149,7 @@
       "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "d003b123c685098bf81be5cb3dbc299c1199641a698c29fc00d3118f23618d9d",
+      "sha256": "b1461ae124f110e157fafe0008faf3f93541781243b9a2a5d3225df18006c214",
       "allowDelete": false
     },
     {

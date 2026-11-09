@@ -5,6 +5,7 @@ param(
     [string]$BuildRun='',
     [string]$NativeUiRun='',
     [string]$UiBuildRun='',
+    [string]$PublicationEvidence='',
     [string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe'
 )
 $ErrorActionPreference='Stop'
@@ -12,7 +13,7 @@ $project=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'RuntimeQualification.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
-foreach($path in @($ComponentRun,$BuildRun,$NativeUiRun,$UiBuildRun)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
+foreach($path in @($ComponentRun,$BuildRun,$NativeUiRun,$UiBuildRun,$PublicationEvidence)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
 $ComponentRun=[IO.Path]::GetFullPath($ComponentRun);$RunRoot=[IO.Path]::GetFullPath($RunRoot)
 if($BuildRun){$BuildRun=[IO.Path]::GetFullPath($BuildRun)}
@@ -71,4 +72,9 @@ if($UiBuildRun){$arguments.Add($UiBuildRun)}
 $ragArguments=@('-Xmx256m','-cp',$classpath,$ragClass)+$arguments.ToArray()
 & $Java @ragArguments
 if($LASTEXITCODE-ne0){throw "Local release RAG failed: $RunRoot"}
-Write-Output (Join-Path $reportRoot 'release-rag-report.json')
+$reportFile=Join-Path $reportRoot 'release-rag-report.json'
+if($PublicationEvidence){
+    $inputs=@{RagReport=$reportFile;PublicationEvidence=$PublicationEvidence;RunRoot=(Join-Path $RunRoot 'publication')}
+    & (Join-Path $PSScriptRoot 'verify-release-readme.ps1') @inputs
+}
+Write-Output $reportFile

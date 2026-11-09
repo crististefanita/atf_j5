@@ -162,7 +162,7 @@ La limita lizibilității se alege un mod explicit de derulare sau o dispunere a
 
 ## Tura automată — probă nativă rămasă
 
-[Contractul de lifecycle](../rentz/ATF_Lifecycle.md) descrie ordinea cadru, mutare și checkpoint. [Dosarul Rentz 0.3.0](../../release/0.3.0/README.md#calificare) păstrează calificarea publicării și acoperirea probei native cu pachet izolat. `TurnPacingTest` verifică separat intervalul de 550 ms și invalidarea cadrului.
+[Contractul de lifecycle](../rentz/ATF_Lifecycle.md) descrie ordinea cadru, mutare și checkpoint. [Catalogul livrării](../../release/README.md) indică dosarul calificării curente și acoperirea probei native cu pachet izolat. `TurnPacingTest` verifică intervalul de 550 ms și invalidarea cadrului.
 
 - [ ] În următoarea probă nativă focalizată pe tură, măsurați intervalul dintre cadrul actorului și mutare și verificați o singură mutare per cadru, anularea la pauză sau navigare și reluarea din checkpoint. Asociați jurnalul și capturile cu SHA-ul APK-ului verificat.
 
