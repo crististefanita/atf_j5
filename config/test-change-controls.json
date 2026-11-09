@@ -1089,7 +1089,7 @@
       "criterion": "Rentz and two standard deals reach DEAL_END; seat geometry, first human move, score history and restart are observed; the learning registry is isolated and unchanged; Extent keeps each original screenshot inline.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "d46faf4e5e71f961eec918960ded36e9e5a2087bd084965d1af02490125afc8b",
+      "sha256": "9ef26d023bdc1dbb16ea9b17d11932fa797a7a4d2453558159369ac282f36d1f",
       "allowDelete": false
     },
     {

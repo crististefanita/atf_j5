@@ -125,8 +125,8 @@ function TapNode($Node,[string]$Label){
     Adb @('shell','input','tap',[string][int](($box[0]+$box[2])/2),[string][int](($box[1]+$box[3])/2)) 'tap'|Out-Null;$watch.Stop()
     $actions.Add([pscustomobject]@{operation='Tap Android control';control=$Label;bounds=$Node.bounds;elapsedMillis=$watch.ElapsedMilliseconds})
 }
-function State([long]$After=-1,[string]$Screen='GAME'){
-    $deadline=[datetime]::UtcNow.AddSeconds(25)
+function State([long]$After=-1,[string]$Screen='GAME',[int]$TimeoutSeconds=25){
+    $deadline=[datetime]::UtcNow.AddSeconds($TimeoutSeconds)
     do{
         $read=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/actor-view.json') 'actor' -Allowed @(0,1)
         if($read.ExitCode-eq0){
@@ -582,7 +582,7 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
             if($contract-eq'RENTZ'){RentzSequenceChecks $captured $state}
             else{Check 'A non-sequence contract is available for geometry comparison' $true $true}
         }
-        $steps=0;$firstOwnMoveCaptured=$false
+        $steps=0;$firstOwnMoveCaptured=$false;$delegatedPlays=0
         while($state.view.phase-eq'PLAY'){
             $before=$state
             if($state.view.turn-eq0-and@($state.view.legal).Count-gt0){
@@ -595,21 +595,37 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
                         Check 'Exactly the selected human card left the hand' ($before.view.hand.Count-1) $state.view.hand.Count
                         Check 'The same seat geometry survives a card play' $baseSeats (SeatGeometry $captured $state)
                     }
+                    if($deal-eq1-and$state.view.phase-eq'PLAY'){
+                        $beforeAuto=$state
+                        $toggle=Get-RentzTapTarget -Nodes @(Ui) -Label 'Auto play' -Class 'android.widget.CheckBox'
+                        if($null-eq$toggle-or$toggle.GetAttribute('checked')-cne'false'){throw 'Expected an unchecked Auto play control before delegation.'}
+                        TapNode $toggle 'Auto play'
+                        $state=State -After $beforeAuto.revision -TimeoutSeconds 90
+                        $oldOwnPlays=@($beforeAuto.view.events|Where-Object {$_.seat-eq0-and$_.action-ceq'PLAY'}).Count
+                        $newOwnPlays=@($state.view.events|Where-Object {$_.seat-eq0-and$_.action-ceq'PLAY'}).Count
+                        $delegatedPlays=$newOwnPlays-$oldOwnPlays
+                        if($state.view.phase-ne'DEAL_END'-or$delegatedPlays-lt1){
+                            throw 'Auto play must play for seat zero and stop at the completed hand.'
+                        }
+                    }
                 }
             }else{$state=State -After $before.revision}
             if(++$steps-gt128){throw "Subgame $deal exceeded its bounded public action count."}
         }
         if($state.view.phase-ne'DEAL_END'){throw "Subgame $deal ended in an unexpected phase: $($state.view.phase)."}
         $terminal=$state
+        if($contract-eq'RENTZ'){Tap 'View table'}
         Observe "Subgame $deal completed: $contract" {param($captured)
             Check 'Exact completed hand number' $deal $terminal.view.handNumber
             Check 'Completed subgame contract' $contract $terminal.view.contract
             Check 'One score value per player' $terminal.view.players $terminal.view.dealPoints.Count
             if($contract-eq'RENTZ'){
                 Check 'Rentz finishing order contains each player' $terminal.view.players $terminal.view.finishOrder.Count
+                Check 'Auto play added seat-zero plays without manual card taps' $true ($delegatedPlays-gt0)
                 RentzSequenceChecks $captured $terminal
             }
         }
+        if($contract-eq'RENTZ'){Tap 'Options';Tap 'Hand score'}
         $startTitle="Consecutive subgame $deal starts: $contract"
         $moveTitle="Subgame $deal first human move remains visible"
         $completeTitle="Subgame $deal completed: $contract"
