@@ -6,6 +6,11 @@ Laborator specializat în regulile Rentz și verificarea lor prin componente off
 
 Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări legale, închiderea mâinii și scor. Interfața grafică și integrarea Android se tratează separat, după stabilizarea acestor contracte.
 
+## Ediție cu acces autorizat
+
+- [Sursa Rentz Lab 0.10.0](https://github.com/crististefanita/atf_j5/tree/v0.10.0) · 15 realizări de joc și antrenament separat.
+- [Descarcă APK-ul Rentz Lab 0.10.0](https://drive.google.com/file/d/1P3mxUDBFRFAKp-sIMtf7wIWoTd_WvLhH/view?usp=drivesdk) · Android 8.0+. Folosește contul Google Drive autorizat.
+
 ## Jocul
 
 - [Detalii Rentz Lab 0.5.0](https://github.com/crististefanita/atf_j5/releases/tag/v0.5.0) · codul sursă și notele livrării.

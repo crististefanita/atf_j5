@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "state": "PUBLISHED",
+  "channel": "authenticated-only",
+  "version": "0.10.0",
+  "versionCode": 14,
+  "sourceCommit": "4ce921671f84647f239cbad486b9604170c1c81a",
+  "sourceTag": "v0.10.0",
+  "applicationId": "ro.rentzlab.app",
+  "apkBytes": 906076,
+  "apkSha256": "4e2e871240cc71a9d94592aea31cf21377ba471bd167e66def3a46061a2b943a",
+  "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+  "provider": "Google Drive",
+  "link": "https://drive.google.com/file/d/1P3mxUDBFRFAKp-sIMtf7wIWoTd_WvLhH/view?usp=drivesdk",
+  "authenticatedDownload": "PASS",
+  "verifiedUtc": "2026-11-09T19:48:52.6890531Z"
+}

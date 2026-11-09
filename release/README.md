@@ -8,6 +8,10 @@ Catalogul tehnic reunește candidatul curent, identitatea livrării și dovezile
 
 - [Rentz Lab 0.5.0](0.5.0/README.md) · publicat; descărcarea APK-ului este în README-ul principal.
 
+## Ediție cu acces autorizat
+
+[Rentz Lab 0.10.0](restricted-0.10.0.json) este distribuit conturilor autorizate. Linkul APK se află în README-ul principal.
+
 ## Organizare
 
 | Zonă | Rol |
