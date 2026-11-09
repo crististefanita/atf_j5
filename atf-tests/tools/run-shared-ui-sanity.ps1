@@ -505,7 +505,10 @@ function SeatGeometry($nodes,$state){
     $names=@('Ana')+@($state.opponents);$rectangles=[Collections.Generic.List[string]]::new()
     for($seat=0;$seat-lt$state.view.players;$seat++){
         $name=[string]$names[$seat]
-        $frames=@($nodes|Where-Object{([string]$_.'content-desc').StartsWith($name+'. Points:',[StringComparison]::Ordinal)})
+        $frames=@($nodes|Where-Object{
+            $label=if($_ -is [Xml.XmlElement]){$_.GetAttribute('content-desc')}else{[string]$_.description}
+            $label.StartsWith($name+'. Points:',[StringComparison]::Ordinal)
+        })
         if($frames.Count-ne1){throw "One visible frame required for seat $seat ($name)."}
         $rectangles.Add("$seat=$($frames[0].bounds)")
     }
