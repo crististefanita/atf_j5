@@ -52,12 +52,15 @@ public final class RentzCardSpaceTest {
 
         float density = 440f / 160;
         int width = 968, height = 1259, seatHeight = 164;
-        int seatWidth = Math.round(density * TableSizing.seatWidthDp(Math.round(width / density), false));
+        var viewport = new TableViewportPolicy(Math.round(1920 / density));
+        int widthDp = Math.round(width / density);
+        int seatWidth = Math.round(density * TableSizing.seatWidthDp(widthDp, viewport.isCompact()));
         int centerWidth = Math.round(220 * density);
-        int gap = Math.round(new TableViewportPolicy(Math.round(1920 / density)).regionGapDp() * density);
+        int gap = Math.round(viewport.regionGapDp() * density);
         assertThrows(IllegalArgumentException.class, () -> TableGeometry.arrangeDisplay(width, height, 4,
                 seatWidth, seatHeight, centerWidth, 0, gap, false, TableGeometry.CenterAlignment.BALANCED));
-        int centerHeight = Math.round(RentzTableContent.MINIMUM_CENTER_HEIGHT_DP * density);
+        int centerHeight = RentzCardSpace.minimumControlsHeightPx(4, session.view().phase(), density,
+                PlayedCardMetrics.forTable(4, widthDp, 1f, viewport));
         var layout = TableGeometry.arrangeDisplay(width, height, 4, seatWidth, seatHeight,
                 centerWidth, centerHeight, gap, false, TableGeometry.CenterAlignment.BALANCED);
         assertEquals(centerHeight, layout.center().bottom() - layout.center().top());
@@ -117,6 +120,12 @@ public final class RentzCardSpaceTest {
         var corrected = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, 605,
                 RentzCardSpace.referenceHeightPx(4, 0, density, trick), 198);
         assertEquals(trickSeats, corrected.seats());
+        int completedControlsHeight = Math.round(70 * density);
+        int restoredHeight = Math.max(completedControlsHeight,
+                RentzCardSpace.minimumControlsHeightPx(4, RentzMatch.Phase.DEAL_END, density, trick));
+        var restoredSeats = TableGeometry.arrangeDisplay(width, height, 4, seatWidth, seatHeight, 605,
+                restoredHeight, gap, false, TableGeometry.CenterAlignment.BALANCED).seats();
+        assertEquals("Restoring a completed trick game preserves the four seat rectangles", trickSeats, restoredSeats);
     }
 
     @Test public void namesAndTrickCardsRetainTheWhistClockwiseOrderAtTheReferenceWidths() {

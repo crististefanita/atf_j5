@@ -3,6 +3,7 @@ package ro.rentzlab.app.ui.table;
 import ro.cardtable.ui.table.PlayedCardMetrics;
 import ro.cardtable.ui.table.TableGeometry;
 import ro.cardtable.ui.table.TableSeatLayout;
+import ro.rentzlab.core.RentzMatch;
 
 import java.util.List;
 
@@ -24,10 +25,21 @@ final class RentzCardSpace {
     static int referenceHeightPx(int players, int footerDp, float density, PlayedCardMetrics.Layout trick) {
         int sequenceHeight = Math.round((REFERENCE_HEIGHT_DP + footerDp) * density);
         if (players != 4) return sequenceHeight;
-        int trickHeight = Math.max(Math.round(trick.centerHeightDp() * density),
+        return Math.max(sequenceHeight, trickHeightPx(density, trick));
+    }
+
+    static int minimumControlsHeightPx(int players, RentzMatch.Phase phase, float density, PlayedCardMetrics.Layout trick) {
+        if (players == 4 && (phase == RentzMatch.Phase.DEAL_END || phase == RentzMatch.Phase.MATCH_END)) {
+            return trickHeightPx(density, trick);
+        }
+        // Shared table geometry requires a nonempty center, including when it has no controls.
+        return Math.round(density);
+    }
+
+    private static int trickHeightPx(float density, PlayedCardMetrics.Layout trick) {
+        return Math.max(Math.round(trick.centerHeightDp() * density),
                 Math.round((trick.rows() - 1) * trick.rowStrideDp() * density)
                         + Math.round(trick.cellHeightDp() * density));
-        return Math.max(sequenceHeight, trickHeight);
     }
 
     static Plan plan(int width, int height, int players, int seatWidth, int seatHeight, int gap,

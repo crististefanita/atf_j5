@@ -56,7 +56,8 @@ public final class RentzTablePanel extends LinearLayout {
             center = cards ? new PlayedCardsView(context, viewport.isCompact()).build(
                     RentzTableContent.plays(visible, names), trick,
                     holding ? copy.text("Completed trick", "Levată încheiată") : copy.text("Current trick", "Levată curentă"))
-                    : center(view, actions);
+                    : center(view, actions, RentzCardSpace.minimumControlsHeightPx(view.players(), view.phase(),
+                            getResources().getDisplayMetrics().density, trick));
         }
         board.setTag("game-board"); board.setContentDescription(copy.text("Rentz table", "Masa Rentz"));
         String turnBadge = RentzTableContent.turnLabel(view, copy, forcedPass).toUpperCase(java.util.Locale.ROOT);
@@ -131,9 +132,9 @@ public final class RentzTablePanel extends LinearLayout {
         nativeCollection.cancel();
         nativeCollection = null;
     }
-    private View center(RentzMatch.Observation view, Actions actions) {
+    private View center(RentzMatch.Observation view, Actions actions, int minimumHeightPx) {
         var box = new LinearLayout(context); box.setOrientation(VERTICAL); box.setGravity(Gravity.CENTER);
-        box.setMinimumHeight(dp(RentzTableContent.MINIMUM_CENTER_HEIGHT_DP));
+        box.setMinimumHeight(minimumHeightPx);
         if (view.phase() == RentzMatch.Phase.CHOOSE) {
             if (view.turn() != view.seat()) return box;
             if (!view.revealed()) {
