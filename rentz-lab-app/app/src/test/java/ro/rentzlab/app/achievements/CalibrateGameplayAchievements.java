@@ -51,7 +51,7 @@ public final class CalibrateGameplayAchievements {
 
     public static void main(String[] args) throws Exception {
         var gson = new GsonBuilder().setPrettyPrinting().create();
-        var document = JsonParser.parseString(Files.readString(Path.of(args[0]), StandardCharsets.UTF_8)).getAsJsonObject();
+        var document = JsonParser.parseString(new String(Files.readAllBytes(Path.of(args[0])), StandardCharsets.UTF_8)).getAsJsonObject();
         if (!document.keySet().equals(java.util.Set.of("schemaVersion", "seatCounts", "campaigns", "runs", "hardSimulation")))
             throw new IllegalArgumentException("Unexpected calibration plan fields");
         var plan = gson.fromJson(document, Plan.class);
@@ -96,7 +96,7 @@ public final class CalibrateGameplayAchievements {
                 .map(b -> new BadgeReport(b.id(), b.level().name(), b.goal(), b.romanian(), badgeRates.getOrDefault(b.id(), List.of())))
                 .toList();
         var summary = new Summary(1, games, hands, decisions, plan, details, reports);
-        Files.writeString(Path.of(args[1]), gson.toJson(summary), StandardCharsets.UTF_8);
+        Files.write(Path.of(args[1]), gson.toJson(summary).getBytes(StandardCharsets.UTF_8));
         System.out.println("Completed " + games + " matches, " + hands + " hands and " + decisions + " accepted decisions");
     }
 
