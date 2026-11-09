@@ -4,6 +4,7 @@ import ro.rentzlab.ai.*;
 import ro.rentzlab.app.achievements.*;
 
 import org.json.*;
+import ro.rentzlab.app.profile.LocalProfile;
 import ro.rentzlab.core.*;
 import java.util.*;
 

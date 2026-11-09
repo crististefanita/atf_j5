@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import ro.rentzlab.app.profile.LocalProfile;
 import ro.rentzlab.core.deal.DealSeed;
 
 public record AchievementProgress(LocalProfile profile, Map<String, List<Mark>> marks) {

@@ -21,6 +21,7 @@ import ro.rentzlab.app.lifecycle.SessionStorage;
 import ro.rentzlab.app.testing.AndroidComponentLayer;
 import ro.rentzlab.app.testing.UiAuditRule;
 import ro.rentzlab.app.ui.profile.ProfileSettings;
+import ro.rentzlab.app.profile.LocalProfile;
 import ro.rentzlab.core.Contract;
 import ro.rentzlab.core.RentzMatch;
 

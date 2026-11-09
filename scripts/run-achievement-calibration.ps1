@@ -22,22 +22,20 @@ foreach($entry in $manifest){
     }
 }
 $classes=Join-Path $stage 'app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes'
+$testClasses=Join-Path $stage 'app/build/intermediates/javac/debugUnitTest/compileDebugUnitTestJavaWithJavac/classes'
+$runner=Join-Path $testClasses 'ro/rentzlab/app/achievements/CalibrateGameplayAchievements.class'
+if(-not(Test-Path -LiteralPath $runner -PathType Leaf)){throw 'The offline simulator must have been compiled by the qualified Android JVM stage.'}
 $core=Join-Path $stage 'game-core/build/libs/game-core.jar'
 $names=Join-Path $stage 'ui-library/ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar'
 $gsonDirectory=Join-Path $env:USERPROFILE '.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.11.0'
 $gson=@(Get-ChildItem -LiteralPath $gsonDirectory -Recurse -File -Filter 'gson-2.11.0.jar')
 if($gson.Count-ne1){throw 'Expected a single resolved Gson binary from the Android cache.'}
-$runner=Join-Path $stage 'tools/CalibrateGameplayAchievements.java'
 $plan=Join-Path $stage 'config/rentz-achievement-calibration.yaml'
 $rules=Join-Path $stage 'app/src/main/achievement-rules/rentz-gameplay-achievements.yaml'
 $null=New-Item -Path $RunRoot -ItemType Directory
-$out=Join-Path $RunRoot 'classes'
-$null=New-Item -Path $out -ItemType Directory
-$cp=@($classes,$core,$names,$gson[0].FullName)-join[IO.Path]::PathSeparator
-& "$JavaHome/bin/javac.exe" -encoding UTF-8 --release 17 -cp $cp -d $out $runner
-if($LASTEXITCODE){throw 'Calibration compilation failed.'}
+$cp=@($testClasses,$classes,$core,$names,$gson[0].FullName)-join[IO.Path]::PathSeparator
 $summary=Join-Path $RunRoot 'summary.json'
-& "$JavaHome/bin/java.exe" -Xmx512m -cp ($out+[IO.Path]::PathSeparator+$cp) ro.rentzlab.app.achievements.CalibrateGameplayAchievements $plan $summary
+& "$JavaHome/bin/java.exe" -Xmx512m -cp $cp ro.rentzlab.app.achievements.CalibrateGameplayAchievements $plan $summary
 if($LASTEXITCODE){throw 'Calibration did not complete.'}
 $data=Get-Content -LiteralPath $summary -Raw|ConvertFrom-Json
 if($data.games-lt200-or$data.achievements.Count-ne15){throw 'Calibration did not cover the full catalog and match plan.'}

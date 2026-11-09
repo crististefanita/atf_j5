@@ -19,7 +19,7 @@
       "criterion": "Cover the exact YAML order and thresholds, terminal ranking, provenance, replay and persistence.",
       "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
       "expires": "2026-12-09",
-      "sha256": "d2200cdda0d89beda6bcdc094fa62feeb719bbd521359d86dc1f86767dd63940",
+      "sha256": "d820646b66b49c2ab03138db483525480976084fb61525db7d5030207d61a4b4",
       "allowDelete": false
     },
     {
@@ -29,7 +29,7 @@
       "criterion": "Measure independent legal batches, reject redundant and unreachable rules, and prove the visible table collection states.",
       "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
       "expires": "2026-12-09",
-      "sha256": "c25da85c2ee57c39994191d770581e4eaa7f57fa676de5d866cccde3b1c19fcd",
+      "sha256": "169b0e8a525d8bed56947bbee7e729602588cf58e1db8fc7b120a3e99ef34041",
       "allowDelete": false
     },
     {
@@ -39,7 +39,7 @@
       "criterion": "Prove visual status transitions, combined filters, eligibility reasons, persistence and legal reachability of each new rule.",
       "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
       "expires": "2026-12-09",
-      "sha256": "686ccfecf429e4fa714f9064941e8e8a20499d59717582f313ed14d960ed0b41",
+      "sha256": "a99c7d5659b2339d69db35ec3e3a36a64634d83d60ef6f98391f7ae22f547fb4",
       "allowDelete": false
     },
     {
@@ -49,7 +49,7 @@
       "criterion": "Prove ordering, assisted play provenance, atomic persistence, identity boundaries and distinct days.",
       "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
       "expires": "2026-12-09",
-      "sha256": "a4f1504fd2fe6fbdbdda02d0b402e20eabbe89654fde55ab04a342c3bc059c98",
+      "sha256": "124dc6846b65bc5a576ca8313cc08079257f857fd72bcdbf62ae030affcaa475",
       "allowDelete": false
     },
     {
@@ -1189,7 +1189,7 @@
       "criterion": "Gradle versionName and monotonically increasing versionCode match the release catalog candidate.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "c94aecd85345d29357b41b0f9daf0dde4ffbfa4d6bce6efce8fd2a91880775ff",
+      "sha256": "a91cc7109dc3af8c92c330a8d8c1e2c048a277827cf0dcb62fbb9de6d19ca8eb",
       "allowDelete": false
     },
     {

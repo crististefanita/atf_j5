@@ -4,7 +4,7 @@ import ro.rentzlab.app.ui.copy.RentzUiText.Language;
 import java.util.Objects;
 import java.time.ZoneId;
 import java.util.UUID;
-import ro.rentzlab.app.achievements.LocalProfile;
+import ro.rentzlab.app.profile.LocalProfile;
 
 /** Injected durable preference port; failed writes never change the effective profile. */
 public final class ProfileSettings {

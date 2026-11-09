@@ -23,6 +23,7 @@ import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.GameSession.Action;
 import ro.rentzlab.app.GameSession.Command;
 import ro.rentzlab.app.GameSession.Origin;
+import ro.rentzlab.app.profile.LocalProfile;
 import ro.rentzlab.core.Card;
 import ro.rentzlab.core.Contract;
 import ro.rentzlab.core.RentzMatch;

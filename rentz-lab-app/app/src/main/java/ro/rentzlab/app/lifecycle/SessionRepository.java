@@ -3,7 +3,7 @@ package ro.rentzlab.app.lifecycle;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.SessionJson;
 import ro.rentzlab.app.achievements.AchievementProgress;
-import ro.rentzlab.app.achievements.LocalProfile;
+import ro.rentzlab.app.profile.LocalProfile;
 import java.time.Clock;
 import java.util.Objects;
 

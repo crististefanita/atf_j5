@@ -1,4 +1,4 @@
-package ro.rentzlab.app.achievements;
+package ro.rentzlab.app.profile;
 
 import java.time.ZoneId;
 import java.util.Objects;

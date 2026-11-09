@@ -24,6 +24,7 @@ import ro.rentzlab.app.testing.UiAuditRule;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.app.ui.screens.AchievementBrowser;
 import ro.rentzlab.app.ui.screens.AchievementBrowser.Query;
+import ro.rentzlab.app.profile.LocalProfile;
 import ro.rentzlab.core.Card;
 import ro.rentzlab.core.Contract;
 import ro.rentzlab.core.RentzMatch;
