@@ -3,6 +3,7 @@ package ro.rentzlab.app;
 import ro.rentzlab.ai.*;
 
 import ro.cardtable.names.PlayerNames;
+import ro.rentzlab.app.achievements.AchievementHand;
 import ro.rentzlab.core.*;
 import java.util.*;
 
@@ -11,7 +12,20 @@ public final class GameSession {
     public static final String SCORE_PROFILE = "LABORATORY_V1";
     private static final ScoreProfile SCORING = ScoreProfile.laboratory();
     public enum Action { REVEAL, CHOOSE, PLAY, PASS, NEXT_HAND }
-    public record Command(Action action,int seat,Card card,Contract contract,boolean blind) { }
+    public enum Origin { UNKNOWN, MANUAL, DELEGATED, AUTOMATIC }
+    public record Command(Action action,int seat,Card card,Contract contract,boolean blind,Origin origin) {
+        public Command(Action action,int seat,Card card,Contract contract,boolean blind) {
+            this(action,seat,card,contract,blind,Origin.UNKNOWN);
+        }
+        public Command {
+            Objects.requireNonNull(origin);
+            if (((origin == Origin.MANUAL || origin == Origin.DELEGATED) && seat != 0)
+                    || (origin == Origin.AUTOMATIC && seat == 0 && action != Action.PASS)) {
+                throw new IllegalArgumentException("Command origin differs from actor");
+            }
+        }
+        public Command from(Origin source) { return new Command(action, seat, card, contract, blind, source); }
+    }
     public record Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands,List<String> opponents) {
         public Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands) {
             this(schema,players,seed,difficulty,commands,List.of());
@@ -29,6 +43,8 @@ public final class GameSession {
     private final RentzPlayer player;
     private final List<String> opponents;
     private final List<Command> commands=new ArrayList<>();
+    private final AchievementHand.Recorder achievementRecorder;
+    private final List<AchievementHand> achievementHands = new ArrayList<>();
     public GameSession(int players,long seed,RentzPlayer.Difficulty difficulty) {
         this(players,seed,difficulty,List.of());
     }
@@ -43,6 +59,7 @@ public final class GameSession {
             throw new IllegalArgumentException("Saved opponents");
         opponents=savedOpponents.isEmpty()?defaultOpponents(players,seed):Card.immutable(savedOpponents);
         match=new RentzMatch(players,seed,scoringProfile());
+        achievementRecorder = new AchievementHand.Recorder(players);
         player=new RentzPlayer(difficulty,scoringProfile(),PolicySettings.defaults());
     }
     public static ScoreProfile scoringProfile(){return SCORING;}
@@ -53,6 +70,13 @@ public final class GameSession {
             case PLAY->match.play(command.seat(),command.card());case PASS->match.pass(command.seat());case NEXT_HAND->match.nextHand();
         }
         commands.add(command);
+        achievementRecorder.observe(command);
+        if (command.action() == Action.PLAY || command.action() == Action.PASS) {
+            var history = match.history();
+            if (history.size() > achievementHands.size()) {
+                achievementHands.add(achievementRecorder.settle(history.get(history.size() - 1), difficulty));
+            }
+        }
     }
     public void advanceBots(){
         int actions=0;
@@ -70,13 +94,14 @@ public final class GameSession {
     }
     private void advancePolicyTurn(int actor) {
         var observation = match.observe(actor);
+        var origin = actor == 0 ? Origin.DELEGATED : Origin.AUTOMATIC;
         if (observation.phase() == RentzMatch.Phase.CHOOSE) {
-            if (!observation.revealed()) apply(new Command(Action.REVEAL, actor, null, null, false));
-            apply(new Command(Action.CHOOSE, actor, null, player.choose(match.observe(actor)).selected(), false));
+            if (!observation.revealed()) apply(new Command(Action.REVEAL, actor, null, null, false, origin));
+            apply(new Command(Action.CHOOSE, actor, null, player.choose(match.observe(actor)).selected(), false, origin));
         } else if (observation.legal().isEmpty()) {
-            apply(new Command(Action.PASS, actor, null, null, false));
+            apply(new Command(Action.PASS, actor, null, null, false, Origin.AUTOMATIC));
         } else {
-            apply(new Command(Action.PLAY, actor, player.card(observation).selected(), null, false));
+            apply(new Command(Action.PLAY, actor, player.card(observation).selected(), null, false, origin));
         }
     }
     public boolean hasPendingBotTurn() {
@@ -99,6 +124,10 @@ public final class GameSession {
     public RentzMatch.Observation view(){return match.observe(0);}
     public boolean blindChoiceAvailable(){var view=view();return view.phase()==RentzMatch.Phase.CHOOSE&&view.turn()==0&&!view.revealed()&&view.available().size()>1;}
     public List<RentzMatch.HandResult> history(){return match.history();}
+    public List<AchievementHand> achievementHands() { return List.copyOf(achievementHands); }
+    public AchievementHand latestAchievementHand() {
+        return achievementHands.isEmpty() ? null : achievementHands.get(achievementHands.size() - 1);
+    }
     public RentzPlayer.Difficulty difficulty(){return difficulty;}
     static List<String> defaultOpponents(int players,long seed) {
         return PlayerNames.forMatch(players,PlayerNames.DEFAULT_HUMAN,seed).subList(1,players);

@@ -3,6 +3,46 @@
   "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
   "controls": [
     {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/GameplayAchievementComponentTest.java",
+      "owner": "Rentz Android",
+      "reason": "Qualify the gameplay milestones separately from training.",
+      "criterion": "Cover the exact YAML order and thresholds, terminal ranking, provenance, replay and persistence.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
+      "expires": "2026-12-09",
+      "sha256": "d2200cdda0d89beda6bcdc094fa62feeb719bbd521359d86dc1f86767dd63940",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/AchievementFullCatalogComponentTest.java",
+      "owner": "Rentz Android",
+      "reason": "Qualify the complete 800 achievement catalog and its saved evidence.",
+      "criterion": "Measure independent legal batches, reject redundant and unreachable rules, and prove the visible table collection states.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
+      "expires": "2026-12-09",
+      "sha256": "c25da85c2ee57c39994191d770581e4eaa7f57fa676de5d866cccde3b1c19fcd",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/AchievementBrowserComponentTest.java",
+      "owner": "Rentz Android",
+      "reason": "Qualify the second achievement catalog and its presentation using controlled hands.",
+      "criterion": "Prove visual status transitions, combined filters, eligibility reasons, persistence and legal reachability of each new rule.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
+      "expires": "2026-12-09",
+      "sha256": "686ccfecf429e4fa714f9064941e8e8a20499d59717582f313ed14d960ed0b41",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/AchievementPilotTest.java",
+      "owner": "Rentz Android",
+      "reason": "Cover the first local achievement catalog and durable profile progress.",
+      "criterion": "Prove ordering, assisted play provenance, atomic persistence, identity boundaries and distinct days.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
+      "expires": "2026-12-09",
+      "sha256": "a4f1504fd2fe6fbdbdda02d0b402e20eabbe89654fde55ab04a342c3bc059c98",
+      "allowDelete": false
+    },
+    {
       "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationTargetGovernanceTest.java",
       "owner": "Rentz release",
       "reason": "Apply the project documentation controls to the owner pages used during release qualification.",
@@ -29,7 +69,7 @@
       "criterion": "Verify the centered grid, Rentz card band against the shared trick band at compact and tall four-seat sizes, forced pass and legal card tint at 3 through 6 seats. Preserve the Whist order at all reference widths.",
       "proof": "../../rentz_back/ui-review/turn-pacing-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "6860c3464e310abba7e07e275081eafba50d6e336b4c8ae96218acc2932fb016",
+      "sha256": "0c9a692cb6997172e8dfdae4ee9cdbc95156a2ef4cd4c0174514ce6d2620e0be",
       "allowDelete": false
     },
     {
@@ -119,7 +159,7 @@
       "criterion": "Refuse impossible sole wins in both arms. Preserve exact bounds, split winners and losses.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "b56dbcff7890d322298ee36eedb0f9cf199f6cf1aaed854335321e581fb80b17",
+      "sha256": "a54f44c275f787cdc78d492ffdb0abf0f1ec0569f9141e04e04d611d1a6816cd",
       "allowDelete": false
     },
     {
@@ -205,21 +245,21 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java",
       "owner": "Rentz release",
-      "reason": "Rentz release · Require the three-game Android acceptance to be explicit in the native report.",
+      "reason": "Rentz release · Require the consecutive-game Android acceptance to be explicit in the native report.",
       "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "e5919bb1ebc20676a10175e4c1bac08a70122843aee65508413e431b8e123fdd",
+      "sha256": "c8d5f1338509e21c379f3feced9e20d6ab1131df592a6ee7f7e57a9258881288",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlowTest.java",
       "owner": "Rentz release",
       "reason": "Keep the native Extent title and scope truthful for each UI sanity mode.",
-      "criterion": "The three-game acceptance identifies Rentz plus two other complete games, while narrower sanity reports state only their measured scope.",
+      "criterion": "The acceptance reports the measured scope of consecutive complete games. Narrower sanity reports describe their own scope.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "23b07b3f38f39bb3b3a6e3e6a8c816405fd57a95389ba239b6ad47de8caad37f",
+      "sha256": "3448bb6bb778bdc7c9eace435c06512d77cbf9753ef9e57ccbd389b8a2586208",
       "allowDelete": false
     },
     {
@@ -239,7 +279,7 @@
       "criterion": "Refuse impossible sole wins in both arms. Preserve exact bounds, split winners and losses.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "30f391504476ef39300ad560039a1f9af726160caf5f39533ec4d637d41c00ea",
+      "sha256": "03a694c0a20ab31326467643ef6d96c885530d6e62093badfb242a92e625b4c0",
       "allowDelete": false
     },
     {
@@ -275,11 +315,11 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java",
       "owner": "Rentz release",
-      "reason": "Make three-game native acceptance a mandatory candidate-promotion gate; bind complete deals, display evidence, learning isolation and Extent to the pinned APK source.",
+      "reason": "Make five-game native acceptance a mandatory candidate-promotion gate; bind complete deals, display evidence, learning isolation and Extent to the pinned APK source.",
       "criterion": "A missing or partial Rentz-plus-two-games receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "329ca136f71fb62c3cbe246ced3874fc7fdff53bec68fe9ebc67d2eb0b889373",
+      "sha256": "e41cb76333a9b6b4037db8f4ead5c7732df158fb087f99add672e8eb59d1ff13",
       "allowDelete": false
     },
     {
@@ -445,11 +485,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz release",
-      "reason": "Govern release-state, three complete game deals, display layout, learning isolation, source identity and Extent evidence.",
+      "reason": "Govern release-state, five complete game deals, display layout, learning isolation, source identity and Extent evidence.",
       "criterion": "Two deals or missing required geometry cannot qualify an APK; receipt mutations remain BLOCKED, while a valid Rentz-plus-two-games receipt is source-bound and report corruption blocks promotion.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "c01f8846485ade9fa5d48ed3e52afebd729f479fab725f8f4ef902c2b01a727f",
+      "sha256": "a7994b3021e8345bccf5505359051f2cd4994ac244b0c5e7cbf6eb06d8e3473e",
       "allowDelete": false
     },
     {
@@ -639,7 +679,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "3cd2a7d4f80c8aace2e9e90c7ab054f6320116c3e133ba3114f50f8aef843993",
+      "sha256": "a4adfaa2f970c509780c6f54147dd973b7d3148ca07568ad093ad14a21d816fc",
       "allowDelete": false
     },
     {
@@ -799,7 +839,7 @@
       "criterion": "Exercise both localized menus and persisted selection without starting a new game.",
       "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
       "expires": "2026-11-20",
-      "sha256": "1ef0f1fba0e552719c6d21c660e5a28d0a78bc854ecce43e13debc138da0864b",
+      "sha256": "c1faceebf64056ba463cdd95c0cdb6af1fe6a761f72ae4a71cdf5dc6d77a8822",
       "allowDelete": false
     },
     {
@@ -859,7 +899,7 @@
       "criterion": "Verify every 3–6 player award row and an alternate profile, preserving explicit zero rewards and absent places.",
       "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "40d25feaabd29d65dacdcaff457bec6c079483ccd3cb1e0a217bb41898a2e41b",
+      "sha256": "567697e30773bd49712e069d439592a760eff3459b1c097be3f17c6926f173e7",
       "allowDelete": false
     },
     {
@@ -1095,11 +1135,11 @@
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz release",
-      "reason": "Run three complete native games per APK candidate and bind deal/display checkpoints to the same UI-sanity build.",
+      "reason": "Run five complete native games per APK candidate and bind deal/display checkpoints to the same UI-sanity build.",
       "criterion": "Rentz and two standard deals reach DEAL_END; seat geometry, first human move, score history and restart are observed; the learning registry is isolated and unchanged; Extent keeps each original screenshot inline.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "3e3e06cbaaef3c9c494ae481c4dce6d899a0bb8494cd169d105918ba3895f8a0",
+      "sha256": "809caf7be6e5e7e8051d59e56709b131de31a3d516f5467be522ec1104907132",
       "allowDelete": false
     },
     {
@@ -1129,7 +1169,7 @@
       "criterion": "Commit, source manifest, package, version, signing certificate, APK bytes, and reporting tools match receipts.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "9b4d87eec688794de0cda2b43f906187f5eab201067c52be0bd9c9078a158d37",
+      "sha256": "ffef12bd889732e8ef229b4ec5fe276b3468dee03d9349864d8e704ef9811cd4",
       "allowDelete": false
     },
     {
@@ -1139,7 +1179,7 @@
       "criterion": "Gradle versionName and monotonically increasing versionCode match the release catalog candidate.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "02de2d334cc75e5fb70f16c171c31590a882545d2919696cd9dd44bcaec4a5b0",
+      "sha256": "c94aecd85345d29357b41b0f9daf0dde4ffbfa4d6bce6efce8fd2a91880775ff",
       "allowDelete": false
     },
     {
@@ -1149,7 +1189,7 @@
       "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "b1461ae124f110e157fafe0008faf3f93541781243b9a2a5d3225df18006c214",
+      "sha256": "7f2486d01a11dca54f242cf911a6d5221939094cbfce039b1b1bc4149ffbe055",
       "allowDelete": false
     },
     {

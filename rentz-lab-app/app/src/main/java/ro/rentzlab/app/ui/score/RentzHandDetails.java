@@ -20,6 +20,11 @@ public final class RentzHandDetails extends ScrollView {
 
     public RentzHandDetails(Context context, RentzScoreContent.Row hand, List<String> players, RentzUiText copy,
             boolean showProfile) {
+        this(context, hand, players, copy, showProfile, java.util.Collections.emptyList());
+    }
+
+    public RentzHandDetails(Context context, RentzScoreContent.Row hand, List<String> players, RentzUiText copy,
+            boolean showProfile, List<RentzScoreContent.Standing> standings) {
         super(context);
         setId(ro.rentzlab.app.R.id.history_details);
         var content = new LinearLayout(context);
@@ -27,6 +32,13 @@ public final class RentzHandDetails extends ScrollView {
         int padding = dp(16);
         content.setPadding(padding, dp(8), padding, dp(8));
         addView(content);
+        if (!standings.isEmpty()) {
+            line(content, copy.text("Final standings", "Clasament final"), true);
+            for (var standing : standings) {
+                line(content, standing.place() + ". " + players.get(standing.seat()) + "   ·   Σ " + standing.total(), false);
+            }
+            line(content, copy.text("Last hand details", "Detaliile ultimei mâini"), true);
+        }
         String chooser = copy.text("Chosen by ", "Ales de ") + players.get(hand.chooser());
         if (showProfile) chooser += "\n" + copy.text("Scoring profile · ", "Profil de punctaj · ") + GameSession.SCORE_PROFILE;
         line(content, chooser, false);

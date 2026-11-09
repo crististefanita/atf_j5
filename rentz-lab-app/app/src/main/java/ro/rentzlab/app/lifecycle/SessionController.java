@@ -1,6 +1,7 @@
 package ro.rentzlab.app.lifecycle;
 
 import ro.rentzlab.app.GameSession;
+import ro.rentzlab.app.achievements.AchievementProgress;
 import ro.rentzlab.ai.RentzPlayer;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -53,6 +54,7 @@ public final class SessionController implements AutoCloseable {
     private void invalidate(){generation++;if(pending!=null)pending.cancel(true);clearPending();}
     private void clearPending(){pending=null;pendingHumanAutomation=false;}
     public synchronized GameSession session(){return session;}
+    public synchronized AchievementProgress achievements() { return active && owner.isCurrent() ? owner.progress() : null; }
     public synchronized boolean isBusy(){return pending!=null;}
     public synchronized boolean newGame(int players,long seed,RentzPlayer.Difficulty difficulty){
         return newGame(players,seed,difficulty,ro.cardtable.names.PlayerNames.DEFAULT_HUMAN);

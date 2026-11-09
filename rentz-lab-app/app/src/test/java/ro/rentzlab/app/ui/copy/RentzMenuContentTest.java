@@ -32,4 +32,14 @@ public final class RentzMenuContentTest {
         }
         audit.rejects("Unsupported Rentz table size", IllegalArgumentException.class, () -> setup.players(2));
     }
+
+    @Test public void handProgressAndContractHaveSeparateLocalizedLabels() {
+        var ro = new RentzUiText(RentzUiText.Language.RO);
+        var en = new RentzUiText(RentzUiText.Language.EN);
+        audit.equal("Romanian progress", "Mâna 5/32", ro.handProgress(5, 32));
+        audit.equal("English progress", "Hand 48/48", en.handProgress(48, 48));
+        audit.equal("Game not selected", "", ro.playedContract(null, false));
+        audit.equal("Selected game below progress", "Zece de treflă", ro.playedContract(Contract.TEN_CLUBS, false));
+        audit.equal("Blind multiplier remains with the game", "King of hearts ×2", en.playedContract(Contract.KING_HEARTS, true));
+    }
 }

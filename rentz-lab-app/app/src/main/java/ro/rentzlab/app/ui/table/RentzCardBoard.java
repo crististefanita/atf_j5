@@ -11,7 +11,7 @@ import ro.cardtable.ui.table.TableViewportPolicy;
 
 import java.util.function.BiFunction;
 
-/** Measures the sequence grid while retaining the common seat geometry. */
+/** Fits the center content to the same measured seat band throughout four-player play. */
 final class RentzCardBoard extends ViewGroup {
     private final int players;
     private final int footerDp;
@@ -62,8 +62,11 @@ final class RentzCardBoard extends ViewGroup {
         int budget = (int) Math.floor(plan.band().height() / density);
         if (widthDp != previousWidth || budget != previousBudget) {
             center.removeAllViews();
-            center.addView(render.apply(widthDp, budget),
-                    new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+            View content = render.apply(widthDp, budget);
+            if (content.getLayoutParams() == null) {
+                content.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+            }
+            center.addView(content);
             previousWidth = widthDp;
             previousBudget = budget;
         }

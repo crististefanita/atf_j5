@@ -24,10 +24,10 @@ public final class RentzNativeFlow {
     static ReportScope reportScope(String versionName,boolean completeGameAcceptance,String scope){
         String version=versionName==null||versionName.isBlank()?"0.1.0":versionName;
         String checkedScope=scope==null||scope.isBlank()?"unspecified native sanity scope":scope;
-        if(completeGameAcceptance)return new ReportScope("Rentz Lab · trei jocuri complete și reluare prin interfață",
-                "APK local "+version+", profil de laborator; acceptanță nativă pentru un deal Rentz complet și două jocuri standard complete ("+checkedScope+"), nu pentru întreaga serie de concurs.");
+        if(completeGameAcceptance)return new ReportScope("Rentz Lab · jocuri consecutive complete și reluare prin interfață",
+                "APK local "+version+", profil de laborator; acceptanță nativă: "+checkedScope+".");
         return new ReportScope("Rentz Lab · sanity nativ și reluare prin interfață",
-                "APK local "+version+", profil de laborator; domeniu verificat: "+checkedScope+". Acest raport nu pretinde acceptanța cu trei jocuri complete sau acoperirea tuturor fluxurilor.");
+                "APK local "+version+", profil de laborator; domeniu verificat: "+checkedScope+". Acest raport nu pretinde acceptanța cu jocuri consecutive complete sau acoperirea tuturor fluxurilor.");
     }
     public static void main(String[] args)throws Exception{
         switch (args[0]) {
@@ -95,7 +95,7 @@ public final class RentzNativeFlow {
         boolean all=receipt.required("status").textValue().equals("PASS");
         ReportScope reportScope=reportScope(receipt.path("versionName").asText("0.1.0"),receipt.path("consecutiveSubgames").asBoolean(false),receipt.path("scope").asText(""));
         try(var session=new ExtentReportSession(directory.resolve("android-extent.html"),ReportingSettings.defaults())){
-            var tags=receipt.path("consecutiveSubgames").asBoolean(false)?List.of("android","rentz","native","sanity","three-complete-games"):List.of("android","rentz","native","sanity");
+            var tags=receipt.path("consecutiveSubgames").asBoolean(false)?List.of("android","rentz","native","sanity","consecutive-complete-games"):List.of("android","rentz","native","sanity");
             var raw=session.startScenario(reportScope.title(),"atf.rentz",reportScope.description(),tags);
             try(var phase=raw.startPhase("Identitatea aplicației și domeniul acceptanței")){
                 phase.observation(new ReportObservation("Receipt Android",List.of(new ReportField("APK SHA-256",receipt.path("apkSha256").asText()),new ReportField("Pachet",receipt.path("package").asText()),new ReportField("Dispozitiv",receipt.path("serial").asText()),new ReportField("API Android",receipt.path("api").asText()),new ReportField("Domeniu",receipt.path("scope").asText())),List.of(new ReportObservation.Body("Rezultat, proveniență și limitări",JSON.writerWithDefaultPrettyPrinter().writeValueAsString(receipt),ReportObservation.Format.JSON)),List.of()));phase.complete(all?AtfReportStatus.PASS:AtfReportStatus.FAIL);

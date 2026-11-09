@@ -44,18 +44,23 @@ public final class RentzTablePanel extends LinearLayout {
         boolean cards = view.phase() == RentzMatch.Phase.PLAY && view.contract() != Contract.RENTZ || holding;
         boolean sequence = view.contract() == Contract.RENTZ && view.phase() != RentzMatch.Phase.CHOOSE;
         var trick = PlayedCardMetrics.forTable(view.players(), width, fontScale, viewport);
-        if (sequence) {
-            int footer = view.phase() == RentzMatch.Phase.DEAL_END ? NEXT_HAND_FOOTER_DP : 0;
+        if (sequence || view.players() == 4 && view.phase() != RentzMatch.Phase.CHOOSE) {
+            int footer = sequence && view.phase() == RentzMatch.Phase.DEAL_END ? NEXT_HAND_FOOTER_DP : 0;
             var cardBoard = new RentzCardBoard(context, view.players(), footer, viewport, trick,
-                    (measuredWidth, budget) -> sequence(view, actions, measuredWidth, budget, fontScale));
+                    (measuredWidth, budget) -> {
+                        if (sequence) return sequence(view, actions, measuredWidth, budget, fontScale);
+                        if (cards) return playedCards(visible, names, holding, viewport, RentzCardSpace.fitTrick(trick, budget));
+                        View controls = center(view, actions, 0);
+                        controls.setLayoutParams(new FrameLayout.LayoutParams(dp(Math.min(220, measuredWidth)),
+                                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+                        return controls;
+                    });
             board = cardBoard;
             center = cardBoard.center();
         } else {
             board = new BoardLayout(context, view.players(), cards ? width : Math.min(width, 220),
                     viewport, cards, TableGeometry.CenterAlignment.BALANCED);
-            center = cards ? new PlayedCardsView(context, viewport.isCompact()).build(
-                    RentzTableContent.plays(visible, names), trick,
-                    holding ? copy.text("Completed trick", "Levată încheiată") : copy.text("Current trick", "Levată curentă"))
+            center = cards ? playedCards(visible, names, holding, viewport, trick)
                     : center(view, actions, RentzCardSpace.minimumControlsHeightPx(view.players(), view.phase(),
                             getResources().getDisplayMetrics().density, trick));
         }
@@ -84,6 +89,11 @@ public final class RentzTablePanel extends LinearLayout {
         });
         hand.setTag("player-hand"); hand.setContentDescription(copy.text("Your hand", "Mâna ta") + ": " + handCards.size());
         addView(hand, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(HandLayoutMetrics.reservedHandHeightDp())));
+    }
+    private View playedCards(List<TrickRules.Play> visible, List<String> names, boolean holding,
+            TableViewportPolicy viewport, PlayedCardMetrics.Layout trick) {
+        return new PlayedCardsView(context, viewport.isCompact()).build(RentzTableContent.plays(visible, names), trick,
+                holding ? copy.text("Completed trick", "Levată încheiată") : copy.text("Current trick", "Levată curentă"));
     }
     public void collect(CollectionTarget target, long deadline, Runnable resized) {
         if (defaultCollectionScale && center.isHardwareAccelerated() && ValueAnimator.areAnimatorsEnabled()) {

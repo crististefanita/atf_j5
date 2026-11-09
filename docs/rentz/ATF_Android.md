@@ -47,7 +47,7 @@ Fișierul debug este numai citit pentru sincronizare și decizie. Adaptorul nu i
 - `-HistoryOnly -HistoryMatrix` folosește fontul 1,5 la 360 dpi. Proba scurtează dialogul deschis, verifică schimbarea containerului derulabil și readuce fereastra la înălțimea inițială. Lansatorul salvează și restaurează dimensiunea, densitatea și fontul emulatorului în cadrul aceleiași rezervări. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 - `-HistoryOnly -HistoryDetails` deschide două mâini din jurnalul restaurat. Verifică dublarea la levate, locurile Rentz cu premii egale și revenirea la poziția din grilă. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 
-[Lansatorul prototipului](../../atf-tests/tools/run-android-sanity.ps1) păstrează contractul UI anterior și refuză receipt-ul `card-table-ui-v1` înainte de ADB. [Adaptorul Java](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) păstrează decizia și oracolul independent; migrarea lor în noua navigare rămâne explicită în U09, fără a declara executată suita veche pe noul UI.
+[Lansatorul prototipului](../../atf-tests/tools/run-android-sanity.ps1) păstrează contractul UI anterior și refuză receipt-ul `card-table-ui-v1` înainte de ADB. Traseul actual folosește [oracolul Java](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) pentru replay și confruntarea proiecției publice. U09 păstrează separat eventuala migrare a deciziei externe din suita veche.
 
 | Livrabil sau limită | Contract |
 |---|---|

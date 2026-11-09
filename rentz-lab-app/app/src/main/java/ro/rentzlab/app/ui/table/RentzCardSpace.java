@@ -25,7 +25,7 @@ final class RentzCardSpace {
     static int referenceHeightPx(int players, int footerDp, float density, PlayedCardMetrics.Layout trick) {
         int sequenceHeight = Math.round((REFERENCE_HEIGHT_DP + footerDp) * density);
         if (players != 4) return sequenceHeight;
-        return Math.max(sequenceHeight, trickHeightPx(density, trick));
+        return Math.max(Math.round(REFERENCE_HEIGHT_DP * density), trickHeightPx(density, trick));
     }
 
     static int minimumControlsHeightPx(int players, RentzMatch.Phase phase, float density, PlayedCardMetrics.Layout trick) {
@@ -40,6 +40,18 @@ final class RentzCardSpace {
         return Math.max(Math.round(trick.centerHeightDp() * density),
                 Math.round((trick.rows() - 1) * trick.rowStrideDp() * density)
                         + Math.round(trick.cellHeightDp() * density));
+    }
+
+    static PlayedCardMetrics.Layout fitTrick(PlayedCardMetrics.Layout trick, int budgetDp) {
+        if (trick.centerHeightDp() <= budgetDp) return trick;
+        int stride = Math.max(1, Math.min(trick.rowStrideDp(),
+                (budgetDp - trick.cellHeightDp()) / (trick.rows() - 1)));
+        int cell = Math.max(1, Math.min(trick.cellHeightDp(), budgetDp - (trick.rows() - 1) * stride));
+        int label = Math.min(trick.playerLabelHeightDp(), Math.max(0, cell - 1));
+        int padding = Math.min(trick.itemVerticalPaddingDp(), Math.max(0, cell - label - 1));
+        return new PlayedCardMetrics.Layout(trick.columns(), trick.rows(), trick.cardWidthDp(), cell - label - padding,
+                label, padding, trick.centerWidthDp(), trick.safeCenterWidthDp(), cell, stride,
+                cell + (trick.rows() - 1) * stride, trick.slots());
     }
 
     static Plan plan(int width, int height, int players, int seatWidth, int seatHeight, int gap,

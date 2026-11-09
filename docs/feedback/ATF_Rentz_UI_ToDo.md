@@ -70,7 +70,7 @@ Ordinea livrării este contractul producătorului, componentele, consumul pe art
 | P2 | Politica numelui este pe puncte de cod, iar filtrul dialogului comun este UTF-16. | U02, proprietar J4: port de filtrare compatibil cu politica consumatorului, păstrând comportamentul Whist cerut. |
 | P2 | Proba nativă minimă acoperă 3/4/6 locuri pe un singur afișaj. | U01/U04/U05: font mărit și viewport compact, folosind componentele înaintea capturilor native focalizate; fără repetarea mâinii complete la fiecare rezoluție. |
 | P2 | Grila de secvențe este măsurată între chenarele jocului, cu probe pentru 3–6 locuri. | Confirmați pe APK-ul candidat grila la 3, 5 și 6 locuri, cu profil compact, profil înalt și font mărit. Verificați lizibilitatea celui mai lung rang, nuanța exclusiv pe cărțile legale, marcajul „Pasează” și stabilitatea grilei înainte și după pas. |
-| P2 | Lansatorul prototipului folosește alte etichete și altă navigare. | U09: noul receipt identifică `uiContract`; lansatorul vechi refuză noul UI înainte de ADB. Migrați decizia și oracolul independent în traseul nou înainte de a declara înlocuită suita veche. |
+| P2 | U09: lansatorul prototipului are navigare proprie și refuză noul UI înainte de ADB. | Evaluați migrarea deciziei externe pe baza actorului public. Traseul curent acoperă deja replay-ul independent, delegarea din produs și emiterea receipt-ului. |
 
 ## P1: Rentz organizat în jurul lui J
 
@@ -97,9 +97,8 @@ Schema stabilește relația rangurilor, fără a reprezenta o distribuire de ant
 
 | ID și stare | Cerință și criteriu de acceptanță |
 |---|---|
-| **S01 · TODO** | **Clasament general lizibil pentru toți jucătorii.** Nume, total confirmat și poziție, cu egalități tratate explicit. Scorurile negative se ordonează numeric; zero nu este lipsă de date. Ordinea locurilor la masă rămâne stabilă în istoric, chiar dacă ordinea clasamentului se schimbă. |
+| **S01 · MATRICE NATIVĂ** | [Clasamentul final](../rentz/ATF_UiIntegration.md#clasamentul-final) este verificat la componentă pentru 3–6 locuri. [Proba terminală](../../../../rentz_back/ui-review/j5-070-final-standings-20261109-02/android-extent.html) acoperă șase locuri pe profil compact, cu text mărit și revenire din istoric. Rămân egalitățile randate nativ și verificările celorlalte mărimi de masă. |
 | **S04 · PARȚIAL** | **Delta și totalul confirmat sunt separate.** Componentele verifică o mână în curs și totalurile tuturor locurilor. Sanity-ul confruntă totalurile finale și revizia după derulare. Rămâne proba cu sosire în Rentz înaintea decontării. |
-| **S07 · PARȚIAL** | **Punctajul mâinii are ecran propriu.** După colectare apar contractul, dublarea, contribuțiile, Δ și Σ. Rămâne clasamentul de final cu egalități, separat de ordinea locurilor și de rezultatul mâinii. |
 
 ## Arhitectură de prezentare și refolosire
 
@@ -166,29 +165,12 @@ La limita lizibilității se alege un mod explicit de derulare sau o dispunere a
 
 - [ ] În următoarea probă nativă focalizată pe tură, măsurați intervalul dintre cadrul actorului și mutare și verificați o singură mutare per cadru, anularea la pauză sau navigare și reluarea din checkpoint. Asociați jurnalul și capturile cu SHA-ul APK-ului verificat.
 
-## P1 — Geometria mesei Rentz și sub-jocuri consecutive
+## P1 — Geometria mesei Rentz la 3, 5 și 6 jucători
 
-### Constatare din codul live
-
-- `RentzTablePanel` alege `RentzCardBoard` pentru contractul Rentz și `BoardLayout` pentru celelalte șapte contracte. În modurile cu levate, tabela comună este construită cu `fullWidthCardRows=true`; planul inițial Rentz cheamă `RentzCardSpace.plan` cu `false` și o lățime de referință de 220 dp. Comentariul `RentzCardBoard` spune că păstrează geometria comună, însă parametrii trimiși către planificator diferă de cei ai `BoardLayout`; comportamentul trebuie aliniat sau comentariul trebuie corectat explicit.
-- În `TableGeometry`, diferența dintre centre influențează decalarea colțurilor. La 3, 5 și 6 jucători, `fullWidthCardRows` produce alte ancore verticale; la 4, chiar dacă flag-ul nu schimbă formula, Rentz folosește un centru de 128 dp, iar celelalte contracte folosesc înălțimea din `PlayedCardMetrics`, deci decalarea colțurilor se schimbă și ea. Planul Rentz poate apropia colțurile de centru și micșora banda verticală disponibilă. Fallback-ul Rentz folosește ancorele pe lățime completă doar dacă banda inițială scade sub pragul de 72 dp; egalitatea nu este garantată în toate viewporturile.
-- Tabla secvenței este o grilă cu patru rânduri de etichete, nu fețe de carte: fiecare rând are `2 × jucători` sloturi, înălțimea rândului este limitată la 40 dp, iar textul la 15 sp. Sloturile sunt așezate egal, fără suprapunere. Mărirea benzii centrale singură nu crește cardurile peste aceste plafoane.
-
-Constatarea este dedusă din parametrii reali ai celor două planuri și din formula comună pentru colțuri; nu este o afirmație că toate rezoluțiile au fost validate pe Android.
-
-### Schimbare de testare introdusă
-
-`atf-tests/tools/run-shared-ui-sanity.ps1 -ConsecutiveSubgames` adaugă un traseu nativ de trei mâini în aceeași partidă: primul sub-joc Rentz, apoi două sub-jocuri standard selectate prin interfață când omul este la rând sau automat de AI. Verifică sloturile și cărțile publice ale secvenței, păstrează geometria chenarelor la începutul și după mutări, verifică cele trei rânduri de istoric și restart-ul, apoi compară sesiunea cu replay-ul independent al jurnalului. Capturile sunt folosite de Extent-ul proiectului ca PNG original inline base64.
-
-`RentzCardSpaceTest` compară acum banda Rentz cu banda comună a jocurilor de levate la patru jucători, în viewport compact și înalt; verificarea nouă cere ca Rentz să nu primească mai mult spațiu central doar prin schimbarea reperului. Acoperirea existentă la 3–6 jucători verifică banda și evitarea suprapunerilor, dar încă nu impune paritatea ancorelor cu cele șapte moduri comune.
-
-### Închidere solicitată
+Pentru patru jucători, mecanismul comun de alocare a spațiului este descris în [integrarea UI](../rentz/ATF_UiIntegration.md#schimbarea-contractului-la-masa-de-patru-jucători). Traseul pentru cele cinci jocuri consecutive și derularea istoricului aparțin [calificării APK](../rentz/ATF_Release.md#ordinea-calificării-android-curente).
 
 | Prioritate | Criteriu verificabil |
 |---|---|
-| P1 | Comparați chenarele Rentz și levată la 3, 4, 5 și 6 jucători, cu aceleași dimensiuni, insets, font și viewport. Dacă jocul nu cere intenționat altă distanțare, folosiți aceleași ancore pentru toate contractele; apoi măsurați banda centrală rămasă, nu doar centrul teoretic. |
-| P1 | În Rentz, păstrați rangul și culoarea pentru toate sloturile publice, inclusiv sloturile goale și cele jucate. Testați o reprezentare suprapusă/etajată care mărește fața fără să ascundă rangul, legalitatea sau ținta tactilă; accesibilitatea trebuie să expună fiecare carte o singură dată. |
-| P1 | Rulați `-ConsecutiveSubgames` pe APK-ul izolat calificat. Raportul trebuie să arate trei sub-jocuri distincte în istoric, măsurătorile native ale chenarelor, grila Rentz înainte/după depuneri, identitatea APK-ului și replay-ul jurnalului cu aceeași stare finală. |
-| P2 | Componentele trebuie să confrunte ancorele comune și Rentz în toate cele patru numere de jucători și în profiluri compacte, înalte, cu text mărit și fereastră scundă. Testul nativ de patru locuri rămâne o verificare focalizată, nu substituie matricea. |
-
-**Stare:** traseul și aserțiunea focalizată sunt adăugate, dar nu sunt încă executate. Nu modificați UI-ul în baza unei presupuneri despre distanță; măsurați comparația nativă după ce porțile de guvernanță permit build-ul și rularea.
+| P1 | Comparați chenarele Rentz și levată la 3, 5 și 6 jucători în aceleași condiții de afișaj. Măsurați banda rămasă pentru cărți și documentați diferențele deliberate de distanțare. |
+| P1 | Evaluați o reprezentare etajată a cărților Rentz. Fiecare slot trebuie să își păstreze rangul, culoarea și o singură descriere accesibilă. |
+| P2 | Verificați la nivel de componentă ancorele și banda disponibilă în profiluri compacte, înalte, cu text mărit și în ferestre scunde. |

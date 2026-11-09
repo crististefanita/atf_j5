@@ -78,6 +78,14 @@ J6 rămâne momentan JVM/console, fără dependență Android. Modelele UI păst
 
 [Componentele mâinii](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java) · [Dovezile native pentru chenare, nume și mână](../../../../rentz_back/ui-review/shared-seats-collection-j5/README.md)
 
+### Schimbarea contractului la masa de patru jucători
+
+- Secvența Rentz, levata și rezultatul folosesc aceeași bandă între chenare. Masa măsoară locurile înainte de a adapta conținutul central.
+- Pe un ecran scund, levata reduce mai întâi distanța dintre rânduri și păstrează ordinea cărților.
+- Masa și ecranul de punctaj afișează progresul `Mâna x/y` pe primul rând și contractul pe rândul următor. Marcajul `×2` rămâne lângă contract.
+
+[Componentele de geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) verifică încadrarea pe dimensiuni controlate. [Acceptanța de release](ATF_Release.md#ordinea-calificării-android-curente) compară dreptunghiurile native înainte și după schimbarea contractului, după mutări și după reluare.
+
 ## Traseul minim de calificare
 
 1. Rulați componentele aplicației prin `scripts/test-rentz-android-jvm.ps1`, cu workspace și cache externe înregistrate.
@@ -98,7 +106,7 @@ Receipt-ul probei UI este distinct de cel al release-ului și se produce numai d
 | `assertionDirectory`, `capturedComparisons` | JSON-urile comparațiilor capturate în execuția finală, fără populație goală. |
 | `uiLibrary`, `lintErrors`, `lintWarnings` | Proveniența AAR-ului și rezultatul Lint al acelorași intrări. |
 
-Nu utilizați receipt-ul `Debug` sau `Release` ca substitut pentru varianta izolată. Lansatorul prototipului refuză noul contract; migrarea deciziei independente și unificarea producătorului de receipt rămân U09.
+Varianta izolată are receipt propriu. Runnerul curent folosește replay-ul independent al sesiunii, iar integrarea deciziei externe din lansatorul prototipului rămâne U09.
 
 ## Auditul cititorului Extent
 
@@ -111,6 +119,29 @@ Pentru acest increment, `-HelpAwardsOnly` parcurge ajutorul în ambele limbi. `-
 - Folosiți controlul standard de expandare, apoi disclosure-urile acțiunilor, aserțiunilor și corpurilor. Toate rândurile trebuie desfăcute, iar ultimul trebuie accesibil prin derulare reală.
 - Captura este un link către viewer, nu un `<img>` permanent în tabel. Capturile identice pot folosi referințe; verificați PNG-ul rezolvat față de original, decodarea, încadrarea și închiderea completă a viewer-ului înaintea următorului click.
 - Verificarea cititorului poate utiliza Chromium offline; acest lucru nu schimbă proveniența acțiunilor Android, executate prin ADB și UI Automator.
+
+## Realizări și profil local
+
+- Meniul **Realizări** prezintă 15 rezultate confirmate la masă, câte cinci pe nivel. Ordinea recomandă un traseu, iar fiecare obiectiv avansează independent.
+- **Antrenament** păstrează catalogul de 800 de obiective și filtrele sale. Identificatorii și dovezile deja salvate rămân valabile când se schimbă ecranul din care sunt accesate.
+- Profilul salvează o identitate aleatorie și fusul orar ales la creare. Numele afișat se poate schimba separat. Sincronizarea între dispozitive și comutarea între profiluri rămân în plan.
+- Progresul se confirmă la închiderea mâinii și se scrie atomic împreună cu partida. Jocul manual, delegarea și pasul obligatoriu au surse distincte. Jurnalele vechi păstrează creditul confirmat, iar obiectivele adăugate încep să numere de la următoarea mână confirmată.
+- Obiectivele pe zile folosesc fusul salvat și cer o distribuire distinctă pentru fiecare zi numărată. Ora provine din dispozitiv.
+- Căutarea recunoaște titlul și regula în română sau engleză, inclusiv când lipsesc diacriticele. Filtrele se combină și păstrează ordinea de învățare. Rândurile spun explicit dacă obiectivul este blocat, în progres sau deblocat.
+- Ecranul folosește verdele tablei și paleta locurilor la masă. Cartonașele deblocate au fundal crem și text de stare, iar bara din antet arată progresul total.
+- Detaliul folosește aceeași evaluare ca acordarea creditului. El arată criteriul, tipul dovezii și ce a lipsit din ultima mână a partidei curente. O mână eligibilă poate avea deja credit dacă dovada a mai fost înregistrată.
+- Clasările din Realizări folosesc rezultatul terminal Rentz. Egalitățile păstrează locul comun. O partidă integral manuală cere decizii manuale confirmate de la început și permite pasul automat obligatoriu.
+- Testele cu mâini simulate verifică ordinea, pragurile, proveniența și reluarea. Partidele offline verifică disponibilitatea obiectivelor pe loturi separate. Rularea nativă are puncte distincte pentru Realizări și Antrenament.
+
+[Catalogul și calibrarea](../feedback/ATF_Rentz_Achievements_ToDo.md) · [Catalogul executabil](../../rentz-lab-app/app/src/main/achievement-rules/rentz-gameplay-achievements.yaml) · [Componentele Realizări](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/GameplayAchievementComponentTest.java)
+
+## Clasamentul final
+
+- La `MATCH_END`, ecranul de punctaj afișează înaintea detaliilor ultimei mâini numele, locul și totalul confirmat pentru fiecare jucător.
+- Sortarea este numerică, descrescătoare. Totalurile egale au același loc și păstrează ordinea locurilor la masă. Următorul loc ține cont de numărul jucătorilor aflați la egalitate.
+- Clasamentul se calculează din totaluri la afișare. Istoricul confirmat și ordinea mesei rămân stabile după reluare.
+
+[Componentele clasamentului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java) acoperă egalitățile, scorurile negative și cele patru mărimi de masă. [Acceptanța terminală](../feedback/ATF_Rentz_UI_ToDo.md#p1-tabelă-de-scor-elegantă-și-utilă) rămâne distinctă de traseul de release cu cinci mâini.
 
 ## Istoricul adaptiv Rentz
 

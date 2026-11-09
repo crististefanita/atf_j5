@@ -2,7 +2,7 @@ plugins { id 'com.android.application' }
 android {
     namespace 'ro.rentzlab.app'
     compileSdk 36
-    defaultConfig { applicationId 'ro.rentzlab.app'; minSdk 26; targetSdk 36; versionCode 8; versionName '0.5.0' }
+    defaultConfig { applicationId 'ro.rentzlab.app'; minSdk 26; targetSdk 36; versionCode 14; versionName '0.10.0' }
     buildFeatures { buildConfig true }
     signingConfigs {
         release {
@@ -53,3 +53,4 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.json:json:20240205'
 }
+apply from: 'achievement-catalog.gradle'

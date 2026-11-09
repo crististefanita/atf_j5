@@ -213,6 +213,32 @@ class ArenaAdmissionTest {
         assertTrue(verdict.findings().getFirst().contains("candidate"));
     }
 
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+            "true, 3840, 0, true", "true, 3845, 0, false",
+            "false, -7040, 0, true", "false, -7045, 0, false",
+            "true, 100, 6240, true", "true, 100, 6245, false",
+            "false, 100, -7040, true", "false, 100, -7045, false"
+    })
+    void rejectsAlignedScoresOutsideTheCompleteSchedule(boolean candidate, int score, long opponentSum, boolean possible) {
+        var original = neighbor();
+        double margin = score - opponentSum / 3.0;
+        double credit = margin > 0 ? 1 : 0;
+        var rows = original.games().stream().map(p -> {
+            double controlMargin = candidate ? p.controlMargin() : margin;
+            double candidateMargin = candidate ? margin : p.candidateMargin();
+            return new OfflineArena.Paired(p.seed(), p.seat(), p.family(), p.candidate(), controlMargin,
+                    candidateMargin, candidateMargin - controlMargin, candidate ? credit : p.winCredit(),
+                    candidate ? score : p.rootScore(), p.elapsedMillis(), p.maxDecisionNanos(), p.searchedDecisions(),
+                    p.exactShortcuts(), candidate ? p.controlWinCredit() : credit,
+                    candidate ? p.controlScore() : score, p.candidateWork(), p.controlWork());
+        }).toList();
+        var result = PromotionAdmission.inspect(summarize(original, rows, SCORING), PROTOCOL,
+                new PromotionAdmission.Expected(SOURCE, SETTINGS, SCORING));
+        assertEquals(possible, result.coherent(), result.findings().toString());
+        if (!possible) assertTrue(result.findings().getFirst().contains(candidate ? "candidate score" : "control score"));
+    }
+
     private static OfflineArena.Summary summarize(OfflineArena.Summary original, List<OfflineArena.Paired> games,
                                                    ScoreProfile scoring) {
         var protocol = original.declaredProtocol();

@@ -1,6 +1,7 @@
 param([Parameter(Mandatory)][string]$BuildQualification,[Parameter(Mandatory)][string]$RunRoot,
-    [switch]$SeatExtremes,[switch]$HistoryOnly,[switch]$HistoryMatrix,[switch]$HistoryDetails,[switch]$HelpAwardsOnly,[switch]$CompactScores,[switch]$ConsecutiveSubgames,[string]$ComponentRun,[string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe')
+    [switch]$SeatExtremes,[switch]$HistoryOnly,[switch]$HistoryMatrix,[switch]$HistoryDetails,[switch]$HelpAwardsOnly,[switch]$CompactScores,[switch]$ConsecutiveSubgames,[switch]$CompactConsecutive,[string]$ComponentRun,[string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe')
 $ErrorActionPreference='Stop'
+$consecutiveGameCount=5
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $project 'rentz-reference/tools/RentzAndroid.psm1') -Force
@@ -16,6 +17,7 @@ if(($HistoryMatrix-or$HistoryDetails)-and-not$HistoryOnly){throw 'History matrix
 if($HelpAwardsOnly-and($HistoryOnly-or$SeatExtremes)){throw 'Choose a single native sanity scope.'}
 if($CompactScores-and($HelpAwardsOnly-or$HistoryOnly-or$SeatExtremes)){throw 'Compact scores continue the one-hand sanity.'}
 if($ConsecutiveSubgames-and($HelpAwardsOnly-or$HistoryOnly-or$SeatExtremes-or$CompactScores)){throw 'Consecutive subgames are a standalone native sanity scope.'}
+if($CompactConsecutive-and-not$ConsecutiveSubgames){throw 'Compact consecutive testing requires ConsecutiveSubgames.'}
 if($HistoryOnly){
     if($SeatExtremes){throw 'Choose a single native sanity scope.'}
     Assert-AtfArtifactPath -Path $build.historyFixture -ProjectRoot $project
@@ -87,21 +89,25 @@ $owned=$false;$installed=$false;$released=$false;$failure='';$extentPath='';$ord
 $points=[Collections.Generic.List[object]]::new();$actions=[Collections.Generic.List[object]]::new();$cleanup=[Collections.Generic.List[string]]::new();$completedGames=[Collections.Generic.List[object]]::new()
 $initialSize='';$initialDensity='';$initialFont='';$finalSize='';$finalDensity='';$finalFont='';$packagesBefore='';$packagesAfter='';$api=''
 $wasAsleep=$false
-$displayChanged=$false;$displayProfile='';$logicalProfile='';$restoreSize='';$restoreDensity='';$restoreFont=''
+$displayChanged=$false;$displayProfile='';$logicalProfile='';$restoreSize='';$restoreDensity='';$restoreFont='';$effectiveDisplay=$null
 function Adb([string[]]$Command,[string]$Name,[int[]]$Allowed=@(0)){
     $script:ordinal++;Invoke-RentzAdb -RunRoot $raw -Arguments $Command -Label ('{0:d4}-{1}'-f$script:ordinal,$Name) -AllowedExitCodes $Allowed
 }
-function Ui {
+function Ui([datetime]$Deadline=[datetime]::UtcNow.AddSeconds(25)) {
     $remote='/sdcard/rentz-ui-'+$leaseId+'.xml'
-    for($attempt=0;$attempt-lt3;$attempt++){
+    for($attempt=0;$attempt-lt8-and[datetime]::UtcNow-lt$Deadline;$attempt++){
         $dump=Adb @('shell','uiautomator','dump',$remote) 'dump'
-        if(($dump.Output+$dump.Error)-match[regex]::Escape($remote)-and($dump.Output+$dump.Error)-notmatch'(?i)ERROR|Exception'){
+        $receipt=$dump.Output+$dump.Error
+        if($receipt-match[regex]::Escape($remote)-and$receipt-notmatch'(?i)ERROR|Exception'){
             [xml]$doc=(Adb @('exec-out','cat',$remote) 'hierarchy').Output
-            return @($doc.SelectNodes('//node'))
+            $nodes=@($doc.SelectNodes('/hierarchy/node/descendant-or-self::node'))
+            if($nodes.Count){return $nodes}
+            throw 'Fresh native hierarchy contains no nodes.'
         }
+        if($receipt-notmatch'(?i)null root node returned|could not get idle state'){throw "Android hierarchy dump was rejected: $receipt"}
         Start-Sleep -Milliseconds 300
     }
-    throw 'Fresh native hierarchy unavailable after the three observation attempts.'
+    throw 'Fresh native hierarchy unavailable within the observation retry budget.'
 }
 function Bounds($node){
     $m=[regex]::Match([string]$node.bounds,'^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$')
@@ -111,7 +117,7 @@ function Bounds($node){
 function Tap([string]$Label,[string]$Class=''){
     $deadline=[datetime]::UtcNow.AddSeconds(30)
     do{
-        $node=Get-RentzTapTarget -Nodes @(Ui) -Label $Label -Class $Class
+        $node=Get-RentzTapTarget -Nodes @(Ui $deadline) -Label $Label -Class $Class
         if($null-ne$node){
             TapNode $node $Label
             return
@@ -543,10 +549,13 @@ function CardLabel($card){
 function HumanContractLabel([string]$contract){
     return @{TRICKS='Tricks';QUEENS='Queens';DIAMONDS='Diamonds';KING_HEARTS='King of Hearts';TOTALS='Totals';WHIST='Whist';TEN_CLUBS='Ten of Clubs';RENTZ='Rentz'}[$contract]
 }
-function ChooseHumanSubgame($state,[switch]$ForceRentz){
+function ChooseHumanSubgame($state,[string[]]$Played=@(),[switch]$ForceRentz){
     if(-not$state.view.revealed){$revision=$state.revision;Tap 'Show cards';$state=State -After $revision}
     $available=@($state.view.available)
-    $contract=if($ForceRentz){'RENTZ'}elseif($available -contains 'TRICKS'){'TRICKS'}else{@($available|Where-Object{$_-ne'RENTZ'}|Select-Object -First 1)[0]}
+    $contract=if($ForceRentz){'RENTZ'}else{
+        $new=@($available|Where-Object{$_ -ne 'RENTZ' -and $_ -notin $Played})
+        if($new.Count){$new[0]}else{$available[0]}
+    }
     if(-not$contract-or$available -notcontains$contract){throw "Required human subgame is unavailable: $contract"}
     Tap 'Choose game';Tap (HumanContractLabel $contract)
     return (State -After $state.revision)
@@ -560,9 +569,44 @@ function ConfirmNativeCheck($checkpoints,[string]$Title,[string]$Name){
     }
     return $true
 }
+function GameHeadingChecks($nodes,$state){
+    $progress="Hand $($state.view.handNumber)/$($state.view.players*8)"
+    $contract=(HumanContractLabel $state.view.contract)+$(if($state.view.blind){' ×2'}else{''})
+    $first=@($nodes|Where-Object{$_.class-ceq'android.widget.TextView'-and$_.text-ceq$progress})
+    $second=@($nodes|Where-Object{$_.class-ceq'android.widget.TextView'-and$_.text-ieq$contract})
+    Check 'Hand progress occupies its own native text row' 1 $first.Count
+    Check 'Contract occupies its own native text row' 1 $second.Count
+    if($first.Count-eq1-and$second.Count-eq1){
+        Check 'Contract is directly below hand progress' $true ((Bounds $first[0])[3]-le(Bounds $second[0])[1])
+    }
+}
+function ReadConsecutiveHistory([string]$Title,[string[]]$Contracts){
+    $seen=[Collections.Generic.HashSet[int]]::new()
+    for($page=1;$page-le$Contracts.Count;$page++){
+        $before=$seen.Count
+        Observe "$Title · viewport $page" {param($nodes)
+            $rows=@($nodes|Where-Object{$_.text-match'(?m)^\d+ · '})
+            Check 'Native history shows confirmed hand rows' $true ($rows.Count-gt0)
+            foreach($row in $rows){
+                $match=[regex]::Match($row.text,'^(\d+) · ([^\r\n]+)')
+                $number=[int]$match.Groups[1].Value
+                if($number-lt1-or$number-gt$Contracts.Count){throw "Unexpected confirmed hand $number"}
+                $expected=HumanContractLabel $Contracts[$number-1]
+                $label=$match.Groups[2].Value -replace ' ×2$',''
+                Check "Confirmed hand $number contract" $expected.ToLowerInvariant() $label.ToLowerInvariant()
+                [void]$seen.Add($number)
+            }
+        }
+        if($seen.Count-eq$Contracts.Count-or$seen.Count-eq$before){break}
+        $body=Bounds (HistoryElement @(Ui) 'history_body')
+        $body[2]=[int]($body[0]+($body[2]-$body[0])*.35)
+        HistorySwipe $body
+    }
+    return $seen.Count
+}
 function RunConsecutiveSubgames($state,[string]$journalFile){
-    $selectedContracts=[Collections.Generic.List[string]]::new();$baseSeats='';$playedNormal=$false
-    for($deal=1;$deal-le3;$deal++){
+    $selectedContracts=[Collections.Generic.List[string]]::new();$baseSeats=''
+    for($deal=1;$deal-le$consecutiveGameCount;$deal++){
         if($deal-eq1){
             if($state.view.phase-ne'CHOOSE'-or$state.view.turn-ne0){throw 'The first subgame must begin at the human chooser.'}
             $state=ChooseHumanSubgame $state -ForceRentz
@@ -571,7 +615,7 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
             $revision=$state.revision;Tap 'Next hand';$state=State -After $revision
             $choiceSteps=0
             while($state.view.phase-eq'CHOOSE'){
-                if($state.view.turn-eq0){$state=ChooseHumanSubgame $state}
+                if($state.view.turn-eq0){$state=ChooseHumanSubgame $state -Played $selectedContracts.ToArray()}
                 else{$state=State -After $state.revision}
                 if(++$choiceSteps-gt8){throw 'The next chooser did not resolve through the UI flow.'}
             }
@@ -579,13 +623,12 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
         if($state.view.phase-ne'PLAY'){throw "Subgame $deal did not enter PLAY."}
         $contract=[string]$state.view.contract;$selectedContracts.Add($contract)
         if($deal-eq1-and$contract-ne'RENTZ'){throw 'The first visible subgame must be Rentz.'}
-        if($deal-gt1-and$contract-eq'RENTZ'){throw "Subgame $deal must be a non-Rentz contrast after the opening Rentz subgame."}
-        if($contract-ne'RENTZ'){$playedNormal=$true}
         $nodes=@(Ui);$seatGeometry=SeatGeometry $nodes $state
         if($deal-eq1){$baseSeats=$seatGeometry}
         $title="Consecutive subgame $deal starts: $contract"
         Observe $title {param($captured)
             TableChecks $captured $state
+            GameHeadingChecks $captured $state
             Check 'Four-player table uses the same seat rectangles in this viewport' $baseSeats $seatGeometry
             Check 'Visible subgame matches the public actor state' $contract $state.view.contract
             if($contract-eq'RENTZ'){RentzSequenceChecks $captured $state}
@@ -626,12 +669,13 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
         $terminal=$state
         if($contract-eq'RENTZ'){Tap 'View table'}
         Observe "Subgame $deal completed: $contract" {param($captured)
+            GameHeadingChecks $captured $terminal
             Check 'Exact completed hand number' $deal $terminal.view.handNumber
             Check 'Completed subgame contract' $contract $terminal.view.contract
             Check 'One score value per player' $terminal.view.players $terminal.view.dealPoints.Count
             if($contract-eq'RENTZ'){
                 Check 'Rentz finishing order contains each player' $terminal.view.players $terminal.view.finishOrder.Count
-                Check 'Auto play added seat-zero plays without manual card taps' $true ($delegatedPlays-gt0)
+                if($deal-eq1){Check 'Auto play added seat-zero plays without manual card taps' $true ($delegatedPlays-gt0)}
                 RentzSequenceChecks $captured $terminal
             }
         }
@@ -648,37 +692,84 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
             seatGeometryVerified=$true;firstHumanMoveVerified=(ConfirmNativeCheck $points $moveTitle 'The same seat geometry survives a card play');completionVerified=($terminal.view.phase-eq'DEAL_END');
             rentzFinishOrderVerified=($contract-eq'RENTZ'-and$terminal.view.finishOrder.Count-eq$terminal.view.players)})
     }
-    if(-not$playedNormal){throw 'The three-subgame sample did not include a non-Rentz contract for visual comparison.'}
-    $journal=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/session.json') 'three-subgame-journal'
-    $journalPath=Join-Path $raw 'three-subgame-journal.json';[IO.File]::WriteAllText($journalPath,$journal.Output,[Text.UTF8Encoding]::new($false))
-    $actor=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/actor-view.json') 'three-subgame-actor'
-    $actorPath=Join-Path $raw 'three-subgame-actor.json';[IO.File]::WriteAllText($actorPath,$actor.Output,[Text.UTF8Encoding]::new($false))
+    if(@($selectedContracts | Sort-Object -Unique).Count -lt 3){throw 'At least three distinct native contracts are required.'}
+    $journal=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/session.json') 'consecutive-subgames-journal'
+    $journalPath=Join-Path $raw 'consecutive-subgames-journal.json';[IO.File]::WriteAllText($journalPath,$journal.Output,[Text.UTF8Encoding]::new($false))
+    $actor=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/actor-view.json') 'consecutive-subgames-actor'
+    $actorPath=Join-Path $raw 'consecutive-subgames-actor.json';[IO.File]::WriteAllText($actorPath,$actor.Output,[Text.UTF8Encoding]::new($false))
     $oracle=Invoke-DevelopmentAudit $journalPath $actorPath
-    if($oracle.status-ne'PASS'-or$oracle.completedDeals-ne3-or$oracle.phase-ne'DEAL_END'){throw 'Three-deal independent journal replay did not match the visible application state.'}
+    if($oracle.status-ne'PASS'-or$oracle.completedDeals-ne$consecutiveGameCount-or$oracle.phase-ne'DEAL_END'){throw 'Independent journal replay did not match the consecutive UI games.'}
+    $script:consecutiveContracts=$selectedContracts.ToArray();$script:consecutiveOracle=$oracle
     $oracleContracts=@($oracle.history|ForEach-Object{$_.contract})
     Tap 'Score history';$history=State -Screen 'HISTORY'
-    Observe 'Score history contains the three consecutive subgames' {param($captured)
-        $rows=@($captured|Where-Object{$_.text-match'(?m)^\d+ · '})
-        Check 'Three completed history rows are visible' 3 $rows.Count
-        if($rows.Count-eq3){for($index=0;$index-lt3;$index++){
-            $label=HumanContractLabel $selectedContracts[$index]
-            Check "History row $($index+1) retains its actual contract" $true (($rows[$index].text)-match("(?m)^"+($index+1)+" · "+[regex]::Escape($label)))
-        }}
-        Check 'Independent journal replay preserves the three visible contracts' ($selectedContracts -join ',') ($oracleContracts -join ',')
+    $historyCount=ReadConsecutiveHistory 'Score history' $selectedContracts.ToArray()
+    Observe 'Score history contains the consecutive subgames' {param($captured)
+        Check 'All completed history rows are reachable' $consecutiveGameCount $historyCount
+        Check 'Independent journal replay preserves the visible contracts' ($selectedContracts -join ',') ($oracleContracts -join ',')
         Check 'Rentz occurs in the independently replayed match segment' $true ($oracleContracts -contains 'RENTZ')
         Check 'At least one standard contract occurs in the same segment' $true (@($oracleContracts|Where-Object{$_-ne'RENTZ'}).Count-gt0)
         Check 'Independent audit saw all human-visible commands' $true ($oracle.auditedTransitions-gt0)
         Check 'Score history state belongs to the final application revision' $terminal.revision $history.revision
-        Check 'Rentz history row is present' $true ((Text $captured).Contains('Rentz'))
     }
     Tap 'Close';$null=State;Tap 'Main menu'
-    Observe 'The match with three subgames remains resumable' {param($captured)
+    Observe 'The match remains resumable' {param($captured)
         Check 'Resume remains enabled' 1 @($captured|Where-Object{$_.text-eq'Resume game'-and$_.enabled-eq'true'}).Count
     }
-    Adb @('shell','am','force-stop','ro.rentzlab.app.uisanity') 'three-subgame-restart-stop'|Out-Null
-    Adb @('shell','am','start','-W','-n','ro.rentzlab.app.uisanity/ro.rentzlab.app.MainActivity') 'three-subgame-restart-start'|Out-Null
+    Tap 'Achievements';$null=State -Screen 'ACHIEVEMENTS'
+    $gameplayEarned=[string](@(Ui)|Where-Object text -Match '^Unlocked [1-9][0-9]*/15$'|Select-Object -First 1).text
+    $progress=($journal.Output|ConvertFrom-Json).achievements
+    Observe 'Gameplay and training keep independent progress' {param($captured)
+        Check 'Confirmed manual play grants gameplay credit' $true ($gameplayEarned.Length-gt0-and
+            @($progress.marks.'play-first-hand').Count-eq1-and$null-ne$progress.marks.'play-first-hand')
+        Check 'Incomplete match cannot grant a terminal title' $true ($null-eq$progress.marks.'play-first-win')
+        Check 'Training has its own route' 1 @($captured|Where-Object text -CEQ 'Training').Count
+    }
+    Tap 'Training';$null=State -Screen 'TRAINING'
+    $earned=[string](@(Ui)|Where-Object text -Match '^Unlocked [1-9][0-9]*/800$'|Select-Object -First 1).text
+    Observe 'Achievements record manual and assisted play after settlement' {param($captured)
+        Check 'Progress is visible for the local profile' 1 @($captured|Where-Object text -Match '^Unlocked [1-9][0-9]*/800$').Count
+        Check 'Complete catalog records new credit after settlement' $true (@($progress.marks.PSObject.Properties.Name|Where-Object {$_ -like 's3-*'}).Count-gt0)
+        $missing=@(foreach($key in @('first-choice','first-card','first-hand','assisted-hand')){
+            if($null-eq$progress.marks.$key-or@($progress.marks.$key).Count-ne1){$key}
+        })
+        Check 'Manual and assisted milestones are recorded separately' 0 $missing.Count
+        Check 'Visible profile belongs to the player' 1 @($captured|Where-Object text -CEQ 'Local profile · Ana').Count
+    }
+    Tap 'Search and filters';Tap 'Status filter' 'android.widget.Spinner';Tap 'Unlocked'
+    Tap 'Search achievements' 'android.widget.EditText'
+    Adb @('shell','input','text','chose%syourself') 'achievement-search-rule'|Out-Null
+    Tap 'Apply'
+    Observe 'Search and status filter reveal the unlocked lesson' {param($captured)
+        Check 'Combined query returns exactly one achievement' 1 @($captured|Where-Object text -CEQ 'Matching achievements 1').Count
+        Check 'Unlocked row states its completed counter' 1 @($captured|Where-Object text -CEQ 'Easy · Unlocked 1/1').Count
+        Check 'Result retains its learning section' 1 @($captured|Where-Object text -CEQ '1 · Learn the table').Count
+    }
+    Tap 'First choice'
+    Observe 'Achievement details explain eligibility for the recent hand' {param($captured)
+        $text=Text $captured
+        Check 'Eligibility contains rule, counting unit and recent context' $true ($text.Contains('Eligibility')-and
+            $text.Contains('Finish a hand whose contract you chose yourself.')-and
+            $text.Contains('Distinct completed hands')-and$text.Contains('Last completed hand'))
+    }
+    Tap 'Close';Tap 'Search and filters';Tap 'Reset'
+    Tap 'Back';$null=State -Screen 'ACHIEVEMENTS'
+    Tap 'Back';$null=State -Screen 'MENU'
+    Adb @('shell','am','force-stop','ro.rentzlab.app.uisanity') 'consecutive-subgames-restart-stop'|Out-Null
+    Adb @('shell','am','start','-W','-n','ro.rentzlab.app.uisanity/ro.rentzlab.app.MainActivity') 'consecutive-subgames-restart-start'|Out-Null
+    Tap 'Achievements';$null=State -Screen 'ACHIEVEMENTS'
+    Observe 'Gameplay milestones survive process restart' {param($captured)
+        Check 'Same gameplay total after restart' $gameplayEarned ([string](@($captured|Where-Object text -Match '^Unlocked [1-9][0-9]*/15$'|Select-Object -First 1).text))
+    }
+    Tap 'Training';$null=State -Screen 'TRAINING'
+    $afterRestart=(Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/session.json') 'achievement-checkpoint-after-restart').Output
+    Observe 'Achievements and local identity survive restart without duplicate credit' {param($captured)
+        Check 'Same achievements total after restart' $earned ([string](@($captured|Where-Object text -Match '^Unlocked [1-9][0-9]*/800$'|Select-Object -First 1).text))
+        Check 'Restart leaves the durable checkpoint byte-for-byte unchanged' $true ($journal.Output-ceq$afterRestart)
+    }
+    Tap 'Back';$null=State -Screen 'ACHIEVEMENTS'
+    Tap 'Back';$null=State -Screen 'MENU'
     Tap 'Resume game';Tap 'View table';$restored=State
-    Observe 'Three-deal match restores its final contract and scores' {param($captured)
+    Observe 'The match restores its final contract and scores' {param($captured)
         Check 'Restored revision equals the terminal revision' $terminal.revision $restored.revision
         Check 'Restored completed phase' 'DEAL_END' $restored.view.phase
         Check 'Restored final contract' $terminal.view.contract $restored.view.contract
@@ -687,13 +778,20 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
         TableChecks $captured $restored
     }
     Tap 'Options';Tap 'Score history';$null=State -Screen 'HISTORY'
-    Observe 'The three confirmed rows remain after process restart' {param($captured)
-        $rows=@($captured|Where-Object{$_.text-match'(?m)^\d+ · '})
-        Check 'Restarted history retains all three completed subgames' 3 $rows.Count
-        Check 'Restarted history still includes Rentz' $true ((Text $captured).Contains('Rentz'))
-        Check 'Restarted history retains the final contract' $true ((Text $captured).Contains((HumanContractLabel $selectedContracts[2])))
+    $historyCount=ReadConsecutiveHistory 'Restarted score history' $selectedContracts.ToArray()
+    Observe 'The confirmed rows remain after process restart' {param($captured)
+        Check 'Restarted history retains all completed subgames' $consecutiveGameCount $historyCount
     }
-    $script:threeSubgameContracts=$selectedContracts.ToArray();$script:threeSubgameOracle=$oracle
+    Tap 'Close';$null=State;Tap 'Options';Tap 'Main menu';Tap 'Achievements';$null=State -Screen 'ACHIEVEMENTS'
+    Tap 'Training';$null=State -Screen 'TRAINING'
+    Tap 'Local profile · Ana';Tap 'Player' 'android.widget.EditText'
+    Adb @('shell','input','keyevent','KEYCODE_MOVE_END') 'achievement-profile-end'|Out-Null
+    Adb @('shell','input','text','M') 'achievement-profile-rename'|Out-Null
+    Tap 'Save'
+    Observe 'Renaming the local profile retains achievement progress' {param($captured)
+        Check 'New profile display name appears' 1 @($captured|Where-Object text -CEQ 'Local profile · AnaM').Count
+        Check 'Same achievements total after rename' $earned ([string](@($captured|Where-Object text -Match '^Unlocked [1-9][0-9]*/800$'|Select-Object -First 1).text))
+    }
 }
 function RunCompactScores($terminal){
     Tap 'Close';$null=State
@@ -748,6 +846,20 @@ try{
     Adb @('shell','input','keyevent','KEYCODE_WAKEUP') 'wake-device'|Out-Null
     Adb @('shell','wm','dismiss-keyguard') 'dismiss-emulator-keyguard'|Out-Null
     $initialSize=(Adb @('shell','wm','size') 'size').Output;$initialDensity=(Adb @('shell','wm','density') 'density').Output;$initialFont=(Adb @('shell','settings','get','system','font_scale') 'font').Output
+    if($CompactConsecutive){
+        $restoreSize=DisplayOverride $initialSize 'size' '\d+x\d+'
+        $restoreDensity=DisplayOverride $initialDensity 'density' '\d+'
+        $restoreFont=$initialFont.Trim()
+        if($restoreFont-notmatch'^(?:null|\d+(?:\.\d+)?)$'){throw 'Unexpected original Android font scale'}
+        $displayChanged=$true
+        Adb @('shell','wm','density','360') 'consecutive-density'|Out-Null
+        Adb @('shell','settings','put','system','font_scale','1.5') 'consecutive-font'|Out-Null
+        SetHistorySize '720x1280'
+        $density=DisplayOverride (Adb @('shell','wm','density') 'consecutive-effective-density').Output 'density' '\d+'
+        $font=(Adb @('shell','settings','get','system','font_scale') 'consecutive-effective-font').Output.Trim()
+        $effectiveDisplay=[ordered]@{viewport=$logicalProfile;density=$density;fontScale=$font}
+        if($logicalProfile-cne'720x1280'-or$density-cne'360'-or$font-cne'1.5'){throw 'The compact Android profile is not active.'}
+    }
     $api=(Adb @('shell','getprop','ro.build.version.sdk') 'api').Output.Trim()
     $activity=(Adb @('shell','dumpsys','activity','activities') 'foreground').Output
     $match=[regex]::Match($activity,'mResumedActivity:.*? ([a-zA-Z0-9_.]+/[a-zA-Z0-9_.$]+) ');if($match.Success){$initialActivity=$match.Groups[1].Value}
@@ -758,6 +870,35 @@ try{
     Adb @('shell','am','start','-W','-n','ro.rentzlab.app.uisanity/ro.rentzlab.app.MainActivity') 'launch'|Out-Null
     if($HelpAwardsOnly){RunHelpAwardsSanity}elseif($HistoryOnly){RunHistorySanity}else{
     Observe 'English shared home and disabled resume' {param($nodes) $t=Text $nodes;Check 'Rentz home' $true ($t.Contains('Rentz'));Check 'English first launch' $true ($t.Contains('New game'));Check 'Resume disabled' 1 @($nodes|Where-Object{$_.text-eq'Resume game'-and$_.enabled-eq'false'}).Count}
+    if($ConsecutiveSubgames){
+        Tap 'Achievements'
+        Observe 'Gameplay catalog opens with fifteen milestones' {param($nodes)
+            Check 'Gameplay starts with the first manual hand' $true ((Text $nodes).Contains('Unlocked 0/15')-and
+                (Text $nodes).Contains('First completed hand'))
+        }
+        Tap 'Training'
+        Observe 'Achievements open at the beginning of the learning path' {param($nodes)
+            Check 'Fresh profile has zero unlocked achievements' 1 @($nodes|Where-Object text -CEQ 'Unlocked 0/800').Count
+            $ordered=@($nodes|Where-Object text -CIn @('1 · Learn the table','First choice','First card')|ForEach-Object text)
+            Check 'Onboarding comes before contract goals' '1 · Learn the table|First choice|First card' ($ordered-join'|')
+        }
+        Tap 'Search and filters';Tap 'Search achievements' 'android.widget.EditText'
+        Adb @('shell','input','text','zzznomatch') 'achievement-search-empty'|Out-Null
+        Tap 'Apply'
+        Observe 'Achievement search reports an empty result' {param($nodes)
+            Check 'Empty result is visible and can be reset' $true ((Text $nodes).Contains('No matching achievements')-and
+                (Text $nodes).Contains('Search and filters'))
+        }
+        Tap 'Search and filters';Tap 'Reset'
+        Tap 'Search and filters';Tap 'Difficulty filter' 'android.widget.Spinner';Tap 'Hard';Tap 'Apply'
+        Observe 'Full catalog exposes the mastery tier on the table surface' {param($nodes)
+            Check 'Hard filter exposes 100 achievements in mastery order' $true ((Text $nodes).Contains('Matching achievements 100')-and
+                (Text $nodes).Contains('4 · Master the game'))
+        }
+        Tap 'Search and filters';Tap 'Reset'
+        Tap 'Back'
+        Tap 'Back'
+    }
     Tap 'Player: You';Tap 'Player' 'android.widget.EditText';$typing=[Diagnostics.Stopwatch]::StartNew();Adb @('shell','input','text','Ana') 'type-name'|Out-Null;$typing.Stop()
     $actions.Add([pscustomobject]@{operation='Enter Android text';control='Player';value='Ana';elapsedMillis=$typing.ElapsedMilliseconds})
     Tap 'Save'
@@ -829,7 +970,9 @@ try{
     }
     }
 }catch{
-    $failure=$_.Exception.ToString()+"`r`nInvocation: "+$_.InvocationInfo.PositionMessage+"`r`nScriptStackTrace: "+$_.ScriptStackTrace
+    $failure=$_.Exception.ToString()+"
+Invocation: "+$_.InvocationInfo.PositionMessage+"
+ScriptStackTrace: "+$_.ScriptStackTrace
     if($owned){try{Adb @('shell','logcat','-d','-t','150','-s','AndroidRuntime:E') 'failure-logcat'|Out-Null}catch{$cleanup.Add($_.Exception.ToString())}}
 }finally{
     if($owned){
@@ -870,16 +1013,18 @@ if(-not $HelpAwardsOnly){
     if(Test-Path -LiteralPath $developmentLedger -PathType Leaf){$isolatedDevelopmentLedgerSha256After=(Get-FileHash -LiteralPath $developmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()}
     if($ConsecutiveSubgames-and-not$sharedDevelopmentLedgerUnchanged-and-not$failure){$failure='Shared training ledger changed during isolated native acceptance.'}
 }
-$minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}elseif($ConsecutiveSubgames){16}else{10}
+$minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}elseif($ConsecutiveSubgames){3*$consecutiveGameCount+4}else{10}
 if($HistoryDetails){$minimum+=4}
 if($CompactScores){$minimum++}
 if(-not$failure-and($cleanup.Count-or-not$released-or-not$preserved-or$points.Count-lt$minimum)){$failure='Native closeout failed or the declared checkpoint population is incomplete.'}
-$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: full Rentz followed by two non-Rentz games, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
+$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Five consecutive complete UI games in one match: full Rentz first, at least three distinct contracts, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
 if($HistoryDetails){$scope+='; confirmed blind trick contributions and the actual Rentz finishing places after journal restore'}
+if($ConsecutiveSubgames){$scope+='; learning order, search, filters, eligibility, local profile and durable achievement progress'}
+if($CompactConsecutive){$scope+='; compact 720x1280, density 360, font scale 1.5'}
 if($CompactScores){$scope+='; Romanian compact signed scores at font scale 1.5 and a 720x1280 logical viewport'}
-$display=[ordered]@{before=@{size=$initialSize.Trim();density=$initialDensity.Trim();font=$initialFont.Trim()};after=@{size=$finalSize.Trim();density=$finalDensity.Trim();font=$finalFont.Trim()}}
+$display=[ordered]@{before=@{size=$initialSize.Trim();density=$initialDensity.Trim();font=$initialFont.Trim()};effective=$effectiveDisplay;after=@{size=$finalSize.Trim();density=$finalDensity.Trim();font=$finalFont.Trim()}}
 if($component){
-    $reportInput=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;consecutiveSubgames=[bool]$ConsecutiveSubgames;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;failure=$failure;display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;subgames=$threeSubgameContracts;completedGames=$completedGames.ToArray();gameAudit=$threeSubgameOracle;developmentLedger=$developmentLedger;developmentLedgerScope=$(if($HelpAwardsOnly){'NOT_USED'}else{'RUN_ISOLATED_COPY'});sharedDevelopmentLedgerSha256Before=$sharedDevelopmentLedgerSha256Before;sharedDevelopmentLedgerSha256After=$sharedDevelopmentLedgerSha256After;sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerUnchanged;isolatedDevelopmentLedgerSha256Before=$isolatedDevelopmentLedgerSha256Before;isolatedDevelopmentLedgerSha256After=$isolatedDevelopmentLedgerSha256After;checkpoints=$points.ToArray()}
+    $reportInput=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;consecutiveSubgames=[bool]$ConsecutiveSubgames;compactConsecutive=[bool]$CompactConsecutive;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;failure=$failure;display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;subgames=$consecutiveContracts;completedGames=$completedGames.ToArray();gameAudit=$consecutiveOracle;developmentLedger=$developmentLedger;developmentLedgerScope=$(if($HelpAwardsOnly){'NOT_USED'}else{'RUN_ISOLATED_COPY'});sharedDevelopmentLedgerSha256Before=$sharedDevelopmentLedgerSha256Before;sharedDevelopmentLedgerSha256After=$sharedDevelopmentLedgerSha256After;sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerUnchanged;isolatedDevelopmentLedgerSha256Before=$isolatedDevelopmentLedgerSha256Before;isolatedDevelopmentLedgerSha256After=$isolatedDevelopmentLedgerSha256After;checkpoints=$points.ToArray()}
     $reportInput|ConvertTo-Json -Depth 16|Set-Content -LiteralPath (Join-Path $raw 'ui-result.json') -Encoding utf8NoBOM
     ConvertTo-Json -InputObject @($points.ToArray()) -Depth 16|Set-Content -LiteralPath (Join-Path $raw 'checkpoints.json') -Encoding utf8NoBOM
     if($points.Count){
@@ -893,7 +1038,7 @@ if($component){
     }
 }
 $extentHash='';if($extentPath-and(Test-Path -LiteralPath $extentPath -PathType Leaf)){$extentHash=(Get-FileHash -LiteralPath $extentPath -Algorithm SHA256).Hash.ToLowerInvariant()}
-$result=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;helpAwardsOnly=[bool]$HelpAwardsOnly;historyOnly=[bool]$HistoryOnly;historyMatrix=[bool]$HistoryMatrix;historyDetails=[bool]$HistoryDetails;seatExtremes=[bool]$SeatExtremes;consecutiveSubgames=[bool]$ConsecutiveSubgames;subgames=$threeSubgameContracts;completedGames=$completedGames.ToArray();gameAudit=$threeSubgameOracle;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;build=$build;rawRoot=$raw;extentReport=$extentPath;extentReportSha256=$extentHash;reportingLibrary=$reportingLibrary.name;reportingLibrarySha256=$reportingLibrary.sha256;runnerSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant();developmentLedger=$developmentLedger;developmentLedgerScope=$(if($HelpAwardsOnly){'NOT_USED'}else{'RUN_ISOLATED_COPY'});isolatedDevelopmentLedgerSha256Before=$isolatedDevelopmentLedgerSha256Before;isolatedDevelopmentLedgerSha256After=$isolatedDevelopmentLedgerSha256After;sharedDevelopmentLedger=$sharedDevelopmentLedger;sharedDevelopmentLedgerSha256Before=$sharedDevelopmentLedgerSha256Before;sharedDevelopmentLedgerSha256After=$sharedDevelopmentLedgerSha256After;sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerUnchanged;developmentExposures=$developmentExposures.ToArray();failure=$failure;cleanupFailures=$cleanup.ToArray();display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;checkpoints=$points.ToArray()}
+$result=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;helpAwardsOnly=[bool]$HelpAwardsOnly;historyOnly=[bool]$HistoryOnly;historyMatrix=[bool]$HistoryMatrix;historyDetails=[bool]$HistoryDetails;seatExtremes=[bool]$SeatExtremes;consecutiveSubgames=[bool]$ConsecutiveSubgames;compactConsecutive=[bool]$CompactConsecutive;subgames=$consecutiveContracts;completedGames=$completedGames.ToArray();gameAudit=$consecutiveOracle;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;build=$build;rawRoot=$raw;extentReport=$extentPath;extentReportSha256=$extentHash;reportingLibrary=$reportingLibrary.name;reportingLibrarySha256=$reportingLibrary.sha256;runnerSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant();developmentLedger=$developmentLedger;developmentLedgerScope=$(if($HelpAwardsOnly){'NOT_USED'}else{'RUN_ISOLATED_COPY'});isolatedDevelopmentLedgerSha256Before=$isolatedDevelopmentLedgerSha256Before;isolatedDevelopmentLedgerSha256After=$isolatedDevelopmentLedgerSha256After;sharedDevelopmentLedger=$sharedDevelopmentLedger;sharedDevelopmentLedgerSha256Before=$sharedDevelopmentLedgerSha256Before;sharedDevelopmentLedgerSha256After=$sharedDevelopmentLedgerSha256After;sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerUnchanged;developmentExposures=$developmentExposures.ToArray();failure=$failure;cleanupFailures=$cleanup.ToArray();display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;checkpoints=$points.ToArray()}
 $result|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $RunRoot 'result.json') -Encoding utf8NoBOM
 if($failure){throw "Shared UI sanity failed: $RunRoot"}
 Write-Output $RunRoot

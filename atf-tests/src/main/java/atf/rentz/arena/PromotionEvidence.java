@@ -15,6 +15,20 @@ import ro.rentzlab.core.ScoreProfile;
 /** Complete finite paired population; aggregate claims are checked separately. */
 final class PromotionEvidence {
     private record Key(Kind family, long seed, int seat) { }
+    private record ScoreBounds(int quantum, long minimum, long seatMaximum, long opponentsMaximum) {
+        static ScoreBounds forMatch(ScoreProfile profile, int players) {
+            long penalties = 8L * profile.trickPenalty() + 4L * profile.queenPenalty()
+                    + 2L * players * profile.diamondPenalty() + profile.kingPenalty();
+            long rewards = 8L * profile.trickReward() + profile.tenReward();
+            var rentz = profile.finishRewards().subList(0, players).stream()
+                    .sorted(java.util.Comparator.reverseOrder()).toList();
+            long opponentsAwards = rentz.stream().limit(players - 1L).mapToLong(Integer::longValue).sum();
+            // Each chooser has every contract. Totals repeats the four penalties, and blind can double a deal.
+            long doubled = 2L * players;
+            return new ScoreBounds(scoreQuantum(profile, players), -2L * doubled * penalties,
+                    doubled * (rewards + rentz.getFirst()), doubled * (rewards + opponentsAwards));
+        }
+    }
     private PromotionEvidence() { }
     static Map<Kind, List<Paired>> population(List<Paired> games, Protocol protocol, ArenaPolicies policies,
                                                ScoreProfile scoring) {
@@ -26,7 +40,7 @@ final class PromotionEvidence {
         var seeds = new HashSet<>(protocol.seeds());
         int players = protocol.players();
         scoring.assertMatchSafe(players);
-        int quantum = scoreQuantum(scoring, players);
+        var bounds = ScoreBounds.forMatch(scoring, players);
         long transitions = 0, nanos = 0;
         int fallbacks = 0, limited = 0;
         for (var game : games) {
@@ -37,13 +51,13 @@ final class PromotionEvidence {
             require(Double.isFinite(game.controlMargin()) && Double.isFinite(game.candidateMargin())
                     && Double.isFinite(game.delta()) && Double.compare(game.delta(), game.candidateMargin() - game.controlMargin()) == 0,
                     "finite margins and independently consistent delta required");
-            require(scorePossible(game.rootScore(), game.candidateMargin(), game.winCredit(), players, quantum),
+            require(scorePossible(game.rootScore(), game.candidateMargin(), game.winCredit(), players, bounds),
                     "candidate score or opponent sum contradicts the trusted score profile");
-            require(scorePossible(game.controlScore(), game.controlMargin(), game.controlWinCredit(), players, quantum),
+            require(scorePossible(game.controlScore(), game.controlMargin(), game.controlWinCredit(), players, bounds),
                     "control score or opponent sum contradicts the trusted score profile");
-            require(credit(game.rootScore(), game.candidateMargin(), game.winCredit(), players, quantum),
+            require(credit(game.rootScore(), game.candidateMargin(), game.winCredit(), players, bounds.quantum()),
                     "candidate win credit contradicts the score margin or table size");
-            require(credit(game.controlScore(), game.controlMargin(), game.controlWinCredit(), players, quantum),
+            require(credit(game.controlScore(), game.controlMargin(), game.controlWinCredit(), players, bounds.quantum()),
                     "control win credit contradicts the score margin or table size");
             require(game.elapsedMillis() >= 0 && game.maxDecisionNanos() >= 0
                     && game.searchedDecisions() >= 0 && game.exactShortcuts() >= 0, "negative game measurements");
@@ -82,13 +96,15 @@ final class PromotionEvidence {
         return a;
     }
 
-    private static boolean scorePossible(int score, double margin, double winCredit, int players, int quantum) {
+    private static boolean scorePossible(int score, double margin, double winCredit, int players, ScoreBounds bounds) {
+        int quantum = bounds.quantum();
         if (quantum == 0) return score == 0 && margin == 0 && winCredit == 1.0 / players;
         int opponents = players - 1;
         long sum = opponentSum(score, margin, opponents);
         // Round to recover the integer sum, then reproduce the producer's floating-point margin.
-        return score % quantum == 0 && sum % quantum == 0
-                && sum >= (long) Integer.MIN_VALUE * opponents && sum <= (long) Integer.MAX_VALUE * opponents
+        return score >= bounds.minimum() && score <= bounds.seatMaximum()
+                && sum >= bounds.minimum() && sum <= bounds.opponentsMaximum()
+                && score % quantum == 0 && sum % quantum == 0
                 && margin == score - (double) sum / opponents;
     }
 

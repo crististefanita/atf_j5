@@ -7,6 +7,7 @@ import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.ai.RentzPlayer;
 import ro.rentzlab.core.*;
 import java.util.List;
+import java.util.Set;
 
 @AndroidComponentLayer
 public final class RentzScoreContentTest {
@@ -61,5 +62,33 @@ public final class RentzScoreContentTest {
             audit.truth("The next hand cannot reopen the previous result " + contract,
                     RentzScoreContent.currentHand(restored.view(), restored.history(), copy).isEmpty());
         }
+    }
+
+    @Test public void finalStandingsUseCompetitionTiesAndKeepHistoryInSeatOrder() {
+        var totals = List.of(-30, 20, 20, 0, -30, 5);
+        var end = standingsInput(RentzMatch.Phase.MATCH_END, totals);
+        audit.equal("Shared positions leave the next competition rank vacant", List.of(
+                new RentzScoreContent.Standing(1, 1, 20), new RentzScoreContent.Standing(2, 1, 20),
+                new RentzScoreContent.Standing(5, 3, 5), new RentzScoreContent.Standing(3, 4, 0),
+                new RentzScoreContent.Standing(0, 5, -30), new RentzScoreContent.Standing(4, 5, -30)),
+                RentzScoreContent.finalStandings(end));
+        audit.equal("Final ranking does not mutate seat totals", totals, end.totals());
+        audit.truth("An ordinary settled hand has no final standings",
+                RentzScoreContent.finalStandings(standingsInput(RentzMatch.Phase.DEAL_END, totals)).isEmpty());
+        for (int players = 3; players <= 6; players++) {
+            var tied = standingsInput(RentzMatch.Phase.MATCH_END, java.util.Collections.nCopies(players, -50));
+            var rows = RentzScoreContent.finalStandings(tied);
+            audit.equal("All seats retained " + players, players, rows.size());
+            for (int seat = 0; seat < players; seat++) {
+                audit.equal("Tied seat order " + players + "/" + seat,
+                        new RentzScoreContent.Standing(seat, 1, -50), rows.get(seat));
+            }
+        }
+    }
+
+    private static RentzMatch.Observation standingsInput(RentzMatch.Phase phase, List<Integer> totals) {
+        return new RentzMatch.Observation(0, totals.size(), 0, 0, totals.size() * 8, phase,
+                Contract.WHIST, false, true, List.of(), List.of(), List.of(), List.of(), totals,
+                List.of(), List.of(), List.of(), List.of(), List.of(), Set.of());
     }
 }

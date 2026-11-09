@@ -17,10 +17,16 @@ public final class RentzUiText {
     public String mainMenu() { return text("Main menu", "Meniu principal"); }
     public String autoPlay() { return text("Auto play", "Joc automat"); }
     public String history() { return text("Score history", "Istoricul scorului"); }
+    public String achievements() { return text("Achievements", "Realizări"); }
+    public String training() { return text("Training", "Antrenament"); }
     public String close() { return text("Close", "Închide"); }
     public String back() { return text("Back", "Înapoi"); }
     public String points() { return text("Points:", "Puncte:"); }
     public String total() { return text("Total:", "Total:"); }
+    public String handProgress(int current, int total) { return text("Hand ", "Mâna ") + current + "/" + total; }
+    public String playedContract(Contract contract, boolean blind) {
+        return contract == null ? "" : contract(contract) + (blind ? " ×2" : "");
+    }
     public String play(String label) { return text("Play ", "Joacă ") + label; }
     public String seatTurn(boolean choosing) { return choosing ? text("Choosing", "Alege") : text("Playing", "Joacă"); }
     public String trickScoring(ScoreProfile scoring) {

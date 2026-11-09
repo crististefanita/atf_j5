@@ -7,6 +7,7 @@
 - [Paritatea interfeței cu Whist Lab](ATF_Rentz_UI_ToDo.md) deține meniul, profilul, masa, cărțile și scorul Rentz, cu priorități și acceptanță prin componente și E2E selectiv. [Producătorul UI](../../../atf_j4/docs/feedback/ATF_CardUi_Extraction.md) deține extragerea prin refactorizare; adaptarea nu importă motorul sau regulile Whist.
 - [Integritate și calitate](ATF_RentzQuality.md) deține criteriile strategice și documentare încă deschise. Validarea, lifecycle-ul, guvernanța sursei și [calificarea consumatorului](../rentz/ATF_Qualification.md) au contracte și probe proprii; calificarea nativă rămâne separată.
 - [Criteriile RAG rămase](ATF_Release_RAG.md) urmăresc probele de acceptanță suplimentare. [Ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) descrie fluxul curent și porțile deschise.
+- [Realizări pentru profil](ATF_Rentz_Achievements_ToDo.md) propune catalogul pe contracte, condițiile de progres și meniul pentru o etapă viitoare.
 
 ## Închidere și transfer
 

@@ -1,0 +1,65 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+abstract class GenerateRentzAchievementCatalog extends DefaultTask {
+    @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract RegularFileProperty getRulesFile()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDirectory()
+
+    @TaskAction
+    void generate() {
+        def catalog = new JsonSlurper().parse(rulesFile.get().asFile)
+        def tiers = ['EASY', 'MEDIUM', 'HARD']
+        if (catalog.keySet() != ['schemaVersion', 'tiers'].toSet() || catalog.schemaVersion != 1 ||
+                catalog.tiers.keySet() != tiers.toSet()) {
+            throw new GradleException('Invalid Rentz achievement catalog schema or tiers')
+        }
+        def ids = [] as Set
+        def rules = [] as Set
+        def copy = ['titleEn', 'titleRo', 'ruleEn', 'ruleRo']
+        def entries = tiers.collectMany { tier ->
+            def rows = catalog.tiers[tier]
+            if (!(rows instanceof List) || rows.size() != 5) throw new GradleException("Expected five achievements for $tier")
+            rows.collect { row ->
+                if (row.keySet() != (['id', 'metric', 'target'] + copy).toSet() ||
+                        !(row.id ==~ /play-[a-z0-9-]+/) || !(row.metric ==~ /[A-Z][A-Z0-9_]*/) ||
+                        !(row.target instanceof Integer) || row.target < 1 || row.target > 8 ||
+                        !copy.every { row[it] instanceof String && !row[it].isBlank() } ||
+                        !ids.add(row.id) || !rules.add([row.metric, row.target])) {
+                    throw new GradleException("Invalid or duplicate achievement for $tier: $row")
+                }
+                def text = copy.collect { JsonOutput.toJson(row[it]) }.join(', ')
+                "            new Rule(${JsonOutput.toJson(row.id)}, Level.$tier, Metric.${row.metric}, ${row.target}, $text)"
+            }
+        }.join(',\n')
+        def file = outputDirectory.get().file('ro/rentzlab/app/achievements/GameplayAchievementCatalogData.java').asFile
+        file.parentFile.mkdirs()
+        file.setText("""package ro.rentzlab.app.achievements;
+
+import java.util.List;
+import ro.rentzlab.app.achievements.AchievementCatalog.Level;
+import ro.rentzlab.app.achievements.GameplayAchievementCatalog.Metric;
+import ro.rentzlab.app.achievements.GameplayAchievementCatalog.Rule;
+
+final class GameplayAchievementCatalogData {
+    private GameplayAchievementCatalogData() { }
+    static List<Rule> rules() {
+        return List.of(
+$entries
+        );
+    }
+}
+""", 'UTF-8')
+    }
+}
+
+def generateRentzAchievementCatalog = tasks.register('generateRentzAchievementCatalog', GenerateRentzAchievementCatalog) {
+    rulesFile.set(layout.projectDirectory.file('src/main/achievement-rules/rentz-gameplay-achievements.yaml'))
+    outputDirectory.set(layout.buildDirectory.dir('generated/sources/rentzAchievements/java'))
+}
+androidComponents.onVariants(androidComponents.selector().all()) { variant ->
+    variant.sources.java.addGeneratedSourceDirectory(generateRentzAchievementCatalog) { it.outputDirectory }
+}

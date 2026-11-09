@@ -17,9 +17,17 @@ import java.util.function.IntConsumer;
 public final class RentzMenus {
     private final ScreenViews views;
     public RentzMenus(ScreenViews views) { this.views = views; }
-    public void home(RentzUiText copy, String name, boolean resume, HomeMenuContent.Actions actions, IntConsumer language) {
+    public void home(RentzUiText copy, String name, boolean resume, HomeMenuContent.Actions actions, IntConsumer language,
+            Runnable achievements) {
         views.applyStandardWindowChrome();
-        new HomeMenu(views).home(copy.home(), name, resume, actions, language);
+        var labels = copy.home();
+        var page = views.page(null, labels.title());
+        new HomeMenu(views).languagePicker(page, labels.languageLabel(), labels.selectedLanguage(), language);
+        for (var control : labels.controls(name, resume, actions)) {
+            if (control.tag().equals("btn_instructions")) views.addQuietButton(page, copy.achievements(), achievements);
+            if (control.kind() == HomeMenuContent.Kind.QUIET) views.addQuietButton(page, control.label(), control.action());
+            else views.addButton(page, control.label(), control.tag(), control.enabled(), control.action(), control.primary());
+        }
     }
     public void setup(RentzUiText copy, SetupSelection selection, boolean replacing, IntConsumer language, Runnable start, Runnable back,
             java.util.function.BooleanSupplier current) {

@@ -62,6 +62,7 @@
     "scripts/AtfMavenCache.psm1",
     "scripts/TestCollections.psm1",
     "scripts/test-rentz-android-jvm.ps1",
+    "scripts/run-achievement-calibration.ps1",
     "atf-tests/tools/test-cache-lease.ps1",
     "atf-tests/tools/test-runtime-controls.ps1",
     "atf-tests/tools/run-arena.ps1",

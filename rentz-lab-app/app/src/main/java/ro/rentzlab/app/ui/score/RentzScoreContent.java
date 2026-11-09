@@ -7,6 +7,7 @@ import ro.rentzlab.core.HandScoring;
 import ro.rentzlab.core.ScoreProfile;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import java.util.List;
+import java.util.Comparator;
 import java.util.Optional;
 
 /** Exact confirmed deltas and totals; seat order is never sorted by score or edited names. */
@@ -18,6 +19,7 @@ public final class RentzScoreContent {
         public Row { values = List.copyOf(values); }
     }
     public record Detail(int seat, int place, Value score, List<HandScoring.Contribution> contributions) { }
+    public record Standing(int seat, int place, int total) { }
     private RentzScoreContent() { }
 
     public static List<List<Integer>> finishingAwards(ScoreProfile profile) {
@@ -34,8 +36,24 @@ public final class RentzScoreContent {
         var last = history.get(history.size() - 1);
         return last.number() == view.handNumber() ? Optional.of(row(last, copy)) : Optional.empty();
     }
+    public static List<Standing> finalStandings(RentzMatch.Observation view) {
+        if (view.phase() != RentzMatch.Phase.MATCH_END) return List.of();
+        var totals = view.totals();
+        var seats = java.util.stream.IntStream.range(0, totals.size()).boxed()
+                .sorted(Comparator.<Integer>comparingInt(totals::get).reversed().thenComparingInt(seat -> seat))
+                .collect(immutable());
+        var standings = new java.util.ArrayList<Standing>(seats.size());
+        int place = 0;
+        for (int index = 0; index < seats.size(); index++) {
+            int seat = seats.get(index);
+            int total = totals.get(seat);
+            if (index == 0 || total != standings.get(index - 1).total()) place = index + 1;
+            standings.add(new Standing(seat, place, total));
+        }
+        return List.copyOf(standings);
+    }
     private static Row row(RentzMatch.HandResult hand, RentzUiText copy) {
-        return new Row(hand.number(), hand.chooser(), copy.contract(hand.contract()) + (hand.blind() ? " ×2" : ""),
+        return new Row(hand.number(), hand.chooser(), copy.playedContract(hand.contract(), hand.blind()),
                 java.util.stream.IntStream.range(0, hand.points().size()).mapToObj(seat ->
                         new Value(hand.points().get(seat), hand.totals().get(seat))).collect(immutable()), hand.scoring());
     }

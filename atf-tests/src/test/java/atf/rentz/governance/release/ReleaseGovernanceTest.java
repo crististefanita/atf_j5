@@ -169,8 +169,8 @@ class ReleaseGovernanceTest {
         assertFalse(report.path("mayPublish").asBoolean());
         assertEquals("BLOCKED", report.path("releaseWorkflow").path("nativeUiAcceptance").path("status").asText(),
                 "The APK remains staged until the complete Rentz plus two other games UI acceptance passes.");
-        assertEquals(3, report.path("releaseWorkflow").path("nativeUiAcceptance").path("requiredCompleteGames").asInt(),
-                "The required native acceptance includes three complete games.");
+        assertEquals(5, report.path("releaseWorkflow").path("nativeUiAcceptance").path("requiredCompleteGames").asInt(),
+                "The required native acceptance includes five complete games.");
         assertEquals("STAGED_CANDIDATE_ONLY", report.path("releaseWorkflow").path("artifactDisposition").asText());
         assertEquals("BLOCKED",gate(report,"local-catalog").path("status").asText(),"An incomplete local fixture is not a valid release catalog");
         for(var row:report.path("gates"))if(!row.path("id").asText().equals("local-catalog"))
@@ -388,6 +388,7 @@ class ReleaseGovernanceTest {
         Path extent=ui.resolve("android-extent.html");
         String shot=pngDataUri(0);
         var uiReceipt=JSON().createObjectNode().put("status","PASS").put("consecutiveSubgames",true)
+                .put("compactConsecutive",true)
                 .put("package","ro.rentzlab.app.uisanity").put("apkSha256",sha(isolated)).put("displayAndPackagesPreserved",true)
                 .put("leaseReleased",true).put("rawRoot",raw.toString()).put("extentReport",extent.toString())
                 .put("developmentLedgerScope","RUN_ISOLATED_COPY").put("developmentLedger",learningLedger.toString())
@@ -397,38 +398,54 @@ class ReleaseGovernanceTest {
                 .put("runnerSha256",sha(root.resolve("atf-tests/tools/run-shared-ui-sanity.ps1")))
                 .put("reportingLibrary","atf-reporting-1.0.0-j24").put("reportingLibrarySha256",sha(root.resolve("lib/atf-reporting-1.0.0-j24.jar")));
         uiReceipt.putArray("cleanupFailures");
-        uiReceipt.putArray("subgames").add("RENTZ").add("TRICKS").add("DIAMONDS");
+        var contracts=List.of("RENTZ","TRICKS","DIAMONDS","TRICKS","WHIST");
+        contracts.forEach(uiReceipt.putArray("subgames")::add);
         var display=uiReceipt.putObject("display");
         display.putObject("before").put("size","Physical size: 1080x1920").put("density","Physical density: 440").put("font","1.0");
         display.putObject("after").put("size","Physical size: 1080x1920").put("density","Physical density: 440").put("font","1.0");
+        display.putObject("effective").put("viewport","720x1280").put("density","360").put("fontScale","1.5");
         var completed=uiReceipt.putArray("completedGames");
-        completed.addObject().put("number",1).put("contract","RENTZ").put("phase","DEAL_END").put("handNumber",1).put("scoreCount",4)
-                .put("seatGeometryVerified",true).put("firstHumanMoveVerified",true).put("completionVerified",true).put("rentzFinishOrderVerified",true);
-        completed.addObject().put("number",2).put("contract","TRICKS").put("phase","DEAL_END").put("handNumber",2).put("scoreCount",4)
-                .put("seatGeometryVerified",true).put("firstHumanMoveVerified",true).put("completionVerified",true).put("rentzFinishOrderVerified",false);
-        completed.addObject().put("number",3).put("contract","DIAMONDS").put("phase","DEAL_END").put("handNumber",3).put("scoreCount",4)
-                .put("seatGeometryVerified",true).put("firstHumanMoveVerified",true).put("completionVerified",true).put("rentzFinishOrderVerified",false);
-        var audit=uiReceipt.putObject("gameAudit").put("status","PASS").put("auditedTransitions",24).put("completedDeals",3).put("phase","DEAL_END");
+        var audit=uiReceipt.putObject("gameAudit").put("status","PASS").put("auditedTransitions",128)
+                .put("completedDeals",contracts.size()).put("phase","DEAL_END");
         var auditHistory=audit.putArray("history");
-        for(int i=0;i<3;i++)auditHistory.addObject().put("number",i+1).put("contract",List.of("RENTZ","TRICKS","DIAMONDS").get(i)).putArray("points").add(0).add(0).add(0).add(0);
         var checkpoints=uiReceipt.putArray("checkpoints");
-        addUiCheckpoint(checkpoints,"Consecutive subgame 1 starts: RENTZ","Four-player table uses the same seat rectangles in this viewport");
-        addUiCheckpoint(checkpoints,"Subgame 1 first human move remains visible","The same seat geometry survives a card play");
-        addUiCheckpoint(checkpoints,"Subgame 1 completed: RENTZ","One score value per player","Rentz finishing order contains each player");
-        addUiCheckpoint(checkpoints,"Consecutive subgame 2 starts: TRICKS","Four-player table uses the same seat rectangles in this viewport");
-        addUiCheckpoint(checkpoints,"Subgame 2 first human move remains visible","The same seat geometry survives a card play");
-        addUiCheckpoint(checkpoints,"Subgame 2 completed: TRICKS","One score value per player");
-        addUiCheckpoint(checkpoints,"Consecutive subgame 3 starts: DIAMONDS","Four-player table uses the same seat rectangles in this viewport");
-        addUiCheckpoint(checkpoints,"Subgame 3 first human move remains visible","The same seat geometry survives a card play");
-        addUiCheckpoint(checkpoints,"Subgame 3 completed: DIAMONDS","One score value per player");
-        addUiCheckpoint(checkpoints,"Score history contains the three consecutive subgames","Three completed history rows are visible");
-        addUiCheckpoint(checkpoints,"The match with three subgames remains resumable","Resume remains enabled");
-        addUiCheckpoint(checkpoints,"Three-deal match restores its final contract and scores","Restored seat geometry");
-        addUiCheckpoint(checkpoints,"The three confirmed rows remain after process restart","Restarted history retains all three completed subgames");
-        for(int i=13;i<16;i++)addUiCheckpoint(checkpoints,"Supporting native checkpoint "+i,"Native viewport remains valid");
+        for(int i=0;i<contracts.size();i++){
+            int number=i+1;
+            String contract=contracts.get(i);
+            boolean rentz=contract.equals("RENTZ");
+            completed.addObject().put("number",number).put("contract",contract).put("phase","DEAL_END")
+                    .put("handNumber",number).put("scoreCount",4).put("seatGeometryVerified",true)
+                    .put("firstHumanMoveVerified",true).put("completionVerified",true).put("rentzFinishOrderVerified",rentz);
+            auditHistory.addObject().put("number",number).put("contract",contract).putArray("points").add(0).add(0).add(0).add(0);
+            addUiCheckpoint(checkpoints,"Consecutive subgame "+number+" starts: "+contract,
+                    "Four-player table uses the same seat rectangles in this viewport","Contract is directly below hand progress");
+            addUiCheckpoint(checkpoints,"Subgame "+number+" first human move remains visible","The same seat geometry survives a card play");
+            String title="Subgame "+number+" completed: "+contract;
+            if(rentz)addUiCheckpoint(checkpoints,title,"One score value per player","Contract is directly below hand progress","Rentz finishing order contains each player");
+            else addUiCheckpoint(checkpoints,title,"One score value per player","Contract is directly below hand progress");
+        }
+        addUiCheckpoint(checkpoints,"Score history contains the consecutive subgames","All completed history rows are reachable");
+        addUiCheckpoint(checkpoints,"The match remains resumable","Resume remains enabled");
+        addUiCheckpoint(checkpoints,"The match restores its final contract and scores","Restored seat geometry");
+        addUiCheckpoint(checkpoints,"The confirmed rows remain after process restart","Restarted history retains all completed subgames");
+        addUiCheckpoint(checkpoints,"Achievements open at the beginning of the learning path","Onboarding comes before contract goals");
+        addUiCheckpoint(checkpoints,"Gameplay catalog opens with fifteen milestones","Gameplay starts with the first manual hand");
+        addUiCheckpoint(checkpoints,"Gameplay and training keep independent progress",
+                "Confirmed manual play grants gameplay credit","Incomplete match cannot grant a terminal title");
+        addUiCheckpoint(checkpoints,"Gameplay milestones survive process restart","Same gameplay total after restart");
+        addUiCheckpoint(checkpoints,"Achievement search reports an empty result","Empty result is visible and can be reset");
+        addUiCheckpoint(checkpoints,"Full catalog exposes the mastery tier on the table surface","Hard filter exposes 100 achievements in mastery order");
+        addUiCheckpoint(checkpoints,"Achievements record manual and assisted play after settlement",
+                "Manual and assisted milestones are recorded separately","Complete catalog records new credit after settlement");
+        addUiCheckpoint(checkpoints,"Search and status filter reveal the unlocked lesson","Combined query returns exactly one achievement");
+        addUiCheckpoint(checkpoints,"Achievement details explain eligibility for the recent hand","Eligibility contains rule, counting unit and recent context");
+        addUiCheckpoint(checkpoints,"Achievements and local identity survive restart without duplicate credit",
+                "Same achievements total after restart","Restart leaves the durable checkpoint byte-for-byte unchanged");
+        addUiCheckpoint(checkpoints,"Renaming the local profile retains achievement progress","Same achievements total after rename");
         byte[] capture=java.util.Base64.getDecoder().decode(shot.substring("data:image/png;base64,".length()));
         byte[] distinct=java.util.Base64.getDecoder().decode(pngDataUri(1).substring("data:image/png;base64,".length()));
         for(var checkpoint:checkpoints) {
+            ((com.fasterxml.jackson.databind.node.ObjectNode)checkpoint).put("logicalViewport","720x1280");
             byte[] original=checkpoint.equals(checkpoints.get(1))?distinct:capture;
             Files.write(raw.resolve(checkpoint.path("image").asText()),original);
             Files.writeString(raw.resolve(checkpoint.path("hierarchy").asText()),"<hierarchy/>");
@@ -458,7 +475,7 @@ class ReleaseGovernanceTest {
         Path productReceipt = build.resolve("build-qualification.json");
         byte[] productReceiptBytes = Files.readAllBytes(productReceipt);
         Files.delete(productReceipt);
-        var beforeProduct = ReleaseReadinessRag.evaluate(root, "gate:native-ui three games", component, null, ui, build);
+        var beforeProduct = ReleaseReadinessRag.evaluate(root, "gate:native-ui consecutive games", component, null, ui, build);
         assertEquals("PASS", gate(beforeProduct, "native-ui").path("status").asText());
         assertEquals("PASS", gate(beforeProduct, "native-ui-report").path("status").asText());
         assertEquals("NOT_RUN", gate(beforeProduct, "release-build").path("status").asText());
@@ -471,7 +488,7 @@ class ReleaseGovernanceTest {
             ((com.fasterxml.jackson.databind.node.ObjectNode) malformed.withArray("completedGames").get(0))
                     .set("firstHumanMoveVerified", invalid);
             Files.write(ui.resolve("result.json"), JSON().writeValueAsBytes(malformed));
-            var blocked = ReleaseReadinessRag.evaluate(root, "gate:native-ui three games", component, null, ui, build);
+            var blocked = ReleaseReadinessRag.evaluate(root, "gate:native-ui consecutive games", component, null, ui, build);
             assertEquals("BLOCKED", gate(blocked, "native-ui").path("status").asText());
             assertFalse(blocked.path("releaseWorkflow").path("readyForProductBuild").asBoolean());
         }
@@ -480,9 +497,27 @@ class ReleaseGovernanceTest {
         incompleteUi.withArray("completedGames").remove(2);
         Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(incompleteUi));
         var incompleteGameReceipt=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
-        assertEquals("BLOCKED",gate(incompleteGameReceipt,"native-ui").path("status").asText(),"Two complete games do not satisfy the three-game APK gate");
+        assertEquals("BLOCKED",gate(incompleteGameReceipt,"native-ui").path("status").asText(),"Four complete games do not satisfy the five-game APK gate");
         assertFalse(incompleteGameReceipt.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
         assertEquals("STAGED_CANDIDATE_ONLY",incompleteGameReceipt.path("releaseWorkflow").path("artifactDisposition").asText());
+
+        var insufficientVariety=uiReceipt.deepCopy();
+        var repeated=insufficientVariety.putArray("subgames");
+        List.of("RENTZ","TRICKS","TRICKS","TRICKS","TRICKS").forEach(repeated::add);
+        Files.write(ui.resolve("result.json"),JSON().writeValueAsBytes(insufficientVariety));
+        var repeatedReceipt=ReleaseReadinessRag.evaluate(root,"gate:native-ui contract variety",component,null,ui,build);
+        assertEquals("BLOCKED",gate(repeatedReceipt,"native-ui").path("status").asText());
+        assertTrue(gate(repeatedReceipt,"native-ui").path("actual").asText().contains("RAG-UI-CONTRACT-VARIETY"));
+        var wrongFont=uiReceipt.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode)wrongFont.at("/display/effective")).put("fontScale","1.0");
+        Files.write(ui.resolve("result.json"),JSON().writeValueAsBytes(wrongFont));
+        var wrongProfile=ReleaseReadinessRag.evaluate(root,"gate:native-ui compact profile",component,null,ui,build);
+        assertTrue(gate(wrongProfile,"native-ui").path("actual").asText().contains("RAG-UI-COMPACT-PROFILE"));
+        var wrongViewport=uiReceipt.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode)wrongViewport.withArray("checkpoints").get(0)).put("logicalViewport","1080x1920");
+        Files.write(ui.resolve("result.json"),JSON().writeValueAsBytes(wrongViewport));
+        var wrongCapture=ReleaseReadinessRag.evaluate(root,"gate:native-ui compact capture",component,null,ui,build);
+        assertTrue(gate(wrongCapture,"native-ui").path("actual").asText().contains("RAG-UI-CHECKPOINT-VIEWPORT"));
 
         var missingGeometry=uiReceipt.deepCopy();
         ((com.fasterxml.jackson.databind.node.ObjectNode)missingGeometry.withArray("checkpoints").get(0)).put("title","Unrelated native checkpoint");

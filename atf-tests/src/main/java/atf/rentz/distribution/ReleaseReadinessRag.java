@@ -28,6 +28,7 @@ import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
+import ro.rentzlab.core.Contract;
 
 /** Local, deterministic retrieval for release review. It never runs or promotes a release gate. */
 public final class ReleaseReadinessRag {
@@ -51,6 +52,8 @@ public final class ReleaseReadinessRag {
     private static final Pattern NATIVE_EXTENT_STEP = Pattern.compile("<a class=\"node [^\"]*\" id=\"[0-9]+\"><span>THEN ([^<]+)</span></a>");
     private static final Pattern NATIVE_SCREENSHOT_ID = Pattern.compile(" id=\"(atf-screenshot-screenshot-[0-9]+)\"");
     private static final int MAX_INLINE_PNG_BYTES = 8 * 1024 * 1024;
+    private static final int REQUIRED_COMPLETE_GAMES = 5;
+    private static final int REQUIRED_DISTINCT_CONTRACTS = 3;
 
     private static final int MAX_CORPUS_SOURCES = 64;
     private static final long MAX_CORPUS_BYTES = 4L * 1024 * 1024;
@@ -238,9 +241,10 @@ public final class ReleaseReadinessRag {
         String nativeReportStatus = status(gates, "native-ui-report");
         nativeAcceptance.put("status", nativeUiStatus.equals("FAIL") || nativeReportStatus.equals("FAIL") ? "FAIL"
                 : nativeUiStatus.equals("PASS") && nativeReportStatus.equals("PASS") ? "PASS" : "BLOCKED");
-        nativeAcceptance.put("requiredCompleteGames", 3);
-        nativeAcceptance.put("requiredSequence", "one complete Rentz game followed by two complete non-Rentz games");
-        nativeAcceptance.put("requiredDisplayEvidence", "stable four-seat geometry, completed-game checkpoints and inline native screenshots");
+        nativeAcceptance.put("requiredCompleteGames", REQUIRED_COMPLETE_GAMES);
+        nativeAcceptance.put("requiredDistinctContracts", REQUIRED_DISTINCT_CONTRACTS);
+        nativeAcceptance.put("requiredSequence", "a complete Rentz opener followed by four complete games in the same match");
+        nativeAcceptance.put("requiredDisplayEvidence", "720x1280 logical viewport, density 360, font scale 1.5, stable four-seat geometry and inline native screenshots");
         nativeAcceptance.put("receiptGate", "native-ui + native-ui-report");
         workflow.put("artifactDisposition", candidateReady ? "ELIGIBLE_FOR_PROMOTION_REVIEW" : "STAGED_CANDIDATE_ONLY");
         workflow.put("publishAllowed", false);
@@ -271,8 +275,9 @@ public final class ReleaseReadinessRag {
             byte[] indexBytes = Files.readAllBytes(root.resolve("release/index.json"));
             byte[] manifestBytes = Files.readAllBytes(manifestPath);
             catalog.put("status", "PASS");
-            catalog.put("actual", "Current " + version + " is PUBLISHED and locally verified; candidate "
-                    + index.path("candidate").path("version").asText() + " passes the version and versionCode policy.");
+            String pending = index.path("candidate").path("version").asText();
+            catalog.put("actual", "Current " + version + " is PUBLISHED and locally verified."
+                    + (pending.isEmpty() ? "" : " Candidate " + pending + " passes the version and versionCode policy."));
             catalog.put("receipt", "release/index.json + release/" + version + "/release-validation.json");
             catalog.put("indexSha256", sha256(indexBytes));
             catalog.put("manifestSha256", sha256(manifestBytes));
@@ -626,24 +631,32 @@ public final class ReleaseReadinessRag {
                     || !ui.path("cleanupFailures").isArray() || !ui.path("cleanupFailures").isEmpty())
                 throw new IOException("RAG-UI-CLOSEOUT");
             JsonNode contracts = ui.path("subgames");
-            if (!contracts.isArray() || contracts.size() != 3 || !contracts.get(0).asText().equals("RENTZ")
-                    || contracts.get(1).asText().equals("RENTZ") || contracts.get(2).asText().equals("RENTZ"))
+            if (!contracts.isArray() || contracts.size() != REQUIRED_COMPLETE_GAMES || !contracts.get(0).asText().equals("RENTZ"))
                 throw new IOException("RAG-UI-SUBGAMES");
+            var distinct = new HashSet<Contract>();
+            for (JsonNode contract : contracts) distinct.add(Contract.valueOf(contract.asText()));
+            if (distinct.size() < REQUIRED_DISTINCT_CONTRACTS) throw new IOException("RAG-UI-CONTRACT-VARIETY");
             JsonNode audit = ui.path("gameAudit");
-            if (!audit.path("status").asText().equals("PASS") || exactCount(audit.path("completedDeals")) != 3
+            if (!audit.path("status").asText().equals("PASS") || exactCount(audit.path("completedDeals")) != REQUIRED_COMPLETE_GAMES
                     || exactCount(audit.path("auditedTransitions")) < 1 || !audit.path("phase").asText().equals("DEAL_END"))
                 throw new IOException("RAG-UI-ORACLE");
             JsonNode display = ui.path("display"), before = display.path("before"), after = display.path("after");
+            JsonNode effective = display.path("effective"), compact = ui.path("compactConsecutive");
+            if (!compact.isBoolean() || !compact.booleanValue() || !effective.path("viewport").asText().equals("720x1280")
+                    || !effective.path("density").asText().equals("360") || !effective.path("fontScale").asText().equals("1.5"))
+                throw new IOException("RAG-UI-COMPACT-PROFILE");
             if (!before.path("size").asText().matches("Physical size: [1-9][0-9]*x[1-9][0-9]*")
                     || !before.path("density").asText().matches("Physical density: [1-9][0-9]*")
                     || !before.path("font").asText().matches("[0-9]+(?:\\.[0-9]+)?")
                     || !before.equals(after)) throw new IOException("RAG-UI-DISPLAY-PRESERVATION");
             JsonNode checkpoints = ui.path("checkpoints");
-            if (!checkpoints.isArray() || checkpoints.size() < 16) throw new IOException("RAG-UI-CHECKPOINTS");
+            if (!checkpoints.isArray() || checkpoints.size() < REQUIRED_COMPLETE_GAMES * 3 + 4) throw new IOException("RAG-UI-CHECKPOINTS");
             for (JsonNode checkpoint : checkpoints) {
                 if (checkpoint.path("title").asText().isBlank() || !checkpoint.path("image").asText().endsWith(".png")
                         || !checkpoint.path("hierarchy").asText().endsWith(".txt") || !checkpoint.path("checks").isArray()
                         || checkpoint.path("checks").isEmpty()) throw new IOException("RAG-UI-CHECKPOINT-SCHEMA");
+                if (!checkpoint.path("logicalViewport").asText().equals("720x1280"))
+                    throw new IOException("RAG-UI-CHECKPOINT-VIEWPORT");
                 for (JsonNode check : checkpoint.path("checks"))
                     if (check.path("name").asText().isBlank() || !check.path("passed").asBoolean(false)
                             || !check.path("expected").isTextual() || !check.path("actual").isTextual())
@@ -651,9 +664,10 @@ public final class ReleaseReadinessRag {
             }
             JsonNode completedGames = ui.path("completedGames");
             JsonNode auditHistory = audit.path("history");
-            if (!completedGames.isArray() || completedGames.size() != 3 || !auditHistory.isArray() || auditHistory.size() != 3)
+            if (!completedGames.isArray() || completedGames.size() != REQUIRED_COMPLETE_GAMES
+                    || !auditHistory.isArray() || auditHistory.size() != REQUIRED_COMPLETE_GAMES)
                 throw new IOException("RAG-UI-COMPLETE-GAMES");
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < REQUIRED_COMPLETE_GAMES; i++) {
                 String contract = contracts.get(i).asText();
                 JsonNode game = completedGames.get(i), history = auditHistory.get(i);
                 if (exactCount(game.path("number")) != i + 1 || !game.path("contract").asText().equals(contract)
@@ -666,22 +680,39 @@ public final class ReleaseReadinessRag {
                     throw new IOException("RAG-UI-COMPLETE-GAME-IDENTITY");
                 requireUiCheckpoint(checkpoints, "Consecutive subgame " + (i + 1) + " starts: " + contract,
                         "Four-player table uses the same seat rectangles in this viewport");
+                requireUiCheckpoint(checkpoints, "Consecutive subgame " + (i + 1) + " starts: " + contract,
+                        "Contract is directly below hand progress");
                 requireUiCheckpoint(checkpoints, "Subgame " + (i + 1) + " first human move remains visible",
                         "The same seat geometry survives a card play");
                 requireUiCheckpoint(checkpoints, "Subgame " + (i + 1) + " completed: " + contract,
                         "One score value per player");
-                if (i == 0) {
-                    if (!contract.equals("RENTZ") || !game.path("rentzFinishOrderVerified").asBoolean(false))
+                requireUiCheckpoint(checkpoints, "Subgame " + (i + 1) + " completed: " + contract,
+                        "Contract is directly below hand progress");
+                if (contract.equals("RENTZ")) {
+                    if (!game.path("rentzFinishOrderVerified").asBoolean(false))
                         throw new IOException("RAG-UI-RENTZ-COMPLETE");
-                    requireUiCheckpoint(checkpoints, "Subgame 1 completed: RENTZ", "Rentz finishing order contains each player");
+                    requireUiCheckpoint(checkpoints, "Subgame " + (i + 1) + " completed: RENTZ", "Rentz finishing order contains each player");
                 }
-                if (i > 0 && contract.equals("RENTZ")) throw new IOException("RAG-UI-NON-RENTZ-CONTRAST");
             }
-            requireUiCheckpoint(checkpoints, "Score history contains the three consecutive subgames", "Three completed history rows are visible");
-            requireUiCheckpoint(checkpoints, "The match with three subgames remains resumable", "Resume remains enabled");
-            requireUiCheckpoint(checkpoints, "Three-deal match restores its final contract and scores", "Restored seat geometry");
-            requireUiCheckpoint(checkpoints, "The three confirmed rows remain after process restart", "Restarted history retains all three completed subgames");
-            uiGate.put("status", "PASS"); uiGate.put("actual", "Three complete native games reached DEAL_END: Rentz plus two non-Rentz games; independent replay, seat geometry, history and restart passed.");
+            requireUiCheckpoint(checkpoints, "Score history contains the consecutive subgames", "All completed history rows are reachable");
+            requireUiCheckpoint(checkpoints, "The match remains resumable", "Resume remains enabled");
+            requireUiCheckpoint(checkpoints, "The match restores its final contract and scores", "Restored seat geometry");
+            requireUiCheckpoint(checkpoints, "The confirmed rows remain after process restart", "Restarted history retains all completed subgames");
+            requireUiCheckpoint(checkpoints, "Achievements open at the beginning of the learning path", "Onboarding comes before contract goals");
+            requireUiCheckpoint(checkpoints, "Gameplay catalog opens with fifteen milestones", "Gameplay starts with the first manual hand");
+            requireUiCheckpoint(checkpoints, "Gameplay and training keep independent progress", "Confirmed manual play grants gameplay credit");
+            requireUiCheckpoint(checkpoints, "Gameplay and training keep independent progress", "Incomplete match cannot grant a terminal title");
+            requireUiCheckpoint(checkpoints, "Gameplay milestones survive process restart", "Same gameplay total after restart");
+            requireUiCheckpoint(checkpoints, "Achievement search reports an empty result", "Empty result is visible and can be reset");
+            requireUiCheckpoint(checkpoints, "Full catalog exposes the mastery tier on the table surface", "Hard filter exposes 100 achievements in mastery order");
+            requireUiCheckpoint(checkpoints, "Achievements record manual and assisted play after settlement", "Manual and assisted milestones are recorded separately");
+            requireUiCheckpoint(checkpoints, "Achievements record manual and assisted play after settlement", "Complete catalog records new credit after settlement");
+            requireUiCheckpoint(checkpoints, "Search and status filter reveal the unlocked lesson", "Combined query returns exactly one achievement");
+            requireUiCheckpoint(checkpoints, "Achievement details explain eligibility for the recent hand", "Eligibility contains rule, counting unit and recent context");
+            requireUiCheckpoint(checkpoints, "Achievements and local identity survive restart without duplicate credit", "Same achievements total after restart");
+            requireUiCheckpoint(checkpoints, "Achievements and local identity survive restart without duplicate credit", "Restart leaves the durable checkpoint byte-for-byte unchanged");
+            requireUiCheckpoint(checkpoints, "Renaming the local profile retains achievement progress", "Same achievements total after rename");
+            uiGate.put("status", "PASS"); uiGate.put("actual", "Five complete native games across at least three contracts reached DEAL_END. Replay, seat geometry, history, restart and achievement browsing passed.");
             uiGate.put("receipt", "result.json"); uiGate.put("receiptSha256", receiptHash);
 
             Path extent = Path.of(ui.path("extentReport").asText()).toAbsolutePath().normalize();

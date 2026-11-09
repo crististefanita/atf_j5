@@ -260,6 +260,35 @@ Case 'First human move evidence requires one successful Boolean assertion' {
         Require $rejected 'Missing or duplicate checkpoints cannot qualify the first move'
     }
 }
+Case 'Transient Android root loss retries but never reads a stale hierarchy' {
+    $tokens=$null;$errors=$null
+    $path=Join-Path $project 'atf-tests/tools/run-shared-ui-sanity.ps1'
+    $ast=[Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$errors)
+    Require (-not$errors) 'Shared UI runner does not parse'
+    $definition=$ast.Find({param($node) $node-is[Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-ceq'Ui'},$true)
+    . ([scriptblock]::Create($definition.Extent.Text))
+    $leaseId='fixture'
+    $state=@{dumps=0;reads=0;mode='RECOVER'}
+    function Start-Sleep { param([int]$Milliseconds) }
+    function Adb($Command,$Name) {
+        if($Name-eq'dump'){
+            $state.dumps++
+            if($state.mode-eq'FATAL'){return @{Output='';Error='permission denied'}}
+            if($state.mode-eq'MISSING'-or$state.dumps-le3){return @{Output='';Error='ERROR: null root node returned by UiTestAutomationBridge.'}}
+            return @{Output="UI hierchary dumped to: $($Command[-1])";Error=''}
+        }
+        $state.reads++
+        return @{Output='<hierarchy><node text="fresh"/></hierarchy>';Error=''}
+    }
+    $nodes=@(Ui)
+    Require ($nodes.Count-eq1-and$nodes[0].text-ceq'fresh'-and$state.dumps-eq4-and$state.reads-eq1) 'Fourth fresh result must recover'
+    foreach($mode in @('MISSING','FATAL')){
+        $state.mode=$mode;$state.dumps=0;$state.reads=0;$rejected=$false
+        try{Ui|Out-Null}catch{$rejected=$true}
+        $expected=if($mode-eq'MISSING'){8}else{1}
+        Require ($rejected-and$state.dumps-eq$expected-and$state.reads-eq0) 'No stale read and no retry of fatal errors'
+    }
+}
 Case 'Direct Release build rejects missing native evidence before staging' {
     $output=Join-Path $fixture 'release-without-native-evidence'
     $component=Join-Path $fixture 'component-not-read-before-preflight'

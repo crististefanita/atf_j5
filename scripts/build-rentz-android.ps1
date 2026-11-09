@@ -58,7 +58,7 @@ $lab=Join-Path $source 'rentz-lab-app'
 New-Item -ItemType Directory -Path $RunRoot|Out-Null
 if($Configuration-eq'Release'){
     $prebuild=Join-Path $RunRoot 'rag-prebuild'
-    $inputs=@{Question='gate:native-ui Rentz trei jocuri complete';ComponentRun=$ComponentRun;
+    $inputs=@{Question='gate:native-ui Rentz jocuri consecutive complete';ComponentRun=$ComponentRun;
         UiBuildRun=$UiBuildRun;NativeUiRun=$NativeUiRun;RunRoot=$prebuild}
     & (Join-Path $source 'scripts/run-release-rag.ps1') @inputs | Out-Null
     $gate=Get-Content -LiteralPath (Join-Path $prebuild 'report/release-rag-report.json') -Raw | ConvertFrom-Json

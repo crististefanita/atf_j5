@@ -212,6 +212,10 @@ Pentru un traseu care pornește o partidă sau încarcă un jurnal, folosiți un
 
 ## Admiterea rezultatelor reluate
 
+Poarta compară scorul fiecărui braț și suma adversarilor cu limitele conservatoare ale profilului de încredere. Programul include toate cele opt contracte pentru fiecare alegător, penalitățile repetate în Totale și posibilitatea dublării. Suma adversarilor folosește contribuțiile comune ale cărților și premiile posibile de sosire. [Regresii de frontieră](../../atf-tests/src/test/java/atf/rentz/ArenaAdmissionTest.java)
+
+Limitele elimină scorurile imposibile ca magnitudine; auditul tranzițiilor rămâne dovada rezultatului efectiv.
+
 ```mermaid
 flowchart LR
     EXPECTED[Context de încredere] -->|confruntă| ID[Identitatea declarației]

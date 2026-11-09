@@ -155,6 +155,31 @@ public final class RentzCardSpaceTest {
         }
     }
 
+    @Test public void compactFourSeatBandFitsCardsAndKeepsItsReferenceDuringSettlement() {
+        float density = 2.25f;
+        int width = 630, height = 739, seatHeight = 225;
+        var viewport = new TableViewportPolicy(520, 1.5f);
+        int seatWidth = Math.round(TableSizing.seatWidthDp(280, viewport.isCompact()) * density);
+        int gap = Math.round(viewport.regionGapDp() * density);
+        var trick = PlayedCardMetrics.forTable(4, 280, 1.5f, viewport);
+        int reference = RentzCardSpace.referenceHeightPx(4, 0, density, trick);
+        assertEquals(reference, RentzCardSpace.referenceHeightPx(4, 51, density, trick));
+
+        var board = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, 495, reference, 162);
+        int budgetDp = (int) Math.floor(board.band().height() / density);
+        assertTrue(budgetDp < trick.centerHeightDp());
+        var fitted = RentzCardSpace.fitTrick(trick, budgetDp);
+        assertEquals(trick.slots(), fitted.slots());
+        assertEquals(trick.cardHeightDp(), fitted.cardHeightDp());
+        int renderedHeight = Math.round((fitted.rows() - 1) * fitted.rowStrideDp() * density)
+                + Math.round(fitted.cellHeightDp() * density);
+        assertTrue(renderedHeight <= board.band().height());
+        int top = board.band().centeredTop(renderedHeight);
+        var cards = new TableGeometry.Rect(0, top, width, top + renderedHeight);
+        assertTrue(board.seats().stream().noneMatch(cards::overlaps));
+        assertSame(trick, RentzCardSpace.fitTrick(trick, trick.centerHeightDp()));
+    }
+
     @Test public void onlyLegalSequenceCardsGetTintAndForcedPassUsesOneCommand() {
         var copy = new RentzUiText(RentzUiText.Language.RO);
         for (int players = 3; players <= 6; players++) {

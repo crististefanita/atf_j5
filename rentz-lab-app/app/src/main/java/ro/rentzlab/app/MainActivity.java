@@ -5,6 +5,7 @@ import static ro.rentzlab.app.ui.collection.UiLists.immutable;
 import android.app.*;
 import android.os.*;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.*;
@@ -35,6 +36,8 @@ public final class MainActivity extends Activity {
     private final TrickPreview preview = new TrickPreview();
     private final Handler display = new Handler(Looper.getMainLooper());
     private String screen = "MENU", historyReturn = "MENU";
+    private final RentzAchievementsScreen.State achievements = new RentzAchievementsScreen.State();
+    private final RentzAchievementsScreen.State training = new RentzAchievementsScreen.State();
     private long generation;
     private boolean active;
     private boolean restorePreviewPending;
@@ -58,7 +61,12 @@ public final class MainActivity extends Activity {
                 });
         if (saved != null) {
             screen = saved.getString("route", "MENU");
-            if (!java.util.Set.of("MENU", "SETUP", "HELP", "GAME", "HISTORY").contains(screen)) screen = "MENU";
+            if (!java.util.Set.of("MENU", "SETUP", "HELP", "GAME", "HISTORY", "ACHIEVEMENTS", "TRAINING").contains(screen))
+                screen = "MENU";
+            var achievementState = saved.getBundle("gameplayAchievements");
+            if (achievementState != null) achievements.restore(achievementState);
+            var trainingState = saved.getBundle("trainingAchievements");
+            training.restore(trainingState == null ? saved : trainingState);
             setup.players(saved.getInt("players", 4));
             setup.difficulty(ro.rentzlab.ai.RentzPlayer.Difficulty.valueOf(saved.getString("difficulty", "HARD")));
             historyReturn = saved.getString("historyReturn", "MENU");
@@ -89,10 +97,21 @@ public final class MainActivity extends Activity {
             case "HELP" -> menus.help(copy, GameSession.scoringProfile(), () -> route("MENU"));
             case "GAME" -> game(frame);
             case "HISTORY" -> history(frame);
+            case "ACHIEVEMENTS" -> showAchievements(copy, AchievementBrowser.Collection.GAMEPLAY);
+            case "TRAINING" -> showAchievements(copy, AchievementBrowser.Collection.TRAINING);
             default -> menus.home(copy, profile.preferredName(), controller.session() != null, new HomeMenuContent.Actions(
-                    this::profile, () -> route("SETUP"), this::resume, this::openHistory, () -> route("HELP")), language);
+                    this::profile, () -> route("SETUP"), this::resume, this::openHistory, () -> route("HELP")), language,
+                    () -> route("ACHIEVEMENTS"));
         }
         publish();
+    }
+    private void showAchievements(RentzUiText copy, AchievementBrowser.Collection collection) {
+        var session = controller.session();
+        var latest = session == null ? null : session.latestAchievementHand();
+        boolean isTraining = collection == AchievementBrowser.Collection.TRAINING;
+        new RentzAchievementsScreen(views).show(copy, copy.humanName(profile.preferredName()), controller.achievements(),
+                latest, isTraining ? training : achievements, collection, this::profile,
+                () -> route("TRAINING"), this::back);
     }
     private void language(int index) {
         var next = index == 0 ? RentzUiText.Language.EN : RentzUiText.Language.RO;
@@ -154,6 +173,7 @@ public final class MainActivity extends Activity {
         if (!holding && !showSettledTable && settlement.isPresent()) {
             var row = settlement.get();
             new RentzHandScoreScreen(views).show(copy, row, names, view.players() * 8,
+                    RentzScoreContent.finalStandings(view),
                     view.phase() == RentzMatch.Phase.DEAL_END ? next : null, !controller.isBusy(),
                     this::openHistory, () -> { showSettledTable = true; redraw(); }, () -> route("MENU"));
             return;
@@ -173,12 +193,24 @@ public final class MainActivity extends Activity {
             menu.show();
         });
         header.addView(options, new LinearLayout.LayoutParams(views.dp(48), views.dp(48)));
-        String title = copy.text("Hand ", "Mâna ") + view.handNumber() + "/" + view.players() * 8
-                + (view.contract() == null ? "" : " · " + copy.contract(view.contract()) + (view.blind() ? " ×2" : ""));
-        var heading = views.text(title, 16, android.graphics.Color.WHITE, true);
-        heading.setSingleLine(true); heading.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        heading.setContentDescription(title);
-        header.addView(heading, new LinearLayout.LayoutParams(0, views.dp(48), 1f));
+        var heading = new LinearLayout(this);
+        heading.setOrientation(LinearLayout.VERTICAL);
+        heading.setGravity(Gravity.CENTER_VERTICAL);
+        heading.setMinimumHeight(views.dp(48));
+        var progress = views.text(copy.handProgress(view.handNumber(), view.players() * 8),
+                14, android.graphics.Color.WHITE, true);
+        progress.setSingleLine(true);
+        progress.setIncludeFontPadding(false);
+        heading.addView(progress, views.matchWrap());
+        var contract = views.text(copy.playedContract(view.contract(), view.blind()),
+                12, android.graphics.Color.WHITE, false);
+        contract.setSingleLine(true);
+        contract.setIncludeFontPadding(false);
+        contract.setAutoSizeTextTypeUniformWithConfiguration(9, 12, 1, android.util.TypedValue.COMPLEX_UNIT_SP);
+        contract.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        if (view.contract() == null) contract.setVisibility(View.INVISIBLE);
+        heading.addView(contract, views.matchWrap());
+        header.addView(heading, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         if (playable) {
             var toggle = new CheckBox(this);
             toggle.setText(copy.autoPlay());
@@ -266,7 +298,9 @@ public final class MainActivity extends Activity {
                 || !permit.consume(session.save().commands().size(), generation, controller.isBusy())) return;
         try {
             preview.display(session.view(), SystemClock.uptimeMillis());
-            if (controller.apply(command.get())) redraw();
+            var move = command.get();
+            var origin = move.action() == GameSession.Action.PASS ? GameSession.Origin.AUTOMATIC : GameSession.Origin.MANUAL;
+            if (controller.apply(move.from(origin))) redraw();
         } catch (Exception error) { showFailure(error); }
     }
     private void openHistory() { historyReturn = screen.equals("GAME") ? "GAME" : "MENU"; route("HISTORY"); }
@@ -292,7 +326,7 @@ public final class MainActivity extends Activity {
         if (BuildConfig.DEBUG) try { controller.publish(screen, autoPlay); }
         catch (Exception error) { android.util.Log.e("RentzLab", "Debug projection failed", error); }
     }
-    private void back() { if (!controller.isBusy()) route("MENU"); }
+    private void back() { if (!controller.isBusy()) route(screen.equals("TRAINING") ? "ACHIEVEMENTS" : "MENU"); }
     @Override public boolean onKeyUp(int keyCode, android.view.KeyEvent event) {
         if (Build.VERSION.SDK_INT < 33 && keyCode == android.view.KeyEvent.KEYCODE_BACK && !event.isCanceled()) {
             back(); return true;
@@ -322,6 +356,12 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onSaveInstanceState(Bundle saved) {
         saved.putString("route", screen); saved.putString("historyReturn", historyReturn);
+        var achievementState = new Bundle();
+        achievements.save(achievementState);
+        saved.putBundle("gameplayAchievements", achievementState);
+        var trainingState = new Bundle();
+        training.save(trainingState);
+        saved.putBundle("trainingAchievements", trainingState);
         saved.putInt("players", setup.players()); saved.putString("difficulty", setup.difficulty().name()); super.onSaveInstanceState(saved);
     }
     @Override protected void onDestroy() { unregisterBack.run(); picker.close(); controller.close(); super.onDestroy(); }

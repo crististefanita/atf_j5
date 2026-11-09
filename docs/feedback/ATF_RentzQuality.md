@@ -14,7 +14,6 @@ Registrul separă mecanismele implementate de promovarea strategică și de inte
 | ID | Prioritate | Statut și impact | Responsabil |
 |---|---|---|---|
 | Q32 | P1 | Recuperarea poate debloca un lot rezervat fără a înregistra distribuirea din jurnalul capturat. | Adaptorul și registrul expunerilor. |
-| Q33 | P2 | Admiterea poate promova un rezultat cu scor final imposibil pentru profilul declarat. | Poarta evaluării și profilul de scor. |
 | Q08 | P2 | Obiective și continuare completă implementate offline; promovarea produsului cere progres independent și integrare proprie. | Politicile și protocolul AI. |
 
 
@@ -58,7 +57,6 @@ Nivelurile testelor, corpusul documentar și revizuirea diferențelor Git au con
 |---|---|---|
 
 | P2 | Contractele de transport și arhivă sunt adaptoare locale pentru distribuția produsului; reutilizarea printr-o bibliotecă comună nu este încă împachetată. | Prin ownerul comun, promovați un API generic cu nume de produs configurabil și oracole negative independente. Păstrați în consumator selecția versiunii, regulile Rentz și acceptanța consumatorului. |
-| P1 · înaintea folosirii RAG | Asistența generativă poate confunda politica, metadatele declarate și dovada live dacă nu fixează sursa și nu se abține la conflict. | [Cerințele RAG](ATF_Release_RAG.md): citate versionate, porți deterministe, separarea canalelor și teste negative; fără PASS dedus sau publicare autonomă. |
 
 [Procesul livrării](../rentz/ATF_Release.md) separă DRAFT, PREPARED și PUBLISHED; o pregătire validă nu este un APK calificat.
 
@@ -85,7 +83,6 @@ Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; 
 | ID | Reproducere și impact | Criteriu de închidere |
 |---|---|---|
 | Q32 | [Adaptorul](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) acceptă un jurnal valid din altă rulare la prima completare cu tokenul corect. Registrul înregistrează distribuirea străină, iar un alias al distribuirii capturate poate intra în lotul rezervat. Proba offline acoperă recuperarea, nu traseul normal din interfață. | Legați marcajul de identitatea rulării și de dovada capturii înainte de a permite prima completare. Cu două jurnale valide, cel străin trebuie refuzat fără ștergerea marcajului; cel corect trebuie să blocheze toate aliasurile. Păstrați reluarea idempotentă după scriere. |
-| Q33 | [Admiterea](../../atf-tests/src/main/java/atf/rentz/arena/PromotionEvidence.java) acceptă un scor compatibil cu unitatea profilului și cu marja, dar mai mare decât limita conservatoare a unei partide. Rezumatul modificat rămâne eligibil pentru promovare chiar după recalcularea agregatelor. | Derivați limitele din profilul de încredere și programul partidei, în aritmetică sigură. Respingeți depășirile pentru candidat și control, inclusiv la suma adversarilor; păstrați un control pozitiv dintr-o partidă reală. Această verificare nu înlocuiește replay-ul. |
 
 [Reproducerea offline](../../../../rentz_back/infrastructure/governance/20261107-post-q31-review/findings.log) folosește registre temporare și nu modifică loturile active. Închideți întâi Q32: integritatea lotului este precondiție pentru orice rezultat de forță.
 
@@ -101,6 +98,7 @@ Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; 
 | Q20–Q25 | [Identitatea distribuirii](../rentz/ATF_Learning.md#identitatea-distribuirii-și-expunerea) și [guvernanța](../rentz/ATF_Qualification.md) | [Q20](../../../../rentz_back/infrastructure/governance/20261107-q20/TDD.md) · [Q21–Q22](../../../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md) · [Q23–Q25](../../../../rentz_back/infrastructure/governance/20261107-q23-q25/TDD.md) |
 | Q26–Q28 | [Scor și expunere](../rentz/ATF_Learning.md) și [identitatea invocărilor](../rentz/ATF_Qualification.md#containere-jupiter-imbricate) | [Q26–Q28](../../../../rentz_back/infrastructure/governance/20261107-q26-q28/TDD.md) |
 | Q29–Q31 | [Deficitul adversarilor și expunerea nativă](../rentz/ATF_Learning.md), plus [structura XML](../rentz/ATF_Qualification.md#containere-jupiter-imbricate) | [Q29–Q31](../../../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md) |
+| Q33 | [Limitele punctajului la admitere](../rentz/ATF_Learning.md#admiterea-rezultatelor-reluate) | [Regresii de frontieră și partidă reală](../../atf-tests/src/test/java/atf/rentz/ArenaAdmissionTest.java) |
 | Descărcarea din README | [Identitatea livrării și canalele de descărcare](../rentz/ATF_Release.md) | [Receipt de browser autentificat](https://github.com/crististefanita/atf_j5/blob/cf740288acbebd13b67a9f0d69f18e4d9f94518f/release/0.1.2/reports/distribution/download-readme.json) |
 
 <a id="calificarea-integrării-ui-pentru-012"></a>
