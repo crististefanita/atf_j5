@@ -6,9 +6,11 @@ param(
     [string]$NativeUiRun='',
     [string]$UiBuildRun='',
     [string]$PublicationEvidence='',
+    [switch]$RestrictedPublication,
     [string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe'
 )
 $ErrorActionPreference='Stop'
+if($RestrictedPublication-and-not$PublicationEvidence){throw 'RestrictedPublication requires PublicationEvidence.'}
 $project=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'RuntimeQualification.psm1') -Force
@@ -75,6 +77,7 @@ if($LASTEXITCODE-ne0){throw "Local release RAG failed: $RunRoot"}
 $reportFile=Join-Path $reportRoot 'release-rag-report.json'
 if($PublicationEvidence){
     $inputs=@{RagReport=$reportFile;PublicationEvidence=$PublicationEvidence;RunRoot=(Join-Path $RunRoot 'publication')}
+    if($RestrictedPublication){$inputs.Restricted=$true}
     & (Join-Path $PSScriptRoot 'verify-release-readme.ps1') @inputs
 }
 Write-Output $reportFile

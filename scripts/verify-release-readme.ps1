@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory)][string]$RagReport,
     [Parameter(Mandatory)][string]$PublicationEvidence,
-    [Parameter(Mandatory)][string]$RunRoot
+    [Parameter(Mandatory)][string]$RunRoot,
+    [switch]$Restricted
 )
 $ErrorActionPreference = 'Stop'
 $project = Split-Path -Parent $PSScriptRoot
@@ -11,9 +12,30 @@ foreach($path in @($RagReport, $PublicationEvidence, $RunRoot)){
 }
 if(Test-Path -LiteralPath $RunRoot){throw 'Use a fresh external README verification directory.'}
 
+function Confirm-RestrictedApk($Proof,[string]$File,[string]$Version,[string]$Source,[string]$Digest){
+    if($Proof.status -cne 'PASS' -or $Proof.scope -cne 'RESTRICTED_TEST_DISTRIBUTION' -or
+        $Proof.version -cne $Version -or $Proof.sourceCommit -cne $Source -or
+        $Proof.driveFileId -cnotmatch '^[A-Za-z0-9_-]{10,}$' -or
+        $Proof.link -cnotmatch ('^https://drive\.google\.com/file/d/'+[regex]::Escape($Proof.driveFileId)+'/view(?:\?usp=drivesdk)?$')){
+        throw 'Restricted publication does not identify the qualified version, source and Drive file.'
+    }
+    $permissions = @($Proof.permissions | Where-Object {$_})
+    if(-not $permissions.Count -or -not @($permissions | Where-Object {$_.type -ceq 'user' -and $_.role -ceq 'owner'}).Count -or
+        @($permissions | Where-Object {$_.type -cnotin @('user','group')}).Count){
+        throw 'Restricted publication requires explicit Drive permissions and excludes anonymous or domain access.'
+    }
+    $copy = $Proof.authenticated
+    if($copy.provider -cne 'Google Drive' -or $copy.status -cne 'PASS' -or $copy.sha256 -cne $Digest -or
+        ($copy.bytes -isnot [long] -and $copy.bytes -isnot [int]) -or $copy.bytes -le 0 -or
+        -not (Test-Path -LiteralPath $File -PathType Leaf) -or
+        (Get-Item -LiteralPath $File).Length -ne $copy.bytes -or
+        (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash -ine $Digest){
+        throw 'Authenticated APK bytes do not match the qualified artifact.'
+    }
+    return $Proof.link
+}
+
 $rag = Get-Content -LiteralPath $RagReport -Raw | ConvertFrom-Json
-$github = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'github-release.json') -Raw | ConvertFrom-Json
-$public = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'public-download.json') -Raw | ConvertFrom-Json
 $source = $rag.candidate.sourceCommit
 $version = $rag.candidate.candidateVersion
 $digest = $rag.releaseWorkflow.artifactSha256
@@ -31,33 +53,43 @@ foreach($gate in $requiredGates){
 $tag = "v$version"
 $apk = "RentzLab-$version.apk"
 $repository = $rag.candidate.repository
-$releaseUrl = "https://github.com/$repository/releases/tag/$tag"
-if($github.stage -cne 'PUBLISHED_AND_AUTHENTICATED_DOWNLOAD_VERIFIED' -or $github.sourceCommit -cne $source -or
-    $github.tag -cne $tag -or $github.latest -cne $tag -or $github.releaseUrl -cne $releaseUrl -or $github.apkSha256 -cne $digest -or
-    $public.stage -cne 'ANONYMOUS_DOWNLOAD_VERIFIED' -or $public.authenticated -ne $false -or $public.bothApkArchivesVerified -ne $true){
-    throw 'The published release and both download checks must identify the qualified APK.'
-}
-foreach($name in @($apk, "$apk.sha256")){
-    $authenticated = @($github.assets | Where-Object name -CEQ $name)
-    $anonymous = @($public.assets | Where-Object url -Like "*/$tag/$name")
-    if($authenticated.Count -ne 1 -or $anonymous.Count -ne 1 -or
-        $authenticated[0].http -ne 200 -or $anonymous[0].http -ne 200 -or
-        $authenticated[0].sha256 -cne $anonymous[0].sha256 -or $authenticated[0].bytes -ne $anonymous[0].bytes){
-        throw "Download evidence differs for $name"
+$sectionName = 'Jocul'
+if($Restricted){
+    $proof = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'restricted-download.json') -Raw | ConvertFrom-Json
+    $direct = Confirm-RestrictedApk $proof (Join-Path $PublicationEvidence "authenticated-$apk") $version $source $digest
+    $releaseUrl = "https://github.com/$repository/tree/$tag"
+    $sectionName = 'Ediție cu acces autorizat'
+}else{
+    $github = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'github-release.json') -Raw | ConvertFrom-Json
+    $public = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'public-download.json') -Raw | ConvertFrom-Json
+    $releaseUrl = "https://github.com/$repository/releases/tag/$tag"
+    if($github.stage -cne 'PUBLISHED_AND_AUTHENTICATED_DOWNLOAD_VERIFIED' -or $github.sourceCommit -cne $source -or
+        $github.tag -cne $tag -or $github.latest -cne $tag -or $github.releaseUrl -cne $releaseUrl -or $github.apkSha256 -cne $digest -or
+        $public.stage -cne 'ANONYMOUS_DOWNLOAD_VERIFIED' -or $public.authenticated -ne $false -or $public.bothApkArchivesVerified -ne $true){
+        throw 'The published release and both download checks must identify the qualified APK.'
     }
-    foreach($channel in @('authenticated','anonymous')){
-        $file = Join-Path $PublicationEvidence "$channel-$name"
-        if((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -ine $anonymous[0].sha256 -or
-            (Get-Item -LiteralPath $file).Length -ne $anonymous[0].bytes){
-            throw "Downloaded bytes differ for $channel $name"
+    foreach($name in @($apk, "$apk.sha256")){
+        $authenticated = @($github.assets | Where-Object name -CEQ $name)
+        $anonymous = @($public.assets | Where-Object url -Like "*/$tag/$name")
+        if($authenticated.Count -ne 1 -or $anonymous.Count -ne 1 -or
+            $authenticated[0].http -ne 200 -or $anonymous[0].http -ne 200 -or
+            $authenticated[0].sha256 -cne $anonymous[0].sha256 -or $authenticated[0].bytes -ne $anonymous[0].bytes){
+            throw "Download evidence differs for $name"
+        }
+        foreach($channel in @('authenticated','anonymous')){
+            $file = Join-Path $PublicationEvidence "$channel-$name"
+            if((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -ine $anonymous[0].sha256 -or
+                (Get-Item -LiteralPath $file).Length -ne $anonymous[0].bytes){
+                throw "Downloaded bytes differ for $channel $name"
+            }
         }
     }
-}
-$publicApk = @($public.assets | Where-Object url -Like "*/$tag/$apk")[0]
-$direct = $publicApk.url
-if($publicApk.sha256 -cne $digest -or ([uri]$direct).Scheme -cne 'https' -or
-    [IO.File]::ReadAllText((Join-Path $PublicationEvidence "anonymous-$apk.sha256")).Trim() -cne "$digest  $apk"){
-    throw 'The public link or checksum content differs from the qualified APK.'
+    $publicApk = @($public.assets | Where-Object url -Like "*/$tag/$apk")[0]
+    $direct = $publicApk.url
+    if($publicApk.sha256 -cne $digest -or ([uri]$direct).Scheme -cne 'https' -or
+        [IO.File]::ReadAllText((Join-Path $PublicationEvidence "anonymous-$apk.sha256")).Trim() -cne "$digest  $apk"){
+        throw 'The public link or checksum content differs from the qualified APK.'
+    }
 }
 
 $remote = git -C $project ls-remote --symref origin HEAD "refs/tags/$tag" "refs/tags/$tag^{}"
@@ -74,13 +106,24 @@ git -C $project merge-base --is-ancestor $source $head
 if($LASTEXITCODE){throw 'The pushed README must descend from the qualified source.'}
 $readme = (git -C $project show ($head+':README.md')) -join "`n"
 if($LASTEXITCODE){throw 'The pushed README is missing.'}
-$section = [regex]::Match($readme, '(?ms)^## Jocul\s*$\n(.*?)(?=^## |\z)')
+$section = [regex]::Match($readme, '(?ms)^## '+[regex]::Escape($sectionName)+'[^\S\r\n]*$\n(.*?)(?=^## |\z)')
 $links = @([regex]::Matches($section.Groups[1].Value,'\]\(([^)\s]+)\)') | ForEach-Object {$_.Groups[1].Value})
 if(-not $section.Success -or $links.Count -ne 2 -or $links[0] -cne $releaseUrl -or $links[1] -cne $direct){
-    throw 'The pushed Jocul section does not link the verified release and public APK.'
+    throw 'The pushed README section does not link the verified source and APK for the selected channel.'
 }
 $catalog = (git -C $project show ($head+':release/index.json')) -join "`n"
-if($LASTEXITCODE -or ($catalog | ConvertFrom-Json).currentVersion -cne $version){
+if($LASTEXITCODE){throw 'The pushed release catalog is missing.'}
+$catalog = $catalog | ConvertFrom-Json
+if($Restricted){
+    $tracked = (git -C $project show ($head+":release/restricted-$version.json")) -join "`n"
+    if($LASTEXITCODE){throw 'The pushed restricted distribution record is missing.'}
+    $tracked = $tracked | ConvertFrom-Json
+    if($catalog.candidate.version -cne $version -or $tracked.version -cne $version -or
+        $tracked.sourceCommit -cne $source -or $tracked.apkSha256 -cne $digest -or $tracked.link -cne $direct -or
+        $tracked.channel -cne 'authenticated-only'){
+        throw 'The pushed restricted distribution record differs from the qualified download.'
+    }
+}elseif($catalog.currentVersion -cne $version){
     throw 'The pushed release catalog does not identify the verified APK version.'
 }
 
@@ -95,5 +138,8 @@ $report = Join-Path $RunRoot 'readme-publication.json'
     apkSha256 = $digest
     releaseUrl = $releaseUrl
     directApkUrl = $direct
+    channel = $(if($Restricted){'authenticated-only'}else{'public'})
+    authenticatedDownload = 'PASS'
+    anonymousDownload = $(if($Restricted){'NOT_APPLICABLE'}else{'PASS'})
 } | ConvertTo-Json | Set-Content -LiteralPath $report -Encoding utf8NoBOM
 Write-Output $report

@@ -3,6 +3,16 @@
   "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
   "controls": [
     {
+      "path": "scripts/verify-release-readme.ps1",
+      "owner": "Rentz release",
+      "reason": "Close the authenticated distribution channel after the qualified source and README reach the remote.",
+      "criterion": "Require the authenticated artifact bytes and SHA-256, explicit provider permissions, exact source tag, and the pushed download link.",
+      "proof": "docs/rentz/ATF_Release.md",
+      "expires": "2026-12-09",
+      "sha256": "3be34bc5152089d26e504f99c5c90dcb6eb89e2e75410f32a8251d4eaaa05ed6",
+      "allowDelete": false
+    },
+    {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/GameplayAchievementComponentTest.java",
       "owner": "Rentz Android",
       "reason": "Qualify the gameplay milestones separately from training.",
@@ -339,7 +349,7 @@
       "criterion": "Only external fresh report roots and source-bound component/build/UI receipts are accepted; publishAllowed remains false.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "cf63a6e80acedd53b320137b167faa033698874a206b8182b3966ffc3f2d64dd",
+      "sha256": "c544be1c971bd3aded04816417cea8057edd9b079676f66126f5c95c1ebb1f12",
       "allowDelete": false
     },
     {
@@ -349,7 +359,7 @@
       "criterion": "New protected paths are asserted; the actual Git diff must have one current review control per protected change.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "7acde0ca22be535828cc147b898bda09eb5aaa821cb6a385e1868b4ccf51e66e",
+      "sha256": "f56006a98bdaaacf2be289d488d11703985db5930b5d802e413bd7f6e7e0509d",
       "allowDelete": false
     },
     {
@@ -679,7 +689,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a4adfaa2f970c509780c6f54147dd973b7d3148ca07568ad093ad14a21d816fc",
+      "sha256": "7a126d5603c450f45c2ab2b7953a67a42c2ca31ffd50c2f3463b78869dd923d2",
       "allowDelete": false
     },
     {
@@ -719,7 +729,7 @@
       "criterion": "The archive stays in its registered external collection; the RAG runner is explicitly registered and its component entry still enforces physical-path, workspace and system-TEMP boundaries.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-rentz-0.3.0/README.md",
       "expires": "2026-11-20",
-      "sha256": "5cb37014371c50e93ec756e9dde879e2350ba4e42ed39ac0795de0a970e51bc9",
+      "sha256": "6660f5c0e84a14c42690a053b3594243114ec1d6f5d8c49afbab6a65855c2b99",
       "allowDelete": false
     },
     {

@@ -157,8 +157,9 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 Distribuiți candidatul numai după calificarea RAG locală și verificarea semnăturii. Folosiți un canal cu acces restricționat la conturile permise. Un prerelease GitHub dintr-un repository public are aceeași vizibilitate publică a artefactelor.
 
 - Verificați lista de permisiuni și descărcați APK-ul cu un cont autorizat. Confruntați dimensiunea și SHA-256 cu binarul calificat.
-- Testați linkul fără sesiune și cereți refuzul accesului la octeți. Păstrați dovada distinctă de cea autentificată.
-- Înregistrați canalul și verdictul în dosarul extern. Catalogul public și secțiunea din README rămân legate de ediția publică validată până la promovarea pe acel canal.
+- Pentru canalul restricționat, poarta de descărcare obligatorie folosește numai contul autorizat. Verificați permisiunile furnizorului pentru a confirma că accesul este limitat la conturi sau grupuri explicite.
+- Publicați secțiunea separată **Ediție cu acces autorizat** în README, cu tagul sursei și linkul furnizorului. Păstrați ediția publică în **Jocul**. Dosarul din `release/restricted-<versiune>.json` identifică ediția autorizată fără a include APK-ul sau date de cont.
+- După push, folosiți `verify-release-readme.ps1 -Restricted` cu raportul RAG local calificat și proba de descărcare autentificată. Pentru rularea din același snapshot, `run-release-rag.ps1 -PublicationEvidence <dovezi> -RestrictedPublication` selectează aceeași verificare.
 
 ### Rută publică de rezervă
 

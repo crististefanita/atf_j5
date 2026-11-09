@@ -15,7 +15,7 @@ Starea `PUBLISHED` a unei ediții și verdictul `PASS` al unei porți sunt afirm
 | E2E obligatoriu pentru candidat APK | [Ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) deține traseul cu cinci jocuri, profilul compact măsurat și contractul Extent. Porțile `native-ui` și `native-ui-report` leagă dovada de același commit și aceeași variantă UI-sanity. |
 | Catalog local | `ReleaseCatalog` verifică manifestul, APK-ul publicat local și pasul candidat de versiune/cod Android. Aceasta nu dovedește existența release-ului remote. |
 | Publicare și descărcări | Raportul local păstrează porțile remote `NOT_RUN`. Operatorul colectează separat dovezile descărcărilor autentificate și anonime. `publishAllowed` rămâne `false`. |
-| README după push | Verificatorul din [lansatorul RAG](../../scripts/run-release-rag.ps1) confruntă dovada calificării, octeții descărcați, tagul remote și cele două linkuri din README-ul împins. Verdictul `readme-publication` are receipt separat. |
+| README după push | Verificatorul din [lansatorul RAG](../../scripts/run-release-rag.ps1) confruntă dovada calificării, octeții descărcați, tagul remote și linkurile din README. Canalul restricționat cere descărcarea autorizată și permisiuni explicite. Verdictul `readme-publication` are receipt separat. |
 | Promovare | `READY_FOR_MAIN_PROMOTION_REVIEW` este o etapă locală de candidat, cu decizie umană; nu este `PUBLISHED`. |
 
 ## Pe scurt

@@ -300,6 +300,39 @@ Case 'Direct Release build rejects missing native evidence before staging' {
     }
     Require ($rejected-and-not(Test-Path -LiteralPath $output)) 'Release must require both native inputs before creating a build directory'
 }
+Case 'Restricted publication requires authorized bytes and explicit access' {
+    $tokens=$null;$errors=$null
+    $scriptPath=Join-Path $project 'scripts/verify-release-readme.ps1'
+    $ast=[Management.Automation.Language.Parser]::ParseFile($scriptPath,[ref]$tokens,[ref]$errors)
+    Require (-not$errors) 'README verifier does not parse'
+    $definition=$ast.Find({param($node) $node-is[Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-ceq'Confirm-RestrictedApk'},$true)
+    . ([scriptblock]::Create($definition.Extent.Text))
+    $file=Join-Path $fixture 'downloaded.apk'
+    [IO.File]::WriteAllText($file,'Qualified artifact fixture')
+    $digest=Hash $file
+    $source='0123456789abcdef0123456789abcdef01234567'
+    $proof=[ordered]@{
+        status='PASS';scope='RESTRICTED_TEST_DISTRIBUTION';version='0.10.0';sourceCommit=$source
+        driveFileId='Fixture1234';link='https://drive.google.com/file/d/Fixture1234/view'
+        permissions=@(@{type='user';role='owner'})
+        authenticated=@{provider='Google Drive';status='PASS';bytes=(Get-Item $file).Length;sha256=$digest}
+    }
+    $fixtureJson=ConvertTo-Json $proof -Depth 5
+    Require ((Confirm-RestrictedApk (ConvertFrom-Json $fixtureJson) $file '0.10.0' $source $digest)-ceq$proof.link) 'Authenticated fixture did not qualify'
+    foreach($mutation in @('anyone','wrong-file-id','wrong-commit','missing-auth','changed-bytes')){
+        $bad=ConvertFrom-Json $fixtureJson
+        switch($mutation){
+            anyone {$bad.permissions+=@{type='anyone';role='reader'}}
+            'wrong-file-id' {$bad.driveFileId='Different1234'}
+            'wrong-commit' {$bad.sourceCommit='0123456789abcdef0123456789abcdef01234568'}
+            'missing-auth' {$bad.authenticated=$null}
+            'changed-bytes' {[IO.File]::WriteAllText($file,'Different artifact fixture')}
+        }
+        $rejected=$false
+        try {Confirm-RestrictedApk $bad $file '0.10.0' $source $digest | Out-Null}catch{$rejected=$true}
+        Require $rejected "Restricted gate admitted mutation: $mutation"
+    }
+}
 $failed=@($results|Where-Object status -EQ FAIL)
 [ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;productFixtures=$product;scope='Byte fixtures, injected Java recorder and extracted publication block; no real JVM body, game, full native launcher or device';results=$results}|ConvertTo-Json -Depth 7|Set-Content "$RunRoot/controls.json" -Encoding utf8NoBOM
 $results|Format-Table name,status -AutoSize

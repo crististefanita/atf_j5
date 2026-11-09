@@ -79,6 +79,7 @@ class TestChangeGovernanceTest {
                 || path.equals("scripts/TestSourceInventory.psm1") || path.equals("scripts/RuntimeQualification.psm1")
                 || path.equals("config/infrastructure-workspaces.json")
                 || path.equals("config/release-rag-corpus.json") || path.equals("scripts/run-release-rag.ps1")
+                || path.equals("scripts/verify-release-readme.ps1")
                 || path.equals("scripts/InfrastructureWorkspaces.psm1")
                 || path.equals("library-provenance.json") || path.startsWith("lib/atf-reporting-")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/AtfReportingLibrary.java")
@@ -102,6 +103,7 @@ class TestChangeGovernanceTest {
     @Test void releaseRagPolicyRunnerAndRetrieverAreProtectedByExactChangeControls() {
         assertTrue(protectedPath("config/release-rag-corpus.json"));
         assertTrue(protectedPath("scripts/run-release-rag.ps1"));
+        assertTrue(protectedPath("scripts/verify-release-readme.ps1"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java"));
     }
 
