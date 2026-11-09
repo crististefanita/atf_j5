@@ -3,6 +3,16 @@
   "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
   "controls": [
     {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/CalibrateGameplayAchievements.java",
+      "owner": "Rentz Android",
+      "reason": "Compile the offline achievement simulator as governed Android JVM test support.",
+      "criterion": "Reproduce the qualified match plan, exact gameplay catalog and chronology from compiled JVM inputs.",
+      "proof": "docs/rentz/ATF_Infrastructure.md",
+      "expires": "2026-12-09",
+      "sha256": "055f0349d7e2475cc02575529b9ecef6ac89e9d6f33009d856df4265d87e9396",
+      "allowDelete": false
+    },
+    {
       "path": "scripts/verify-release-readme.ps1",
       "owner": "Rentz release",
       "reason": "Close the authenticated distribution channel after the qualified source and README reach the remote.",
