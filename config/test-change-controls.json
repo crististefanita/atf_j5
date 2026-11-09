@@ -3,6 +3,16 @@
   "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
   "controls": [
     {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java",
+      "owner": "Rentz Android",
+      "reason": "Protect the optional AI takeover at the session and checkpoint boundary.",
+      "criterion": "Verify manual default, Normal and Hard choice, legal Rentz and Whist moves, revoked delivery, opponent isolation, settlement and restore.",
+      "proof": "docs/rentz/ATF_Lifecycle.md#joc-automat-pentru-locul-tău",
+      "expires": "2026-11-30",
+      "sha256": "b16570ab76538121ae66473de22e2f61d4e839618a5774c4020752eed21f11c8",
+      "allowDelete": false
+    },
+    {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java",
       "owner": "Rentz UI",
       "reason": "Qualify the measured card regions and the clockwise Whist play order.",

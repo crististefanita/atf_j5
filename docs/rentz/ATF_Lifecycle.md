@@ -42,7 +42,11 @@ Comanda umană se salvează înaintea următorului cadru. Worker-ul reconstruie�
 
 ## Joc automat pentru locul tău
 
-Bifa **Joc automat** deleagă deciziile pentru mâna curentă. Pornește debifată. AI-ul folosește dificultatea partidei și observația locului tău. Când trebuie ales contractul, își dezvăluie mâna și alege dintre contractele disponibile. În joc, aplică o mutare legală după pauza vizuală obișnuită. Pasul obligatoriu în Rentz se aplică și în modul manual.
+Bifa **Joc automat** deleagă deciziile pentru mâna curentă și pornește debifată.
+
+- Politica folosește dificultatea partidei și observația locului tău.
+- La alegerea contractului, AI-ul dezvăluie mâna și alege un contract disponibil.
+- La joc, AI-ul aplică o mutare legală după pauza vizuală obișnuită. Pasul obligatoriu în Rentz se aplică și în modul manual.
 
 | Eveniment | Efect |
 |---|---|

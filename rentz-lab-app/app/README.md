@@ -6,6 +6,8 @@ Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu tr
 
 [Nucleul UI](../../docs/rentz/ATF_UiIntegration.md) este consumat în configurația live: meniu, editor de nume, temă, chenare, geometrie, mână și depuneri. [Atlasul prezentării](src/main/java/ro/rentzlab/app/ui/README.md) delimitează adaptoarele Rentz, iar [feedback-ul](../../docs/feedback/ATF_Rentz_UI_ToDo.md) păstrează diferențele încă necalificate.
 
+- Pe masă, bifa **Joc automat** îi dă AI-ului locul tău pentru mâna curentă. Debifezi oricând, iar controlul revine automat la tine la scor sau la revenirea în aplicație. [Contractul delegării](../../docs/rentz/ATF_Lifecycle.md#joc-automat-pentru-locul-tău)
+
 ## Responsabilități
 
 | Componentă | Contract |
@@ -29,8 +31,6 @@ Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu tr
 La reluarea unei mâini punctate, masa prezintă ultima levată din salvare. Cărțile dispar la termenul vizual înainte de trecerea la pagina de scor. Pentru ambele trasee, raportul distinge primul cadru animat, durata totală și direcția fiecărei cărți. [Dovezile cadrelor Android](../../../../rentz_back/ui-review/restart-collection-j5/README.md)
 
 [Contractul de lifecycle](../../docs/rentz/ATF_Lifecycle.md) explică ordinea checkpoint-urilor, reluarea și limita calificării JVM. Politica AI primește numai observația permisă, chiar dacă motorul de fundal reconstruiește privat partida din seed și jurnal.
-
-Pe masă, bifa **Joc automat** îi dă AI-ului locul tău pentru mâna curentă. Poți debifa în timpul jocului. La scor sau la revenirea în aplicație, controlul este din nou manual. [Contractul delegării](../../docs/rentz/ATF_Lifecycle.md#joc-automat-pentru-locul-tău)
 
 ## Salvare și reluare
 
