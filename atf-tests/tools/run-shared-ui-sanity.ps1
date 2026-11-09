@@ -597,7 +597,8 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
                     }
                     if($deal-eq1-and$state.view.phase-eq'PLAY'){
                         $beforeAuto=$state
-                        $toggle=Get-RentzTapTarget -Nodes @(Ui) -Label 'Auto play' -Class 'android.widget.CheckBox'
+                        [xml]$moveFrame=Get-Content -Raw -LiteralPath (Join-Path $raw $points[-1].hierarchy)
+                        $toggle=Get-RentzTapTarget -Nodes @($moveFrame.SelectNodes('//node')) -Label 'Auto play' -Class 'android.widget.CheckBox'
                         if($null-eq$toggle-or$toggle.GetAttribute('checked')-cne'false'){throw 'Expected an unchecked Auto play control before delegation.'}
                         TapNode $toggle 'Auto play'
                         $state=State -After $beforeAuto.revision -TimeoutSeconds 90
