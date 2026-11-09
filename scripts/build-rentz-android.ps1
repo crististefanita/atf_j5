@@ -5,9 +5,17 @@ param(
     [string]$Sdk='C:\tools\whist-android-sdk',
     [ValidateSet('Debug','Release')][string]$Configuration='Debug',
     [switch]$UiSanity,
-    [switch]$UiSanityOnly
+    [switch]$UiSanityOnly,
+    [string]$UiBuildRun='',
+    [string]$NativeUiRun=''
 )
 $ErrorActionPreference='Stop'
+if($Configuration-eq'Release'-and(-not$UiBuildRun-or-not$NativeUiRun)){
+    throw 'Release requires UiBuildRun and NativeUiRun for the RAG prebuild gate.'
+}
+if($Configuration-ne'Release'-and($UiBuildRun-or$NativeUiRun)){
+    throw 'The RAG prebuild inputs apply only to Release.'
+}
 if($UiSanityOnly-and($UiSanity-or$Configuration-eq'Release')){
     throw 'UiSanityOnly builds only the isolated test package with debug signing.'
 }
@@ -47,9 +55,20 @@ foreach($row in Get-Content -Raw -LiteralPath $componentManifest|ConvertFrom-Jso
     $regressionInputs.Add($row.path,$row.sha256)
 }
 $lab=Join-Path $source 'rentz-lab-app'
+New-Item -ItemType Directory -Path $RunRoot|Out-Null
+if($Configuration-eq'Release'){
+    $prebuild=Join-Path $RunRoot 'rag-prebuild'
+    $inputs=@{Question='gate:native-ui Rentz trei jocuri complete';ComponentRun=$ComponentRun;
+        UiBuildRun=$UiBuildRun;NativeUiRun=$NativeUiRun;RunRoot=$prebuild}
+    & (Join-Path $source 'scripts/run-release-rag.ps1') @inputs | Out-Null
+    $gate=Get-Content -LiteralPath (Join-Path $prebuild 'report/release-rag-report.json') -Raw | ConvertFrom-Json
+    if($gate.releaseWorkflow.readyForProductBuild-isnot[bool]-or-not$gate.releaseWorkflow.readyForProductBuild-or
+        $gate.releaseWorkflow.sourceCommit-cne$sourceCommit){
+        throw "Release blocked by RAG prebuild: $prebuild"
+    }
+}
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 $stage=New-AtfWorkspace -Kind android -ProjectRoot $root
-New-Item -ItemType Directory -Path $RunRoot|Out-Null
 $stage|Set-Content -LiteralPath (Join-Path $RunRoot 'stage.txt') -Encoding utf8NoBOM
 $manifest=@(foreach($file in Get-ChildItem -LiteralPath $lab -Recurse -File|Where-Object{[IO.Path]::GetRelativePath($lab,$_.FullName)-notmatch'(^|[\\/])(build|target|\.gradle|\.git)([\\/]|$)'-and$_.Name-ne'local.properties'}){
     $relative=[IO.Path]::GetRelativePath($lab,$file.FullName);$target=Join-Path $stage $relative

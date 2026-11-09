@@ -147,7 +147,7 @@ public final class ReleaseCatalog {
     static boolean isMinorOrMajorStep(String current,String candidate){
         String[] from=current.split("\\."),to=candidate.split("\\.");
         try{int major=Integer.parseInt(from[0]),minor=Integer.parseInt(from[1]);int nextMajor=Integer.parseInt(to[0]),nextMinor=Integer.parseInt(to[1]),patch=Integer.parseInt(to[2]);
-            return patch==0&&((nextMajor==major&&nextMinor==minor+1)||(nextMajor==major+1&&nextMinor==0));
+            return patch==0&&((nextMajor==major&&nextMinor>minor)||(nextMajor==major+1&&nextMinor==0));
         }catch(RuntimeException invalid){return false;}
     }
     private static void require(boolean valid,String code) throws IOException { if(!valid)throw new IOException(code); }

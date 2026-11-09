@@ -3,6 +3,16 @@
   "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
   "controls": [
     {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationTargetGovernanceTest.java",
+      "owner": "Rentz release",
+      "reason": "Apply the project documentation controls to the owner pages used during release qualification.",
+      "criterion": "Declared owner pages exist and pass the inventory checks for links, diagrams, structure, style, prose and artifact paths.",
+      "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
+      "expires": "2026-12-09",
+      "sha256": "98e3df66e5d2e353a74a67bc9e58ddd910126d96508a2b3500b398d3133ee966",
+      "allowDelete": false
+    },
+    {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java",
       "owner": "Rentz Android",
       "reason": "Protect the optional AI takeover at the session and checkpoint boundary.",
@@ -269,7 +279,7 @@
       "criterion": "A missing or partial Rentz-plus-two-games receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a2c941ff2568dec3f71d9d05e56eda1cb05153b5462fd5dce3399f32e7d89ccb",
+      "sha256": "329ca136f71fb62c3cbe246ced3874fc7fdff53bec68fe9ebc67d2eb0b889373",
       "allowDelete": false
     },
     {
@@ -439,7 +449,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK; receipt mutations remain BLOCKED, while a valid Rentz-plus-two-games receipt is source-bound and report corruption blocks promotion.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "b3ac0a6a72f3744c8dd083735ed468e173466644a47e0f3574d24f889fe38d1a",
+      "sha256": "cffc16692f35a6f256a9e825aafade76340efd9956ed7d0f8bf6bf6093c4f3a8",
       "allowDelete": false
     },
     {
@@ -629,7 +639,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a01c26a5ac432c0abfa42c112106bef42698bd5d6bf4fb9b253fdc058e10e774",
+      "sha256": "3cd2a7d4f80c8aace2e9e90c7ab054f6320116c3e133ba3114f50f8aef843993",
       "allowDelete": false
     },
     {
@@ -1025,11 +1035,11 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java",
       "owner": "Rentz release",
-      "reason": "Release 0.4.0 candidate version boundary and catalog identity.",
+      "reason": "Release candidate version boundary and catalog identity.",
       "criterion": "Published version remains separate; candidate advances one minor or major boundary and Android versionCode increases.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "9dbf34eb498897450c1d7ed0ee8a76e9bb054b5cb2bdb6886543f7798db19e08",
+      "sha256": "54455ddc5bd82e06c71b21a692251d9bfa72a4a29f61ee05481d776f457ae2be",
       "allowDelete": false
     },
     {
@@ -1049,7 +1059,7 @@
       "criterion": "One valid boundary passes; patch-only, skipped, backward, and invalid transitions fail.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "b097179daba522308644153f8b1ae01a5b451e68d27170c940204339cce23b23",
+      "sha256": "231d943dd29ed4351aab74542954c5aa6cffd274e96844532646e958f1602aa9",
       "allowDelete": false
     },
     {
@@ -1119,7 +1129,7 @@
       "criterion": "Commit, source manifest, package, version, signing certificate, APK bytes, and reporting tools match receipts.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "0dbb26dd3355e4cef2422569c42b29f56b83017dee7d5ed9f7507f008615a5b9",
+      "sha256": "9b4d87eec688794de0cda2b43f906187f5eab201067c52be0bd9c9078a158d37",
       "allowDelete": false
     },
     {
@@ -1129,7 +1139,7 @@
       "criterion": "Gradle versionName and monotonically increasing versionCode match the release catalog candidate.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "971ab1ab7e4023e5a2ea973067f1cc770a0338eb516563ec710e5cdc6448ec09",
+      "sha256": "02de2d334cc75e5fb70f16c171c31590a882545d2919696cd9dd44bcaec4a5b0",
       "allowDelete": false
     },
     {
@@ -1139,7 +1149,7 @@
       "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "ec82e6d4633eff9231ecfbadaf9cffbb4bc719f282ed23f002df69407aa36132",
+      "sha256": "d003b123c685098bf81be5cb3dbc299c1199641a698c29fc00d3118f23618d9d",
       "allowDelete": false
     },
     {

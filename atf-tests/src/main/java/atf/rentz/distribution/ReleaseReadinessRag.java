@@ -1,5 +1,6 @@
 package atf.rentz.distribution;
 
+import atf.reporting.evidence.ui.ExtentUiEvidenceMarkup;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,10 +17,12 @@ import java.text.Normalizer;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +48,8 @@ public final class ReleaseReadinessRag {
     private static final Pattern SECRET_CONTENT = Pattern.compile("(?i)(?:\\bgh[pousr]_[a-z0-9]{20,}\\b|\\bgithub_pat_[a-z0-9_]{30,}\\b|\\bAKIA[0-9A-Z]{16}\\b|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\\b(?:password|client_secret|api[_-]?key|access[_-]?token)\\s*[:=]\\s*[\"'][^\"'\\r\\n]{12,}[\"'])");
     private static final Pattern VERSION = Pattern.compile("(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)");
     private static final Pattern INLINE_PNG = Pattern.compile("data:image/png;base64,([^\\\"'\\s<>]+)");
+    private static final Pattern NATIVE_EXTENT_STEP = Pattern.compile("<a class=\"node [^\"]*\" id=\"[0-9]+\"><span>THEN ([^<]+)</span></a>");
+    private static final Pattern NATIVE_SCREENSHOT_ID = Pattern.compile(" id=\"(atf-screenshot-screenshot-[0-9]+)\"");
     private static final int MAX_INLINE_PNG_BYTES = 8 * 1024 * 1024;
 
     private static final int MAX_CORPUS_SOURCES = 64;
@@ -220,12 +225,11 @@ public final class ReleaseReadinessRag {
         workflow.put("candidateWorktree", git.available() && git.dirtyFiles() == 0 ? "CLEAN_PINNED_SNAPSHOT" : "NOT_QUALIFIED");
         boolean localTestsPass = status(gates, "offline-regression").equals("PASS")
                 && status(gates, "component-extent-report").equals("PASS") && status(gates, "android-jvm").equals("PASS");
-        boolean candidateReady = localTestsPass && status(gates, "native-ui").equals("PASS")
-                && status(gates, "native-ui-report").equals("PASS") && status(gates, "release-build").equals("PASS")
-                && git.available() && git.dirtyFiles() == 0;
-        workflow.put("readyForProductBuild", localTestsPass && status(gates, "local-catalog").equals("PASS")
+        boolean readyForProductBuild = localTestsPass && status(gates, "local-catalog").equals("PASS")
                 && status(gates, "native-ui").equals("PASS") && status(gates, "native-ui-report").equals("PASS")
-                && conflicts.isEmpty());
+                && conflicts.isEmpty();
+        boolean candidateReady = readyForProductBuild && status(gates, "release-build").equals("PASS");
+        workflow.put("readyForProductBuild", readyForProductBuild);
         workflow.put("stage", candidateReady ? "READY_FOR_MAIN_PROMOTION_REVIEW" : localTestsPass ? "COMPONENTS_QUALIFIED" : "DRAFT_OR_BLOCKED");
         workflow.put("readyForMainPromotionReview", candidateReady);
         workflow.put("nativeUiRequiredForPromotion", true);
@@ -685,10 +689,10 @@ public final class ReleaseReadinessRag {
             byte[] htmlBytes = readExternalFile(extent, 128L * 1024 * 1024);
             if (!sha256(htmlBytes).equalsIgnoreCase(ui.path("extentReportSha256").asText())) throw new IOException("RAG-UI-REPORT-HASH");
             String html = new String(htmlBytes, StandardCharsets.UTF_8);
-            int embedded = validateInlinePngs(html);
-            if (embedded < checkpoints.size()) throw new IOException("RAG-UI-REPORT-SCREENSHOTS");
-            reportGate.put("status", "PASS"); reportGate.put("actual", "The atf-reporting Extent artifact contains at least one original inline PNG for each recorded native checkpoint.");
-            reportGate.put("receipt", "raw/android-extent.html"); reportGate.put("receiptSha256", sha256(htmlBytes));
+            validateInlinePngs(html);
+            verifyNativeExtent(html, externalRun(root, Path.of(ui.required("rawRoot").asText())), checkpoints);
+            reportGate.put("status", "PASS"); reportGate.put("actual", "Each native Extent checkpoint preserves its original inline PNG and every expected/actual comparison in order.");
+            reportGate.put("receipt", run.relativize(extent).toString().replace('\\', '/')); reportGate.put("receiptSha256", sha256(htmlBytes));
         } catch (Exception invalid) {
             if (!uiGate.path("status").asText().equals("PASS") && !uiGate.path("status").asText().equals("FAIL")) {
                 uiGate.put("status", "BLOCKED");
@@ -697,6 +701,60 @@ public final class ReleaseReadinessRag {
             reportGate.put("status", "BLOCKED"); reportGate.put("actual", safeFailure(invalid, "RAG-UI-REPORT-INVALID"));
             if (!receiptHash.isBlank()) { uiGate.put("receipt", "result.json"); uiGate.put("receiptSha256", receiptHash); }
         }
+    }
+
+    private static void verifyNativeExtent(String html, Path raw, JsonNode checkpoints) throws IOException {
+        var steps = NATIVE_EXTENT_STEP.matcher(html);
+        var files = new HashSet<String>();
+        var capturesByDigest = new HashMap<String, String>();
+        var captureIds = new HashSet<String>();
+        boolean hasStep = steps.find();
+        for (JsonNode checkpoint : checkpoints) {
+            if (!hasStep || !steps.group(1).equals(ExtentUiEvidenceMarkup.escape(checkpoint.required("title").asText())))
+                throw new IOException("RAG-UI-REPORT-CHECKPOINT");
+            int start = steps.end();
+            hasStep = steps.find();
+            int end = hasStep ? steps.start() : html.length();
+            byte[] image = nativeCapture(raw, checkpoint.required("image").asText(), files, MAX_INLINE_PNG_BYTES);
+            nativeCapture(raw, checkpoint.required("hierarchy").asText(), files, 4L * 1024 * 1024);
+            verifyNativeScreenshot(html, start, end, image, capturesByDigest, captureIds);
+            int assertions = html.indexOf("<div class=\"atf-ui-assertions\"", start, end);
+            if (assertions < 0) throw new IOException("RAG-UI-REPORT-COMPARISONS");
+            int tableStart = html.indexOf("<tbody>", assertions, end);
+            if (tableStart < 0) throw new IOException("RAG-UI-REPORT-COMPARISONS");
+            int tableEnd = html.indexOf("</tbody>", tableStart, end);
+            var rows = new StringBuilder("<tbody>");
+            for (JsonNode check : checkpoint.required("checks")) {
+                rows.append("<tr><td>").append(ExtentUiEvidenceMarkup.escape(check.required("name").asText()))
+                        .append("</td><td>").append(ExtentUiEvidenceMarkup.escape(check.required("expected").asText()))
+                        .append("</td><td>").append(ExtentUiEvidenceMarkup.escape(check.required("actual").asText()))
+                        .append("</td><td>✅</td></tr>");
+            }
+            if (tableEnd != tableStart + rows.length() || !html.startsWith(rows.toString(), tableStart))
+                throw new IOException("RAG-UI-REPORT-COMPARISONS");
+        }
+        if (hasStep) throw new IOException("RAG-UI-REPORT-CHECKPOINT");
+    }
+
+    private static void verifyNativeScreenshot(String html, int start, int end, byte[] image,
+                                               Map<String, String> capturesByDigest, Set<String> captureIds) throws IOException {
+        String digest = sha256(image);
+        String previousCapture = capturesByDigest.get(digest);
+        if (previousCapture != null && html.indexOf("href=\"#" + previousCapture + "\"", start, end) >= 0) return;
+        String screenshot = "href=\"data:image/png;base64," + Base64.getEncoder().encodeToString(image) + "\"";
+        int href = html.indexOf(screenshot, start, end);
+        if (href < 0) throw new IOException("RAG-UI-REPORT-CAPTURE-MISMATCH");
+        int linkEnd = html.indexOf(">", href + screenshot.length(), end);
+        if (linkEnd < 0) throw new IOException("RAG-UI-REPORT-CAPTURE-MISMATCH");
+        var id = NATIVE_SCREENSHOT_ID.matcher(html).region(href + screenshot.length(), linkEnd);
+        if (!id.find() || !captureIds.add(id.group(1))) throw new IOException("RAG-UI-REPORT-CAPTURE-ID");
+        capturesByDigest.put(digest, id.group(1));
+    }
+
+    private static byte[] nativeCapture(Path raw, String name, Set<String> files, long limit) throws IOException {
+        if (!name.matches("[A-Za-z0-9_-]+\\.(?:png|txt)") || !files.add(name.toLowerCase(Locale.ROOT)))
+            throw new IOException("RAG-UI-REPORT-CAPTURE-PATH");
+        return readExternalFile(raw.resolve(name), limit);
     }
 
     private static Path externalRun(Path root, Path supplied) throws IOException {

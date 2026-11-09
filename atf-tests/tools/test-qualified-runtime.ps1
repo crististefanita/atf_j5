@@ -260,6 +260,17 @@ Case 'First human move evidence requires one successful Boolean assertion' {
         Require $rejected 'Missing or duplicate checkpoints cannot qualify the first move'
     }
 }
+Case 'Direct Release build rejects missing native evidence before staging' {
+    $output=Join-Path $fixture 'release-without-native-evidence'
+    $component=Join-Path $fixture 'component-not-read-before-preflight'
+    $rejected=$false
+    try {
+        & (Join-Path $project 'scripts/build-rentz-android.ps1') -Configuration Release -ComponentRun $component -RunRoot $output | Out-Null
+    } catch {
+        $rejected=$_.Exception.Message -ceq 'Release requires UiBuildRun and NativeUiRun for the RAG prebuild gate.'
+    }
+    Require ($rejected-and-not(Test-Path -LiteralPath $output)) 'Release must require both native inputs before creating a build directory'
+}
 $failed=@($results|Where-Object status -EQ FAIL)
 [ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;productFixtures=$product;scope='Byte fixtures, injected Java recorder and extracted publication block; no real JVM body, game, full native launcher or device';results=$results}|ConvertTo-Json -Depth 7|Set-Content "$RunRoot/controls.json" -Encoding utf8NoBOM
 $results|Format-Table name,status -AutoSize

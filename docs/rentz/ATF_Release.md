@@ -43,7 +43,7 @@ RAG-ul aplică domeniul declarat: pentru o ediție numai pentru Android, iOS est
 ## Versiunea candidatului și staging
 
 - `release/index.json` separă `currentVersion` de `candidate.version` și `candidate.versionCode`; pregătirea candidatului nu schimbă linkul produsului.
-- O schimbare care cere release, inclusiv o refactorizare, primește următorul minor; o ruptură de compatibilitate justifică majorul. `versionCode` crește și corespunde valorilor Gradle.
+- O schimbare care cere release, inclusiv o refactorizare, avansează minorul. Catalogul permite omiterea minorilor care nu au fost publicați. O ruptură de compatibilitate justifică următorul major. `versionCode` crește și corespunde valorilor Gradle.
 - Candidatele și rezultatele se pregătesc în workspace-ul J5 alocat, în afara checkout-ului. Rapoartele și APK-urile rămân sub rădăcina de date configurată prin `RENTZ_DATA_ROOT`, niciodată în TEMP arbitrar.
 - Runner-ele folosesc workspace-uri externe înregistrate `components-<id>`, cu descriptor pentru proprietar, tip, ID și `sourceRoot`; RAG acceptă stagingul Android JVM numai când toate valorile corespund politicii și candidatului fixat.
 - Promovarea în `main` păstrează același commit, manifest, rapoarte, APK și checksum. Orice schimbare de octeți cere o nouă calificare.
@@ -51,10 +51,11 @@ RAG-ul aplică domeniul declarat: pentru o ediție numai pentru Android, iOS est
 ```mermaid
 flowchart LR
     SOURCE[Snapshot identificat] -->|testează fără dispozitiv| CHECK[Componente și guvernanță]
-    CHECK -->|permite build izolat| ARTIFACT[Artefacte semnate pe platformă]
-    ARTIFACT -->|rulează pe varianta UI legată de aceeași sursă| UIE2E[3 jocuri complete și Extent nativ]
-    UIE2E -->|sursă, jocuri, geometrie și raport verificate| READY[Dosar calificat]
-    UIE2E -->|FAIL, lipsă sau neconcordanță| BLOCKED[APK păstrat în staging]
+    CHECK -->|construiește| ARTIFACT[APK izolat de test]
+    ARTIFACT -->|rulează| UIE2E[3 jocuri și Extent nativ]
+    UIE2E -->|furnizează dovezi| RAG[Verdict RAG]
+    RAG -->|permite semnarea| READY[Dosar calificat]
+    RAG -->|oprește buildul| BLOCKED[Diagnostic în staging]
     READY -->|publică draftul confruntat| RELEASE[GitHub Release]
     RELEASE -->|descarcă și confruntă octeții| FILE[Copie completă]
 ```
@@ -77,16 +78,14 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 .\scripts\run-release-rag.ps1 -Question 'gate:native-ui Rentz trei jocuri complete' -ComponentRun <regresie-trecuta> -UiBuildRun <build-izolat> -NativeUiRun <rulare-nativa> -RunRoot <RAG-prebuild>
 ```
 
-După verdictul `readyForProductBuild=true`, construiți produsul cu identitatea de semnare provisionată și confruntați ambele dosare.
+După verdictul `readyForProductBuild=true`, construiți produsul cu identitatea de semnare provisionată. Builderul primește cele două dosare de acceptanță și recalculează verdictul pe sursa calificată înainte de staging Android și semnare.
 
 ```powershell
-.\scripts\build-rentz-android.ps1 -Configuration Release -ComponentRun <regresie-trecuta> -RunRoot <build-produs>
+.\scripts\build-rentz-android.ps1 -Configuration Release -ComponentRun <regresie-trecuta> -UiBuildRun <build-izolat> -NativeUiRun <rulare-nativa> -RunRoot <build-produs>
 .\scripts\run-release-rag.ps1 -Question 'gate:release-build APK Rentz semnat' -ComponentRun <regresie-trecuta> -BuildRun <build-produs> -UiBuildRun <build-izolat> -NativeUiRun <rulare-nativa> -RunRoot <RAG-final>
 ```
 
-RAG-ul este un consumator read-only de receipte. Starea live a porților este:
-
-Raportul RAG este consultativ și nu înlocuiește verdictul determinist al porților. Un `PUBLISHED` deja existent nu califică automat integrarea RAG, iar o etapă locală `READY_FOR_MAIN_PROMOTION_REVIEW` nu confirmă publicarea remote.
+RAG citește dovezile originale, aplică verificările de calificare și înregistrează verdictul. Etapa `READY_FOR_MAIN_PROMOTION_REVIEW` permite operatorului să revizuiască promovarea. Publicarea și probele de descărcare au porți proprii.
 
 - **Calificare locală:** regresie, Extent, Android JVM, build și acceptanța nativă obligatorie trebuie legate de același commit.
 - **Jocuri și display:** pentru fiecare APK candidat, varianta `ro.rentzlab.app.uisanity` execută prin interfață trei deal-uri complete: Rentz până la `DEAL_END`, apoi două jocuri non-Rentz până la `DEAL_END`. Raportul verifică locurile la fiecare joc și după reluare, scorurile și istoricul, replay-ul independent și capturile native inline Base64. Poarta este impusă de [`attachNativeUiReceipt`](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java) și protejată de [regresia mutantelor de release](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java). Sunt trei jocuri/deal-uri complete; această probă nu pretinde încheierea întregii serii multi-contract.
@@ -132,7 +131,7 @@ Raportul RAG este consultativ și nu înlocuiește verdictul determinist al por�
 
 - `atf-reporting` este dependența modulului Maven `atf-tests`; versiunea vine din proprietatea `atf.reporting.version`, iar testul de adopție verifică perechea JAR/POM și SHA-256 din [proveniența consumerului](../../library-provenance.json).
 - Colecția de componente produce Extent din XML-urile Surefire originale și reconciliază fiecare suită, testcase și total. Raportul nu inventează aserțiuni de domeniu pe care XML-ul nu le păstrează.
-- Sanity-ul Android produce Extent prin aceeași bibliotecă; așteptările, observațiile și capturile PNG inline Base64 sunt colectate în timpul fiecărui checkpoint.
+- Sanity-ul Android produce Extent prin aceeași bibliotecă. RAG confruntă fiecare checkpoint în ordinea execuției, cu toate perechile așteptat și observat, și verifică octeții PNG inline față de captura originală. Capturile identice pot referi aceeași imagine încorporată. Ierarhia nativă rămâne în dosarul de dovezi.
 - Receipt-ul păstrează versiunea și hash-ul JAR-ului, sursa, intrările, rezultatul și digestul HTML. APK-ul și raportul rămân artefacte externe.
 
 [Atributele Git](https://git-scm.com/docs/gitattributes) dezactivează conversia text pentru intrările APK și dosarul release. Înainte de push se confruntă octeții din Git cu inventarul, separat de copia din workspace.

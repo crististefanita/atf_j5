@@ -31,8 +31,8 @@ class ReleaseGovernanceTest {
         assertNotNull(edition,"Catalog verification returns an explicit edition");
         var index=ReleaseCatalog.read(ReleaseCatalog.root().resolve("release/index.json"));
         assertEquals("0.3.0",index.path("currentVersion").asText(),"Published entry stays stable until the candidate is accepted");
-        assertEquals("0.4.0",index.path("candidate").path("version").asText(),"Refactor and feature batch advances the candidate minor version");
-        assertEquals(7,index.path("candidate").path("versionCode").asInt());
+        assertEquals("0.5.0",index.path("candidate").path("version").asText(),"Refactor and feature batch advances the candidate minor version");
+        assertEquals(8,index.path("candidate").path("versionCode").asInt());
         assertTrue(java.util.List.of("DRAFT","PREPARED","PUBLISHED").contains(edition.state()),"Actual release state remains explicit");
         if(edition.state().equals("DRAFT"))assertNull(edition.target(),"A draft cannot invent a downloadable APK");
         else assertNotNull(edition.target(),"A qualified edition has a complete expected identity");
@@ -176,10 +176,10 @@ class ReleaseGovernanceTest {
 
     @Test void ragQualifiesTheLocalPublishedCatalogWithoutPromotingRemoteGates() throws Exception {
         Path root=ReleaseCatalog.root();
-        var report=ReleaseReadinessRag.evaluate(root,"gate:local-catalog version:0.4.0 APK candidate");
+        var report=ReleaseReadinessRag.evaluate(root,"gate:local-catalog version:0.5.0 APK candidate");
         var catalog=gate(report,"local-catalog");
         assertEquals("PASS",catalog.path("status").asText());
-        assertTrue(catalog.path("actual").asText().contains("candidate 0.4.0"));
+        assertTrue(catalog.path("actual").asText().contains("candidate 0.5.0"));
         assertTrue(catalog.path("artifactSha256").asText().matches("[a-f0-9]{64}"));
         assertTrue(catalog.path("indexSha256").asText().matches("[a-f0-9]{64}"));
         assertTrue(catalog.path("manifestSha256").asText().matches("[a-f0-9]{64}"));
@@ -381,8 +381,7 @@ class ReleaseGovernanceTest {
         Path learningLedger=ui.resolve("learning-exposure.json");
         Files.writeString(learningLedger,"{\"schemaVersion\":1,\"exposures\":[]}",StandardCharsets.UTF_8);
         Path extent=ui.resolve("android-extent.html");
-        String shot=pngDataUri();
-        Files.writeString(extent,"<html><body>atf-reporting Extent report "+inlineImages(shot,16)+"</body></html>",StandardCharsets.UTF_8);
+        String shot=pngDataUri(0);
         var uiReceipt=JSON().createObjectNode().put("status","PASS").put("consecutiveSubgames",true)
                 .put("package","ro.rentzlab.app.uisanity").put("apkSha256",sha(isolated)).put("displayAndPackagesPreserved",true)
                 .put("leaseReleased",true).put("rawRoot",raw.toString()).put("extentReport",extent.toString())
@@ -390,7 +389,7 @@ class ReleaseGovernanceTest {
                 .put("isolatedDevelopmentLedgerSha256Before",sha(learningLedger)).put("isolatedDevelopmentLedgerSha256After",sha(learningLedger))
                 .put("sharedDevelopmentLedgerUnchanged",true).put("sharedDevelopmentLedgerSha256Before",sha(learningLedger))
                 .put("sharedDevelopmentLedgerSha256After",sha(learningLedger))
-                .put("extentReportSha256",sha(extent)).put("runnerSha256",sha(root.resolve("atf-tests/tools/run-shared-ui-sanity.ps1")))
+                .put("runnerSha256",sha(root.resolve("atf-tests/tools/run-shared-ui-sanity.ps1")))
                 .put("reportingLibrary","atf-reporting-1.0.0-j24").put("reportingLibrarySha256",sha(root.resolve("lib/atf-reporting-1.0.0-j24.jar")));
         uiReceipt.putArray("cleanupFailures");
         uiReceipt.putArray("subgames").add("RENTZ").add("TRICKS").add("DIAMONDS");
@@ -422,6 +421,19 @@ class ReleaseGovernanceTest {
         addUiCheckpoint(checkpoints,"Three-deal match restores its final contract and scores","Restored seat geometry");
         addUiCheckpoint(checkpoints,"The three confirmed rows remain after process restart","Restarted history retains all three completed subgames");
         for(int i=13;i<16;i++)addUiCheckpoint(checkpoints,"Supporting native checkpoint "+i,"Native viewport remains valid");
+        byte[] capture=java.util.Base64.getDecoder().decode(shot.substring("data:image/png;base64,".length()));
+        byte[] distinct=java.util.Base64.getDecoder().decode(pngDataUri(1).substring("data:image/png;base64,".length()));
+        for(var checkpoint:checkpoints) {
+            byte[] original=checkpoint.equals(checkpoints.get(1))?distinct:capture;
+            Files.write(raw.resolve(checkpoint.path("image").asText()),original);
+            Files.writeString(raw.resolve(checkpoint.path("hierarchy").asText()),"<hierarchy/>");
+        }
+        Files.write(raw.resolve("checkpoints.json"),JSON().writeValueAsBytes(checkpoints));
+        Files.writeString(raw.resolve("ui-result.json"),"{\"status\":\"PASS\",\"consecutiveSubgames\":true}");
+        atf.rentz.android.RentzNativeFlow.main(new String[]{"report",raw.toString()});
+        String originalExtent=Files.readString(raw.resolve("android-extent.html"));
+        Files.writeString(extent,originalExtent);
+        uiReceipt.put("extentReportSha256",sha(extent));
         uiReceipt.putObject("build").put("sourceCommit",git(root,"rev-parse","HEAD").strip()).put("apkSha256",sha(isolated));
         Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
 
@@ -430,10 +442,12 @@ class ReleaseGovernanceTest {
         assertEquals("PASS / "+buildActual,gate(report,"release-build").path("status").asText()+" / "+buildActual);
         String uiActual=gate(report,"native-ui").path("actual").asText();
         assertEquals("PASS / "+uiActual,gate(report,"native-ui").path("status").asText()+" / "+uiActual);
-        assertEquals("PASS",gate(report,"native-ui-report").path("status").asText());
-        assertTrue(report.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
+        assertEquals("PASS",gate(report,"native-ui-report").path("status").asText(),
+                gate(report,"native-ui-report").path("actual").asText());
+        assertFalse(report.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean(),
+                "The intentionally incomplete fixture catalog blocks promotion even when the APK and UI gates pass");
         assertEquals("PASS", report.path("releaseWorkflow").path("nativeUiAcceptance").path("status").asText());
-        assertEquals("ELIGIBLE_FOR_PROMOTION_REVIEW", report.path("releaseWorkflow").path("artifactDisposition").asText());
+        assertEquals("STAGED_CANDIDATE_ONLY", report.path("releaseWorkflow").path("artifactDisposition").asText());
         assertFalse(report.path("releaseWorkflow").path("publishAllowed").asBoolean());
 
         Path productReceipt = build.resolve("build-qualification.json");
@@ -479,19 +493,35 @@ class ReleaseGovernanceTest {
         assertEquals("BLOCKED",gate(alteredExtent,"native-ui-report").path("status").asText(),"Extent hash mismatch blocks report qualification");
         assertEquals("PASS",gate(alteredExtent,"native-ui").path("status").asText(),"A report-integrity defect does not rewrite the observed UI execution result");
         uiReceipt.put("extentReportSha256",sha(extent));
-        Files.writeString(extent,"<html><body>atf-reporting Extent report "+inlineImages(shot,15)+"</body></html>",StandardCharsets.UTF_8);
+        String captureHref="href=\""+shot+"\"";
+        Files.writeString(extent,originalExtent.replaceFirst(java.util.regex.Pattern.quote(captureHref),"href=\"#missing\""));
         uiReceipt.put("extentReportSha256",sha(extent));
         Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
         var missingScreenshots=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
         assertEquals("BLOCKED",gate(missingScreenshots,"native-ui-report").path("status").asText(),"Each native checkpoint needs an inline source PNG");
         assertEquals("PASS",gate(missingScreenshots,"native-ui").path("status").asText());
-        Files.writeString(extent,"<html><body>atf-reporting Extent report "+inlineImages("data:image/png;base64,AAAA",16)+"</body></html>",StandardCharsets.UTF_8);
+        Files.writeString(extent,originalExtent.replaceFirst(java.util.regex.Pattern.quote(shot),"data:image/png;base64,AAAA"));
         uiReceipt.put("extentReportSha256",sha(extent));
         Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
         var malformedScreenshots=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
         assertEquals("BLOCKED",gate(malformedScreenshots,"native-ui-report").path("status").asText(),"Image markers without a valid PNG payload cannot qualify the report");
         assertEquals("PASS",gate(malformedScreenshots,"native-ui").path("status").asText());
-        Files.writeString(extent,"<html><body>atf-reporting Extent report "+inlineImages(shot,16)+"</body></html>",StandardCharsets.UTF_8);
+        String assertionRow="<tr><td>One score value per player</td><td>true</td><td>true</td><td>✅</td></tr>";
+        for(String changed:List.of(
+                originalExtent.replaceFirst(java.util.regex.Pattern.quote(captureHref),"href=\""+pngDataUri(2)+"\""),
+                originalExtent.replaceFirst("href=\"#atf-screenshot-screenshot-1\"","href=\"#atf-screenshot-screenshot-2\""),
+                originalExtent.replaceFirst(java.util.regex.Pattern.quote(assertionRow),
+                        assertionRow.replace("<td>true</td><td>true</td>","<td>true</td><td>false</td>")))) {
+            assertNotEquals(originalExtent,changed);
+            Files.writeString(extent,changed);
+            uiReceipt.put("extentReportSha256",sha(extent));
+            Files.write(ui.resolve("result.json"),JSON().writeValueAsBytes(uiReceipt));
+            var substituted=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
+            assertEquals("BLOCKED",gate(substituted,"native-ui-report").path("status").asText(),
+                    "Rehashing a substituted PNG, a wrong capture reference or an altered actual value cannot qualify the report");
+            assertEquals("PASS",gate(substituted,"native-ui").path("status").asText());
+        }
+        Files.writeString(extent,originalExtent);
         uiReceipt.put("extentReportSha256",sha(extent));
         Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
 
@@ -684,19 +714,16 @@ class ReleaseGovernanceTest {
         if(process.exitValue()!=0)throw new IOException("fixture Git command failed: "+output);
         return output;
     }
-    private static String pngDataUri() throws IOException {
+    private static String pngDataUri(int red) throws IOException {
         var png=new java.io.ByteArrayOutputStream();
         png.write(new byte[]{(byte)0x89,'P','N','G','\r','\n',0x1a,'\n'});
         byte[] ihdr={0,0,0,1,0,0,0,1,8,6,0,0,0};
         writePngChunk(png,"IHDR",ihdr);
         var pixels=new java.io.ByteArrayOutputStream();
-        try(var compressor=new java.util.zip.DeflaterOutputStream(pixels)){compressor.write(new byte[]{0,0,0,0,0});}
+        try(var compressor=new java.util.zip.DeflaterOutputStream(pixels)){compressor.write(new byte[]{0,(byte)red,0,0,0});}
         writePngChunk(png,"IDAT",pixels.toByteArray());
         writePngChunk(png,"IEND",new byte[0]);
         return "data:image/png;base64,"+java.util.Base64.getEncoder().encodeToString(png.toByteArray());
-    }
-    private static String inlineImages(String dataUri,int count) {
-        return ("<img src=\""+dataUri+"\"/>").repeat(count);
     }
     private static void writePngChunk(java.io.ByteArrayOutputStream png,String name,byte[] data) throws IOException {
         byte[] type=name.getBytes(StandardCharsets.US_ASCII);
