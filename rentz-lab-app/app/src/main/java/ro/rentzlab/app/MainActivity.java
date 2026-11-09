@@ -39,6 +39,7 @@ public final class MainActivity extends Activity {
     private boolean active;
     private boolean restorePreviewPending;
     private boolean showSettledTable;
+    private boolean autoPlay;
     private AlertDialog historyDialog;
     private Exception pendingProblem;
     private Runnable unregisterBack = () -> { };
@@ -70,8 +71,10 @@ public final class MainActivity extends Activity {
     }
     private RentzUiText copy() { return new RentzUiText(profile.language()); }
     private void route(String value) {
-        if (screen.equals("GAME") && !value.equals("GAME") && controller.session() != null)
-            preview.reset(controller.session().view());
+        if (screen.equals("GAME") && !value.equals("GAME")) {
+            stopAutoPlay();
+            if (controller.session() != null) preview.reset(controller.session().view());
+        }
         if (value.equals("MENU")) showSettledTable = false;
         screen = value; redraw();
     }
@@ -137,7 +140,10 @@ public final class MainActivity extends Activity {
         if (session == null) { route("MENU"); return; }
         var view = session.view(); var copy = copy();
         boolean forcedPass = session.hasForcedHumanPass();
-        boolean automaticTurn = session.hasPendingBotTurn() || forcedPass;
+        boolean playable = view.phase() == RentzMatch.Phase.CHOOSE || view.phase() == RentzMatch.Phase.PLAY;
+        if (!playable) stopAutoPlay();
+        boolean automatedHumanTurn = autoPlay && session.hasPendingHumanDecision();
+        boolean automaticTurn = session.hasPendingBotTurn() || forcedPass || automatedHumanTurn;
         long now = SystemClock.uptimeMillis();
         var visible = preview.display(view, now); boolean holding = preview.remaining(now) > 0;
         var permit = new InputPermit(session.save().commands().size(), frame);
@@ -173,6 +179,22 @@ public final class MainActivity extends Activity {
         heading.setSingleLine(true); heading.setEllipsize(android.text.TextUtils.TruncateAt.END);
         heading.setContentDescription(title);
         header.addView(heading, new LinearLayout.LayoutParams(0, views.dp(48), 1f));
+        if (playable) {
+            var toggle = new CheckBox(this);
+            toggle.setText(copy.autoPlay());
+            toggle.setTextSize(13);
+            toggle.setSingleLine(true);
+            toggle.setTextColor(android.graphics.Color.WHITE);
+            toggle.setButtonTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE));
+            toggle.setChecked(autoPlay);
+            toggle.setOnCheckedChangeListener((button, checked) -> {
+                if (!gameFrame(frame)) return;
+                if (checked) autoPlay = true;
+                else stopAutoPlay();
+                redraw();
+            });
+            header.addView(toggle, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, views.dp(48)));
+        }
         page.addView(header);
         var actions = new RentzTablePanel.Actions(
                 () -> command(permit, () -> new GameSession.Command(GameSession.Action.REVEAL, 0, null, null, false)),
@@ -189,13 +211,23 @@ public final class MainActivity extends Activity {
             });
             else animateCollection(panel, frame);
         } else if (automaticTurn && !controller.isBusy()) {
-            Runnable move = forcedPass ? () -> command(permit,
-                    () -> new GameSession.Command(GameSession.Action.PASS, 0, null, null, false)) : controller::resume;
+            Runnable move;
+            if (forcedPass) {
+                move = () -> command(permit, () -> new GameSession.Command(GameSession.Action.PASS, 0, null, null, false));
+            } else if (automatedHumanTurn) {
+                move = controller::resumeHumanTurn;
+            } else {
+                move = controller::resume;
+            }
             TurnPacing.afterVisibleFrame(automaticTurn,
                     preview.remaining(SystemClock.uptimeMillis()) > 0,
                     action -> afterFirstFrame(panel, frame, action),
                     () -> gameFrame(frame) && !controller.isBusy(), display::postDelayed, move);
         }
+    }
+    private void stopAutoPlay() {
+        autoPlay = false;
+        controller.cancelHumanAutomation();
     }
     private void afterFirstFrame(RentzTablePanel panel, long frame, Runnable action) {
         var observer = panel.getViewTreeObserver();
@@ -246,7 +278,9 @@ public final class MainActivity extends Activity {
         });
     }
     private void showFailure(Exception error) {
-        android.util.Log.e("RentzLab", "UI action failed; checkpoint retained", error); screen = "MENU";
+        android.util.Log.e("RentzLab", "UI action failed; checkpoint retained", error);
+        stopAutoPlay();
+        screen = "MENU";
         pendingProblem = active ? null : error;
         if (active) {
             redraw();
@@ -255,7 +289,7 @@ public final class MainActivity extends Activity {
         }
     }
     private void publish() {
-        if (BuildConfig.DEBUG) try { controller.publish(screen); }
+        if (BuildConfig.DEBUG) try { controller.publish(screen, autoPlay); }
         catch (Exception error) { android.util.Log.e("RentzLab", "Debug projection failed", error); }
     }
     private void back() { if (!controller.isBusy()) route("MENU"); }
@@ -281,6 +315,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onPause() {
         active = false; generation++; display.removeCallbacksAndMessages(null);
+        stopAutoPlay();
         picker.dismiss();
         if (historyDialog != null) { historyDialog.setOnDismissListener(null); historyDialog.dismiss(); historyDialog = null; }
         controller.deactivate(); super.onPause();

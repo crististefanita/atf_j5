@@ -15,6 +15,7 @@ public final class RentzUiText {
     public String you() { return text("You", "Tu"); }
     public String humanName(String preferred) { return preferred.isBlank() ? you() : preferred; }
     public String mainMenu() { return text("Main menu", "Meniu principal"); }
+    public String autoPlay() { return text("Auto play", "Joc automat"); }
     public String history() { return text("Score history", "Istoricul scorului"); }
     public String close() { return text("Close", "Închide"); }
     public String back() { return text("Back", "Înapoi"); }

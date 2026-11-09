@@ -62,8 +62,13 @@ public final class GameSession {
         }
     }
     public void advanceBotTurn() {
-        if (!hasPendingBotTurn()) return;
-        int actor = view().turn();
+        var state = view();
+        if (isDecisionPhase(state) && state.turn() != state.seat()) advancePolicyTurn(state.turn());
+    }
+    public void advanceHumanTurn() {
+        if (hasPendingHumanDecision()) advancePolicyTurn(0);
+    }
+    private void advancePolicyTurn(int actor) {
         var observation = match.observe(actor);
         if (observation.phase() == RentzMatch.Phase.CHOOSE) {
             if (!observation.revealed()) apply(new Command(Action.REVEAL, actor, null, null, false));
@@ -76,8 +81,15 @@ public final class GameSession {
     }
     public boolean hasPendingBotTurn() {
         var state = view();
-        return state.turn() != state.seat()
-                && (state.phase() == RentzMatch.Phase.CHOOSE || state.phase() == RentzMatch.Phase.PLAY);
+        return state.turn() != state.seat() && isDecisionPhase(state);
+    }
+    public boolean hasPendingHumanDecision() {
+        var state = view();
+        return state.turn() == state.seat() && isDecisionPhase(state)
+                && (state.phase() == RentzMatch.Phase.CHOOSE || !state.legal().isEmpty());
+    }
+    private static boolean isDecisionPhase(RentzMatch.Observation state) {
+        return state.phase() == RentzMatch.Phase.CHOOSE || state.phase() == RentzMatch.Phase.PLAY;
     }
     public boolean hasForcedHumanPass() {
         var state = view();

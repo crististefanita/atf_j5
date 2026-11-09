@@ -269,7 +269,7 @@
       "criterion": "Every source declares exactly one class, owner and known gate; the retriever rejects path traversal, secret-like names, generated output and unsupported file types.",
       "proof": "docs/feedback/ATF_Release_RAG.md",
       "expires": "2026-11-30",
-      "sha256": "1d57515859acea2bab9bb0365828096be6e191ad663ef6ac30c81c64b58652ed",
+      "sha256": "9b05b6e0126cfebb3c4ad70e0813c4902b199547c08f884a68f5dd7e1a84bb49",
       "allowDelete": false
     },
     {

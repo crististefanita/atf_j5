@@ -40,6 +40,18 @@ Comanda umană se salvează înaintea următorului cadru. Worker-ul reconstruie�
 | Salvarea continuării | Verificarea proprietarului și IO sunt în aceeași secțiune serializată; un eșec nu adoptă candidatul. |
 | Callback | Este executat numai pentru proprietarul activ; un callback deja pus în coadă poate deveni invalid. |
 
+## Joc automat pentru locul tău
+
+Bifa **Joc automat** deleagă deciziile pentru mâna curentă. Pornește debifată. AI-ul folosește dificultatea partidei și observația locului tău. Când trebuie ales contractul, își dezvăluie mâna și alege dintre contractele disponibile. În joc, aplică o mutare legală după pauza vizuală obișnuită. Pasul obligatoriu în Rentz se aplică și în modul manual.
+
+| Eveniment | Efect |
+|---|---|
+| Debifezi jocul automat | O decizie proprie aflată în așteptare își pierde dreptul de a fi salvată. Tura adversarului poate continua. |
+| Ieși din masă sau aplicația intră în pauză | Acordul se încheie. La revenire pornești de la ultima mutare salvată, cu bifa oprită. |
+| Mâna se punctează | AI-ul se oprește la scor. Jucătorul pornește mâna următoare. |
+
+Comenzile delegate folosesc același jurnal ca mutările manuale. Setarea rămâne în activitate, astfel că formatul salvării este același. [Componentele Joc automat](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java) verifică o alegere legală, revocarea unei decizii aflate în livrare și mâini complete de Rentz și Whist până la scor.
+
 ## Suspendare, înlocuire și reluare
 
 | Eveniment | Comportament |

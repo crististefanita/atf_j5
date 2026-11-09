@@ -6,6 +6,8 @@
     {"path": "docs/feedback/ATF_Release_RAG.md", "class": "contract", "owner": "release-review", "gate": "policy"},
     {"path": "docs/feedback/ATF_Rentz.md", "class": "feedback", "owner": "rentz-product", "gate": "policy"},
     {"path": "docs/rentz/ATF_Release.md", "class": "normative", "owner": "release", "gate": "policy"},
+    {"path": "docs/rentz/ATF_Lifecycle.md", "class": "normative", "owner": "rentz-android", "gate": "android-jvm"},
+    {"path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java", "class": "test", "owner": "rentz-android", "gate": "android-jvm"},
     {"path": "scripts/run-rentz-components.ps1", "class": "gate", "owner": "test-runner", "gate": "offline-regression"},
     {"path": "scripts/run-release-rag.ps1", "class": "gate", "owner": "release-review", "gate": "retrieval"},
     {"path": "atf-tests/tools/run-shared-ui-sanity.ps1", "class": "gate", "owner": "android-e2e", "gate": "native-ui"},

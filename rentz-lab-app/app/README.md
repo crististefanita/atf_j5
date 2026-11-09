@@ -30,6 +30,8 @@ La reluarea unei mâini punctate, masa prezintă ultima levată din salvare. Că
 
 [Contractul de lifecycle](../../docs/rentz/ATF_Lifecycle.md) explică ordinea checkpoint-urilor, reluarea și limita calificării JVM. Politica AI primește numai observația permisă, chiar dacă motorul de fundal reconstruiește privat partida din seed și jurnal.
 
+Pe masă, bifa **Joc automat** îi dă AI-ului locul tău pentru mâna curentă. Poți debifa în timpul jocului. La scor sau la revenirea în aplicație, controlul este din nou manual. [Contractul delegării](../../docs/rentz/ATF_Lifecycle.md#joc-automat-pentru-locul-tău)
+
 ## Salvare și reluare
 
 ```mermaid
