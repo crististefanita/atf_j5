@@ -156,9 +156,9 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 
 Distribuiți candidatul numai după calificarea RAG locală și verificarea semnăturii. Folosiți un canal cu acces restricționat la conturile permise. Un prerelease GitHub dintr-un repository public are aceeași vizibilitate publică a artefactelor.
 
-- Verificați lista de permisiuni și descărcați APK-ul cu un cont autorizat. Confruntați dimensiunea și SHA-256 cu binarul calificat.
-- Pentru canalul restricționat, poarta de descărcare obligatorie folosește numai contul autorizat. Verificați permisiunile furnizorului pentru a confirma că accesul este limitat la conturi sau grupuri explicite.
-- Publicați secțiunea separată **Ediție cu acces autorizat** în README, cu tagul sursei și linkul furnizorului. Păstrați ediția publică în **Jocul**. Dosarul din `release/restricted-<versiune>.json` identifică ediția autorizată fără a include APK-ul sau date de cont.
+- Confirmați prin API că repository-ul GitHub al artefactelor este privat înainte de upload. Un repository privat separat, al aceluiași proprietar, permite păstrarea accesului existent la surse. Tagul din ambele repository-uri identifică același commit calificat.
+- Verificați permisiunile și descărcați APK-ul și fișierul SHA-256 din GitHub Releases cu un cont autorizat. Confruntați dimensiunea, digestul și numele fișierului cu binarul calificat. Păstrați dovada în dosarul extern, fără acreditări sau URL-uri temporare.
+- După publicare, puneți pagina release-ului și linkul direct către APK în secțiunea **Ediție cu acces autorizat** din README și verificați linkurile din commitul împins. Secțiunea **Jocul** păstrează ediția publică. Registrul `release/restricted-<versiune>.json` identifică ediția autorizată.
 - După push, folosiți `verify-release-readme.ps1 -Restricted` cu raportul RAG local calificat și proba de descărcare autentificată. Pentru rularea din același snapshot, `run-release-rag.ps1 -PublicationEvidence <dovezi> -RestrictedPublication` selectează aceeași verificare.
 
 ### Rută publică de rezervă

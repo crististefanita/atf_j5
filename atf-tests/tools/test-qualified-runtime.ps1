@@ -333,6 +333,51 @@ Case 'Restricted publication requires authorized bytes and explicit access' {
         Require $rejected "Restricted gate admitted mutation: $mutation"
     }
 }
+$githubRestrictedCase = 'GitHub edition requires a private repository, exact tag and verified checksum'
+Case $githubRestrictedCase {
+    $tokens=$null;$errors=$null
+    $scriptPath=Join-Path $project 'scripts/verify-release-readme.ps1'
+    $ast=[Management.Automation.Language.Parser]::ParseFile($scriptPath,[ref]$tokens,[ref]$errors)
+    Require (-not$errors) 'README verifier does not parse'
+    $definition=$ast.Find({param($node) $node-is[Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-ceq'Confirm-RestrictedApk'},$true)
+    . ([scriptblock]::Create($definition.Extent.Text))
+    $apk='RentzLab-0.11.0.apk'
+    $file=Join-Path $fixture "authenticated-$apk"
+    $checksum="$file.sha256"
+    [IO.File]::WriteAllText($file,'Qualified GitHub artifact fixture')
+    $digest=Hash $file
+    $source='0123456789abcdef0123456789abcdef01234567'
+    $sourceRepo='owner/source'
+    $releaseRepo='owner/editions'
+    $proof=[ordered]@{
+        status='PASS';scope='RESTRICTED_TEST_DISTRIBUTION';version='0.11.0';sourceCommit=$source
+        releaseRepository=$releaseRepo;repositoryPrivate=$true;repositoryVisibility='private'
+        releaseId=42;assetId=43;releaseState='PUBLISHED';tag='v0.11.0';tagCommit=$source
+        releaseUrl="https://github.com/$releaseRepo/releases/tag/v0.11.0"
+        link="https://github.com/$releaseRepo/releases/download/v0.11.0/$apk"
+        authenticated=@{provider='GitHub';status='PASS';http=200;bytes=(Get-Item $file).Length;sha256=$digest}
+    }
+    $fixtureJson=ConvertTo-Json $proof -Depth 5
+    [IO.File]::WriteAllText($checksum,"$digest  $apk")
+    Require ((Confirm-RestrictedApk (ConvertFrom-Json $fixtureJson) $file '0.11.0' $source $digest $sourceRepo)-ceq$proof.link) 'Private GitHub fixture did not qualify'
+    foreach($mutation in @('public','wrong-visibility','draft','wrong-tag','wrong-link','wrong-owner','wrong-checksum','missing-checksum')){
+        $bad=ConvertFrom-Json $fixtureJson
+        [IO.File]::WriteAllText($checksum,"$digest  $apk")
+        switch($mutation){
+            public {$bad.repositoryPrivate=$false}
+            'wrong-visibility' {$bad.repositoryVisibility='public'}
+            draft {$bad.releaseState='DRAFT'}
+            'wrong-tag' {$bad.tagCommit='0123456789abcdef0123456789abcdef01234568'}
+            'wrong-link' {$bad.link=$bad.releaseUrl}
+            'wrong-owner' {$bad.releaseRepository='another/editions'}
+            'wrong-checksum' {[IO.File]::WriteAllText($checksum,"$digest  another.apk")}
+            'missing-checksum' {Remove-Item -LiteralPath $checksum}
+        }
+        $rejected=$false
+        try {Confirm-RestrictedApk $bad $file '0.11.0' $source $digest $sourceRepo | Out-Null}catch{$rejected=$true}
+        Require $rejected "Private GitHub gate admitted mutation: $mutation"
+    }
+}
 $failed=@($results|Where-Object status -EQ FAIL)
 [ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;productFixtures=$product;scope='Byte fixtures, injected Java recorder and extracted publication block; no real JVM body, game, full native launcher or device';results=$results}|ConvertTo-Json -Depth 7|Set-Content "$RunRoot/controls.json" -Encoding utf8NoBOM
 $results|Format-Table name,status -AutoSize

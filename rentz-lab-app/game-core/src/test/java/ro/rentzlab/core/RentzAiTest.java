@@ -23,6 +23,58 @@ class RentzAiTest {
         for(int seat=2;seat<4;seat++)game.play(seat,LabPolicy.card(game.observe(seat)));
         assertEquals(0,game.history().get(0).points().get(1));assertEquals(-100,game.history().get(0).points().get(0));
     }
+
+    @Test void negativeDiscardProtectsTheNewPublicMinimumAfterTheSevenWasPlayed() {
+        var hand = cards("H7 H8 H9 D7 D8 D9 S8");
+        var before = discardView(Contract.TRICKS, hand, cards("C7"));
+        var after = discardView(Contract.TRICKS, hand, cards("C7 S7"));
+        assertEquals(c("S8"), TacticalPolicy.card(before, scoring, PolicySettings.defaults()));
+        assertEquals(c("H9"), TacticalPolicy.card(after, scoring, PolicySettings.defaults()));
+        assertEquals(c("H9"), TacticalPolicy.card(before, scoring, PolicySettings.handMarginReference()));
+    }
+
+    @Test void aPubliclyLosingLeadSpendsTheHighestSafeCardAndKeepsTheLowest() {
+        var hand = cards("C7 C10 D9 H9");
+        var view = publicView(Contract.TOTALS, hand, cards("C8 C9"), List.of());
+        assertEquals(c("C10"), TacticalPolicy.card(view, scoring, PolicySettings.defaults()));
+        assertEquals(c("C7"), TacticalPolicy.card(view, scoring, PolicySettings.handMarginReference()));
+    }
+
+    @Test void bothDifficultiesSpendTheJackUnderAQueenWhenEveryFollowLoses() {
+        var opening = deal(Map.of(0, cards("CQ"), 1, cards("CJ C8 D7 D8 D9 H7 H8 S7")));
+        var game = game(opening, Contract.TRICKS);
+        game.play(0, c("CQ"));
+        var view = game.observe(1);
+        var normal = new RentzPlayer(RentzPlayer.Difficulty.NORMAL, scoring, PolicySettings.defaults()).card(view);
+        var hard = new SearchPolicy(scoring, PolicySettings.defaults()).card(view);
+        assertEquals(c("CJ"), normal.selected());
+        assertEquals(c("CJ"), hard.selected());
+        assertEquals("PUBLIC_HIGHEST_FORCED_LOSER", hard.method());
+        assertEquals(0, hard.worlds());
+        for (var capture : List.of(Contract.WHIST, Contract.TEN_CLUBS)) {
+            var positive = game(opening, capture);
+            positive.play(0, c("CQ"));
+            assertEquals(c("C8"), TacticalPolicy.card(positive.observe(1), scoring, PolicySettings.defaults()));
+        }
+    }
+
+    @Test void avoidingTricksNeverKeepsTheKingOfHeartsOverAFreePenaltyDiscard() {
+        var hand = cards("H7 HK HA D7 D8 D9 S8");
+        var view = discardView(Contract.KING_HEARTS, hand, cards("C7 S7"));
+        assertEquals(c("HK"), TacticalPolicy.card(view, scoring, PolicySettings.defaults()));
+    }
+
+    private static RentzMatch.Observation discardView(Contract contract, List<Card> hand, List<Card> seen) {
+        return publicView(contract, hand, seen, List.of(new TrickRules.Play(0, c("C7"))));
+    }
+
+    private static RentzMatch.Observation publicView(Contract contract, List<Card> hand, List<Card> seen,
+            List<TrickRules.Play> trick) {
+        return new RentzMatch.Observation(1, 4, 1, 0, 1, RentzMatch.Phase.PLAY, contract, false, true,
+                hand, hand, List.of(7, hand.size(), 8, 8), List.of(0, 0, 0, 0), List.of(0, 0, 0, 0),
+                List.of(), trick, seen, List.of(), List.of(), Set.of(), List.of());
+    }
+
     @Test void safeLoserDisposesOfHigherStrengthAndLastWinnerSpendsTheCheapestCard() {
         var negative=game(deal(Map.of(0,cards("CA"),1,cards("C8 C10 CQ D7 D8 D9 H7 S7"))),Contract.TRICKS);
         negative.play(0,c("CA"));assertEquals(c("CQ"),TacticalPolicy.card(negative.observe(1),scoring,settings));

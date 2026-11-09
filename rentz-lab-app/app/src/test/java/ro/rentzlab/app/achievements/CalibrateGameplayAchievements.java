@@ -82,7 +82,7 @@ public final class CalibrateGameplayAchievements {
                 }
             }
             for (var badge : GameplayAchievementCatalog.badges()) {
-                if (!eligible(badge.id(), cell)) continue;
+                if (!GameplayAchievementCatalog.supportsTable(badge, cell.players(), cell.run().difficulty())) continue;
                 var rates = badgeRates.computeIfAbsent(badge.id(), ignored -> new ArrayList<>());
                 for (int length : plan.campaigns()) rates.add(rate(cell, badge, length, campaigns));
             }
@@ -147,9 +147,11 @@ public final class CalibrateGameplayAchievements {
         int chooser = run.mode() == Mode.PRODUCT ? 0 : (int) Math.floorMod(seed, players);
         var match = new RentzMatch(players, seed, scoring, chooser);
         var recorder = new AchievementHand.Recorder(players);
-        var normal = new RentzPlayer(Difficulty.NORMAL, scoring, PolicySettings.defaults());
-        var hardSettings = new PolicySettings(hard.worlds(), .05, 3, .3, 2, PolicySettings.Objective.HAND_MARGIN,
-                PolicySettings.Tactic.LEGACY, hard.maxTransitions());
+        var product = PolicySettings.defaults();
+        var normal = new RentzPlayer(Difficulty.NORMAL, scoring, product);
+        var hardSettings = new PolicySettings(hard.worlds(), product.riskWeight(), product.ownChainWeight(),
+                product.releaseWeight(), product.skipThreatWeight(), product.objective(), product.tactic(),
+                hard.maxTransitions());
         var bounded = new RentzPlayer(Difficulty.HARD, scoring, hardSettings);
         var random = new Random(seed ^ 0x428b42ffL);
         var hands = new ArrayList<AchievementHand>();
@@ -259,11 +261,4 @@ public final class CalibrateGameplayAchievements {
         return progress;
     }
 
-    private static boolean eligible(String id, Cell cell) {
-        return switch (id) {
-            case "play-rentz-large-first" -> cell.players() >= 5;
-            case "play-hard-large-win" -> cell.players() >= 5 && cell.run().difficulty() == Difficulty.HARD;
-            default -> true;
-        };
-    }
 }

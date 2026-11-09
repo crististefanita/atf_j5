@@ -12,25 +12,54 @@ foreach($path in @($RagReport, $PublicationEvidence, $RunRoot)){
 }
 if(Test-Path -LiteralPath $RunRoot){throw 'Use a fresh external README verification directory.'}
 
-function Confirm-RestrictedApk($Proof,[string]$File,[string]$Version,[string]$Source,[string]$Digest){
+function Confirm-RestrictedApk($Proof,[string]$File,[string]$Version,[string]$Source,[string]$Digest,[string]$SourceRepository){
     if($Proof.status -cne 'PASS' -or $Proof.scope -cne 'RESTRICTED_TEST_DISTRIBUTION' -or
-        $Proof.version -cne $Version -or $Proof.sourceCommit -cne $Source -or
-        $Proof.driveFileId -cnotmatch '^[A-Za-z0-9_-]{10,}$' -or
-        $Proof.link -cnotmatch ('^https://drive\.google\.com/file/d/'+[regex]::Escape($Proof.driveFileId)+'/view(?:\?usp=drivesdk)?$')){
-        throw 'Restricted publication does not identify the qualified version, source and Drive file.'
-    }
-    $permissions = @($Proof.permissions | Where-Object {$_})
-    if(-not $permissions.Count -or -not @($permissions | Where-Object {$_.type -ceq 'user' -and $_.role -ceq 'owner'}).Count -or
-        @($permissions | Where-Object {$_.type -cnotin @('user','group')}).Count){
-        throw 'Restricted publication requires explicit Drive permissions and excludes anonymous or domain access.'
+        $Proof.version -cne $Version -or $Proof.sourceCommit -cne $Source){
+        throw 'Restricted publication does not identify the qualified version and source.'
     }
     $copy = $Proof.authenticated
-    if($copy.provider -cne 'Google Drive' -or $copy.status -cne 'PASS' -or $copy.sha256 -cne $Digest -or
+    if($copy.status -cne 'PASS' -or $copy.sha256 -cne $Digest -or
         ($copy.bytes -isnot [long] -and $copy.bytes -isnot [int]) -or $copy.bytes -le 0 -or
         -not (Test-Path -LiteralPath $File -PathType Leaf) -or
         (Get-Item -LiteralPath $File).Length -ne $copy.bytes -or
         (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash -ine $Digest){
         throw 'Authenticated APK bytes do not match the qualified artifact.'
+    }
+    switch -CaseSensitive ($copy.provider){
+        'GitHub' {
+            $repository = $Proof.releaseRepository
+            $tag = "v$Version"
+            $apk = "RentzLab-$Version.apk"
+            if($SourceRepository -cnotmatch '^[A-Za-z0-9-]+/[A-Za-z0-9_.-]+$' -or
+                $repository -cnotmatch '^[A-Za-z0-9-]+/[A-Za-z0-9_.-]+$' -or
+                ($repository -split '/')[0] -cne ($SourceRepository -split '/')[0] -or
+                $Proof.repositoryPrivate -isnot [bool] -or -not $Proof.repositoryPrivate -or
+                $Proof.repositoryVisibility -cne 'private' -or $Proof.releaseId -le 0 -or
+                $Proof.assetId -le 0 -or $Proof.releaseState -cne 'PUBLISHED' -or
+                $Proof.tag -cne $tag -or $Proof.tagCommit -cne $Source -or $copy.http -ne 200 -or
+                $Proof.releaseUrl -cne "https://github.com/$repository/releases/tag/$tag" -or
+                $Proof.link -cne "https://github.com/$repository/releases/download/$tag/$apk"){
+                throw 'GitHub distribution requires a published asset in a verified private repository, bound to the qualified tag.'
+            }
+            $checksum = Join-Path (Split-Path -Parent $File) "authenticated-$apk.sha256"
+            if(-not (Test-Path -LiteralPath $checksum -PathType Leaf) -or
+                [IO.File]::ReadAllText($checksum).Trim() -cne "$Digest  $apk"){
+                throw 'The authenticated GitHub checksum does not match the qualified APK.'
+            }
+        }
+        'Google Drive' {
+            if($Proof.driveFileId -cnotmatch '^[A-Za-z0-9_-]{10,}$' -or
+                $Proof.link -cnotmatch ('^https://drive\.google\.com/file/d/'+[regex]::Escape($Proof.driveFileId)+'/view(?:\?usp=drivesdk)?$')){
+                throw 'Restricted publication does not identify the qualified Drive file.'
+            }
+            $permissions = @($Proof.permissions | Where-Object {$_})
+            if(-not $permissions.Count -or
+                -not @($permissions | Where-Object {$_.type -ceq 'user' -and $_.role -ceq 'owner'}).Count -or
+                @($permissions | Where-Object {$_.type -cnotin @('user','group')}).Count){
+                throw 'Restricted publication requires explicit Drive permissions and excludes anonymous or domain access.'
+            }
+        }
+        default { throw 'Unknown authenticated APK provider.' }
     }
     return $Proof.link
 }
@@ -56,8 +85,8 @@ $repository = $rag.candidate.repository
 $sectionName = 'Jocul'
 if($Restricted){
     $proof = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'restricted-download.json') -Raw | ConvertFrom-Json
-    $direct = Confirm-RestrictedApk $proof (Join-Path $PublicationEvidence "authenticated-$apk") $version $source $digest
-    $releaseUrl = "https://github.com/$repository/tree/$tag"
+    $direct = Confirm-RestrictedApk $proof (Join-Path $PublicationEvidence "authenticated-$apk") $version $source $digest $repository
+    $releaseUrl = if($proof.authenticated.provider -ceq 'GitHub'){ $proof.releaseUrl }else{ "https://github.com/$repository/tree/$tag" }
     $sectionName = 'Ediție cu acces autorizat'
 }else{
     $github = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'github-release.json') -Raw | ConvertFrom-Json
@@ -122,6 +151,11 @@ if($Restricted){
         $tracked.sourceCommit -cne $source -or $tracked.apkSha256 -cne $digest -or $tracked.link -cne $direct -or
         $tracked.channel -cne 'authenticated-only'){
         throw 'The pushed restricted distribution record differs from the qualified download.'
+    }
+    if($proof.authenticated.provider -ceq 'GitHub' -and
+        ($tracked.provider -cne 'GitHub' -or $tracked.releaseRepository -cne $proof.releaseRepository -or
+         $tracked.releaseId -ne $proof.releaseId -or $tracked.assetId -ne $proof.assetId)){
+        throw 'The pushed distribution record refers to a different GitHub release or asset.'
     }
 }elseif($catalog.currentVersion -cne $version){
     throw 'The pushed release catalog does not identify the verified APK version.'

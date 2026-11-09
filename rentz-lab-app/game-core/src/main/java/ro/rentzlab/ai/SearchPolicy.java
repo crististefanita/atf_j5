@@ -1,6 +1,7 @@
 package ro.rentzlab.ai;
 
 import ro.rentzlab.core.*;
+import ro.rentzlab.ai.tactics.VoidTactics;
 
 import java.util.*;
 
@@ -32,6 +33,13 @@ public final class SearchPolicy {
         if(view.contract()==Contract.RENTZ) {
             var ace=options.stream().filter(c->c.rank()==14).findFirst();
             if(ace.isPresent())return new Decision<>(ace.get(),0,"PUBLIC_ACE_EXTRA_TURN",Collections.emptyList());
+        }
+        if (settings.tactic() == PolicySettings.Tactic.PUBLIC_VOID_AWARE && VoidTactics.avoidance(view.contract())) {
+            Card loser = VoidTactics.highestForcedLoser(view);
+            if (loser != null) return new Decision<>(loser, 0, "PUBLIC_HIGHEST_FORCED_LOSER", Collections.emptyList());
+            Card preferred = TacticalPolicy.card(view, scoring, settings);
+            options.remove(preferred);
+            options.add(0, preferred);
         }
         return evaluate(view,options,false);
     }

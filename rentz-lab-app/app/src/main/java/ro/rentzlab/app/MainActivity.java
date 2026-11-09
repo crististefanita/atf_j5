@@ -108,9 +108,10 @@ public final class MainActivity extends Activity {
     private void showAchievements(RentzUiText copy, AchievementBrowser.Collection collection) {
         var session = controller.session();
         var latest = session == null ? null : session.latestAchievementHand();
+        var table = session == null ? null : new AchievementBrowser.Table(session.view().players(), session.difficulty());
         boolean isTraining = collection == AchievementBrowser.Collection.TRAINING;
         new RentzAchievementsScreen(views).show(copy, copy.humanName(profile.preferredName()), controller.achievements(),
-                latest, isTraining ? training : achievements, collection, this::profile,
+                latest, isTraining ? training : achievements, collection, table, this::profile,
                 () -> route("TRAINING"), this::back);
     }
     private void language(int index) {

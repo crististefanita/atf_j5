@@ -56,8 +56,9 @@ Politica primește `Observation`, nu `RentzMatch`, generatorul sau fișierele ar
 
 | Context | Mecanism | Tip |
 |---|---|---|
-| Negativ, actor fără culoarea cerută | Aruncă o contribuție penalizată; departajează prin puterea eliminată. | Regulă locală. |
-| Negativ, carte sigur pierzătoare | Candidatul elimină întâi contribuția penalizată, apoi puterea; reperul păstrează rangul maxim. | Preferință locală, fără etichetă de optimalitate globală. |
+| Negativ, actor fără culoarea cerută | Elimină penalitatea disponibilă. La penalități egale, protejează ieșirile mici și preferă culorile scurte când adversarii mai au cărți din ele. | Numără cărțile nevăzute mai mari și mai mici din culoare. |
+| Negativ, toate cărțile din culoarea cerută pierd | Joacă rangul cel mai mare care pierde sigur. De exemplu, sub damă, joacă valetul și păstrează cartea mai mică. | Normal aplică regula direct, iar Hard închide decizia pe baza levatei publice. |
+| Negativ, la deschiderea levatei | Dacă toate cărțile adverse rămase din culoare sunt mai mari, tactica locală folosește cea mai mare ieșire sigur pierzătoare. | Păstrează rangurile mici pentru alte levate. Hard poate compara continuările. |
 | Negativ, ultimul actor obligat să câștige | Candidatul minimizează costul propriei cărți, apoi elimină puterea mare la cost egal. | Penalitatea deja pe masă este aceeași pentru toate alternativele. |
 | Zece de treflă cu dovadă publică | Fără treflă mai mare necunoscută în afara mâinii, folosește ieșirea câștigătoare și capturează ținta. | În `HAND_MARGIN`, dovada închide decizia fără sampling; nu certifică orizontul complet. |
 | Whist pozitiv, ultimul loc | Câștigă cu cel mai mic câștigător disponibil. | Rang verificabil în levata completată. |
@@ -71,7 +72,7 @@ Coeficienții din `PolicySettings` sunt fixați de candidat. Contextul se schimb
 |---|---|
 | YAML de strategie | `PolicyInputs` verifică schema, parametrii și legăturile către cod/teste. Schema reperului are probă de paritate cu fabrica; schema candidatului declară separat obiectivul complet. |
 | Arena JVM | Protocolul fixează fișierul de politică, obiectivul, bugetul și familiile înainte de expunerea datelor. `HARD_REFERENCE` este reper de evaluare păstrat, nu al treilea nivel din meniu. |
-| Aplicația Android | Folosește fabrica `PolicySettings.defaults()` din APK; nu citește YAML din directorul proiectului și nu actualizează ponderi în fundal. |
+| Aplicația Android | Folosește `PolicySettings.defaults()` din APK cu tactica `PUBLIC_VOID_AWARE`. Politica de referință pentru comparații rămâne `handMarginReference()`. |
 
 Schimbarea valorilor implicite cere actualizarea configurației, a fabricii și a verificării lor, apoi reconstruirea candidatului. Un profil diferit transmis explicit motorului are identitate distinctă în evaluare.
 

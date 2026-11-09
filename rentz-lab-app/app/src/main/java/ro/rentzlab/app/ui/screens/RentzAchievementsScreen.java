@@ -72,11 +72,12 @@ public final class RentzAchievementsScreen {
     public RentzAchievementsScreen(ScreenViews views) { this.views = views; }
 
     public void show(RentzUiText copy, String name, AchievementProgress progress, AchievementHand latest, State state,
-            AchievementBrowser.Collection collection, Runnable profile, Runnable training, Runnable back) {
+            AchievementBrowser.Collection collection, AchievementBrowser.Table table, Runnable profile,
+            Runnable training, Runnable back) {
         views.applyTableWindowChrome();
         var page = views.gamePage();
         boolean isTraining = collection == AchievementBrowser.Collection.TRAINING;
-        var browser = new AchievementBrowser(copy, progress, latest, collection);
+        var browser = new AchievementBrowser(copy, progress, latest, collection, table);
         views.addText(page, isTraining ? copy.training() : copy.achievements(), 22, Color.WHITE, true, 8, 4);
         tableAction(page, copy.text("Local profile", "Profil local") + " · " + name, profile);
         views.addText(page, copy.text("Unlocked ", "Deblocate ") + browser.unlocked() + "/" + browser.total(),

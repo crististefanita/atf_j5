@@ -1,6 +1,7 @@
 package ro.rentzlab.ai;
 
 import ro.rentzlab.core.*;
+import ro.rentzlab.ai.tactics.VoidTactics;
 
 import java.util.*;
 
@@ -18,7 +19,13 @@ public final class TacticalPolicy {
             Card local=ro.rentzlab.ai.tactics.TargetTactics.negativeFollow(view,scoring);if(local!=null)return local;
         }
         if(view.contract()==Contract.RENTZ)return sequence(view,settings);
+        boolean voidAware = ownContinuation && settings.tactic() == PolicySettings.Tactic.PUBLIC_VOID_AWARE
+                && VoidTactics.avoidance(view.contract());
         if(view.trick().isEmpty()) {
+            if (voidAware) {
+                Card loser = VoidTactics.losingLead(view);
+                if (loser != null) return loser;
+            }
             if(view.contract()==Contract.WHIST)return highest(view.legal());
             if(view.contract()==Contract.TEN_CLUBS)return view.legal().stream().filter(c->!target(c,Card.Suit.CLUBS,10)).min(order()).orElse(view.legal().get(0));
             return lowest(view.legal());
@@ -26,6 +33,7 @@ public final class TacticalPolicy {
         Card.Suit suit=view.trick().get(0).card().suit();
         boolean follows=view.legal().get(0).suit()==suit;
         if(!follows) {
+            if (voidAware) return VoidTactics.discard(view, card -> penalty(card, view.contract(), scoring));
             if(view.contract()==Contract.WHIST||view.contract()==Contract.TEN_CLUBS)
                 return view.legal().stream().filter(c->view.contract()!=Contract.TEN_CLUBS||!target(c,Card.Suit.CLUBS,10)).min(order()).orElse(view.legal().get(0));
             return view.legal().stream().max(Comparator.<Card>comparingInt(c->penalty(c,view.contract(),scoring)).thenComparing(order())).orElseThrow(java.util.NoSuchElementException::new);

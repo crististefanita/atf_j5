@@ -20,6 +20,24 @@ public final class GameplayAchievementCatalog {
         final Unit unit;
         Metric(Unit unit) { this.unit = unit; }
 
+        boolean supportsTable(int players, Difficulty difficulty) {
+            return switch (this) {
+                case RENTZ_LARGE_FIRST -> players >= 5;
+                case HARD_LARGE_WIN -> players >= 5 && difficulty == Difficulty.HARD;
+                default -> true;
+            };
+        }
+
+        boolean coversContract(Contract contract) {
+            return switch (this) {
+                case RENTZ_SEQUENCE, RENTZ_TOP_TWO, RENTZ_LARGE_FIRST -> contract == Contract.RENTZ;
+                case CLEAN_TOTALS -> contract == Contract.TOTALS;
+                case CONTRACT, TARGET, CONTRACT_TARGET -> true;
+                default -> false;
+            };
+        }
+
+
         boolean matches(AchievementHand hand) {
             return switch (this) {
                 case HAND, CONTRACT -> true;
@@ -27,13 +45,11 @@ public final class GameplayAchievementCatalog {
                 case TARGET, CONTRACT_TARGET -> AchievementCatalog.target(hand);
                 case RENTZ_SEQUENCE -> isRentz(hand) && (hand.tactics().has(EXTEND_LOW) || hand.tactics().has(EXTEND_HIGH));
                 case MATCH_FINISHED -> hand.complete();
-                case MATCH_WIN -> hand.complete() && rank(hand) == 1;
+                case MATCH_WIN, HARD_LARGE_WIN -> hand.complete() && rank(hand) == 1;
                 case RENTZ_TOP_TWO -> isRentz(hand) && hand.tactics().has(TOP_TWO);
                 case MATCH_PODIUM -> hand.complete() && rank(hand) <= Math.min(3, hand.players() - 1);
-                case RENTZ_LARGE_FIRST -> isRentz(hand) && hand.players() >= 5 && AchievementCatalog.target(hand);
+                case RENTZ_LARGE_FIRST -> isRentz(hand) && AchievementCatalog.target(hand);
                 case CLEAN_TOTALS -> hand.result().contract() == Contract.TOTALS && hand.tactics().has(NO_TRICKS);
-                case HARD_LARGE_WIN -> hand.complete() && hand.difficulty() == Difficulty.HARD
-                        && hand.players() >= 5 && rank(hand) == 1;
             };
         }
     }
@@ -47,7 +63,8 @@ public final class GameplayAchievementCatalog {
                 case HARD -> Stage.MASTERY;
             };
             return new Badge(id, stage, level, null, metric.unit, target, titleEn, titleRo, ruleEn, ruleRo,
-                    metric.unit == Unit.MATCH ? PlayMode.MANUAL_MATCH : PlayMode.MANUAL, h -> true, metric::matches);
+                    metric.unit == Unit.MATCH ? PlayMode.MANUAL_MATCH : PlayMode.MANUAL,
+                    h -> metric.supportsTable(h.players(), h.difficulty()), metric::matches);
         }
     }
 
@@ -56,6 +73,18 @@ public final class GameplayAchievementCatalog {
     private GameplayAchievementCatalog() { }
 
     public static List<Badge> badges() { return BADGES; }
+
+    public static boolean supportsTable(Badge badge, int players, Difficulty difficulty) {
+        return metricFor(badge).supportsTable(players, difficulty);
+    }
+
+    public static boolean coversContract(Badge badge, Contract contract) {
+        return metricFor(badge).coversContract(contract);
+    }
+
+    private static Metric metricFor(Badge badge) {
+        return RULES.stream().filter(rule -> rule.id().equals(badge.id())).findFirst().orElseThrow().metric();
+    }
 
     private static List<Badge> create() {
         var rows = new ArrayList<Badge>();

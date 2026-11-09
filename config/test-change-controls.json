@@ -9,7 +9,7 @@
       "criterion": "Reproduce the qualified match plan, exact gameplay catalog and chronology from compiled JVM inputs.",
       "proof": "docs/rentz/ATF_Infrastructure.md",
       "expires": "2026-12-09",
-      "sha256": "055f0349d7e2475cc02575529b9ecef6ac89e9d6f33009d856df4265d87e9396",
+      "sha256": "8552b1878fec7e44179df6d015daeac5e993f59d4d1383a9ac20f04e0fe8e1d3",
       "allowDelete": false
     },
     {
@@ -19,7 +19,7 @@
       "criterion": "Require the authenticated artifact bytes and SHA-256, explicit provider permissions, exact source tag, and the pushed download link.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-12-09",
-      "sha256": "3be34bc5152089d26e504f99c5c90dcb6eb89e2e75410f32a8251d4eaaa05ed6",
+      "sha256": "0d76e7fcb695f81859c52be8e8562edec22ccb3d286c48522553ac84c69321a8",
       "allowDelete": false
     },
     {
@@ -29,7 +29,7 @@
       "criterion": "Cover the exact YAML order and thresholds, terminal ranking, provenance, replay and persistence.",
       "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
       "expires": "2026-12-09",
-      "sha256": "d820646b66b49c2ab03138db483525480976084fb61525db7d5030207d61a4b4",
+      "sha256": "27593b0d2b1bf77c28907cdedf51286877cea4f2e81a34d3a7cc5a89bda99380",
       "allowDelete": false
     },
     {
@@ -699,7 +699,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "7a126d5603c450f45c2ab2b7953a67a42c2ca31ffd50c2f3463b78869dd923d2",
+      "sha256": "c9c438681d81a72e6c640197df3956f4d5d569048ae44b409f137973d5427c80",
       "allowDelete": false
     },
     {
@@ -979,7 +979,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "97c7a45fe794db32f94523913f8229d854bbc14b31fd9ff18395fdb9579e6350",
+      "sha256": "f851e79c16fe509dc03a301a0cba22f6186396a0d0347bb61ad54b477028b52c",
       "allowDelete": false
     },
     {
@@ -1199,7 +1199,7 @@
       "criterion": "Gradle versionName and monotonically increasing versionCode match the release catalog candidate.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a91cc7109dc3af8c92c330a8d8c1e2c048a277827cf0dcb62fbb9de6d19ca8eb",
+      "sha256": "4d5128ef075be26de669ba78bd214db4114b4791011fbc7946ecf2b9bbbbc07f",
       "allowDelete": false
     },
     {
@@ -1209,7 +1209,7 @@
       "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "7f2486d01a11dca54f242cf911a6d5221939094cbfce039b1b1bc4149ffbe055",
+      "sha256": "2b66e96ba6bdd689bef0a6f181c384ee5235fb3d0437d95a9ed9541c9529a148",
       "allowDelete": false
     },
     {

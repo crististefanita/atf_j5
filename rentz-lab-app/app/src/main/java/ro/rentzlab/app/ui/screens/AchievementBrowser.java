@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import ro.rentzlab.ai.RentzPlayer.Difficulty;
 import ro.rentzlab.app.achievements.AchievementCatalog;
 import ro.rentzlab.app.achievements.AchievementCatalog.Badge;
 import ro.rentzlab.app.achievements.AchievementCatalog.Level;
@@ -31,6 +32,7 @@ public final class AchievementBrowser {
     }
 
     public record Details(String title, String progress, String rule, String context, String latest) { }
+    public record Table(int players, Difficulty difficulty) { }
 
     private record Entry(long id, Badge badge, String searchable) { }
     private static final Pattern MARKS = Pattern.compile("\\p{M}+");
@@ -41,15 +43,22 @@ public final class AchievementBrowser {
     private final RentzUiText copy;
     private final AchievementProgress progress;
     private final AchievementHand latest;
+    private final Table table;
 
     public AchievementBrowser(RentzUiText copy, AchievementProgress progress, AchievementHand latest) {
         this(copy, progress, latest, Collection.TRAINING);
     }
 
     public AchievementBrowser(RentzUiText copy, AchievementProgress progress, AchievementHand latest, Collection collection) {
+        this(copy, progress, latest, collection, latest == null ? null : new Table(latest.players(), latest.difficulty()));
+    }
+
+    public AchievementBrowser(RentzUiText copy, AchievementProgress progress, AchievementHand latest,
+            Collection collection, Table table) {
         this.copy = copy;
         this.progress = progress;
         this.latest = latest;
+        this.table = table;
         this.collection = collection;
         this.entries = collection == Collection.GAMEPLAY ? GAMEPLAY : TRAINING;
     }
@@ -60,8 +69,21 @@ public final class AchievementBrowser {
     }
 
     public String recommendation() {
-        return entries.stream().map(Entry::badge).filter(badge -> status(badge) != Status.UNLOCKED)
-                .findFirst().map(this::title).orElse(copy.text("All achievements unlocked", "Toate realizările sunt deblocate"));
+        boolean pending = false;
+        for (var entry : entries) {
+            var badge = entry.badge();
+            if (status(badge) == Status.UNLOCKED) continue;
+            if (supportsCurrentTable(badge)) return title(badge);
+            pending = true;
+        }
+        return pending
+                ? copy.text("Change table size or difficulty to continue", "Schimbă numărul de jucători sau dificultatea")
+                : copy.text("All achievements unlocked", "Toate realizările sunt deblocate");
+    }
+
+    private boolean supportsCurrentTable(Badge badge) {
+        return collection != Collection.GAMEPLAY || table == null
+                || GameplayAchievementCatalog.supportsTable(badge, table.players(), table.difficulty());
     }
 
     public List<Row> rows(Query query) {
@@ -85,11 +107,16 @@ public final class AchievementBrowser {
     private boolean matches(Query query, String[] words, Entry entry) {
         var badge = entry.badge();
         return (query.level() == null || query.level() == badge.level())
-                && (query.contract() == null || query.contract() == badge.contract())
+                && (query.contract() == null || matchesContract(badge, query.contract()))
                 && (query.status() == null || query.status() == status(badge))
                 && (query.mode() == null || query.mode() == badge.mode() || badge.mode() == PlayMode.EITHER
                         || query.mode() == PlayMode.MANUAL && badge.mode() == PlayMode.MANUAL_MATCH)
                 && Arrays.stream(words).allMatch(entry.searchable()::contains);
+    }
+
+    private boolean matchesContract(Badge badge, Contract contract) {
+        return collection == Collection.GAMEPLAY ? GameplayAchievementCatalog.coversContract(badge, contract)
+                : contract == badge.contract();
     }
 
     public Details details(Badge badge) {
@@ -98,7 +125,10 @@ public final class AchievementBrowser {
         if (!criteria.isEmpty()) rule += "\n\n" + criteria;
         return new Details(title(badge), summary(badge, count(badge), status(badge)),
                 rule, mode(badge.mode()) + " · " + unit(badge.unit()),
-                switch (badge.eligibility(latest)) {
+                !supportsCurrentTable(badge)
+                        ? copy.text("The current table or difficulty does not meet this goal.",
+                                "Masa sau dificultatea curentă nu îndeplinește cerința.")
+                        : switch (badge.eligibility(latest)) {
                     case NO_HAND -> copy.text("No completed hand in the current match.", "Nu există încă o mână încheiată în partida curentă.");
                     case OTHER_CONTRACT -> copy.text("The last hand used another contract.", "Ultima mână a avut alt contract.");
                     case MATCH_IN_PROGRESS -> copy.text("The final standings are not available yet.", "Clasamentul final nu este încă disponibil.");

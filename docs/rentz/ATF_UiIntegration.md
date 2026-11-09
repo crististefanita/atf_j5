@@ -123,6 +123,7 @@ Pentru acest increment, `-HelpAwardsOnly` parcurge ajutorul în ambele limbi. `-
 ## Realizări și profil local
 
 - Meniul **Realizări** prezintă 15 rezultate confirmate la masă, câte cinci pe nivel. Ordinea recomandă un traseu, iar fiecare obiectiv avansează independent.
+- Recomandarea ține cont de numărul de jucători și de dificultatea partidei curente, inclusiv înainte de prima mână. Obiectivele care cer altă configurație rămân vizibile cu regula lor. Filtrul după contract afișează tacticile contractului și obiectivele de varietate sau de scor la care contribuie.
 - **Antrenament** păstrează catalogul de 800 de obiective și filtrele sale. Identificatorii și dovezile deja salvate rămân valabile când se schimbă ecranul din care sunt accesate.
 - Profilul salvează o identitate aleatorie și fusul orar ales la creare. Numele afișat se poate schimba separat. Sincronizarea între dispozitive și comutarea între profiluri rămân în plan.
 - Progresul se confirmă la închiderea mâinii și se scrie atomic împreună cu partida. Jocul manual, delegarea și pasul obligatoriu au surse distincte. Jurnalele vechi păstrează creditul confirmat, iar obiectivele adăugate încep să numere de la următoarea mână confirmată.

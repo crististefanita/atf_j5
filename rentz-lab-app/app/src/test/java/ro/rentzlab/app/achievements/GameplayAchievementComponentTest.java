@@ -5,6 +5,7 @@ import static ro.rentzlab.app.achievements.AchievementCatalog.*;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -147,9 +148,59 @@ public final class GameplayAchievementComponentTest {
         var third = hand(Contract.TRICKS, true, true, Difficulty.HARD, List.of(42, 51, 60, 33, 24), Set.of());
         var fourth = hand(Contract.TRICKS, true, true, Difficulty.HARD, List.of(33, 51, 60, 42, 24), Set.of());
         check("play-hard-large-win", firstHard, firstNormal);
+        audit.equal("A qualifying rank on the wrong difficulty is a context mismatch", Eligibility.CONTEXT,
+                badge("play-hard-large-win").eligibility(firstNormal));
         check("play-two-podiums", third, fourth);
         check("play-finish-match", firstHard, openingOnly);
         check("play-three-wins", firstHard, third);
+    }
+
+    @Test public void recommendationsRespectTheCurrentTableBeforeTheFirstHand() {
+        var copy = new RentzUiText(RentzUiText.Language.RO);
+        var rentz = badge("play-rentz-large-first");
+        var hard = badge("play-hard-large-win");
+        var marks = new LinkedHashMap<String, List<AchievementProgress.Mark>>();
+        for (var rule : GameplayAchievementCatalog.badges()) {
+            if (rule == rentz || rule == hard) continue;
+            marks.put(rule.id(), java.util.stream.IntStream.range(0, rule.goal())
+                    .mapToObj(i -> new AchievementProgress.Mark("fixture-" + i, NOW)).toList());
+        }
+        var progress = new AchievementProgress(PROFILE, marks);
+        var small = new AchievementBrowser(copy, progress, null, AchievementBrowser.Collection.GAMEPLAY,
+                new AchievementBrowser.Table(4, Difficulty.HARD));
+        audit.equal("A small table is guided to change configuration", "Schimbă numărul de jucători sau dificultatea",
+                small.recommendation());
+        audit.equal("An incompatible goal explains the table requirement before any hand",
+                "Masa sau dificultatea curentă nu îndeplinește cerința.", small.details(rentz).latest());
+        audit.equal("Incompatible goals are still visible", 15L, small.rows(AchievementBrowser.Query.empty()).stream()
+                .filter(row -> row.badge() != null).count());
+        var large = new AchievementBrowser(copy, progress, null, AchievementBrowser.Collection.GAMEPLAY,
+                new AchievementBrowser.Table(5, Difficulty.NORMAL));
+        audit.equal("A large Normal table can pursue the Rentz milestone", rentz.romanian(), large.recommendation());
+        marks.put(rentz.id(), List.of(new AchievementProgress.Mark("fixture-1", NOW),
+                new AchievementProgress.Mark("fixture-2", NOW)));
+        progress = new AchievementProgress(PROFILE, marks);
+        var hardTable = new AchievementBrowser(copy, progress, null, AchievementBrowser.Collection.GAMEPLAY,
+                new AchievementBrowser.Table(5, Difficulty.HARD));
+        audit.equal("The Hard objective is recommended on a qualifying table", hard.romanian(), hardTable.recommendation());
+    }
+
+    @Test public void gameplayContractFilterShowsTacticsAndRelevantScoringGoals() {
+        var copy = new RentzUiText(RentzUiText.Language.RO);
+        var gameplay = new AchievementBrowser(copy, AchievementProgress.empty(PROFILE), null,
+                AchievementBrowser.Collection.GAMEPLAY);
+        var rentz = new AchievementBrowser.Query("", null, Contract.RENTZ, null, null);
+        var totals = new AchievementBrowser.Query("", null, Contract.TOTALS, null, null);
+        audit.equal("Rentz filter shows sequence, placement and contract goals",
+                List.of("play-first-target", "play-three-contracts", "play-rentz-sequence", "play-four-targets",
+                        "play-two-rentz-top-two", "play-eight-targets", "play-rentz-large-first"), filteredIds(gameplay, rentz));
+        audit.equal("Totals filter includes clean hands and cross-contract scoring goals",
+                List.of("play-first-target", "play-three-contracts", "play-four-targets", "play-clean-totals",
+                        "play-eight-targets"), filteredIds(gameplay, totals));
+    }
+
+    private static List<String> filteredIds(AchievementBrowser browser, AchievementBrowser.Query query) {
+        return browser.rows(query).stream().filter(row -> row.badge() != null).map(row -> row.badge().id()).toList();
     }
 
     @Test public void profileCodecAndBrowserKeepTrainingAndGameplayProgressSeparate() throws Exception {
