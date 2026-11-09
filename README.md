@@ -8,8 +8,8 @@ Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări 
 
 ## Ediție cu acces autorizat
 
-- [Sursa Rentz Lab 0.10.0](https://github.com/crististefanita/atf_j5/tree/v0.10.0) · 15 realizări de joc și antrenament separat.
-- [Descarcă APK-ul Rentz Lab 0.10.0](https://drive.google.com/file/d/1P3mxUDBFRFAKp-sIMtf7wIWoTd_WvLhH/view?usp=drivesdk) · Android 8.0+. Folosește contul Google Drive autorizat.
+- [Rentz Lab 0.11.0](https://github.com/crististefanita/atf_j5_releases/releases/tag/v0.11.0) · Tactică defensivă pentru jocurile negative și corecții la realizări.
+- [Descarcă APK-ul Rentz Lab 0.11.0](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.11.0/RentzLab-0.11.0.apk) · Android 8.0+. Autentifică-te în GitHub cu un cont care are acces la ediție.
 
 ## Jocul
 

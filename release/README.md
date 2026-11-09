@@ -10,7 +10,7 @@ Catalogul tehnic reunește candidatul curent, identitatea livrării și dovezile
 
 ## Ediție cu acces autorizat
 
-[Rentz Lab 0.10.0](restricted-0.10.0.json) este distribuit conturilor autorizate. Linkul APK se află în README-ul principal.
+[Rentz Lab 0.11.0](restricted-0.11.0.json) este distribuit conturilor autorizate. Linkul APK se află în README-ul principal.
 
 ## Organizare
 
