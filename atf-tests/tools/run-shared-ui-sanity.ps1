@@ -551,6 +551,15 @@ function ChooseHumanSubgame($state,[switch]$ForceRentz){
     Tap 'Choose game';Tap (HumanContractLabel $contract)
     return (State -After $state.revision)
 }
+function ConfirmNativeCheck($checkpoints,[string]$Title,[string]$Name){
+    $checkpoint=@($checkpoints|Where-Object title -CEQ $Title)
+    if($checkpoint.Count-ne1){throw "Expected exactly one native checkpoint: $Title"}
+    $check=@($checkpoint[0].checks|Where-Object name -CEQ $Name)
+    if($check.Count-ne1-or$check[0].passed-isnot[bool]-or-not$check[0].passed){
+        throw "Missing passing native assertion: $Title / $Name"
+    }
+    return $true
+}
 function RunConsecutiveSubgames($state,[string]$journalFile){
     $selectedContracts=[Collections.Generic.List[string]]::new();$baseSeats='';$playedNormal=$false
     for($deal=1;$deal-le3;$deal++){
@@ -636,7 +645,7 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
             throw "Game $deal did not produce all required native display checkpoints."
         }
         $completedGames.Add([ordered]@{number=$deal;contract=$contract;phase=$terminal.view.phase;handNumber=$terminal.view.handNumber;scoreCount=$terminal.view.dealPoints.Count;
-            seatGeometryVerified=$true;firstHumanMoveVerified=$firstHumanMoveCaptured;completionVerified=($terminal.view.phase-eq'DEAL_END');
+            seatGeometryVerified=$true;firstHumanMoveVerified=(ConfirmNativeCheck $points $moveTitle 'The same seat geometry survives a card play');completionVerified=($terminal.view.phase-eq'DEAL_END');
             rentzFinishOrderVerified=($contract-eq'RENTZ'-and$terminal.view.finishOrder.Count-eq$terminal.view.players)})
     }
     if(-not$playedNormal){throw 'The three-subgame sample did not include a non-Rentz contract for visual comparison.'}

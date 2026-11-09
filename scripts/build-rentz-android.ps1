@@ -4,9 +4,14 @@ param(
     [string]$JavaHome='C:\tools\Java21\jdk-21.0.12.1+1',
     [string]$Sdk='C:\tools\whist-android-sdk',
     [ValidateSet('Debug','Release')][string]$Configuration='Debug',
-    [switch]$UiSanity
+    [switch]$UiSanity,
+    [switch]$UiSanityOnly
 )
 $ErrorActionPreference='Stop'
+if($UiSanityOnly-and($UiSanity-or$Configuration-eq'Release')){
+    throw 'UiSanityOnly builds only the isolated test package with debug signing.'
+}
+$buildUi=$UiSanity-or$UiSanityOnly
 $root=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $root
@@ -18,7 +23,7 @@ if($component.status-ne'PASS'){throw 'Qualified offline component source require
 if($component.collection.name-ne'regression'-or-not$component.androidJvm){throw 'Full offline regression including Android JVM is required before assembling an APK.'}
 $source=$root
 $sourceCommit=''
-if($Configuration-eq'Release'){
+if($Configuration-eq'Release'-or$UiSanityOnly){
     if(-not$component.sourceCommit){throw 'Release requires regression from a pinned source worktree.'}
     $source=[IO.Path]::GetFullPath($component.source)
     $sourceCommit=Get-AtfReleaseSourceCommit -SourceRoot $source -ProjectRoot $root
@@ -74,8 +79,9 @@ try{
         $env:RENTZ_STORE_PASSWORD=[Net.NetworkCredential]::new('rentz',$secure).Password
         $env:RENTZ_STORE_FILE=$identity.store
     }
-    $tasks=@(':game-core:test',':app:testDebugUnitTest',(':app:assemble'+$Configuration))
-    if($UiSanity){$tasks+=@("-Prentz.uiEvidence=$RunRoot/assertions",':app:lintDebug',':app:assembleUiSanity')}
+    $tasks=@(':game-core:test',':app:testDebugUnitTest')
+    if(-not$UiSanityOnly){$tasks+=(':app:assemble'+$Configuration)}
+    if($buildUi){$tasks+=@("-Prentz.uiEvidence=$RunRoot/assertions",':app:lintDebug',':app:assembleUiSanity')}
     & (Join-Path $stage 'gradlew.bat') -p $stage --offline --no-daemon ("-Prentz.mavenRepository="+$component.repository.Replace('\','/')) @tasks *> (Join-Path $RunRoot 'build.log')
     $exit=$LASTEXITCODE
 }finally{$env:JAVA_HOME=$savedJava;$env:JAVA_TOOL_OPTIONS=$savedOptions;$env:RENTZ_STORE_FILE=$savedStore;$env:RENTZ_STORE_PASSWORD=$savedPassword;$secure=$null;$cacheLease.Dispose()}
@@ -97,6 +103,7 @@ $passed=$exit-eq0-and$results.Count-ge2-and@($results|Where-Object{$_.failures-o
 $apk=Join-Path $RunRoot 'rentz-lab-debug.apk';$hash='';$certificate=@();$version=$null;$debuggable=$null;$applicationId='';$apkBytes=0
 $uiApk='';$uiApkHash='';$uiApplicationId='';$uiAuditedCases=0;$uiCertificate=@();$uiApkBytes=0
 if($passed){
+    if(-not$UiSanityOnly){
     $variant=$Configuration.ToLowerInvariant()
     $version=(Get-Content -Raw -LiteralPath (Join-Path $stage "app/build/outputs/apk/$variant/output-metadata.json")|ConvertFrom-Json).elements[0]
     if($Configuration-eq'Release'){$apk=Join-Path $RunRoot ('RentzLab-'+$version.versionName+'.apk')}
@@ -116,9 +123,15 @@ if($passed){
         $actual=($certificate[0]-split':\s*',2)[1].Trim().ToLowerInvariant()
         $passed=$passed-and-not$debuggable-and$actual-eq$identity.certificateSha256
     }elseif($Configuration-eq'Release'){$passed=$false}
-    if($UiSanity){
+    }
+    if($buildUi){
         $uiMetadata=Get-Content -Raw -LiteralPath (Join-Path $stage 'app/build/outputs/apk/uiSanity/output-metadata.json')|ConvertFrom-Json
         if(-not$uiMetadata.elements.Count){throw 'Isolated UI-sanity APK metadata is missing.'}
+        if($UiSanityOnly){
+            $uiVersion=[string]$uiMetadata.elements[0].versionName
+            if(-not$uiVersion.EndsWith('-ui-sanity',[StringComparison]::Ordinal)){throw 'Expected isolated test version suffix'}
+            $version=[pscustomobject]@{versionName=$uiVersion.Substring(0,$uiVersion.Length-10);versionCode=$uiMetadata.elements[0].versionCode}
+        }
         $uiSource=Join-Path $stage ('app/build/outputs/apk/uiSanity/'+$uiMetadata.elements[0].outputFile)
         $uiApk=Join-Path $RunRoot 'rentz-lab-ui-sanity.apk';Copy-Item -LiteralPath $uiSource -Destination $uiApk
         $uiApkHash=(Get-FileHash -LiteralPath $uiApk -Algorithm SHA256).Hash
@@ -141,6 +154,7 @@ if($passed){
         $uiApkBytes=(Get-Item -LiteralPath $uiApk).Length
     }
 }
+if(-not$UiSanityOnly){
 [ordered]@{
     status=$(if($passed){'PASS'}else{'FAIL'})
     uiContract=$(if(Test-Path -LiteralPath (Join-Path $stage 'app/src/main/java/ro/rentzlab/app/ui/table/RentzTableContent.java')){'card-table-ui-v1'}else{'prototype-v1'})
@@ -157,7 +171,8 @@ if($passed){
     signing=$(if($Configuration-eq'Release'){'Dedicated Rentz release identity; external DPAPI credential'}else{'Local Android debug certificate; not an original-app release'})
     tests=$results;drift=$drift;populationChanges=$population
 }|ConvertTo-Json -Depth 7|Set-Content -LiteralPath (Join-Path $RunRoot 'build-qualification.json') -Encoding utf8NoBOM
-if($UiSanity){
+}
+if($buildUi){
     [ordered]@{
         status=$(if($passed){'PASS'}else{'FAIL'});uiSanity=$true;sourceCommit=$sourceCommit
         applicationId=$uiApplicationId;apk=$uiApk;apkSha256=$uiApkHash;apkBytes=$uiApkBytes;versionName=$version.versionName

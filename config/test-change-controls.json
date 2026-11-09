@@ -19,7 +19,7 @@
       "criterion": "Verify the centered grid, Rentz card band against the shared trick band at compact and tall four-seat sizes, forced pass and legal card tint at 3 through 6 seats. Preserve the Whist order at all reference widths.",
       "proof": "../../rentz_back/ui-review/turn-pacing-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "c3a989a898433af606642368ef347144b9bf2e887835b78039993eaccf61ffb7",
+      "sha256": "2c9bc488fea013b89672cd023478725814bd54abbf3acc4c997c201c2180f016",
       "allowDelete": false
     },
     {
@@ -269,7 +269,7 @@
       "criterion": "A missing or partial Rentz-plus-two-games receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a92f9639f8c23a1cee4673af1071b2c8bb6c3fce25903c24ee082e99d48a3994",
+      "sha256": "a2c941ff2568dec3f71d9d05e56eda1cb05153b5462fd5dce3399f32e7d89ccb",
       "allowDelete": false
     },
     {
@@ -289,7 +289,7 @@
       "criterion": "Only external fresh report roots and source-bound component/build/UI receipts are accepted; publishAllowed remains false.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "2bbad5e82d5a6bfdcb67ff2c05f864d72e62f7f231db74095abba163693a6609",
+      "sha256": "f33e1733cbbd798c7c36f12c17bd9da77bf7d9618a3c8de8424faef6fef458b8",
       "allowDelete": false
     },
     {
@@ -439,7 +439,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK; receipt mutations remain BLOCKED, while a valid Rentz-plus-two-games receipt is source-bound and report corruption blocks promotion.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "b8c16b9b7f307b0b9beb5d843ac9fc47d856569b66fdba44387e450f509c9a90",
+      "sha256": "b3ac0a6a72f3744c8dd083735ed468e173466644a47e0f3574d24f889fe38d1a",
       "allowDelete": false
     },
     {
@@ -629,7 +629,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "41c57ae824bc225e27cbf00de635eb17a284f46cae18dd8143c7439622c7ce1f",
+      "sha256": "a01c26a5ac432c0abfa42c112106bef42698bd5d6bf4fb9b253fdc058e10e774",
       "allowDelete": false
     },
     {
@@ -1089,7 +1089,7 @@
       "criterion": "Rentz and two standard deals reach DEAL_END; seat geometry, first human move, score history and restart are observed; the learning registry is isolated and unchanged; Extent keeps each original screenshot inline.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "0f48d3405b98ee2a65ad19db57e95a77bfafcaf222b4745d53b0bd36d69e1bd1",
+      "sha256": "3e3e06cbaaef3c9c494ae481c4dce6d899a0bb8494cd169d105918ba3895f8a0",
       "allowDelete": false
     },
     {
@@ -1119,7 +1119,7 @@
       "criterion": "Commit, source manifest, package, version, signing certificate, APK bytes, and reporting tools match receipts.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "5f070733ebfcfe32ab83bdde2765853925e0b9aaac780ea99ba1301194f327f8",
+      "sha256": "0dbb26dd3355e4cef2422569c42b29f56b83017dee7d5ed9f7507f008615a5b9",
       "allowDelete": false
     },
     {

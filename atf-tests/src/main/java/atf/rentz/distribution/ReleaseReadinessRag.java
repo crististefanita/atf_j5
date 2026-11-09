@@ -60,14 +60,15 @@ public final class ReleaseReadinessRag {
     private ReleaseReadinessRag() { }
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 3 || args.length > 6) throw new IllegalArgumentException(
-                "Usage: ReleaseReadinessRag <project-root> <fresh-external-run-directory> <question> [component-run] [build-run] [native-ui-run]");
+        if (args.length < 3 || args.length > 7) throw new IllegalArgumentException(
+                "Usage: ReleaseReadinessRag <project-root> <fresh-external-run-directory> <question> [component-run] [build-run|-] [native-ui-run] [ui-build-run]");
         Path root = Path.of(args[0]).toRealPath();
         Path output = Path.of(args[1]).toAbsolutePath().normalize();
         assertExternalDestination(root, output, true);
         if (args[2].isBlank()) throw new IllegalArgumentException("RAG-QUESTION: non-empty question required");
-        ObjectNode report = evaluate(root, args[2], args.length >= 4 ? Path.of(args[3]) : null,
-                args.length >= 5 ? Path.of(args[4]) : null, args.length >= 6 ? Path.of(args[5]) : null);
+        Path productBuild = args.length >= 5 && !args[4].equals("-") ? Path.of(args[4]) : null;
+        ObjectNode report = evaluate(root, args[2], args.length >= 4 ? Path.of(args[3]) : null, productBuild,
+                args.length >= 6 ? Path.of(args[5]) : null, args.length >= 7 ? Path.of(args[6]) : productBuild);
         if (!snapshotStillMatches(root, report)) {
             report.withArray("conflicts").add("An indexed source changed while the report was being written.");
             report.put("aggregate", "BLOCKED"); report.put("mayPublish", false);
@@ -104,6 +105,11 @@ public final class ReleaseReadinessRag {
 
     /** Optional read-only receipts for the exact Release APK and native multi-subgame UI flow. */
     public static ObjectNode evaluate(Path projectRoot, String question, Path componentRun, Path buildRun, Path nativeUiRun) throws IOException {
+        return evaluate(projectRoot, question, componentRun, buildRun, nativeUiRun, buildRun);
+    }
+
+    public static ObjectNode evaluate(Path projectRoot, String question, Path componentRun, Path buildRun,
+                                      Path nativeUiRun, Path uiBuildRun) throws IOException {
         Path root = projectRoot.toRealPath();
         if (question == null || question.isBlank()) throw new IOException("RAG-QUESTION");
         JsonNode config = readSafeJson(root, "config/release-rag-corpus.json", 65_536);
@@ -195,7 +201,7 @@ public final class ReleaseReadinessRag {
         attachLocalCatalog(root, gates);
         if (componentRun != null) attachRegressionReceipt(root, git, gates, componentRun);
         if (buildRun != null) attachReleaseBuildReceipt(root, git, gates, componentRun, buildRun);
-        if (nativeUiRun != null) attachNativeUiReceipt(root, git, gates, componentRun, buildRun, nativeUiRun);
+        if (nativeUiRun != null) attachNativeUiReceipt(root, git, gates, componentRun, uiBuildRun, nativeUiRun);
 
         ArrayNode conflicts = report.putArray("conflicts");
         if (!git.available()) conflicts.add("Git identity unavailable; candidate source cannot be pinned.");
@@ -217,6 +223,9 @@ public final class ReleaseReadinessRag {
         boolean candidateReady = localTestsPass && status(gates, "native-ui").equals("PASS")
                 && status(gates, "native-ui-report").equals("PASS") && status(gates, "release-build").equals("PASS")
                 && git.available() && git.dirtyFiles() == 0;
+        workflow.put("readyForProductBuild", localTestsPass && status(gates, "local-catalog").equals("PASS")
+                && status(gates, "native-ui").equals("PASS") && status(gates, "native-ui-report").equals("PASS")
+                && conflicts.isEmpty());
         workflow.put("stage", candidateReady ? "READY_FOR_MAIN_PROMOTION_REVIEW" : localTestsPass ? "COMPONENTS_QUALIFIED" : "DRAFT_OR_BLOCKED");
         workflow.put("readyForMainPromotionReview", candidateReady);
         workflow.put("nativeUiRequiredForPromotion", true);
@@ -481,28 +490,7 @@ public final class ReleaseReadinessRag {
             String candidateVersion = releaseIndex.path("candidate").path("version").asText(releaseIndex.path("currentVersion").asText());
             if (!version.equals(candidateVersion))
                 throw new IOException("RAG-BUILD-VERSION");
-            Path sourceManifest = receipt.path("sourceManifest").isTextual() ? Path.of(receipt.path("sourceManifest").asText()) : run.resolve("source-identity.json");
-            if (!sourceManifest.toRealPath().startsWith(run) || !sha256(readExternalFile(sourceManifest, 4L * 1024 * 1024))
-                    .equalsIgnoreCase(receipt.path("sourceManifestSha256").asText())) throw new IOException("RAG-BUILD-MANIFEST");
-            JsonNode androidSourceRows = JSON.readTree(readExternalFile(sourceManifest, 4L * 1024 * 1024));
-            JsonNode qualifiedSourceRows = JSON.readTree(readExternalFile(componentRun.toRealPath().resolve("source-identity.json"), 4L * 1024 * 1024));
-            if (!androidSourceRows.isArray() || androidSourceRows.isEmpty() || !qualifiedSourceRows.isArray())
-                throw new IOException("RAG-BUILD-MANIFEST-SCHEMA");
-            Set<String> seenAndroidPaths = new HashSet<>();
-            int qualifiedAndroidFiles = 0;
-            for (JsonNode row : qualifiedSourceRows) if (row.path("path").asText().startsWith("rentz-lab-app/")) qualifiedAndroidFiles++;
-            if (androidSourceRows.size() != qualifiedAndroidFiles) throw new IOException("RAG-BUILD-MANIFEST-POPULATION");
-            for (JsonNode row : androidSourceRows) {
-                String path = ReleasePaths.relative(row.path("path").asText());
-                if (!seenAndroidPaths.add(path) || !row.path("sha256").asText().matches("(?i)[a-f0-9]{64}"))
-                    throw new IOException("RAG-BUILD-MANIFEST-ROW");
-                String expected = "";
-                for (JsonNode sourceRow : qualifiedSourceRows) if (sourceRow.path("path").asText().equals("rentz-lab-app/" + path)) {
-                    expected = sourceRow.path("sha256").asText(); break;
-                }
-                if (expected.isBlank() || !expected.equalsIgnoreCase(row.path("sha256").asText()))
-                    throw new IOException("RAG-BUILD-MANIFEST-DRIFT");
-            }
+            verifyAndroidSourceManifest(run, componentRun, receipt);
             Path apk = Path.of(receipt.path("productApk").asText()).toAbsolutePath().normalize();
             if (!apk.startsWith(run) || !Files.isRegularFile(apk, LinkOption.NOFOLLOW_LINKS)
                     || !apk.getFileName().toString().equals("RentzLab-" + version + ".apk")) throw new IOException("RAG-BUILD-APK-BOUNDARY");
@@ -539,21 +527,47 @@ public final class ReleaseReadinessRag {
         throw new IOException("RAG-UI-CHECKPOINT-MISSING: " + title);
     }
 
+    private static void verifyAndroidSourceManifest(Path run, Path componentRun, JsonNode receipt) throws IOException {
+        Path sourceManifest = receipt.path("sourceManifest").isTextual() ? Path.of(receipt.path("sourceManifest").asText()) : run.resolve("source-identity.json");
+        if (!sourceManifest.toRealPath().startsWith(run) || !sha256(readExternalFile(sourceManifest, 4L * 1024 * 1024))
+                .equalsIgnoreCase(receipt.path("sourceManifestSha256").asText())) throw new IOException("RAG-BUILD-MANIFEST");
+        JsonNode androidSourceRows = JSON.readTree(readExternalFile(sourceManifest, 4L * 1024 * 1024));
+        JsonNode qualifiedSourceRows = JSON.readTree(readExternalFile(componentRun.toRealPath().resolve("source-identity.json"), 4L * 1024 * 1024));
+        if (!androidSourceRows.isArray() || androidSourceRows.isEmpty() || !qualifiedSourceRows.isArray())
+            throw new IOException("RAG-BUILD-MANIFEST-SCHEMA");
+        Set<String> seenAndroidPaths = new HashSet<>();
+        int qualifiedAndroidFiles = 0;
+        for (JsonNode row : qualifiedSourceRows) if (row.path("path").asText().startsWith("rentz-lab-app/")) qualifiedAndroidFiles++;
+        if (androidSourceRows.size() != qualifiedAndroidFiles) throw new IOException("RAG-BUILD-MANIFEST-POPULATION");
+        for (JsonNode row : androidSourceRows) {
+            String path = ReleasePaths.relative(row.path("path").asText());
+            if (!seenAndroidPaths.add(path) || !row.path("sha256").asText().matches("(?i)[a-f0-9]{64}"))
+                throw new IOException("RAG-BUILD-MANIFEST-ROW");
+            String expected = "";
+            for (JsonNode sourceRow : qualifiedSourceRows) if (sourceRow.path("path").asText().equals("rentz-lab-app/" + path)) {
+                expected = sourceRow.path("sha256").asText(); break;
+            }
+            if (expected.isBlank() || !expected.equalsIgnoreCase(row.path("sha256").asText()))
+                throw new IOException("RAG-BUILD-MANIFEST-DRIFT");
+        }
+    }
+
     private static void attachNativeUiReceipt(Path root, GitIdentity git, ArrayNode gates, Path componentRun, Path suppliedBuildRun, Path suppliedUiRun) {
         ObjectNode uiGate = gate(gates, "native-ui"), reportGate = gate(gates, "native-ui-report");
         if (suppliedBuildRun == null) { uiGate.put("status", "BLOCKED"); uiGate.put("actual", "A source-bound UI-sanity build receipt is required."); return; }
         Path run = null; String receiptHash = ""; JsonNode ui = null;
         try {
             Path buildRun = externalRun(root, suppliedBuildRun);
-            JsonNode productBuild = JSON.readTree(readExternalFile(buildRun.resolve("build-qualification.json"), 4L * 1024 * 1024));
             JsonNode build = JSON.readTree(readExternalFile(buildRun.resolve("ui-sanity-build-qualification.json"), 4L * 1024 * 1024));
+            JsonNode releaseIndex = readSafeJson(root, "release/index.json", 65_536);
+            String candidateVersion = releaseIndex.path("candidate").path("version").asText(releaseIndex.path("currentVersion").asText());
             if (!build.path("status").asText().equals("PASS") || !build.path("sourceCommit").asText().equals(git.commit())
                     || !build.path("uiSanity").asBoolean(false) || !build.path("applicationId").asText().equals("ro.rentzlab.app.uisanity")
                     || exactCount(build.path("newAuditedCases")) < 1
-                    || !build.path("versionName").asText().equals(productBuild.path("productVersionName").asText())
-                    || !build.path("sourceManifestSha256").asText().equalsIgnoreCase(productBuild.path("sourceManifestSha256").asText())
+                    || !build.path("versionName").asText().equals(candidateVersion)
                     || componentRun == null || !Path.of(build.path("componentRun").asText()).toRealPath().equals(componentRun.toRealPath()))
                 throw new IOException("RAG-UI-BUILD-IDENTITY");
+            verifyAndroidSourceManifest(buildRun, componentRun, build);
             Path builder = root.resolve("scripts/build-rentz-android.ps1").normalize();
             assertNoSymlinkPath(builder);
             if (!builder.startsWith(root) || !Files.isRegularFile(builder, LinkOption.NOFOLLOW_LINKS)
@@ -641,7 +655,8 @@ public final class ReleaseReadinessRag {
                 if (exactCount(game.path("number")) != i + 1 || !game.path("contract").asText().equals(contract)
                         || !game.path("phase").asText().equals("DEAL_END") || exactCount(game.path("handNumber")) != i + 1
                         || exactCount(game.path("scoreCount")) != 4 || !game.path("seatGeometryVerified").asBoolean(false)
-                        || !game.path("firstHumanMoveVerified").asBoolean(false) || !game.path("completionVerified").asBoolean(false)
+                        || !game.path("firstHumanMoveVerified").isBoolean() || !game.path("firstHumanMoveVerified").booleanValue()
+                        || !game.path("completionVerified").asBoolean(false)
                         || !history.path("contract").asText().equals(contract) || exactCount(history.path("number")) != i + 1
                         || !history.path("points").isArray() || history.path("points").size() != 4)
                     throw new IOException("RAG-UI-COMPLETE-GAME-IDENTITY");

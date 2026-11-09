@@ -31,6 +31,43 @@ public final class RentzCardSpaceTest {
         assertWindows(3, new int[]{1, 2}, new int[]{0});
     }
 
+    @Test public void theRecordedSecondHandCanLayOutAndCompleteTheOpponentChoice() {
+        var session = new GameSession(4, 1794214887269L, RentzPlayer.Difficulty.NORMAL);
+        session.apply(new GameSession.Command(GameSession.Action.REVEAL, 0, null, null, false));
+        session.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null, Contract.RENTZ, false));
+        for (int turn = 0; turn < 128 && session.view().phase() == RentzMatch.Phase.PLAY; turn++) {
+            if (session.hasForcedHumanPass()) {
+                session.apply(new GameSession.Command(GameSession.Action.PASS, 0, null, null, false));
+            } else if (session.hasPendingHumanDecision()) {
+                session.advanceHumanTurn();
+            } else {
+                session.advanceBotTurn();
+            }
+        }
+        assertEquals(RentzMatch.Phase.DEAL_END, session.view().phase());
+        session.apply(new GameSession.Command(GameSession.Action.NEXT_HAND, 0, null, null, false));
+        assertEquals(2, session.view().handNumber());
+        assertEquals(1, session.view().turn());
+        assertEquals(RentzMatch.Phase.CHOOSE, session.view().phase());
+
+        float density = 440f / 160;
+        int width = 968, height = 1259, seatHeight = 164;
+        int seatWidth = Math.round(density * TableSizing.seatWidthDp(Math.round(width / density), false));
+        int centerWidth = Math.round(220 * density);
+        int gap = Math.round(new TableViewportPolicy(Math.round(1920 / density)).regionGapDp() * density);
+        assertThrows(IllegalArgumentException.class, () -> TableGeometry.arrangeDisplay(width, height, 4,
+                seatWidth, seatHeight, centerWidth, 0, gap, false, TableGeometry.CenterAlignment.BALANCED));
+        int centerHeight = Math.round(RentzTableContent.MINIMUM_CENTER_HEIGHT_DP * density);
+        var layout = TableGeometry.arrangeDisplay(width, height, 4, seatWidth, seatHeight,
+                centerWidth, centerHeight, gap, false, TableGeometry.CenterAlignment.BALANCED);
+        assertEquals(centerHeight, layout.center().bottom() - layout.center().top());
+        assertTrue(layout.seats().stream().noneMatch(layout.center()::overlaps));
+
+        session.advanceBotTurn();
+        assertEquals(RentzMatch.Phase.PLAY, session.view().phase());
+        assertNotNull(session.view().contract());
+    }
+
     @Test public void fourSeatsKeepTheOriginalPositionsWhenTheCardsHaveRoom() {
         assertWindows(4, new int[]{1, 2, 3}, new int[]{0});
     }

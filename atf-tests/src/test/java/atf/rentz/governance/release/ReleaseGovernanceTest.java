@@ -436,6 +436,27 @@ class ReleaseGovernanceTest {
         assertEquals("ELIGIBLE_FOR_PROMOTION_REVIEW", report.path("releaseWorkflow").path("artifactDisposition").asText());
         assertFalse(report.path("releaseWorkflow").path("publishAllowed").asBoolean());
 
+        Path productReceipt = build.resolve("build-qualification.json");
+        byte[] productReceiptBytes = Files.readAllBytes(productReceipt);
+        Files.delete(productReceipt);
+        var beforeProduct = ReleaseReadinessRag.evaluate(root, "gate:native-ui three games", component, null, ui, build);
+        assertEquals("PASS", gate(beforeProduct, "native-ui").path("status").asText());
+        assertEquals("PASS", gate(beforeProduct, "native-ui-report").path("status").asText());
+        assertEquals("NOT_RUN", gate(beforeProduct, "release-build").path("status").asText());
+        assertFalse(beforeProduct.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
+        Files.write(productReceipt, productReceiptBytes);
+
+        for (var invalid : java.util.List.of(com.fasterxml.jackson.databind.node.NullNode.getInstance(),
+                com.fasterxml.jackson.databind.node.TextNode.valueOf("true"))) {
+            var malformed = uiReceipt.deepCopy();
+            ((com.fasterxml.jackson.databind.node.ObjectNode) malformed.withArray("completedGames").get(0))
+                    .set("firstHumanMoveVerified", invalid);
+            Files.write(ui.resolve("result.json"), JSON().writeValueAsBytes(malformed));
+            var blocked = ReleaseReadinessRag.evaluate(root, "gate:native-ui three games", component, null, ui, build);
+            assertEquals("BLOCKED", gate(blocked, "native-ui").path("status").asText());
+            assertFalse(blocked.path("releaseWorkflow").path("readyForProductBuild").asBoolean());
+        }
+
         var incompleteUi=uiReceipt.deepCopy();
         incompleteUi.withArray("completedGames").remove(2);
         Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(incompleteUi));

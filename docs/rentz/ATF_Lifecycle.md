@@ -35,6 +35,7 @@ Comanda umană se salvează înaintea următorului cadru. Worker-ul reconstruie�
 |---|---|
 | Acceptarea comenzii | Refuzul regulii sau al scrierii păstrează sesiunea anterioară; un checkpoint acceptat precede calculul adversarilor. |
 | Prezentarea turei | Cadrul marchează actorul curent, apoi așteaptă 550 ms înainte de o mutare AI. Colectarea levatei se încheie înaintea cadrului următorului actor. |
+| Alegerea adversarului | Panoul central păstrează o înălțime minimă și când nu are controale. Geometria poate astfel încheia măsurarea mesei înainte de programarea turei AI. |
 | Calcul | Nu există scrieri sau acces la controalele Android; modificările aparțin numai copiei. |
 | Livrare | Generația, sesiunea capturată și jurnalul ei trebuie să fie încă actuale. |
 | Salvarea continuării | Verificarea proprietarului și IO sunt în aceeași secțiune serializată; un eșec nu adoptă candidatul. |

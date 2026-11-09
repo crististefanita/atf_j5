@@ -132,6 +132,7 @@ public final class RentzTablePanel extends LinearLayout {
     }
     private View center(RentzMatch.Observation view, Actions actions) {
         var box = new LinearLayout(context); box.setOrientation(VERTICAL); box.setGravity(Gravity.CENTER);
+        box.setMinimumHeight(dp(RentzTableContent.MINIMUM_CENTER_HEIGHT_DP));
         if (view.phase() == RentzMatch.Phase.CHOOSE) {
             if (view.turn() != view.seat()) return box;
             if (!view.revealed()) {

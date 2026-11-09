@@ -4,6 +4,7 @@ param(
     [Parameter(Mandatory)][string]$RunRoot,
     [string]$BuildRun='',
     [string]$NativeUiRun='',
+    [string]$UiBuildRun='',
     [string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe'
 )
 $ErrorActionPreference='Stop'
@@ -11,11 +12,14 @@ $project=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'RuntimeQualification.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
-foreach($path in @($ComponentRun,$BuildRun,$NativeUiRun)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
+foreach($path in @($ComponentRun,$BuildRun,$NativeUiRun,$UiBuildRun)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
 $ComponentRun=[IO.Path]::GetFullPath($ComponentRun);$RunRoot=[IO.Path]::GetFullPath($RunRoot)
 if($BuildRun){$BuildRun=[IO.Path]::GetFullPath($BuildRun)}
 if($NativeUiRun){$NativeUiRun=[IO.Path]::GetFullPath($NativeUiRun)}
+if($UiBuildRun){$UiBuildRun=[IO.Path]::GetFullPath($UiBuildRun)}
+if($NativeUiRun-and-not($BuildRun-or$UiBuildRun)){throw 'Native UI evidence requires a source-bound UI build receipt.'}
+if($UiBuildRun-and-not$NativeUiRun){throw 'UiBuildRun requires NativeUiRun.'}
 if((Test-Path -LiteralPath $RunRoot)-or$RunRoot.StartsWith($project+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){
     throw 'A fresh external RAG report directory is required.'
 }
@@ -61,7 +65,9 @@ if($component.status-eq'PASS'){
 
 $arguments=[Collections.Generic.List[string]]::new()
 $arguments.Add($source);$arguments.Add($reportRoot);$arguments.Add($Question);$arguments.Add($ComponentRun)
-if($BuildRun){$arguments.Add($BuildRun);if($NativeUiRun){$arguments.Add($NativeUiRun)}}elseif($NativeUiRun){throw 'Native UI evidence requires the source-bound build receipt.'}
+if($BuildRun-or$NativeUiRun){$arguments.Add($(if($BuildRun){$BuildRun}else{'-'}))}
+if($NativeUiRun){$arguments.Add($NativeUiRun)}
+if($UiBuildRun){$arguments.Add($UiBuildRun)}
 $ragArguments=@('-Xmx256m','-cp',$classpath,$ragClass)+$arguments.ToArray()
 & $Java @ragArguments
 if($LASTEXITCODE-ne0){throw "Local release RAG failed: $RunRoot"}

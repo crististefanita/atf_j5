@@ -15,6 +15,8 @@ import java.util.stream.IntStream;
 
 /** Public Rentz observation to neutral visual content; no Whist bids, trump or scoring. */
 public final class RentzTableContent {
+    // Shared table geometry requires a nonempty center, including when it has no controls.
+    static final int MINIMUM_CENTER_HEIGHT_DP = 1;
     private static final List<Card.Suit> SUIT_ORDER = List.of(Card.Suit.SPADES, Card.Suit.HEARTS, Card.Suit.CLUBS, Card.Suit.DIAMONDS);
     private static final Comparator<Card> HAND_ORDER = Comparator.comparingInt((Card card) -> SUIT_ORDER.indexOf(card.suit()))
             .thenComparingInt(Card::rank);

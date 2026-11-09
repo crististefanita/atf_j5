@@ -236,6 +236,30 @@ Case 'Hand order ignores played Rentz board cells but detects a reversed hand' {
     $reversed=@(TableChecks $nodes $state|Where-Object name -CEQ 'Actual left-to-right hand order')
     Require ($reversed.Count-eq1-and-not$reversed[0].passed) 'A reversed own hand must still fail'
 }
+Case 'First human move evidence requires one successful Boolean assertion' {
+    $tokens=$null;$errors=$null
+    $path=Join-Path $project 'atf-tests/tools/run-shared-ui-sanity.ps1'
+    $ast=[Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$errors)
+    Require (-not$errors) 'Shared UI runner does not parse'
+    $definition=$ast.Find({param($node) $node-is[Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-eq'ConfirmNativeCheck'},$true)
+    . ([scriptblock]::Create($definition.Extent.Text))
+    $title='Subgame 1 first human move remains visible'
+    $check='The same seat geometry survives a card play'
+    $valid=[pscustomobject]@{title=$title;checks=@([pscustomobject]@{name=$check;passed=$true})}
+    $value=ConfirmNativeCheck @($valid) $title $check
+    Require ($value-is[bool]-and$value) 'The receipt requires a JSON Boolean true'
+    foreach($invalid in @($null,$false,'true')){
+        $bad=[pscustomobject]@{title=$title;checks=@([pscustomobject]@{name=$check;passed=$invalid})}
+        $rejected=$false
+        try { ConfirmNativeCheck @($bad) $title $check | Out-Null } catch { $rejected=$true }
+        Require $rejected 'Null, false and string values cannot qualify the first move'
+    }
+    foreach($count in @(0,2)){
+        $rejected=$false
+        try { ConfirmNativeCheck (@($valid)*$count) $title $check | Out-Null } catch { $rejected=$true }
+        Require $rejected 'Missing or duplicate checkpoints cannot qualify the first move'
+    }
+}
 $failed=@($results|Where-Object status -EQ FAIL)
 [ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;productFixtures=$product;scope='Byte fixtures, injected Java recorder and extracted publication block; no real JVM body, game, full native launcher or device';results=$results}|ConvertTo-Json -Depth 7|Set-Content "$RunRoot/controls.json" -Encoding utf8NoBOM
 $results|Format-Table name,status -AutoSize
