@@ -99,6 +99,26 @@ public final class RentzCardSpaceTest {
         }
     }
 
+    @Test public void fourSeatSequenceUsesTheSameFootprintAsTricksAtNativeDensity() {
+        float density = 440f / 160;
+        var viewport = new TableViewportPolicy(Math.round(1920 / density));
+        int widthDp = 352, width = Math.round(widthDp * density), height = 1259, seatHeight = 164;
+        int seatWidth = Math.round(TableSizing.seatWidthDp(widthDp, viewport.isCompact()) * density);
+        int gap = Math.round(viewport.regionGapDp() * density);
+        var trick = PlayedCardMetrics.forTable(4, widthDp, 1f, viewport);
+        int measuredTrick = Math.max(Math.round(trick.centerHeightDp() * density),
+                Math.round((trick.rows() - 1) * trick.rowStrideDp() * density)
+                        + Math.round(trick.cellHeightDp() * density));
+        var trickSeats = TableGeometry.arrangeDisplay(width, height, 4, seatWidth, seatHeight, width,
+                measuredTrick, gap, true, TableGeometry.CenterAlignment.BALANCED).seats();
+        int oldFootprint = Math.round(RentzCardSpace.REFERENCE_HEIGHT_DP * density);
+        var old = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, 605, oldFootprint, 198);
+        assertNotEquals("The old reference shifted the flank seats", trickSeats, old.seats());
+        var corrected = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, 605,
+                RentzCardSpace.referenceHeightPx(4, 0, density, trick), 198);
+        assertEquals(trickSeats, corrected.seats());
+    }
+
     @Test public void namesAndTrickCardsRetainTheWhistClockwiseOrderAtTheReferenceWidths() {
         var viewport = new TableViewportPolicy(569);
         for (int players = 3; players <= 6; players++) {

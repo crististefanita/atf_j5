@@ -43,9 +43,10 @@ public final class RentzTablePanel extends LinearLayout {
         int width = Math.min(760, Math.max(240, WindowContent.widthDp(context) - 40));
         boolean cards = view.phase() == RentzMatch.Phase.PLAY && view.contract() != Contract.RENTZ || holding;
         boolean sequence = view.contract() == Contract.RENTZ && view.phase() != RentzMatch.Phase.CHOOSE;
+        var trick = PlayedCardMetrics.forTable(view.players(), width, fontScale, viewport);
         if (sequence) {
             int footer = view.phase() == RentzMatch.Phase.DEAL_END ? NEXT_HAND_FOOTER_DP : 0;
-            var cardBoard = new RentzCardBoard(context, view.players(), footer, viewport,
+            var cardBoard = new RentzCardBoard(context, view.players(), footer, viewport, trick,
                     (measuredWidth, budget) -> sequence(view, actions, measuredWidth, budget, fontScale));
             board = cardBoard;
             center = cardBoard.center();
@@ -53,7 +54,7 @@ public final class RentzTablePanel extends LinearLayout {
             board = new BoardLayout(context, view.players(), cards ? width : Math.min(width, 220),
                     viewport, cards, TableGeometry.CenterAlignment.BALANCED);
             center = cards ? new PlayedCardsView(context, viewport.isCompact()).build(
-                    RentzTableContent.plays(visible, names), PlayedCardMetrics.forTable(view.players(), width, fontScale, viewport),
+                    RentzTableContent.plays(visible, names), trick,
                     holding ? copy.text("Completed trick", "Levată încheiată") : copy.text("Current trick", "Levată curentă"))
                     : center(view, actions);
         }

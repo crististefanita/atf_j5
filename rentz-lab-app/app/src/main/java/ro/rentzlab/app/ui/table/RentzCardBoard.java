@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import ro.cardtable.ui.table.PlayedCardMetrics;
 import ro.cardtable.ui.table.TableGeometry;
 import ro.cardtable.ui.table.TableSizing;
 import ro.cardtable.ui.table.TableViewportPolicy;
@@ -15,18 +16,20 @@ final class RentzCardBoard extends ViewGroup {
     private final int players;
     private final int footerDp;
     private final TableViewportPolicy viewport;
+    private final PlayedCardMetrics.Layout trick;
     private final BiFunction<Integer, Integer, View> render;
     private final FrameLayout center;
     private RentzCardSpace.Plan plan;
     private int previousWidth = -1;
     private int previousBudget = -1;
 
-    RentzCardBoard(Context context, int players, int footerDp, TableViewportPolicy viewport,
+    RentzCardBoard(Context context, int players, int footerDp, TableViewportPolicy viewport, PlayedCardMetrics.Layout trick,
                    BiFunction<Integer, Integer, View> render) {
         super(context);
         this.players = players;
         this.footerDp = footerDp;
         this.viewport = viewport;
+        this.trick = trick;
         this.render = render;
         center = new FrameLayout(context);
         setClipChildren(false);
@@ -48,7 +51,7 @@ final class RentzCardBoard extends ViewGroup {
         for (int index = 0; index < players; index++) getChildAt(index).measure(exact(seatWidth), exact(seatHeight));
 
         int gap = Math.round(viewport.regionGapDp() * density);
-        int reference = Math.round((RentzCardSpace.REFERENCE_HEIGHT_DP + footerDp) * density);
+        int reference = RentzCardSpace.referenceHeightPx(players, footerDp, density, trick);
         int readable = Math.round((RentzCardSpace.MIN_READABLE_HEIGHT_DP + footerDp) * density);
         int minimum = TableGeometry.minimumHeight(players, seatHeight, Math.max(1, Math.round((4 + footerDp) * density)), gap);
         int offered = MeasureSpec.getMode(heightSpec) == MeasureSpec.UNSPECIFIED

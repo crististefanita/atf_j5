@@ -1,5 +1,6 @@
 package ro.rentzlab.app.ui.table;
 
+import ro.cardtable.ui.table.PlayedCardMetrics;
 import ro.cardtable.ui.table.TableGeometry;
 import ro.cardtable.ui.table.TableSeatLayout;
 
@@ -19,6 +20,15 @@ final class RentzCardSpace {
     record Plan(List<TableGeometry.Rect> seats, Band band) { }
 
     private RentzCardSpace() { }
+
+    static int referenceHeightPx(int players, int footerDp, float density, PlayedCardMetrics.Layout trick) {
+        int sequenceHeight = Math.round((REFERENCE_HEIGHT_DP + footerDp) * density);
+        if (players != 4) return sequenceHeight;
+        int trickHeight = Math.max(Math.round(trick.centerHeightDp() * density),
+                Math.round((trick.rows() - 1) * trick.rowStrideDp() * density)
+                        + Math.round(trick.cellHeightDp() * density));
+        return Math.max(sequenceHeight, trickHeight);
+    }
 
     static Plan plan(int width, int height, int players, int seatWidth, int seatHeight, int gap,
                      int referenceWidth, int referenceHeight, int minimumReadableHeight) {

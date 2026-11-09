@@ -19,7 +19,7 @@
       "criterion": "Verify the centered grid, Rentz card band against the shared trick band at compact and tall four-seat sizes, forced pass and legal card tint at 3 through 6 seats. Preserve the Whist order at all reference widths.",
       "proof": "../../rentz_back/ui-review/turn-pacing-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "2c9bc488fea013b89672cd023478725814bd54abbf3acc4c997c201c2180f016",
+      "sha256": "4160d0978fc8f5e5ff37c103784fc5c11442044557348246689f29cb414486ef",
       "allowDelete": false
     },
     {

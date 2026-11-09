@@ -72,11 +72,16 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 
 ```powershell
 .\scripts\run-rentz-components.ps1 -Collection regression -SourceRoot <worktree-J5-inregistrat>
-.\scripts\run-release-rag.ps1 -Question 'gate:release-build version:current APK semnat' -ComponentRun <regresie-trecuta> -RunRoot <director-RAG-extern-nou>
-.\scripts\Initialize-RentzSigning.ps1
-.\scripts\build-rentz-android.ps1 -RunRoot <director-build-extern-nou> -ComponentRun <regresie-trecuta> -Configuration Release -UiSanity
-.\atf-tests\tools\run-shared-ui-sanity.ps1 -BuildQualification <director-build-extern-nou>\ui-sanity-build-qualification.json -ComponentRun <regresie-trecuta> -ConsecutiveSubgames -RunRoot <director-UI-extern-nou>
-.\scripts\run-release-rag.ps1 -Question 'gate:release-build versiunea candidat jocuri complete Rentz display' -ComponentRun <regresie-trecuta> -BuildRun <director-build-extern-nou> -NativeUiRun <director-UI-extern-nou> -RunRoot <director-RAG-final-extern-nou>
+.\scripts\build-rentz-android.ps1 -UiSanityOnly -ComponentRun <regresie-trecuta> -RunRoot <build-izolat>
+.\atf-tests\tools\run-shared-ui-sanity.ps1 -BuildQualification <build-izolat>\ui-sanity-build-qualification.json -ComponentRun <regresie-trecuta> -ConsecutiveSubgames -RunRoot <rulare-nativa>
+.\scripts\run-release-rag.ps1 -Question 'gate:native-ui Rentz trei jocuri complete' -ComponentRun <regresie-trecuta> -UiBuildRun <build-izolat> -NativeUiRun <rulare-nativa> -RunRoot <RAG-prebuild>
+```
+
+După verdictul `readyForProductBuild=true`, construiți produsul cu identitatea de semnare provisionată și confruntați ambele dosare.
+
+```powershell
+.\scripts\build-rentz-android.ps1 -Configuration Release -ComponentRun <regresie-trecuta> -RunRoot <build-produs>
+.\scripts\run-release-rag.ps1 -Question 'gate:release-build APK Rentz semnat' -ComponentRun <regresie-trecuta> -BuildRun <build-produs> -UiBuildRun <build-izolat> -NativeUiRun <rulare-nativa> -RunRoot <RAG-final>
 ```
 
 RAG-ul este un consumator read-only de receipte. Starea live a porților este:
