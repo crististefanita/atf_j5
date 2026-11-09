@@ -679,7 +679,7 @@
       "criterion": "The archive stays in its registered external collection; the RAG runner is explicitly registered and its component entry still enforces physical-path, workspace and system-TEMP boundaries.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-rentz-0.3.0/README.md",
       "expires": "2026-11-20",
-      "sha256": "2f996303fef80e4d960634e376546c742f3c07d47e2a2e16e917817504406b1c",
+      "sha256": "5cb37014371c50e93ec756e9dde879e2350ba4e42ed39ac0795de0a970e51bc9",
       "allowDelete": false
     },
     {
