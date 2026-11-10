@@ -34,6 +34,7 @@ public final class AchievementPopup {
         if (more > 0) views.addText(card, "+" + more + copy.text(" more updated", " în plus"), 12, Color.WHITE, false, 3, 0);
         String closeProgress = copy.text("Close achievement progress", "Închide progresul la realizări");
         var close = views.actionButton(copy.close(), closeProgress, true, dismiss, false, 12);
+        close.setContentDescription(closeProgress);
         card.addView(close, views.matchWrap());
         card.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         var layout = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
