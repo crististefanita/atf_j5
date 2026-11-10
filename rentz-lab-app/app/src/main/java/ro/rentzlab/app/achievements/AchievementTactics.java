@@ -19,7 +19,7 @@ public record AchievementTactics(Set<Fact> facts) {
         QUEEN_PASSED, QUEEN_DISCARDED, NO_EARLY_QUEENS, AT_MOST_ONE_QUEEN, NO_QUEENS,
         FIRST_DIAMOND_PASSED, DIAMOND_DISCARDED, NO_EARLY_DIAMONDS, AT_MOST_TWO_DIAMONDS, NO_DIAMONDS,
         KING_PASSED, KING_FOLLOWED, KING_DISCARDED, KING_LEAD_PASSED, KING_PASSED_AFTER_WIN,
-        NO_KING, WIN_FIRST, WIN_LAST, RUN_OF_TWO, AT_LEAST_THREE, AT_LEAST_FOUR,
+        NO_KING, WIN_FIRST, WIN_LAST, WIN_ANY, RUN_OF_TWO, AT_LEAST_THREE, AT_LEAST_FOUR,
         TEN_CAPTURED, OPPONENT_TEN, OWN_TEN, TEN_ON_LEAD, TEN_AFTER_LOSS,
         OPEN, EXTEND_LOW, EXTEND_HIGH, ACE_RETAINS_TURN, TOP_TWO, FOLLOWED_SUIT, SAFE_DISCARD
     }
@@ -87,6 +87,7 @@ public record AchievementTactics(Set<Fact> facts) {
         if (wins <= 2) found.add(Fact.AT_MOST_TWO);
         if (!found.contains(Fact.RUN_OF_TWO)) found.add(Fact.NO_RUN_OF_TWO);
         if (wins == 0) found.add(Fact.NO_TRICKS);
+        else found.add(Fact.WIN_ANY);
         if (wins >= 3) found.add(Fact.AT_LEAST_THREE);
         if (wins >= 4) found.add(Fact.AT_LEAST_FOUR);
     }

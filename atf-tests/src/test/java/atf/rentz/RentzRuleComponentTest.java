@@ -130,6 +130,15 @@ class RentzRuleComponentTest {
         Path malformed=folder.resolve("malformed-number.yaml");Files.writeString(malformed,original.replace("riskWeight: 0.05","riskWeight: .nan"));
         assertThrows(com.fasterxml.jackson.core.JsonParseException.class,()->PolicyInputs.read(malformed,Path.of("..")),"Parser rejects its malformed numeric representation before typed policy validation");
     }
+    @Test void victoryCandidateChangesTheObjectiveAndTacticAtTheSameBudget() throws Exception {
+        var reference = PolicySettings.defaults();
+        var candidate = PolicyInputs.read(Path.of("../config/rentz-victory-policy.yaml"), Path.of(".."));
+        assertEquals(PolicySettings.Objective.MATCH_WIN_LAST_HAND, candidate.objective());
+        assertEquals(PolicySettings.Tactic.PUBLIC_CAPTURE_AWARE, candidate.tactic());
+        assertEquals(reference.worlds(), candidate.worlds());
+        assertEquals(reference.maxTransitions(), candidate.maxTransitions());
+    }
+
     @Test void hardDecisionUsesTheSameAllowedObservationForDifferentRealDeals() {
         var scoring=ScoreProfile.laboratory();var first=new ArrayList<List<Card>>();var deck=Card.deck(4);
         for(int seat=0;seat<4;seat++)first.add(new ArrayList<>(deck.subList(seat*8,seat*8+8)));

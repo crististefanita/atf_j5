@@ -98,7 +98,8 @@ class RuleBindingGovernanceTest {
         while (root != null && !Files.isRegularFile(root.resolve("config/rentz-rules.yaml"))) root = root.getParent();
         assertNotNull(root);
         RuleCatalog.verifyBindings(root, RuleCatalog.claims(root.resolve("config/rentz-rules.yaml")));
-        for (String name : List.of("rentz-policy.yaml", "rentz-hard-policy.yaml", "rentz-contextual-policy.yaml", "rentz-match-policy.yaml"))
+        for (String name : List.of("rentz-policy.yaml", "rentz-hard-policy.yaml", "rentz-contextual-policy.yaml",
+                "rentz-match-policy.yaml", "rentz-victory-policy.yaml"))
             PolicyInputs.read(root.resolve("config/" + name), root);
     }
 }

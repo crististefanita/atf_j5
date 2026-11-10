@@ -17,12 +17,15 @@ Hard folosește un buget explicit de lumi și tranziții. [Politica implicită](
 | [Hard cu dovadă publică](../../config/rentz-hard-policy.yaml) | Păstrează tactica legacy și închide numai captura demonstrabilă a țintei la obiectivul mâinii. |
 | [Contextual experimental](../../config/rentz-contextual-policy.yaml) | Adaugă costul cărții și eliminarea penalității în continuarea proprie; o regulă locală corectă poate avea efect strategic negativ. |
 | [Partidă experimentală](../../config/rentz-match-policy.yaml) | Evaluează obiectivul terminal cu bugete aliniate; nu este implicitul produsului. |
+| [Victorie și capturi publice](../../config/rentz-victory-policy.yaml) | Păstrează marja până la ultima mână, apoi folosește clasamentul final. Adaugă capturi certe și enumerarea finalurilor mici. |
 
 | Obiectiv explicit | Orizont și utilitate | Limită |
 |---|---|---|
 | `HAND_MARGIN` | Finalul mâinii: puncte proprii minus media adversarilor. | Nu folosește poziția în clasamentul final. |
 | `MATCH_POINTS` | Finalul partidei: totalul propriu. | Maximizarea punctelor poate alege alt risc decât câștigarea partidei. |
 | `MATCH_WIN_SHARE` | Finalul partidei: unu împărțit între liderii egali, zero pentru ceilalți. | Frecvență condiționată de lumile și continuarea simulate, fără probabilitate reală calibrată. |
+| `MATCH_WIN_LAST_HAND` | Marja mâinii până la ultima distribuire. În ultima mână, media creditului de victorie are prioritate, apoi distanța față de cel mai bine clasat rival. | Obiectiv terminal numai când mâna curentă încheie partida. |
+| `MATCH_WIN_PROVEN` | Pornește de la alegerea pe marja mâinii. În finalurile scurte de levată, o poate înlocui cu o carte care garantează primul loc. | Cere o dovadă completă în limita bugetului și păstrează alegerea inițială când dovada lipsește. |
 
 ## Informația permisă
 
@@ -52,6 +55,32 @@ Politica primește `Observation`, nu `RentzMatch`, generatorul sau fișierele ar
 
 `KnowledgeSampler` folosește potrivire între cărți și locuri disponibile, cu ordine aleatorizată. Distribuirile respectă restricțiile și sunt reluate pe istoricul public; uniformitatea, probabilitățile calibrate și intențiile adversarului nu sunt demonstrate de această construcție.
 
+Profilul de victorie încearcă și enumerarea la cel mult șase cărți necunoscute.
+
+- Construiește atribuiri distincte care respectă mărimea mâinilor și culorile excluse de jocul public.
+- Folosește setul complet dacă încape în bugetul de lumi și tranziții pentru toate alternativele. Peste oricare plafon, revine la eșantionare.
+- Limitează enumerarea la evaluarea mâinii curente, inclusiv când aceasta încheie partida.
+
+### Dovada de victorie din ultimele levate
+
+În ultima mână a partidei, dacă fiecare loc are cel mult două cărți și actorul are două mutări legale, Hard poate verifica distribuirea rămasă și toate răspunsurile legale. Pornește de la alegerea pe marjă și o schimbă numai când aceea nu garantează primul loc, iar alternativa câștigă fără egalitate în toate continuările. Motorul existent verifică obligația de culoare, câștigătorul levatei și scorul, inclusiv închiderea la captura țintei.
+
+```mermaid
+flowchart LR
+    BASE[Alegere pe marja mâinii] -->|declanșează| WORLDS[Distribuiri compatibile]
+    WORLDS -->|constrâng| PLAYS[Răspunsuri legale]
+    PLAYS -->|determină| RANK[Scor final pentru fiecare continuare]
+    RANK -->|certifică alternativa| MOVE[Schimbă cartea]
+    RANK -->|păstrează alegerea| BASE
+```
+
+<details>
+<summary>Legendă</summary>
+
+Dovada folosește bugetul rămas după căutare, cu un plafon de 4.096 tranziții. Se aplică sub-jocurilor pe levate. Profilul de capturi publice rămâne separat pentru evaluare.
+
+</details>
+
 ## Reguli tactice și ponderi
 
 | Context | Mecanism | Tip |
@@ -65,6 +94,11 @@ Politica primește `Observation`, nu `RentzMatch`, generatorul sau fișierele ar
 | Zece de treflă, levată imposibil de câștigat | Păstrează ținta dacă există altă aruncare legală. | Regulă locală, fără promisiune de captură viitoare. |
 | Secvențe | Ponderează cărțile proprii conectate, frontierele eliberate și apropierea actorului sărit de terminare. | Caracteristici recalculate din context. |
 | As legal în secvențe | Elimină asul cu tură suplimentară, păstrând celelalte continuări legale. | Scurtătură publică, în varianta laboratorului. |
+
+În profilul de victorie, o carte mai mare rămasă poate amenința levata curentă numai dacă un loc care urmează o poate deține.
+
+- La Whist, câștigătorul sigur cel mai mic departajează estimările egale. Căutarea evaluează și păstrarea câștigătorilor prin cedarea levatei.
+- La Zece de treflă, captura sigură închide decizia când ținta este deja în levată sau chiar cartea jucată.
 
 Coeficienții din `PolicySettings` sunt fixați de candidat. Contextul se schimbă după mutări; coeficienții nu se rescriu automat după o victorie sau înfrângere.
 

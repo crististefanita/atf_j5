@@ -39,7 +39,7 @@ for (const cell of summary.cells) {
     stageCounts[cell.stage] += cell.games;
 }
 if (stageCounts.calibration < 200 || stageCounts.holdout < 300 || seeds.size !== summary.games ||
-    summary.games !== receipt.games || summary.achievements.length !== rules.length || rules.length !== 15) {
+    summary.games !== receipt.games || summary.achievements.length !== rules.length || rules.length === 0) {
     throw new Error('The complete catalog and the independent cohorts must be measured');
 }
 
@@ -207,7 +207,7 @@ for (const row of assessments) {
     lines.push(`| ${tiers[row.level]} | ${row.title} | ${fmt(product.one)} | ${fmt(mixed.one)} | ${fmt(product.three)} | ${fmt(mixed.three)} | ${fmt(product.eight)} | ${fmt(mixed.eight)} | ${row.scores.join('/')} | ${row.score} |`);
 }
 lines.push('', '## Calificare', '');
-lines.push(ready ? 'Toate cele 15 obiective au trecut criteriile și au note peste 90.' : 'Catalogul cere ajustări înainte de calificare.');
+lines.push(ready ? `Toate cele ${rules.length} obiective au trecut criteriile și au note peste 90.` : 'Catalogul cere ajustări înainte de calificare.');
 for (const row of assessments.filter(row => row.reasons.length))
     lines.push(`- **${row.title}** — ${row.reasons.join(', ')}.`);
 lines.push('', 'Normal folosește politica aplicației. În cohortele Greu, căutarea folosește bugetul declarat în plan. Mixul introduce și o politică aleatorie legală. Ratele nu estimează direct dificultatea resimțită de jucători.', '');

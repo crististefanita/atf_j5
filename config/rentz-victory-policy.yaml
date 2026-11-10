@@ -1,0 +1,33 @@
+schemaVersion: 3
+id: RENTZ_CONTEXTUAL_SEARCH_V3
+status: EXPERIMENTAL_CANDIDATE
+information: OWN_HAND_AND_PUBLIC_EVENTS
+normal:
+  choice: BASELINE_HAND_STRENGTH
+  card: PUBLIC_TACTICAL
+hard:
+  worlds: 8
+  riskWeight: 0.05
+  ownChainWeight: 3.0
+  releaseWeight: 0.3
+  skipThreatWeight: 2.0
+  objective: MATCH_WIN_LAST_HAND
+  tactic: PUBLIC_CAPTURE_AWARE
+  maxTransitions: 65536
+rules:
+  - id: TERMINAL_WIN_CREDIT
+    condition: În ultima mână, creditul de victorie folosește totalurile publice și împarte egalitățile. În celelalte mâini se păstrează marja mâinii.
+    implementation: SearchPolicy.choose
+    verification: RentzMatchStrategyTest.lastHandPolicyUsesThePublicStandingsAtTheTerminalBoundary
+  - id: WHIST_CHEAP_SAFE_WINNER
+    condition: La estimări egale, folosește câștigătorul sigur de rang minim. Cărțile disponibile locurilor care mai au de jucat limitează dovada.
+    implementation: SearchPolicy.card
+    verification: RentzAiTest.whistUsesAPublicVoidToSaveTheHigherWinner
+  - id: TEN_SAFE_TARGET_CAPTURE
+    condition: Oprește căutarea doar când ținta este pe masă sau este cartea jucată și niciun loc rămas nu poate depăși câștigătorul.
+    implementation: SearchPolicy.card
+    verification: RentzAiTest.tenOfClubsCapturesAnOffSuitTargetWithTheCheapestCertainWinner
+  - id: SMALL_FEASIBLE_WORLD_SET
+    condition: Pentru cel mult șase cărți necunoscute, folosește distribuirile distincte când întregul set încape în bugetul de lumi și tranziții al căutării.
+    implementation: KnowledgeSampler.exactSmallWorlds
+    verification: RentzAiTest.aSmallEndgameEvaluatesEachCompatibleDistributionOnce

@@ -4,7 +4,7 @@
 
 Laborator specializat în regulile Rentz și verificarea lor prin componente offline. Motorul local este independent de aplicația de referință `com.boonwiz.rentz`; regulile declarate, variantele modelate și ipotezele neconfirmate au statut explicit.
 
-Prioritatea este contractul jocului: distribuire, alegerea sub-jocului, mutări legale, închiderea mâinii și scor. Interfața grafică și integrarea Android se tratează separat, după stabilizarea acestor contracte.
+Motorul validează distribuirea, alegerea sub-jocului, mutările legale și scorul. Aplicația Android folosește același motor și adaugă masa de joc, salvarea, reluarea și profilul local.
 
 ## Ediție cu acces autorizat
 

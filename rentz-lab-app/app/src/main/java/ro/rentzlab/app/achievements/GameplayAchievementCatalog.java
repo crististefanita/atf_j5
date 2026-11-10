@@ -15,7 +15,8 @@ public final class GameplayAchievementCatalog {
         HAND(Unit.HAND), CHOICE(Unit.HAND), TARGET(Unit.HAND), CONTRACT(Unit.CONTRACT),
         RENTZ_SEQUENCE(Unit.HAND), MATCH_FINISHED(Unit.MATCH), MATCH_WIN(Unit.MATCH),
         CONTRACT_TARGET(Unit.CONTRACT), RENTZ_TOP_TWO(Unit.HAND), MATCH_PODIUM(Unit.MATCH),
-        RENTZ_LARGE_FIRST(Unit.HAND), CLEAN_TOTALS(Unit.HAND), HARD_LARGE_WIN(Unit.MATCH);
+        RENTZ_LARGE_FIRST(Unit.HAND), CLEAN_TOTALS(Unit.HAND), HARD_LARGE_WIN(Unit.MATCH),
+        WHIST_TRICK(Unit.HAND), WHIST_CHAIN(Unit.HAND), OPPONENT_TEN_CAPTURE(Unit.HAND);
 
         final Unit unit;
         Metric(Unit unit) { this.unit = unit; }
@@ -32,6 +33,8 @@ public final class GameplayAchievementCatalog {
             return switch (this) {
                 case RENTZ_SEQUENCE, RENTZ_TOP_TWO, RENTZ_LARGE_FIRST -> contract == Contract.RENTZ;
                 case CLEAN_TOTALS -> contract == Contract.TOTALS;
+                case WHIST_TRICK, WHIST_CHAIN -> contract == Contract.WHIST;
+                case OPPONENT_TEN_CAPTURE -> contract == Contract.TEN_CLUBS;
                 case CONTRACT, TARGET, CONTRACT_TARGET -> true;
                 default -> false;
             };
@@ -50,6 +53,9 @@ public final class GameplayAchievementCatalog {
                 case MATCH_PODIUM -> hand.complete() && rank(hand) <= Math.min(3, hand.players() - 1);
                 case RENTZ_LARGE_FIRST -> isRentz(hand) && AchievementCatalog.target(hand);
                 case CLEAN_TOTALS -> hand.result().contract() == Contract.TOTALS && hand.tactics().has(NO_TRICKS);
+                case WHIST_TRICK -> hand.result().contract() == Contract.WHIST && hand.tactics().has(WIN_ANY);
+                case WHIST_CHAIN -> hand.result().contract() == Contract.WHIST && hand.tactics().has(RUN_OF_TWO);
+                case OPPONENT_TEN_CAPTURE -> hand.result().contract() == Contract.TEN_CLUBS && hand.tactics().has(OPPONENT_TEN);
             };
         }
     }

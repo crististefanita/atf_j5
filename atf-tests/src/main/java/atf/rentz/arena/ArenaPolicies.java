@@ -51,7 +51,7 @@ public record ArenaPolicies(PolicySettings.Objective evaluationObjective, Actor 
         return switch (evaluationObjective) {
             case HAND_MARGIN -> ClusteredEvaluation.Metric.MARGIN;
             case MATCH_POINTS -> ClusteredEvaluation.Metric.POINTS;
-            case MATCH_WIN_SHARE -> ClusteredEvaluation.Metric.WIN_SHARE;
+            case MATCH_WIN_SHARE, MATCH_WIN_LAST_HAND, MATCH_WIN_PROVEN -> ClusteredEvaluation.Metric.WIN_SHARE;
         };
     }
 }

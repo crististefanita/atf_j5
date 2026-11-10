@@ -3,6 +3,8 @@ package ro.rentzlab.app.lifecycle;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.achievements.AchievementProgress;
 import ro.rentzlab.ai.RentzPlayer;
+import ro.rentzlab.core.RentzMatch;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -10,6 +12,7 @@ import java.util.concurrent.FutureTask;
 
 /** Owner checkpoints; background work only sees a detached replay of immutable input. */
 public final class SessionController implements AutoCloseable {
+    public record AchievementNotice(int hand, boolean matchEnd, List<AchievementProgress.Change> changes) { }
     public interface Listener {void ready();void failed(Exception error);}
     @FunctionalInterface public interface Advance {void bots(GameSession session) throws Exception;}
     @FunctionalInterface private interface Preparation {GameSession prepare() throws Exception;}
@@ -20,6 +23,7 @@ public final class SessionController implements AutoCloseable {
     private final Advance advance;
     private SessionRepository.Owner owner;
     private GameSession session;
+    private AchievementNotice achievementNotice;
     private FutureTask<Void> pending;
     private boolean pendingHumanAutomation;
     private long generation;
@@ -50,11 +54,17 @@ public final class SessionController implements AutoCloseable {
         active = true;
         return true;
     }
-    public synchronized void deactivate(){active=false;invalidate();if(owner!=null)owner.close();}
+    public synchronized void deactivate(){active=false;achievementNotice=null;invalidate();if(owner!=null)owner.close();}
     private void invalidate(){generation++;if(pending!=null)pending.cancel(true);clearPending();}
     private void clearPending(){pending=null;pendingHumanAutomation=false;}
     public synchronized GameSession session(){return session;}
     public synchronized AchievementProgress achievements() { return active && owner.isCurrent() ? owner.progress() : null; }
+    public synchronized AchievementNotice takeAchievementNotice(int hand) {
+        if (achievementNotice == null || achievementNotice.hand() != hand) return null;
+        var notice = achievementNotice;
+        achievementNotice = null;
+        return notice;
+    }
     public synchronized boolean isBusy(){return pending!=null;}
     public synchronized boolean newGame(int players,long seed,RentzPlayer.Difficulty difficulty){
         return newGame(players,seed,difficulty,ro.cardtable.names.PlayerNames.DEFAULT_HUMAN);
@@ -74,11 +84,23 @@ public final class SessionController implements AutoCloseable {
         if(pending!=null)return false;
         try{
             var prepared=preparation.prepare();
-            owner.commit(prepared);
-            session=prepared;
+            commit(prepared);
             return true;
         }
         catch(Exception error){owner.runIfCurrent(()->listener.failed(error));return false;}
+    }
+    private void commit(GameSession candidate) throws Exception {
+        var previous = owner.progress();
+        var view = candidate.view();
+        var updated = owner.commit(candidate);
+        boolean matchEnd = view.phase() == RentzMatch.Phase.MATCH_END;
+        if (matchEnd || view.phase() == RentzMatch.Phase.DEAL_END) {
+            var changes = updated == null ? List.<AchievementProgress.Change>of() : updated.gameplayChangesSince(previous);
+            if (!changes.isEmpty()) achievementNotice = new AchievementNotice(view.handNumber(), matchEnd, changes);
+        } else {
+            achievementNotice = null;
+        }
+        session = candidate;
     }
     public synchronized boolean resume(){
         return submit(advance, false);
@@ -119,7 +141,7 @@ public final class SessionController implements AutoCloseable {
         if(session!=origin||!session.save().equals(input))return;
         owner.runIfCurrent(()->{
             if(failure!=null){listener.failed(failure);return;}
-            try{if(!candidate.save().equals(input)){owner.commit(candidate);session=candidate;}}
+            try{if(!candidate.save().equals(input))commit(candidate);}
             catch(Exception error){listener.failed(error);return;}
             listener.ready();
         });

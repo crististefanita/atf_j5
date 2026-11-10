@@ -204,4 +204,53 @@ public class SessionControllerTest {
         }
         assertTrue("Fixture must exercise both a play and a pass",sawPlay&&sawPass);
     }
+
+    @Test public void aSavedHandEmitsOneNoticeAndFailedOrRestoredSettlementsEmitNone() throws Exception {
+        var storage = new LifecycleFixture.Memory();
+        var profile = new ro.rentzlab.app.profile.LocalProfile(new java.util.UUID(0, 7), java.time.ZoneId.of("UTC"));
+        var repository = new SessionRepository(storage, profile, java.time.Clock.systemUTC());
+        var worker = new LifecycleFixture.Worker();
+        var delivery = new LifecycleFixture.Queue();
+        var events = new LifecycleFixture.Events();
+        try (var controller = new SessionController(repository, worker, delivery, events)) {
+            controller.activate();
+            assertTrue(controller.newGame(4, 31, ro.rentzlab.ai.RentzPlayer.Difficulty.NORMAL));
+            assertTrue(controller.apply(LifecycleFixture.REVEAL));
+            assertTrue(controller.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null,
+                    Contract.WHIST, false, GameSession.Origin.MANUAL)));
+            for (int card = 0; card < 31; card++) playWhistTurn(controller, worker, delivery);
+            assertNull(controller.takeAchievementNotice(1));
+            storage.fail = true;
+            playWhistTurn(controller, worker, delivery);
+            assertEquals(1, events.failed);
+            assertEquals(RentzMatch.Phase.PLAY, controller.session().view().phase());
+            assertNull(controller.takeAchievementNotice(1));
+
+            storage.fail = false;
+            playWhistTurn(controller, worker, delivery);
+            var notice = controller.takeAchievementNotice(1);
+            assertNotNull(notice);
+            assertFalse(notice.matchEnd());
+            assertTrue(notice.changes().stream().anyMatch(change -> change.badge().id().equals("play-first-hand")));
+            assertNull(controller.takeAchievementNotice(1));
+
+            controller.deactivate();
+            controller.activate();
+            assertEquals(RentzMatch.Phase.DEAL_END, controller.session().view().phase());
+            assertNull(controller.takeAchievementNotice(1));
+        }
+    }
+
+    private static void playWhistTurn(SessionController controller, LifecycleFixture.Worker worker,
+            LifecycleFixture.Queue delivery) {
+        var view = controller.session().view();
+        if (view.turn() == 0) {
+            controller.apply(new GameSession.Command(GameSession.Action.PLAY, 0, view.legal().get(0), null,
+                    false, GameSession.Origin.MANUAL));
+        } else {
+            assertTrue(controller.resume());
+            worker.next();
+            delivery.all();
+        }
+    }
 }

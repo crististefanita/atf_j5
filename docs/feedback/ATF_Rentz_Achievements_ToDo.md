@@ -2,15 +2,15 @@
 
 ## Pe scurt
 
-**Realizări** prezintă 15 rezultate de joc. **Antrenament** păstrează cele 800 de obiective, cu aceiași identificatori și același progres salvat. [Integrarea ecranelor și testele](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
+**Realizări** prezintă rezultatele de joc din catalogul executabil. **Antrenament** păstrează cele 800 de obiective, cu aceiași identificatori și același progres salvat. [Integrarea ecranelor și testele](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
 
 ## Realizările de joc
 
 | Nivel | Parcurs | Dovadă |
 |---|---|---|
-| Ușor | Prima mână și prima țintă, apoi varietate, două alegeri personale și extinderea unui șir Rentz. | Mâini confirmate, contracte distincte și mutare acceptată de motor. |
-| Mediu | Ținte în patru contracte, partidă completă, clasări la Rentz și rezultate la clasamentul general. | La trei locuri, podiumul cere clasarea în primii doi. La mesele mai mari, contează primii trei. |
-| Greu | Două mâini curate la Totale, toate țintele și titluri repetate, apoi performanțe la mese mari. | Partide distincte, praguri de scor și proveniența deciziilor. |
+| Ușor | Prima mână și prima țintă, varietate, două alegeri personale, extinderea unui șir Rentz și prima levată de Whist. | Mâini confirmate, contracte distincte și mutări acceptate de motor. |
+| Mediu | Ținte în patru contracte, partidă completă, clasări la Rentz și la general, plus captura unui 10♣ advers. | La trei locuri, podiumul cere clasarea în primii doi. La mesele mai mari, contează primii trei. |
+| Greu | Mâini curate la Totale, toate țintele, titluri repetate, performanțe la mese mari și serii de levate la Whist. | Praguri de scor, mâini sau partide distincte și proveniența deciziilor. |
 
 - YAML-ul declară nivelul, ordinea, pragul și textele. Gradle validează și generează tabelul tipizat pentru Android.
 - Motorul confirmă rezultatul, iar catalogul acordă credit în paralel. Partida și actualizările profilului se salvează în aceeași operație.
@@ -125,7 +125,7 @@ Pilotul folosește [decontarea motorului](../../rentz-lab-app/game-core/src/main
 - Detaliul afișează regula, progresul numeric, tipul dovezii și motivul de eligibilitate pentru ultima mână confirmată din partida curentă.
 - Adăugați ruta inversă din profil și, dacă se introduce importul, extindeți verificările de restabilire a stării.
 - Folosiți o listă virtualizată cu identități stabile. Verificați 800 de intrări, text mărit, navigarea TalkBack, starea offline și încărcarea după migrarea profilului.
-- Afișați o notificare discretă după închiderea mâinii. Mai multe insigne simultane se grupează, iar deschiderea ecranului nu oprește sau schimbă partida.
+- Extindeți acceptanța Android a panoului la ultima mână a partidei. Traseul curent verifică o deblocare simultană cu progres parțial, închiderea manuală și reluarea fără repetarea panoului.
 
 ## Livrare etapizată
 
@@ -139,11 +139,3 @@ Pilotul folosește [decontarea motorului](../../rentz-lab-app/game-core/src/main
 - **Componente:** perechi pozitiv/negativ pentru fiecare tip de metrică, deduplicare, offline, restabilire profil, două dispozitive, ceas mutat, egalități și respingerea autodelegării pentru realizări manuale.
 - **Calibrare:** pe 3–6 locuri și ambele dificultăți, măsurați oportunitățile și proporția de reușită. Combinațiile trebuie să aibă un traseu demonstrabil, fără să ceară pierderi deliberate sau o distribuire aproape unică.
 - **E2E selectiv:** joc real, deschidere realizare, revenire după restart și import repetat. Extent arată regula, acțiunile eligibile, progresul înainte/după și capturile native.
-
-### Rezultatul calibrării
-
-- Fiecare contract are 50 de obiective ușoare, 20 medii și 10 grele. Alte 160 acoperă jocul manual și asistat, alegerea, tactica, clasamentul și colecțiile.
-- Pentru noile variante pe contract, două loturi disjuncte însumează 12.288 de mâini legale. Pragurile minime observate sunt 12% pe oportunitate pentru Ușor și Mediu și 16% pentru reperele noi pe zile.
-- Testele cer suficiente dovezi pentru pragul și unitatea fiecărei realizări. Ele compară și rezultatele eligibile între obiective cu același contract, unitate și prag.
-- Captura propriului 10♣ trece la Greu, iar aruncarea K♥ la Mediu. Cinci repere repetitive și extinderea Rentz cer acum alegerea personală pentru dovezile noi. Dovezile confirmate anterior rămân în profil.
-- Ratele descriu mutări legale generate reproductibil. Timpul de deblocare în joc uman, sincronizarea și importul între dispozitive rămân verificări separate.

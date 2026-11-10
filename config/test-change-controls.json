@@ -3,6 +3,16 @@
   "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
   "controls": [
     {
+      "path": "atf-tests/src/test/java/atf/rentz/RentzRuleComponentTest.java",
+      "owner": "Rentz AI",
+      "reason": "Qualify the opt-in victory profile and its declared search budget.",
+      "criterion": "Parse the live YAML, resolve rule bindings and enforce matching worlds and transitions against the shipped factory.",
+      "proof": "docs/rentz/ATF_Learning.md",
+      "expires": "2026-12-10",
+      "sha256": "82e5b146f1054128ea372db45362f5cf7d9394af79a8b3d90af556b0a34893d5",
+      "allowDelete": false
+    },
+    {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/CalibrateGameplayAchievements.java",
       "owner": "Rentz Android",
       "reason": "Compile the offline achievement simulator as governed Android JVM test support.",
@@ -29,7 +39,7 @@
       "criterion": "Cover the exact YAML order and thresholds, terminal ranking, provenance, replay and persistence.",
       "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
       "expires": "2026-12-09",
-      "sha256": "27593b0d2b1bf77c28907cdedf51286877cea4f2e81a34d3a7cc5a89bda99380",
+      "sha256": "70c414b6bd5b3d7f331476e2c69edaa0ead01eba6be8efa9ad485c2e34ec670e",
       "allowDelete": false
     },
     {
@@ -149,7 +159,7 @@
       "criterion": "Jupiter and Surefire establish the selected Nested population; invalid or ambiguous ownership fails. Trusted context verifies the effective candidate, control, opponents and objective before promotion.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "694861eb12b11cd36ca09aecf3d01f209580e425ee9bc98926f1d2272d64975a",
+      "sha256": "00177fafbe5990502032e254535199bb21edfb696914c6c23b2cbdd9282f9429",
       "allowDelete": false
     },
     {
@@ -519,7 +529,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "0cfb79c8a171f11982af19c4d6a49c3ee0addee91d132fc9a181ed99e38599e2",
+      "sha256": "4bb90ab5f96758366ce92d8fcb16f48f0f7fd04822b720301634002f4aec6b14",
       "allowDelete": false
     },
     {
@@ -799,7 +809,7 @@
       "criterion": "Each production turn is isolated until authorized delivery. The owner retries a transient read failure and stale callbacks cannot commit.",
       "proof": "../../rentz_back/ui-review/turn-pacing-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "2d65e3f4699c5d4e451fb0176988d0048141e6cdbc073d54bdea53996477dcbe",
+      "sha256": "8b1ecdb0e2002624460e738129d4689b4b8e1e0e7f54b9aab3d714738ad0a829",
       "allowDelete": false
     },
     {
@@ -959,7 +969,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "390ada4fdd34a022b08bf479325f6f28856c842cf388ecb976c0e0a0fc10a2e5",
+      "sha256": "ed4c3a6cbb550ca1f541aea2f84eb3f1279b89055080d125798e40dcce1669d8",
       "allowDelete": false
     },
     {
@@ -979,7 +989,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "f851e79c16fe509dc03a301a0cba22f6186396a0d0347bb61ad54b477028b52c",
+      "sha256": "418f17912822dd992d105e79cc132df7f0fa103b8ef9af5a76027657ba4d1ac1",
       "allowDelete": false
     },
     {
@@ -1009,7 +1019,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "246dfc5a4f79894888427839d9c1df90b547998f6bb3f87c4348c91fada47c88",
+      "sha256": "8d7f68f52427aef08e0e66807869d5b5fbac976e3e36145d366f515c376fe124",
       "allowDelete": false
     },
     {
@@ -1159,7 +1169,7 @@
       "criterion": "Rentz and two standard deals reach DEAL_END; seat geometry, first human move, score history and restart are observed; the learning registry is isolated and unchanged; Extent keeps each original screenshot inline.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "809caf7be6e5e7e8051d59e56709b131de31a3d516f5467be522ec1104907132",
+      "sha256": "a78ca42c0cf8e567953c0d955c166c5e16e356911dd8522faf5913df4b8b3633",
       "allowDelete": false
     },
     {
@@ -1199,7 +1209,7 @@
       "criterion": "Gradle versionName and monotonically increasing versionCode match the release catalog candidate.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "4d5128ef075be26de669ba78bd214db4114b4791011fbc7946ecf2b9bbbbc07f",
+      "sha256": "faf328107ed1f07204b040669e10524cf6b096fef03a88eaea91e1b755a2df4d",
       "allowDelete": false
     },
     {
@@ -1209,7 +1219,7 @@
       "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "2b66e96ba6bdd689bef0a6f181c384ee5235fb3d0437d95a9ed9541c9529a148",
+      "sha256": "2a83f44b59835b8570d475c9792f0bc6d13b6a65ef25a082edcae804401d1e52",
       "allowDelete": false
     },
     {

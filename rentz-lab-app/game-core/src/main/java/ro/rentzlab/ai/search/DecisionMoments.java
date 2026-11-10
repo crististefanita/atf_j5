@@ -33,7 +33,7 @@ final class DecisionMoments<T> {
 
     int completed() { return completed; }
 
-    SearchPolicy.Decision<T> decision(PolicySettings settings, boolean full, SearchPolicy.Work work) {
+    SearchPolicy.Decision<T> decision(PolicySettings.Objective objective, double riskWeight, boolean full, SearchPolicy.Work work) {
         var estimates = new ArrayList<SearchPolicy.Estimate<T>>();
         T best = null;
         double bestScore = Double.NEGATIVE_INFINITY;
@@ -41,7 +41,7 @@ final class DecisionMoments<T> {
         for (int option = 0; option < options.size(); option++) {
             double mean = sums[option] / completed;
             double spread = Math.sqrt(Math.max(0, squares[option] / completed - mean * mean));
-            double score = mean - settings.riskWeight() * spread;
+            double score = mean - riskWeight * spread;
             double gap = gaps[option] / completed;
             estimates.add(new SearchPolicy.Estimate<>(options.get(option), mean, spread, score));
             if (score > bestScore + 1e-9 || full && Math.abs(score - bestScore) <= 1e-9 && gap > bestGap + 1e-9) {
@@ -50,7 +50,7 @@ final class DecisionMoments<T> {
                 bestGap = gap;
             }
         }
-        String method = full ? "COMMON_FEASIBLE_WORLDS_FULL_MATCH_" + settings.objective() : "COMMON_FEASIBLE_WORLDS_ROLLOUT";
+        String method = full ? "COMMON_FEASIBLE_WORLDS_FULL_MATCH_" + objective : "COMMON_FEASIBLE_WORLDS_ROLLOUT";
         return new SearchPolicy.Decision<>(Objects.requireNonNull(best), completed, method, Card.immutable(estimates), work);
     }
 }

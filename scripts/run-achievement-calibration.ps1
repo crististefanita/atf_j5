@@ -38,7 +38,11 @@ $summary=Join-Path $RunRoot 'summary.json'
 & "$JavaHome/bin/java.exe" -Xmx512m -cp $cp ro.rentzlab.app.achievements.CalibrateGameplayAchievements $plan $summary
 if($LASTEXITCODE){throw 'Calibration did not complete.'}
 $data=Get-Content -LiteralPath $summary -Raw|ConvertFrom-Json
-if($data.games-lt200-or$data.achievements.Count-ne15){throw 'Calibration did not cover the full catalog and match plan.'}
+$catalog=Get-Content -LiteralPath $rules -Raw|ConvertFrom-Json
+$expected=@($catalog.tiers.EASY)+@($catalog.tiers.MEDIUM)+@($catalog.tiers.HARD)
+if($data.games-lt200-or($data.achievements.id -join ',')-cne($expected.id -join ',')){
+    throw 'Calibration did not cover the full catalog and match plan.'
+}
 [ordered]@{
     status='PASS'
     scope='Offline full Rentz matches and independent holdout'

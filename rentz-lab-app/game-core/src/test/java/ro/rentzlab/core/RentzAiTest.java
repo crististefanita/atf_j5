@@ -3,6 +3,7 @@ package ro.rentzlab.core;
 import ro.rentzlab.testing.RentzComponentLayer;
 
 import ro.rentzlab.ai.*;
+import ro.rentzlab.ai.tactics.CaptureTactics;
 
 import java.util.*;
 import org.junit.jupiter.api.Test;
@@ -85,6 +86,113 @@ class RentzAiTest {
     @Test void tenOfClubsIsNotGivenAwayOnAnUnwinnableOffSuitTrick() {
         var game=game(deal(Map.of(0,cards("H7"),1,cards("C10 D7 D8 DQ DA S7 S8 S9"))),Contract.TEN_CLUBS);
         game.play(0,c("H7"));assertNotEquals(c("C10"),TacticalPolicy.card(game.observe(1),scoring,settings));
+    }
+
+    @Test void whistUsesAPublicVoidToSaveTheHigherWinner() {
+        var opening = deal(Map.of(0, cards("CA CQ C10 C8"), 1, cards("CK CJ C9 C7"), 2, cards("H9"), 3, cards("D9")));
+        var noPoints = new ScoreProfile(0, 0, 0, 0, 0, 0, List.of(0, 0, 0, 0, 0, 0));
+        var game = RentzMatch.fromOpeningDeal(opening, 17, noPoints, 0);
+        game.choose(0, Contract.WHIST, false);
+        game.play(0, c("CA"));
+        game.play(1, c("C9"));
+        game.play(2, c("H9"));
+        game.play(3, c("D9"));
+        game.play(0, c("C10"));
+        var view = game.observe(1);
+        var memory = new KnowledgeSampler(view);
+        assertTrue(memory.unknownCards().contains(c("CQ")));
+        assertFalse(memory.allows(2, c("CQ")));
+        assertEquals(c("CJ"), CaptureTactics.cheapestSafeCapture(view, memory));
+        var decision = new SearchPolicy(noPoints, captureAware()).card(view);
+        assertTrue(decision.worlds() > 0, "A safe Whist winner remains a preference, since ducking can pay later");
+        assertEquals(c("CJ"), decision.selected(), "With equal estimates the jack saves the king");
+        assertTrue(decision.estimates().stream().anyMatch(estimate -> estimate.option().equals(c("C7"))));
+        assertTrue(decision.estimates().stream().anyMatch(estimate -> estimate.option().equals(c("CK"))));
+    }
+
+    @Test void whistDoesNotInferAVoidBeforeAnOpponentShowsIt() {
+        var opening = deal(Map.of(0, cards("C10"), 1, cards("CK CJ"), 2, cards("CA")));
+        var game = RentzMatch.fromOpeningDeal(opening, 17, scoring, 0);
+        game.choose(0, Contract.WHIST, false);
+        game.play(0, c("C10"));
+        var view = game.observe(1);
+        assertNull(CaptureTactics.cheapestSafeCapture(view, new KnowledgeSampler(view)));
+    }
+
+    @Test void tenOfClubsCapturesAnOffSuitTargetWithTheCheapestCertainWinner() {
+        var opening = deal(Map.of(0, cards("HJ"), 1, cards("C10 C9 CJ CQ CK CA D9 D10"), 2, cards("H8"), 3, cards("HA HK")));
+        var game = RentzMatch.fromOpeningDeal(opening, 17, scoring, 0);
+        game.choose(0, Contract.TEN_CLUBS, false);
+        game.play(0, c("HJ"));
+        game.play(1, c("C10"));
+        game.play(2, c("H8"));
+        var decision = new SearchPolicy(scoring, captureAware()).card(game.observe(3));
+        assertEquals(c("HK"), decision.selected());
+        assertEquals("PUBLIC_TEN_SAFE_CAPTURE", decision.method());
+        assertEquals(0, decision.worlds());
+        game.play(3, decision.selected());
+        assertEquals(scoring.tenReward(), game.history().get(0).points().get(3));
+    }
+
+    @Test void tenOfClubsDoesNotCashAnExposedTenUnderAnUnseenHigherClub() {
+        var opening = deal(Map.of(0, cards("C10 C9"), 1, cards("CA")));
+        var game = RentzMatch.fromOpeningDeal(opening, 17, scoring, 0);
+        game.choose(0, Contract.TEN_CLUBS, false);
+        var decision = new SearchPolicy(scoring, captureAware()).card(game.observe(0));
+        assertTrue(decision.worlds() > 0, "An unknown higher club keeps the choice in the search");
+    }
+
+    @Test void tenOfClubsUsesPublicVoidsToCashTheTenWithoutSpendingTheKing() {
+        var opening = deal(Map.of(0, cards("CA CQ C8 C7"), 1, cards("CK CJ C10 C9"), 2, cards("H9"), 3, cards("D9")));
+        var game = RentzMatch.fromOpeningDeal(opening, 17, scoring, 0);
+        game.choose(0, Contract.TEN_CLUBS, false);
+        game.play(0, c("CA"));
+        game.play(1, c("C9"));
+        game.play(2, c("H9"));
+        game.play(3, c("D9"));
+        game.play(0, c("C8"));
+        var view = game.observe(1);
+        assertTrue(new KnowledgeSampler(view).unknownCards().contains(c("CQ")));
+        var decision = new SearchPolicy(scoring, captureAware()).card(view);
+        assertEquals(c("C10"), decision.selected());
+        assertEquals("PUBLIC_TEN_SAFE_CAPTURE", decision.method());
+    }
+
+    @Test void aSmallEndgameEvaluatesEachCompatibleDistributionOnce() {
+        var opening = new OpeningDeal(List.of(cards("C9 C10 CJ CQ CK CA H9 H10"),
+                cards("D9 D10 DJ DQ DK DA HJ HQ"), cards("S9 S10 SJ SQ SK SA HK HA")));
+        var game = RentzMatch.fromOpeningDeal(opening, 19, scoring, 0);
+        game.choose(0, Contract.WHIST, false);
+        for (int play = 0; play < 18; play++) {
+            int seat = game.observe(0).turn();
+            Card card = game.observe(seat).legal().stream()
+                    .filter(candidate -> candidate.suit() != Card.Suit.HEARTS).findFirst().orElseThrow();
+            game.play(seat, card);
+        }
+        var view = game.observe(0);
+        var memory = new KnowledgeSampler(view);
+        assertEquals(cards("HJ HQ HK HA"), memory.unknownCards());
+        var worlds = memory.exactSmallWorlds(6);
+        assertEquals(6, new HashSet<>(worlds).size());
+        assertEquals(6, worlds.size());
+        assertTrue(memory.exactSmallWorlds(5).isEmpty(), "A capped enumeration must not return a biased prefix");
+        for (var world : worlds) assertEquals(view, replay(view, world).observe(0));
+        var settings = new PolicySettings(8, .05, 3, .3, 2, PolicySettings.Objective.HAND_MARGIN,
+                PolicySettings.Tactic.PUBLIC_CAPTURE_AWARE, 65536);
+        var decision = new SearchPolicy(scoring, settings).card(view);
+        assertEquals(8, decision.work().requestedWorlds());
+        assertEquals(6, decision.work().completedWorlds());
+        var smallBudget = new PolicySettings(8, .05, 3, .3, 2, PolicySettings.Objective.HAND_MARGIN,
+                PolicySettings.Tactic.PUBLIC_CAPTURE_AWARE, 120);
+        var reference = new PolicySettings(8, .05, 3, .3, 2, PolicySettings.Objective.HAND_MARGIN,
+                PolicySettings.Tactic.PUBLIC_VOID_AWARE, 120);
+        assertEquals(new SearchPolicy(scoring, reference).card(view), new SearchPolicy(scoring, smallBudget).card(view),
+                "An unaffordable exact set uses ordinary sampling instead of a prefix of assignments");
+    }
+
+    private static PolicySettings captureAware() {
+        return new PolicySettings(2, .05, 3, .3, 2, PolicySettings.Objective.HAND_MARGIN,
+                PolicySettings.Tactic.PUBLIC_CAPTURE_AWARE, 65536);
     }
     @Test void sequenceOpeningFavorsAnOwnedChainAndAcePreservesEveryOtherContinuation() {
         var chain=game(deal(Map.of(0,cards("CJ C10 C9 C8 C7 DJ HQ HA"))),Contract.RENTZ);

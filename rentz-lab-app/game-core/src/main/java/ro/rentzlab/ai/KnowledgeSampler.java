@@ -45,6 +45,42 @@ public final class KnowledgeSampler {
     public boolean allows(int seat,Card card){return !forbidden.get(seat).contains(card);}
     public List<Card> unknownCards(){return Card.immutable(unknown);}
 
+    /** Returns all distinct small feasible assignments, or an empty list when the search would exceed the cap. */
+    public List<OpeningDeal> exactSmallWorlds(int limit) {
+        if (limit < 1) throw new IllegalArgumentException("Positive world cap required");
+        if (unknown.size() > 6) return Collections.emptyList();
+        var hands = new ArrayList<List<Card>>();
+        for (var cards : played) hands.add(new ArrayList<>(cards));
+        hands.get(view.seat()).addAll(view.hand());
+        var worlds = new ArrayList<OpeningDeal>();
+        if (!enumerate(0, hands, worlds, limit)) return Collections.emptyList();
+        return Card.immutable(worlds);
+    }
+
+    private boolean enumerate(int index, List<List<Card>> hands, List<OpeningDeal> worlds, int limit) {
+        if (index == unknown.size()) {
+            if (worlds.size() == limit) return false;
+            var ordered = new ArrayList<List<Card>>();
+            for (var hand : hands) {
+                var cards = new ArrayList<>(hand);
+                cards.sort(TacticalPolicy.order());
+                ordered.add(cards);
+            }
+            worlds.add(new OpeningDeal(ordered));
+            return true;
+        }
+        Card card = unknown.get(index);
+        for (int seat = 0; seat < hands.size(); seat++) {
+            var hand = hands.get(seat);
+            if (seat == view.seat() || hand.size() == 8 || !allows(seat, card)) continue;
+            hand.add(card);
+            boolean withinLimit = enumerate(index + 1, hands, worlds, limit);
+            hand.remove(hand.size() - 1);
+            if (!withinLimit) return false;
+        }
+        return true;
+    }
+
     public OpeningDeal sample(long samplingSeed) {
         var random=new Random(samplingSeed);var cards=new ArrayList<>(unknown);Collections.shuffle(cards,random);
         var slots=new ArrayList<Integer>();

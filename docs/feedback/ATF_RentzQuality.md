@@ -36,6 +36,7 @@ Registrul separă mecanismele implementate de promovarea strategică și de inte
 
 - Un orizont mai lung trebuie să depășească reperul pe obiectivul declarat, pe lot nou, fără ajustare după expunere. O regresie măsurată păstrează candidatul experimental și implicitul produsului neschimbat.
 - Diagnosticul separă variația lumilor de eroarea politicii de continuare; o pierdere devine regresie mică numai cu justificarea independentă a deciziei.
+- Pentru tactica live de joc în lipsa culorii, fixați varianta și comutatorul înaintea lotului. Comparați reperul și candidata pe aceleași distribuiri și rotații, separat pe contracte și număr de locuri. Raportați puncte, credit de victorie, cost și intervalul pereche pe seed. Un câștig pe subsetul tactic nu validează singur profilul global. [Ramura tactică](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/ai/TacticalPolicy.java)
 - Profilul contextual rămâne separat de candidatul cu dovadă publică. Reguli locale plauzibile sau componente verzi nu justifică păstrarea lor într-un candidat care pierde comparația pereche.
 - Integrarea Android trebuie să transporte registrul public complet și să alinieze codec-ul, identitatea politicii și APK-ul înaintea calificării native. Componentele JVM nu închid această frontieră.
 
@@ -57,6 +58,7 @@ Nivelurile testelor, corpusul documentar și revizuirea diferențelor Git au con
 |---|---|---|
 
 | P2 | Contractele de transport și arhivă sunt adaptoare locale pentru distribuția produsului; reutilizarea printr-o bibliotecă comună nu este încă împachetată. | Prin ownerul comun, promovați un API generic cu nume de produs configurabil și oracole negative independente. Păstrați în consumator selecția versiunii, regulile Rentz și acceptanța consumatorului. |
+| P2 | Descrierea de început din [README](../../README.md) lasă integrarea Android pentru o etapă ulterioară, deși documentul oferă două ediții instalabile. | Descrierea scurtă separă Android livrat, edițiile disponibile și lucrările viitoare. Guvernanța confruntă secțiunile de produs cu registrul fiecărui canal. O rută mutată în secțiunea greșită și un candidat prezentat ca disponibil sunt refuzate separat. [Dovada pe canal](ATF_Release_RAG.md#legătura-dintre-extent-și-descărcarea-din-readme) |
 
 [Procesul livrării](../rentz/ATF_Release.md) separă DRAFT, PREPARED și PUBLISHED; o pregătire validă nu este un APK calificat.
 

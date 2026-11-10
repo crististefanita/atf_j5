@@ -11,10 +11,14 @@ hard:
   ownChainWeight: 3.0
   releaseWeight: 0.3
   skipThreatWeight: 2.0
-  objective: HAND_MARGIN
+  objective: MATCH_WIN_PROVEN
   tactic: PUBLIC_VOID_AWARE
   maxTransitions: 65536
 rules:
+  - id: LAST_TRICKS_CERTIFIED_WIN
+    condition: Schimbă alegerea de marjă în ultima mână cu cel mult două cărți pe loc numai dacă alternativa dovedește primul loc fără egalitate pentru toate atribuirile fezabile și răspunsurile legale.
+    implementation: SearchPolicy.card
+    verification: RentzMatchStrategyTest.finalWhistCanGiveBothTricksToTheTrailingRivalToSecureFirstPlace
   - id: NEGATIVE_VOID_TARGET
     condition: Off suit, dispose of the highest direct penalty before weighing losing exits and suit length.
     implementation: TacticalPolicy.card

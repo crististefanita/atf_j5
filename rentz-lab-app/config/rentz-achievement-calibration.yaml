@@ -3,14 +3,14 @@
   "seatCounts": [3, 4, 5, 6],
   "campaigns": [1, 3, 8],
   "runs": [
-    {"stage":"calibration", "mode":"PRODUCT", "difficulty":"NORMAL", "firstSeed":292000, "matchesPerTable":16},
-    {"stage":"calibration", "mode":"MIXED", "difficulty":"NORMAL", "firstSeed":293000, "matchesPerTable":16},
-    {"stage":"calibration", "mode":"PRODUCT", "difficulty":"HARD", "firstSeed":294000, "matchesPerTable":16},
-    {"stage":"calibration", "mode":"MIXED", "difficulty":"HARD", "firstSeed":295000, "matchesPerTable":16},
-    {"stage":"holdout", "mode":"PRODUCT", "difficulty":"NORMAL", "firstSeed":602000, "matchesPerTable":24},
-    {"stage":"holdout", "mode":"MIXED", "difficulty":"NORMAL", "firstSeed":603000, "matchesPerTable":24},
-    {"stage":"holdout", "mode":"PRODUCT", "difficulty":"HARD", "firstSeed":604000, "matchesPerTable":24},
-    {"stage":"holdout", "mode":"MIXED", "difficulty":"HARD", "firstSeed":605000, "matchesPerTable":24}
+    {"stage":"calibration", "mode":"PRODUCT", "difficulty":"NORMAL", "firstSeed":2292000, "matchesPerTable":16},
+    {"stage":"calibration", "mode":"MIXED", "difficulty":"NORMAL", "firstSeed":2293000, "matchesPerTable":16},
+    {"stage":"calibration", "mode":"PRODUCT", "difficulty":"HARD", "firstSeed":2294000, "matchesPerTable":16},
+    {"stage":"calibration", "mode":"MIXED", "difficulty":"HARD", "firstSeed":2295000, "matchesPerTable":16},
+    {"stage":"holdout", "mode":"PRODUCT", "difficulty":"NORMAL", "firstSeed":2602000, "matchesPerTable":24},
+    {"stage":"holdout", "mode":"MIXED", "difficulty":"NORMAL", "firstSeed":2603000, "matchesPerTable":24},
+    {"stage":"holdout", "mode":"PRODUCT", "difficulty":"HARD", "firstSeed":2604000, "matchesPerTable":24},
+    {"stage":"holdout", "mode":"MIXED", "difficulty":"HARD", "firstSeed":2605000, "matchesPerTable":24}
   ],
   "hardSimulation": {"worlds":1, "maxTransitions":256}
 }

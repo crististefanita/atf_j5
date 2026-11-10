@@ -14,9 +14,8 @@ class DecisionMomentsTest {
         moments.commit(new double[]{0,10},new double[]{0,1});
         moments.commit(new double[]{10,0},new double[]{0,1});
         var work = new SearchPolicy.Work(3,2,2,123,128,true);
-        var settings = new PolicySettings(3,.05,3,.3,2);
-        var hand = moments.decision(settings,false,work);
-        var full = moments.decision(settings,true,work);
+        var hand = moments.decision(PolicySettings.Objective.HAND_MARGIN, .05, false, work);
+        var full = moments.decision(PolicySettings.Objective.MATCH_POINTS, .05, true, work);
         assertEquals("first",hand.selected());
         assertEquals("second",full.selected());
         assertEquals(2,hand.worlds());

@@ -19,7 +19,7 @@ public final class TacticalPolicy {
             Card local=ro.rentzlab.ai.tactics.TargetTactics.negativeFollow(view,scoring);if(local!=null)return local;
         }
         if(view.contract()==Contract.RENTZ)return sequence(view,settings);
-        boolean voidAware = ownContinuation && settings.tactic() == PolicySettings.Tactic.PUBLIC_VOID_AWARE
+        boolean voidAware = ownContinuation && settings.tactic().usesVoidTactics()
                 && VoidTactics.avoidance(view.contract());
         if(view.trick().isEmpty()) {
             if (voidAware) {

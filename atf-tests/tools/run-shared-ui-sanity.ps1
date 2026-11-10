@@ -3,6 +3,9 @@ param([Parameter(Mandatory)][string]$BuildQualification,[Parameter(Mandatory)][s
 $ErrorActionPreference='Stop'
 $consecutiveGameCount=5
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
+$gameplayCatalog=Get-Content -LiteralPath (Join-Path $project 'rentz-lab-app/app/src/main/achievement-rules/rentz-gameplay-achievements.yaml') -Raw|ConvertFrom-Json
+$gameplayTotal=$gameplayCatalog.tiers.EASY.Count+$gameplayCatalog.tiers.MEDIUM.Count+$gameplayCatalog.tiers.HARD.Count
+$gameplayProgressPattern='^Unlocked [1-9][0-9]*/'+$gameplayTotal+'$'
 Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $project 'rentz-reference/tools/RentzAndroid.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
@@ -143,12 +146,15 @@ function State([long]$After=-1,[string]$Screen='GAME',[int]$TimeoutSeconds=25){
     throw 'Current actor checkpoint did not reach the expected revision and route.'
 }
 function Check([string]$Name,$Expected,$Actual){[pscustomobject]@{name=$Name;expected=[string]$Expected;actual=[string]$Actual;passed=([string]$Expected-ceq[string]$Actual)}}
-function Observe([string]$Title,[scriptblock]$Verify){
+function Observe([string]$Title,[scriptblock]$Verify,[string]$UntilText=''){
     $deadline=[datetime]::UtcNow.AddSeconds(25);$attempt=0;$lastFailure=$null
     do{
         $attempt++;$name='checkpoint-{0:d2}-attempt-{1:d2}'-f($points.Count+1),$attempt
         $watch=[Diagnostics.Stopwatch]::StartNew()
-        try{$nodes=@(Save-RentzObservation -RunRoot $raw -Name $name);$lastFailure=$null;break}
+        try{
+            $nodes=@(Save-RentzObservation -RunRoot $raw -Name $name);$lastFailure=$null
+            if(!$UntilText-or$nodes.text -ccontains $UntilText){break}
+        }
         catch{if($_.Exception.Message-notlike'Fresh hierarchy was not confirmed*'){throw};$lastFailure=$_.Exception;Start-Sleep -Milliseconds 250}
         finally{$watch.Stop()}
     }while([datetime]::UtcNow-lt$deadline)
@@ -667,9 +673,31 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
         }
         if($state.view.phase-ne'DEAL_END'){throw "Subgame $deal ended in an unexpected phase: $($state.view.phase)."}
         $terminal=$state
+        if($deal-eq2){
+            Observe 'Manual settlement presents achievement progress' {param($captured)
+                Check 'Achievement progress heading is visible' 1 @($captured|Where-Object text -CEQ 'Achievement progress').Count
+                Check 'First manually completed hand is unlocked' 1 @($captured|Where-Object text -CEQ 'First completed hand · Unlocked').Count
+                Check 'The same panel includes partial progress' 1 @($captured|Where-Object text -CEQ 'Three contracts · 1/3').Count
+                $score=@($captured|Where-Object text -CEQ 'Hand score')
+                $progress=@($captured|Where-Object text -CEQ 'Achievement progress')
+                Check 'The score title stays above the achievement panel' $true ($score.Count-eq1-and$progress.Count-eq1-and
+                    (Bounds $score[0])[3]-le(Bounds $progress[0])[1])
+                Check 'Achievement panel has a distinct dismiss control' 1 @($captured|Where-Object {
+                    $_.description-ceq'Close achievement progress'-and$_.enabled-eq'true'-and$_.clickable-eq'true'
+                }).Count
+            } -UntilText 'Achievement progress'
+            $dismiss=$lastObservation | Where-Object {
+                $_.description-ceq'Close achievement progress'-and$_.enabled-eq'true'-and$_.clickable-eq'true'
+            }
+            TapNode $dismiss 'Close achievement progress'
+        }elseif($deal-gt2){
+            $dismiss=Get-RentzTapTarget -Nodes @(Ui) -Label 'Close achievement progress'
+            if($null-ne$dismiss){TapNode $dismiss 'Close achievement progress'}
+        }
         if($contract-eq'RENTZ'){Tap 'View table'}
         Observe "Subgame $deal completed: $contract" {param($captured)
             GameHeadingChecks $captured $terminal
+            if($deal-eq2){Check 'Dismissing the achievement panel returns to the score' 0 @($captured|Where-Object text -CEQ 'Achievement progress').Count}
             Check 'Exact completed hand number' $deal $terminal.view.handNumber
             Check 'Completed subgame contract' $contract $terminal.view.contract
             Check 'One score value per player' $terminal.view.players $terminal.view.dealPoints.Count
@@ -716,7 +744,7 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
         Check 'Resume remains enabled' 1 @($captured|Where-Object{$_.text-eq'Resume game'-and$_.enabled-eq'true'}).Count
     }
     Tap 'Achievements';$null=State -Screen 'ACHIEVEMENTS'
-    $gameplayEarned=[string](@(Ui)|Where-Object text -Match '^Unlocked [1-9][0-9]*/15$'|Select-Object -First 1).text
+    $gameplayEarned=[string](@(Ui)|Where-Object text -Match $gameplayProgressPattern|Select-Object -First 1).text
     $progress=($journal.Output|ConvertFrom-Json).achievements
     Observe 'Gameplay and training keep independent progress' {param($captured)
         Check 'Confirmed manual play grants gameplay credit' $true ($gameplayEarned.Length-gt0-and
@@ -758,7 +786,7 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
     Adb @('shell','am','start','-W','-n','ro.rentzlab.app.uisanity/ro.rentzlab.app.MainActivity') 'consecutive-subgames-restart-start'|Out-Null
     Tap 'Achievements';$null=State -Screen 'ACHIEVEMENTS'
     Observe 'Gameplay milestones survive process restart' {param($captured)
-        Check 'Same gameplay total after restart' $gameplayEarned ([string](@($captured|Where-Object text -Match '^Unlocked [1-9][0-9]*/15$'|Select-Object -First 1).text))
+        Check 'Same gameplay total after restart' $gameplayEarned ([string](@($captured|Where-Object text -Match $gameplayProgressPattern|Select-Object -First 1).text))
     }
     Tap 'Training';$null=State -Screen 'TRAINING'
     $afterRestart=(Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/session.json') 'achievement-checkpoint-after-restart').Output
@@ -768,7 +796,12 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
     }
     Tap 'Back';$null=State -Screen 'ACHIEVEMENTS'
     Tap 'Back';$null=State -Screen 'MENU'
-    Tap 'Resume game';Tap 'View table';$restored=State
+    Tap 'Resume game'
+    Observe 'Resuming a saved settlement does not repeat achievement progress' {param($captured)
+        Check 'The score is available after resume' 1 @($captured|Where-Object text -CEQ 'Hand score').Count
+        Check 'No achievement panel is replayed' 0 @($captured|Where-Object text -CEQ 'Achievement progress').Count
+    } -UntilText 'Hand score'
+    Tap 'View table';$restored=State
     Observe 'The match restores its final contract and scores' {param($captured)
         Check 'Restored revision equals the terminal revision' $terminal.revision $restored.revision
         Check 'Restored completed phase' 'DEAL_END' $restored.view.phase
@@ -872,8 +905,8 @@ try{
     Observe 'English shared home and disabled resume' {param($nodes) $t=Text $nodes;Check 'Rentz home' $true ($t.Contains('Rentz'));Check 'English first launch' $true ($t.Contains('New game'));Check 'Resume disabled' 1 @($nodes|Where-Object{$_.text-eq'Resume game'-and$_.enabled-eq'false'}).Count}
     if($ConsecutiveSubgames){
         Tap 'Achievements'
-        Observe 'Gameplay catalog opens with fifteen milestones' {param($nodes)
-            Check 'Gameplay starts with the first manual hand' $true ((Text $nodes).Contains('Unlocked 0/15')-and
+        Observe "Gameplay catalog opens with $gameplayTotal milestones" {param($nodes)
+            Check 'Gameplay starts with the first manual hand' $true ((Text $nodes).Contains("Unlocked 0/$gameplayTotal")-and
                 (Text $nodes).Contains('First completed hand'))
         }
         Tap 'Training'

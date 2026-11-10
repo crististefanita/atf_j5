@@ -27,6 +27,21 @@ public record AchievementProgress(LocalProfile profile, Map<String, List<Mark>> 
 
     public int count(AchievementCatalog.Badge badge) { return marks.getOrDefault(badge.id(), List.of()).size(); }
 
+    public record Change(AchievementCatalog.Badge badge, int count) {
+        public boolean unlocked() { return count >= badge.goal(); }
+    }
+
+    public List<Change> gameplayChangesSince(AchievementProgress previous) {
+        if (previous == null || !profile.equals(previous.profile())) return List.of();
+        var changes = new ArrayList<Change>();
+        for (var badge : GameplayAchievementCatalog.badges()) {
+            int current = count(badge);
+            if (current > previous.count(badge)) changes.add(new Change(badge, current));
+        }
+        changes.sort(java.util.Comparator.comparing(Change::unlocked).reversed());
+        return List.copyOf(changes);
+    }
+
     public AchievementProgress record(int players, long seed, AchievementHand hand, Instant at) {
         return record(players, seed, hand, at, AchievementCatalog.all());
     }

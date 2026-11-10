@@ -44,6 +44,7 @@ public final class MainActivity extends Activity {
     private boolean showSettledTable;
     private boolean autoPlay;
     private AlertDialog historyDialog;
+    private View achievementPopup;
     private Exception pendingProblem;
     private Runnable unregisterBack = () -> { };
 
@@ -89,6 +90,7 @@ public final class MainActivity extends Activity {
     private void redraw() {
         if (!active || isFinishing() || isDestroyed()) return;
         display.removeCallbacksAndMessages(null);
+        dismissAchievementPopup();
         long frame = ++generation;
         var copy = copy(); var menus = new RentzMenus(views);
         java.util.function.IntConsumer language = index -> { if (frame == generation) language(index); };
@@ -173,10 +175,15 @@ public final class MainActivity extends Activity {
         if (settlement.isEmpty()) showSettledTable = false;
         if (!holding && !showSettledTable && settlement.isPresent()) {
             var row = settlement.get();
-            new RentzHandScoreScreen(views).show(copy, row, names, view.players() * 8,
+            var progressSlot = new RentzHandScoreScreen(views).show(copy, row, names, view.players() * 8,
                     RentzScoreContent.finalStandings(view),
                     view.phase() == RentzMatch.Phase.DEAL_END ? next : null, !controller.isBusy(),
                     this::openHistory, () -> { showSettledTable = true; redraw(); }, () -> route("MENU"));
+            var notice = controller.takeAchievementNotice(view.handNumber());
+            if (notice != null) {
+                achievementPopup = AchievementPopup.show(views, progressSlot, copy, notice, this::dismissAchievementPopup);
+                display.postDelayed(this::dismissAchievementPopup, 8000);
+            }
             return;
         }
         var page = views.gamePage(); views.applyTableWindowChrome();
@@ -328,6 +335,12 @@ public final class MainActivity extends Activity {
         catch (Exception error) { android.util.Log.e("RentzLab", "Debug projection failed", error); }
     }
     private void back() { if (!controller.isBusy()) route(screen.equals("TRAINING") ? "ACHIEVEMENTS" : "MENU"); }
+    private void dismissAchievementPopup() {
+        if (achievementPopup != null && achievementPopup.getParent() instanceof android.view.ViewGroup parent) {
+            parent.removeView(achievementPopup);
+        }
+        achievementPopup = null;
+    }
     @Override public boolean onKeyUp(int keyCode, android.view.KeyEvent event) {
         if (Build.VERSION.SDK_INT < 33 && keyCode == android.view.KeyEvent.KEYCODE_BACK && !event.isCanceled()) {
             back(); return true;
@@ -350,6 +363,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onPause() {
         active = false; generation++; display.removeCallbacksAndMessages(null);
+        dismissAchievementPopup();
         stopAutoPlay();
         picker.dismiss();
         if (historyDialog != null) { historyDialog.setOnDismissListener(null); historyDialog.dismiss(); historyDialog = null; }

@@ -22,7 +22,7 @@ abstract class GenerateRentzAchievementCatalog extends DefaultTask {
         def copy = ['titleEn', 'titleRo', 'ruleEn', 'ruleRo']
         def entries = tiers.collectMany { tier ->
             def rows = catalog.tiers[tier]
-            if (!(rows instanceof List) || rows.size() != 5) throw new GradleException("Expected five achievements for $tier")
+            if (!(rows instanceof List) || rows.isEmpty()) throw new GradleException("Expected achievements for $tier")
             rows.collect { row ->
                 if (row.keySet() != (['id', 'metric', 'target'] + copy).toSet() ||
                         !(row.id ==~ /play-[a-z0-9-]+/) || !(row.metric ==~ /[A-Z][A-Z0-9_]*/) ||

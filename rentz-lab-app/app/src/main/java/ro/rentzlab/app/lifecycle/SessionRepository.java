@@ -46,7 +46,7 @@ public final class SessionRepository {
                 return session;
             }
         }
-        public void commit(GameSession session) throws Exception {
+        public AchievementProgress commit(GameSession session) throws Exception {
             synchronized(SessionRepository.this){
                 requireCurrent();
                 if (!loaded && profile != null) load();
@@ -64,6 +64,7 @@ public final class SessionRepository {
                 durable = candidate;
                 durableHandCount = hands.size();
                 progress = next;
+                return progress;
             }
         }
         public AchievementProgress progress() {

@@ -29,20 +29,43 @@ public final class GameplayAchievementComponentTest {
     private static final LocalProfile PROFILE = new LocalProfile(new UUID(0, 1), ZoneId.of("UTC"));
     @Rule public final UiAuditRule audit = new UiAuditRule();
 
-    @Test public void yamlOrderAndThresholdsMatchAllFifteenGameplayMilestones() {
+    @Test public void yamlOrderAndThresholdsMatchAllGameplayMilestones() {
         var catalog = GameplayAchievementCatalog.badges();
         audit.equal("Exact YAML order for all three levels", List.of(
-                "play-first-hand", "play-first-target", "play-three-contracts", "play-first-choice", "play-rentz-sequence",
-                "play-four-targets", "play-finish-match", "play-two-rentz-top-two", "play-first-win", "play-two-podiums",
-                "play-clean-totals", "play-eight-targets", "play-three-wins", "play-rentz-large-first", "play-hard-large-win"),
+                "play-first-hand", "play-first-target", "play-three-contracts", "play-first-choice", "play-rentz-sequence", "play-whist-first-trick",
+                "play-four-targets", "play-finish-match", "play-two-rentz-top-two", "play-first-win", "play-two-podiums", "play-opponent-ten",
+                "play-clean-totals", "play-eight-targets", "play-three-wins", "play-rentz-large-first", "play-hard-large-win", "play-whist-chains"),
                 catalog.stream().map(Badge::id).toList());
-        audit.equal("Exact thresholds for all fifteen", List.of(1, 1, 3, 2, 1, 4, 1, 2, 1, 2, 2, 8, 3, 2, 2),
+        audit.equal("Exact thresholds", List.of(1, 1, 3, 2, 1, 1, 4, 1, 2, 1, 2, 1, 2, 8, 3, 2, 2, 3),
                 catalog.stream().map(Badge::goal).toList());
         for (var level : Level.values())
-            audit.equal("Five milestones for " + level, 5L, catalog.stream().filter(b -> b.level() == level).count());
+            audit.equal("Six milestones for " + level, 6L, catalog.stream().filter(b -> b.level() == level).count());
         audit.equal("Training catalog stays separate", 800, AchievementCatalog.badges().size());
-        audit.equal("One evidence store knows all unique IDs", 815L,
+        audit.equal("One evidence store knows all unique IDs", 818L,
                 AchievementCatalog.all().stream().map(Badge::id).distinct().count());
+    }
+
+    @Test public void positiveMilestonesUseTheSpecificCaptureAndGroupOnlyNewGameplayProgress() {
+        var whist = hand(Contract.WHIST, false, false, Difficulty.NORMAL, List.of(0, 0, 0, 0),
+                Set.of(AchievementTactics.Fact.WIN_ANY, AchievementTactics.Fact.RUN_OF_TWO));
+        var ownTen = hand(Contract.TEN_CLUBS, false, false, Difficulty.NORMAL, List.of(0, 0, 0, 0),
+                Set.of(AchievementTactics.Fact.OWN_TEN));
+        var otherTen = hand(Contract.TEN_CLUBS, false, false, Difficulty.NORMAL, List.of(0, 0, 0, 0),
+                Set.of(AchievementTactics.Fact.OPPONENT_TEN));
+        check("play-opponent-ten", otherTen, ownTen);
+        check("play-whist-first-trick", whist, otherTen);
+        check("play-whist-chains", whist, otherTen);
+        var empty = AchievementProgress.empty(PROFILE);
+        var first = empty.record(4, 81, whist, NOW);
+        var changes = first.gameplayChangesSince(empty);
+        audit.equal("Unlocks come before incremental progress", "play-first-hand", changes.get(0).badge().id());
+        var streak = changes.stream().filter(change -> change.badge().id().equals("play-whist-chains"))
+                .findFirst().orElseThrow();
+        audit.equal("A new streak advances once per settled hand", 1, streak.count());
+        audit.truth("A partial streak is not an unlock", !streak.unlocked());
+        audit.truth("Training is excluded from the popup", changes.stream().allMatch(change -> change.badge().id().startsWith("play-")));
+        audit.equal("Replay produces no notification", List.of(),
+                first.record(4, 81 + (1L << 48), whist, NOW).gameplayChangesSince(first));
     }
 
     @Test public void aHardGoalCanUnlockBeforeAnyMediumGoalAndReplayIsIdempotent() {
@@ -77,6 +100,10 @@ public final class GameplayAchievementComponentTest {
         audit.equal("The runner-up cannot receive a title", Eligibility.TACTIC, first.eligibility(loss));
         audit.equal("Shared first place qualifies", Eligibility.ELIGIBLE, first.eligibility(tied));
         var state = AchievementProgress.empty(PROFILE);
+        var lastHandChanges = state.record(4, 23, tied, NOW).gameplayChangesSince(state);
+        audit.truth("The last hand groups completion and victory in the same notification",
+                lastHandChanges.stream().filter(AchievementProgress.Change::unlocked)
+                        .map(change -> change.badge().id()).toList().containsAll(List.of("play-finish-match", "play-first-win")));
         for (long seed : new long[]{23, 23 + (1L << 48), 24, 25}) state = state.record(4, seed, tied, NOW);
         audit.equal("One win can advance several targets", 1, state.count(first));
         audit.equal("Three distinct victories unlock the series", 3, state.count(badge("play-three-wins")));
@@ -172,7 +199,8 @@ public final class GameplayAchievementComponentTest {
                 small.recommendation());
         audit.equal("An incompatible goal explains the table requirement before any hand",
                 "Masa sau dificultatea curentă nu îndeplinește cerința.", small.details(rentz).latest());
-        audit.equal("Incompatible goals are still visible", 15L, small.rows(AchievementBrowser.Query.empty()).stream()
+        audit.equal("Incompatible goals are still visible", (long) GameplayAchievementCatalog.badges().size(),
+                small.rows(AchievementBrowser.Query.empty()).stream()
                 .filter(row -> row.badge() != null).count());
         var large = new AchievementBrowser(copy, progress, null, AchievementBrowser.Collection.GAMEPLAY,
                 new AchievementBrowser.Table(5, Difficulty.NORMAL));
@@ -213,7 +241,7 @@ public final class GameplayAchievementComponentTest {
         var copy = new RentzUiText(RentzUiText.Language.RO);
         var gameplay = new AchievementBrowser(copy, restored, result, AchievementBrowser.Collection.GAMEPLAY);
         var training = new AchievementBrowser(copy, restored, result, AchievementBrowser.Collection.TRAINING);
-        audit.equal("Gameplay screen keeps 15 objectives", 15, gameplay.total());
+        audit.equal("Gameplay screen shows the complete catalog", 18, gameplay.total());
         audit.equal("Training screen keeps 800 objectives", 800, training.total());
         audit.equal("Independent unlocked gameplay count", 1L, gameplay.unlocked());
         audit.equal("The next recommendation after the first hand is a scoring target",
