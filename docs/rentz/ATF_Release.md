@@ -69,7 +69,8 @@ Tagul identifică sursa comună a artefactelor declarate. Fiecare artefact își
 
 ## Ordinea calificării Android curente
 
-Pentru verificarea catalogului, aduceți în `release/<versiune>` din checkout-ul izolat APK-ul ediției active și checksum-ul. Folosiți copia verificată din depozitul extern sau descărcați ambele fișiere din GitHub cu un cont autorizat. Comparați dimensiunea și SHA-256 cu manifestul înainte de regresie. Git păstrează manifestul, iar fișierele binare sunt ignorate.
+- Aduceți în `release/<versiune>` APK-ul ediției active și checksum-ul, din depozitul extern sau din GitHub cu un cont autorizat.
+- Comparați dimensiunea și SHA-256 cu manifestul înainte de regresie. Git păstrează manifestul, iar fișierele binare sunt ignorate.
 
 Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și cache-urile pregătite:
 

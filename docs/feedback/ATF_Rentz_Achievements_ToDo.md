@@ -38,7 +38,7 @@ Duratele sunt ipoteze de calibrare. Publicarea fiecărei familii cere măsurarea
 | Catalog Android propriu | Mențineți toate cele 800 în profilul Rentz. Un eventual subset Play Games Services are propriul buget. Google documentează maximum 400 de realizări pe durata de viață a jocului și 2.000 de puncte în total. [Puncte și realizări Android](https://developer.android.com/games/pgs/achievements) |
 | Contracte Rentz | Folosiți profilul de reguli activ pentru măsurare. Jocurile de evitare, captură și secvență au obiective diferite. [Regulile modelului](../rentz/ATF_Rules.md) · [Catalogul jocurilor românești](https://www.pagat.com/national/romania.html) |
 
-## Catalogul propus
+## Matrice pentru extindere
 
 | Familie | Ușoare | Medii | Grele |
 |---|---:|---:|---:|
@@ -83,9 +83,7 @@ Fiecare rând conține cinci fapte candidate, A–E. „Prima” și „ultima l
 | 20 medii | 5 fapte × 4 contexte | Trei confirmări ca alegător, patru când a ales un adversar, patru la mese de cel puțin cinci sau trei în modul Greu. |
 | 10 grele | 5 fapte × 2 parcursuri | Același fapt pe trei zile active, la minimum două mărimi de masă, respectiv pe patru zile active în modul Greu. Două mâini eligibile în fiecare zi, în partide diferite. |
 
-În etapa a doua, fiecare contract primește 15 obiective ușoare, 6 medii și 2 grele.
-
-- **Ușor** include o mână, două mâini distincte și o mărime de masă. Dacă pilotul are deja același obiectiv de o mână, noul reper cere ca jucătorul să fi ales contractul.
+- **Ușor** include o mână, două mâini distincte și o mărime de masă. Dacă există deja obiectivul de o mână, verificați dacă alegerea personală a contractului adaugă o dovadă distinctă.
 - **Mediu** include alegătorul, masa, dificultatea și alegerea pe nevăzute.
 - **Greu** cere câte o dovadă pe zi din partide distincte.
 
