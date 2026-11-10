@@ -946,7 +946,7 @@ try{
     Observe 'English shared home and disabled resume' {param($nodes) $t=Text $nodes;Check 'Rentz home' $true ($t.Contains('Rentz'));Check 'English first launch' $true ($t.Contains('New game'));Check 'Resume disabled' 1 @($nodes|Where-Object{$_.text-eq'Resume game'-and$_.enabled-eq'false'}).Count}
     if($ConsecutiveSubgames){
         Tap 'Achievements'
-        Observe "Gameplay catalog opens with $gameplayTotal milestones" {param($nodes)
+        Observe 'Gameplay catalog opens' {param($nodes)
             Check 'Gameplay starts with the first manual hand' $true ((Text $nodes).Contains("Unlocked 0/$gameplayTotal")-and
                 (Text $nodes).Contains('First completed hand'))
         }

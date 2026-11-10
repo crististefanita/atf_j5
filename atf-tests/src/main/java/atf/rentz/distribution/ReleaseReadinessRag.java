@@ -699,7 +699,12 @@ public final class ReleaseReadinessRag {
             requireUiCheckpoint(checkpoints, "The match restores its final contract and scores", "Restored seat geometry");
             requireUiCheckpoint(checkpoints, "The confirmed rows remain after process restart", "Restarted history retains all completed subgames");
             requireUiCheckpoint(checkpoints, "Achievements open at the beginning of the learning path", "Onboarding comes before contract goals");
-            requireUiCheckpoint(checkpoints, "Gameplay catalog opens with fifteen milestones", "Gameplay starts with the first manual hand");
+            requireUiCheckpoint(checkpoints, "Gameplay catalog opens", "Gameplay starts with the first manual hand");
+            requireUiCheckpoint(checkpoints, "Manual settlement presents achievement progress", "First manually completed hand is unlocked");
+            requireUiCheckpoint(checkpoints, "Manual settlement presents achievement progress", "The same panel includes partial progress");
+            requireUiCheckpoint(checkpoints, "Manual settlement presents achievement progress", "The score title stays above the achievement panel");
+            requireUiCheckpoint(checkpoints, "Manual settlement presents achievement progress", "Achievement panel has a distinct dismiss control");
+            requireUiCheckpoint(checkpoints, "Resuming a saved settlement does not repeat achievement progress", "No achievement panel is replayed");
             requireUiCheckpoint(checkpoints, "Gameplay and training keep independent progress", "Confirmed manual play grants gameplay credit");
             requireUiCheckpoint(checkpoints, "Gameplay and training keep independent progress", "Incomplete match cannot grant a terminal title");
             requireUiCheckpoint(checkpoints, "Gameplay milestones survive process restart", "Same gameplay total after restart");

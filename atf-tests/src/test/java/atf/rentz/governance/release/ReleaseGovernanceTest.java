@@ -429,7 +429,7 @@ class ReleaseGovernanceTest {
         addUiCheckpoint(checkpoints,"The match restores its final contract and scores","Restored seat geometry");
         addUiCheckpoint(checkpoints,"The confirmed rows remain after process restart","Restarted history retains all completed subgames");
         addUiCheckpoint(checkpoints,"Achievements open at the beginning of the learning path","Onboarding comes before contract goals");
-        addUiCheckpoint(checkpoints,"Gameplay catalog opens with fifteen milestones","Gameplay starts with the first manual hand");
+        addUiCheckpoint(checkpoints,"Gameplay catalog opens","Gameplay starts with the first manual hand");
         addUiCheckpoint(checkpoints,"Gameplay and training keep independent progress",
                 "Confirmed manual play grants gameplay credit","Incomplete match cannot grant a terminal title");
         addUiCheckpoint(checkpoints,"Gameplay milestones survive process restart","Same gameplay total after restart");
@@ -442,6 +442,10 @@ class ReleaseGovernanceTest {
         addUiCheckpoint(checkpoints,"Achievements and local identity survive restart without duplicate credit",
                 "Same achievements total after restart","Restart leaves the durable checkpoint byte-for-byte unchanged");
         addUiCheckpoint(checkpoints,"Renaming the local profile retains achievement progress","Same achievements total after rename");
+        addUiCheckpoint(checkpoints,"Resuming a saved settlement does not repeat achievement progress","No achievement panel is replayed");
+        addUiCheckpoint(checkpoints,"Manual settlement presents achievement progress","First manually completed hand is unlocked",
+                "The same panel includes partial progress","The score title stays above the achievement panel",
+                "Achievement panel has a distinct dismiss control");
         byte[] capture=java.util.Base64.getDecoder().decode(shot.substring("data:image/png;base64,".length()));
         byte[] distinct=java.util.Base64.getDecoder().decode(pngDataUri(1).substring("data:image/png;base64,".length()));
         for(var checkpoint:checkpoints) {
@@ -525,6 +529,13 @@ class ReleaseGovernanceTest {
         var missingGeometryEvidence=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
         assertEquals("BLOCKED",gate(missingGeometryEvidence,"native-ui").path("status").asText(),"A complete-deal receipt without seat-layout evidence is insufficient");
         assertFalse(missingGeometryEvidence.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
+        var missingAchievementPanel=uiReceipt.deepCopy();
+        var achievementCheckpoints=missingAchievementPanel.withArray("checkpoints");
+        achievementCheckpoints.remove(achievementCheckpoints.size()-1);
+        Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(missingAchievementPanel));
+        var missingAchievementEvidence=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
+        assertEquals("BLOCKED",gate(missingAchievementEvidence,"native-ui").path("status").asText(),"Achievement panel evidence is required for promotion");
+        assertFalse(missingAchievementEvidence.path("releaseWorkflow").path("readyForProductBuild").asBoolean());
         Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(uiReceipt));
 
         uiReceipt.put("extentReportSha256","0".repeat(64));
