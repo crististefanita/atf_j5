@@ -29,6 +29,34 @@ function Fake([string]$Output='Salut ș ț',[string]$ErrorText='',[int]$Exit=0){
     return $p
 }
 function Command($Context,$Process){Invoke-RentzAdb -RunRoot $Context.run -LeasePath $Context.lease -ProcessFactory {$Process}.GetNewClosure() -Arguments @('offline-only') -Label command -TimeoutSeconds 1}
+Case 'Release waits for a transient reader and refuses an obsolete owner' {
+    $c=Context 'lease-contention'
+    $started=[Threading.ManualResetEventSlim]::new()
+    $job=Start-ThreadJob -ArgumentList $c.lease,$started -ScriptBlock {
+        param($path,$ready)
+        $reader=[IO.File]::Open($path,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+        try{$ready.Set();Start-Sleep -Milliseconds 800}finally{$reader.Dispose()}
+    }
+    try{
+        Require ($started.Wait(5000)) 'Fixture reader did not acquire its lock'
+        Require (-not(Close-RentzAndroidLease -Path $c.lease -LeaseId other -Serial offline-fixture)) 'Obsolete owner released the lease'
+        Require ((Get-Content $c.lease -Raw|ConvertFrom-Json).active) 'Obsolete owner modified the reservation'
+        Require (Close-RentzAndroidLease -Path $c.lease -LeaseId mine -Serial offline-fixture) 'Own lease was not released'
+        Require (-not(Get-Content $c.lease -Raw|ConvertFrom-Json).active) 'Lease still active'
+    }finally{ $job|Remove-Job -Force; $started.Dispose() }
+}
+Case 'Android System UI wait requires its own title and one enabled system action' {
+    [xml]$dialog='<hierarchy><node package="android"><node package="android" text="System UI isn&apos;t responding" resource-id="android:id/alertTitle"/><node package="android" class="android.widget.Button" text="Wait" resource-id="android:id/aerr_wait" enabled="true" clickable="true" bounds="[36,718][684,826]"/></node></hierarchy>'
+    $nodes=@($dialog.SelectNodes('//node'))
+    $target=Get-RentzSystemUiWaitTarget -Nodes $nodes
+    Require ($target.bounds-ceq'[36,718][684,826]') 'The verified Wait button was missed'
+    $nodes[1].SetAttribute('package','ro.rentzlab.app.uisanity')
+    Require ($null-eq(Get-RentzSystemUiWaitTarget -Nodes $nodes)) 'An app lookalike was accepted'
+    $nodes[1].SetAttribute('package','android')
+    $nodes[2].SetAttribute('enabled','false')
+    $failed=$false;try{Get-RentzSystemUiWaitTarget -Nodes $nodes|Out-Null}catch{$failed=$_.Exception.Message-match'ANDROID_SYSTEM_UI_ANR'}
+    Require $failed 'A disabled system action was accepted'
+}
 Case 'UTF8 is explicit on both redirected process streams' {
     $c=Context 'utf8';$p=Fake;$r=Command $c $p
     Require ($r.Output-eq'Salut ș ț') 'Unicode output was altered'

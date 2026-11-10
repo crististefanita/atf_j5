@@ -92,24 +92,43 @@ $owned=$false;$installed=$false;$released=$false;$failure='';$extentPath='';$ord
 $points=[Collections.Generic.List[object]]::new();$actions=[Collections.Generic.List[object]]::new();$cleanup=[Collections.Generic.List[string]]::new();$completedGames=[Collections.Generic.List[object]]::new()
 $initialSize='';$initialDensity='';$initialFont='';$finalSize='';$finalDensity='';$finalFont='';$packagesBefore='';$packagesAfter='';$api=''
 $wasAsleep=$false
+$systemUiRecoveries=0
 $displayChanged=$false;$displayProfile='';$logicalProfile='';$restoreSize='';$restoreDensity='';$restoreFont='';$effectiveDisplay=$null
-function Adb([string[]]$Command,[string]$Name,[int[]]$Allowed=@(0)){
-    $script:ordinal++;Invoke-RentzAdb -RunRoot $raw -Arguments $Command -Label ('{0:d4}-{1}'-f$script:ordinal,$Name) -AllowedExitCodes $Allowed
+function Adb([string[]]$Command,[string]$Name,[int[]]$Allowed=@(0),[switch]$Binary){
+    $script:ordinal++;Invoke-RentzAdb -RunRoot $raw -Arguments $Command -Label ('{0:d4}-{1}'-f$script:ordinal,$Name) -AllowedExitCodes $Allowed -Binary:$Binary
+}
+function Recover-SystemUi([xml]$Document,[string]$Hierarchy,[string]$Screenshot=''){
+    $target=Get-RentzSystemUiWaitTarget -Nodes @($Document.SelectNodes('//node'))
+    if($null-eq$target){return $false}
+    if(!$Screenshot){$Screenshot=(Adb @('exec-out','screencap','-p') 'system-ui-anr' -Binary).File}
+    if($script:systemUiRecoveries-ge2){throw "ANDROID_SYSTEM_UI_ANR: recovery exhausted. Hierarchy: $Hierarchy. Screenshot: $Screenshot"}
+    $script:systemUiRecoveries++
+    TapNode $target 'Android System UI: Wait'
+    $actions.Add([pscustomobject]@{operation='Android System UI recovery';hierarchy=[IO.Path]::GetFileName($Hierarchy);image=[IO.Path]::GetFileName($Screenshot)})
+    Start-Sleep -Seconds 2
+    return $true
 }
 function Ui([datetime]$Deadline=[datetime]::UtcNow.AddSeconds(25)) {
     $remote='/sdcard/rentz-ui-'+$leaseId+'.xml'
+    $interrupted=$false
     for($attempt=0;$attempt-lt8-and[datetime]::UtcNow-lt$Deadline;$attempt++){
-        $dump=Adb @('shell','uiautomator','dump',$remote) 'dump'
+        $dump=Adb @('shell','uiautomator','dump',$remote) 'dump' @(0,137)
+        if($dump.ExitCode-eq137){Start-Sleep -Milliseconds 300;continue}
         $receipt=$dump.Output+$dump.Error
         if($receipt-match[regex]::Escape($remote)-and$receipt-notmatch'(?i)ERROR|Exception'){
-            [xml]$doc=(Adb @('exec-out','cat',$remote) 'hierarchy').Output
+            $read=Adb @('exec-out','cat',$remote) 'hierarchy'
+            [xml]$doc=$read.Output
             $nodes=@($doc.SelectNodes('/hierarchy/node/descendant-or-self::node'))
-            if($nodes.Count){return $nodes}
+            if($nodes.Count){
+                if(Recover-SystemUi $doc $read.File){$interrupted=$true;continue}
+                return $nodes
+            }
             throw 'Fresh native hierarchy contains no nodes.'
         }
         if($receipt-notmatch'(?i)null root node returned|could not get idle state'){throw "Android hierarchy dump was rejected: $receipt"}
         Start-Sleep -Milliseconds 300
     }
+    if($interrupted){throw 'ANDROID_SYSTEM_UI_ANR: no fresh application hierarchy within the observation budget.'}
     throw 'Fresh native hierarchy unavailable within the observation retry budget.'
 }
 function Bounds($node){
@@ -153,6 +172,14 @@ function Observe([string]$Title,[scriptblock]$Verify,[string]$UntilText=''){
         $watch=[Diagnostics.Stopwatch]::StartNew()
         try{
             $nodes=@(Save-RentzObservation -RunRoot $raw -Name $name);$lastFailure=$null
+            if($nodes.text-ccontains"System UI isn't responding"){
+                $hierarchy=Join-Path $raw "$name-hierarchy.txt"
+                [xml]$doc=Get-Content -LiteralPath $hierarchy -Raw
+                if(Recover-SystemUi $doc $hierarchy (Join-Path $raw "$name.png")){
+                    $lastFailure=[InvalidOperationException]::new("ANDROID_SYSTEM_UI_ANR: no fresh application frame after $name.")
+                    continue
+                }
+            }
             if(!$UntilText-or$nodes.text -ccontains $UntilText){break}
         }
         catch{if($_.Exception.Message-notlike'Fresh hierarchy was not confirmed*'){throw};$lastFailure=$_.Exception;Start-Sleep -Milliseconds 250}
@@ -865,7 +892,7 @@ function RunCompactScores($terminal){
     }
 }
 try{
-    $stream=[IO.File]::Open($leasePath,[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)
+    $stream=Open-RentzAndroidLeaseFile -Path $leasePath
     try{
         $reader=[IO.StreamReader]::new($stream,[Text.Encoding]::UTF8,$true,1024,$true);$text=$reader.ReadToEnd();$reader.Dispose()
         if($text-and($text|ConvertFrom-Json).active){throw 'Android is reserved by another owner.'}
@@ -1031,11 +1058,10 @@ ScriptStackTrace: "+$_.ScriptStackTrace
             if($initialActivity){Adb @('shell','am','start','-W','-n',$initialActivity) 'restore-foreground'|Out-Null}
             if($wasAsleep){Adb @('shell','input','keyevent','KEYCODE_SLEEP') 'restore-sleep'|Out-Null}
         }catch{$cleanup.Add($_.Exception.ToString())}
-        $stream=[IO.File]::Open($leasePath,[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)
         try{
-            $reader=[IO.StreamReader]::new($stream,[Text.Encoding]::UTF8,$true,1024,$true);$current=$reader.ReadToEnd()|ConvertFrom-Json;$reader.Dispose()
-            if($current.leaseId-eq$leaseId){$current.active=$false;$current|Add-Member -NotePropertyName releasedUtc -NotePropertyValue ([datetime]::UtcNow.ToString('o')) -Force;$bytes=[Text.UTF8Encoding]::new($false).GetBytes(($current|ConvertTo-Json));$stream.SetLength(0);$stream.Position=0;$stream.Write($bytes);$stream.Flush($true);$released=$true}
-        }finally{$stream.Dispose()}
+            $released=Close-RentzAndroidLease -Path $leasePath -LeaseId $leaseId -Serial '127.0.0.1:5555'
+            if(!$released){$cleanup.Add('ANDROID-LEASE: own active reservation was not present at cleanup.')}
+        }catch{$cleanup.Add($_.Exception.ToString())}
     }
 }
 $preserved=$initialSize-and$initialSize-eq$finalSize-and$initialDensity-eq$finalDensity-and$initialFont-eq$finalFont-and$packagesBefore-ceq$packagesAfter

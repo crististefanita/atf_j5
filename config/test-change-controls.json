@@ -709,7 +709,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "c9c438681d81a72e6c640197df3956f4d5d569048ae44b409f137973d5427c80",
+      "sha256": "8a6e0c8023ff86488451c40e018f14d608d63815eaafb2cbbd003489c0ba1880",
       "allowDelete": false
     },
     {
@@ -719,7 +719,7 @@
       "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "4043e8e9f127aecb4a13477dd95ac2f41b005a362700e1448cb43f5202fa00cd",
+      "sha256": "1e4df6104fd3608d260dc54d3f1a94f233fc0de5cc55a0f675df187775500fe5",
       "allowDelete": false
     },
     {
@@ -1169,7 +1169,7 @@
       "criterion": "Rentz and two standard deals reach DEAL_END; seat geometry, first human move, score history and restart are observed; the learning registry is isolated and unchanged; Extent keeps each original screenshot inline.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a78ca42c0cf8e567953c0d955c166c5e16e356911dd8522faf5913df4b8b3633",
+      "sha256": "b2bab40b686a9a86236b1e3cb8a2698b1373cb4a7183abe2cef4ba2ef3be42fe",
       "allowDelete": false
     },
     {

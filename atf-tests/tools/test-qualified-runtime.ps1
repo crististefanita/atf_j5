@@ -270,10 +270,12 @@ Case 'Transient Android root loss retries but never reads a stale hierarchy' {
     $leaseId='fixture'
     $state=@{dumps=0;reads=0;mode='RECOVER'}
     function Start-Sleep { param([int]$Milliseconds) }
+    function Recover-SystemUi($Document,$Hierarchy) { return $false }
     function Adb($Command,$Name) {
         if($Name-eq'dump'){
             $state.dumps++
             if($state.mode-eq'FATAL'){return @{Output='';Error='permission denied'}}
+            if($state.mode-eq'KILLED'-and$state.dumps-le3){return @{ExitCode=137;Output="UI hierarchy dumped to: $($Command[-1])";Error=''}}
             if($state.mode-eq'MISSING'-or$state.dumps-le3){return @{Output='';Error='ERROR: null root node returned by UiTestAutomationBridge.'}}
             return @{Output="UI hierchary dumped to: $($Command[-1])";Error=''}
         }
@@ -282,6 +284,9 @@ Case 'Transient Android root loss retries but never reads a stale hierarchy' {
     }
     $nodes=@(Ui)
     Require ($nodes.Count-eq1-and$nodes[0].text-ceq'fresh'-and$state.dumps-eq4-and$state.reads-eq1) 'Fourth fresh result must recover'
+    $state.mode='KILLED';$state.dumps=0;$state.reads=0
+    $nodes=@(Ui)
+    Require ($nodes.Count-eq1-and$state.dumps-eq4-and$state.reads-eq1) 'A killed dump must not authorize a stale read'
     foreach($mode in @('MISSING','FATAL')){
         $state.mode=$mode;$state.dumps=0;$state.reads=0;$rejected=$false
         try{Ui|Out-Null}catch{$rejected=$true}

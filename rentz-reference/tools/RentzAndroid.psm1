@@ -1,3 +1,44 @@
+function Open-RentzAndroidLeaseFile {
+    param([Parameter(Mandatory)][string]$Path,[switch]$ReadOnly,[switch]$Existing)
+    $mode=if($ReadOnly-or$Existing){[IO.FileMode]::Open}else{[IO.FileMode]::OpenOrCreate}
+    $access=if($ReadOnly){[IO.FileAccess]::Read}else{[IO.FileAccess]::ReadWrite}
+    $share=if($ReadOnly){[IO.FileShare]::Read}else{[IO.FileShare]::None}
+    $wait=[Diagnostics.Stopwatch]::StartNew()
+    while($true){
+        try{return [IO.File]::Open($Path,$mode,$access,$share)}
+        catch{
+            $cause=$_.Exception.GetBaseException()
+            if($cause -isnot [IO.IOException] -or ($cause.HResult -band 0xffff) -notin @(32,33) -or
+                $wait.ElapsedMilliseconds-ge4000){throw}
+            Start-Sleep -Milliseconds 100
+        }
+    }
+}
+
+function Read-RentzAndroidLease {
+    param([Parameter(Mandatory)][string]$Path)
+    $stream=Open-RentzAndroidLeaseFile -Path $Path -ReadOnly
+    try{
+        $reader=[IO.StreamReader]::new($stream,[Text.Encoding]::UTF8,$true,1024,$true)
+        try{return ($reader.ReadToEnd()|ConvertFrom-Json)}finally{$reader.Dispose()}
+    }finally{$stream.Dispose()}
+}
+
+function Close-RentzAndroidLease {
+    param([Parameter(Mandatory)][string]$Path,[Parameter(Mandatory)][string]$LeaseId,[Parameter(Mandatory)][string]$Serial)
+    $stream=Open-RentzAndroidLeaseFile -Path $Path -Existing
+    try{
+        $reader=[IO.StreamReader]::new($stream,[Text.Encoding]::UTF8,$true,1024,$true)
+        try{$current=$reader.ReadToEnd()|ConvertFrom-Json}finally{$reader.Dispose()}
+        if(!$current.active-or$current.leaseId-cne$LeaseId-or$current.serial-cne$Serial){return $false}
+        $current.active=$false
+        $current|Add-Member -NotePropertyName releasedUtc -NotePropertyValue ([datetime]::UtcNow.ToString('o')) -Force
+        $bytes=[Text.UTF8Encoding]::new($false).GetBytes(($current|ConvertTo-Json))
+        $stream.SetLength(0);$stream.Position=0;$stream.Write($bytes);$stream.Flush($true)
+        return $true
+    }finally{$stream.Dispose()}
+}
+
 function Invoke-RentzAdb {
     param(
         [Parameter(Mandatory)][string]$RunRoot,
@@ -11,7 +52,7 @@ function Invoke-RentzAdb {
     )
     $ErrorActionPreference = 'Stop'
     $own = Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'lease.json') | ConvertFrom-Json
-    $current = Get-Content -Raw -LiteralPath $LeasePath | ConvertFrom-Json
+    $current = Read-RentzAndroidLease -Path $LeasePath
     if (-not $current.active -or $current.leaseId -ne $own.leaseId -or $current.serial -ne $own.serial) {
         throw 'ANDROID-LEASE: current resource owner differs; no command sent.'
     }
@@ -59,7 +100,7 @@ function Invoke-RentzAdb {
         $output = if ($Binary) { '' } else { $outputTask.Result }
         if (-not $Binary) { $stream=[IO.File]::Open($outputFile,[IO.FileMode]::CreateNew);try{$bytes=[Text.Encoding]::UTF8.GetBytes($output);$stream.Write($bytes)}finally{$stream.Dispose()} }
         if ($process.ExitCode -notin $AllowedExitCodes) { throw "ADB failed ($($process.ExitCode)): $Label; $stderr" }
-        $current=Get-Content -Raw -LiteralPath $LeasePath|ConvertFrom-Json
+        $current=Read-RentzAndroidLease -Path $LeasePath
         if(-not$current.active-or$current.leaseId-ne$own.leaseId-or$current.serial-ne$own.serial){throw 'ANDROID-LEASE: resource owner changed in flight; result rejected.'}
         [pscustomobject]@{ExitCode=$process.ExitCode;Output=$output;Error=$stderr;File=$outputFile}
     } catch { $primary=$_.Exception; throw }
@@ -79,8 +120,8 @@ function Save-RentzObservation {
     if ($Name -notmatch '^[a-zA-Z0-9_.-]+$') { throw 'Invalid observation name' }
     if(Test-Path -LiteralPath (Join-Path $RunRoot "$Name.png")){throw 'Observation already exists'}
     $remote = "/sdcard/rentz-$Name-$([guid]::NewGuid().ToString('N')).xml"
-    $dump = & $Command @{RunRoot=$RunRoot;Arguments=@('shell','uiautomator','dump',$remote);Label="$Name-dump"}
-    if (($dump.Output + $dump.Error) -notmatch [regex]::Escape($remote) -or ($dump.Output + $dump.Error) -match '(?i)ERROR|Exception') {
+    $dump = & $Command @{RunRoot=$RunRoot;Arguments=@('shell','uiautomator','dump',$remote);Label="$Name-dump";AllowedExitCodes=@(0,137)}
+    if ($dump.ExitCode-ne0 -or ($dump.Output + $dump.Error) -notmatch [regex]::Escape($remote) -or ($dump.Output + $dump.Error) -match '(?i)ERROR|Exception') {
         throw 'Fresh hierarchy was not confirmed; no earlier capture will be reused.'
     }
     $xml = & $Command @{RunRoot=$RunRoot;Arguments=@('exec-out','cat',$remote);Label="$Name-hierarchy"}
@@ -110,4 +151,15 @@ function Get-RentzTapTarget {
     return $null
 }
 
-Export-ModuleMember -Function Invoke-RentzAdb,Save-RentzObservation,Get-RentzTapTarget
+function Get-RentzSystemUiWaitTarget {
+    param([Parameter(Mandatory)][System.Xml.XmlElement[]]$Nodes)
+    $title=@($Nodes|Where-Object {$_.package-ceq'android'-and$_.'resource-id'-ceq'android:id/alertTitle'-and
+        $_.text-ceq"System UI isn't responding"})
+    if(!$title.Count){return $null}
+    $wait=@($title[0].SelectNodes('ancestor::node[.//node[@resource-id="android:id/aerr_wait"]][1]//node[@resource-id="android:id/aerr_wait"]')|
+        Where-Object {$_.package-ceq'android'-and$_.class-ceq'android.widget.Button'-and$_.enabled-eq'true'-and$_.clickable-eq'true'})
+    if($title.Count-ne1-or$wait.Count-ne1){throw 'ANDROID_SYSTEM_UI_ANR: no unambiguous system Wait action.'}
+    return $wait[0]
+}
+
+Export-ModuleMember -Function Invoke-RentzAdb,Save-RentzObservation,Get-RentzTapTarget,Open-RentzAndroidLeaseFile,Close-RentzAndroidLease,Get-RentzSystemUiWaitTarget
