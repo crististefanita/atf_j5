@@ -1209,7 +1209,7 @@
       "criterion": "Gradle versionName and monotonically increasing versionCode match the release catalog candidate.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "ac25ca2d2a2f5f0d5884e354c24246efb661a482302b006a23afece57d0961cf",
+      "sha256": "4bcc4682ee8137f371cb6f59243d3975345ca15eba99624292ef8a7c4e4b4b19",
       "allowDelete": false
     },
     {
@@ -1219,7 +1219,7 @@
       "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "4382867951a443bf65911c18fb4298b8253a097f99adc64406ff2d33de3cf84b",
+      "sha256": "6f8e173c97f968f51f4eee6ce59747caaa5c9dc3bb4bdccf15fef3d342162b2b",
       "allowDelete": false
     },
     {
