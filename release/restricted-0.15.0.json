@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "state": "PUBLISHED",
+  "channel": "authenticated-only",
+  "version": "0.15.0",
+  "versionCode": 19,
+  "sourceCommit": "d3c050b793c2e529d0f6557ee98ec9f0e11873ba",
+  "sourceTag": "v0.15.0",
+  "applicationId": "ro.rentzlab.app",
+  "apkBytes": 916708,
+  "apkSha256": "8ba0d9920183665944a759e8554c3e75884ec06031671933f98dc368bfd913a1",
+  "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+  "provider": "GitHub",
+  "releaseRepository": "crististefanita/atf_j5_releases",
+  "releaseId": 440820452,
+  "assetId": 732688239,
+  "link": "https://github.com/crististefanita/atf_j5_releases/releases/download/v0.15.0/RentzLab-0.15.0.apk",
+  "authenticatedDownload": "PASS",
+  "verifiedUtc": "2026-11-10T19:35:02.461536Z"
+}

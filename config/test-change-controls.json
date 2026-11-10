@@ -1219,7 +1219,7 @@
       "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "6f8e173c97f968f51f4eee6ce59747caaa5c9dc3bb4bdccf15fef3d342162b2b",
+      "sha256": "52d743435d3b30848e049d8e07642c57c7e840a3b60c06c6129f0c94aab79810",
       "allowDelete": false
     },
     {
