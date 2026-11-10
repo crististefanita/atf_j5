@@ -12,7 +12,13 @@ import java.util.concurrent.FutureTask;
 
 /** Owner checkpoints; background work only sees a detached replay of immutable input. */
 public final class SessionController implements AutoCloseable {
-    public record AchievementNotice(int hand, boolean matchEnd, List<AchievementProgress.Change> changes) { }
+    public record AchievementNotice(int hand, boolean matchEnd, List<AchievementProgress.Change> changes) {
+        public List<AchievementProgress.Change> previewChanges() {
+            if (changes.size() <= 2 || !changes.get(0).unlocked()) return changes.subList(0, Math.min(2, changes.size()));
+            var partial = changes.stream().filter(change -> !change.unlocked()).findFirst();
+            return List.of(changes.get(0), partial.orElse(changes.get(1)));
+        }
+    }
     public interface Listener {void ready();void failed(Exception error);}
     @FunctionalInterface public interface Advance {void bots(GameSession session) throws Exception;}
     @FunctionalInterface private interface Preparation {GameSession prepare() throws Exception;}

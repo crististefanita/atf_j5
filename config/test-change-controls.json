@@ -39,7 +39,7 @@
       "criterion": "Cover the exact YAML order and thresholds, terminal ranking, provenance, replay and persistence.",
       "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
       "expires": "2026-12-09",
-      "sha256": "70c414b6bd5b3d7f331476e2c69edaa0ead01eba6be8efa9ad485c2e34ec670e",
+      "sha256": "1c1863d7872d2cd6e264652a14f643c3f7ba2183dce423985ae06fbf3600294a",
       "allowDelete": false
     },
     {

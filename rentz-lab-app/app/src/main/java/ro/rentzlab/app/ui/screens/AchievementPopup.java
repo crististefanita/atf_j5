@@ -23,14 +23,14 @@ public final class AchievementPopup {
         String title = notice.matchEnd() ? copy.text("Match achievement progress", "Progres după partidă")
                 : copy.text("Achievement progress", "Progres la realizări");
         views.addText(card, title, 15, Color.WHITE, true, 0, 3);
-        int visible = Math.min(2, notice.changes().size());
-        for (var change : notice.changes().subList(0, visible)) {
+        var visible = notice.previewChanges();
+        for (var change : visible) {
             String name = copy.text(change.badge().english(), change.badge().romanian());
             String status = change.unlocked() ? copy.text("Unlocked", "Deblocată")
                     : change.count() + "/" + change.badge().goal();
             views.addText(card, name + " · " + status, 13, Color.WHITE, false, 2, 0);
         }
-        int more = notice.changes().size() - visible;
+        int more = notice.changes().size() - visible.size();
         if (more > 0) views.addText(card, "+" + more + copy.text(" more updated", " în plus"), 12, Color.WHITE, false, 3, 0);
         String closeProgress = copy.text("Close achievement progress", "Închide progresul la realizări");
         var close = views.actionButton(copy.close(), closeProgress, true, dismiss, false, 12);

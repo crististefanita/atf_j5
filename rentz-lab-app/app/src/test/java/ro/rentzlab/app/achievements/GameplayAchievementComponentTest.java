@@ -59,6 +59,13 @@ public final class GameplayAchievementComponentTest {
         var first = empty.record(4, 81, whist, NOW);
         var changes = first.gameplayChangesSince(empty);
         audit.equal("Unlocks come before incremental progress", "play-first-hand", changes.get(0).badge().id());
+        var unlocks = changes.stream().filter(AchievementProgress.Change::unlocked).toList();
+        audit.truth("Fixture has enough unlocks to crowd out incremental progress", unlocks.size() >= 2);
+        var notice = new ro.rentzlab.app.lifecycle.SessionController.AchievementNotice(1, false, changes);
+        var firstPartial = changes.stream().filter(change -> !change.unlocked()).findFirst().orElseThrow();
+        audit.equal("Two-row popup reserves one row for partial progress", List.of(unlocks.get(0), firstPartial), notice.previewChanges());
+        var unlockOnly = new ro.rentzlab.app.lifecycle.SessionController.AchievementNotice(1, false, unlocks);
+        audit.equal("Two unlocks remain visible when there is no partial progress", unlocks.subList(0, 2), unlockOnly.previewChanges());
         var streak = changes.stream().filter(change -> change.badge().id().equals("play-whist-chains"))
                 .findFirst().orElseThrow();
         audit.equal("A new streak advances once per settled hand", 1, streak.count());

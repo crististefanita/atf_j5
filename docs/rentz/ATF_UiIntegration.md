@@ -123,7 +123,7 @@ Pentru acest increment, `-HelpAwardsOnly` parcurge ajutorul în ambele limbi. `-
 ## Realizări și profil local
 
 - Meniul **Realizări** prezintă rezultatele confirmate la masă, grupate în trei niveluri. Ordinea recomandă un traseu, iar fiecare obiectiv avansează independent.
-- După salvarea punctajului, un panou temporar sub antet grupează realizările avansate în mâna respectivă. Arată mai întâi deblocările, apoi contoarele parțiale. La ultima mână include și obiectivele confirmate la clasamentul final.
+- După salvarea punctajului, un panou temporar sub antet grupează realizările avansate în mâna respectivă. Când apar deblocări și progres parțial, afișează câte un rând din fiecare și numărul celorlalte actualizări. La ultima mână include obiectivele confirmate la clasamentul final.
 - Panoul se închide automat sau prin butonul de închidere. Reafișarea punctajului și reluarea unei partide salvate păstrează progresul fără repetarea notificării.
 - Recomandarea ține cont de numărul de jucători și de dificultatea partidei curente, inclusiv înainte de prima mână. Obiectivele care cer altă configurație rămân vizibile cu regula lor. Filtrul după contract afișează tacticile contractului și obiectivele de varietate sau de scor la care contribuie.
 - **Antrenament** păstrează catalogul de 800 de obiective și filtrele sale. Identificatorii și dovezile deja salvate rămân valabile când se schimbă ecranul din care sunt accesate.
