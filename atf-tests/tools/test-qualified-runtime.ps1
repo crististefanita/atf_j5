@@ -294,6 +294,34 @@ Case 'Transient Android root loss retries but never reads a stale hierarchy' {
         Require ($rejected-and$state.dumps-eq$expected-and$state.reads-eq0) 'No stale read and no retry of fatal errors'
     }
 }
+Case 'Achievement query retries corrupted native input and requires an exact focused value' {
+    $tokens=$null;$errors=$null
+    $ast=[Management.Automation.Language.Parser]::ParseFile((Join-Path $project 'atf-tests/tools/run-shared-ui-sanity.ps1'),[ref]$tokens,[ref]$errors)
+    Require (-not$errors) 'Shared UI runner does not parse'
+    $definition=$ast.Find({param($node) $node-is [Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-ceq'EnterAchievementSearch'},$true)
+    . ([scriptblock]::Create($definition.Extent.Text))
+    $state=@{writes=0;clears=0;stubborn=$false;focused=$true}
+    function Tap($Label,$Class) {Require ($Label-ceq'Search achievements'-and$Class-ceq'android.widget.EditText') 'Wrong input target'}
+    function Adb($Command,$Name) {
+        if($Name-ceq'achievement-search-rule'){
+            Require ($Command[-1]-ceq'chose%syourself') 'Query encoding changed';$state.writes++
+        }else{
+            Require ($Command[3]-ceq'KEYCODE_MOVE_END'-and$Command[4]-ceq'KEYCODE_DEL') 'Retry must clear the observed input';$state.clears++
+        }
+    }
+    function Ui { [xml]$sample='<hierarchy><node/></hierarchy>';return $sample.DocumentElement.FirstChild }
+    function Get-RentzTapTarget($Nodes,$Label,$Class) {
+        [pscustomobject]@{focused=[string]$state.focused.ToString().ToLowerInvariant();text=$(if($state.stubborn-or$state.writes-eq1){'cchose yourse'}else{'chose yourself'})}
+    }
+    EnterAchievementSearch 'chose yourself'
+    Require ($state.writes-eq2-and$state.clears-eq1) 'Corrupted query must be replaced before Apply'
+    foreach($mode in @('stubborn','blurred')){
+        $state.writes=0;$state.clears=0;$state.stubborn=$true;$state.focused=$mode-ne'blurred';$failed=$false
+        try{EnterAchievementSearch 'chose yourself'}catch{$failed=$_.Exception.Message-like'ANDROID_TEXT_INPUT:*'}
+        $expected=if($state.focused){3}else{1}
+        Require ($failed-and$state.writes-eq$expected) 'Unconfirmed input must fail within the retry budget'
+    }
+}
 Case 'Direct Release build rejects missing native evidence before staging' {
     $output=Join-Path $fixture 'release-without-native-evidence'
     $component=Join-Path $fixture 'component-not-read-before-preflight'

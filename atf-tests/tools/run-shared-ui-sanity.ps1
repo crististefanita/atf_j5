@@ -153,6 +153,21 @@ function TapNode($Node,[string]$Label){
     Adb @('shell','input','tap',[string][int](($box[0]+$box[2])/2),[string][int](($box[1]+$box[3])/2)) 'tap'|Out-Null;$watch.Stop()
     $actions.Add([pscustomobject]@{operation='Tap Android control';control=$Label;bounds=$Node.bounds;elapsedMillis=$watch.ElapsedMilliseconds})
 }
+function EnterAchievementSearch([string]$Query){
+    Tap 'Search achievements' 'android.widget.EditText'
+    $field=$null
+    for($attempt=1;$attempt-le3;$attempt++){
+        if($null-ne$field){
+            $keys=@('shell','input','keyevent','KEYCODE_MOVE_END')+(@('KEYCODE_DEL')*[Math]::Max($field.text.Length,$Query.Length))
+            Adb $keys 'clear-unconfirmed-achievement-query'|Out-Null
+        }
+        Adb @('shell','input','text',$Query.Replace(' ','%s')) 'achievement-search-rule'|Out-Null
+        $field=Get-RentzTapTarget -Nodes @(Ui) -Label 'Search achievements' -Class 'android.widget.EditText'
+        if($null-eq$field-or$field.focused-cne'true'){throw 'ANDROID_TEXT_INPUT: achievement search field lost focus.'}
+        if($field.text-ceq$Query){return}
+    }
+    throw 'ANDROID_TEXT_INPUT: achievement query did not match the focused field after three attempts.'
+}
 function State([long]$After=-1,[string]$Screen='GAME',[int]$TimeoutSeconds=25){
     $deadline=[datetime]::UtcNow.AddSeconds($TimeoutSeconds)
     do{
@@ -791,8 +806,7 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
         Check 'Visible profile belongs to the player' 1 @($captured|Where-Object text -CEQ 'Local profile · Ana').Count
     }
     Tap 'Search and filters';Tap 'Status filter' 'android.widget.Spinner';Tap 'Unlocked'
-    Tap 'Search achievements' 'android.widget.EditText'
-    Adb @('shell','input','text','chose%syourself') 'achievement-search-rule'|Out-Null
+    EnterAchievementSearch 'chose yourself'
     Tap 'Apply'
     Observe 'Search and status filter reveal the unlocked lesson' {param($captured)
         Check 'Combined query returns exactly one achievement' 1 @($captured|Where-Object text -CEQ 'Matching achievements 1').Count
