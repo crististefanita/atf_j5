@@ -29,7 +29,7 @@
       "criterion": "Require the authenticated artifact bytes and SHA-256, explicit provider permissions, exact source tag, and the pushed download link.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-12-09",
-      "sha256": "0d76e7fcb695f81859c52be8e8562edec22ccb3d286c48522553ac84c69321a8",
+      "sha256": "b2cc6b2d597415d8167a01f716500e03ee7621c99300782f9024bde710989d5b",
       "allowDelete": false
     },
     {
@@ -519,7 +519,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK; receipt mutations remain BLOCKED, while a valid Rentz-plus-two-games receipt is source-bound and report corruption blocks promotion.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "8d6d8425c0edb32ce2755b9bd133d2f378b9d9695e3502ae03f7de08299785e9",
+      "sha256": "ed8fa887e93747e6e0083150707ce027749aed5e0f695996a68dd8d08232dfc4",
       "allowDelete": false
     },
     {
@@ -1109,7 +1109,7 @@
       "criterion": "Published version remains separate; candidate advances one minor or major boundary and Android versionCode increases.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "54455ddc5bd82e06c71b21a692251d9bfa72a4a29f61ee05481d776f457ae2be",
+      "sha256": "17188cb5b13c52611550456e8c37757e4366115eeeddaeeb1d4d038f268cf377",
       "allowDelete": false
     },
     {
@@ -1219,7 +1219,7 @@
       "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a4c24c93f3c85adefd5b15f4e396b16d17ee9b5dc805abc8f43c8b656274aa22",
+      "sha256": "673e1df07f320a0ac66ff702352561f13b3d270599a094bf4e963924d0c18418",
       "allowDelete": false
     },
     {

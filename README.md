@@ -11,11 +11,6 @@ Motorul validează distribuirea, alegerea sub-jocului, mutările legale și scor
 - [Rentz Lab 0.13.0](https://github.com/crististefanita/atf_j5_releases/releases/tag/v0.13.0) · Cărțile jucabile în Rentz se disting printr-un contur verde discret.
 - [Descarcă APK-ul Rentz Lab 0.13.0](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.13.0/RentzLab-0.13.0.apk) · Android 8.0+. Autentifică-te în GitHub cu un cont care are acces la ediție.
 
-## Jocul
-
-- [Detalii Rentz Lab 0.5.0](https://github.com/crististefanita/atf_j5/releases/tag/v0.5.0) · codul sursă și notele livrării.
-- [Descarcă APK-ul Rentz Lab 0.5.0](https://rentz-lab-apk.totaloatcake.chatgpt.site/v0.5.0/RentzLab-0.5.0.apk) · Android 8.0+.
-
 ## Module și responsabilități
 
 | Zonă | Responsabilitate |

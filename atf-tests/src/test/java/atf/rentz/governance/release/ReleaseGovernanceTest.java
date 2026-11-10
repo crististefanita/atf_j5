@@ -59,6 +59,17 @@ class ReleaseGovernanceTest {
         assertDoesNotThrow(()->ReleaseCatalog.verifyMainGuide(guide("PREPARED"),"example/game","1.2.0","PREPARED"));
         assertDoesNotThrow(()->ReleaseCatalog.verifyMainGuide(guide("DRAFT"),"example/game","1.2.0","DRAFT"));
     }
+    @Test void restrictedEditionHasOneVersionAndRejectsASecondDownloadSection() throws Exception {
+        String restricted=guide("PUBLISHED").replace("## Jocul","## Ediție cu acces autorizat")
+                .replace("example/game","example/private-editions");
+        assertDoesNotThrow(()->ReleaseCatalog.verifyRestrictedGuide(restricted,"example/private-editions","1.2.0"));
+        String stale=restricted+"\n## Jocul\n\n[APK vechi](https://downloads.example.test/v1.1.0/RentzLab-1.1.0.apk)\n";
+        assertEquals("RELEASE-MAIN-EXTRA-DOWNLOAD",assertThrows(IOException.class,
+                ()->ReleaseCatalog.verifyRestrictedGuide(stale,"example/private-editions","1.2.0")).getMessage());
+        assertEquals("RELEASE-MAIN-LINKS",assertThrows(IOException.class,
+                ()->ReleaseCatalog.verifyRestrictedGuide(restricted.replace("/v1.2.0/","/v1.1.0/"),
+                        "example/private-editions","1.2.0")).getMessage());
+    }
     @Test void aVerifiedPublicCopyIsTheOnlyDirectDownloadInTheMainGuide() throws Exception {
         String github = "https://github.com/example/game/releases/download/v1.2.0/RentzLab-1.2.0.apk";
         String mirror = "https://download.example.test/v1.2.0/RentzLab-1.2.0.apk";

@@ -47,7 +47,7 @@ RAG-ul aplică domeniul declarat: pentru o ediție numai pentru Android, iOS est
 - Candidatele și rezultatele se pregătesc în workspace-ul J5 alocat, în afara checkout-ului. Rapoartele și APK-urile rămân sub rădăcina de date configurată prin `RENTZ_DATA_ROOT`, niciodată în TEMP arbitrar.
 - Runner-ele folosesc workspace-uri externe înregistrate `components-<id>`, cu descriptor pentru proprietar, tip, ID și `sourceRoot`; RAG acceptă stagingul Android JVM numai când toate valorile corespund politicii și candidatului fixat.
 - Promovarea în `main` păstrează același commit, manifest, rapoarte, APK și checksum. Orice schimbare de octeți cere o nouă calificare.
-- `currentVersion` și linkul README se actualizează după publicare și verificarea accesului autentificat și anonim.
+- După publicare și verificarea accesului, promovați versiunea la `currentVersion`, actualizați README-ul și eliminați `candidate` când acesta coincide cu ediția publicată.
 ```mermaid
 flowchart LR
     SOURCE[Snapshot identificat] -->|testează fără dispozitiv| CHECK[Componente și guvernanță]
@@ -69,7 +69,7 @@ Tagul identifică sursa comună a artefactelor declarate. Fiecare artefact își
 
 ## Ordinea calificării Android curente
 
-Pentru verificarea catalogului public, aduceți în checkout-ul izolat copia APK-ului deja publicat și checksumul său. Comparați dimensiunea și SHA-256 cu manifestul public înainte de regresie. Git păstrează manifestul, iar binarul de referință vine din depozitul extern.
+Pentru verificarea catalogului, aduceți în `release/<versiune>` din checkout-ul izolat APK-ul ediției active și checksum-ul. Folosiți copia verificată din depozitul extern sau descărcați ambele fișiere din GitHub cu un cont autorizat. Comparați dimensiunea și SHA-256 cu manifestul înainte de regresie. Git păstrează manifestul, iar fișierele binare sunt ignorate.
 
 Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și cache-urile pregătite:
 
@@ -99,7 +99,7 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 - **Promovare:** lipsa, FAIL-ul sau o captură fără verificare păstrează candidatul în `STAGED_CANDIDATE_ONLY`. Numai trecerea porților `native-ui` și `native-ui-report`, alături de regresie și build, permite `READY_FOR_MAIN_PROMOTION_REVIEW`; publicarea remote rămâne o etapă separată.
 - **Staging:** `ReleaseCatalog` verifică separat ediția publicată local și pasul de versiune al candidatului.
 - **Revizuire:** după trecerea porților locale, RAG poate raporta `READY_FOR_MAIN_PROMOTION_REVIEW`; operatorul decide promovarea.
-- **Publicare:** adaptoarele pentru remote, descărcarea autentificată și cea anonimă lipsesc. Aceste porți rămân `NOT_RUN`, agregatul e `BLOCKED`, iar `publishAllowed=false`.
+- **Publicare:** rularea locală lasă porțile remote la `NOT_RUN`. Verificarea după push folosește dovada GitHub autentificată și răspunsul anonim, prin `verify-release-readme.ps1 -Restricted`.
 
 - Lansatorul verifică workspace-ul și colecția completă, apoi scrie indexul și raportul într-un director extern nou. Filtrele `gate:`, `class:` și `version:` sunt exacte; sunt returnate cel mult cinci citări cu commit, cale, linii și SHA-256.
 - Corpusul este allowlistat și verificat înainte de indexare. Testele negative acoperă lipsa sursei, fragmente ostile și date sensibile; textul recuperat nu are autoritate de execuție sau verdict.
@@ -107,7 +107,7 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 
 - **Cache concurent:** folosiți `-MavenRepository <cache-dedicat>` la calificare când alte procese pot încărca aceleași JAR-uri; calea rămâne în `infrastructure/cache`. Nu opriți procesele altui proprietar și nu transformați eroarea de înlocuire într-un rezultat verde.
 - **Izolare:** staging-ul este workspace-ul temporar înregistrat de J5, în afara sursei și a TEMP-ului Windows. Rulările intermediare rămân în depozitul extern; numai dosarul selectat se copiază în `release/<versiune>`.
-- **Istoric:** înainte de înlocuirea dosarului ediției curente, arhivați-l în `distribution/archives` și verificați toate căile, dimensiunile și SHA-256 față de sursă. Tagurile și release-urile deja publicate rămân imuabile.
+- **Istoric:** arhivați dovezile în `distribution/archives` înainte de înlocuirea dosarului activ. Păstrați tagurile de sursă. Retrageți intrările GitHub Release înlocuite după verificarea ediției noi.
 - **Commit fixat:** pregătiți candidatul DRAFT într-un worktree `atf_j5` dintr-un workspace alocat de J5. Regresia refuză un worktree modificat și verifică din nou commit-ul, populația și hash-urile la final.
 - **Intrări Android:** build-ul Release preia automat sursa din receipt-ul regresiei. Confruntă întregul inventar Android JVM, inclusiv configurația Gradle, resursele și biblioteca UI. Opțiunea `-UiSanity` produce separat varianta izolată și comparațiile pentru Extent din același snapshot.
 - **Teste:** se păstrează populațiile Maven și Android JVM, fără FAIL, erori sau skip-uri; o selecție scurtă nu se redenumește regresie. Testele de guvernanță și controalele negative ale descărcării se execută offline înainte de publicare.
@@ -149,31 +149,20 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 5. Verificați README → release curent → asset: bytes efectivi, SHA-256 și toate CRC-urile. Un răspuns 404 salvat cu extensia APK rămâne eroare.
 6. Păstrați distinct accesul autentificat, accesul fără sesiune și blocarea browserului. Tokenul API nu se transmite originilor CDN; o probă Android poate consuma numai redirectul temporar al asset-ului, fără expunerea lui în rapoarte.
 7. Rulați intrarea explicită de acceptanță a distribuției cu classpath-ul calificat și tokenul numai în mediu. Nu o includeți implicit în regresia offline.
-8. Actualizați starea, README-ul principal și legătura notelor către commit-ul dovezilor. Secțiunea Jocul are doar release-ul curent și descărcarea directă; catalogul tehnic rămâne în Documentație.
-9. După commit și push, rulați verificarea finală cu opțiunea `-PublicationEvidence` din lansatorul RAG. Pentru un raport RAG deja generat, folosiți `scripts/verify-release-readme.ps1` cu raportul calificat și directorul probelor de distribuție. Verificarea citește README-ul din commitul remote, confruntă cele două linkuri cu release-ul și copia publică, apoi scrie verdictul `readme-publication` în depozitul extern.
+8. Actualizați catalogul și secțiunea **Ediție cu acces autorizat** din README cu release-ul curent și descărcarea directă.
+9. După push, rulați `scripts/verify-release-readme.ps1 -Restricted` cu raportul RAG calificat și directorul probelor de distribuție. Verificatorul citește README-ul din commitul remote, confruntă linkurile și octeții descărcați și salvează `readme-publication` în depozitul extern.
+10. După verificare, retrageți edițiile anterioare și drafturile lor. Confirmați că GitHub Releases listează o singură ediție și repetați verificarea accesului.
 
 [Calificarea componentelor](ATF_Qualification.md) · [Protocolul Android](ATF_Android.md) · [Catalogul livrării](../../release/README.md)
 
-### Distribuție de test cu autentificare
+### Distribuție cu autentificare
 
 Distribuiți candidatul numai după calificarea RAG locală și verificarea semnăturii. Folosiți un canal cu acces restricționat la conturile permise. Un prerelease GitHub dintr-un repository public are aceeași vizibilitate publică a artefactelor.
 
 - Confirmați prin API că repository-ul GitHub al artefactelor este privat înainte de upload. Un repository privat separat, al aceluiași proprietar, permite păstrarea accesului existent la surse. Tagul din ambele repository-uri identifică același commit calificat.
 - Verificați permisiunile și descărcați APK-ul și fișierul SHA-256 din GitHub Releases cu un cont autorizat. Confruntați dimensiunea, digestul și numele fișierului cu binarul calificat. Păstrați dovada în dosarul extern, fără acreditări sau URL-uri temporare.
-- După publicare, puneți pagina release-ului și linkul direct către APK în secțiunea **Ediție cu acces autorizat** din README și verificați linkurile din commitul împins. Secțiunea **Jocul** păstrează ediția publică. Registrul `release/restricted-<versiune>.json` identifică ediția autorizată.
+- Registrul `release/restricted-<versiune>.json` leagă release-ul și asset-ul privat de manifestul ediției active. Catalogul refuză o a doua rută de descărcare în README.
 - După push, folosiți `verify-release-readme.ps1 -Restricted` cu raportul RAG local calificat și proba de descărcare autentificată. Pentru rularea din același snapshot, `run-release-rag.ps1 -PublicationEvidence <dovezi> -RestrictedPublication` selectează aceeași verificare.
-
-### Rută publică de rezervă
-
-- Verificați fără sesiune pagina proiectului, pagina release-ului și descărcarea efectivă.
-- Dacă GitHub răspunde cu 404 anonim, confruntați întâi asset-ul prin API autentificat; apoi copiați APK-ul semnat și checksum-ul pe gazda HTTPS controlată de proiect.
-- Adresa directă are forma `/v<versionName>/RentzLab-<versionName>.apk`, fără query sau fragment.
-- Pagina publică de descărcare afișează versiunea și checksum-ul și rămâne accesibilă fără sesiune GitHub.
-
-- Descărcați copia fără token sau cookies și verificați HTTP 200, octeții, SHA-256 și integritatea arhivei.
-- Consemnați în `publicDownload` URL-ul, momentul UTC, statusul și identitatea copiei.
-- Actualizați linkul direct din `Jocul` numai după confirmarea copiilor publice.
-- Păstrați separat rezultatul autentificat GitHub și descărcarea anonimă. O schimbare de rută nu cere reconstruirea APK-ului.
 
 ### Proba Android a APK-ului livrat
 

@@ -66,7 +66,7 @@ Aceste intrări sunt active în configurația live. [Repository-ul admis](../../
 
 Testele de licitație, atu și punctaj Whist rămân exclusiv în J4. J5 implementează propriile componente pe observații și comenzi Rentz reale; opt cărți pe loc, faza nevăzută, pasul, secvențele și scorul nu se testează prin redenumirea fixture-urilor Whist.
 
-J6 rămâne momentan JVM/console, fără dependență Android. Modelele UI păstrează date vizibile neutre, dar layout-ul calificat actual acoperă 3–6 locuri; suportul altor mese și al cărților comunitare cere o extensie verificată distinct.
+Modelele UI păstrează date vizibile neutre. În Rentz, componentele acoperă mese de 3–6 locuri, iar calificarea nativă declară separat configurația executată.
 
 ### Nume, scoruri și ordinea mâinii
 
@@ -77,6 +77,12 @@ J6 rămâne momentan JVM/console, fără dependență Android. Modelele UI păst
 | Mână vizibilă | Ordinea este ♠ ♥ ♣ ♦, apoi rang crescător. Proiecția păstrează identitatea și legalitatea; proba nativă verifică ordinea fizică și centrajul ultimei cărți. |
 
 [Componentele mâinii](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java) · [Dovezile native pentru chenare, nume și mână](../../../../rentz_back/ui-review/shared-seats-collection-j5/README.md)
+
+### Marcajul cărților jucabile în Rentz
+
+În tura manuală, cărțile legale primesc fundal verde pal și contur verde. Marcajul se recalculează la fiecare tură, inclusiv după mutare și după pasul automat. Geometria și zonele de atingere rămân cele ale mâinii, iar descrierile accesibile indică acțiunea permisă în română și engleză.
+
+Componentele confruntă setul marcat cu regulile motorului. Proba `-RentzCardMarksOnly` verifică pe emulator acțiunile accesibile și culorile capturate pentru o carte, mai multe cărți, după mutare și după pas. [Componentele de geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) · [Runner Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 
 ### Schimbarea contractului la masa de patru jucători
 

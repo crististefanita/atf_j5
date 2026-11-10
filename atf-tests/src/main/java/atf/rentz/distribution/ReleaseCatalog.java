@@ -49,7 +49,8 @@ public final class ReleaseCatalog {
         String gradle=Files.readString(root.resolve("rentz-lab-app/app/build.gradle"));
         require(gradle.contains("versionName '"+buildVersion+"'") && buildVersionCode==declared(gradle,"versionCode")
                 && number(identity,"minSdk")==declared(gradle,"minSdk") && number(identity,"targetSdk")==declared(gradle,"targetSdk"),"RELEASE-GRADLE");
-        String state=manifest.path("publication").path("state").asText();
+        JsonNode publication=manifest.path("publication");
+        String state=publication.path("state").asText();
         require(List.of("DRAFT","PREPARED","PUBLISHED").contains(state),"RELEASE-STATE");
         require(identity.path("apkName").asText().equals("RentzLab-"+version+".apk"),"RELEASE-FILENAME");
         for(String name:List.of("README.md","reports/README.md","release-notes.md"))
@@ -58,15 +59,23 @@ public final class ReleaseCatalog {
             require(children.filter(Files::isDirectory).map(p->p.getFileName().toString()).toList().equals(List.of(version)),"RELEASE-POPULATION");
         }
         require(Files.readString(root.resolve("release/README.md")).contains("("+version+"/README.md)"),"RELEASE-CATALOG-LINK");
-        String publicUrl = publicDownloadUrl(manifest.path("publicDownload"), identity, version, state);
-        verifyMainGuide(Files.readString(root.resolve("README.md")),repository,version,state,publicUrl);
+        String guide=Files.readString(root.resolve("README.md"));
+        String downloadRepository=repository;
+        if(publication.path("channel").asText().equals("authenticated-only")) {
+            require(state.equals("PUBLISHED") && !manifest.has("publicDownload"),"RELEASE-RESTRICTED-STATE");
+            downloadRepository=verifyRestrictedReceipt(root,repository,version,identity,publication);
+            verifyRestrictedGuide(guide,downloadRepository,version);
+        } else {
+            String publicUrl=publicDownloadUrl(manifest.path("publicDownload"),identity,version,state);
+            verifyMainGuide(guide,repository,version,state,publicUrl);
+        }
         for(String retired:List.of("dist","artifacts","releases"))require(!Files.exists(root.resolve(retired)),"RELEASE-RETIRED: "+retired);
         if(state.equals("DRAFT")) {
             require(!requireDelivery,"RELEASE-NOT-QUALIFIED");
             require(identity.path("apkBytes").isNull() && identity.path("sha256").isNull(),"RELEASE-DRAFT-IDENTITY");
             return new Edition(folder,manifest,null,state);
         }
-        ApkDownloadTarget target=new ApkDownloadTarget(repository,version,number(identity,"apkBytes"),identity.path("sha256").asText());
+        ApkDownloadTarget target=new ApkDownloadTarget(downloadRepository,version,number(identity,"apkBytes"),identity.path("sha256").asText());
         Path apk=folder.resolve(target.fileName());ApkPayload.verify(apk,target.bytes(),target.sha256());
         require(Files.readString(folder.resolve(target.fileName()+".sha256")).trim().equals(target.sha256()+"  "+target.fileName()),"RELEASE-CHECKSUM");
         JsonNode qualification=manifest.path("qualification");
@@ -79,6 +88,51 @@ public final class ReleaseCatalog {
                 && manifest.path("publication").path("sourceCommit").asText().matches("[a-f0-9]{40}"),"RELEASE-PUBLISHED-IDENTITY");
         return new Edition(folder,manifest,target,state);
     }
+    private static String verifyRestrictedReceipt(Path root,String repository,String version,JsonNode identity,
+                                                   JsonNode publication) throws IOException {
+        String name="restricted-"+version+".json";
+        try(var children=Files.list(root.resolve("release"))) {
+            require(children.map(p->p.getFileName().toString()).filter(n->n.startsWith("restricted-") && n.endsWith(".json"))
+                    .toList().equals(List.of(name)),"RELEASE-RESTRICTED-POPULATION");
+        }
+        JsonNode proof=read(root.resolve("release").resolve(name));
+        String distribution=proof.path("releaseRepository").asText();
+        String tag="v"+version;
+        require(distribution.matches(Pattern.quote(repository.split("/")[0])+"/[A-Za-z0-9_-][A-Za-z0-9_.-]*")
+                && !distribution.equals(repository),"RELEASE-RESTRICTED-REPOSITORY");
+        require(proof.path("state").asText().equals("PUBLISHED") && proof.path("provider").asText().equals("GitHub")
+                && proof.path("channel").asText().equals("authenticated-only")
+                && proof.path("authenticatedDownload").asText().equals("PASS")
+                && proof.path("version").asText().equals(version) && proof.path("sourceTag").asText().equals(tag)
+                && proof.path("sourceCommit").equals(publication.path("sourceCommit"))
+                && proof.path("sourceCommit").equals(identity.path("sourceCommit"))
+                && proof.path("applicationId").equals(identity.path("applicationId"))
+                && proof.path("certificateSha256").equals(identity.path("certificateSha256"))
+                && proof.path("apkSha256").equals(identity.path("sha256"))
+                && number(proof,"apkBytes")==number(identity,"apkBytes")
+                && number(proof,"versionCode")==number(identity,"versionCode")
+                && number(proof,"releaseId")==number(publication,"releaseId") && number(proof,"assetId")>0
+                && proof.path("link").asText().equals(new ApkDownloadTarget(distribution,version,
+                        number(identity,"apkBytes"),identity.path("sha256").asText()).publicUrl()),
+                "RELEASE-RESTRICTED-IDENTITY");
+        return distribution;
+    }
+
+    public static void verifyRestrictedGuide(String guide,String repository,String version) throws IOException {
+        String normalized=guide.replace("\r\n","\n");
+        String heading="\n## Ediție cu acces autorizat\n";
+        int start=normalized.indexOf(heading);
+        require(start>=0 && start==normalized.lastIndexOf(heading),"RELEASE-MAIN-SECTION");
+        int end=normalized.indexOf("\n## ",start+1);
+        if(end<0)end=normalized.length();
+        String base="https://github.com/"+repository+"/releases/";
+        List<String> expected=List.of(base+"tag/v"+version,base+"download/v"+version+"/RentzLab-"+version+".apk");
+        require(links(normalized.substring(start,end)).equals(expected),"RELEASE-MAIN-LINKS");
+        require(links(normalized.substring(0,start)+normalized.substring(end)).stream().noneMatch(link ->
+                link.contains("/releases/tag/") || link.contains("/releases/download/") || link.matches("(?i).*\\.apk(?:[?#].*)?")),
+                "RELEASE-MAIN-EXTRA-DOWNLOAD");
+        require(normalized.contains("(release/README.md)"),"RELEASE-MAIN-CATALOG");
+    }
     public static void verifyMainGuide(String guide,String repository,String version,String state) throws IOException {
         verifyMainGuide(guide, repository, version, state, null);
     }
@@ -86,8 +140,7 @@ public final class ReleaseCatalog {
         String normalized=guide.replace("\r\n","\n");int start=normalized.indexOf("\n## Jocul\n");
         require(start>=0,"RELEASE-MAIN-SECTION");int end=normalized.indexOf("\n## ",start+1);
         String section=normalized.substring(start,end<0?normalized.length():end);
-        var links=Pattern.compile("\\]\\(([^)\\s]+)\\)")
-                .matcher(section).results().map(match->match.group(1)).toList();
+        var links=links(section);
         String local="release/"+version+"/";
         List<String> expected=switch(state) {
             case "DRAFT" -> List.of(local+"README.md");
@@ -98,6 +151,9 @@ public final class ReleaseCatalog {
         };
         require(links.equals(expected),"RELEASE-MAIN-LINKS");
         require(normalized.contains("(release/README.md)"),"RELEASE-MAIN-CATALOG");
+    }
+    private static List<String> links(String markdown) {
+        return Pattern.compile("\\]\\(([^)\\s]+)\\)").matcher(markdown).results().map(match->match.group(1)).toList();
     }
     private static String publicDownloadUrl(JsonNode proof, JsonNode identity, String version, String state) throws IOException {
         if (proof.isMissingNode()) return null;

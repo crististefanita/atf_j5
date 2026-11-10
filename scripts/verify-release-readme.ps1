@@ -86,6 +86,10 @@ $sectionName = 'Jocul'
 if($Restricted){
     $proof = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'restricted-download.json') -Raw | ConvertFrom-Json
     $direct = Confirm-RestrictedApk $proof (Join-Path $PublicationEvidence "authenticated-$apk") $version $source $digest $repository
+    if($proof.authenticated.provider -ceq 'GitHub' -and
+        ($proof.anonymous.repositoryApiHttp -ne 404 -or $proof.anonymous.directApkHttp -ne 404)){
+        throw 'The private GitHub repository and direct asset must deny anonymous access.'
+    }
     $releaseUrl = if($proof.authenticated.provider -ceq 'GitHub'){ $proof.releaseUrl }else{ "https://github.com/$repository/tree/$tag" }
     $sectionName = 'Ediție cu acces autorizat'
 }else{
@@ -147,7 +151,8 @@ if($Restricted){
     $tracked = (git -C $project show ($head+":release/restricted-$version.json")) -join "`n"
     if($LASTEXITCODE){throw 'The pushed restricted distribution record is missing.'}
     $tracked = $tracked | ConvertFrom-Json
-    if($catalog.candidate.version -cne $version -or $tracked.version -cne $version -or
+    if(($catalog.currentVersion -cne $version -and $catalog.candidate.version -cne $version) -or
+        $tracked.version -cne $version -or
         $tracked.sourceCommit -cne $source -or $tracked.apkSha256 -cne $digest -or $tracked.link -cne $direct -or
         $tracked.channel -cne 'authenticated-only'){
         throw 'The pushed restricted distribution record differs from the qualified download.'
@@ -174,6 +179,6 @@ $report = Join-Path $RunRoot 'readme-publication.json'
     directApkUrl = $direct
     channel = $(if($Restricted){'authenticated-only'}else{'public'})
     authenticatedDownload = 'PASS'
-    anonymousDownload = $(if($Restricted){'NOT_APPLICABLE'}else{'PASS'})
+    anonymousDownload = $(if(!$Restricted){'PASS'}elseif($proof.authenticated.provider -ceq 'GitHub'){'DENIED'}else{'NOT_APPLICABLE'})
 } | ConvertTo-Json | Set-Content -LiteralPath $report -Encoding utf8NoBOM
 Write-Output $report

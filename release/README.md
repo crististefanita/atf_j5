@@ -2,15 +2,11 @@
 
 ## Pe scurt
 
-Catalogul tehnic reunește candidatul curent, identitatea livrării și dovezile sale; starea calificării rămâne explicită.
+Catalogul tehnic păstrează ediția publicată, identitatea APK-ului și rezultatele calificării.
 
 ## Versiunea curentă
 
-- [Rentz Lab 0.5.0](0.5.0/README.md) · publicat; descărcarea APK-ului este în README-ul principal.
-
-## Ediție cu acces autorizat
-
-[Rentz Lab 0.13.0](restricted-0.13.0.json) este distribuit conturilor autorizate. Linkul APK se află în README-ul principal.
+[Rentz Lab 0.13.0](0.13.0/README.md) este disponibil conturilor autorizate pe GitHub. [Descărcare](../README.md#ediție-cu-acces-autorizat) · [Dovada accesului](restricted-0.13.0.json)
 
 ## Organizare
 
@@ -22,6 +18,6 @@ Catalogul tehnic reunește candidatul curent, identitatea livrării și dovezile
 
 - APK-ul și checksum-ul local sunt excluse din Git; nu se descarcă prin Raw sau dintr-un folder de surse.
 - README-ul principal oferă release-ul curent și descărcarea sa directă după publicare. Catalogul tehnic aparține documentației.
-- Rulările intermediare și diagnosticele complete rămân în depozitul extern înregistrat. Dosarul sursei păstrează numai livrarea selectată.
+- Catalogul și GitHub Releases păstrează o singură ediție activă. Tagurile de sursă și dovezile istorice se păstrează pentru trasabilitate.
 
 [Procesul livrării](../docs/rentz/ATF_Release.md) · [Calificarea componentelor](../docs/rentz/ATF_Qualification.md)

@@ -120,21 +120,13 @@ Pilotul folosește [decontarea motorului](../../rentz-lab-app/game-core/src/main
 
 ## Meniu și accesibilitate
 
-- **Realizări** se deschide din meniul principal și permite editarea numelui profilului. Ecranul păstrează interogarea aplicată, poziția listei și detaliul deschis la recrearea activității.
-- Rezumatul arată totalul deblocat. Panoul de căutare recomandă următorul reper și permite combinarea filtrelor după dificultate, contract, stare și mod de joc. Căutarea folosește titlul și regula în ambele limbi.
-- Detaliul afișează regula, progresul numeric, tipul dovezii și motivul de eligibilitate pentru ultima mână confirmată din partida curentă.
+Meniul, filtrarea și detaliul de eligibilitate sunt descrise în [integrarea realizărilor](../rentz/ATF_UiIntegration.md#realizări-și-profil-local).
+
 - Adăugați ruta inversă din profil și, dacă se introduce importul, extindeți verificările de restabilire a stării.
 - Folosiți o listă virtualizată cu identități stabile. Verificați 800 de intrări, text mărit, navigarea TalkBack, starea offline și încărcarea după migrarea profilului.
 - Extindeți acceptanța Android a panoului la ultima mână a partidei. Traseul curent verifică o deblocare simultană cu progres parțial, închiderea manuală și reluarea fără repetarea panoului.
 
-## Livrare etapizată
-
-| Etapă | Ușoare | Medii | Grele | Condiție |
-|---|---:|---:|---:|---|
-| 1. Pilot offline | 40 | 12 | 4 | Profil stabil, progres salvat, meniu ordonat și obiective pentru cele opt contracte. |
-| 2. Extinderea catalogului | 120 | 48 | 16 | Căutare, filtre, detalii despre eligibilitate și verificarea că regulile sunt realizabile prin mutări legale. |
-| 3. Extindere și calibrare | 340 | 140 | 80 | Buget net pe nivel după reclasificări. Validare pe mâini legale, partide complete, progres salvat și afișare pe tabla verde. |
-| **Total cumulativ** | **500** | **200** | **100** | Catalog complet, cu identități stabile și probe pentru fiecare familie. |
+## Verificări pentru extindere
 
 - **Componente:** perechi pozitiv/negativ pentru fiecare tip de metrică, deduplicare, offline, restabilire profil, două dispozitive, ceas mutat, egalități și respingerea autodelegării pentru realizări manuale.
 - **Calibrare:** pe 3–6 locuri și ambele dificultăți, măsurați oportunitățile și proporția de reușită. Combinațiile trebuie să aibă un traseu demonstrabil, fără să ceară pierderi deliberate sau o distribuire aproape unică.
