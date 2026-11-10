@@ -596,6 +596,12 @@ function RentzSequenceChecks($nodes,$state){
         $inside=@(foreach($cell in $cells){$box=Bounds $cell;if($box[0]-lt$boardBox[0]-or$box[2]-gt$boardBox[2]-or$box[1]-lt$boardBox[1]-or$box[3]-gt$boardBox[3]){$cell}})
         Check 'Every sequence slot remains inside the table viewport' 0 $inside.Count
     }
+    $seats=@($nodes|Where-Object description -Match '\. Points: .*\. Total:'|ForEach-Object{ ,(Bounds $_) })
+    $covered=@(foreach($cell in $cells){
+        $box=Bounds $cell
+        if(@($seats|Where-Object{$box[0]-lt$_[2]-and$box[2]-gt$_[0]-and$box[1]-lt$_[3]-and$box[3]-gt$_[1]}).Count){$cell}
+    })
+    Check 'Sequence cards clear every player frame' 0 $covered.Count
     $rows=@($cells|ForEach-Object{(Bounds $_)[1]}|Sort-Object -Unique)
     Check 'Rentz cards remain grouped into exactly four suit rows' 4 $rows.Count
     foreach($row in $rows){Check "One rank slot per card in suit row $row" (2*$state.view.players) @($cells|Where-Object{(Bounds $_)[1]-eq$row}).Count}
@@ -653,6 +659,7 @@ function RunRentzCardMarks($state){
             Tap 'Main menu';Tap 'New game';Tap 'Start game';Tap 'Start';$state=State
         }
         $state=ChooseHumanSubgame $state -ForceRentz
+        $seatsAtStart=SeatGeometry @(Ui) $state
         $lastCard='';$lastMoveRevision=-1
         for($step=0;$step-lt100-and$state.view.phase-eq'PLAY';$step++){
             if($state.view.turn-eq0-and$state.view.legal.Count-gt0){
@@ -675,6 +682,8 @@ function RunRentzCardMarks($state){
                         if($labels.Contains('after automatic pass')){
                             Check 'A real seat-zero pass is present in the public action history' $true ($pass[0].sequence-gt0-and$null-eq$pass[0].card)
                         }
+                        Check 'Player frames stay fixed as the Rentz sequence grows' $seatsAtStart (SeatGeometry $nodes $current)
+                        RentzSequenceChecks $nodes $current
                         RentzMarkChecks $nodes $current (Join-Path $raw "$name.png")
                     }
                     if($single){$covered.single=$true}else{$covered.multiple=$true}

@@ -3,8 +3,11 @@ package ro.rentzlab.app.ui.table;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.util.TypedValue;
 import android.view.*;
 import android.widget.*;
 import ro.cardtable.ui.animation.CollectionTarget;
@@ -23,7 +26,8 @@ import java.util.function.Consumer;
 /** Rentz central modes compose neutral seats, public cards and a single shared hand renderer. */
 public final class RentzTablePanel extends LinearLayout {
     public record Actions(Runnable reveal, Runnable choose, Runnable blind, Runnable next, Consumer<String> card) { }
-    private static final int NEXT_HAND_FOOTER_DP = 51;
+    private static final int CHOICE_HEIGHT_DP = 48;
+    private static final int CHOICE_MARGIN_DP = 3;
     private final Context context;
     private final RentzUiText copy;
     private final boolean paused;
@@ -38,20 +42,23 @@ public final class RentzTablePanel extends LinearLayout {
         defaultCollectionScale = holding
                 && Settings.Global.getFloat(context.getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 1f;
         float fontScale = getResources().getConfiguration().fontScale;
+        float density = getResources().getDisplayMetrics().density;
         var viewport = new TableViewportPolicy(WindowContent.heightDp(context), fontScale);
         setOrientation(VERTICAL); setGravity(Gravity.BOTTOM); setPadding(dp(8), 0, dp(8), 0); setClipChildren(false);
         int width = Math.min(760, Math.max(240, WindowContent.widthDp(context) - 40));
         boolean cards = view.phase() == RentzMatch.Phase.PLAY && view.contract() != Contract.RENTZ || holding;
         boolean sequence = view.contract() == Contract.RENTZ && view.phase() != RentzMatch.Phase.CHOOSE;
         var trick = PlayedCardMetrics.forTable(view.players(), width, fontScale, viewport);
-        if (sequence || view.players() == 4 && view.phase() != RentzMatch.Phase.CHOOSE) {
-            int footer = sequence && view.phase() == RentzMatch.Phase.DEAL_END ? NEXT_HAND_FOOTER_DP : 0;
+        if (view.phase() != RentzMatch.Phase.CHOOSE) {
+            int footer = sequence && view.phase() == RentzMatch.Phase.DEAL_END ? dp(CHOICE_HEIGHT_DP) + dp(CHOICE_MARGIN_DP) : 0;
             var cardBoard = new RentzCardBoard(context, view.players(), footer, viewport, trick,
-                    (measuredWidth, budget) -> {
-                        if (sequence) return sequence(view, actions, measuredWidth, budget, fontScale);
-                        if (cards) return playedCards(visible, names, holding, viewport, RentzCardSpace.fitTrick(trick, budget));
+                    (widthPx, budgetPx) -> {
+                        if (sequence) return sequence(view, actions, RentzCardSpace.sequence(view.players(), widthPx,
+                                budgetPx - footer, density, fontScale));
+                        if (cards) return playedCards(visible, names, holding, viewport,
+                                RentzCardSpace.fitTrick(trick, (int) (budgetPx / density)));
                         View controls = center(view, actions, 0);
-                        controls.setLayoutParams(new FrameLayout.LayoutParams(dp(Math.min(220, measuredWidth)),
+                        controls.setLayoutParams(new FrameLayout.LayoutParams(Math.min(dp(220), widthPx),
                                 ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
                         return controls;
                     });
@@ -60,9 +67,7 @@ public final class RentzTablePanel extends LinearLayout {
         } else {
             board = new BoardLayout(context, view.players(), cards ? width : Math.min(width, 220),
                     viewport, cards, TableGeometry.CenterAlignment.BALANCED);
-            center = cards ? playedCards(visible, names, holding, viewport, trick)
-                    : center(view, actions, RentzCardSpace.minimumControlsHeightPx(view.players(), view.phase(),
-                            getResources().getDisplayMetrics().density, trick));
+            center = cards ? playedCards(visible, names, holding, viewport, trick) : center(view, actions, dp(1));
         }
         board.setTag("game-board"); board.setContentDescription(copy.text("Rentz table", "Masa Rentz"));
         String turnBadge = RentzTableContent.turnLabel(view, copy, forcedPass).toUpperCase(java.util.Locale.ROOT);
@@ -75,7 +80,6 @@ public final class RentzTablePanel extends LinearLayout {
         addView(board, boardParams);
         var handCards = RentzTableContent.hand(view, copy, paused);
         var fan = new HandFan(context, handCards, viewport.handClearanceDp(false), viewport.isCompact(), actions.card());
-        float density = getResources().getDisplayMetrics().density;
         var hand = new CenteredHandView(context, dp(HandLayoutMetrics.maxViewportWidthDp()), widthPx -> {
             View rendered = fan.build(widthPx);
             for (var card : handCards) {
@@ -160,35 +164,52 @@ public final class RentzTablePanel extends LinearLayout {
         }
         return box;
     }
-    private View sequence(RentzMatch.Observation view, Actions actions, int width, int budget, float fontScale) {
+    private View sequence(RentzMatch.Observation view, Actions actions, RentzCardSpace.Sequence metrics) {
         var box = new LinearLayout(context);
         box.setOrientation(VERTICAL);
         box.setGravity(Gravity.CENTER);
-        boolean nextHand = view.phase() == RentzMatch.Phase.DEAL_END;
-        var metrics = RentzCardSpace.sequence(view.players(), width, budget - (nextHand ? NEXT_HAND_FOOTER_DP : 0), fontScale);
         for (var row : RentzSequenceContent.rows(view)) {
-            var line = new LinearLayout(context);
-            line.setGravity(Gravity.CENTER);
-            for (var cell : row) {
+            var line = new FrameLayout(context);
+            for (int column = 0; column < row.size(); column++) {
+                var cell = row.get(column);
+                var face = RentzTableContent.face(cell.card());
+                boolean covered = column > 0 && row.get(column - 1).played() && metrics.overlaps();
                 var tile = new TextView(context);
-                tile.setGravity(Gravity.CENTER);
-                tile.setSingleLine(true);
+                tile.setGravity(Gravity.LEFT | (metrics.stackedIndex() ? Gravity.TOP : Gravity.CENTER_VERTICAL));
+                tile.setSingleLine(!cell.played() || !metrics.stackedIndex());
                 tile.setIncludeFontPadding(false);
-                tile.setTextSize(metrics.labelSp());
-                tile.setText(cell.played() ? cell.card().label() : cell.opening() ? RentzTableContent.face(cell.card()).rankLabel() : "·");
-                tile.setTextColor(cell.played() ? TablePalette.ACTIVE_SEAT_TEXT : Color.rgb(194, 211, 197));
-                if (cell.played()) tile.setBackground(TablePalette.seatFrame(context, true));
+                tile.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+                tile.setTextSize(TypedValue.COMPLEX_UNIT_PX, metrics.labelSizePx());
+                int width = cell.played() ? metrics.faceWidth() : metrics.indexWidth();
+                int padding = metrics.indexPadding();
+                if (cell.played()) {
+                    tile.setBackground(sequenceCardFace());
+                    tile.setTextColor(face.red() ? Color.rgb(173, 57, 58) : Color.rgb(42, 53, 47));
+                    tile.setText(metrics.stackedIndex() ? face.rankLabel() + "\n" + face.suitSymbol() : cell.card().label());
+                } else {
+                    tile.setTextColor(Color.rgb(194, 211, 197));
+                    tile.setText(cell.opening() ? face.rankLabel() : covered ? "" : "·");
+                }
+                tile.setPadding(padding, padding, width - metrics.indexWidth() + padding, padding);
                 tile.setContentDescription(cell.played() ? cell.card().label() : copy.text("Empty slot ", "Loc liber ") + cell.card().label());
+                tile.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
                 tile.setTag("sequence:" + RentzTableContent.id(cell.card()));
-                int side = dp(metrics.sideInsetDp()), vertical = dp(metrics.verticalInsetDp());
-                var slot = new LayoutParams(0, dp(metrics.rowHeightDp()) - 2 * vertical, 1f);
-                slot.setMargins(side, vertical, side, vertical);
+                var slot = new FrameLayout.LayoutParams(width, metrics.faceHeight(), Gravity.TOP | Gravity.LEFT);
+                slot.leftMargin = metrics.left(column);
+                slot.topMargin = (metrics.rowHeight() - metrics.faceHeight()) / 2;
                 line.addView(tile, slot);
             }
-            box.addView(line, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(metrics.rowHeightDp())));
+            box.addView(line, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metrics.rowHeight()));
         }
-        if (nextHand) box.addView(button(copy.text("Next hand", "Mâna următoare"), actions.next()), choiceSize());
+        if (view.phase() == RentzMatch.Phase.DEAL_END) box.addView(button(copy.text("Next hand", "Mâna următoare"), actions.next()), choiceSize());
         return box;
+    }
+    private GradientDrawable sequenceCardFace() {
+        var face = new GradientDrawable();
+        face.setColor(Color.rgb(255, 254, 248));
+        face.setStroke(dp(1), Color.rgb(191, 201, 191));
+        face.setCornerRadius(dp(5));
+        return face;
     }
     private Button button(String label, Runnable action) {
         var button = new Button(context); button.setAllCaps(false); button.setText(label); button.setTextSize(13);
@@ -196,6 +217,6 @@ public final class RentzTablePanel extends LinearLayout {
         button.setBackground(TablePalette.seatFrame(context, true)); button.setEnabled(!paused);
         button.setOnClickListener(ignored -> action.run()); return button;
     }
-    private LayoutParams choiceSize() { var params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)); params.topMargin = dp(3); return params; }
+    private LayoutParams choiceSize() { var params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(CHOICE_HEIGHT_DP)); params.topMargin = dp(CHOICE_MARGIN_DP); return params; }
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
 }

@@ -96,10 +96,10 @@
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java",
       "owner": "Rentz UI",
       "reason": "Qualify the measured card regions and the clockwise Whist play order.",
-      "criterion": "Verify the centered grid, Rentz card band against the shared trick band at compact and tall four-seat sizes, forced pass and legal card tint at 3 through 6 seats. Preserve the Whist order at all reference widths.",
+      "criterion": "Verify Whist play rectangles and the centered sequence for 3 through 6 seats at compact, tall and short sizes. Keep exposed indexes readable and preserve forced pass and legal card tint.",
       "proof": "../../rentz_back/ui-review/turn-pacing-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "27b8756e56ca78522ce1fc8106b9d1e02963ec27421c4f2dd88399e67dfff9fc",
+      "sha256": "7ac12e4be168de3a30867e27054a5200397ca19c2fdf6ce00308f6d46ca2c9d6",
       "allowDelete": false
     },
     {
@@ -1169,7 +1169,7 @@
       "criterion": "Rentz and two standard deals reach DEAL_END; seat geometry, first human move, score history and restart are observed; the learning registry is isolated and unchanged; Extent keeps each original screenshot inline.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "b69d1920090ccad01dc985e5b661d5441445735c75e419ed1ece13e1c5bfbd4a",
+      "sha256": "d4b6444f81e7b3648eccf5371325d7062a6432ccb73520af8bd2cb2f521128b5",
       "allowDelete": false
     },
     {

@@ -11,10 +11,10 @@ import ro.cardtable.ui.table.TableViewportPolicy;
 
 import java.util.function.BiFunction;
 
-/** Fits the center content to the same measured seat band throughout four-player play. */
+/** Uses Whist's full-width play positions and measures Rentz content in the free center band. */
 final class RentzCardBoard extends ViewGroup {
     private final int players;
-    private final int footerDp;
+    private final int footerPx;
     private final TableViewportPolicy viewport;
     private final PlayedCardMetrics.Layout trick;
     private final BiFunction<Integer, Integer, View> render;
@@ -23,11 +23,11 @@ final class RentzCardBoard extends ViewGroup {
     private int previousWidth = -1;
     private int previousBudget = -1;
 
-    RentzCardBoard(Context context, int players, int footerDp, TableViewportPolicy viewport, PlayedCardMetrics.Layout trick,
+    RentzCardBoard(Context context, int players, int footerPx, TableViewportPolicy viewport, PlayedCardMetrics.Layout trick,
                    BiFunction<Integer, Integer, View> render) {
         super(context);
         this.players = players;
-        this.footerDp = footerDp;
+        this.footerPx = footerPx;
         this.viewport = viewport;
         this.trick = trick;
         this.render = render;
@@ -51,23 +51,22 @@ final class RentzCardBoard extends ViewGroup {
         for (int index = 0; index < players; index++) getChildAt(index).measure(exact(seatWidth), exact(seatHeight));
 
         int gap = Math.round(viewport.regionGapDp() * density);
-        int reference = RentzCardSpace.referenceHeightPx(players, footerDp, density, trick);
-        int readable = Math.round((RentzCardSpace.MIN_READABLE_HEIGHT_DP + footerDp) * density);
-        int minimum = TableGeometry.minimumHeight(players, seatHeight, Math.max(1, Math.round((4 + footerDp) * density)), gap);
+        int reference = RentzCardSpace.trickHeightPx(density, trick);
+        int minimum = TableGeometry.minimumHeight(players, seatHeight, 4 + footerPx, gap);
         int offered = MeasureSpec.getMode(heightSpec) == MeasureSpec.UNSPECIFIED
-                ? TableGeometry.minimumHeight(players, seatHeight, reference, gap) : MeasureSpec.getSize(heightSpec);
+                ? Math.max(Math.round(viewport.minimumBoardHeightDp() * density),
+                        TableGeometry.minimumHeight(players, seatHeight, reference, gap)) : MeasureSpec.getSize(heightSpec);
         int height = Math.max(offered, minimum);
-        int referenceWidth = Math.min(width, Math.round(RentzCardSpace.REFERENCE_WIDTH_DP * density));
-        plan = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap, referenceWidth, reference, readable);
-        int budget = (int) Math.floor(plan.band().height() / density);
-        if (widthDp != previousWidth || budget != previousBudget) {
+        plan = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap, reference);
+        int budget = plan.band().height();
+        if (width != previousWidth || budget != previousBudget) {
             center.removeAllViews();
-            View content = render.apply(widthDp, budget);
+            View content = render.apply(width, budget);
             if (content.getLayoutParams() == null) {
                 content.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             }
             center.addView(content);
-            previousWidth = widthDp;
+            previousWidth = width;
             previousBudget = budget;
         }
         center.measure(exact(width), 0);

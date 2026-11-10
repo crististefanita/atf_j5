@@ -4,7 +4,6 @@ import org.junit.Test;
 import ro.cardtable.ui.hand.HandLayoutMetrics;
 import ro.cardtable.ui.table.PlayedCardMetrics;
 import ro.cardtable.ui.table.TableGeometry;
-import ro.cardtable.ui.table.TableSeatLayout;
 import ro.cardtable.ui.table.TableSizing;
 import ro.cardtable.ui.table.TableViewportPolicy;
 import ro.rentzlab.ai.RentzPlayer;
@@ -62,8 +61,7 @@ public final class RentzCardSpaceTest {
         int gap = Math.round(viewport.regionGapDp() * density);
         assertThrows(IllegalArgumentException.class, () -> TableGeometry.arrangeDisplay(width, height, 4,
                 seatWidth, seatHeight, centerWidth, 0, gap, false, TableGeometry.CenterAlignment.BALANCED));
-        int centerHeight = RentzCardSpace.minimumControlsHeightPx(4, session.view().phase(), density,
-                PlayedCardMetrics.forTable(4, widthDp, 1f, viewport));
+        int centerHeight = Math.round(density);
         var layout = TableGeometry.arrangeDisplay(width, height, 4, seatWidth, seatHeight,
                 centerWidth, centerHeight, gap, false, TableGeometry.CenterAlignment.BALANCED);
         assertEquals(centerHeight, layout.center().bottom() - layout.center().top());
@@ -74,7 +72,7 @@ public final class RentzCardSpaceTest {
         assertNotNull(session.view().contract());
     }
 
-    @Test public void fourSeatsKeepTheOriginalPositionsWhenTheCardsHaveRoom() {
+    @Test public void fourSeatsUseWhistPlayPositionsThroughoutTheContract() {
         assertWindows(4, new int[]{1, 2, 3}, new int[]{0});
     }
 
@@ -86,49 +84,51 @@ public final class RentzCardSpaceTest {
         assertWindows(6, new int[]{2, 3, 4}, new int[]{0, 1, 5});
     }
 
-    @Test public void fourSeatRentzBandIsComparedWithTheSharedTrickBandAtCompactAndTallSizes() {
-        for (var window : List.of(COMPACT, TALL)) {
-            var viewport = new TableViewportPolicy(window.height(), window.fontScale());
-            int gap = viewport.regionGapDp();
-            int width = Math.min(760, Math.max(240, window.width() - 40));
-            int seatWidth = TableSizing.seatWidthDp(width, viewport.isCompact());
-            var rentz = RentzCardSpace.plan(width, window.boardHeight(), 4, seatWidth,
-                    window.seatHeight(), gap, 220, 128, 72);
-            var trick = PlayedCardMetrics.forTable(4, width, window.fontScale(), viewport);
-            var shared = TableGeometry.arrangeDisplay(width, window.boardHeight(), 4, seatWidth,
-                    window.seatHeight(), width, trick.centerHeightDp(), gap, true,
-                    TableGeometry.CenterAlignment.BALANCED);
-            int sharedBand = centerBand(shared.seats(), 4, gap);
-            assertEquals("Same four-player seat population", 4, shared.seats().size());
-            assertTrue("Rentz sequence never gains room by changing the shared seat reference",
-                    rentz.band().height() <= sharedBand);
-        }
-    }
-
-    @Test public void fourSeatSequenceUsesTheSameFootprintAsTricksAtNativeDensity() {
+    @Test public void everySeatUsesTheWhistTrickFootprintAtFractionalNativeDensity() {
         float density = 440f / 160;
         var viewport = new TableViewportPolicy(Math.round(1920 / density));
         int widthDp = 352, width = Math.round(widthDp * density), height = 1259, seatHeight = 164;
         int seatWidth = Math.round(TableSizing.seatWidthDp(widthDp, viewport.isCompact()) * density);
         int gap = Math.round(viewport.regionGapDp() * density);
-        var trick = PlayedCardMetrics.forTable(4, widthDp, 1f, viewport);
-        int measuredTrick = Math.max(Math.round(trick.centerHeightDp() * density),
-                Math.round((trick.rows() - 1) * trick.rowStrideDp() * density)
-                        + Math.round(trick.cellHeightDp() * density));
-        var trickSeats = TableGeometry.arrangeDisplay(width, height, 4, seatWidth, seatHeight, width,
-                measuredTrick, gap, true, TableGeometry.CenterAlignment.BALANCED).seats();
-        int oldFootprint = Math.round(RentzCardSpace.REFERENCE_HEIGHT_DP * density);
-        var old = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, 605, oldFootprint, 198);
-        assertNotEquals("The old reference shifted the flank seats", trickSeats, old.seats());
-        var corrected = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, 605,
-                RentzCardSpace.referenceHeightPx(4, 0, density, trick), 198);
-        assertEquals(trickSeats, corrected.seats());
-        int completedControlsHeight = Math.round(70 * density);
-        int restoredHeight = Math.max(completedControlsHeight,
-                RentzCardSpace.minimumControlsHeightPx(4, RentzMatch.Phase.DEAL_END, density, trick));
-        var restoredSeats = TableGeometry.arrangeDisplay(width, height, 4, seatWidth, seatHeight, 605,
-                restoredHeight, gap, false, TableGeometry.CenterAlignment.BALANCED).seats();
-        assertEquals("Restoring a completed trick game preserves the four seat rectangles", trickSeats, restoredSeats);
+        for (int players = 3; players <= 6; players++) {
+            var trick = PlayedCardMetrics.forTable(players, widthDp, 1f, viewport);
+            int measuredTrick = Math.max(Math.round(trick.centerHeightDp() * density),
+                    Math.round((trick.rows() - 1) * trick.rowStrideDp() * density)
+                            + Math.round(trick.cellHeightDp() * density));
+            var whist = TableGeometry.arrangeDisplay(width, height, players, seatWidth, seatHeight, width,
+                    measuredTrick, gap, true, TableGeometry.CenterAlignment.BALANCED);
+            var rentz = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap,
+                    RentzCardSpace.trickHeightPx(density, trick));
+            assertEquals(whist.seats(), rentz.seats());
+        }
+    }
+
+    @Test public void flanksOpenMoreSpaceThanTheOldNarrowReference() {
+        int width = 372, height = 640, seatHeight = 58, gap = 8;
+        var viewport = new TableViewportPolicy(872);
+        int seatWidth = TableSizing.seatWidthDp(width, false);
+        for (int players : new int[]{3, 5, 6}) {
+            int upper = players == 3 ? 1 : 2;
+            var old = TableGeometry.arrangeDisplay(width, height, players, seatWidth, seatHeight,
+                    220, 128, gap, false, TableGeometry.CenterAlignment.BALANCED);
+            var trick = PlayedCardMetrics.forTable(players, width, 1f, viewport);
+            var play = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap, trick.centerHeightDp());
+            assertTrue(play.seats().get(upper).bottom() < old.seats().get(upper).bottom());
+            if (players >= 5) assertTrue(play.seats().get(1).top() > old.seats().get(1).top());
+        }
+    }
+
+    @Test public void denseSuitRowsOverlapFacesWhileKeepingEveryIndexAndBothEdgesVisible() {
+        float density = 2.25f;
+        int width = 630;
+        var dense = RentzCardSpace.sequence(6, width, 528, density, 1.5f);
+        assertTrue(dense.overlaps());
+        assertTrue(dense.faceWidth() > width / 12);
+        assertTrue(dense.faceHeight() > Math.round(40 * density));
+        assertTrue(dense.stackedIndex());
+        assertTrue(dense.labelSizePx() >= 10 * density);
+        assertSequenceFits(dense, 12, width, 528);
+        assertFalse(RentzCardSpace.sequence(3, 980, 528, density, 1f).overlaps());
     }
 
     @Test public void namesAndTrickCardsRetainTheWhistClockwiseOrderAtTheReferenceWidths() {
@@ -165,10 +165,8 @@ public final class RentzCardSpaceTest {
         int seatWidth = Math.round(TableSizing.seatWidthDp(280, viewport.isCompact()) * density);
         int gap = Math.round(viewport.regionGapDp() * density);
         var trick = PlayedCardMetrics.forTable(4, 280, 1.5f, viewport);
-        int reference = RentzCardSpace.referenceHeightPx(4, 0, density, trick);
-        assertEquals(reference, RentzCardSpace.referenceHeightPx(4, 51, density, trick));
-
-        var board = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, 495, reference, 162);
+        int reference = RentzCardSpace.trickHeightPx(density, trick);
+        var board = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, reference);
         int budgetDp = (int) Math.floor(board.band().height() / density);
         assertTrue(budgetDp < trick.centerHeightDp());
         var fitted = RentzCardSpace.fitTrick(trick, budgetDp);
@@ -181,6 +179,12 @@ public final class RentzCardSpaceTest {
         var cards = new TableGeometry.Rect(0, top, width, top + renderedHeight);
         assertTrue(board.seats().stream().noneMatch(cards::overlaps));
         assertSame(trick, RentzCardSpace.fitTrick(trick, trick.centerHeightDp()));
+        var compact = RentzCardSpace.sequence(4, width, board.band().height(), density, 1.5f);
+        assertTrue(compact.faceWidth() > width / 8);
+        assertSequenceFits(compact, 8, width, board.band().height());
+        int footer = Math.round(48 * density) + Math.round(3 * density);
+        var sequence = RentzCardSpace.sequence(4, width, board.band().height() - footer, density, 1.5f);
+        assertSequenceFits(sequence, 8, width, board.band().height() - footer);
     }
 
     @Test public void onlyLegalSequenceCardsGetAnOutlineAcrossMovesTurnsAndForcedPasses() {
@@ -275,22 +279,19 @@ public final class RentzCardSpaceTest {
             var viewport = new TableViewportPolicy(window.height(), window.fontScale());
             int gap = viewport.regionGapDp();
             int seatWidth = TableSizing.seatWidthDp(window.width(), viewport.isCompact());
+            var trick = PlayedCardMetrics.forTable(players, window.width(), window.fontScale(), viewport);
             var plan = RentzCardSpace.plan(window.width(), window.boardHeight(), players, seatWidth,
-                    window.seatHeight(), gap, 220, 128, 72);
+                    window.seatHeight(), gap, trick.centerHeightDp());
             int budget = plan.band().height();
-            assertTrue(budget > 0);
-            var sequence = RentzCardSpace.sequence(players, window.width(), budget, window.fontScale());
-            int contentHeight = 4 * sequence.rowHeightDp();
-            assertTrue(contentHeight <= budget);
-            int slotWidth = window.width() / (2 * players) - 2 * sequence.sideInsetDp();
-            assertTrue(sequence.labelSp() * window.fontScale() * 2 <= slotWidth + .001f);
-            if (window == TALL || window == COMPACT) {
-                var original = TableGeometry.arrangeDisplay(window.width(), window.boardHeight(), players,
-                        seatWidth, window.seatHeight(), 220, 128, gap, false, TableGeometry.CenterAlignment.BALANCED);
-                assertEquals("Use the existing Rentz seat positions", original.seats(), plan.seats());
-                assertTrue(sequence.labelSp() > 11);
-            }
-            if (window == TALL) assertTrue(sequence.rowHeightDp() - 2 * sequence.verticalInsetDp() > 32);
+            var sequence = RentzCardSpace.sequence(players, window.width(), budget, 1f, window.fontScale());
+            int contentHeight = 4 * sequence.rowHeight();
+            assertSequenceFits(sequence, 2 * players, window.width(), budget);
+            int maxFootprint = window.boardHeight() - TableGeometry.minimumHeight(players, window.seatHeight(), 0, gap);
+            var whist = TableGeometry.arrangeDisplay(window.width(), window.boardHeight(), players,
+                    seatWidth, window.seatHeight(), window.width(), Math.min(trick.centerHeightDp(), maxFootprint), gap,
+                    true, TableGeometry.CenterAlignment.BALANCED);
+            assertEquals(whist.seats(), plan.seats());
+            if (window == TALL) assertTrue(sequence.faceHeight() > 40);
             int top = plan.band().centeredTop(contentHeight);
             int upperBottom = Arrays.stream(upper).map(i -> plan.seats().get(i).bottom()).max().orElseThrow();
             int lowerTop = Arrays.stream(lower).map(i -> plan.seats().get(i).top()).min().orElseThrow();
@@ -303,6 +304,18 @@ public final class RentzCardSpaceTest {
         }
     }
 
+    private static void assertSequenceFits(RentzCardSpace.Sequence sequence, int columns, int width, int budget) {
+        assertTrue(4 * sequence.rowHeight() <= budget);
+        assertTrue(sequence.faceHeight() > 0 && sequence.faceHeight() <= sequence.rowHeight());
+        assertTrue(sequence.labelSizePx() > 0);
+        assertTrue(sequence.left(0) >= 0);
+        assertTrue(sequence.left(columns - 1) + sequence.faceWidth() <= width);
+        assertTrue(sequence.indexWidth() <= sequence.faceWidth());
+        for (int column = 0; column < columns - 1; column++) {
+            assertTrue(sequence.left(column) + sequence.indexWidth() <= sequence.left(column + 1));
+        }
+    }
+
     private static double clockwise(TableGeometry.Rect rectangle, int width, int height) {
         double left = (width - rectangle.left() - rectangle.right()) / 2.0;
         double below = (rectangle.top() + rectangle.bottom() - height) / 2.0;
@@ -310,18 +323,4 @@ public final class RentzCardSpaceTest {
         return angle < 0 ? angle + 2 * Math.PI : angle;
     }
 
-    private static int centerBand(List<TableGeometry.Rect> seats, int players, int gap) {
-        var anchors = TableSeatLayout.positions(players);
-        int upperBottom = 0;
-        int lowerTop = seats.get(0).top();
-        for (int index = 0; index < anchors.length; index++) {
-            var seat = seats.get(index);
-            switch (anchors[index]) {
-                case NORTH, NORTH_WEST, NORTH_EAST -> upperBottom = Math.max(upperBottom, seat.bottom());
-                case SOUTH, SOUTH_WEST, SOUTH_EAST -> lowerTop = Math.min(lowerTop, seat.top());
-                default -> throw new IllegalArgumentException("Unexpected table anchor");
-            }
-        }
-        return lowerTop - upperBottom - 2 * gap;
-    }
 }
