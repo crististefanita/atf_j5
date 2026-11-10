@@ -168,6 +168,8 @@ if($Restricted){
 
 $null = New-Item -ItemType Directory -Path $RunRoot
 $report = Join-Path $RunRoot 'readme-publication.json'
+$retirementAllowed = $Restricted -and $proof.authenticated.provider -ceq 'GitHub' -and
+    $catalog.currentVersion -ceq $version -and $proof.latestTag -ceq $tag -and $proof.readmeCommit -ceq $head
 [ordered]@{
     gate = 'readme-publication'
     status = 'PASS'
@@ -180,5 +182,12 @@ $report = Join-Path $RunRoot 'readme-publication.json'
     channel = $(if($Restricted){'authenticated-only'}else{'public'})
     authenticatedDownload = 'PASS'
     anonymousDownload = $(if(!$Restricted){'PASS'}elseif($proof.authenticated.provider -ceq 'GitHub'){'DENIED'}else{'NOT_APPLICABLE'})
-} | ConvertTo-Json | Set-Content -LiteralPath $report -Encoding utf8NoBOM
+    retirement = [ordered]@{
+        allowed = [bool]$retirementAllowed
+        latestTag = $(if($retirementAllowed){$tag}else{$null})
+        qualificationSha256 = (Get-FileHash -LiteralPath $RagReport -Algorithm SHA256).Hash.ToLowerInvariant()
+        preserveSourceTags = $true
+        preserveAuditEvidence = $true
+    }
+} | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $report -Encoding utf8NoBOM
 Write-Output $report

@@ -33,7 +33,7 @@ public final class SessionJson {
             if(command.origin()!=GameSession.Origin.UNKNOWN)row.put("origin",command.origin().name());
             commands.put(row);
         }
-        var json = new JSONObject().put("schema",saved.schema()).put("players",saved.players()).put("seed",saved.seed()).put("difficulty",saved.difficulty().name()).put("profile",GameSession.SCORE_PROFILE).put("policy","RENTZ_PUBLIC_LOOKAHEAD_V1").put("rules","RENTZ_RULES_V2").put("commands",commands);
+        var json = new JSONObject().put("schema",saved.schema()).put("players",saved.players()).put("seed",saved.seed()).put("difficulty",saved.difficulty().name()).put("profile",GameSession.SCORE_PROFILE).put("policy","RENTZ_PUBLIC_LOOKAHEAD_V1").put("rules",saved.dealEnding().journalVersion()).put("commands",commands);
         if (!saved.opponents().equals(GameSession.defaultOpponents(saved.players(),saved.seed()))) json.put("opponents",new JSONArray(saved.opponents()));
         return json;
     }
@@ -61,8 +61,7 @@ public final class SessionJson {
         if(!SavedJson.text(json,"profile").equals(GameSession.SCORE_PROFILE)||!SavedJson.text(json,"policy").equals("RENTZ_PUBLIC_LOOKAHEAD_V1")){
             throw new IllegalArgumentException("Saved profile identity");
         }
-        String rules=json.has("rules")?SavedJson.text(json,"rules"):"RENTZ_RULES_V1";
-        if(!rules.equals("RENTZ_RULES_V1")&&!rules.equals("RENTZ_RULES_V2"))throw new IllegalArgumentException("Saved rules identity");
+        var dealEnding=RentzMatch.DealEnding.fromJournal(json.has("rules")?SavedJson.text(json,"rules"):"RENTZ_RULES_V1");
         int players=SavedJson.intValue(json,"players");
         if(players<3||players>6)throw new IllegalArgumentException("Saved table size");
         var commands=new ArrayList<GameSession.Command>();
@@ -78,7 +77,7 @@ public final class SessionJson {
             }
         }
         var session = GameSession.restore(new GameSession.Saved(SavedJson.intValue(json,"schema"),players,SavedJson.integer(json,"seed"),
-                RentzPlayer.Difficulty.valueOf(SavedJson.text(json,"difficulty")),commands,opponents));
+                RentzPlayer.Difficulty.valueOf(SavedJson.text(json,"difficulty")),commands,opponents,dealEnding));
         return new Checkpoint(session, json.has("achievements") ? progress(json.getJSONObject("achievements")) : null);
     }
 

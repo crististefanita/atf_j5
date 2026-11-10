@@ -155,6 +155,12 @@ function TapNode($Node,[string]$Label){
     Adb @('shell','input','tap',[string][int](($box[0]+$box[2])/2),[string][int](($box[1]+$box[3])/2)) 'tap'|Out-Null;$watch.Stop()
     $actions.Add([pscustomobject]@{operation='Tap Android control';control=$Label;bounds=$Node.bounds;elapsedMillis=$watch.ElapsedMilliseconds})
 }
+function AchievementKeyboardShown {
+    $dump=(Adb @('shell','dumpsys','input_method') 'achievement-search-keyboard').Output
+    $shown=[regex]::Match($dump,'\bmInputShown=(true|false)\b')
+    if(!$shown.Success){throw 'ANDROID_TEXT_INPUT: cannot determine whether the achievement keyboard is visible.'}
+    return $shown.Groups[1].Value-ceq'true'
+}
 function EnterAchievementSearch([string]$Query){
     Tap 'Search achievements' 'android.widget.EditText'
     $field=$null
@@ -166,7 +172,15 @@ function EnterAchievementSearch([string]$Query){
         Adb @('shell','input','text',$Query.Replace(' ','%s')) 'achievement-search-rule'|Out-Null
         $field=Get-RentzTapTarget -Nodes @(Ui) -Label 'Search achievements' -Class 'android.widget.EditText'
         if($null-eq$field-or$field.focused-cne'true'){throw 'ANDROID_TEXT_INPUT: achievement search field lost focus.'}
-        if($field.text-ceq$Query){return}
+        if($field.text-ceq$Query){
+            if(!(AchievementKeyboardShown)){return}
+            Adb @('shell','input','keyevent','KEYCODE_BACK') 'hide-achievement-search-keyboard'|Out-Null
+            for($read=0;$read-lt5;$read++){
+                if(!(AchievementKeyboardShown)){return}
+                Start-Sleep -Milliseconds 150
+            }
+            throw 'ANDROID_TEXT_INPUT: the achievement keyboard remained visible after Back.'
+        }
     }
     throw 'ANDROID_TEXT_INPUT: achievement query did not match the focused field after three attempts.'
 }
@@ -1039,8 +1053,7 @@ try{
             $ordered=@($nodes|Where-Object text -CIn @('1 · Learn the table','First choice','First card')|ForEach-Object text)
             Check 'Onboarding comes before contract goals' '1 · Learn the table|First choice|First card' ($ordered-join'|')
         }
-        Tap 'Search and filters';Tap 'Search achievements' 'android.widget.EditText'
-        Adb @('shell','input','text','zzznomatch') 'achievement-search-empty'|Out-Null
+        Tap 'Search and filters';EnterAchievementSearch 'zzznomatch'
         Tap 'Apply'
         Observe 'Achievement search reports an empty result' {param($nodes)
             Check 'Empty result is visible and can be reset' $true ((Text $nodes).Contains('No matching achievements')-and

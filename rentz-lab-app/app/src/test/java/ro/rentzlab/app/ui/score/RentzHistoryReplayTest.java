@@ -92,9 +92,6 @@ public final class RentzHistoryReplayTest {
         var expected = RentzScoreContent.rows(match.history(), copy);
         audit.equal("All 48 rows survive the canonical journal", expected, RentzScoreContent.rows(restored.history(), copy));
         audit.equal("Historical places and categories are immutable across the next deal and restore", match.history(), restored.history());
-        var legacy = new JSONObject(journal);
-        legacy.remove("rules");
-        audit.equal("Compatible legacy journals reconstruct the same settlements", match.history(), SessionJson.restore(legacy.toString()).history());
         audit.equal("Journal stays command-based", false, new JSONObject(journal).has("history"));
         var localized = RentzScoreContent.rows(restored.history(), rom);
         audit.equal("Changing copy preserves each score cell", expected.stream().map(RentzScoreContent.Row::values).toList(), localized.stream().map(RentzScoreContent.Row::values).toList());

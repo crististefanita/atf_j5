@@ -200,12 +200,13 @@ public final class ReleaseReadinessRag {
 
         ArrayNode gates = report.putArray("gates");
         for (String id : List.of("offline-regression", "component-extent-report", "android-jvm", "native-ui", "native-ui-report", "release-build", "local-catalog",
-                "remote-publication", "authenticated-download", "anonymous-download")) {
+                "remote-publication", "authenticated-download", "anonymous-download", "release-retirement")) {
             ObjectNode gate = gates.addObject(); gate.put("id", id); gate.put("status", "NOT_RUN");
             gate.put("expected", "Receiptul desemnat trebuie să identifice același candidat.");
             gate.put("actual", "RAG-ul este read-only și nu a primit un receipt verificabil pentru această poartă.");
             gate.put("receipt", "");
         }
+        gate(gates, "release-retirement").put("expected", "The latest qualified release must download from the pushed README with an authorized account before prior releases are retired. Preserve source tags and audit evidence.");
         attachLocalCatalog(root, gates);
         if (componentRun != null) attachRegressionReceipt(root, git, gates, componentRun);
         if (buildRun != null) attachReleaseBuildReceipt(root, git, gates, componentRun, buildRun);
@@ -220,6 +221,7 @@ public final class ReleaseReadinessRag {
         next.add("Run the remaining deterministic gates for one clean, pinned source snapshot.");
         next.add("Supply original build, native UI, catalog, publication and channel-specific download receipts before changing those gates from NOT_RUN.");
         next.add("Review remote publication and authenticated and anonymous downloads as separate evidence.");
+        next.add("Retire previous releases only after the pushed README verifies the authenticated APK of the qualified latest release. Preserve source tags and audit evidence.");
         report.put("responsible", "release operator");
         ObjectNode workflow = report.putObject("releaseWorkflow");
         workflow.put("candidateVersion", version);
@@ -249,6 +251,11 @@ public final class ReleaseReadinessRag {
         workflow.put("artifactDisposition", candidateReady ? "ELIGIBLE_FOR_PROMOTION_REVIEW" : "STAGED_CANDIDATE_ONLY");
         workflow.put("publishAllowed", false);
         workflow.put("artifactSha256", gate(gates, "release-build").path("artifactSha256").asText(""));
+        ObjectNode retirement = workflow.putObject("retirement");
+        retirement.put("allowed", false);
+        retirement.put("requiredReceipt", "readme-publication.retirement.allowed");
+        retirement.put("preserveSourceTags", true);
+        retirement.put("preserveAuditEvidence", true);
         workflow.put("nextAction", candidateReady
                 ? "Review and promote this exact commit to the remote default branch; only then prepare the published catalog and verify both download channels."
                 : "Complete each missing deterministic gate on this exact snapshot; keep the APK and reports in the registered external candidate workspace.");

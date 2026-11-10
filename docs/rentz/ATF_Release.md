@@ -152,7 +152,7 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 7. Rulați intrarea explicită de acceptanță a distribuției cu classpath-ul calificat și tokenul numai în mediu. Nu o includeți implicit în regresia offline.
 8. Actualizați catalogul și secțiunea **Ediție cu acces autorizat** din README cu release-ul curent și descărcarea directă.
 9. După push, rulați `scripts/verify-release-readme.ps1 -Restricted` cu raportul RAG calificat și directorul probelor de distribuție. Verificatorul citește README-ul din commitul remote, confruntă linkurile și octeții descărcați și salvează `readme-publication` în depozitul extern.
-10. După verificare, retrageți edițiile anterioare și drafturile lor. Confirmați că GitHub Releases listează o singură ediție și repetați verificarea accesului.
+10. Retrageți edițiile anterioare doar când `readme-publication.retirement.allowed` este `true`. Verificarea cere trecerea porților RAG, tagul marcat `latest` în GitHub și descărcarea autentificată a APK-ului din README-ul împins. Păstrați tagurile Git și dovezile de audit. După retragere, confruntați din nou inventarul și descărcarea ediției curente.
 
 [Calificarea componentelor](ATF_Qualification.md) · [Protocolul Android](ATF_Android.md) · [Catalogul livrării](../../release/README.md)
 

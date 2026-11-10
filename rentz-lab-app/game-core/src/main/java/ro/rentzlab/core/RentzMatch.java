@@ -25,6 +25,25 @@ public final class RentzMatch {
         PASS
     }
 
+    public enum DealEnding {
+        LEGACY("RENTZ_RULES_V2"),
+        SCORING_CARDS("RENTZ_RULES_V3");
+
+        private final String journalVersion;
+
+        DealEnding(String journalVersion) { this.journalVersion = journalVersion; }
+
+        public String journalVersion() { return journalVersion; }
+
+        public static DealEnding fromJournal(String version) {
+            return switch (version) {
+                case "RENTZ_RULES_V1", "RENTZ_RULES_V2" -> LEGACY;
+                case "RENTZ_RULES_V3" -> SCORING_CARDS;
+                default -> throw new IllegalArgumentException("Saved rules identity");
+            };
+        }
+    }
+
     public record TurnEvent(int sequence, int seat, Action action, Card card, int boardCardCount) {}
 
     public record HandResult(
@@ -124,6 +143,7 @@ public final class RentzMatch {
     private final int players;
     private final int firstChooser;
     private final ScoreProfile scoring;
+    private final DealEnding dealEnding;
     private final Random shuffle;
     private final List<EnumSet<Contract>> remaining = new ArrayList<>();
     private final List<HandResult> history = new ArrayList<>();
@@ -147,13 +167,17 @@ public final class RentzMatch {
     }
 
     public RentzMatch(int players, long seed, ScoreProfile scoring, int firstChooser) {
-        this(players, seed, scoring, firstChooser, null);
+        this(players, seed, scoring, firstChooser, DealEnding.SCORING_CARDS);
+    }
+
+    public RentzMatch(int players, long seed, ScoreProfile scoring, int firstChooser, DealEnding dealEnding) {
+        this(players, seed, scoring, firstChooser, null, dealEnding);
     }
 
     public static RentzMatch fromOpeningDeal(
             OpeningDeal opening, long continuationSeed, ScoreProfile scoring, int firstChooser) {
         java.util.Objects.requireNonNull(opening);
-        return new RentzMatch(opening.players(), continuationSeed, scoring, firstChooser, opening);
+        return new RentzMatch(opening.players(), continuationSeed, scoring, firstChooser, opening, DealEnding.SCORING_CARDS);
     }
 
     /**
@@ -175,7 +199,8 @@ public final class RentzMatch {
                         hypotheticalSeed,
                         scoring,
                         progress.firstChooser(),
-                        opening);
+                        opening,
+                        DealEnding.SCORING_CARDS);
         for (int seat = 0; seat < game.players; seat++) {
             game.totals[seat] = progress.totals().get(seat);
             var schedule = EnumSet.noneOf(Contract.class);
@@ -190,13 +215,14 @@ public final class RentzMatch {
     }
 
     private RentzMatch(
-            int players, long seed, ScoreProfile scoring, int firstChooser, OpeningDeal opening) {
+            int players, long seed, ScoreProfile scoring, int firstChooser, OpeningDeal opening, DealEnding dealEnding) {
         Card.deck(players);
         if (firstChooser < 0 || firstChooser >= players)
             throw new IllegalArgumentException("First chooser");
         this.firstChooser = firstChooser;
         this.players = players;
         this.scoring = java.util.Objects.requireNonNull(scoring);
+        this.dealEnding = java.util.Objects.requireNonNull(dealEnding);
         scoring.assertMatchSafe(players);
         shuffle = new Random(DealSeed.effective(seed));
         totals = new int[players];
@@ -355,15 +381,22 @@ public final class RentzMatch {
         for (var play : trick) captured.add(play.card());
         points[winner] =
                 Math.addExact(points[winner], scoring.trickPoints(contract, captured, blind, counts[winner]));
-        boolean terminal =
-                hands.get(0).isEmpty()
-                        || contract == Contract.KING_HEARTS
-                                && captured.contains(new Card(Card.Suit.HEARTS, 13))
-                        || contract == Contract.TEN_CLUBS
-                                && captured.contains(new Card(Card.Suit.CLUBS, 10));
         trick.clear();
         turn = winner;
-        if (terminal) finish();
+        if (hands.get(0).isEmpty() || scoringCardsCaptured()) finish();
+    }
+
+    private boolean scoringCardsCaptured() {
+        int target = switch (contract) {
+            case KING_HEARTS, TEN_CLUBS -> 1;
+            case QUEENS -> dealEnding == DealEnding.SCORING_CARDS ? 4 : 0;
+            case DIAMONDS -> dealEnding == DealEnding.SCORING_CARDS ? 2 * players : 0;
+            default -> 0;
+        };
+        if (target == 0) return false;
+        int captured = 0;
+        for (var seatCounts : counts) captured += seatCounts[contract.ordinal()];
+        return captured == target;
     }
 
     private int nextActive(int seat) {

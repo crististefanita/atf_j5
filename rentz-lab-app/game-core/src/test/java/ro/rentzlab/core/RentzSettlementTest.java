@@ -6,6 +6,7 @@ import ro.rentzlab.ai.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ class RentzSettlementTest {
                     game.choose(seed % players, contract, blind);
                     var expected = new int[players];
                     var pending = new ArrayList<TrickRules.Play>();
-                    int tricks = 0, actions = 0;
+                    int tricks = 0, actions = 0, capturedTargets = 0;
                     while (game.observe(0).phase() == RentzMatch.Phase.PLAY) {
                         int actor = game.observe(0).turn();
                         var before = game.observe(actor);
@@ -55,9 +56,8 @@ class RentzSettlementTest {
                             int winner = independentWinner(pending);
                             expected[winner] += independentPoints(contract, pending) * (blind ? 2 : 1);
                             tricks++;
-                            boolean terminal = tricks == 8
-                                    || contract == Contract.KING_HEARTS && contains(pending, Card.Suit.HEARTS, 13)
-                                    || contract == Contract.TEN_CLUBS && contains(pending, Card.Suit.CLUBS, 10);
+                            capturedTargets += (int) pending.stream().filter(play -> isTarget(contract, play.card())).count();
+                            boolean terminal = tricks == 8 || capturedTargets == targetCount(contract, players);
                             assertEquals(terminal ? RentzMatch.Phase.DEAL_END : RentzMatch.Phase.PLAY, after.phase());
                             assertEquals(winner, after.turn(), "Capturer, not chooser or last actor, leads the next trick");
                             assertTrue(after.trick().isEmpty());
@@ -69,10 +69,83 @@ class RentzSettlementTest {
                     assertEquals(integers(expected), game.history().get(0).points());
                     assertEquals(integers(expected), game.observe(0).totals());
                     assertEquals(independentPool(contract, players) * (blind ? 2 : 1), Arrays.stream(expected).sum());
-                    if (contract != Contract.KING_HEARTS && contract != Contract.TEN_CLUBS) assertEquals(8, tricks);
+                    if (targetCount(contract, players) == Integer.MAX_VALUE) assertEquals(8, tricks);
                 }
             }
         }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Contract.class, names = {"TEN_CLUBS", "QUEENS", "DIAMONDS", "KING_HEARTS"})
+    void fixedObjectiveEndsOnlyAfterItsLastScoringTrick(Contract contract) {
+        var game = RentzMatch.fromOpeningDeal(targetDeal(contract), 1, DISTINCT, 0);
+        game.choose(0, contract, true);
+
+        for (int trick = 0; trick < 2; trick++) {
+            boolean playTargets = contract == Contract.DIAMONDS || trick == 1;
+            for (int play = 0; play < 4; play++) {
+                int actor = game.observe(0).turn();
+                var before = game.observe(actor);
+                Card card = before.legal().stream()
+                        .filter(candidate -> isTarget(contract, candidate) == playTargets)
+                        .findFirst().orElseGet(() -> before.legal().get(0));
+                game.play(actor, card);
+                if (trick != 1 || play != 3) {
+                    assertEquals(RentzMatch.Phase.PLAY, game.observe(0).phase());
+                    assertTrue(game.history().isEmpty());
+                }
+            }
+        }
+
+        var settled = game.observe(0);
+        assertEquals(RentzMatch.Phase.DEAL_END, settled.phase());
+        assertEquals(List.of(6, 6, 6, 6), settled.handSizes());
+        assertEquals(independentPool(contract, 4) * 2, settled.dealPoints().stream().mapToInt(Integer::intValue).sum());
+        assertEquals(settled.dealPoints(), settled.totals());
+        assertEquals(1, game.history().size());
+        var nextActor = game.observe(settled.turn());
+        assertTrue(nextActor.legal().isEmpty());
+        assertThrows(IllegalStateException.class, () -> game.play(settled.turn(), nextActor.hand().get(0)));
+        game.nextHand();
+        assertEquals(RentzMatch.Phase.CHOOSE, game.observe(0).phase());
+        assertEquals(settled.totals(), game.observe(0).totals());
+    }
+
+    private static OpeningDeal targetDeal(Contract contract) {
+        var deck = Card.deck(4);
+        if (contract == Contract.DIAMONDS) {
+            var diamonds = deck.stream().filter(card -> card.suit() == Card.Suit.DIAMONDS).toList();
+            var rest = deck.stream().filter(card -> card.suit() != Card.Suit.DIAMONDS).toList();
+            var hands = new ArrayList<List<Card>>();
+            for (int seat = 0; seat < 4; seat++) {
+                var hand = new ArrayList<>(diamonds.subList(seat * 2, seat * 2 + 2));
+                hand.addAll(rest.subList(seat * 6, seat * 6 + 6));
+                hands.add(hand);
+            }
+            return new OpeningDeal(hands);
+        }
+        var suits = new ArrayList<>(List.of(Card.Suit.values()));
+        if (contract == Contract.KING_HEARTS) java.util.Collections.swap(suits, 0, suits.indexOf(Card.Suit.HEARTS));
+        return new OpeningDeal(suits.stream().map(suit -> deck.stream().filter(card -> card.suit() == suit).toList()).toList());
+    }
+
+    private static boolean isTarget(Contract contract, Card card) {
+        return switch (contract) {
+            case QUEENS -> card.rank() == 12;
+            case DIAMONDS -> card.suit() == Card.Suit.DIAMONDS;
+            case KING_HEARTS -> card.suit() == Card.Suit.HEARTS && card.rank() == 13;
+            case TEN_CLUBS -> card.suit() == Card.Suit.CLUBS && card.rank() == 10;
+            default -> false;
+        };
+    }
+
+    private static int targetCount(Contract contract, int players) {
+        return switch (contract) {
+            case QUEENS -> 4;
+            case DIAMONDS -> players * 2;
+            case KING_HEARTS, TEN_CLUBS -> 1;
+            default -> Integer.MAX_VALUE;
+        };
     }
 
     @ParameterizedTest

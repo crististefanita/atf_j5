@@ -69,15 +69,17 @@ public final class RentzNativeFlow {
     }
     private static void audit(Path privateJournal,Path actorView)throws Exception{
         var journal=JSON.readTree(privateJournal.toFile());
-        if(journal.required("schema").intValue()!=1||!journal.required("profile").textValue().equals("LABORATORY_V1")||!Set.of("RENTZ_RULES_V1","RENTZ_RULES_V2").contains(journal.path("rules").asText("RENTZ_RULES_V1")))throw new IllegalArgumentException("Native journal profile or rules");
-        var score=ScoreProfile.laboratory();var game=new RentzMatch(journal.required("players").intValue(),journal.required("seed").longValue(),score);int audited=0;
+        if(journal.required("schema").intValue()!=1||!journal.required("profile").textValue().equals("LABORATORY_V1"))throw new IllegalArgumentException("Native journal profile");
+        var rules=journal.get("rules");
+        var dealEnding=RentzMatch.DealEnding.fromJournal(rules==null?"RENTZ_RULES_V1":rules.asText());
+        var score=ScoreProfile.laboratory();var game=new RentzMatch(journal.required("players").intValue(),journal.required("seed").longValue(),score,0,dealEnding);int audited=0;
         for(var command:journal.required("commands")){
             int seat=command.required("seat").intValue();String action=command.required("action").textValue();
             switch(action){
                 case "REVEAL"->game.reveal(seat);
                 case "CHOOSE"->game.choose(seat,Contract.valueOf(command.required("contract").textValue()),command.required("blind").booleanValue());
                 case "NEXT_HAND"->game.nextHand();
-                case "PLAY"->{var before=game.observe(seat);Card card=JSON.treeToValue(command.required("card"),Card.class);game.play(seat,card);OfflineGameAudit.card(before,card,game.observe(seat),score);audited++;}
+                case "PLAY"->{var before=game.observe(seat);Card card=JSON.treeToValue(command.required("card"),Card.class);game.play(seat,card);OfflineGameAudit.card(before,card,game.observe(seat),score,dealEnding);audited++;}
                 case "PASS"->{var before=game.observe(seat);game.pass(seat);OfflineGameAudit.pass(before,game.observe(seat));audited++;}
                 default->throw new IllegalArgumentException("Unknown native command");
             }

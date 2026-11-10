@@ -5,6 +5,8 @@ import ro.rentzlab.app.testing.AndroidComponentLayer;
 import ro.rentzlab.ai.*;
 import org.junit.Test;
 import ro.rentzlab.core.*;
+import java.util.ArrayList;
+import java.util.List;
 import static org.junit.Assert.*;
 @AndroidComponentLayer
 public class GameSessionTest {
@@ -22,7 +24,7 @@ public class GameSessionTest {
             if(view.phase()==RentzMatch.Phase.CHOOSE&&view.turn()==0&&view.available().size()==1){
                 assertFalse(view.revealed());assertFalse(session.blindChoiceAvailable());
                 var restored=SessionJson.restore(SessionJson.saved(session).toString());assertFalse(restored.blindChoiceAvailable());
-                var legacy=SessionJson.saved(session);legacy.remove("rules");assertEquals(view,SessionJson.restore(legacy.toString()).view());return;
+                assertEquals(view,restored.view());return;
             }
             if(view.phase()==RentzMatch.Phase.CHOOSE){session.apply(new GameSession.Command(GameSession.Action.CHOOSE,0,null,view.available().iterator().next(),false));}
             else if(view.phase()==RentzMatch.Phase.DEAL_END)session.apply(new GameSession.Command(GameSession.Action.NEXT_HAND,0,null,null,false));
@@ -30,6 +32,50 @@ public class GameSessionTest {
             else fail("Missing last choice");
             session.advanceBots();assertTrue(++actions<2000);
         }
+    }
+    @Test public void oldJournalsKeepTheirTrailingTricksAndNewJournalsEndAtTheObjective()throws Exception {
+        var score=GameSession.scoringProfile();
+        var difficulty=RentzPlayer.Difficulty.NORMAL;
+        for(var contract:List.of(Contract.QUEENS,Contract.DIAMONDS)) {
+            boolean exercised=false;
+            for(long seed=0;seed<32&&!exercised;seed++) {
+                var oldGame=new RentzMatch(4,seed,score,0,RentzMatch.DealEnding.LEGACY);
+                oldGame.choose(0,contract,false);
+                var commands=new ArrayList<GameSession.Command>();
+                commands.add(new GameSession.Command(GameSession.Action.CHOOSE,0,null,contract,false));
+                int frontier=0;
+                while(oldGame.observe(0).phase()==RentzMatch.Phase.PLAY) {
+                    int actor=oldGame.observe(0).turn();
+                    var legal=oldGame.observe(actor).legal();
+                    var card=legal.stream().filter(c->target(contract,c)).findFirst().orElse(legal.get(0));
+                    oldGame.play(actor,card);
+                    commands.add(new GameSession.Command(GameSession.Action.PLAY,actor,card,null,false));
+                    var view=oldGame.observe(0);
+                    if(frontier==0 && view.trick().isEmpty() && view.seen().stream().filter(c->target(contract,c)).count()==(contract==Contract.QUEENS?4:8))
+                        frontier=commands.size();
+                }
+                if(frontier==0||frontier==commands.size())continue;
+                var legacy=GameSession.restore(new GameSession.Saved(1,4,seed,difficulty,commands,List.of(),RentzMatch.DealEnding.LEGACY));
+                var saved=SessionJson.saved(legacy);
+                assertEquals("RENTZ_RULES_V2",saved.getString("rules"));
+                assertEquals(oldGame.observe(0),SessionJson.restore(saved.toString()).view());
+                saved.remove("rules");
+                assertEquals(oldGame.history(),SessionJson.restore(saved.toString()).history());
+
+                var current=GameSession.restore(new GameSession.Saved(1,4,seed,difficulty,commands.subList(0,frontier)));
+                var newJournal=SessionJson.saved(current);
+                assertEquals("RENTZ_RULES_V3",newJournal.getString("rules"));
+                assertEquals(RentzMatch.Phase.DEAL_END,current.view().phase());
+                assertEquals(legacy.history(),current.history());
+                assertEquals(current.view(),SessionJson.restore(newJournal.toString()).view());
+                exercised=true;
+            }
+            assertTrue("Expected an early frontier for "+contract,exercised);
+        }
+    }
+
+    private static boolean target(Contract contract,Card card) {
+        return contract==Contract.QUEENS?card.rank()==12:card.suit()==Card.Suit.DIAMONDS;
     }
     @Test public void aSavedSnapshotCannotBeChangedByLaterCommands(){
         var session=new GameSession(4,3,RentzPlayer.Difficulty.NORMAL);var before=session.save();

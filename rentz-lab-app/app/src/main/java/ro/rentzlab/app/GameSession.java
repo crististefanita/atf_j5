@@ -26,13 +26,18 @@ public final class GameSession {
         }
         public Command from(Origin source) { return new Command(action, seat, card, contract, blind, source); }
     }
-    public record Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands,List<String> opponents) {
+    public record Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands,List<String> opponents,
+                        RentzMatch.DealEnding dealEnding) {
         public Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands) {
             this(schema,players,seed,difficulty,commands,List.of());
+        }
+        public Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands,List<String> opponents) {
+            this(schema,players,seed,difficulty,commands,opponents,RentzMatch.DealEnding.SCORING_CARDS);
         }
         public Saved {
             commands=Card.immutable(commands);
             opponents=Card.immutable(opponents);
+            Objects.requireNonNull(dealEnding);
             if(schema!=1)throw new IllegalArgumentException("Saved session schema");
         }
     }
@@ -40,30 +45,37 @@ public final class GameSession {
     private final long seed;
     private final RentzPlayer.Difficulty difficulty;
     private final RentzMatch match;
+    private final RentzMatch.DealEnding dealEnding;
     private final RentzPlayer player;
     private final List<String> opponents;
     private final List<Command> commands=new ArrayList<>();
     private final AchievementHand.Recorder achievementRecorder;
     private final List<AchievementHand> achievementHands = new ArrayList<>();
     public GameSession(int players,long seed,RentzPlayer.Difficulty difficulty) {
-        this(players,seed,difficulty,List.of());
+        this(players,seed,difficulty,List.of(),RentzMatch.DealEnding.SCORING_CARDS);
     }
     public GameSession(int players,long seed,RentzPlayer.Difficulty difficulty,String rosterName) {
-        this(players,seed,difficulty,PlayerNames.forMatch(players,rosterName,seed).subList(1,players));
+        this(players,seed,difficulty,PlayerNames.forMatch(players,rosterName,seed).subList(1,players),RentzMatch.DealEnding.SCORING_CARDS);
     }
-    private GameSession(int players,long seed,RentzPlayer.Difficulty difficulty,List<String> savedOpponents) {
+    private GameSession(int players,long seed,RentzPlayer.Difficulty difficulty,List<String> savedOpponents,
+                        RentzMatch.DealEnding dealEnding) {
         this.players=players; this.seed=seed; this.difficulty=Objects.requireNonNull(difficulty);
         if (!savedOpponents.isEmpty() && (savedOpponents.size()!=players-1
                 || savedOpponents.stream().map(name->name.toLowerCase(Locale.ROOT)).distinct().count()!=savedOpponents.size()
                 || savedOpponents.stream().anyMatch(name->!PlayerNames.normalize(name).equals(name))))
             throw new IllegalArgumentException("Saved opponents");
         opponents=savedOpponents.isEmpty()?defaultOpponents(players,seed):Card.immutable(savedOpponents);
-        match=new RentzMatch(players,seed,scoringProfile());
+        this.dealEnding=dealEnding;
+        match=new RentzMatch(players,seed,scoringProfile(),0,dealEnding);
         achievementRecorder = new AchievementHand.Recorder(players);
         player=new RentzPlayer(difficulty,scoringProfile(),PolicySettings.defaults());
     }
     public static ScoreProfile scoringProfile(){return SCORING;}
-    public static GameSession restore(Saved saved){var session=new GameSession(saved.players(),saved.seed(),saved.difficulty(),saved.opponents());for(var command:saved.commands())session.apply(command);return session;}
+    public static GameSession restore(Saved saved){
+        var session=new GameSession(saved.players(),saved.seed(),saved.difficulty(),saved.opponents(),saved.dealEnding());
+        for(var command:saved.commands())session.apply(command);
+        return session;
+    }
     public void apply(Command command){
         switch(command.action()){
             case REVEAL->match.reveal(command.seat());case CHOOSE->match.choose(command.seat(),command.contract(),command.blind());
@@ -139,5 +151,5 @@ public final class GameSession {
         result.addAll(opponents);
         return Collections.unmodifiableList(result);
     }
-    public Saved save(){return new Saved(1,players,seed,difficulty,commands,opponents);}
+    public Saved save(){return new Saved(1,players,seed,difficulty,commands,opponents,dealEnding);}
 }

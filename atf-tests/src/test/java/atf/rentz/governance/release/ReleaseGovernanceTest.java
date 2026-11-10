@@ -183,6 +183,11 @@ class ReleaseGovernanceTest {
         assertEquals(5, report.path("releaseWorkflow").path("nativeUiAcceptance").path("requiredCompleteGames").asInt(),
                 "The required native acceptance includes five complete games.");
         assertEquals("STAGED_CANDIDATE_ONLY", report.path("releaseWorkflow").path("artifactDisposition").asText());
+        var retirement=report.path("releaseWorkflow").path("retirement");
+        assertFalse(retirement.required("allowed").booleanValue(),"Local RAG cannot authorize retiring a live release");
+        assertTrue(retirement.required("preserveSourceTags").booleanValue());
+        assertTrue(retirement.required("preserveAuditEvidence").booleanValue());
+        assertEquals("NOT_RUN",gate(report,"release-retirement").path("status").asText());
         assertEquals("BLOCKED",gate(report,"local-catalog").path("status").asText(),"An incomplete local fixture is not a valid release catalog");
         for(var row:report.path("gates"))if(!row.path("id").asText().equals("local-catalog"))
             assertEquals("NOT_RUN",row.path("status").asText());

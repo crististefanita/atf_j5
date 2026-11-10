@@ -298,13 +298,23 @@ Case 'Achievement query retries corrupted native input and requires an exact foc
     $tokens=$null;$errors=$null
     $ast=[Management.Automation.Language.Parser]::ParseFile((Join-Path $project 'atf-tests/tools/run-shared-ui-sanity.ps1'),[ref]$tokens,[ref]$errors)
     Require (-not$errors) 'Shared UI runner does not parse'
-    $definition=$ast.Find({param($node) $node-is [Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-ceq'EnterAchievementSearch'},$true)
-    . ([scriptblock]::Create($definition.Extent.Text))
-    $state=@{writes=0;clears=0;stubborn=$false;focused=$true}
+    foreach($name in @('AchievementKeyboardShown','EnterAchievementSearch')){
+        $definition=$ast.Find({param($node) $node-is [Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-ceq$name},$true)
+        Require ($null-ne$definition) "Missing native input function $name"
+        . ([scriptblock]::Create($definition.Extent.Text))
+    }
+    $state=@{writes=0;clears=0;stubborn=$false;focused=$true;keyboard=$true;back=0;stuckKeyboard=$false}
     function Tap($Label,$Class) {Require ($Label-ceq'Search achievements'-and$Class-ceq'android.widget.EditText') 'Wrong input target'}
     function Adb($Command,$Name) {
         if($Name-ceq'achievement-search-rule'){
             Require ($Command[-1]-ceq'chose%syourself') 'Query encoding changed';$state.writes++
+        }elseif($Name-ceq'achievement-search-keyboard'){
+            Require (($Command-join' ')-ceq'shell dumpsys input_method') 'Keyboard visibility must be observed'
+            return [pscustomobject]@{Output='mInputShown='+$state.keyboard.ToString().ToLowerInvariant()}
+        }elseif($Name-ceq'hide-achievement-search-keyboard'){
+            Require ($state.keyboard-and$Command[-1]-ceq'KEYCODE_BACK') 'Back must only hide a visible keyboard'
+            $state.back++
+            if(!$state.stuckKeyboard){$state.keyboard=$false}
         }else{
             Require ($Command[3]-ceq'KEYCODE_MOVE_END'-and$Command[4]-ceq'KEYCODE_DEL') 'Retry must clear the observed input';$state.clears++
         }
@@ -314,7 +324,13 @@ Case 'Achievement query retries corrupted native input and requires an exact foc
         [pscustomobject]@{focused=[string]$state.focused.ToString().ToLowerInvariant();text=$(if($state.stubborn-or$state.writes-eq1){'cchose yourse'}else{'chose yourself'})}
     }
     EnterAchievementSearch 'chose yourself'
-    Require ($state.writes-eq2-and$state.clears-eq1) 'Corrupted query must be replaced before Apply'
+    Require ($state.writes-eq2-and$state.clears-eq1-and$state.back-eq1-and!$state.keyboard) 'Confirm the full query and close the keyboard before Apply'
+    $state.writes=0;$state.clears=0
+    EnterAchievementSearch 'chose yourself'
+    Require ($state.back-eq1) 'An already hidden keyboard must not receive Back'
+    $state.keyboard=$true;$state.stuckKeyboard=$true;$blocked=$false
+    try{EnterAchievementSearch 'chose yourself'}catch{$blocked=$_.Exception.Message-like'ANDROID_TEXT_INPUT:*remained visible*'}
+    Require ($blocked-and$state.back-eq2) 'A keyboard that stays visible must block Apply'
     foreach($mode in @('stubborn','blurred')){
         $state.writes=0;$state.clears=0;$state.stubborn=$true;$state.focused=$mode-ne'blurred';$failed=$false
         try{EnterAchievementSearch 'chose yourself'}catch{$failed=$_.Exception.Message-like'ANDROID_TEXT_INPUT:*'}

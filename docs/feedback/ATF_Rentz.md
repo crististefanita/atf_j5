@@ -13,6 +13,10 @@
 
 ## Integrare și infrastructură
 
+### Închiderea contractelor cu țintă fixă
+
+Criteriul pentru modelul local este să termine mâna după punctarea levatei cu 10♣, K♥, ultima damă sau ultimul caro din pachet. Verificarea acoperă o levată incompletă, scorul dublat, cărțile rămase și trecerea la următorul contract. Reluarea păstrează regula înregistrată în jurnal. [Probe pe contract](../../rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzSettlementTest.java) · [Probă de reluare](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/GameSessionTest.java)
+
 [Registrul de calitate](ATF_RentzQuality.md) deține adopția binară și probele încă lipsă ale adaptoarelor. [Lifecycle-ul](../rentz/ATF_Lifecycle.md), [guvernanța sursei](../rentz/ATF_Components.md) și validarea strictă au contracte și componente proprii; acceptanța nativă a pauzei, relansării și filesystem-ului rămâne distinctă de JVM.
 
 | Prioritate | Responsabil și diferență | Criteriu de închidere |

@@ -29,7 +29,7 @@
       "criterion": "Require the authenticated artifact bytes and SHA-256, explicit provider permissions, exact source tag, and the pushed download link.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-12-09",
-      "sha256": "b2cc6b2d597415d8167a01f716500e03ee7621c99300782f9024bde710989d5b",
+      "sha256": "64ae9de2706f4e0de2316bcfd81b976144beea4195fc823f2984796f69e0938e",
       "allowDelete": false
     },
     {
@@ -279,7 +279,7 @@
       "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "c8d5f1338509e21c379f3feced9e20d6ab1131df592a6ee7f7e57a9258881288",
+      "sha256": "b5cd65178e2537801001aaca43673c2699f4fb329f48c944208ec0cb2603ac60",
       "allowDelete": false
     },
     {
@@ -349,7 +349,7 @@
       "criterion": "A missing or partial Rentz-plus-two-games receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "b8feafeff5fdc17dc319e7c827df6e249ab44e403ad0a35f92e89fcb0f8823f5",
+      "sha256": "574760daad0396d3a01af4855812d45f16b3cde16fec659227733373b1ad3a31",
       "allowDelete": false
     },
     {
@@ -519,7 +519,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK; receipt mutations remain BLOCKED, while a valid Rentz-plus-two-games receipt is source-bound and report corruption blocks promotion.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "ed8fa887e93747e6e0083150707ce027749aed5e0f695996a68dd8d08232dfc4",
+      "sha256": "4bb20130ee416a9df87ad98ab564023a2247e8acabc80061778a5f608b7a13e3",
       "allowDelete": false
     },
     {
@@ -709,7 +709,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "1a258cb366658a81129936053392994088dc6c202e0e1c1880c89400a7b38bcf",
+      "sha256": "315108ae4a693aa70345fe2ee4743d1ec246899cdac3fc50773642be03b743a8",
       "allowDelete": false
     },
     {
@@ -789,7 +789,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "74b83d7c8620ff33c5a64691bc7cfae636d7f08bc472312043cd1a9e0e0c753e",
+      "sha256": "2db4e125d0458052ee3527dc3b8b6e9e477dca8f73806e05bc20e5773e4cdf9f",
       "allowDelete": false
     },
     {
@@ -916,10 +916,10 @@
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzHistoryReplayTest.java",
       "owner": "Rentz UI",
       "reason": "S05/S06 · Qualify the actual categories and finish order for confirmed hands.",
-      "criterion": "Derive the per-seat breakdown from observed plays. Distinguish equal awards and preserve every result after restoring current and compatible legacy journals.",
+      "criterion": "Derive the per-seat breakdown from observed plays. Distinguish equal awards and preserve every result after restoring the canonical journal.",
       "proof": "../../rentz_back/ui-review/settlement-details-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "74e76412dbbea03b74a1c8bcf8071091038713b18b3ad7c962da85bac35720c8",
+      "sha256": "33920acb416fe021462674ff21c658c1a28260caed1f1c462357a1dd91302368",
       "allowDelete": false
     },
     {
@@ -1049,7 +1049,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "ed497d434a0181251ce8268399aaf8168f279db5d58840ec8a43937e20e7065a",
+      "sha256": "9202f9cf0fadbb33bd5d8ea757acc4de07f8c4a204f51520610f23bd677f6820",
       "allowDelete": false
     },
     {
@@ -1169,7 +1169,7 @@
       "criterion": "Rentz and two standard deals reach DEAL_END; seat geometry, first human move, score history and restart are observed; the learning registry is isolated and unchanged; Extent keeps each original screenshot inline.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "32ac81f4777d5892545a32577a860939f0dcb49cdd4405743654dc9bbc3f25f0",
+      "sha256": "b69d1920090ccad01dc985e5b661d5441445735c75e419ed1ece13e1c5bfbd4a",
       "allowDelete": false
     },
     {
@@ -1209,7 +1209,7 @@
       "criterion": "Gradle versionName and monotonically increasing versionCode match the release catalog candidate.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "5a3aa72b6a1a878aeb985b793c94a4958e35f588469643d2d22944406538ae57",
+      "sha256": "ac25ca2d2a2f5f0d5884e354c24246efb661a482302b006a23afece57d0961cf",
       "allowDelete": false
     },
     {
@@ -1219,7 +1219,7 @@
       "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "673e1df07f320a0ac66ff702352561f13b3d270599a094bf4e963924d0c18418",
+      "sha256": "9f0ef3c0281fdaa61c7a2ea56a49377a95884cada18ae844e383f66d3ed274a7",
       "allowDelete": false
     },
     {

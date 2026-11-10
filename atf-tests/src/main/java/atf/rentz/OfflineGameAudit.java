@@ -7,6 +7,10 @@ import ro.rentzlab.core.*;
 public final class OfflineGameAudit {
     private OfflineGameAudit() { }
     public static void card(RentzMatch.Observation before,Card card,RentzMatch.Observation after,ScoreProfile profile) {
+        card(before,card,after,profile,RentzMatch.DealEnding.SCORING_CARDS);
+    }
+    public static void card(RentzMatch.Observation before,Card card,RentzMatch.Observation after,ScoreProfile profile,
+                            RentzMatch.DealEnding dealEnding) {
         require(before.turn()==before.seat()&&before.hand().contains(card),"Actor ownership");
         var sizes=new ArrayList<>(before.handSizes());sizes.set(before.seat(),sizes.get(before.seat())-1);require(sizes.equals(after.handSizes()),"Only actor card count changes");
         var seen=new ArrayList<>(before.seen());require(!seen.contains(card),"Card played once");seen.add(card);require(seen.equals(after.seen()),"Public card memory");
@@ -34,12 +38,22 @@ public final class OfflineGameAudit {
             else {
                 var best=trick.get(0);for(var play:trick)if(play.card().suit()==trick.get(0).card().suit()&&play.card().rank()>best.card().rank())best=play;
                 next=best.seat();expectedPoints.set(next,expectedPoints.get(next)+points(before.contract(),trick,profile)*(before.blind()?2:1));
-                terminal=sizes.stream().allMatch(n->n==0)||before.contract()==Contract.KING_HEARTS&&has(trick,Card.Suit.HEARTS,13)||before.contract()==Contract.TEN_CLUBS&&has(trick,Card.Suit.CLUBS,10);
+                terminal=sizes.stream().allMatch(n->n==0)||objectiveCaptured(before,seen,dealEnding);
                 require(after.trick().isEmpty(),"Completed trick cleared");
             }
         }
         require(after.turn()==next,"Next actor");require(expectedPoints.equals(after.dealPoints()),"Exact per-seat score delta");
         require(terminal?(after.phase()==RentzMatch.Phase.DEAL_END||after.phase()==RentzMatch.Phase.MATCH_END):after.phase()==RentzMatch.Phase.PLAY,"Termination frontier");
+    }
+    private static boolean objectiveCaptured(RentzMatch.Observation before,List<Card> seen,RentzMatch.DealEnding dealEnding) {
+        boolean current=dealEnding==RentzMatch.DealEnding.SCORING_CARDS;
+        return switch(before.contract()) {
+            case KING_HEARTS -> seen.contains(new Card(Card.Suit.HEARTS,13));
+            case TEN_CLUBS -> seen.contains(new Card(Card.Suit.CLUBS,10));
+            case QUEENS -> current && seen.stream().filter(card->card.rank()==12).count()==4;
+            case DIAMONDS -> current && seen.stream().filter(card->card.suit()==Card.Suit.DIAMONDS).count()==2L*before.players();
+            default -> false;
+        };
     }
     public static void pass(RentzMatch.Observation before,RentzMatch.Observation after) {
         require(before.contract()==Contract.RENTZ&&before.hand().stream().noneMatch(c->fits(before.board(),c,before.players())),"Mandatory play before pass");

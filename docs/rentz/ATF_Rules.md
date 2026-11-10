@@ -53,12 +53,15 @@ flowchart LR
 | Sub-joc | Obiectiv și punctare | Închiderea modelată |
 |---|---|---|
 | Levate | Evită levatele; fiecare se penalizează. | După cele opt levate. |
-| Dame | Evită cele patru dame; fiecare damă capturată se penalizează. | După toate cărțile. |
-| Carouri | Evită cărțile de caro; fiecare se penalizează. | După toate cărțile. |
+| Dame | Evită cele patru dame; fiecare damă capturată se penalizează. | După levata în care este capturată ultima damă. |
+| Carouri | Evită cărțile de caro; fiecare se penalizează. | După levata în care este capturat ultimul caro din pachetul mesei. |
 | Regele de cupă | Evită K♥; câștigătorul levatei îl capturează și primește penalizarea. | După stabilirea câștigătorului acelei levate. |
 | Totale | Cumulează levatele, damele, carourile și K♥. | După toate cărțile. |
 | Whist | Câștigă levate; fiecare aduce recompensa configurată. | După cele opt levate. |
 | Zece de treflă | Capturează 10♣ pentru recompensa configurată. | După levata cu 10♣, conform instrucțiunii din APK. |
+
+- Într-o partidă nouă, punctarea levatei decisive închide contractul cu țintă fixă. Cărțile rămase în mâini nu generează levate.
+- Jurnalele mai vechi păstrează regula anterioară pentru Dame și Carouri, astfel încât comenzile și scorurile lor să poată fi reluate.
 
 Instrucțiunile declară urmarea obligatorie a culorii cerute și câștigul rangului maxim din acea culoare. În lipsa culorii se poate arunca orice altă carte; **nu există atu, licitație de levate sau tăiere obligatorie preluată din Whistul românesc**.
 
