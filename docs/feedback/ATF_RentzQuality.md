@@ -58,7 +58,7 @@ Nivelurile testelor, corpusul documentar și revizuirea diferențelor Git au con
 |---|---|---|
 
 | P2 | Contractele de transport și arhivă sunt adaptoare locale pentru distribuția produsului; reutilizarea printr-o bibliotecă comună nu este încă împachetată. | Prin ownerul comun, promovați un API generic cu nume de produs configurabil și oracole negative independente. Păstrați în consumator selecția versiunii, regulile Rentz și acceptanța consumatorului. |
-| P2 | Descrierea de început din [README](../../README.md) lasă integrarea Android pentru o etapă ulterioară, deși documentul oferă două ediții instalabile. | Descrierea scurtă separă Android livrat, edițiile disponibile și lucrările viitoare. Guvernanța confruntă secțiunile de produs cu registrul fiecărui canal. O rută mutată în secțiunea greșită și un candidat prezentat ca disponibil sunt refuzate separat. [Dovada pe canal](ATF_Release_RAG.md#legătura-dintre-extent-și-descărcarea-din-readme) |
+| P2 | Guvernanța rutelor de descărcare din README. | Verificați secțiunea fiecărui canal. O rută mutată în secțiunea greșită și un candidat prezentat ca disponibil sunt refuzate separat. [Dovada pe canal](ATF_Release_RAG.md#legătura-dintre-extent-și-descărcarea-din-readme) |
 
 [Procesul livrării](../rentz/ATF_Release.md) separă DRAFT, PREPARED și PUBLISHED; o pregătire validă nu este un APK calificat.
 

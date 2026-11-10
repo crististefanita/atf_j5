@@ -8,8 +8,8 @@ Motorul validează distribuirea, alegerea sub-jocului, mutările legale și scor
 
 ## Ediție cu acces autorizat
 
-- [Rentz Lab 0.11.0](https://github.com/crististefanita/atf_j5_releases/releases/tag/v0.11.0) · Tactică defensivă pentru jocurile negative și corecții la realizări.
-- [Descarcă APK-ul Rentz Lab 0.11.0](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.11.0/RentzLab-0.11.0.apk) · Android 8.0+. Autentifică-te în GitHub cu un cont care are acces la ediție.
+- [Rentz Lab 0.12.0](https://github.com/crististefanita/atf_j5_releases/releases/tag/v0.12.0) · Trei realizări noi, progres la punctaj și îmbunătățiri pentru adversarii Greu.
+- [Descarcă APK-ul Rentz Lab 0.12.0](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.12.0/RentzLab-0.12.0.apk) · Android 8.0+. Autentifică-te în GitHub cu un cont care are acces la ediție.
 
 ## Jocul
 
