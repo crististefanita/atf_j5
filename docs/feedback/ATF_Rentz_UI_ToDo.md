@@ -69,7 +69,7 @@ Ordinea livrării este contractul producătorului, componentele, consumul pe art
 | P2 | U06: ritmul și marcajul fiecărui actor trebuie confirmate pe APK-ul candidat. | Înregistrați trei mutări adverse consecutive și trecerea la o levată nouă. Fiecare carte trebuie să apară după marcajul actorului, iar prima mutare următoare să respecte colectarea și propria pauză. Includeți o reluare între două mutări. |
 | P2 | Politica numelui este pe puncte de cod, iar filtrul dialogului comun este UTF-16. | U02, proprietar J4: port de filtrare compatibil cu politica consumatorului, păstrând comportamentul Whist cerut. |
 | P2 | Proba nativă minimă acoperă 3/4/6 locuri pe un singur afișaj. | U01/U04/U05: font mărit și viewport compact, folosind componentele înaintea capturilor native focalizate; fără repetarea mâinii complete la fiecare rezoluție. |
-| P2 | Grila de secvențe este măsurată între chenarele jocului, cu probe pentru 3–6 locuri. | Confirmați pe APK-ul candidat grila la 3, 5 și 6 locuri, cu profil compact, profil înalt și font mărit. Verificați lizibilitatea celui mai lung rang, nuanța exclusiv pe cărțile legale, marcajul „Pasează” și stabilitatea grilei înainte și după pas. |
+| P2 | Grila de secvențe este măsurată între chenarele jocului, cu probe pentru 3–6 locuri. | Confirmați pe APK-ul candidat grila la 3, 5 și 6 locuri, cu profil compact, profil înalt și font mărit. Verificați lizibilitatea celui mai lung rang, marcajul „Pasează” și stabilitatea grilei înainte și după pas. Evidențierea mâinii este urmărită separat în R06. |
 | P2 | U09: lansatorul prototipului are navigare proprie și refuză noul UI înainte de ADB. | Evaluați migrarea deciziei externe pe baza actorului public. Traseul curent acoperă deja replay-ul independent, delegarea din produs și emiterea receipt-ului. |
 
 ## P1: Rentz organizat în jurul lui J
@@ -81,6 +81,9 @@ Ordinea livrării este contractul producătorului, componentele, consumul pe art
 | **R03 · PARȚIAL** | **Slotul gol nu este carte jucată.** Proiecția distinge ancora și cărțile publice, iar legalitatea vine din motor. Rămân marcarea ultimei mutări și indicii explicabili pentru continuare, fără dezvăluirea deținătorilor necunoscuți. |
 | **R04 · PARȚIAL** | **Tabla și comanda explicită de continuare există.** Calculul blochează comenzile și păstrează masa; la încheiere rămâne tabla publică. Rămân sosirile, explicațiile pentru pas/săritură și calificarea nativă a închiderii secvențelor. |
 | **R05 · PARȚIAL** | **Cărțile publice sunt proiectate exact.** Componentele confruntă tabla reală fără umplerea fictivă a sloturilor. Adăugați cazul terminal independent și contorul lizibil; modelul poate încheia cu cărți nejucate, iar orice schimbare a terminării rămâne regulă separată. |
+| **R06 · P2 · IMPLEMENTAT LA COMPONENTĂ** | **Cărțile jucabile se disting discret în mâna mea.** În contractul Rentz, cărțile legale în tura manuală primesc o nuanță verde pal și un contur verde fin. Poziția, indicii și zonele de atingere folosesc în continuare geometria mâinii. Confirmarea vizuală pe APK rămâne deschisă. |
+
+R06 preia ideea de contur din evidențierea de la finalul unei mâini Hold’em. Descrierile Rentz indică acțiunea permisă în română și engleză, iar ridicarea cărții continuă să indice selecția. [Evidențierea din J6](../../../atf_j6/holdem-android/app/src/main/java/ro/atf/holdem/android/HoldemTableView.java)
 
 Schema stabilește relația rangurilor, fără a reprezenta o distribuire de antrenament:
 
@@ -134,6 +137,7 @@ Proiecțiile și adaptoarele existente sunt identificate în atlasul UI. Diagram
 |---|---|
 | Regula deschiderii | J la fiecare culoare, vecini legali și refuz atomic; mese de 3–6 jucători, opțiunea J și varianta mijloc separate. Aceeași configurație după reluare și în lumile AI. |
 | Tabla | Culoare nedeschisă, numai J, extindere în ambele direcții, interval maxim, as, carte minimă, pas și ultimul loc. Reordonarea colecției de cărți nu schimbă geometria finală. |
+| Mâna jucabilă R06 | Componentele compară cărțile marcate cu regulile motorului după mutare, pas și schimbarea turei. Proba nativă `-RentzCardMarksOnly` folosește ecranul compact la font mărit: compară acțiunile accesibile și culorile din captura Android cu setul legal pentru o carte și pentru mai multe, după mutare și după un pas real. [Componente](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) · [Probă nativă](../../atf-tests/tools/run-shared-ui-sanity.ps1) |
 | Limita închiderii | Tabla terminală păstrează exact cărțile publice, inclusiv spațiile rămase; nu apar cărți noi la intrarea în istoricul scorului. |
 | Scor | Istoric gol, prima mână, program complet și reluare; delta zero, puncte negative, valori mari și premii egale. Pentru fiecare jucător, Σ este suma deltelor înregistrate. |
 | Identități | Toate cele 3–6 locuri, nume scurte/lungi și diacritice; totalurile și sosirile nu se atașează altui jucător după sortare. |

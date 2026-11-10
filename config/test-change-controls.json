@@ -99,7 +99,7 @@
       "criterion": "Verify the centered grid, Rentz card band against the shared trick band at compact and tall four-seat sizes, forced pass and legal card tint at 3 through 6 seats. Preserve the Whist order at all reference widths.",
       "proof": "../../rentz_back/ui-review/turn-pacing-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "0c9a692cb6997172e8dfdae4ee9cdbc95156a2ef4cd4c0174514ce6d2620e0be",
+      "sha256": "27b8756e56ca78522ce1fc8106b9d1e02963ec27421c4f2dd88399e67dfff9fc",
       "allowDelete": false
     },
     {
@@ -1169,7 +1169,7 @@
       "criterion": "Rentz and two standard deals reach DEAL_END; seat geometry, first human move, score history and restart are observed; the learning registry is isolated and unchanged; Extent keeps each original screenshot inline.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "2ca686e3d04d85804a9da01668e9bcf7e1426df7587b35235dad4a8d2165560d",
+      "sha256": "32ac81f4777d5892545a32577a860939f0dcb49cdd4405743654dc9bbc3f25f0",
       "allowDelete": false
     },
     {
@@ -1209,7 +1209,7 @@
       "criterion": "Gradle versionName and monotonically increasing versionCode match the release catalog candidate.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "faf328107ed1f07204b040669e10524cf6b096fef03a88eaea91e1b755a2df4d",
+      "sha256": "5a3aa72b6a1a878aeb985b793c94a4958e35f588469643d2d22944406538ae57",
       "allowDelete": false
     },
     {
@@ -1219,7 +1219,7 @@
       "criterion": "Current published entry is unchanged during preparation; candidate identity is explicit and validates one forward boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "2a83f44b59835b8570d475c9792f0bc6d13b6a65ef25a082edcae804401d1e52",
+      "sha256": "a4c24c93f3c85adefd5b15f4e396b16d17ee9b5dc805abc8f43c8b656274aa22",
       "allowDelete": false
     },
     {

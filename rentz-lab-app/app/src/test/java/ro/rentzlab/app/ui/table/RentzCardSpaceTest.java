@@ -1,6 +1,7 @@
 package ro.rentzlab.app.ui.table;
 
 import org.junit.Test;
+import ro.cardtable.ui.hand.HandLayoutMetrics;
 import ro.cardtable.ui.table.PlayedCardMetrics;
 import ro.cardtable.ui.table.TableGeometry;
 import ro.cardtable.ui.table.TableSeatLayout;
@@ -15,6 +16,8 @@ import ro.rentzlab.core.RentzMatch;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -180,8 +183,10 @@ public final class RentzCardSpaceTest {
         assertSame(trick, RentzCardSpace.fitTrick(trick, trick.centerHeightDp()));
     }
 
-    @Test public void onlyLegalSequenceCardsGetTintAndForcedPassUsesOneCommand() {
+    @Test public void onlyLegalSequenceCardsGetAnOutlineAcrossMovesTurnsAndForcedPasses() {
         var copy = new RentzUiText(RentzUiText.Language.RO);
+        boolean singleChoice = false;
+        boolean severalChoices = false;
         for (int players = 3; players <= 6; players++) {
             boolean playable = false;
             boolean passed = false;
@@ -191,16 +196,12 @@ public final class RentzCardSpaceTest {
                 session.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null, Contract.RENTZ, true));
                 for (int turn = 0; turn < 120 && session.view().phase() == RentzMatch.Phase.PLAY; turn++) {
                     var state = session.view();
-                    var legalIds = state.legal().stream().map(RentzTableContent::id).toList();
-                    var hand = RentzTableContent.hand(state, copy, false);
-                    for (var card : hand) {
-                        var tint = RentzTableContent.handTint(Contract.RENTZ, card);
-                        assertEquals(legalIds.contains(card.id()), tint.isPresent());
-                        if (tint.isPresent()) assertEquals(0xfff1f8ec, tint.getAsInt());
-                        assertTrue(RentzTableContent.handTint(Contract.WHIST, card).isEmpty());
+                    assertLegalMarks(state, copy);
+                    for (var card : RentzTableContent.hand(state, copy, false)) {
+                        assertTrue(RentzTableContent.handMark(Contract.WHIST, card).isEmpty());
                     }
                     for (var card : RentzTableContent.hand(state, copy, true)) {
-                        assertTrue(RentzTableContent.handTint(Contract.RENTZ, card).isEmpty());
+                        assertTrue(RentzTableContent.handMark(Contract.RENTZ, card).isEmpty());
                     }
                     if (state.turn() != 0) {
                         assertFalse(session.hasForcedHumanPass());
@@ -208,22 +209,65 @@ public final class RentzCardSpaceTest {
                     } else if (!state.legal().isEmpty()) {
                         assertFalse(session.hasForcedHumanPass());
                         playable = true;
-                        session.apply(new GameSession.Command(GameSession.Action.PLAY, 0, state.legal().get(0), null, false));
+                        singleChoice |= state.legal().size() == 1;
+                        severalChoices |= state.legal().size() > 1;
+                        var playedCard = state.legal().get(0);
+                        session.apply(new GameSession.Command(GameSession.Action.PLAY, 0, playedCard, null, false));
+                        assertFalse(markedCards(session.view(), copy).contains(RentzTableContent.id(playedCard)));
                     } else {
                         assertTrue(session.hasForcedHumanPass());
+                        assertTrue(markedCards(state, copy).isEmpty());
                         assertEquals("Pasează", RentzTableContent.turnLabel(state, copy, true));
                         int revision = session.save().commands().size();
                         session.apply(new GameSession.Command(GameSession.Action.PASS, 0, null, null, false));
                         assertEquals(revision + 1, session.save().commands().size());
                         assertEquals(state.board(), session.view().board());
                         assertFalse(session.hasForcedHumanPass());
+                        assertTrue(markedCards(session.view(), copy).isEmpty());
                         passed = true;
                     }
+                    assertLegalMarks(session.view(), copy);
                     if (playable && passed) break;
                 }
             }
             assertTrue("Fixture exercises legal cards and a forced pass with " + players + " players", playable && passed);
         }
+        assertTrue("Fixtures exercise both a single legal card and multiple legal cards", singleChoice && severalChoices);
+    }
+
+    @Test public void playableOutlineFitsTheVisibleStripOfAnOverlappingCompactHand() {
+        var session = new GameSession(4, 31, RentzPlayer.Difficulty.NORMAL);
+        var copy = new RentzUiText(RentzUiText.Language.EN);
+        assertTrue(markedCards(session.view(), copy).isEmpty());
+        session.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null, Contract.RENTZ, true));
+        var hand = RentzTableContent.hand(session.view(), copy, false);
+        var marked = hand.stream().filter(card -> RentzTableContent.handMark(Contract.RENTZ, card).isPresent()).toList();
+        assertFalse(marked.isEmpty());
+        assertTrue(marked.size() < hand.size());
+        assertTrue(marked.stream().allMatch(card -> card.description().startsWith("Play ")));
+
+        float density = 2.25f;
+        var mark = RentzTableContent.handMark(Contract.RENTZ, marked.get(0)).orElseThrow();
+        assertEquals(0xfff1f8ec, mark.fill());
+        assertEquals(0xff4e805c, mark.outline());
+        assertEquals(3, mark.outlineWidthPx(density));
+        int indexWidthPx = Math.round(24 * density);
+        var fan = HandLayoutMetrics.fan(hand.size(), 630, density, 1.5f, indexWidthPx);
+        assertTrue(fan.advance() < fan.cardWidth());
+        assertTrue(mark.outlineWidthPx(density) * 2 < indexWidthPx);
+        assertTrue(indexWidthPx <= fan.advance());
+    }
+
+    private static Set<String> markedCards(RentzMatch.Observation view, RentzUiText copy) {
+        return RentzTableContent.hand(view, copy, false).stream()
+                .filter(card -> RentzTableContent.handMark(view.contract(), card).isPresent())
+                .map(card -> card.id()).collect(Collectors.toSet());
+    }
+
+    private static void assertLegalMarks(RentzMatch.Observation state, RentzUiText copy) {
+        var expected = state.phase() == RentzMatch.Phase.PLAY && state.turn() == state.seat()
+                ? state.legal().stream().map(RentzTableContent::id).collect(Collectors.toSet()) : Set.of();
+        assertEquals(expected, markedCards(state, copy));
     }
 
     private static void assertWindows(int players, int[] upper, int[] lower) {

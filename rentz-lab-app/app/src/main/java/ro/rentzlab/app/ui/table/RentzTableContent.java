@@ -59,9 +59,15 @@ public final class RentzTableContent {
     static String turnLabel(RentzMatch.Observation view, RentzUiText copy, boolean passing) {
         return passing ? copy.text("Passing", "Pasează") : copy.seatTurn(view.phase() == RentzMatch.Phase.CHOOSE);
     }
-    static java.util.OptionalInt handTint(Contract contract, HandCard card) {
+    record HandMark(int fill, int outline) {
+        int outlineWidthPx(float density) { return Math.max(1, Math.round(1.5f * density)); }
+    }
+
+    private static final HandMark PLAYABLE_RENTZ_CARD = new HandMark(0xfff1f8ec, 0xff4e805c);
+
+    static java.util.Optional<HandMark> handMark(Contract contract, HandCard card) {
         return contract == Contract.RENTZ && card.playable()
-                ? java.util.OptionalInt.of(0xfff1f8ec) : java.util.OptionalInt.empty();
+                ? java.util.Optional.of(PLAYABLE_RENTZ_CARD) : java.util.Optional.empty();
     }
     public static List<PlayedCardContent> plays(List<TrickRules.Play> plays, List<String> names) {
         return plays.stream().map(play -> new PlayedCardContent(play.seat(), play.card().label(), face(play.card()).red(),

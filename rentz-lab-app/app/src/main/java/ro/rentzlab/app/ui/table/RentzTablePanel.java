@@ -75,13 +75,15 @@ public final class RentzTablePanel extends LinearLayout {
         addView(board, boardParams);
         var handCards = RentzTableContent.hand(view, copy, paused);
         var fan = new HandFan(context, handCards, viewport.handClearanceDp(false), viewport.isCompact(), actions.card());
+        float density = getResources().getDisplayMetrics().density;
         var hand = new CenteredHandView(context, dp(HandLayoutMetrics.maxViewportWidthDp()), widthPx -> {
             View rendered = fan.build(widthPx);
             for (var card : handCards) {
-                RentzTableContent.handTint(view.contract(), card).ifPresent(tint -> {
+                RentzTableContent.handMark(view.contract(), card).ifPresent(mark -> {
                     var slot = rendered.<ViewGroup>findViewWithTag("hand-card:" + card.id());
                     if (slot != null && slot.getChildAt(0).getBackground() instanceof CardFaceDrawable face) {
-                        face.setColor(tint);
+                        face.setColor(mark.fill());
+                        face.setStroke(mark.outlineWidthPx(density), mark.outline());
                     }
                 });
             }

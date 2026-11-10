@@ -1,5 +1,5 @@
 param([Parameter(Mandatory)][string]$BuildQualification,[Parameter(Mandatory)][string]$RunRoot,
-    [switch]$SeatExtremes,[switch]$HistoryOnly,[switch]$HistoryMatrix,[switch]$HistoryDetails,[switch]$HelpAwardsOnly,[switch]$CompactScores,[switch]$ConsecutiveSubgames,[switch]$CompactConsecutive,[string]$ComponentRun,[string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe')
+    [switch]$SeatExtremes,[switch]$HistoryOnly,[switch]$HistoryMatrix,[switch]$HistoryDetails,[switch]$HelpAwardsOnly,[switch]$CompactScores,[switch]$ConsecutiveSubgames,[switch]$CompactConsecutive,[switch]$RentzCardMarksOnly,[string]$ComponentRun,[string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe')
 $ErrorActionPreference='Stop'
 $consecutiveGameCount=5
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
@@ -21,6 +21,8 @@ if($HelpAwardsOnly-and($HistoryOnly-or$SeatExtremes)){throw 'Choose a single nat
 if($CompactScores-and($HelpAwardsOnly-or$HistoryOnly-or$SeatExtremes)){throw 'Compact scores continue the one-hand sanity.'}
 if($ConsecutiveSubgames-and($HelpAwardsOnly-or$HistoryOnly-or$SeatExtremes-or$CompactScores)){throw 'Consecutive subgames are a standalone native sanity scope.'}
 if($CompactConsecutive-and-not$ConsecutiveSubgames){throw 'Compact consecutive testing requires ConsecutiveSubgames.'}
+if($RentzCardMarksOnly-and($ConsecutiveSubgames-or$HelpAwardsOnly-or$HistoryOnly-or$SeatExtremes-or$CompactScores)){throw 'Rentz card marks are a standalone compact scope.'}
+if($RentzCardMarksOnly){Add-Type -AssemblyName System.Drawing.Common}
 if($HistoryOnly){
     if($SeatExtremes){throw 'Choose a single native sanity scope.'}
     Assert-AtfArtifactPath -Path $build.historyFixture -ProjectRoot $project
@@ -594,6 +596,87 @@ function CardLabel($card){
     $rank=switch([int]$card.rank){11{'J'}12{'Q'}13{'K'}14{'A'}default{[string]$card.rank}}
     return $rank+@{CLUBS='♣';DIAMONDS='♦';HEARTS='♥';SPADES='♠'}[[string]$card.suit]
 }
+function RentzMarkChecks($Nodes,$State,[string]$Png){
+    $legal=@($State.view.legal|ForEach-Object{CardLabel $_}|Sort-Object)
+    $hand=@($Nodes|Where-Object{$_.description-match'^(?:Play (?:\d+|[JQKA])[♣♦♥♠]|(?:\d+|[JQKA])[♣♦♥♠]\. Unavailable)$'}|
+        Sort-Object @{Expression={(Bounds $_)[0]}})
+    $visible=@($hand|Where-Object description -CLike 'Play *'|ForEach-Object{$_.description.Substring(5)}|Sort-Object)
+    Check 'Only legal cards have the native play action' ($legal-join' ') ($visible-join' ')
+    Check 'Every own card is present in the native hand' $State.view.hand.Count $hand.Count
+    $marked=[Collections.Generic.List[string]]::new()
+    $bitmap=[Drawing.Bitmap]::new($Png)
+    try{
+        [int]$width,[int]$height=$logicalProfile.Split('x')
+        $sx=$bitmap.Width/$width;$sy=$bitmap.Height/$height
+        for($i=0;$i-lt$hand.Count;$i++){
+            $box=Bounds $hand[$i];$right=$box[2]
+            if($i+1-lt$hand.Count){$right=[Math]::Min($right,(Bounds $hand[$i+1])[0])}
+            $label=$hand[$i].description-replace'^Play |\. Unavailable$',''
+            $outline=0;$fill=0;$sampled=0
+            # The lower strip intersects the drawable. Inset from the rounded left corner:
+            # the previous overlapped card can still be visible through that corner.
+            $left=$box[0]+[Math]::Min(16,($right-$box[0])/3)
+            for($y=[int][Math]::Ceiling([Math]::Max($box[1],$box[3]-90)*$sy);$y-lt[Math]::Min($bitmap.Height,$box[3]*$sy);$y++){
+                for($x=[int][Math]::Ceiling($left*$sx);$x-lt($right-1)*$sx-and$x-lt$bitmap.Width;$x++){
+                    $pixel=$bitmap.GetPixel($x,$y);$sampled++
+                    if([Math]::Abs($pixel.R-78)-le9-and[Math]::Abs($pixel.G-128)-le9-and[Math]::Abs($pixel.B-92)-le9){$outline++}
+                    if([Math]::Abs($pixel.R-241)-le4-and[Math]::Abs($pixel.G-248)-le4-and[Math]::Abs($pixel.B-236)-le4){$fill++}
+                }
+            }
+            # A few antialiased pixels on an unmarked card can match the fill palette.
+            $tinted=$sampled-gt0-and$fill-ge0.15*$sampled
+            $on=$outline-ge3-and$tinted
+            if($on){$marked.Add($label)}
+            [pscustomobject]@{name="Native pixels for $label";expected=$(if($label-in$legal){'Green outline and tinted face'}else{'No green outline or tint'});actual="outline=$outline; tint=$fill/$sampled";passed=($sampled-gt0-and$(if($label-in$legal){$on}else{$outline-lt3-and-not$tinted}))}
+        }
+    }finally{$bitmap.Dispose()}
+    Check 'Exactly the playable cards have the visible Rentz mark' ($legal-join' ') (($marked|Sort-Object)-join' ')
+}
+function RunRentzCardMarks($state){
+    $covered=@{single=$false;multiple=$false;move=$false;pass=$false}
+    for($attempt=1;$attempt-le3;$attempt++){
+        if($attempt-gt1){
+            Tap 'Main menu';Tap 'New game';Tap 'Start game';Tap 'Start';$state=State
+        }
+        $state=ChooseHumanSubgame $state -ForceRentz
+        $lastCard='';$lastMoveRevision=-1
+        for($step=0;$step-lt100-and$state.view.phase-eq'PLAY';$step++){
+            if($state.view.turn-eq0-and$state.view.legal.Count-gt0){
+                $single=$state.view.legal.Count-eq1
+                $pass=@($state.view.events|Where-Object{$_.seat-eq0-and$_.action-ceq'PASS'}|Select-Object -Last 1)
+                $labels=[Collections.Generic.List[string]]::new()
+                if($single-and-not$covered.single){$labels.Add('single legal card')}
+                if(!$single-and-not$covered.multiple){$labels.Add('multiple legal cards')}
+                if($lastCard-and-not$covered.move){$labels.Add('after manual move')}
+                if($pass.Count-and-not$covered.pass){$labels.Add('after automatic pass')}
+                if($labels.Count){
+                    $previous=$state
+                    Observe ('R06: '+($labels-join'; ')) {param($nodes)
+                        $current=State
+                        Check 'Captured a stable human Rentz turn' ("RENTZ/0/"+$previous.revision) ($current.view.contract+'/'+$current.view.turn+'/'+$current.revision)
+                        if($labels.Contains('after manual move')){
+                            Check 'Played card is absent from the next manual hand' $false ($lastCard-in@($current.view.hand|ForEach-Object{CardLabel $_}))
+                            Check 'The UI move advanced the command revision' $true ($current.revision-gt$lastMoveRevision)
+                        }
+                        if($labels.Contains('after automatic pass')){
+                            Check 'A real seat-zero pass is present in the public action history' $true ($pass[0].sequence-gt0-and$null-eq$pass[0].card)
+                        }
+                        RentzMarkChecks $nodes $current (Join-Path $raw "$name.png")
+                    }
+                    if($single){$covered.single=$true}else{$covered.multiple=$true}
+                    if($lastCard){$covered.move=$true}
+                    if($pass.Count){$covered.pass=$true}
+                    if($covered.single-and$covered.multiple-and$covered.move-and$covered.pass){return}
+                }
+                $lastCard=CardLabel $state.view.legal[0];$lastMoveRevision=$state.revision
+                Tap ('Play '+$lastCard)
+            }
+            $state=State -After $state.revision
+        }
+        if($state.view.phase-cne'DEAL_END'){throw 'R06 hand did not settle within the native action budget.'}
+    }
+    throw ('R06 did not reach all required states: '+(($covered.Keys|Where-Object{-not$covered[$_]})-join', '))
+}
 function HumanContractLabel([string]$contract){
     return @{TRICKS='Tricks';QUEENS='Queens';DIAMONDS='Diamonds';KING_HEARTS='King of Hearts';TOTALS='Totals';WHIST='Whist';TEN_CLUBS='Ten of Clubs';RENTZ='Rentz'}[$contract]
 }
@@ -920,7 +1003,7 @@ try{
     Adb @('shell','input','keyevent','KEYCODE_WAKEUP') 'wake-device'|Out-Null
     Adb @('shell','wm','dismiss-keyguard') 'dismiss-emulator-keyguard'|Out-Null
     $initialSize=(Adb @('shell','wm','size') 'size').Output;$initialDensity=(Adb @('shell','wm','density') 'density').Output;$initialFont=(Adb @('shell','settings','get','system','font_scale') 'font').Output
-    if($CompactConsecutive){
+    if($CompactConsecutive-or$RentzCardMarksOnly){
         $restoreSize=DisplayOverride $initialSize 'size' '\d+x\d+'
         $restoreDensity=DisplayOverride $initialDensity 'density' '\d+'
         $restoreFont=$initialFont.Trim()
@@ -994,7 +1077,9 @@ try{
     Observe 'Hidden hand and real Rentz chooser' {param($nodes) Check 'Hand remains hidden' 0 @($state.view.hand).Count;Check 'Chooser phase' 'CHOOSE' $state.view.phase;TableChecks $nodes $state}
     $revision=$state.revision;Tap 'Show cards';$state=State -After $revision
     Observe 'Eight revealed cards on the shared table' {param($nodes) Check 'Eight own cards' 8 @($state.view.hand).Count;TableChecks $nodes $state}
-    if($ConsecutiveSubgames){
+    if($RentzCardMarksOnly){
+        RunRentzCardMarks $state
+    }elseif($ConsecutiveSubgames){
         RunConsecutiveSubgames $state $journalFile
     }else{
     Tap 'Choose game';$revision=$state.revision;Tap 'Tricks';$state=State -After $revision
@@ -1086,7 +1171,7 @@ if(-not $HelpAwardsOnly){
     if(Test-Path -LiteralPath $developmentLedger -PathType Leaf){$isolatedDevelopmentLedgerSha256After=(Get-FileHash -LiteralPath $developmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()}
     if($ConsecutiveSubgames-and-not$sharedDevelopmentLedgerUnchanged-and-not$failure){$failure='Shared training ledger changed during isolated native acceptance.'}
 }
-$minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}elseif($ConsecutiveSubgames){3*$consecutiveGameCount+4}else{10}
+$minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}elseif($ConsecutiveSubgames){3*$consecutiveGameCount+4}elseif($RentzCardMarksOnly){8}else{10}
 if($HistoryDetails){$minimum+=4}
 if($CompactScores){$minimum++}
 if(-not$failure-and($cleanup.Count-or-not$released-or-not$preserved-or$points.Count-lt$minimum)){$failure='Native closeout failed or the declared checkpoint population is incomplete.'}
@@ -1094,6 +1179,7 @@ $scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in Eng
 if($HistoryDetails){$scope+='; confirmed blind trick contributions and the actual Rentz finishing places after journal restore'}
 if($ConsecutiveSubgames){$scope+='; learning order, search, filters, eligibility, local profile and durable achievement progress'}
 if($CompactConsecutive){$scope+='; compact 720x1280, density 360, font scale 1.5'}
+if($RentzCardMarksOnly){$scope='R06 native Rentz card marks: one or several legal cards, after manual move and automatic pass; 720x1280, density 360, font scale 1.5'}
 if($CompactScores){$scope+='; Romanian compact signed scores at font scale 1.5 and a 720x1280 logical viewport'}
 $display=[ordered]@{before=@{size=$initialSize.Trim();density=$initialDensity.Trim();font=$initialFont.Trim()};effective=$effectiveDisplay;after=@{size=$finalSize.Trim();density=$finalDensity.Trim();font=$finalFont.Trim()}}
 if($component){
