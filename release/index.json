@@ -1,9 +1,8 @@
 {
   "schemaVersion": 1,
   "repository": "crististefanita/atf_j5",
-  "currentVersion": "0.13.0",
-  "candidate": { "version": "0.14.0", "versionCode": 18 },
+  "currentVersion": "0.14.0",
   "versions": [
-    "0.13.0"
+    "0.14.0"
   ]
 }

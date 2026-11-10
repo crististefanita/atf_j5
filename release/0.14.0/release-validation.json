@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "versionName": "0.14.0",
+    "versionCode": 18,
+    "applicationId": "ro.rentzlab.app",
+    "sourceCommit": "e5869d3c55358f45d39c71aed706cc31cbb509df",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "apkName": "RentzLab-0.14.0.apk",
+    "apkBytes": 916096,
+    "sha256": "41285eede42c619f64bc476990c6d0c5a835748ad7243ab59181907f21b6405b",
+    "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+    "debuggable": false
+  },
+  "publication": {
+    "state": "PUBLISHED",
+    "channel": "authenticated-only",
+    "sourceCommit": "e5869d3c55358f45d39c71aed706cc31cbb509df",
+    "releaseId": 440643720
+  },
+  "qualification": {
+    "status": "PASS",
+    "tests": 542,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "integrity": {
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 391,
+        "sha256": "6843aed1eb7b1938f7b34f8448f1232718f036a9be5b7e617b87ffa4ea6b066e"
+      },
+      {
+        "path": "release-notes.md",
+        "bytes": 299,
+        "sha256": "1d92e64b816e207fff8683d3bce33b8792355e3b1ba226e6c50cb80a1ee20a99"
+      },
+      {
+        "path": "RentzLab-0.14.0.apk",
+        "bytes": 916096,
+        "sha256": "41285eede42c619f64bc476990c6d0c5a835748ad7243ab59181907f21b6405b"
+      },
+      {
+        "path": "RentzLab-0.14.0.apk.sha256",
+        "bytes": 86,
+        "sha256": "ab51454a90336ebf9362280c6e24d7391309b805a86b42ee64e8a59c6b302f39"
+      },
+      {
+        "path": "reports/README.md",
+        "bytes": 492,
+        "sha256": "2259c7f29f4c8e31ccf7c9567b0d7e155da6f810d11b5b3b9875bb97d1317aec"
+      }
+    ]
+  }
+}
