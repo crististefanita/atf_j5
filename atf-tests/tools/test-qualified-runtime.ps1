@@ -442,8 +442,10 @@ Case 'Pushed README requires one clean game section for each distribution channe
     foreach ($repo in @('example/game', 'example/private-editions')) {
         $page = "https://github.com/$repo/releases/tag/v1.2.0"
         $asset = "https://github.com/$repo/releases/download/v1.2.0/RentzLab-1.2.0.apk"
-        $clean = "# Rentz`n`n## Jocul`n`n- [Rentz Lab]($page)`n- [Descarcă APK-ul]($asset)`n`n## Documentație`n"
-        Confirm-ReadmeGameLinks $clean $page $asset
+        $listedPage = if ($repo -ceq 'example/game') { $page }
+        $releaseLine = if ($listedPage) { "- [Rentz Lab]($listedPage)`n" } else { '' }
+        $clean = "# Rentz`n`n## Jocul`n`n$releaseLine- [Descarcă APK-ul]($asset)`n`n## Documentație`n"
+        Confirm-ReadmeGameLinks $clean $listedPage $asset
         $invalid = @(
             $clean.Replace('## Jocul', '## Ediție cu acces autorizat')
             $clean.Replace("## Jocul`n`n", "## Jocul`n`nAutentifică-te în GitHub.`n`n")
@@ -451,10 +453,12 @@ Case 'Pushed README requires one clean game section for each distribution channe
             $clean.Replace('## Documentație', "## Jocul`n`n## Documentație")
             "$clean`n- [APK vechi](https://downloads.example.test/v1.1.0/RentzLab-1.1.0.apk)`n"
             $clean.Replace($asset, ($asset + '?redirect=1'))
+            $clean.Replace('.apk)', '_sanity.apk)')
+            if (!$listedPage) { $clean.Replace("- [Descarcă APK-ul]", "- [Rentz Lab]($page)`n- [Descarcă APK-ul]") }
         )
         foreach ($candidate in $invalid) {
             $rejected = $false
-            try { Confirm-ReadmeGameLinks $candidate $page $asset } catch { $rejected = $true }
+            try { Confirm-ReadmeGameLinks $candidate $listedPage $asset } catch { $rejected = $true }
             Require $rejected "README verifier accepted invalid navigation for $repo"
         }
     }

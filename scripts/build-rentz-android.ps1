@@ -121,6 +121,7 @@ if($sourceCommit){
 $passed=$exit-eq0-and$results.Count-ge2-and@($results|Where-Object{$_.failures-or$_.errors-or$_.skipped-or$_.tests-lt1}).Count-eq0-and@($results|Where-Object{$_.module-eq'app'}).Count-gt0-and$drift.Count-eq0-and$population.Count-eq0
 $apk=Join-Path $RunRoot 'rentz-lab-debug.apk';$hash='';$certificate=@();$version=$null;$debuggable=$null;$applicationId='';$apkBytes=0
 $uiApk='';$uiApkHash='';$uiApplicationId='';$uiAuditedCases=0;$uiCertificate=@();$uiApkBytes=0
+$historyFixture='';$historyFixtureSha256=''
 if($passed){
     if(-not$UiSanityOnly){
     $variant=$Configuration.ToLowerInvariant()
@@ -168,6 +169,16 @@ if($passed){
         & (Join-Path $Sdk 'build-tools/36.0.0/zipalign.exe') -c -P 16 -v 4 $uiApk *> (Join-Path $RunRoot 'ui-apk-alignment.txt');$uiAligned=$LASTEXITCODE-eq0
         $uiDebuggable=[bool](@(Get-Content -LiteralPath (Join-Path $RunRoot 'ui-apk-badging.txt')|Where-Object{$_-eq'application-debuggable'}).Count)
         $auditDirectory=Join-Path $RunRoot 'assertions'
+        $historyFixture=Join-Path $auditDirectory 'history-fixture/fixture.json'
+        $historyJournal=Join-Path $auditDirectory 'history-fixture/session.json'
+        if(!(Test-Path -LiteralPath $historyFixture -PathType Leaf) -or
+            !(Test-Path -LiteralPath $historyJournal -PathType Leaf)){throw 'The UI build must export the scored history fixture and its journal.'}
+        $history=Get-Content -LiteralPath $historyFixture -Raw|ConvertFrom-Json
+        if($history.kind -cne 'confirmed-rentz-history' -or
+            (Get-FileHash -LiteralPath $historyJournal -Algorithm SHA256).Hash -ine $history.journalSha256){
+            throw 'The UI build history fixture does not identify its journal.'
+        }
+        $historyFixtureSha256=(Get-FileHash -LiteralPath $historyFixture -Algorithm SHA256).Hash.ToLowerInvariant()
         if(Test-Path -LiteralPath $auditDirectory -PathType Container){
             foreach($auditFile in Get-ChildItem -LiteralPath $auditDirectory -Filter '*.json' -File){
                 $audit=Get-Content -Raw -LiteralPath $auditFile.FullName|ConvertFrom-Json
@@ -206,6 +217,7 @@ if($buildUi){
         componentRun=$ComponentRun;reportingLibrary=$reportingLibrary.name
         reportingLibrarySha256=$reportingLibrary.sha256
         certificate=$uiCertificate
+        historyFixture=$historyFixture;historyFixtureSha256=$historyFixtureSha256
     }|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $RunRoot 'ui-sanity-build-qualification.json') -Encoding utf8NoBOM
 }
 if(-not$passed){throw "Android build not qualified: $RunRoot"}

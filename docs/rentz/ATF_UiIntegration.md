@@ -121,7 +121,9 @@ Varianta izolată are receipt propriu. Runnerul curent folosește replay-ul inde
 - [Driverul focalizat](../../atf-tests/tools/run-trick-collection-sanity.ps1) execută ultima mutare legală și reia mâna după oprirea procesului. Înregistrați fixture-ul de dezvoltare înainte de a-l expune emulatorului.
 - [Analiza cadrelor](../../atf-tests/tools/analyze-trick-collection.mjs) măsoară timestamp-urile, centrele cărților și apropierea de chenarul câștigător. Extent include cadrele și hash-urile înregistrărilor. [Dosarul de verificare](../../../../rentz_back/ui-review/restart-collection-j5/README.md)
 
-`-CompactScores` adaugă verificarea chenarului în română la font 1,5. Ordinea cărților vizibile se confruntă de la stânga la dreapta cu observația motorului. Proba `-HelpAwardsOnly` parcurge ajutorul în ambele limbi și are [un criteriu deschis pentru profilul activ](../feedback/ATF_Rentz_UI_ToDo.md#profilul-de-punctaj-în-proba-istoricului).
+- `-CompactScores` verifică în română chenarul la font 1,5 și confruntă ordinea cărților vizibile cu observația motorului.
+- `-HelpAwardsOnly` verifică în ambele limbi premiile distincte pentru mesele de 3–6 jucători.
+- `-HistoryDetails` confruntă profilul jurnalului și premiile locurilor confirmate.
 
 - Spark grupează metodele sub clasă: confruntați atât populația metodelor, cât și suma comparațiilor; numărul intrărilor din stânga nu este numărul testelor.
 - Folosiți controlul standard de expandare, apoi disclosure-urile acțiunilor, aserțiunilor și corpurilor. Toate rândurile trebuie desfăcute, iar ultimul trebuie accesibil prin derulare reală.

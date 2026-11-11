@@ -192,9 +192,6 @@ O serie de gesturi ADB rapide pe coloana fixă a deschis detaliul unei mâini î
 
 Verificați separat pe dispozitiv o tragere verticală pornită de pe eticheta activă, la viteză obișnuită și după un fling. Tragerea trebuie să mute rândurile, iar o atingere să deschidă un singur detaliu.
 
-## Profilul de punctaj în proba istoricului
+## Profilul de punctaj în probele native
 
-**P2 · runnerul Android.** Fixture-ul exportă jurnalul cu `LABORATORY_V2`, iar proba `-HistoryDetails` așteaptă încă eticheta `LABORATORY_V1`. [Generatorul jurnalului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzHistoryReplayTest.java) · [Runnerul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
-
-- **Istoric.** Derivați profilul așteptat din fixture și verificați locul și premiul fiecărui jucător. Păstrați o probă separată pentru jurnalul istoric cu premii egale și verificați revenirea în grilă.
-- **Ajutor.** `-HelpAwardsOnly` așteaptă aceeași grilă istorică la toate mesele. Verificați premiile profilului activ pentru 3–6 locuri în ambele limbi, inclusiv faptul că numai ultimul loc primește zero. [Grila de laborator](../rentz/ATF_Rules.md)
+Proba de istoric confruntă profilul curent din jurnalul calificat și păstrează ordinea reală a sosirii, inclusiv singurul zero. Proba de ajutor verifică premiile fiecărei mese, în română și engleză. Acceptanța rămâne deschisă până când ambele probe trec pe același candidat. [Contractul verificării](../rentz/ATF_UiIntegration.md)

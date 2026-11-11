@@ -164,7 +164,8 @@ README-ul principal începe cu jocul, descărcarea și prima partidă. Secțiune
 |---|---|
 | `DRAFT` | Dosarul ediției |
 | `PREPARED` | Dosarul ediției, APK-ul local |
-| `PUBLISHED` | Pagina release-ului, APK-ul direct din canalul calificat |
+| `PUBLISHED`, acces restricționat | APK-ul direct din canalul calificat |
+| `PUBLISHED`, acces public | Pagina release-ului, APK-ul direct din canalul calificat |
 
 Catalogul verifică unicitatea secțiunii, ordinea și adresele. Verificatorul post-publicare cere aceeași formă în README-ul remote. Condițiile de acces, compatibilitatea Android și dovezile ediției se citesc în documentele de distribuție și în dosarul ediției.
 

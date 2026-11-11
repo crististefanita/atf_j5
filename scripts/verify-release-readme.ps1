@@ -71,12 +71,12 @@ function Confirm-ReadmeGameLinks([string]$Readme, [string]$ReleaseUrl, [string]$
 
     $section = $sections[0]
     $lines = @($section.Groups[1].Value -split '\n' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-    $expected = @($ReleaseUrl, $ApkUrl)
-    if ($lines.Count -ne $expected.Count) { throw 'Jocul must contain only the release and APK links.' }
+    $expected = @(if ($ReleaseUrl) { $ReleaseUrl }; $ApkUrl)
+    if ($lines.Count -ne $expected.Count) { throw 'Jocul must contain exactly the qualified links for this distribution channel.' }
     for ($i = 0; $i -lt $expected.Count; $i++) {
         $link = [regex]::Match($lines[$i], '^- \[[^\[\]]+\]\(([^()\s]+)\)$')
         if (!$link.Success -or $link.Groups[1].Value -cne $expected[$i]) {
-            throw 'Jocul must contain the qualified release and APK links in order, without additional copy.'
+            throw 'Jocul must contain the qualified links in order, without additional copy.'
         }
     }
     $outside = $text.Remove($section.Index, $section.Length)
@@ -160,7 +160,8 @@ git -C $project merge-base --is-ancestor $source $head
 if($LASTEXITCODE){throw 'The pushed README must descend from the qualified source.'}
 $readme = (git -C $project show ($head+':README.md')) -join "`n"
 if($LASTEXITCODE){throw 'The pushed README is missing.'}
-Confirm-ReadmeGameLinks $readme $releaseUrl $direct
+$readmeReleaseUrl = if (!$Restricted) { $releaseUrl }
+Confirm-ReadmeGameLinks $readme $readmeReleaseUrl $direct
 $catalog = (git -C $project show ($head+':release/index.json')) -join "`n"
 if($LASTEXITCODE){throw 'The pushed release catalog is missing.'}
 $catalog = $catalog | ConvertFrom-Json

@@ -29,7 +29,7 @@
       "criterion": "Require the authenticated artifact bytes and SHA-256, explicit provider permissions and exact source tag. The pushed Jocul section accepts only the two canonical links in order on both channels.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-09",
-      "sha256": "a5755f2bfccfc3458f56b860aae5c9cbc3b6a7ec1f557cbf3891b43c17fe710a",
+      "sha256": "da7a129167cfd1a3adbcaec74dc4a47fee66551f1fff7bb42048fc21414aa174",
       "allowDelete": false
     },
     {
@@ -519,7 +519,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "53825e889237af7406737d5d09d96205fcf20434f5a6cb285e2525a6b7ad34af",
+      "sha256": "4be7cbb0525001a370caf91f3975adc24d99299393c1e6b52241631fd9623dde",
       "allowDelete": false
     },
     {
@@ -709,7 +709,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry. Remote README fixtures exercise both distribution channels and reject extra copy or routes.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "e636cf09f1050cb290ee8d65c27af0624a9d57695850cb601144cb7d00f293d5",
+      "sha256": "93719ee8a9ac3887aaf8241bfe8d5058002b3312c53c62f00865f5a49c72db4d",
       "allowDelete": false
     },
     {
@@ -1109,7 +1109,7 @@
       "criterion": "The main guide accepts the exact production edition or one verified private preview. A newer staged candidate leaves the latest verified download in place.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "273925cd80bbea4bdbe0ce3a290dfae4d379feb8ba66cbd5552f2cbb22cb25d5",
+      "sha256": "06289ae771c7a087fbbf0a3bd38166908b9500761901989f4c92ee601b92ecaf",
       "allowDelete": false
     },
     {
@@ -1169,7 +1169,7 @@
       "criterion": "Capture the chooser and game frames, check the active actor and full hand height, and preserve the five-deal native contract.",
       "proof": "docs/rentz/ATF_Android.md",
       "expires": "2026-11-20",
-      "sha256": "2a5e8e4209d8437923e695f9875713910a606f35eb85d8a8f0de848bbb1c48bc",
+      "sha256": "137488959ae96088493baba53ea9f05e4d1a01d0ac9111e373c903349e598c01",
       "allowDelete": false
     },
     {
@@ -1199,7 +1199,7 @@
       "criterion": "Commit, source manifest, package, version, signing certificate, APK bytes, and reporting tools match receipts.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "3192b8229f72be1d524ef13799a2a8fb2c85d50701d051c1c35a3bb1cbcbe52b",
+      "sha256": "6fc17810640da0efefbc73ae914b8054b4255af7867616295bad26d135ed3ccf",
       "allowDelete": false
     },
     {
@@ -1209,7 +1209,7 @@
       "criterion": "Increment versionCode once and preserve signing while consuming Card Table UI 0.1.10 with desugaring.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "60788cc073216198eb4f7b1df4c756a3de65a761547ffb6b0f6d57b17ac34112",
+      "sha256": "90d375472ccea7dd8643f23a2ebe4f9870c48a089e7ba887811c0d0662915d46",
       "allowDelete": false
     },
     {
@@ -1219,7 +1219,7 @@
       "criterion": "Bind the main README to the qualified 0.18.0 asset and verified access while preserving the production catalog.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "e1e203f49efd796b2baded334d2d8bf9eeefd7fd4dc351514a9914b49949453e",
+      "sha256": "d9c87577f3427cafd38f803cda9c154950f06d9627dc1a1ffc101106a9ded520",
       "allowDelete": false
     },
     {

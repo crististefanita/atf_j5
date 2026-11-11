@@ -69,9 +69,15 @@ class ReleaseGovernanceTest {
                     () -> ReleaseCatalog.verifyMainGuide(noisy, "example/game", "1.2.0", "PUBLISHED"));
         }
     }
-    @Test void restrictedEditionUsesTheSameGameSectionAndRejectsASecondDownloadRoute() throws Exception {
-        String restricted=guide("PUBLISHED").replace("example/game","example/private-editions");
+    @Test void restrictedEditionRequiresOneDirectApkLink() throws Exception {
+        String twoLinks=guide("PUBLISHED").replace("example/game","example/private-editions");
+        String restricted=twoLinks.replaceAll("(?m)^- \\[[^\\n]+/releases/tag/[^\\n]+\\n", "");
         assertDoesNotThrow(()->ReleaseCatalog.verifyRestrictedGuide(restricted,"example/private-editions","1.2.0"));
+        assertEquals("RELEASE-MAIN-LINKS",assertThrows(IOException.class,
+                ()->ReleaseCatalog.verifyRestrictedGuide(twoLinks,"example/private-editions","1.2.0")).getMessage());
+        assertEquals("RELEASE-MAIN-LINKS",assertThrows(IOException.class,
+                ()->ReleaseCatalog.verifyRestrictedGuide(restricted.replace(".apk","_sanity.apk"),
+                        "example/private-editions","1.2.0")).getMessage());
         String stale=restricted+"\n## Descărcări\n\n[APK vechi](https://downloads.example.test/v1.1.0/RentzLab-1.1.0.apk)\n";
         assertEquals("RELEASE-MAIN-EXTRA-DOWNLOAD",assertThrows(IOException.class,
                 ()->ReleaseCatalog.verifyRestrictedGuide(stale,"example/private-editions","1.2.0")).getMessage());
@@ -83,7 +89,8 @@ class ReleaseGovernanceTest {
                         "example/private-editions", "1.2.0")).getMessage());
     }
     @Test void theMainGuideRejectsASecondReleaseHiddenBehindALocalDocumentationLink() {
-        String guide = guide("PUBLISHED") + "\n## APK de test\n\n"
+        String guide = guide("PUBLISHED").replaceAll("(?m)^- \\[[^\\n]+/releases/tag/[^\\n]+\\n", "")
+                + "\n## APK de test\n\n"
                 + "- [Rentz Lab 1.3.0](docs/rentz/ATF_Release.md#apk-de-test)\n";
         var failure = assertThrows(IOException.class, () -> ReleaseCatalog.verifyRestrictedGuide(guide, "example/game", "1.2.0"));
         assertEquals("RELEASE-MAIN-EXTRA-DOWNLOAD", failure.getMessage(), "The prior two-version README must fail");

@@ -128,7 +128,8 @@ public final class ReleaseCatalog {
     }
 
     public static void verifyRestrictedGuide(String guide,String repository,String version) throws IOException {
-        verifyMainGuide(guide, repository, version, "PUBLISHED");
+        verifyGuide(guide, List.of("https://github.com/" + repository + "/releases/download/v" + version
+                + "/RentzLab-" + version + ".apk"));
     }
     public static void verifyMainGuide(String guide,String repository,String version,String state) throws IOException {
         verifyMainGuide(guide, repository, version, state, null);

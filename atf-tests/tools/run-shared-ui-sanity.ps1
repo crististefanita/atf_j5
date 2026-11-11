@@ -16,6 +16,7 @@ $build=Get-Content -LiteralPath $BuildQualification -Raw|ConvertFrom-Json
 if($build.status-ne'PASS'-or$build.applicationId-ne'ro.rentzlab.app.uisanity'-or$build.newAuditedCases-lt1){throw 'Qualified isolated UI build required.'}
 if((Get-FileHash -LiteralPath $build.apk -Algorithm SHA256).Hash-ne$build.apkSha256){throw 'APK changed after qualification.'}
 $fixture=$null
+$historyProfile=$null
 if(($HistoryMatrix-or$HistoryDetails)-and-not$HistoryOnly){throw 'History matrix and details require HistoryOnly.'}
 if($HelpAwardsOnly-and($HistoryOnly-or$SeatExtremes)){throw 'Choose a single native sanity scope.'}
 if($CompactScores-and($HelpAwardsOnly-or$HistoryOnly-or$SeatExtremes)){throw 'Compact scores continue the one-hand sanity.'}
@@ -25,12 +26,17 @@ if($RentzCardMarksOnly-and($ConsecutiveSubgames-or$HelpAwardsOnly-or$HistoryOnly
 if($RentzCardMarksOnly){Add-Type -AssemblyName System.Drawing.Common}
 if($HistoryOnly){
     if($SeatExtremes){throw 'Choose a single native sanity scope.'}
+    if(!$build.historyFixture -or $build.historyFixtureSha256 -notmatch '^[a-f0-9]{64}$'){
+        throw 'The UI build receipt must identify its qualified history fixture.'
+    }
     Assert-AtfArtifactPath -Path $build.historyFixture -ProjectRoot $project
     if((Get-FileHash -LiteralPath $build.historyFixture).Hash-ne$build.historyFixtureSha256){throw 'History fixture identity changed after qualification.'}
     $fixture=Get-Content -LiteralPath $build.historyFixture -Raw|ConvertFrom-Json
     $journal=Join-Path (Split-Path -Parent $build.historyFixture) 'session.json'
     if($fixture.kind-ne'confirmed-rentz-history'-or$fixture.players-ne6-or$fixture.completedHands-ne48-or
         (Get-FileHash -LiteralPath $journal).Hash-ne$fixture.journalSha256){throw 'Qualified 48-hand Rentz journal required.'}
+    $historyProfile=(Get-Content -LiteralPath $journal -Raw|ConvertFrom-Json).profile
+    if($historyProfile-cne'LABORATORY_V2'){throw 'Qualified history must use the current laboratory profile.'}
     if($HistoryDetails-and$fixture.last.finishOrder.Count-ne$fixture.players){throw 'Qualified Rentz finishing order required.'}
 }
 $developmentLedger=Join-Path (Get-AtfDataRoot -ProjectRoot $project) 'learning/exposure.json'
@@ -246,11 +252,16 @@ function HelpAwardChecks($Nodes,[string]$Heading,[string]$Players,[string]$Place
     Check 'Localized finishing awards heading' 1 @($Nodes|Where-Object text -ceq $Heading).Count
     $cells=@($Nodes|Where-Object id -like '*:id/rentz_finishing_award')
     Check 'Eighteen awards for the four supported tables' 18 $cells.Count
-    $expected=@(300,200,100,0,0,0)
+    $expected=@{
+        3=@(300,200,0)
+        4=@(300,200,100,0)
+        5=@(300,175,100,25,0)
+        6=@(300,150,75,50,25,0)
+    }
     foreach($playersCount in 3..6){
         Check "Table row for $playersCount players" 1 @($Nodes|Where-Object description -ceq "$playersCount $Players").Count
         for($position=1;$position-le$playersCount;$position++){
-            $pointsValue=$expected[$position-1]
+            $pointsValue=$expected[$playersCount][$position-1]
             $description="$playersCount $Players, $Place $position, $pointsValue $Points"
             $matches=@($cells|Where-Object description -ceq $description)
             $actual=if($matches.Count-eq1){$matches[0].text}else{"$($matches.Count) visible cells"}
@@ -380,7 +391,7 @@ function RunLastHandDetails([int]$FullWidth) {
     OpenHandDetails $fixture.last
     Observe 'Restored Rentz details show the recorded first finishing place' {param($nodes)
         Check 'Confirmed Rentz hand title' 1 @($nodes|Where-Object text -ceq 'Hand 48 · Rentz').Count
-        Check 'Recorded chooser and profile' 1 @($nodes|Where-Object {($_.text -replace '\s+',' ')-ceq"Chosen by $(SeatName $fixture.last.chooser) Scoring profile · LABORATORY_V1"}).Count
+        Check 'Recorded chooser and profile' 1 @($nodes|Where-Object {($_.text -replace '\s+',' ')-ceq"Chosen by $(SeatName $fixture.last.chooser) Scoring profile · $historyProfile"}).Count
         DetailSeat $nodes $fixture.last 1
     }
     $tree=@(Ui)
@@ -389,7 +400,7 @@ function RunLastHandDetails([int]$FullWidth) {
         HistorySwipe $scroll
         $tree=@(Ui)
     }
-    Observe 'Equal awards retain the actual final places after restoration' {param($nodes)
+    Observe 'Distinct awards and the single zero retain their finishing places after restoration' {param($nodes)
         foreach($place in 4..6){DetailSeat $nodes $fixture.last $place}
         Check 'Assigned last place is explained' 1 @($nodes|Where-Object text -ceq 'Last place is assigned to the player still holding cards.').Count
     }
@@ -461,7 +472,10 @@ function RunShortHistory([int]$FullScoreWidth,[int]$FullRowHeight,[int]$FullLege
 }
 function RunHistorySanity {
     Tap 'Scores'
-    Observe 'An empty history has an explicit native state' {param($nodes) Check 'Empty history text' $true ((Text $nodes).Contains('No completed hands yet'))}
+    Observe 'An empty history has an explicit native state' {
+        param($nodes)
+        Check 'Empty history text' $true ((Text $nodes).Contains('No completed hands yet'))
+    } -UntilText 'No completed hands yet'
     Tap 'Close'
     $historyJournal=Join-Path $raw 'development-journal.json'
     Copy-Item -LiteralPath $journal -Destination $historyJournal
@@ -1100,7 +1114,10 @@ try{
     Tap 'Interface language';Tap 'Română'
     Observe 'Romanian menu keeps the edited profile' {param($nodes) $t=Text $nodes;Check 'Romanian route copy' $true ($t.Contains('Partidă nouă'));Check 'Own persisted name' $true ($t.Contains('Jucător: Ana'))}
     Tap 'Limba interfeței';Tap 'English';Tap 'Scores'
-    Observe 'Empty scores have an explicit native state' {param($nodes) Check 'No fabricated result before a game' $true ((Text $nodes).Contains('No completed hands yet'))}
+    Observe 'Empty scores have an explicit native state' {
+        param($nodes)
+        Check 'No fabricated result before a game' $true ((Text $nodes).Contains('No completed hands yet'))
+    } -UntilText 'No completed hands yet'
     Tap 'Close';Tap 'New game';Tap 'Opponents';Tap 'Normal'
     Observe 'Separate Rentz setup without page scrolling' {param($nodes) $t=Text $nodes;Check 'Real opponent selection' $true ($t.Contains('Normal'));Check 'Start action' $true ($t.Contains('Start game'))}
     $back=[Diagnostics.Stopwatch]::StartNew();Adb @('shell','input','keyevent','KEYCODE_BACK') 'legacy-back'|Out-Null;$back.Stop()
