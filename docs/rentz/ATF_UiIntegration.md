@@ -38,7 +38,7 @@ exclusiveContent {
 Dependența se declară în modulul aplicației, după admitere:
 
 ```groovy
-implementation 'ro.cardtable:card-table-ui:0.1.9'
+implementation 'ro.cardtable:card-table-ui:0.1.10'
 implementation 'ro.cardtable:card-table-names:0.1.0'
 ```
 

@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "coordinate": "ro.cardtable:card-table-ui:0.1.9",
+  "coordinate": "ro.cardtable:card-table-ui:0.1.10",
   "namesCoordinate": "ro.cardtable:card-table-names:0.1.0",
   "producer": "atf_j4",
   "qualification": "C:/work/1/atf_j4/whist-lab-app/atf-card-table-ui/README.md",
   "files": [
     {
-      "sha256": "6296b02187b77b09d107810b1a032f4d762a2dff7b1b39334af18957beb741f7",
-      "path": "ro/cardtable/card-table-ui/0.1.9/card-table-ui-0.1.9.aar"
+      "sha256": "b25f85ac09d1180c7200d0467a4fd34c554e555e9467b41727651f586a7b04e9",
+      "path": "ro/cardtable/card-table-ui/0.1.10/card-table-ui-0.1.10.aar"
     },
     {
-      "sha256": "e2ad93614a7fb8d3d387a3a1e919796396cddc1066f592c9c0969c4ff2d6dadc",
-      "path": "ro/cardtable/card-table-ui/0.1.9/card-table-ui-0.1.9.pom"
+      "sha256": "d1d0eb0c54f641df48884f7945f3c7969c8209075ee7a399deca0c31e5fabd2c",
+      "path": "ro/cardtable/card-table-ui/0.1.10/card-table-ui-0.1.10.pom"
     },
     {
-      "sha256": "7324829de0cbd53e32ddddfe32a44482b443749af1c5fbd19dfeb058d16e84d7",
-      "path": "ro/cardtable/card-table-ui/0.1.9/card-table-ui-0.1.9.module"
+      "sha256": "618396dd955c71c1b1c4a494d987263dc903101366eba3947fe83660aeaf702e",
+      "path": "ro/cardtable/card-table-ui/0.1.10/card-table-ui-0.1.10.module"
     },
     {
-      "sha256": "52d301a669335e3354396e42e17791d442dc0f6fc7c6edaa30a6d4e3ed3a0afb",
-      "path": "ro/cardtable/card-table-ui/0.1.9/card-table-ui-0.1.9-sources.jar"
+      "sha256": "9e3c73cb3da0d8ffca2fb95eb40740fd6861235a2766f4d990328c28d7589500",
+      "path": "ro/cardtable/card-table-ui/0.1.10/card-table-ui-0.1.10-sources.jar"
     },
     {
       "path": "ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar",
@@ -37,5 +37,7 @@
       "path": "ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0-sources.jar",
       "sha256": "92a5fb18ad5e183f89a09392b177803b0b42227f83cf5a278012760291d3c030"
     }
-  ]
+  ],
+  "producerCommit": "06d16afe171b43f3dc773ad15a44f594a6092372",
+  "producerSourceFingerprint": "5dbc0925228464162890d95fbd13bd45fcb63922e50fbc9654da9aeb963b27c6"
 }

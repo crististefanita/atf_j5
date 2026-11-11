@@ -875,11 +875,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java",
       "owner": "Rentz UI",
-      "reason": "Admit the shared hint palette, native decoration and full-width card band.",
-      "criterion": "Preserve the existing class checks and verify the new loaded highlight and geometry classes against the pinned AAR.",
+      "reason": "Admit the shared single-line action indicator with its phase-independent vertical measurement.",
+      "criterion": "Verify the loaded PlayerSeatView, highlight and geometry classes against the pinned AAR, with no engine dependencies.",
       "proof": "../../whist_back/component-suites/card-highlight-20261111/whist-lab-app-card-table-ui-testDebugUnitTest.html",
       "expires": "2026-11-20",
-      "sha256": "c4d9a5175c3d121dd0ccc13747a61261ef9ae27eaf15d07a04a79fef1aa9633e",
+      "sha256": "becf4b298f015e14289e4aabd361fdeed645d6d0045fc787f110c3c4bd55fe29",
       "allowDelete": false
     },
     {
@@ -1206,10 +1206,10 @@
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
       "reason": "Prepare minor release 0.16.0 and retain the admitted UI artifact.",
-      "criterion": "Increment versionCode once and preserve signing while consuming Card Table UI 0.1.9 with desugaring.",
+      "criterion": "Increment versionCode once and preserve signing while consuming Card Table UI 0.1.10 with desugaring.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "35f028ffe81f3aad04496f169fb61225e6e87a977d22fb50efa3585f30e448d7",
+      "sha256": "d694e5a1a19b464b6ce7a7c861d48b87b401ab412e36c91dde58a18791c68a44",
       "allowDelete": false
     },
     {
