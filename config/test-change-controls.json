@@ -1209,7 +1209,7 @@
       "criterion": "Increment versionCode once and preserve signing while consuming Card Table UI 0.1.10 with desugaring.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "d694e5a1a19b464b6ce7a7c861d48b87b401ab412e36c91dde58a18791c68a44",
+      "sha256": "58afab881f4016ade8b64936232937d22271095de7098bb5d71add63e1491af2",
       "allowDelete": false
     },
     {
@@ -1219,7 +1219,7 @@
       "criterion": "Keep the published 0.15.0 link during qualification and declare 0.16.0 with code 20.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "6f3370d1fe5a69bc92ee60a283d9e6defc9b7f3e3f3f05a6d6efe0a949c5d7ad",
+      "sha256": "f728019efe3a7fe11fc259a7b9220de90b03f01dff4a3e49131effbb76191fac",
       "allowDelete": false
     },
     {
