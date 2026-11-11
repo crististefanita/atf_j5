@@ -1219,7 +1219,7 @@
       "criterion": "Keep the published 0.15.0 link during qualification and declare 0.16.0 with code 20.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "d616aefcc2058600d8564f442b5bd65af2c9b0669758c463608c06a880f0429c",
+      "sha256": "6f3370d1fe5a69bc92ee60a283d9e6defc9b7f3e3f3f05a6d6efe0a949c5d7ad",
       "allowDelete": false
     },
     {

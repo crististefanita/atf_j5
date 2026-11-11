@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "versionName": "0.16.0",
+    "versionCode": 20,
+    "applicationId": "ro.rentzlab.app",
+    "sourceCommit": "09c9c45959c9b4a20af11ad937d21fe5c8b09ed3",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "apkName": "RentzLab-0.16.0.apk",
+    "apkBytes": 922130,
+    "sha256": "83539c4c4242a54cff7c218ba58146586ae446cc658bc9b7b2b3ff4a11f0f056",
+    "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+    "debuggable": false
+  },
+  "publication": {
+    "state": "PUBLISHED",
+    "channel": "authenticated-only",
+    "sourceCommit": "09c9c45959c9b4a20af11ad937d21fe5c8b09ed3",
+    "releaseId": 441743708
+  },
+  "qualification": {
+    "status": "PASS",
+    "scope": "offline-components-and-native-five-subgames",
+    "e2e": "PASS",
+    "evidence": {
+      "components": {
+        "path": "components/j5-0160-fit-20261111/component-suite-extent.html",
+        "bytes": 6771035,
+        "sha256": "e6cb80855f6b0265119a9dd65279b944915d28fb5ecdc52e56e7e0a6847d0fa5"
+      },
+      "native": {
+        "path": "distribution/0.16.0-20261111-fit/android-compact-consecutive/android-extent.html",
+        "bytes": 16634664,
+        "sha256": "10f07f10714e2b2300eae7a3ab719c8dd9c0adf2827e62241481dcc34fa4a9fb"
+      },
+      "rag": {
+        "path": "distribution/0.16.0-20261111-fit/rag-final/report/release-rag-report.json",
+        "bytes": 16566,
+        "sha256": "8553bd2e95a23feb3821191bb0a5fc0f464f0697de226f96a10b15374923dc4d"
+      }
+    },
+    "tests": 546,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "integrity": {
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 391,
+        "sha256": "910ed85cf69d7bb48e962d19e02909b391ade76e57bd72e4f8fb4333415e81a1"
+      },
+      {
+        "path": "release-notes.md",
+        "bytes": 402,
+        "sha256": "442419efac25acdc7e4df669d47ae967b86acd3d151d5a4de57dfcc5338f1259"
+      },
+      {
+        "path": "RentzLab-0.16.0.apk",
+        "bytes": 922130,
+        "sha256": "83539c4c4242a54cff7c218ba58146586ae446cc658bc9b7b2b3ff4a11f0f056"
+      },
+      {
+        "path": "RentzLab-0.16.0.apk.sha256",
+        "bytes": 86,
+        "sha256": "9fbd42a82f3287397aac6fe45f9ab74aa79569b5ce71ce4f7514d58aed07898d"
+      },
+      {
+        "path": "reports/README.md",
+        "bytes": 498,
+        "sha256": "298ec4db713d5abbf85b2d0e9824319a1342d3f17f01020ea1ac27b21edb685d"
+      }
+    ]
+  }
+}

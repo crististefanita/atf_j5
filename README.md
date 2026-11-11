@@ -8,8 +8,8 @@ Motorul validează distribuirea, alegerea sub-jocului, mutările legale și scor
 
 ## Ediție cu acces autorizat
 
-- [Rentz Lab 0.15.0](https://github.com/crististefanita/atf_j5_releases/releases/tag/v0.15.0) · Poziții de joc aliniate cu Whist și cărți Rentz mai mari pe masă.
-- [Descarcă APK-ul Rentz Lab 0.15.0](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.15.0/RentzLab-0.15.0.apk) · Android 8.0+. Autentifică-te în GitHub cu un cont care are acces la ediție.
+- [Rentz Lab 0.16.0](https://github.com/crististefanita/atf_j5_releases/releases/tag/v0.16.0) · Poziții stabile de la alegerea contractului la joc și catalogul comun de realizări.
+- [Descarcă APK-ul Rentz Lab 0.16.0](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.16.0/RentzLab-0.16.0.apk) · Android 8.0+. Autentifică-te în GitHub cu un cont care are acces la ediție.
 
 ## Module și responsabilități
 
