@@ -70,7 +70,7 @@ class ArenaAdmissionTest {
                 mutation("different policy", n -> n.put("policyFile", "rentz-policy.yaml")),
                 mutation("null score profile", n -> n.putNull("scoreProfile")),
                 mutation("changed finishing rewards", n ->
-                        ((ObjectNode)n.get("scoreProfile")).putArray("finishRewards").add(301).add(200).add(100).add(0).add(0).add(0)),
+                        ((ObjectNode)n.at("/scoreProfile/finishingPlacesByPlayers")).putArray("4").add(301).add(200).add(100).add(0)),
                 mutation("budget differs from protocol", n -> {
                     ((ObjectNode)n.get("candidateSettings")).put("worlds", 2);
                     ((ObjectNode)n.get("referenceSettings")).put("worlds", 2);

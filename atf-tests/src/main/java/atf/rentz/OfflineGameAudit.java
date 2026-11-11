@@ -23,7 +23,8 @@ public final class OfflineGameAudit {
             terminal=finished.size()==before.players()-1;
             if(terminal) {
                 for(int seat=0;seat<before.players();seat++)if(!finished.contains(seat))finished.add(seat);
-                for(int place=0;place<before.players();place++)expectedPoints.set(finished.get(place),profile.finishRewards().get(place)*(before.blind()?2:1));
+                var awards = profile.finishRewardsFor(before.players());
+                for(int place=0;place<before.players();place++)expectedPoints.set(finished.get(place),awards.get(place)*(before.blind()?2:1));
                 next=before.turn();
             } else {
                 if(card.rank()==14&&sizes.get(before.seat())>0)next=before.seat();
@@ -46,7 +47,7 @@ public final class OfflineGameAudit {
         require(terminal?(after.phase()==RentzMatch.Phase.DEAL_END||after.phase()==RentzMatch.Phase.MATCH_END):after.phase()==RentzMatch.Phase.PLAY,"Termination frontier");
     }
     private static boolean objectiveCaptured(RentzMatch.Observation before,List<Card> seen,RentzMatch.DealEnding dealEnding) {
-        boolean current=dealEnding==RentzMatch.DealEnding.SCORING_CARDS;
+        boolean current=dealEnding.closesOnScoringCards();
         return switch(before.contract()) {
             case KING_HEARTS -> seen.contains(new Card(Card.Suit.HEARTS,13));
             case TEN_CLUBS -> seen.contains(new Card(Card.Suit.CLUBS,10));

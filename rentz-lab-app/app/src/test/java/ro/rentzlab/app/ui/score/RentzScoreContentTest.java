@@ -16,10 +16,10 @@ public final class RentzScoreContentTest {
     @Test public void helpShowsOnlyThePlacesAvailableAtEachTable() {
         var rows = RentzScoreContent.finishingAwards(GameSession.scoringProfile());
         audit.equal("Three through six seats with zero awards at actual places", List.of(
-                List.of(300, 200, 100),
+                List.of(300, 200, 0),
                 List.of(300, 200, 100, 0),
-                List.of(300, 200, 100, 0, 0),
-                List.of(300, 200, 100, 0, 0, 0)), rows);
+                List.of(300, 175, 100, 25, 0),
+                List.of(300, 150, 75, 50, 25, 0)), rows);
         audit.rejects("Award matrix cannot gain an unsupported table", UnsupportedOperationException.class, rows::clear);
         audit.rejects("An actual place cannot be removed", UnsupportedOperationException.class, rows.get(3)::clear);
     }

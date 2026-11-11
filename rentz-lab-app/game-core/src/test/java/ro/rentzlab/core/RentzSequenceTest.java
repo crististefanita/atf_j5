@@ -34,9 +34,36 @@ class RentzSequenceTest {
                 assertTrue(++actions<1000);
             }
             assertEquals(RentzMatch.Phase.DEAL_END,match.observe(0).phase());
-            assertEquals(600,match.history().get(0).points().stream().mapToInt(Integer::intValue).sum());
+            assertEquals(players == 3 ? 500 : 600,
+                    match.history().get(0).points().stream().mapToInt(Integer::intValue).sum());
         }
         assertTrue(aceSeen);assertTrue(skipSeen);assertTrue(passSeen);
+    }
+    @ParameterizedTest @ValueSource(ints={3,4,5,6})
+    void onlyTheLastFinisherGetsZeroWithOrWithoutBlind(int players) {
+        var expected = switch (players) {
+            case 3 -> List.of(300, 200, 0);
+            case 4 -> List.of(300, 200, 100, 0);
+            case 5 -> List.of(300, 175, 100, 25, 0);
+            default -> List.of(300, 150, 75, 50, 25, 0);
+        };
+        for (boolean blind : new boolean[]{false, true}) {
+            var match = new RentzMatch(players, 31, ScoreProfile.laboratory());
+            if (!blind) match.reveal(0);
+            match.choose(0, Contract.RENTZ, blind);
+            for (int turn = 0; match.observe(0).phase() == RentzMatch.Phase.PLAY; turn++) {
+                assertTrue(turn < 200, "The deal must settle");
+                int actor = match.observe(0).turn();
+                var legal = match.observe(actor).legal();
+                if (legal.isEmpty()) match.pass(actor);
+                else match.play(actor, legal.get(0));
+            }
+            var hand = match.history().get(0);
+            var rankPoints = hand.scoring().finishOrder().stream().map(hand.points()::get).toList();
+            assertEquals(expected.stream().map(value -> blind ? 2 * value : value).toList(), rankPoints);
+            assertEquals(1, hand.points().stream().filter(value -> value == 0).count());
+            assertEquals(hand.points(), hand.totals());
+        }
     }
     @Test void mandatoryPlayRefusesPassAndPreservesTheBoard(){
         for(int seed=0;seed<20;seed++){

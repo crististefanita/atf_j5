@@ -33,7 +33,7 @@ public final class SessionJson {
             if(command.origin()!=GameSession.Origin.UNKNOWN)row.put("origin",command.origin().name());
             commands.put(row);
         }
-        var json = new JSONObject().put("schema",saved.schema()).put("players",saved.players()).put("seed",saved.seed()).put("difficulty",saved.difficulty().name()).put("profile",GameSession.SCORE_PROFILE).put("policy","RENTZ_PUBLIC_LOOKAHEAD_V1").put("rules",saved.dealEnding().journalVersion()).put("commands",commands);
+        var json = new JSONObject().put("schema",saved.schema()).put("players",saved.players()).put("seed",saved.seed()).put("difficulty",saved.difficulty().name()).put("profile",saved.dealEnding().laboratoryProfileId()).put("policy","RENTZ_PUBLIC_LOOKAHEAD_V1").put("rules",saved.dealEnding().journalVersion()).put("commands",commands);
         if (!saved.opponents().equals(GameSession.defaultOpponents(saved.players(),saved.seed()))) json.put("opponents",new JSONArray(saved.opponents()));
         return json;
     }
@@ -58,10 +58,10 @@ public final class SessionJson {
     public static Checkpoint restoreCheckpoint(String text)throws JSONException{
         var json=SavedJson.read(text);
         SavedJson.fields(json,Set.of("schema","players","seed","difficulty","profile","policy","commands"),Set.of("rules","opponents","achievements"));
-        if(!SavedJson.text(json,"profile").equals(GameSession.SCORE_PROFILE)||!SavedJson.text(json,"policy").equals("RENTZ_PUBLIC_LOOKAHEAD_V1")){
+        var dealEnding=RentzMatch.DealEnding.fromJournal(json.has("rules")?SavedJson.text(json,"rules"):"RENTZ_RULES_V1");
+        if(!SavedJson.text(json,"profile").equals(dealEnding.laboratoryProfileId())||!SavedJson.text(json,"policy").equals("RENTZ_PUBLIC_LOOKAHEAD_V1")){
             throw new IllegalArgumentException("Saved profile identity");
         }
-        var dealEnding=RentzMatch.DealEnding.fromJournal(json.has("rules")?SavedJson.text(json,"rules"):"RENTZ_RULES_V1");
         int players=SavedJson.intValue(json,"players");
         if(players<3||players>6)throw new IllegalArgumentException("Saved table size");
         var commands=new ArrayList<GameSession.Command>();

@@ -20,7 +20,7 @@ final class PromotionEvidence {
             long penalties = 8L * profile.trickPenalty() + 4L * profile.queenPenalty()
                     + 2L * players * profile.diamondPenalty() + profile.kingPenalty();
             long rewards = 8L * profile.trickReward() + profile.tenReward();
-            var rentz = profile.finishRewards().subList(0, players).stream()
+            var rentz = profile.finishRewardsFor(players).stream()
                     .sorted(java.util.Comparator.reverseOrder()).toList();
             long opponentsAwards = rentz.stream().limit(players - 1L).mapToLong(Integer::longValue).sum();
             // Each chooser has every contract. Totals repeats the four penalties, and blind can double a deal.
@@ -81,9 +81,7 @@ final class PromotionEvidence {
                 profile.kingPenalty(), profile.trickReward(), profile.tenReward()}) {
             result = gcd(result, points);
         }
-        for (int place = 0; place < players; place++) {
-            result = gcd(result, profile.finishRewards().get(place));
-        }
+        for (int award : profile.finishRewardsFor(players)) result = gcd(result, award);
         return result;
     }
 

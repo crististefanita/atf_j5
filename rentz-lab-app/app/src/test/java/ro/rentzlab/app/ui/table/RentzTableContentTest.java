@@ -46,6 +46,7 @@ public final class RentzTableContentTest {
     @Test public void actorAndFactsFollowRentzEventsAcrossEveryContractWithoutWhistFields() {
         for (Contract contract : Contract.values()) {
             var session = ready(4, contract); int actions = 0;
+            boolean constrained = false;
             while (session.view().phase() == RentzMatch.Phase.PLAY) {
                 var view = session.view(); var seats = RentzTableContent.seats(view, copy, session.displayNames("Ana"), false);
                 audit.equal("Active actor " + contract + "/" + actions, List.of(view.turn()), seats.stream().filter(seat -> seat.active()).map(seat -> seat.seat()).toList());
@@ -53,11 +54,29 @@ public final class RentzTableContentTest {
                     audit.equal("Own stats " + contract + "/" + actions + "/" + seat.seat(), List.of("Δ", "Σ"), seat.facts().stream().map(f -> f.label()).toList());
                     audit.equal("Exact confirmed total " + contract + "/" + actions + "/" + seat.seat(), view.totals().get(seat.seat()).toString(), seat.facts().get(1).value());
                 }
+                var cards = RentzTableContent.hand(view, copy, false);
+                audit.equal("Manual input matches the engine for " + contract + "/" + actions,
+                        new HashSet<>(view.legal().stream().map(RentzTableContent::id).toList()),
+                        new HashSet<>(cards.stream().filter(card -> card.playable()).map(card -> card.id()).toList()));
+                if (!constrained && contract != Contract.RENTZ && !view.trick().isEmpty()) {
+                    var lead = view.trick().get(0).card().suit();
+                    var offSuit = view.hand().stream().filter(card -> card.suit() != lead).findFirst();
+                    var following = view.hand().stream().filter(card -> card.suit() == lead).toList();
+                    if (offSuit.isPresent() && !following.isEmpty()) {
+                        var before = session.save().commands();
+                        audit.rejects("Reject off-suit when the lead suit is present in " + contract,
+                                IllegalArgumentException.class,
+                                () -> RentzTableContent.selected(view, RentzTableContent.id(offSuit.get())));
+                        audit.equal("Rejected attempt leaves the journal intact", before, session.save().commands());
+                        constrained = true;
+                    }
+                }
                 if (view.legal().isEmpty()) session.apply(new GameSession.Command(GameSession.Action.PASS, 0, null, null, false));
                 else session.apply(new GameSession.Command(GameSession.Action.PLAY, 0, RentzTableContent.selected(view, RentzTableContent.id(view.legal().get(0))), null, false));
                 session.advanceBots();
                 if (++actions > 80) throw new AssertionError("Rentz hand did not terminate");
             }
+            if (contract == Contract.WHIST) audit.truth("The Whist hand exercised a follow-suit rejection", constrained);
             audit.equal("Single completed hand " + contract, 1, session.history().size());
             audit.truth("No active actor after completion " + contract,
                     RentzTableContent.seats(session.view(), copy, session.displayNames("Ana"), false).stream().noneMatch(seat -> seat.active()));

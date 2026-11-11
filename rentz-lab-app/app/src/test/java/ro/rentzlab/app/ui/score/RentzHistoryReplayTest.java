@@ -27,9 +27,17 @@ public final class RentzHistoryReplayTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
 
     @Test public void completeSixSeatHistoryKeepsEveryConfirmedValueAfterJsonRestore() throws Exception {
+        verifyCompleteSixSeatHistory(RentzMatch.DealEnding.UNIQUE_LAST, List.of(300, 150, 75, 50, 25, 0));
+    }
+
+    @Test public void legacySixSeatHistoryPreservesTiedAwardsAndArrivalOrder() throws Exception {
+        verifyCompleteSixSeatHistory(RentzMatch.DealEnding.SCORING_CARDS, List.of(300, 200, 100, 0, 0, 0));
+    }
+
+    private void verifyCompleteSixSeatHistory(RentzMatch.DealEnding rules, List<Integer> awards) throws Exception {
         int seats = 6;
         long seed = 0x52454E545A4835L;
-        var match = new RentzMatch(seats, seed, ScoreProfile.laboratory());
+        var match = new RentzMatch(seats, seed, rules.laboratoryScoring(), 0, rules);
         var commands = new ArrayList<GameSession.Command>();
         var copy = new RentzUiText(RentzUiText.Language.EN);
         var rom = new RentzUiText(RentzUiText.Language.RO);
@@ -65,7 +73,7 @@ public final class RentzHistoryReplayTest {
                 audit.equal("Finishing order from actual plays for hand " + hand, order,
                         details.stream().map(RentzScoreContent.Detail::seat).toList());
                 for (int place = 0; place < seats; place++) {
-                    int award = List.of(300, 200, 100, 0, 0, 0).get(place) * factor;
+                    int award = awards.get(place) * factor;
                     audit.equal("Place for hand " + hand + " position " + place, place + 1, details.get(place).place());
                     audit.equal("Award for hand " + hand + " position " + place,
                             List.of(new HandScoring.Contribution(Contract.RENTZ, 1, award)), details.get(place).contributions());
@@ -85,8 +93,11 @@ public final class RentzHistoryReplayTest {
             }
         }
         audit.equal("Completed six-player schedule", RentzMatch.Phase.MATCH_END, match.observe(0).phase());
-        audit.equal("Equal awards include a finish order different from seat order", true, equalAwards);
-        var session = GameSession.restore(new GameSession.Saved(1, seats, seed, RentzPlayer.Difficulty.NORMAL, commands));
+        if (rules == RentzMatch.DealEnding.SCORING_CARDS) {
+            audit.equal("Equal awards include a finish order different from seat order", true, equalAwards);
+        }
+        var session = GameSession.restore(new GameSession.Saved(1, seats, seed, RentzPlayer.Difficulty.NORMAL,
+                commands, List.of(), rules));
         String journal = SessionJson.saved(session).toString();
         var restored = SessionJson.restore(journal);
         var expected = RentzScoreContent.rows(match.history(), copy);
@@ -95,7 +106,7 @@ public final class RentzHistoryReplayTest {
         audit.equal("Journal stays command-based", false, new JSONObject(journal).has("history"));
         var localized = RentzScoreContent.rows(restored.history(), rom);
         audit.equal("Changing copy preserves each score cell", expected.stream().map(RentzScoreContent.Row::values).toList(), localized.stream().map(RentzScoreContent.Row::values).toList());
-        writeFixture(journal, expected, commands.size());
+        if (rules == RentzMatch.DealEnding.UNIQUE_LAST) writeFixture(journal, expected, commands.size());
     }
 
     @Test public void totalsRetainBothCategoriesForTheSameDiamondQueen() {

@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import ro.rentzlab.core.Contract;
+import ro.rentzlab.core.RentzMatch;
 import ro.rentzlab.ai.RentzPlayer;
 
 import java.util.List;
@@ -61,8 +62,16 @@ public class SessionJsonValidationTest {
         refused(new JSONObject(original).put("unknown", 1).toString());
         refused(new JSONObject(original).put("rules", JSONObject.NULL).toString());
         refused(new JSONObject(original).put("commands", new JSONObject()).toString());
-        var legacy = new JSONObject(original); legacy.remove("rules");
-        assertEquals(SessionJson.restore(original).view(), SessionJson.restore(legacy.toString()).view());
+        var withoutRules = new JSONObject(original);
+        withoutRules.remove("rules");
+        refused(withoutRules.toString());
+
+        var historical = GameSession.restore(new GameSession.Saved(1, 4, 31, RentzPlayer.Difficulty.NORMAL,
+                List.of(), List.of(), RentzMatch.DealEnding.LEGACY));
+        var legacy = SessionJson.saved(historical);
+        assertEquals("LABORATORY_V1", legacy.getString("profile"));
+        legacy.remove("rules");
+        assertEquals(historical.view(), SessionJson.restore(legacy.toString()).view());
     }
 
     @Test public void commandFieldsAreTypedAndIrrelevantPayloadIsRefused() throws Exception {

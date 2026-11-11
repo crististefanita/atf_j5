@@ -189,7 +189,7 @@
       "criterion": "Refuse impossible sole wins in both arms. Preserve exact bounds, split winners and losses.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a54f44c275f787cdc78d492ffdb0abf0f1ec0569f9141e04e04d611d1a6816cd",
+      "sha256": "407d506ec777b2e688075ef40d69a9fac98dec7a2d07ba97ad1228b492a4e0c5",
       "allowDelete": false
     },
     {
@@ -279,7 +279,7 @@
       "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "b5cd65178e2537801001aaca43673c2699f4fb329f48c944208ec0cb2603ac60",
+      "sha256": "e57ee650e5c8a9a431b6fc2ba8b17c6f2b2c37b141e6a139880bf1c4ea7857ee",
       "allowDelete": false
     },
     {
@@ -309,7 +309,7 @@
       "criterion": "Refuse impossible sole wins in both arms. Preserve exact bounds, split winners and losses.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "03a694c0a20ab31326467643ef6d96c885530d6e62093badfb242a92e625b4c0",
+      "sha256": "574dfcbff30aa4d8548e4f7073265255bbff2d6c35b91ab295c6c5a63db83e13",
       "allowDelete": false
     },
     {
@@ -789,7 +789,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "2db4e125d0458052ee3527dc3b8b6e9e477dca8f73806e05bc20e5773e4cdf9f",
+      "sha256": "a25cc8d13829fa8e1d391df1d255097889da154a8dc148420fd0324519ee0463",
       "allowDelete": false
     },
     {
@@ -829,7 +829,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "f8c964d2f6dbf0391a1144e3f6f5f76c6f79d3f2762bccb3aa1e43936f4c9ed3",
+      "sha256": "a7fc2934828ff583888c88e0368dda5aa86ab4256f5df780c05b49a5dd214293",
       "allowDelete": false
     },
     {
@@ -879,7 +879,7 @@
       "criterion": "Verify the loaded PlayerSeatView, highlight and geometry classes against the pinned AAR, with no engine dependencies.",
       "proof": "../../whist_back/component-suites/card-highlight-20261111/whist-lab-app-card-table-ui-testDebugUnitTest.html",
       "expires": "2026-11-20",
-      "sha256": "becf4b298f015e14289e4aabd361fdeed645d6d0045fc787f110c3c4bd55fe29",
+      "sha256": "03b1428c38db51c60a96b9cac32bd39814f851e741a8ea200bea5a3849c43ae9",
       "allowDelete": false
     },
     {
@@ -919,7 +919,7 @@
       "criterion": "Derive the per-seat breakdown from observed plays. Distinguish equal awards and preserve every result after restoring the canonical journal.",
       "proof": "../../rentz_back/ui-review/settlement-details-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "33920acb416fe021462674ff21c658c1a28260caed1f1c462357a1dd91302368",
+      "sha256": "410e02a544fce14f6db8a2a4ead6c5ccb31137c81dd586887399d59b14fbf596",
       "allowDelete": false
     },
     {
@@ -929,7 +929,7 @@
       "criterion": "Verify every 3–6 player award row and an alternate profile, preserving explicit zero rewards and absent places.",
       "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "567697e30773bd49712e069d439592a760eff3459b1c097be3f17c6926f173e7",
+      "sha256": "fe0ced69bcf503d2c074a9a21ea2032aa2a92432a5af1863f9d58f85e025f165",
       "allowDelete": false
     },
     {
@@ -949,7 +949,7 @@
       "criterion": "Preserve legal card identity, validate physical hand order and verify two complete localized score rows on restored seats.",
       "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "49c8d54e3aa2c3d75289bb436d23a1ac21b0d61e27b13f07d968fbb87fadecd0",
+      "sha256": "b000c25dde926ce828b96f9c57a3426e6f7ea393a52809311f1ebc01ab13457f",
       "allowDelete": false
     },
     {
@@ -1039,7 +1039,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "44e8c80810b4236e12e0eb30fe8223c9fc2b8d6a6edd42d5546b4449d84ee331",
+      "sha256": "1e329cdcefc2e9bba00d25c6a3561f2494e4b8a88d6ad5d99e6a49a67d3ad7cb",
       "allowDelete": false
     },
     {
@@ -1209,7 +1209,7 @@
       "criterion": "Increment versionCode once and preserve signing while consuming Card Table UI 0.1.10 with desugaring.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "58afab881f4016ade8b64936232937d22271095de7098bb5d71add63e1491af2",
+      "sha256": "60788cc073216198eb4f7b1df4c756a3de65a761547ffb6b0f6d57b17ac34112",
       "allowDelete": false
     },
     {
@@ -1219,7 +1219,7 @@
       "criterion": "Keep the published 0.15.0 link during qualification and declare 0.16.0 with code 20.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "f728019efe3a7fe11fc259a7b9220de90b03f01dff4a3e49131effbb76191fac",
+      "sha256": "98d1dadc8fd3e1890a6549bc0cda46d232c1bd72708cabfa780e86e19c7d0a88",
       "allowDelete": false
     },
     {

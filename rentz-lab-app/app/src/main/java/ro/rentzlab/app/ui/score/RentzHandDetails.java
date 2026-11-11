@@ -8,23 +8,13 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import java.util.List;
 import ro.cardtable.ui.theme.TablePalette;
-import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.core.Contract;
 
 /** Renders public settlement facts. A single scroll contains the profile and every player. */
 public final class RentzHandDetails extends ScrollView {
-    public RentzHandDetails(Context context, RentzScoreContent.Row hand, List<String> players, RentzUiText copy) {
-        this(context, hand, players, copy, true);
-    }
-
     public RentzHandDetails(Context context, RentzScoreContent.Row hand, List<String> players, RentzUiText copy,
-            boolean showProfile) {
-        this(context, hand, players, copy, showProfile, java.util.Collections.emptyList());
-    }
-
-    public RentzHandDetails(Context context, RentzScoreContent.Row hand, List<String> players, RentzUiText copy,
-            boolean showProfile, List<RentzScoreContent.Standing> standings) {
+            String scoreProfileId, List<RentzScoreContent.Standing> standings) {
         super(context);
         setId(ro.rentzlab.app.R.id.history_details);
         var content = new LinearLayout(context);
@@ -40,7 +30,9 @@ public final class RentzHandDetails extends ScrollView {
             line(content, copy.text("Last hand details", "Detaliile ultimei mâini"), true);
         }
         String chooser = copy.text("Chosen by ", "Ales de ") + players.get(hand.chooser());
-        if (showProfile) chooser += "\n" + copy.text("Scoring profile · ", "Profil de punctaj · ") + GameSession.SCORE_PROFILE;
+        if (scoreProfileId != null) {
+            chooser += "\n" + copy.text("Scoring profile · ", "Profil de punctaj · ") + scoreProfileId;
+        }
         line(content, chooser, false);
         var details = RentzScoreContent.details(hand);
         if (details.isEmpty()) line(content, copy.text("Scoring details unavailable", "Detaliul punctajului este indisponibil"), false);

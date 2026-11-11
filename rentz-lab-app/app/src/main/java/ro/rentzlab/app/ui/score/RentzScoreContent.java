@@ -24,7 +24,7 @@ public final class RentzScoreContent {
 
     public static List<List<Integer>> finishingAwards(ScoreProfile profile) {
         return java.util.stream.IntStream.rangeClosed(3, 6)
-                .mapToObj(players -> List.copyOf(profile.finishRewards().subList(0, players)))
+                .mapToObj(profile::finishRewardsFor)
                 .collect(immutable());
     }
     public static List<Row> rows(List<RentzMatch.HandResult> history, RentzUiText copy) {

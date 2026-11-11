@@ -27,7 +27,7 @@ public final class RentzHandScoreScreen {
         views.addText(page, copy.text("Hand score", "Punctajul mâinii"), 24, ScreenViews.PINE, true, 0, 8);
         var progress = new FrameLayout(views.activity());
         page.addView(progress, views.matchWrap());
-        page.addView(new RentzHandDetails(views.activity(), row, names, copy, false, standings),
+        page.addView(new RentzHandDetails(views.activity(), row, names, copy, null, standings),
                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         if (next != null) views.addButton(page, copy.text("Next hand", "Mâna următoare"), "rentz-next-hand", canContinue, next, true);
         var actions = new LinearLayout(views.activity());

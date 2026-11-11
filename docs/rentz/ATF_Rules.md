@@ -81,7 +81,18 @@ Fiecare culoare are un șir propriu, deschis cu rangul mesei. Apoi se poate pune
 | As și cărți rămase | Același actor primește tura; poate ajunge la pas dacă nu are continuare. |
 | Carte minimă | Următorul actor eligibil este sărit exact o dată. |
 | Mână golită | Se atribuie locul de sosire; actorul iese din rotație. |
-| Toți în afară de unul au terminat | Ultimul loc este determinat; se punctează și se încheie. |
+| Toți în afară de unul au terminat | Se punctează în ordinea sosirii. Ultimul loc primește singurul zero. |
+
+Profilul de laborator acordă 300 de puncte câștigătorului. La mesele de 4–6 jucători, bugetul rămâne 600 de puncte. Doar ultimul loc primește zero.
+
+| Jucători | Premii în ordinea sosirii |
+|---|---|
+| 3 | 300 · 200 · 0 |
+| 4 | 300 · 200 · 100 · 0 |
+| 5 | 300 · 175 · 100 · 25 · 0 |
+| 6 | 300 · 150 · 75 · 50 · 25 · 0 |
+
+Alegerea pe nevăzute dublează premiile. Sesiunile cu profil istoric își păstrează punctajul la reluare.
 
 ```mermaid
 flowchart LR

@@ -83,7 +83,7 @@ public record PublicProgress(int firstChooser, List<Integer> totals, List<Set<Co
             // The fund has already been checked; only one seat can hold the whole nonzero amount.
             case KING_HEARTS, TEN_CLUBS -> points.stream().allMatch(point -> point == 0 || point == fund);
             case RENTZ -> Arrays.equals(points.stream().mapToInt(Integer::intValue).sorted().toArray(),
-                    profile.finishRewards().subList(0, points.size()).stream().mapToInt(reward -> reward * multiplier)
+                    profile.finishRewardsFor(points.size()).stream().mapToInt(reward -> reward * multiplier)
                             .sorted().toArray());
             case TOTALS -> multiples(points, multiplier) && TotalsAllocation.matches(profile, points, multiplier);
         };
@@ -103,7 +103,7 @@ public record PublicProgress(int firstChooser, List<Integer> totals, List<Set<Co
             case TEN_CLUBS -> profile.tenReward();
             case TOTALS -> -8L * profile.trickPenalty() - 4L * profile.queenPenalty()
                     - 2L * players * profile.diamondPenalty() - profile.kingPenalty();
-            case RENTZ -> profile.finishRewards().subList(0, players).stream().mapToLong(Integer::longValue).sum();
+            case RENTZ -> profile.finishRewardsFor(players).stream().mapToLong(Integer::longValue).sum();
         };
     }
 }

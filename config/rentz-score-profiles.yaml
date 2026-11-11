@@ -11,3 +11,8 @@ rewards:
   trick: 10
   tenClubs: 100
   finishingPlaces: [300, 200, 100, 0, 0, 0]
+  finishingPlacesByPlayers:
+    "3": [300, 200, 0]
+    "4": [300, 200, 100, 0]
+    "5": [300, 175, 100, 25, 0]
+    "6": [300, 150, 75, 50, 25, 0]

@@ -9,7 +9,7 @@ import java.util.*;
 
 /** Transport/lifecycle boundary. The dealing seed and journal never enter a player decision. */
 public final class GameSession {
-    public static final String SCORE_PROFILE = "LABORATORY_V1";
+    public String scoreProfileId() { return dealEnding.laboratoryProfileId(); }
     private static final ScoreProfile SCORING = ScoreProfile.laboratory();
     public enum Action { REVEAL, CHOOSE, PLAY, PASS, NEXT_HAND }
     public enum Origin { UNKNOWN, MANUAL, DELEGATED, AUTOMATIC }
@@ -32,7 +32,7 @@ public final class GameSession {
             this(schema,players,seed,difficulty,commands,List.of());
         }
         public Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands,List<String> opponents) {
-            this(schema,players,seed,difficulty,commands,opponents,RentzMatch.DealEnding.SCORING_CARDS);
+            this(schema,players,seed,difficulty,commands,opponents,RentzMatch.DealEnding.UNIQUE_LAST);
         }
         public Saved {
             commands=Card.immutable(commands);
@@ -52,10 +52,10 @@ public final class GameSession {
     private final AchievementHand.Recorder achievementRecorder;
     private final List<AchievementHand> achievementHands = new ArrayList<>();
     public GameSession(int players,long seed,RentzPlayer.Difficulty difficulty) {
-        this(players,seed,difficulty,List.of(),RentzMatch.DealEnding.SCORING_CARDS);
+        this(players,seed,difficulty,List.of(),RentzMatch.DealEnding.UNIQUE_LAST);
     }
     public GameSession(int players,long seed,RentzPlayer.Difficulty difficulty,String rosterName) {
-        this(players,seed,difficulty,PlayerNames.forMatch(players,rosterName,seed).subList(1,players),RentzMatch.DealEnding.SCORING_CARDS);
+        this(players,seed,difficulty,PlayerNames.forMatch(players,rosterName,seed).subList(1,players),RentzMatch.DealEnding.UNIQUE_LAST);
     }
     private GameSession(int players,long seed,RentzPlayer.Difficulty difficulty,List<String> savedOpponents,
                         RentzMatch.DealEnding dealEnding) {
@@ -66,9 +66,10 @@ public final class GameSession {
             throw new IllegalArgumentException("Saved opponents");
         opponents=savedOpponents.isEmpty()?defaultOpponents(players,seed):Card.immutable(savedOpponents);
         this.dealEnding=dealEnding;
-        match=new RentzMatch(players,seed,scoringProfile(),0,dealEnding);
+        var scoring = dealEnding.laboratoryScoring();
+        match=new RentzMatch(players,seed,scoring,0,dealEnding);
         achievementRecorder = new AchievementHand.Recorder(players);
-        player=new RentzPlayer(difficulty,scoringProfile(),PolicySettings.defaults());
+        player=new RentzPlayer(difficulty,scoring,PolicySettings.defaults());
     }
     public static ScoreProfile scoringProfile(){return SCORING;}
     public static GameSession restore(Saved saved){

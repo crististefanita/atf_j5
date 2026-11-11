@@ -10,6 +10,32 @@ import java.util.List;
 import static org.junit.Assert.*;
 @AndroidComponentLayer
 public class GameSessionTest {
+    @Test public void savedRentzScoringKeepsTheVersionUsedAtSettlement() throws Exception {
+        var legacy = RentzMatch.DealEnding.SCORING_CARDS;
+        var current = RentzMatch.DealEnding.UNIQUE_LAST;
+        for (var rules : List.of(legacy, current)) {
+            var session = GameSession.restore(new GameSession.Saved(1, 6, 31,
+                    RentzPlayer.Difficulty.NORMAL, List.of(), List.of(), rules));
+            session.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null,
+                    Contract.RENTZ, true));
+            for (int turn = 0; session.view().phase() == RentzMatch.Phase.PLAY; turn++) {
+                assertTrue(turn < 200);
+                int actor = session.view().turn();
+                if (actor != 0) session.advanceBotTurn();
+                else if (session.view().legal().isEmpty()) {
+                    session.apply(new GameSession.Command(GameSession.Action.PASS, 0, null, null, false));
+                } else session.advanceHumanTurn();
+            }
+            var history = session.history();
+            assertEquals(rules == legacy ? 3L : 1L,
+                    history.get(0).points().stream().filter(points -> points == 0).count());
+            var journal = SessionJson.saved(session);
+            assertEquals(rules.laboratoryProfileId(), session.scoreProfileId());
+            assertEquals(session.scoreProfileId(), journal.getString("profile"));
+            assertEquals(rules.journalVersion(), journal.getString("rules"));
+            assertEquals(history, SessionJson.restore(journal.toString()).history());
+        }
+    }
     @Test public void incompatibleSavedIdentitiesAreRejected()throws Exception{
         var session=new GameSession(4,31,RentzPlayer.Difficulty.NORMAL);
         for(String key:new String[]{"schema","profile","policy","rules"}){
@@ -64,7 +90,7 @@ public class GameSessionTest {
 
                 var current=GameSession.restore(new GameSession.Saved(1,4,seed,difficulty,commands.subList(0,frontier)));
                 var newJournal=SessionJson.saved(current);
-                assertEquals("RENTZ_RULES_V3",newJournal.getString("rules"));
+                assertEquals("RENTZ_RULES_V4",newJournal.getString("rules"));
                 assertEquals(RentzMatch.Phase.DEAL_END,current.view().phase());
                 assertEquals(legacy.history(),current.history());
                 assertEquals(current.view(),SessionJson.restore(newJournal.toString()).view());

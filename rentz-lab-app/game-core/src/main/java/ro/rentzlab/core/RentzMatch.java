@@ -27,18 +27,25 @@ public final class RentzMatch {
 
     public enum DealEnding {
         LEGACY("RENTZ_RULES_V2"),
-        SCORING_CARDS("RENTZ_RULES_V3");
+        SCORING_CARDS("RENTZ_RULES_V3"),
+        UNIQUE_LAST("RENTZ_RULES_V4");
 
         private final String journalVersion;
 
         DealEnding(String journalVersion) { this.journalVersion = journalVersion; }
 
         public String journalVersion() { return journalVersion; }
+        public boolean closesOnScoringCards() { return this != LEGACY; }
+        public ScoreProfile laboratoryScoring() {
+            return this == UNIQUE_LAST ? ScoreProfile.laboratory() : ScoreProfile.legacyLaboratory();
+        }
+        public String laboratoryProfileId() { return this == UNIQUE_LAST ? "LABORATORY_V2" : "LABORATORY_V1"; }
 
         public static DealEnding fromJournal(String version) {
             return switch (version) {
                 case "RENTZ_RULES_V1", "RENTZ_RULES_V2" -> LEGACY;
                 case "RENTZ_RULES_V3" -> SCORING_CARDS;
+                case "RENTZ_RULES_V4" -> UNIQUE_LAST;
                 default -> throw new IllegalArgumentException("Saved rules identity");
             };
         }
@@ -359,9 +366,10 @@ public final class RentzMatch {
                     finishOrder.add(s);
                 }
             }
+            var awards = scoring.finishRewardsFor(players);
             for (int place = 0; place < players; place++)
                 points[finishOrder.get(place)] =
-                        Math.multiplyExact(scoring.finishRewards().get(place), blind ? 2 : 1);
+                        Math.multiplyExact(awards.get(place), blind ? 2 : 1);
             finish();
             return;
         }
@@ -389,8 +397,8 @@ public final class RentzMatch {
     private boolean scoringCardsCaptured() {
         int target = switch (contract) {
             case KING_HEARTS, TEN_CLUBS -> 1;
-            case QUEENS -> dealEnding == DealEnding.SCORING_CARDS ? 4 : 0;
-            case DIAMONDS -> dealEnding == DealEnding.SCORING_CARDS ? 2 * players : 0;
+            case QUEENS -> dealEnding.closesOnScoringCards() ? 4 : 0;
+            case DIAMONDS -> dealEnding.closesOnScoringCards() ? 2 * players : 0;
             default -> 0;
         };
         if (target == 0) return false;

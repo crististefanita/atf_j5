@@ -31,7 +31,7 @@ public final class RentzHistoryView {
             var grid = new RentzHistoryGrid(context, history, players, copy, hand -> {
                 if (container.getChildCount() != 1) return;
                 container.getChildAt(0).setVisibility(View.GONE);
-                container.addView(new RentzHandDetails(context, hand, players, copy));
+                container.addView(new RentzHandDetails(context, hand, players, copy, session.scoreProfileId(), java.util.Collections.emptyList()));
                 dialog.setTitle(copy.text("Hand ", "Mâna ") + hand.hand() + " · " + hand.label());
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setText(copy.text("Back to history", "Înapoi la istoric"));
             });

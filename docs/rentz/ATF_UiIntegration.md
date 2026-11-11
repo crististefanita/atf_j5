@@ -38,7 +38,7 @@ exclusiveContent {
 Dependența se declară în modulul aplicației, după admitere:
 
 ```groovy
-implementation 'ro.cardtable:card-table-ui:0.1.10'
+implementation 'ro.cardtable:card-table-ui:0.1.11'
 implementation 'ro.cardtable:card-table-names:0.1.0'
 ```
 
@@ -82,7 +82,7 @@ Modelele UI păstrează date vizibile neutre. În Rentz, componentele acoperă m
 
 În tura proprie din sub-jocul Rentz, toate cărțile legale primesc fundal crem și contur auriu. Marcajul vine din observația motorului și se păstrează când tura este delegată. Atingerea rămâne disponibilă numai când jucătorul controlează tura.
 
-Adaptorul aplică stilul comun fețelor identificate în evantai. Componentele confruntă setul marcat cu regulile după mutare manuală sau delegată, după pas și la schimbarea turei.
+Componenta comună aplică stilul cărților marcate. În tura manuală, o atingere respinsă colorează temporar cartea aleasă și evidențiază toate opțiunile legale. Componentele confruntă setul marcat cu regulile după mutare manuală sau delegată, după pas și la schimbarea turei.
 
 Proba `-RentzCardMarksOnly` verifică pe emulator acțiunile accesibile și culorile capturate pentru o carte, mai multe cărți, după mutare și după pas. [Componentele de geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) · [Runner Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 

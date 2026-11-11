@@ -2,7 +2,7 @@
 
 ## Pe scurt
 
-Repository-ul Maven local conține `ro.cardtable:card-table-ui:0.1.10` și `ro.cardtable:card-table-names:0.1.0`, produse în J4. Rendererul Android și politica de nume Java sunt dependențe de produs independente de bibliotecile ATF din `lib` și de motoarele jocurilor.
+Repository-ul Maven local conține `ro.cardtable:card-table-ui:0.1.11` și `ro.cardtable:card-table-names:0.1.0`, produse în J4. Rendererul Android și politica de nume Java sunt dependențe de produs independente de bibliotecile ATF din `lib` și de motoarele jocurilor.
 
 - AAR, JAR, POM, metadata și surse au SHA-256 în [proveniență](provenance.json).
 - Gradle rezolvă exclusiv grupul `ro.cardtable` din acest repository; build-ul nu folosește checkout-ul J4 sau o cale externă de calculator.

@@ -69,10 +69,12 @@ public final class RentzNativeFlow {
     }
     private static void audit(Path privateJournal,Path actorView)throws Exception{
         var journal=JSON.readTree(privateJournal.toFile());
-        if(journal.required("schema").intValue()!=1||!journal.required("profile").textValue().equals("LABORATORY_V1"))throw new IllegalArgumentException("Native journal profile");
+        if(journal.required("schema").intValue()!=1)throw new IllegalArgumentException("Native journal profile");
         var rules=journal.get("rules");
         var dealEnding=RentzMatch.DealEnding.fromJournal(rules==null?"RENTZ_RULES_V1":rules.asText());
-        var score=ScoreProfile.laboratory();var game=new RentzMatch(journal.required("players").intValue(),journal.required("seed").longValue(),score,0,dealEnding);int audited=0;
+        if (!dealEnding.laboratoryProfileId().equals(journal.required("profile").textValue()))
+            throw new IllegalArgumentException("Native journal profile");
+        var score=dealEnding.laboratoryScoring();var game=new RentzMatch(journal.required("players").intValue(),journal.required("seed").longValue(),score,0,dealEnding);int audited=0;
         for(var command:journal.required("commands")){
             int seat=command.required("seat").intValue();String action=command.required("action").textValue();
             switch(action){
