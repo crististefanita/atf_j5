@@ -183,7 +183,8 @@ Un APK de test verificat poate ocupa singur secțiunea **Jocul**. Legătura indi
 
 - Verificați regresia offline, semnătura și identitatea Android izolată înainte de distribuție.
 - Descărcați binarul cu un cont autorizat și confirmați că accesul anonim este refuzat.
-- Ediția de producție se găsește în catalogul tehnic. La promovare, eliminați înregistrarea candidatului din intrarea principală.
+- Păstrați ultimul APK descărcabil în README până când succesorul trece verificarea. Ediția de producție se găsește în catalogul tehnic.
+- La promovarea ediției de producție, eliminați înregistrarea de test din intrarea principală.
 
 ### Proba Android a APK-ului livrat
 

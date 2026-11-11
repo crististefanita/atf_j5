@@ -136,9 +136,10 @@ public final class ReleaseCatalog {
     public static void verifyPreviewGuide(String guide, String repository, String currentVersion,
                                           String candidateVersion, JsonNode receipt) throws IOException {
         String version = receipt.path("version").asText();
-        require(receipt.isObject() && receipt.size() == 8 && !version.equals(currentVersion)
-                        && version.equals(candidateVersion)
+        require(receipt.isObject() && receipt.size() == 8
                         && version.matches("(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)")
+                        && isMinorOrMajorStep(currentVersion, version)
+                        && (version.equals(candidateVersion) || isMinorOrMajorStep(version, candidateVersion))
                         && receipt.path("sourceCommit").asText().matches("[a-f0-9]{40}")
                         && receipt.path("apkSha256").asText().matches("[a-f0-9]{64}")
                         && number(receipt, "releaseId") > 0 && number(receipt, "assetId") > 0

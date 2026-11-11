@@ -519,7 +519,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "747754f5b62b9563c0f7a2d6e0e63e043818ecf9467dcc4852fd6fb5327c0a9c",
+      "sha256": "f009f70bc62561f502c95e06acb8fc0ada0cc3b84ba31b9cd6097ed1c2d40931",
       "allowDelete": false
     },
     {
@@ -1106,10 +1106,10 @@
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java",
       "owner": "Rentz release",
       "reason": "Release candidate version boundary and catalog identity.",
-      "criterion": "The production catalog remains independent. The main guide accepts only its exact edition or the single verified private preview that matches the candidate version.",
+      "criterion": "The main guide accepts the exact production edition or one verified private preview. A newer staged candidate leaves the latest verified download in place.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "cbb3b78f39ec14fd18f774ab81150673023441b776310c9ac8328ed9cff76de8",
+      "sha256": "273925cd80bbea4bdbe0ce3a290dfae4d379feb8ba66cbd5552f2cbb22cb25d5",
       "allowDelete": false
     },
     {

@@ -108,7 +108,9 @@ class ReleaseGovernanceTest {
                 preview + "\n<a href='https://example.test/RentzLab-1.2.0.apk'>Ediția veche</a>\n")) {
             assertThrows(IOException.class, () -> ReleaseCatalog.verifyPreviewGuide(changed, repository, "1.2.0", "1.3.0", receipt));
         }
-        assertThrows(IOException.class, () -> ReleaseCatalog.verifyPreviewGuide(preview, repository, "1.2.0", "1.4.0", receipt));
+        assertDoesNotThrow(() -> ReleaseCatalog.verifyPreviewGuide(preview, repository, "1.2.0", "1.4.0", receipt),
+                "A newly staged candidate does not displace the latest downloadable preview");
+        assertThrows(IOException.class, () -> ReleaseCatalog.verifyPreviewGuide(preview, repository, "1.2.0", "1.2.0", receipt));
         receipt.put("anonymousHttp", 200);
         assertThrows(IOException.class, () -> ReleaseCatalog.verifyPreviewGuide(preview, repository, "1.2.0", "1.3.0", receipt));
     }
