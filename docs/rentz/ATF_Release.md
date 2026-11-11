@@ -177,6 +177,14 @@ Distribuiți candidatul numai după calificarea RAG locală și verificarea semn
 - Registrul `release/restricted-<versiune>.json` leagă release-ul și asset-ul privat de manifestul ediției active. Catalogul refuză o a doua rută de descărcare în README.
 - După push, folosiți `verify-release-readme.ps1 -Restricted` cu raportul RAG local calificat și proba de descărcare autentificată. Pentru rularea din același snapshot, `run-release-rag.ps1 -PublicationEvidence <dovezi> -RestrictedPublication` selectează aceeași verificare.
 
+### APK de test
+
+[Descarcă Rentz Lab 0.18.0 pentru testare](https://github.com/crististefanita/atf_j5_releases/releases/download/preview-v0.18.0/RentzLab-0.18.0-ui-sanity.apk)
+
+- Pachetul evidențiază cartea respinsă și cărțile legale. Se instalează separat de joc.
+- Descărcarea cere un cont GitHub cu acces la depozitul privat.
+- Regresia offline și semnătura califică pachetul de test. Ediția de producție cere acceptanță nativă.
+
 ### Proba Android a APK-ului livrat
 
 - Identificați APK-ul folosit de fiecare probă nativă. Dacă măsurătorile folosesc un APK de test, notați-i hash-ul separat.
