@@ -6,7 +6,7 @@ Rentz Lab este un joc de cărți pentru Android, cu opt sub-jocuri și adversari
 
 ## Jocul
 
-- [Descarcă Rentz Lab 0.18.0 pentru testare](https://github.com/crististefanita/atf_j5_releases/releases/download/preview-v0.18.0/RentzLab-0.18.0-ui-sanity.apk)
+- [Descarcă Rentz Lab 0.19.0](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.19.0/RentzLab-0.19.0.apk)
 
 ## Prima partidă
 

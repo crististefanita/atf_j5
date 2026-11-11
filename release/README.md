@@ -6,7 +6,7 @@ Catalogul tehnic păstrează ediția publicată, identitatea APK-ului și rezult
 
 ## Versiunea curentă
 
-[Rentz Lab 0.16.0](0.16.0/README.md) este disponibil conturilor autorizate pe GitHub. [Descărcare](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.16.0/RentzLab-0.16.0.apk) · [Dovada accesului](restricted-0.16.0.json)
+[Rentz Lab 0.19.0](0.19.0/README.md) este disponibil conturilor autorizate pe GitHub. [Descărcare](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.19.0/RentzLab-0.19.0.apk) · [Dovada accesului](restricted-0.19.0.json)
 
 ## Organizare
 

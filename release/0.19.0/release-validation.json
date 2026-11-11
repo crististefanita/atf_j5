@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "versionName": "0.19.0",
+    "versionCode": 23,
+    "applicationId": "ro.rentzlab.app",
+    "sourceCommit": "61321d470c70dbc3bdca97d5ed4727ddcd4f054c",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "apkName": "RentzLab-0.19.0.apk",
+    "apkBytes": 924958,
+    "sha256": "a32e47e4754095271fc6b6e777213a2ec5b4aee15762f8abad949ad89c27401b",
+    "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+    "debuggable": false
+  },
+  "publication": {
+    "state": "PUBLISHED",
+    "channel": "authenticated-only",
+    "sourceCommit": "61321d470c70dbc3bdca97d5ed4727ddcd4f054c",
+    "releaseId": 442301886
+  },
+  "qualification": {
+    "status": "PASS",
+    "scope": "offline-components-and-native-five-subgames",
+    "e2e": "PASS",
+    "evidence": {
+      "components": {
+        "path": "distribution/j5-score-alignment-0190-20261112/isolated/components/regression-synchronized/component-suite-extent.html",
+        "bytes": 6869977,
+        "sha256": "44ed645f82840270b2da9c27e26af1f49d90ac018cef950bbf17029fb0edf08c"
+      },
+      "native": {
+        "path": "distribution/j5-score-alignment-0190-20261112/isolated/distribution/synchronized-release/android-compact-consecutive/android-extent.html",
+        "bytes": 16190001,
+        "sha256": "44ccdf6677141b2329186cd3abb811befb50861ec07f8b17b2f1893ec27c181a"
+      },
+      "help": {
+        "path": "distribution/j5-score-alignment-0190-20261112/isolated/distribution/synchronized-release/android-help/android-extent.html",
+        "bytes": 3041121,
+        "sha256": "863223db5a7c48aaf31ce47d069720a9fcc7ad4f618db656990684862c79fe2f"
+      },
+      "history": {
+        "path": "distribution/j5-score-alignment-0190-20261112/isolated/distribution/synchronized-release/android-history/android-extent.html",
+        "bytes": 4337905,
+        "sha256": "4fa15efd2500f95352efd8664a2f425b8731f778cc0022c2b3923437ed543039"
+      },
+      "rag": {
+        "path": "distribution/j5-score-alignment-0190-20261112/isolated/distribution/synchronized-release/rag-final/report/release-rag-report.json",
+        "bytes": 16455,
+        "sha256": "a6b777073c28ceac264490ec295479f9b3b5fcb0998116f8edbd3f4a3c4357dc"
+      }
+    },
+    "tests": 560,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "integrity": {
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 370,
+        "sha256": "435e8c4f0a83eae33e9d7f4d339213ca68954f8113331b249ba6fe63d36407b7"
+      },
+      {
+        "path": "release-notes.md",
+        "bytes": 414,
+        "sha256": "a2d917b2a63eb27f5d1edf1e6e29b7a1699421e785868cd7a15f62a65a46b924"
+      },
+      {
+        "path": "RentzLab-0.19.0.apk",
+        "bytes": 924958,
+        "sha256": "a32e47e4754095271fc6b6e777213a2ec5b4aee15762f8abad949ad89c27401b"
+      },
+      {
+        "path": "RentzLab-0.19.0.apk.sha256",
+        "bytes": 86,
+        "sha256": "1199c17c5ebc038cb9d0044b5848be7be79ccbcbee980be4077e839ef366a4a3"
+      },
+      {
+        "path": "reports/README.md",
+        "bytes": 496,
+        "sha256": "4ebaae4fd04ddc79439ecde2fa479daf1770557c6ec6659135f189269f076d64"
+      }
+    ]
+  }
+}

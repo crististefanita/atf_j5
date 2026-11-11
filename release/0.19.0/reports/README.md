@@ -1,8 +1,8 @@
-# Dovezile ediției 0.16.0
+# Dovezile ediției 0.19.0
 
 ## Pe scurt
 
-Dosarul distribution/0.16.0-20261111-fit din RENTZ_DATA_ROOT păstrează auditul semnării și verificarea descărcării. Raportul de componente se află în components/j5-0160-fit-20261111.
+Dosarul distribution/j5-score-alignment-0190-20261112 din depozitul de date păstrează regresia, istoricul, ajutorul, cele cinci jocuri consecutive, semnarea și descărcarea verificată.
 
 ## Identitatea dovezilor
 

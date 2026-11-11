@@ -1219,7 +1219,7 @@
       "criterion": "Bind the main README to the qualified 0.18.0 asset and verified access while preserving the production catalog.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "d9c87577f3427cafd38f803cda9c154950f06d9627dc1a1ffc101106a9ded520",
+      "sha256": "9c6facb498b89c4dc475fb26be49e6fd5b65a6f2973f77c72b06b6c641e1d45b",
       "allowDelete": false
     },
     {
