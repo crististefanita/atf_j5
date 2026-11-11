@@ -196,5 +196,5 @@ Verificați separat pe dispozitiv o tragere verticală pornită de pe eticheta a
 
 **P2 · runnerul Android.** Fixture-ul exportă jurnalul cu `LABORATORY_V2`, iar proba `-HistoryDetails` așteaptă încă eticheta `LABORATORY_V1`. [Generatorul jurnalului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzHistoryReplayTest.java) · [Runnerul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 
-- Derivați așteptarea din identitatea fixture-ului și confruntați-o cu profilul afișat. Verificați locul și premiul fiecărui jucător, inclusiv ultimul loc cu zero.
-- Păstrați o probă distinctă pentru un jurnal istoric cu premii egale. Verificați revenirea la același rând după închiderea detaliului.
+- **Istoric.** Derivați profilul așteptat din fixture și verificați locul și premiul fiecărui jucător. Păstrați o probă separată pentru jurnalul istoric cu premii egale și verificați revenirea în grilă.
+- **Ajutor.** `-HelpAwardsOnly` așteaptă aceeași grilă istorică la toate mesele. Verificați premiile profilului activ pentru 3–6 locuri în ambele limbi, inclusiv faptul că numai ultimul loc primește zero. [Grila de laborator](../rentz/ATF_Rules.md)
