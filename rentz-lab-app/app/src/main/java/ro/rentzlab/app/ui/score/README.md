@@ -38,7 +38,8 @@ Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din st
 
 - Atinge eticheta subliniată a unei mâini pentru a deschide detaliul. Întoarcerea păstrează aceeași grilă și poziția de derulare.
 - La Totale, Q♦ contribuie atât la dame, cât și la carouri. Numărul contribuțiilor rămâne brut, iar punctele afișate includ deja dublarea.
-- La Rentz, locurile urmează ordinea înregistrată de motor. Ultimul loc îi revine jucătorului cu cărți rămase. Mai multe locuri pot avea același premiu.
+- La Rentz, locurile urmează ordinea înregistrată de motor. Ultimul loc îi revine jucătorului cu cărți rămase și primește singur zero în profilul curent.
+- Jurnalele cu profil istoric își păstrează premiile, inclusiv când mai multe locuri au primit zero. Detaliul folosește profilul sesiunii restaurate.
 - În ajutor, un loc existent cu premiu zero afișează `0`, iar un loc care nu există la acea masă are marcajul `—`. Prețurile levatelor din același ecran vin din același profil.
 - Reluarea reexecută jurnalul canonic și reconstruiește rezultatele publice. Un sumar sintetic fără detalii arată explicit lipsa lor.
 

@@ -4,7 +4,7 @@
 
 [Registrul Rentz](ATF_Rentz.md) păstrează lacunele active ale regulilor, modelului și integrării. O regulă stabilă are document responsabil în [aria Rentz](../rentz/README.md); rezultatele concrete rămân în depozitul extern.
 
-- [Paritatea interfeței cu Whist Lab](ATF_Rentz_UI_ToDo.md) deține meniul, profilul, masa, cărțile și scorul Rentz, cu priorități și acceptanță prin componente și E2E selectiv. [Producătorul UI](../../../atf_j4/docs/feedback/ATF_CardUi_Extraction.md) deține extragerea prin refactorizare; adaptarea nu importă motorul sau regulile Whist.
+- [Interfața Rentz](ATF_Rentz_UI_ToDo.md) urmărește diferențele rămase de interacțiune, geometrie și scor, cu probe de componentă și acceptanță nativă selectivă. [Producătorul UI](../../../atf_j4/docs/feedback/ATF_CardUi_Extraction.md) deține extragerea prin refactorizare; adaptarea nu importă motorul sau regulile Whist.
 - [Integritate și calitate](ATF_RentzQuality.md) deține criteriile strategice și documentare încă deschise. Validarea, lifecycle-ul, guvernanța sursei și [calificarea consumatorului](../rentz/ATF_Qualification.md) au contracte și probe proprii; calificarea nativă rămâne separată.
 - [Criteriile RAG rămase](ATF_Release_RAG.md) urmăresc probele de acceptanță suplimentare. [Ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) descrie fluxul curent și porțile deschise.
 - [Extinderea realizărilor](ATF_Rentz_Achievements_ToDo.md) urmărește obiectivele candidate, sincronizarea și probele de accesibilitate rămase. [Integrarea actuală](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)

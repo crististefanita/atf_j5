@@ -8,7 +8,7 @@ Acest pachet verifică identitatea declarată și achiziția APK-ului; nu implem
 
 | Componentă | Responsabilitate |
 |---|---|
-| ReleaseCatalog | Stările candidatului, Gradle, legăturile curente și inventarul dosarului. |
+| ReleaseCatalog | Confruntă Gradle și dosarul ediției de producție. Leagă singura versiune din secțiunea „Jocul” de ediția publicată sau de APK-ul de test verificat. |
 | ApkDownloadTarget | Repository, versiune, bytes integrali și SHA-256 declarate înaintea accesului. |
 | ReleaseDownloadAcceptance | Intrare CLI live explicită, cu șase comparații și Extent; nu se execută implicit în regresie. |
 | GitHubApkDownload | Metadata, redirecturi limitate și transfer complet; credentiala rămâne numai la originea API. |

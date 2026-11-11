@@ -114,7 +114,7 @@ Efectele asului, cărții minime și pasul fără continuare sunt declarate de a
 
 ## Punctaj și siguranță numerică
 
-[Profilul tipizat](../../config/rentz-score-profiles.yaml) conține magnitudini nenegative ale penalizărilor, recompense și șase valori de sosire. Profilul activ este `LABORATORY_ONLY`; valorile preset-urilor originale „Classic” și „Traditional” rămân neconfirmate.
+[Profilul tipizat](../../config/rentz-score-profiles.yaml) declară penalizările, recompensele și câte o grilă de sosire pentru fiecare mărime a mesei. Profilul este `LABORATORY_ONLY`. Valorile preset-urilor originale „Classic” și „Traditional” rămân neconfirmate.
 
 [Observațiile parțiale](../../config/rentz-reference-observations.yaml) păstrează separat magnitudinile vizibile în capturile oficiale pentru patru jucători:
 

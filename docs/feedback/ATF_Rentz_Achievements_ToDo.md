@@ -2,7 +2,7 @@
 
 ## Pe scurt
 
-**Realizări** prezintă rezultatele de joc din catalogul executabil. **Antrenament** păstrează cele 800 de obiective, cu aceiași identificatori și același progres salvat. [Integrarea ecranelor și testele](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
+**Realizări** prezintă cele 18 obiective de joc din catalogul executabil, câte șase pe nivel. **Antrenament** păstrează cele 800 de obiective și progresul lor salvat. Acest registru urmărește extinderea, importul și probele native rămase. [Integrarea ecranelor și testele](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
 
 ## Realizările de joc
 
@@ -35,7 +35,7 @@ Duratele sunt ipoteze de calibrare. Publicarea fiecărei familii cere măsurarea
 | Progres incremental, vizibilitate implicită și dificultăți variate | Afișați pragul și progresul tuturor obiectivelor normale. Rezervați cele ascunse pentru surprize rare; folosiți totaluri persistente între sesiuni. [Ghidul Google pentru realizări](https://developer.android.com/games/pgs/quality) |
 | Identificatori stabili și indicatori de progres | Păstrați identificatorul independent de traducere și folosiți un contor sau o colecție de dovezi care poate fi reconstituită. [Documentația Steamworks](https://partner.steamgames.com/doc/features/achievements) |
 | Obiective zilnice într-un joc de cărți | Folosiți provocări opționale, complementare progresului permanent. Zilele active pot fi separate și realizările deja acordate nu expiră. [Microsoft Solitaire Collection](https://www.microsoft.com/en-us/edge/features/games-menu) |
-| Catalog Android propriu | Mențineți toate cele 800 în profilul Rentz. Un eventual subset Play Games Services are propriul buget. Google documentează maximum 400 de realizări pe durata de viață a jocului și 2.000 de puncte în total. [Puncte și realizări Android](https://developer.android.com/games/pgs/achievements) |
+| Catalog Android propriu | Păstrați cele 800 de obiective în Antrenament. Un eventual subset Play Games Services are propriul buget. Google documentează maximum 400 de realizări pe durata de viață a jocului și 2.000 de puncte în total. [Puncte și realizări Android](https://developer.android.com/games/pgs/achievements) |
 | Contracte Rentz | Folosiți profilul de reguli activ pentru măsurare. Jocurile de evitare, captură și secvență au obiective diferite. [Regulile modelului](../rentz/ATF_Rules.md) · [Catalogul jocurilor românești](https://www.pagat.com/national/romania.html) |
 
 ## Matrice pentru extindere
@@ -46,7 +46,7 @@ Duratele sunt ipoteze de calibrare. Publicarea fiecărei familii cere măsurarea
 | Cinci familii transversale, cu 20 / 8 / 4 repere fiecare | 100 | 40 | 20 |
 | **Total** | **500** | **200** | **100** |
 
-Fiecare poziție din catalog se extinde într-un singur ID stabil, cu titlu RO/EN, explicație, regulă, date de intrare, prag, dovadă minimă și etapă de lansare. Domeniul tuturor pragurilor este un profil de reguli și scor compatibil.
+Distribuția din tabel descrie Antrenamentul. La extinderea Realizărilor, fiecare obiectiv nou cere un ID stabil, texte RO/EN, prag, dovadă și profil de reguli compatibil.
 
 ### Ordinea de învățare
 

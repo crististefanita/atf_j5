@@ -13,16 +13,16 @@
 
 ## Integrare și infrastructură
 
-### Închiderea contractelor cu țintă fixă
+<a id="închiderea-contractelor-cu-țintă-fixă"></a>
 
-Criteriul pentru modelul local este să termine mâna după punctarea levatei cu 10♣, K♥, ultima damă sau ultimul caro din pachet. Verificarea acoperă o levată incompletă, scorul dublat, cărțile rămase și trecerea la următorul contract. Reluarea păstrează regula înregistrată în jurnal. [Probe pe contract](../../rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzSettlementTest.java) · [Probă de reluare](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/GameSessionTest.java)
+[Regulile și punctajul](../rentz/ATF_Rules.md) dețin contractul local de închidere timpurie. Tabelul urmărește verificările încă deschise pentru referință și integrarea nativă.
 
 [Registrul de calitate](ATF_RentzQuality.md) deține adopția binară și probele încă lipsă ale adaptoarelor. [Lifecycle-ul](../rentz/ATF_Lifecycle.md), [guvernanța sursei](../rentz/ATF_Components.md) și validarea strictă au contracte și componente proprii; acceptanța nativă a pauzei, relansării și filesystem-ului rămâne distinctă de JVM.
 
 | Prioritate | Responsabil și diferență | Criteriu de închidere |
 |---|---|---|
 | P1 | Referința: pornirea poate produce WebView negru pe configurația Android inspectată. | Identificați runtime-ul și cauza prin probe delimitate; un ecran utilizabil și instrucțiuni lizibile preced calificarea regulilor. Instalarea sau PID-ul procesului nu constituie succes funcțional. |
-| P1 | Android local: integrarea mesei și a istoricului este livrată. Mai rămân opțiunea „Valet mereu”, geometria compactă, ritmul actorilor și clasamentul final. | Închideți probele de componentă și de acceptanță nativă selectivă din [backlog-ul UI](ATF_Rentz_UI_ToDo.md). Contractele livrate sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md). |
+| P1 | Android local: integrarea mesei și a istoricului este livrată. Mai rămân opțiunea „Valet mereu” și probele native pentru geometrie compactă, ritmul actorilor și clasamentul final. | Închideți probele de componentă și de acceptanță nativă selectivă din [backlog-ul UI](ATF_Rentz_UI_ToDo.md). Contractele livrate sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md). |
 | P2 | Persistență: versiunea regulilor este explicită; compatibilitatea veche este limitată la reluarea validată a comenzilor, fără migrarea scorului sau a opțiunilor noi. | Calificați migrări reprezentative și refuzul sesiunilor incompatibile, cu păstrarea fișierului original. Orice schimbare de profil sau candidat cere identitate și strategie explicită. |
 | P1 | iOS: cererea de suport iPhone nu are încă țintă, build sau calificare proprie în J5. | Contractul actual [descrie livrarea Android](../rentz/ATF_Release.md). Dacă iOS rămâne în scop, adăugați criterii și receipte de release proprii; APK-ul și testele Android nu îl califică. |
 

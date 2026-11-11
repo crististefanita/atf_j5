@@ -47,7 +47,7 @@ Fișierul debug este numai citit pentru sincronizare și decizie. Adaptorul nu i
 - `-HistoryOnly -HistoryMatrix` folosește fontul 1,5 la 360 dpi. Proba scurtează dialogul deschis, verifică schimbarea containerului derulabil și readuce fereastra la înălțimea inițială. Lansatorul salvează și restaurează dimensiunea, densitatea și fontul emulatorului în cadrul aceleiași rezervări. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 - Dialogul Android System UI permite cel mult două acțiuni **Wait** identificate din ierarhia de sistem. Fiecare acțiune păstrează captura și ierarhia, iar runnerul cere o observație proaspătă înainte de a evalua aplicația. Un dialog persistent oprește rularea cu `ANDROID_SYSTEM_UI_ANR` și dovezile capturate.
 - Rezervarea reîncearcă un conflict de partajare pentru cel mult patru secunde. Eliberarea confruntă identificatorul și dispozitivul sub același lock exclusiv, iar erorile de curățare se păstrează separat.
-- `-HistoryOnly -HistoryDetails` deschide două mâini din jurnalul restaurat. Verifică dublarea la levate, locurile Rentz cu premii egale și revenirea la poziția din grilă. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
+- `-HistoryOnly -HistoryDetails` deschide două mâini din jurnalul restaurat pentru detaliile punctajului și revenirea în grilă. Confruntarea profilului curent are [un criteriu deschis](../feedback/ATF_Rentz_UI_ToDo.md#profilul-de-punctaj-în-proba-istoricului).
 
 | Ce se verifică | Nivelul potrivit |
 |---|---|

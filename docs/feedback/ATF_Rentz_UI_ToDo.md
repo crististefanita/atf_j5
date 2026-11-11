@@ -135,7 +135,7 @@ Proiecțiile și adaptoarele existente sunt identificate în atlasul UI. Diagram
 | Regula deschiderii | J la fiecare culoare, vecini legali și refuz atomic; mese de 3–6 jucători, opțiunea J și varianta mijloc separate. Aceeași configurație după reluare și în lumile AI. |
 | Tabla | Culoare nedeschisă, numai J, extindere în ambele direcții, interval maxim, as, carte minimă, pas și ultimul loc. Reordonarea colecției de cărți nu schimbă geometria finală. |
 | Limita închiderii | Tabla terminală păstrează exact cărțile publice, inclusiv spațiile rămase; nu apar cărți noi la intrarea în istoricul scorului. |
-| Scor | Istoric gol, prima mână, program complet și reluare; delta zero, puncte negative, valori mari și premii egale. Pentru fiecare jucător, Σ este suma deltelor înregistrate. |
+| Scor | Istoric gol, prima mână, program complet și reluare; delta zero, puncte negative, valori mari, premiile profilului curent și egalitățile din jurnalele istorice. Pentru fiecare jucător, Σ este suma deltelor înregistrate. |
 | Identități | Toate cele 3–6 locuri, nume scurte/lungi și diacritice; totalurile și sosirile nu se atașează altui jucător după sortare. |
 | Geometrie | Limite în interiorul viewportului, fără intersecții; antete și grupuri corelate după derulare. Fiecare punct interactiv trimite o singură comandă legală, inclusiv după recalcularea dimensiunilor. |
 
@@ -191,3 +191,10 @@ Pentru patru jucători, mecanismul comun de alocare a spațiului este descris î
 O serie de gesturi ADB rapide pe coloana fixă a deschis detaliul unei mâini în timpul derulării. Proba de parcurgere a istoricului folosește celulele de scor pentru gestul vertical. [Captura nativă](../../../../rentz_back/ui-review/j5-live-ui-history-matrix-20261111-gesture-2/android-extent.html)
 
 Verificați separat pe dispozitiv o tragere verticală pornită de pe eticheta activă, la viteză obișnuită și după un fling. Tragerea trebuie să mute rândurile, iar o atingere să deschidă un singur detaliu.
+
+## Profilul de punctaj în proba istoricului
+
+**P2 · runnerul Android.** Fixture-ul exportă jurnalul cu `LABORATORY_V2`, iar proba `-HistoryDetails` așteaptă încă eticheta `LABORATORY_V1`. [Generatorul jurnalului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzHistoryReplayTest.java) · [Runnerul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
+
+- Derivați așteptarea din identitatea fixture-ului și confruntați-o cu profilul afișat. Verificați locul și premiul fiecărui jucător, inclusiv ultimul loc cu zero.
+- Păstrați o probă distinctă pentru un jurnal istoric cu premii egale. Verificați revenirea la același rând după închiderea detaliului.

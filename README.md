@@ -40,7 +40,7 @@ Din meniu poți deschide **Cum se joacă** sau reveni la o sesiune prin **Contin
 | [Aplicație Android](rentz-lab-app/app/README.md) | Afișează masa și păstrează sesiunea și profilul. |
 | [Teste și integrare](atf-tests/README.md) | Verifică regulile, arena offline și integrarea Android. |
 
-Regresia offline pornește din rădăcina proiectului.
+Regresia offline pornește din rădăcina proiectului, cu workspace-ul și cache-urile pregătite. [Pregătirea mediului](docs/rentz/ATF_Infrastructure.md#creare-și-verificare)
 
 ```powershell
 .\scripts\run-rentz-components.ps1

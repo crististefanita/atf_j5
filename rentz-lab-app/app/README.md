@@ -7,6 +7,7 @@ Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu tr
 [Nucleul UI](../../docs/rentz/ATF_UiIntegration.md) este consumat în configurația live: meniu, editor de nume, temă, chenare, geometrie, mână și depuneri. [Atlasul prezentării](src/main/java/ro/rentzlab/app/ui/README.md) delimitează adaptoarele Rentz, iar [feedback-ul](../../docs/feedback/ATF_Rentz_UI_ToDo.md) păstrează diferențele încă necalificate.
 
 - Pe masă, bifa **Joc automat** îi dă AI-ului locul tău pentru mâna curentă. Debifezi oricând, iar controlul revine automat la tine la scor sau la revenirea în aplicație. [Contractul delegării](../../docs/rentz/ATF_Lifecycle.md#joc-automat-pentru-locul-tău)
+- **Realizări** arată obiectivele acordate din joc. **Antrenament** are catalog și filtre proprii, pe același profil local. [Progres și eligibilitate](../../docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local)
 
 ## Responsabilități
 
@@ -28,7 +29,7 @@ Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu tr
 | [Componente ale salvării](src/test/java/ro/rentzlab/app/SessionJsonValidationTest.java) | Intrări invalide, limite numerice, compatibilitate explicită și vecini valizi. |
 | [Componente de lifecycle](src/test/java/ro/rentzlab/app/lifecycle/) | Intercalări deterministe, proprietar înlocuit, anulare ignorată, refuz IO și livrări întârziate, fără emulator. |
 
-La reluarea unei mâini punctate, masa prezintă ultima levată din salvare. Cărțile dispar la termenul vizual înainte de trecerea la pagina de scor. Pentru ambele trasee, raportul distinge primul cadru animat, durata totală și direcția fiecărei cărți. [Dovezile cadrelor Android](../../../../rentz_back/ui-review/restart-collection-j5/README.md)
+La prima reluare după pornirea procesului, masa poate prezenta ultima levată confirmată din jurnal, dacă sesiunea se află încă la limita ei. Termenul vizual pornește la primul cadru pregătit și continuă la redesenare. [Contractul prezentării](src/main/java/ro/rentzlab/app/ui/README.md#continuitate-și-limite)
 
 [Contractul de lifecycle](../../docs/rentz/ATF_Lifecycle.md) explică ordinea checkpoint-urilor, reluarea și limita calificării JVM. Politica AI primește numai observația permisă, chiar dacă motorul de fundal reconstruiește privat partida din seed și jurnal.
 
@@ -61,7 +62,7 @@ Citirea folosește același [JsonReader strict](https://javadoc.io/static/com.go
 | Numere | Token întreg zecimal exact, fără fracții, exponenți sau șiruri numerice; seed-ul păstrează întregul domeniu `long`, iar câmpurile `int` au limită proprie. |
 | Formă | Câmpuri obligatorii și opționale explicite, tipuri reale de text și boolean; câmpurile necunoscute sunt refuzate. |
 | Comenzi | Loc valid, rang întreg și payload specific acțiunii; apoi motorul confruntă legalitatea fiecărei comenzi rejucate. |
-| Compatibilitate | Lipsa câmpului `rules` identifică formatul vechi; regulile acceptate sunt explicite, iar comenzile trebuie să rămână legale în motorul curent. |
+| Compatibilitate | Formatul vechi poate lipsi de câmpul `rules`. Profilul de punctaj trebuie să corespundă regulilor jurnalului, iar replay-ul păstrează premiile acelui profil. |
 | Refuz | Codec-ul nu scrie fișiere și nu repară implicit intrarea; eroarea ajunge la proprietarul persistenței, care păstrează salvarea incompatibilă. |
 
 ## Verificare

@@ -17,7 +17,7 @@ Documentația activă explică Rentz, modelul offline și verificarea independen
 | Cine poate salva după pauză sau înlocuire? | [Lifecycle](rentz/ATF_Lifecycle.md) |
 | Cum calificăm aplicația Android? | [Android](rentz/ATF_Android.md) |
 | Cum calificăm și publicăm o ediție Android? | [Release și livrare](rentz/ATF_Release.md) |
-| Ce poate verifica RAG-ul pentru release și ce rămâne operatorului? | [Contract RAG și feedback deschis](feedback/ATF_Release_RAG.md) |
+| Ce verifică porțile RAG și ce probe rămân deschise? | [Ordinea calificării](rentz/ATF_Release.md#ordinea-calificării-android-curente) · [Feedback](feedback/ATF_Release_RAG.md) |
 | Unde sunt sursele, fixture-urile și rezultatele? | [Infrastructură](rentz/ATF_Infrastructure.md) |
 | Ce reutilizăm fără reguli Whist? | [Transfer](rentz/ATF_Transfer.md) |
 

@@ -35,7 +35,8 @@ Rendererul trimite identitatea selectată. Adaptorul o rezolvă în legalitatea 
 - `TrickPreview` observă evenimente publice noi și furnizează cărțile și locul câștigător către animatorul comun. Fereastra este 1500 ms, cu deplasare, micșorare și estompare în ultimele 500 ms.
 - Prima reluare după pornirea rece arată din jurnal ultima levată confirmată, dacă partida este încă la limita acelei levate. Bugetul începe la primul cadru pregătit pentru desen. Redesenarea folosește termenul existent, iar reluările din același proces continuă de la masa curentă.
 - O levată parțială și sub-jocul Rentz păstrează afișarea lor curentă. Colectarea din checkpoint este o operație de prezentare și lasă jurnalul și punctajul neschimbate.
-- Mâna vizibilă urmează ordinea ♠ ♥ ♣ ♦ și rangul crescător din J4. Selecția se rezolvă prin identitatea cărții în legalitatea curentă.
+- Mâna vizibilă urmează ordinea ♠ ♥ ♣ ♦ și rangul crescător. Adaptorul rezolvă selecția prin identitatea cărții și legalitatea curentă.
+- În tura manuală, o atingere respinsă marchează temporar cartea în roșu și arată alternativele legale în auriu. În sub-jocul Rentz, marcajul cărților legale rămâne vizibil și la delegare.
 - Același loc primește același nume de adversar la masă, pe depuneri și în istoric. Chenarul afișează Δ și Σ, iar descrierea accesibilă citește complet punctele și totalul.
 - După ultima levată, ecranul de punctaj folosește rândul confirmat din istoric. Jucătorul poate continua, reveni la masă sau deschide istoricul.
 - [Sugestia AI](screens/ContractAdvice.java) folosește numai observația mâinii dezvăluite și opțiunile legale ale jucătorului. Dialogul anulează calculul dacă alegerea se închide sau ecranul se schimbă.
