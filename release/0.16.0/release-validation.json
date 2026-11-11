@@ -49,8 +49,8 @@
     "files": [
       {
         "path": "README.md",
-        "bytes": 391,
-        "sha256": "910ed85cf69d7bb48e962d19e02909b391ade76e57bd72e4f8fb4333415e81a1"
+        "bytes": 445,
+        "sha256": "98cd2901d758ba77b90fb5ba029621453cf503540aad736aa851e2ad2fb6f85d"
       },
       {
         "path": "release-notes.md",

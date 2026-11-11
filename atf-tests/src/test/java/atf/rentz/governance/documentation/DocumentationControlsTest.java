@@ -42,6 +42,19 @@ class DocumentationControlsTest {
             assertEquals(List.of(), inspect(good));
         }
     }
+    @Test void aHeadingRemovedFromTheOwnerFailsAtTheOriginalLinkLine() throws Exception {
+        Path target = root.resolve("owner.md");
+        String guide = "# Contract\n\n## Pe scurt\n\n[Contract](owner.md#stable-heading)\n";
+        Files.writeString(target, "## Stable heading\n");
+        assertEquals(List.of(), inspect(guide));
+        Files.writeString(target, "~~~md\n## Stable heading\n~~~\n## Renamed heading\n");
+        var violations = inspect(guide);
+        assertFalse(violations.isEmpty(), "A heading in a fenced example cannot preserve a removed anchor");
+        assertTrue(violations.stream().allMatch(issue -> issue.code().equals("DOC-README-ANCHOR")
+                && issue.file().equals(Path.of("README.md")) && issue.line() == 5
+                && issue.fix().contains("restore the destination heading")), violations::toString);
+    }
+
     @Test void adaptedValidatorsKeepTheirDeclaredSourceIdentity() throws Exception {
         Path project = GovernanceProject.root();
         var manifest = new ObjectMapper().readTree(project.resolve("config/documentation-validators.json").toFile());

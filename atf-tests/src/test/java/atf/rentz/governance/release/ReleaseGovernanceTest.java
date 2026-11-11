@@ -82,6 +82,37 @@ class ReleaseGovernanceTest {
                 () -> ReleaseCatalog.verifyRestrictedGuide(restricted.replace("## Jocul", "## Ediție cu acces autorizat"),
                         "example/private-editions", "1.2.0")).getMessage());
     }
+    @Test void theMainGuideRejectsASecondReleaseHiddenBehindALocalDocumentationLink() {
+        String guide = guide("PUBLISHED") + "\n## APK de test\n\n"
+                + "- [Rentz Lab 1.3.0](docs/rentz/ATF_Release.md#apk-de-test)\n";
+        var failure = assertThrows(IOException.class, () -> ReleaseCatalog.verifyRestrictedGuide(guide, "example/game", "1.2.0"));
+        assertEquals("RELEASE-MAIN-EXTRA-DOWNLOAD", failure.getMessage(), "The prior two-version README must fail");
+    }
+
+    @Test void theMainGuideAcceptsOnlyTheExactVerifiedPreviewWhileItIsSelected() throws Exception {
+        var receipt = new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode();
+        receipt.put("version", "1.3.0").put("sourceCommit", "a".repeat(40)).put("apkSha256", "b".repeat(64))
+                .put("releaseId", 21).put("assetId", 22).put("apkBytes", 23)
+                .put("authenticatedHttp", 200).put("anonymousHttp", 404);
+        String repository = "example/private-editions";
+        String url = "https://github.com/" + repository + "/releases/download/preview-v1.3.0/RentzLab-1.3.0-ui-sanity.apk";
+        String preview = "# Rentz Lab\n\n## Jocul\n\n- [APK de test](" + url + ")\n\n"
+                + "## Documentație\n\n[Catalog](release/README.md)\n";
+        assertDoesNotThrow(() -> ReleaseCatalog.verifyPreviewGuide(preview, repository, "1.2.0", "1.3.0", receipt));
+        for (String changed : List.of(
+                preview.replace("preview-v1.3.0", "preview-v1.2.0"),
+                preview.replace("example/private-editions", "example/other"),
+                preview.replace("-ui-sanity.apk", ".apk"),
+                preview.replace("## Documentație", "- [Ediția veche](https://example.test/RentzLab-1.2.0.apk)\n\n## Documentație"),
+                preview + "\n## APK de test\n\n[Altă versiune](docs/rentz/ATF_Release.md#apk-de-test)\n",
+                preview + "\n<a href='https://example.test/RentzLab-1.2.0.apk'>Ediția veche</a>\n")) {
+            assertThrows(IOException.class, () -> ReleaseCatalog.verifyPreviewGuide(changed, repository, "1.2.0", "1.3.0", receipt));
+        }
+        assertThrows(IOException.class, () -> ReleaseCatalog.verifyPreviewGuide(preview, repository, "1.2.0", "1.4.0", receipt));
+        receipt.put("anonymousHttp", 200);
+        assertThrows(IOException.class, () -> ReleaseCatalog.verifyPreviewGuide(preview, repository, "1.2.0", "1.3.0", receipt));
+    }
+
     @Test void aVerifiedPublicCopyIsTheOnlyDirectDownloadInTheMainGuide() throws Exception {
         String github = "https://github.com/example/game/releases/download/v1.2.0/RentzLab-1.2.0.apk";
         String mirror = "https://download.example.test/v1.2.0/RentzLab-1.2.0.apk";

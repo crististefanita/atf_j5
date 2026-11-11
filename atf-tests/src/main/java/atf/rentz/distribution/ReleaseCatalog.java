@@ -21,7 +21,8 @@ public final class ReleaseCatalog {
     private static final Pattern GAME_SECTION = Pattern.compile("(?ms)^## Jocul[ \\t]*(?:\\n|\\z)(.*?)(?=^## |\\z)");
     private static final Pattern LINK = Pattern.compile("\\]\\(([^)\\s]+)\\)");
     private static final Pattern LINK_BULLET = Pattern.compile("- \\[[^\\[\\]]+\\]\\(([^()\\s]+)\\)");
-    private static final Pattern RELEASE_LINK = Pattern.compile("/releases/(tag|download)/|\\.apk(?:[?#].*)?$",
+    private static final Pattern RELEASE_LINK = Pattern.compile(
+            "/releases/(tag|download|expanded_assets)/|/releases/latest\\b|\\.apk\\b|#apk-de-test\\b",
             Pattern.CASE_INSENSITIVE);
     public record Edition(Path folder, JsonNode manifest, ApkDownloadTarget target, String state) { }
     public static Path root() {
@@ -66,11 +67,14 @@ public final class ReleaseCatalog {
         require(Files.readString(root.resolve("release/README.md")).contains("("+version+"/README.md)"),"RELEASE-CATALOG-LINK");
         String guide=Files.readString(root.resolve("README.md"));
         String downloadRepository=repository;
+        JsonNode readmePreview = index.path("readmePreview");
         if(publication.path("channel").asText().equals("authenticated-only")) {
             require(state.equals("PUBLISHED") && !manifest.has("publicDownload"),"RELEASE-RESTRICTED-STATE");
             downloadRepository=verifyRestrictedReceipt(root,repository,version,identity,publication);
-            verifyRestrictedGuide(guide,downloadRepository,version);
+            if (readmePreview.isMissingNode()) verifyRestrictedGuide(guide, downloadRepository, version);
+            else verifyPreviewGuide(guide, downloadRepository, version, buildVersion, readmePreview);
         } else {
+            require(readmePreview.isMissingNode(), "RELEASE-README-PREVIEW-CHANNEL");
             String publicUrl=publicDownloadUrl(manifest.path("publicDownload"),identity,version,state);
             verifyMainGuide(guide,repository,version,state,publicUrl);
         }
@@ -129,13 +133,23 @@ public final class ReleaseCatalog {
     public static void verifyMainGuide(String guide,String repository,String version,String state) throws IOException {
         verifyMainGuide(guide, repository, version, state, null);
     }
+    public static void verifyPreviewGuide(String guide, String repository, String currentVersion,
+                                          String candidateVersion, JsonNode receipt) throws IOException {
+        String version = receipt.path("version").asText();
+        require(receipt.isObject() && receipt.size() == 8 && !version.equals(currentVersion)
+                        && version.equals(candidateVersion)
+                        && version.matches("(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)")
+                        && receipt.path("sourceCommit").asText().matches("[a-f0-9]{40}")
+                        && receipt.path("apkSha256").asText().matches("[a-f0-9]{64}")
+                        && number(receipt, "releaseId") > 0 && number(receipt, "assetId") > 0
+                        && number(receipt, "apkBytes") > 0 && number(receipt, "authenticatedHttp") == 200
+                        && number(receipt, "anonymousHttp") == 404, "RELEASE-README-PREVIEW-IDENTITY");
+        String url = "https://github.com/" + repository + "/releases/download/preview-v" + version
+                + "/RentzLab-" + version + "-ui-sanity.apk";
+        verifyGuide(guide, List.of(url));
+    }
+
     public static void verifyMainGuide(String guide,String repository,String version,String state,String publicUrl) throws IOException {
-        String normalized = guide.replace("\r\n", "\n");
-        var section = GAME_SECTION.matcher(normalized);
-        require(section.find(), "RELEASE-MAIN-SECTION");
-        String content = section.group(1);
-        String outside = normalized.substring(0, section.start()) + normalized.substring(section.end());
-        require(!section.find(), "RELEASE-MAIN-SECTION");
         String local="release/"+version+"/";
         List<String> expected=switch(state) {
             case "DRAFT" -> List.of(local+"README.md");
@@ -144,11 +158,21 @@ public final class ReleaseCatalog {
                     publicUrl != null ? publicUrl : "https://github.com/"+repository+"/releases/download/v"+version+"/RentzLab-"+version+".apk");
             default -> throw new IOException("RELEASE-STATE");
         };
+        verifyGuide(guide, expected);
+    }
+
+    private static void verifyGuide(String guide, List<String> expected) throws IOException {
+        String normalized = guide.replace("\r\n", "\n");
+        var section = GAME_SECTION.matcher(normalized);
+        require(section.find(), "RELEASE-MAIN-SECTION");
+        String content = section.group(1);
+        String outside = normalized.substring(0, section.start()) + normalized.substring(section.end());
+        require(!section.find(), "RELEASE-MAIN-SECTION");
         require(links(content).equals(expected), "RELEASE-MAIN-LINKS");
         var lines = content.lines().map(String::strip).filter(line -> !line.isEmpty()).toList();
         require(lines.size() == expected.size() && lines.stream().allMatch(line -> LINK_BULLET.matcher(line).matches()),
                 "RELEASE-MAIN-COPY");
-        require(links(outside).stream().noneMatch(link -> RELEASE_LINK.matcher(link).find()), "RELEASE-MAIN-EXTRA-DOWNLOAD");
+        require(!RELEASE_LINK.matcher(outside).find(), "RELEASE-MAIN-EXTRA-DOWNLOAD");
         require(links(outside).contains("release/README.md"), "RELEASE-MAIN-CATALOG");
     }
     private static List<String> links(String markdown) {

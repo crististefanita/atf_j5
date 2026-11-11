@@ -179,11 +179,11 @@ Distribuiți candidatul numai după calificarea RAG locală și verificarea semn
 
 ### APK de test
 
-[Descarcă Rentz Lab 0.18.0 pentru testare](https://github.com/crististefanita/atf_j5_releases/releases/download/preview-v0.18.0/RentzLab-0.18.0-ui-sanity.apk)
+Un APK de test verificat poate ocupa singur secțiunea **Jocul**. Legătura indică direct pachetul candidat din depozitul GitHub privat. Înregistrarea din catalog leagă versiunea de candidatul declarat și păstrează dovada accesului.
 
-- Pachetul evidențiază cartea respinsă și cărțile legale. Se instalează separat de joc.
-- Descărcarea cere un cont GitHub cu acces la depozitul privat.
-- Regresia offline și semnătura califică pachetul de test. Ediția de producție cere acceptanță nativă.
+- Verificați regresia offline, semnătura și identitatea Android izolată înainte de distribuție.
+- Descărcați binarul cu un cont autorizat și confirmați că accesul anonim este refuzat.
+- Ediția de producție se găsește în catalogul tehnic. La promovare, eliminați înregistrarea candidatului din intrarea principală.
 
 ### Proba Android a APK-ului livrat
 

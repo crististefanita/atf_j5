@@ -389,7 +389,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "2f04271f40151160dac5403012e0945f1f08cc73e0f7182081baf6ab6bb34f2d",
+      "sha256": "bd2879fd08d68fdc53c108474c19f5febeeb32e4cae6fdb71e0c50e420ea728c",
       "allowDelete": false
     },
     {
@@ -516,10 +516,10 @@
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz release",
       "reason": "Govern release-state, five complete game deals, display layout, learning isolation, source identity and Extent evidence.",
-      "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject noise, duplicate headings and alternate download links.",
+      "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "eba3d2ed6a236a887593c3c5d836c869829ac28e7cf330cb1c13e086704027ff",
+      "sha256": "747754f5b62b9563c0f7a2d6e0e63e043818ecf9467dcc4852fd6fb5327c0a9c",
       "allowDelete": false
     },
     {
@@ -1106,10 +1106,10 @@
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java",
       "owner": "Rentz release",
       "reason": "Release candidate version boundary and catalog identity.",
-      "criterion": "The published version remains separate and the candidate advances one minor or major boundary with a higher Android versionCode. The game section uses the same link-only format on both channels.",
+      "criterion": "The production catalog remains independent. The main guide accepts only its exact edition or the single verified private preview that matches the candidate version.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "74e9016ae297e9a776db9d89f51ef2ee5d9aa1ca5db3b6c8b608aa5fdd588366",
+      "sha256": "cbb3b78f39ec14fd18f774ab81150673023441b776310c9ac8328ed9cff76de8",
       "allowDelete": false
     },
     {
@@ -1215,11 +1215,11 @@
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Stage the 0.16.0 minor candidate.",
-      "criterion": "Keep the published 0.15.0 link during qualification and declare 0.16.0 with code 20.",
+      "reason": "Record the exact private preview presented in the main guide.",
+      "criterion": "Bind the main README to the qualified 0.18.0 asset and verified access while preserving the production catalog.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "98d1dadc8fd3e1890a6549bc0cda46d232c1bd72708cabfa780e86e19c7d0a88",
+      "sha256": "e1e203f49efd796b2baded334d2d8bf9eeefd7fd4dc351514a9914b49949453e",
       "allowDelete": false
     },
     {

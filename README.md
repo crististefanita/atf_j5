@@ -4,16 +4,9 @@
 
 Rentz Lab este un joc de cărți pentru Android, cu opt sub-jocuri și adversari AI. Poți juca offline, relua o partidă salvată și urmări scorul și realizările.
 
-<a id="ediție-cu-acces-autorizat"></a>
-
 ## Jocul
 
-- [Rentz Lab 0.16.0](https://github.com/crististefanita/atf_j5_releases/releases/tag/v0.16.0)
-- [Descarcă APK-ul](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.16.0/RentzLab-0.16.0.apk)
-
-## APK de test
-
-- [Rentz Lab 0.18.0 cu indiciu la atingere](docs/rentz/ATF_Release.md#apk-de-test)
+- [Descarcă Rentz Lab 0.18.0 pentru testare](https://github.com/crististefanita/atf_j5_releases/releases/download/preview-v0.18.0/RentzLab-0.18.0-ui-sanity.apk)
 
 ## Prima partidă
 

@@ -8,5 +8,15 @@
   "candidate": {
     "version": "0.18.0",
     "versionCode": 22
+  },
+  "readmePreview": {
+    "version": "0.18.0",
+    "sourceCommit": "61b94b2de9e36b46e956e74d0f8431abc11ae6ca",
+    "releaseId": 442182217,
+    "assetId": 736888102,
+    "apkBytes": 1327814,
+    "apkSha256": "393c4b896bd59db94825422ba6860606b701bf30327f93b66a49b523c09dea99",
+    "authenticatedHttp": 200,
+    "anonymousHttp": 404
   }
 }
