@@ -18,6 +18,11 @@ public final class ReleaseCatalog {
     private static final ObjectMapper JSON = new ObjectMapper()
             .enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
             .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+    private static final Pattern GAME_SECTION = Pattern.compile("(?ms)^## Jocul[ \\t]*(?:\\n|\\z)(.*?)(?=^## |\\z)");
+    private static final Pattern LINK = Pattern.compile("\\]\\(([^)\\s]+)\\)");
+    private static final Pattern LINK_BULLET = Pattern.compile("- \\[[^\\[\\]]+\\]\\(([^()\\s]+)\\)");
+    private static final Pattern RELEASE_LINK = Pattern.compile("/releases/(tag|download)/|\\.apk(?:[?#].*)?$",
+            Pattern.CASE_INSENSITIVE);
     public record Edition(Path folder, JsonNode manifest, ApkDownloadTarget target, String state) { }
     public static Path root() {
         String configured=System.getProperty("rentz.project.root", "");
@@ -119,28 +124,18 @@ public final class ReleaseCatalog {
     }
 
     public static void verifyRestrictedGuide(String guide,String repository,String version) throws IOException {
-        String normalized=guide.replace("\r\n","\n");
-        String heading="\n## Ediție cu acces autorizat\n";
-        int start=normalized.indexOf(heading);
-        require(start>=0 && start==normalized.lastIndexOf(heading),"RELEASE-MAIN-SECTION");
-        int end=normalized.indexOf("\n## ",start+1);
-        if(end<0)end=normalized.length();
-        String base="https://github.com/"+repository+"/releases/";
-        List<String> expected=List.of(base+"tag/v"+version,base+"download/v"+version+"/RentzLab-"+version+".apk");
-        require(links(normalized.substring(start,end)).equals(expected),"RELEASE-MAIN-LINKS");
-        require(links(normalized.substring(0,start)+normalized.substring(end)).stream().noneMatch(link ->
-                link.contains("/releases/tag/") || link.contains("/releases/download/") || link.matches("(?i).*\\.apk(?:[?#].*)?")),
-                "RELEASE-MAIN-EXTRA-DOWNLOAD");
-        require(normalized.contains("(release/README.md)"),"RELEASE-MAIN-CATALOG");
+        verifyMainGuide(guide, repository, version, "PUBLISHED");
     }
     public static void verifyMainGuide(String guide,String repository,String version,String state) throws IOException {
         verifyMainGuide(guide, repository, version, state, null);
     }
     public static void verifyMainGuide(String guide,String repository,String version,String state,String publicUrl) throws IOException {
-        String normalized=guide.replace("\r\n","\n");int start=normalized.indexOf("\n## Jocul\n");
-        require(start>=0,"RELEASE-MAIN-SECTION");int end=normalized.indexOf("\n## ",start+1);
-        String section=normalized.substring(start,end<0?normalized.length():end);
-        var links=links(section);
+        String normalized = guide.replace("\r\n", "\n");
+        var section = GAME_SECTION.matcher(normalized);
+        require(section.find(), "RELEASE-MAIN-SECTION");
+        String content = section.group(1);
+        String outside = normalized.substring(0, section.start()) + normalized.substring(section.end());
+        require(!section.find(), "RELEASE-MAIN-SECTION");
         String local="release/"+version+"/";
         List<String> expected=switch(state) {
             case "DRAFT" -> List.of(local+"README.md");
@@ -149,11 +144,15 @@ public final class ReleaseCatalog {
                     publicUrl != null ? publicUrl : "https://github.com/"+repository+"/releases/download/v"+version+"/RentzLab-"+version+".apk");
             default -> throw new IOException("RELEASE-STATE");
         };
-        require(links.equals(expected),"RELEASE-MAIN-LINKS");
-        require(normalized.contains("(release/README.md)"),"RELEASE-MAIN-CATALOG");
+        require(links(content).equals(expected), "RELEASE-MAIN-LINKS");
+        var lines = content.lines().map(String::strip).filter(line -> !line.isEmpty()).toList();
+        require(lines.size() == expected.size() && lines.stream().allMatch(line -> LINK_BULLET.matcher(line).matches()),
+                "RELEASE-MAIN-COPY");
+        require(links(outside).stream().noneMatch(link -> RELEASE_LINK.matcher(link).find()), "RELEASE-MAIN-EXTRA-DOWNLOAD");
+        require(links(outside).contains("release/README.md"), "RELEASE-MAIN-CATALOG");
     }
     private static List<String> links(String markdown) {
-        return Pattern.compile("\\]\\(([^)\\s]+)\\)").matcher(markdown).results().map(match->match.group(1)).toList();
+        return LINK.matcher(markdown).results().map(match -> match.group(1)).toList();
     }
     private static String publicDownloadUrl(JsonNode proof, JsonNode identity, String version, String state) throws IOException {
         if (proof.isMissingNode()) return null;

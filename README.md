@@ -2,63 +2,56 @@
 
 ## Pe scurt
 
-Laborator specializat în regulile Rentz și verificarea lor prin componente offline. Motorul local este independent de aplicația de referință `com.boonwiz.rentz`; regulile declarate, variantele modelate și ipotezele neconfirmate au statut explicit.
+Rentz Lab este un joc de cărți pentru Android, cu opt sub-jocuri și adversari AI. Poți juca offline, relua o partidă salvată și urmări scorul și realizările.
 
-Motorul validează distribuirea, alegerea sub-jocului, mutările legale și scorul. Aplicația Android folosește același motor și adaugă masa de joc, salvarea, reluarea și profilul local.
+<a id="ediție-cu-acces-autorizat"></a>
 
-## Ediție cu acces autorizat
+## Jocul
 
-- [Rentz Lab 0.16.0](https://github.com/crististefanita/atf_j5_releases/releases/tag/v0.16.0) · Poziții stabile de la alegerea contractului la joc și catalogul comun de realizări.
-- [Descarcă APK-ul Rentz Lab 0.16.0](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.16.0/RentzLab-0.16.0.apk) · Android 8.0+. Autentifică-te în GitHub cu un cont care are acces la ediție.
+- [Rentz Lab 0.16.0](https://github.com/crististefanita/atf_j5_releases/releases/tag/v0.16.0)
+- [Descarcă APK-ul](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.16.0/RentzLab-0.16.0.apk)
 
-## Module și responsabilități
+## Prima partidă
 
-| Zonă | Responsabilitate |
-|---|---|
-| [Motor Rentz](rentz-lab-app/game-core/README.md) | Cărți, levate fără atu, opt sub-jocuri, secvențe, rotație, scor și jucători Normal/Hard. |
-| [Aplicație locală](rentz-lab-app/app/README.md) | Interfață nativă pe UI-ul comun, adaptoare Rentz, sesiune salvată, istoric și reluare. |
-| [Testare și integrare](atf-tests/README.md) | Profil YAML tipizat, componente, arenă offline și acceptanța bibliotecilor comune. |
-| [Kit](lib/README.TestKit.md#scope-și-integrare) | Clasificare, lifecycle JUnit și păstrarea comparațiilor evaluate. |
-| [Observarea referinței](rentz-reference/README.md) | Identitatea aplicației originale și capturi Android cu rezervare exclusivă. |
-| [Documentație Rentz](docs/rentz/README.md) | Reguli, proveniență, arhitectură, componente și transfer. |
-
-## Traseul de lucru
+Deschide **Partidă nouă** și alege numărul de jucători și dificultatea. Când îți revine alegerea, selectezi unul dintre sub-jocurile rămase.
 
 ```mermaid
 flowchart LR
-    SOURCE[Regulă și proveniență] -->|formalizează| CONTRACT[Contract Rentz]
-    CONTRACT -->|exercită| CASE[Componentă mică]
-    CASE -->|califică| MODEL[Motor offline]
-    MODEL -->|precede| UI[Adaptor grafic]
+    SETUP["Configurare"] -->|pornești| CHOOSE["Alegere"]
+    CHOOSE -->|selectezi| PLAY["Joc"]
+    PLAY -->|închei| SCORE["Scor"]
+    SCORE -->|mai sunt alegeri| CHOOSE
+    SCORE -->|alegeri epuizate| END["Partidă încheiată"]
 ```
 
 <details>
-<summary>Legendă: domeniul se califică înaintea interfeței</summary>
+<summary><strong>Legendă — de la alegere la scor</strong></summary>
 
-Un rezultat al modelului verifică regula implementată și profilul său. Echivalența cu aplicația originală cere confruntare separată; existența unui APK sau a unei componente verzi nu o stabilește automat.
+- **Alegere.** Jucătorul la rând stabilește sub-jocul.
+- **Joc.** Obiectivul depinde de alegere. În Rentz, construiești secvențe pe culori pornind de la valeți.
+- **Scor.** La finalul mâinii vezi punctele și poți deschide istoricul.
 
 </details>
 
-## Pornire
+Din meniu poți deschide **Cum se joacă** sau reveni la o sesiune prin **Continuă partida**. [Reguli și punctaj](docs/rentz/ATF_Rules.md)
 
-Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și cache-urile Gradle/Maven pregătite:
+## Pentru dezvoltatori
+
+| Zonă | Responsabilitate |
+|---|---|
+| [Motor](rentz-lab-app/game-core/README.md) | Aplică regulile, mutările legale, scorul și politicile AI. |
+| [Aplicație Android](rentz-lab-app/app/README.md) | Afișează masa și păstrează sesiunea și profilul. |
+| [Teste și integrare](atf-tests/README.md) | Verifică regulile, arena offline și integrarea Android. |
+
+Regresia offline pornește din rădăcina proiectului.
 
 ```powershell
 .\scripts\run-rentz-components.ps1
 ```
 
-Intrarea implicită este colecția regression: componente Maven și Android JVM, fără dispozitiv. Pentru reguli fără SDK Android, selectați explicit quick prin parametrul -Collection.
-
-Lansatorul execută o copie temporară și păstrează rezultatele în afara surselor. Profilul activ este de laborator; valorile originale „Classic” și „Traditional” rămân neconfirmate până la calificarea lor.
-
-[Reguli](docs/rentz/ATF_Rules.md) · [Surse și certitudine](docs/rentz/ATF_RuleSources.md) · [Feedback activ](docs/feedback/ATF_Rentz.md)
-
-[Jocul și evaluarea offline](docs/rentz/ATF_Learning.md) explică memoria publică, politicile, compararea distribuirilor și separarea dezvoltării de evaluarea nouă. O partidă a modelului nu confirmă automat comportamentul aplicației originale.
-
 ## Documentație
 
-[Catalogul livrării](release/README.md) · [Procesul de release](docs/rentz/ATF_Release.md)
-
-## Materiale păstrate separat
-
-[Testele istorice Contract Whist](reference-tests/README.md) nu intră în reactorul Rentz. Rularea lor nu califică noul joc și nu face parte din fluxul activ.
+- [Regulile și arhitectura Rentz](docs/rentz/README.md)
+- [Evaluarea offline a jucătorilor AI](docs/rentz/ATF_Learning.md)
+- [Catalogul edițiilor](release/README.md) și [procesul de release](docs/rentz/ATF_Release.md)
+- [Feedback activ](docs/feedback/README.md)

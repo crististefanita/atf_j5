@@ -59,16 +59,28 @@ class ReleaseGovernanceTest {
         assertDoesNotThrow(()->ReleaseCatalog.verifyMainGuide(guide("PREPARED"),"example/game","1.2.0","PREPARED"));
         assertDoesNotThrow(()->ReleaseCatalog.verifyMainGuide(guide("DRAFT"),"example/game","1.2.0","DRAFT"));
     }
-    @Test void restrictedEditionHasOneVersionAndRejectsASecondDownloadSection() throws Exception {
-        String restricted=guide("PUBLISHED").replace("## Jocul","## Ediție cu acces autorizat")
-                .replace("example/game","example/private-editions");
+    @Test void correctUrlsCannotHideAuthenticationNotesOrReleaseCopy() {
+        String clean = guide("PUBLISHED");
+        for (String noisy : List.of(
+                clean.replace("## Jocul\n\n", "## Jocul\n\nAutentifică-te în GitHub.\n\n"),
+                clean.replace("RentzLab-1.2.0.apk)", "RentzLab-1.2.0.apk) · Android 8.0+"),
+                clean.replace("## Documentație", "## Jocul\n\n## Documentație"))) {
+            assertThrows(IOException.class,
+                    () -> ReleaseCatalog.verifyMainGuide(noisy, "example/game", "1.2.0", "PUBLISHED"));
+        }
+    }
+    @Test void restrictedEditionUsesTheSameGameSectionAndRejectsASecondDownloadRoute() throws Exception {
+        String restricted=guide("PUBLISHED").replace("example/game","example/private-editions");
         assertDoesNotThrow(()->ReleaseCatalog.verifyRestrictedGuide(restricted,"example/private-editions","1.2.0"));
-        String stale=restricted+"\n## Jocul\n\n[APK vechi](https://downloads.example.test/v1.1.0/RentzLab-1.1.0.apk)\n";
+        String stale=restricted+"\n## Descărcări\n\n[APK vechi](https://downloads.example.test/v1.1.0/RentzLab-1.1.0.apk)\n";
         assertEquals("RELEASE-MAIN-EXTRA-DOWNLOAD",assertThrows(IOException.class,
                 ()->ReleaseCatalog.verifyRestrictedGuide(stale,"example/private-editions","1.2.0")).getMessage());
         assertEquals("RELEASE-MAIN-LINKS",assertThrows(IOException.class,
                 ()->ReleaseCatalog.verifyRestrictedGuide(restricted.replace("/v1.2.0/","/v1.1.0/"),
                         "example/private-editions","1.2.0")).getMessage());
+        assertEquals("RELEASE-MAIN-SECTION", assertThrows(IOException.class,
+                () -> ReleaseCatalog.verifyRestrictedGuide(restricted.replace("## Jocul", "## Ediție cu acces autorizat"),
+                        "example/private-editions", "1.2.0")).getMessage());
     }
     @Test void aVerifiedPublicCopyIsTheOnlyDirectDownloadInTheMainGuide() throws Exception {
         String github = "https://github.com/example/game/releases/download/v1.2.0/RentzLab-1.2.0.apk";

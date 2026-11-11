@@ -26,10 +26,10 @@
       "path": "scripts/verify-release-readme.ps1",
       "owner": "Rentz release",
       "reason": "Close the authenticated distribution channel after the qualified source and README reach the remote.",
-      "criterion": "Require the authenticated artifact bytes and SHA-256, explicit provider permissions, exact source tag, and the pushed download link.",
-      "proof": "docs/rentz/ATF_Release.md",
+      "criterion": "Require the authenticated artifact bytes and SHA-256, explicit provider permissions and exact source tag. The pushed Jocul section accepts only the two canonical links in order on both channels.",
+      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-09",
-      "sha256": "64ae9de2706f4e0de2316bcfd81b976144beea4195fc823f2984796f69e0938e",
+      "sha256": "a5755f2bfccfc3458f56b860aae5c9cbc3b6a7ec1f557cbf3891b43c17fe710a",
       "allowDelete": false
     },
     {
@@ -516,10 +516,10 @@
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz release",
       "reason": "Govern release-state, five complete game deals, display layout, learning isolation, source identity and Extent evidence.",
-      "criterion": "Two deals or missing required geometry cannot qualify an APK; receipt mutations remain BLOCKED, while a valid Rentz-plus-two-games receipt is source-bound and report corruption blocks promotion.",
+      "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject noise, duplicate headings and alternate download links.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "4bb20130ee416a9df87ad98ab564023a2247e8acabc80061778a5f608b7a13e3",
+      "sha256": "eba3d2ed6a236a887593c3c5d836c869829ac28e7cf330cb1c13e086704027ff",
       "allowDelete": false
     },
     {
@@ -706,10 +706,10 @@
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz consumer",
       "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting.",
-      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
+      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry. Remote README fixtures exercise both distribution channels and reject extra copy or routes.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "315108ae4a693aa70345fe2ee4743d1ec246899cdac3fc50773642be03b743a8",
+      "sha256": "e636cf09f1050cb290ee8d65c27af0624a9d57695850cb601144cb7d00f293d5",
       "allowDelete": false
     },
     {
@@ -1106,10 +1106,10 @@
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java",
       "owner": "Rentz release",
       "reason": "Release candidate version boundary and catalog identity.",
-      "criterion": "Published version remains separate; candidate advances one minor or major boundary and Android versionCode increases.",
+      "criterion": "The published version remains separate and the candidate advances one minor or major boundary with a higher Android versionCode. The game section uses the same link-only format on both channels.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "17188cb5b13c52611550456e8c37757e4366115eeeddaeeb1d4d038f268cf377",
+      "sha256": "74e9016ae297e9a776db9d89f51ef2ee5d9aa1ca5db3b6c8b608aa5fdd588366",
       "allowDelete": false
     },
     {

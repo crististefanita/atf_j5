@@ -150,11 +150,23 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 5. Verificați README → release curent → asset: bytes efectivi, SHA-256 și toate CRC-urile. Un răspuns 404 salvat cu extensia APK rămâne eroare.
 6. Păstrați distinct accesul autentificat, accesul fără sesiune și blocarea browserului. Tokenul API nu se transmite originilor CDN; o probă Android poate consuma numai redirectul temporar al asset-ului, fără expunerea lui în rapoarte.
 7. Rulați intrarea explicită de acceptanță a distribuției cu classpath-ul calificat și tokenul numai în mediu. Nu o includeți implicit în regresia offline.
-8. Actualizați catalogul și secțiunea **Ediție cu acces autorizat** din README cu release-ul curent și descărcarea directă.
+8. Actualizați catalogul și secțiunea **Jocul** din README conform [contractului de navigare](#linkurile-din-readme).
 9. După push, rulați `scripts/verify-release-readme.ps1 -Restricted` cu raportul RAG calificat și directorul probelor de distribuție. Verificatorul citește README-ul din commitul remote, confruntă linkurile și octeții descărcați și salvează `readme-publication` în depozitul extern.
 10. Retrageți edițiile anterioare doar când `readme-publication.retirement.allowed` este `true`. Verificarea cere trecerea porților RAG, tagul marcat `latest` în GitHub și descărcarea autentificată a APK-ului din README-ul împins. Păstrați tagurile Git și dovezile de audit. După retragere, confruntați din nou inventarul și descărcarea ediției curente.
 
 [Calificarea componentelor](ATF_Qualification.md) · [Protocolul Android](ATF_Android.md) · [Catalogul livrării](../../release/README.md)
+
+### Linkurile din README
+
+README-ul principal începe cu jocul, descărcarea și prima partidă. Secțiunea **Jocul** conține câte o legătură pe rând.
+
+| Stare | Legături în ordine |
+|---|---|
+| `DRAFT` | Dosarul ediției |
+| `PREPARED` | Dosarul ediției, APK-ul local |
+| `PUBLISHED` | Pagina release-ului, APK-ul direct din canalul calificat |
+
+Catalogul verifică unicitatea secțiunii, ordinea și adresele. Verificatorul post-publicare cere aceeași formă în README-ul remote. Condițiile de acces, compatibilitatea Android și dovezile ediției se citesc în documentele de distribuție și în dosarul ediției.
 
 ### Distribuție cu autentificare
 

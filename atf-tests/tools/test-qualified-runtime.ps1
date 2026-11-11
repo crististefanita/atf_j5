@@ -427,6 +427,38 @@ Case $githubRestrictedCase {
         Require $rejected "Private GitHub gate admitted mutation: $mutation"
     }
 }
+Case 'Pushed README requires one clean game section for each distribution channel' {
+    $scriptPath = Join-Path $project 'scripts/verify-release-readme.ps1'
+    $tokens = $null
+    $errors = $null
+    $ast = [Management.Automation.Language.Parser]::ParseFile($scriptPath, [ref]$tokens, [ref]$errors)
+    Require (-not $errors) 'README verifier does not parse'
+    $definition = $ast.Find({ param($node)
+        $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -ceq 'Confirm-ReadmeGameLinks'
+    }, $true)
+    Require ($null -ne $definition) 'README navigation validation is missing'
+    . ([scriptblock]::Create($definition.Extent.Text))
+
+    foreach ($repo in @('example/game', 'example/private-editions')) {
+        $page = "https://github.com/$repo/releases/tag/v1.2.0"
+        $asset = "https://github.com/$repo/releases/download/v1.2.0/RentzLab-1.2.0.apk"
+        $clean = "# Rentz`n`n## Jocul`n`n- [Rentz Lab]($page)`n- [Descarcă APK-ul]($asset)`n`n## Documentație`n"
+        Confirm-ReadmeGameLinks $clean $page $asset
+        $invalid = @(
+            $clean.Replace('## Jocul', '## Ediție cu acces autorizat')
+            $clean.Replace("## Jocul`n`n", "## Jocul`n`nAutentifică-te în GitHub.`n`n")
+            $clean.Replace("($asset)", "($asset) · Android 8.0+")
+            $clean.Replace('## Documentație', "## Jocul`n`n## Documentație")
+            "$clean`n- [APK vechi](https://downloads.example.test/v1.1.0/RentzLab-1.1.0.apk)`n"
+            $clean.Replace($asset, ($asset + '?redirect=1'))
+        )
+        foreach ($candidate in $invalid) {
+            $rejected = $false
+            try { Confirm-ReadmeGameLinks $candidate $page $asset } catch { $rejected = $true }
+            Require $rejected "README verifier accepted invalid navigation for $repo"
+        }
+    }
+}
 $failed=@($results|Where-Object status -EQ FAIL)
 [ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;productFixtures=$product;scope='Byte fixtures, injected Java recorder and extracted publication block; no real JVM body, game, full native launcher or device';results=$results}|ConvertTo-Json -Depth 7|Set-Content "$RunRoot/controls.json" -Encoding utf8NoBOM
 $results|Format-Table name,status -AutoSize

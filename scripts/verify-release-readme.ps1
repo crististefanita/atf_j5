@@ -64,6 +64,29 @@ function Confirm-RestrictedApk($Proof,[string]$File,[string]$Version,[string]$So
     return $Proof.link
 }
 
+function Confirm-ReadmeGameLinks([string]$Readme, [string]$ReleaseUrl, [string]$ApkUrl) {
+    $text = $Readme.Replace("`r`n", "`n")
+    $sections = [regex]::Matches($text, '(?ms)^## Jocul[ \t]*(?:\n|\z)(.*?)(?=^## |\z)')
+    if ($sections.Count -ne 1) { throw 'The pushed README must contain exactly one Jocul section.' }
+
+    $section = $sections[0]
+    $lines = @($section.Groups[1].Value -split '\n' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    $expected = @($ReleaseUrl, $ApkUrl)
+    if ($lines.Count -ne $expected.Count) { throw 'Jocul must contain only the release and APK links.' }
+    for ($i = 0; $i -lt $expected.Count; $i++) {
+        $link = [regex]::Match($lines[$i], '^- \[[^\[\]]+\]\(([^()\s]+)\)$')
+        if (!$link.Success -or $link.Groups[1].Value -cne $expected[$i]) {
+            throw 'Jocul must contain the qualified release and APK links in order, without additional copy.'
+        }
+    }
+    $outside = $text.Remove($section.Index, $section.Length)
+    foreach ($link in [regex]::Matches($outside, '\]\(([^)\s]+)\)')) {
+        if ($link.Groups[1].Value -match '/releases/(tag|download)/|\.apk(?:[?#].*)?$') {
+            throw 'The pushed README contains another release or download link outside Jocul.'
+        }
+    }
+}
+
 $rag = Get-Content -LiteralPath $RagReport -Raw | ConvertFrom-Json
 $source = $rag.candidate.sourceCommit
 $version = $rag.candidate.candidateVersion
@@ -82,7 +105,6 @@ foreach($gate in $requiredGates){
 $tag = "v$version"
 $apk = "RentzLab-$version.apk"
 $repository = $rag.candidate.repository
-$sectionName = 'Jocul'
 if($Restricted){
     $proof = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'restricted-download.json') -Raw | ConvertFrom-Json
     $direct = Confirm-RestrictedApk $proof (Join-Path $PublicationEvidence "authenticated-$apk") $version $source $digest $repository
@@ -91,7 +113,6 @@ if($Restricted){
         throw 'The private GitHub repository and direct asset must deny anonymous access.'
     }
     $releaseUrl = if($proof.authenticated.provider -ceq 'GitHub'){ $proof.releaseUrl }else{ "https://github.com/$repository/tree/$tag" }
-    $sectionName = 'Ediție cu acces autorizat'
 }else{
     $github = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'github-release.json') -Raw | ConvertFrom-Json
     $public = Get-Content -LiteralPath (Join-Path $PublicationEvidence 'public-download.json') -Raw | ConvertFrom-Json
@@ -139,11 +160,7 @@ git -C $project merge-base --is-ancestor $source $head
 if($LASTEXITCODE){throw 'The pushed README must descend from the qualified source.'}
 $readme = (git -C $project show ($head+':README.md')) -join "`n"
 if($LASTEXITCODE){throw 'The pushed README is missing.'}
-$section = [regex]::Match($readme, '(?ms)^## '+[regex]::Escape($sectionName)+'[^\S\r\n]*$\n(.*?)(?=^## |\z)')
-$links = @([regex]::Matches($section.Groups[1].Value,'\]\(([^)\s]+)\)') | ForEach-Object {$_.Groups[1].Value})
-if(-not $section.Success -or $links.Count -ne 2 -or $links[0] -cne $releaseUrl -or $links[1] -cne $direct){
-    throw 'The pushed README section does not link the verified source and APK for the selected channel.'
-}
+Confirm-ReadmeGameLinks $readme $releaseUrl $direct
 $catalog = (git -C $project show ($head+':release/index.json')) -join "`n"
 if($LASTEXITCODE){throw 'The pushed release catalog is missing.'}
 $catalog = $catalog | ConvertFrom-Json
