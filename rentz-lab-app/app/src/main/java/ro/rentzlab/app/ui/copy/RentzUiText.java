@@ -48,7 +48,7 @@ public final class RentzUiText {
     public HomeMenuContent home() {
         return new HomeMenuContent("Rentz", text("Language", "Limbă"), language == Language.EN ? 0 : 1,
                 text("Player", "Jucător"), you(), text("New game", "Partidă nouă"), text("Resume game", "Continuă partida"),
-                text("Scores", "Scoruri"), text("How to play", "Cum se joacă"));
+                text("Scores", "Scoruri"), achievements(), text("How to play", "Cum se joacă"));
     }
     public PlayerNameDialog.Text profile() {
         return new PlayerNameDialog.Text(text("Player", "Jucător"), text("Your name", "Numele tău"), text("Save", "Salvează"),

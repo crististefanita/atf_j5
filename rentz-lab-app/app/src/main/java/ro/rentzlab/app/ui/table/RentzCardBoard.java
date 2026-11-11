@@ -52,7 +52,8 @@ final class RentzCardBoard extends ViewGroup {
 
         int gap = Math.round(viewport.regionGapDp() * density);
         int reference = RentzCardSpace.trickHeightPx(density, trick);
-        int minimum = TableGeometry.minimumHeight(players, seatHeight, 4 + footerPx, gap);
+        int minimumCenter = Math.max(4, RentzCardSpace.minimumTrickHeightPx(density, trick.rows()));
+        int minimum = TableGeometry.minimumHeight(players, seatHeight, minimumCenter + footerPx, gap);
         int offered = MeasureSpec.getMode(heightSpec) == MeasureSpec.UNSPECIFIED
                 ? Math.max(Math.round(viewport.minimumBoardHeightDp() * density),
                         TableGeometry.minimumHeight(players, seatHeight, reference, gap)) : MeasureSpec.getSize(heightSpec);

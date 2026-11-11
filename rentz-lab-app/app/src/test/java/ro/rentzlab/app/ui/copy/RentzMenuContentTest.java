@@ -14,12 +14,20 @@ public final class RentzMenuContentTest {
     @Test public void bothLanguagesUseTheCommonHomeWithRealRentzRoutes() {
         for (var language : RentzUiText.Language.values()) {
             var copy = new RentzUiText(language); var seen = new ArrayList<String>();
-            var controls = copy.home().controls("Ana", false, new HomeMenuContent.Actions(() -> seen.add("profile"), () -> seen.add("setup"), () -> seen.add("resume"), () -> seen.add("history"), () -> seen.add("help")));
+            var controls = copy.home().controls("Ana", false, new HomeMenuContent.Actions(
+                    () -> seen.add("profile"), () -> seen.add("setup"), () -> seen.add("resume"),
+                    () -> seen.add("history"), () -> seen.add("achievements"), () -> seen.add("help")));
             audit.equal("Rentz title " + language, "Rentz", copy.home().title());
-            audit.equal("Five visible menu routes " + language, 5, controls.size());
+            audit.equal("Six visible menu routes " + language, 6, controls.size());
             audit.equal("Resume remains visible and disabled " + language, false, controls.get(2).enabled());
             audit.equal("Localized profile name " + language, (language == RentzUiText.Language.EN ? "Player" : "Jucător") + ": Ana", controls.get(0).label());
             controls.get(3).action().run(); audit.equal("Scores own route " + language, List.of("history"), seen);
+            var achievementRoutes = controls.stream().filter(row -> row.tag().equals("btn_achievements")).toList();
+            audit.equal("One achievement route " + language, 1, achievementRoutes.size());
+            audit.equal("Localized achievement label " + language,
+                    language == RentzUiText.Language.EN ? "Achievements" : "Realizări", achievementRoutes.get(0).label());
+            achievementRoutes.get(0).action().run();
+            audit.equal("Achievements own route " + language, List.of("history", "achievements"), seen);
             audit.equal("Eight distinct contract names " + language, 8L, Arrays.stream(Contract.values()).map(copy::contract).distinct().count());
         }
     }

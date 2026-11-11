@@ -1,6 +1,7 @@
 package ro.rentzlab.app.ui.table;
 
 import org.junit.Test;
+import ro.cardtable.ui.cards.CardHighlight;
 import ro.cardtable.ui.hand.HandLayoutMetrics;
 import ro.cardtable.ui.table.PlayedCardMetrics;
 import ro.cardtable.ui.table.TableGeometry;
@@ -169,7 +170,7 @@ public final class RentzCardSpaceTest {
         var board = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, reference);
         int budgetDp = (int) Math.floor(board.band().height() / density);
         assertTrue(budgetDp < trick.centerHeightDp());
-        var fitted = RentzCardSpace.fitTrick(trick, budgetDp);
+        var fitted = RentzCardSpace.fitTrick(trick, board.band().height(), density);
         assertEquals(trick.slots(), fitted.slots());
         assertEquals(trick.cardHeightDp(), fitted.cardHeightDp());
         int renderedHeight = Math.round((fitted.rows() - 1) * fitted.rowStrideDp() * density)
@@ -178,13 +179,49 @@ public final class RentzCardSpaceTest {
         int top = board.band().centeredTop(renderedHeight);
         var cards = new TableGeometry.Rect(0, top, width, top + renderedHeight);
         assertTrue(board.seats().stream().noneMatch(cards::overlaps));
-        assertSame(trick, RentzCardSpace.fitTrick(trick, trick.centerHeightDp()));
+        assertSame(trick, RentzCardSpace.fitTrick(trick, reference, density));
         var compact = RentzCardSpace.sequence(4, width, board.band().height(), density, 1.5f);
         assertTrue(compact.faceWidth() > width / 8);
         assertSequenceFits(compact, 8, width, board.band().height());
         int footer = Math.round(48 * density) + Math.round(3 * density);
         var sequence = RentzCardSpace.sequence(4, width, board.band().height() - footer, density, 1.5f);
         assertSequenceFits(sequence, 8, width, board.band().height() - footer);
+    }
+
+    @Test public void measuredPixelBudgetFitsNativeRowsAcrossDensitiesAndTableSizes() {
+        var normal = new TableViewportPolicy(1000, 1.3f);
+        var compact = new TableViewportPolicy(420, 2f);
+        var fiveSeats = PlayedCardMetrics.forTable(5, 360, 1.3f, normal);
+        var boundary = RentzCardSpace.fitTrick(fiveSeats, 279, 1.5f);
+        assertEquals(278, nativeTrickHeight(boundary, 1.5f));
+        assertEquals(fiveSeats.cardHeightDp(), boundary.cardHeightDp());
+
+        for (int players = 3; players <= 6; players++) {
+            for (var profile : List.of(normal, compact)) {
+                var original = PlayedCardMetrics.forTable(players, profile.isCompact() ? 280 : 360,
+                        profile.isCompact() ? 2f : 1.3f, profile);
+                for (float density : new float[]{0.75f, 1.1f, 1.5f, 2.25f, 2.75f, 3f}) {
+                    int fullHeight = nativeTrickHeight(original, density);
+                    int minimum = nativeTrickHeight(new PlayedCardMetrics.Layout(original.columns(),
+                            original.rows(), original.cardWidthDp(), 1, 0, 0, original.centerWidthDp(),
+                            original.safeCenterWidthDp(), 1, 1, original.rows(), original.slots()), density);
+                    for (int budget : new int[]{minimum, fullHeight * 2 / 3, fullHeight - 1, fullHeight}) {
+                        var fitted = RentzCardSpace.fitTrick(original, budget, density);
+                        assertTrue(players + " seats, density " + density + ", budget " + budget,
+                                nativeTrickHeight(fitted, density) <= budget);
+                        assertEquals(original.slots(), fitted.slots());
+                        assertTrue(fitted.cardHeightDp() > 0);
+                        if (budget == fullHeight) assertSame(original, fitted);
+                    }
+                }
+            }
+        }
+    }
+
+    private static int nativeTrickHeight(PlayedCardMetrics.Layout layout, float density) {
+        int lastRowTop = Math.round((layout.rows() - 1) * layout.rowStrideDp() * density);
+        int lastRowBottom = lastRowTop + Math.round(layout.cellHeightDp() * density);
+        return Math.max(lastRowBottom, Math.round(layout.centerHeightDp() * density));
     }
 
     @Test public void onlyLegalSequenceCardsGetAnOutlineAcrossMovesTurnsAndForcedPasses() {
@@ -202,10 +239,10 @@ public final class RentzCardSpaceTest {
                     var state = session.view();
                     assertLegalMarks(state, copy);
                     for (var card : RentzTableContent.hand(state, copy, false)) {
-                        assertTrue(RentzTableContent.handMark(Contract.WHIST, card).isEmpty());
+                        assertFalse(RentzTableContent.highlightPlayable(Contract.WHIST, card));
                     }
                     for (var card : RentzTableContent.hand(state, copy, true)) {
-                        assertTrue(RentzTableContent.handMark(Contract.RENTZ, card).isEmpty());
+                        assertFalse(RentzTableContent.highlightPlayable(Contract.RENTZ, card));
                     }
                     if (state.turn() != 0) {
                         assertFalse(session.hasForcedHumanPass());
@@ -245,26 +282,26 @@ public final class RentzCardSpaceTest {
         assertTrue(markedCards(session.view(), copy).isEmpty());
         session.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null, Contract.RENTZ, true));
         var hand = RentzTableContent.hand(session.view(), copy, false);
-        var marked = hand.stream().filter(card -> RentzTableContent.handMark(Contract.RENTZ, card).isPresent()).toList();
+        var marked = hand.stream().filter(card -> RentzTableContent.highlightPlayable(Contract.RENTZ, card)).toList();
         assertFalse(marked.isEmpty());
         assertTrue(marked.size() < hand.size());
         assertTrue(marked.stream().allMatch(card -> card.description().startsWith("Play ")));
 
         float density = 2.25f;
-        var mark = RentzTableContent.handMark(Contract.RENTZ, marked.get(0)).orElseThrow();
-        assertEquals(0xfff1f8ec, mark.fill());
-        assertEquals(0xff4e805c, mark.outline());
-        assertEquals(3, mark.outlineWidthPx(density));
+        var mark = CardHighlight.IN_PLACE;
+        assertEquals(0, mark.liftDp(HandLayoutMetrics.cardHeightDp()));
+        assertEquals(0, mark.elevationDp());
+        assertEquals(3, mark.strokeWidthPx(density));
         int indexWidthPx = Math.round(24 * density);
         var fan = HandLayoutMetrics.fan(hand.size(), 630, density, 1.5f, indexWidthPx);
         assertTrue(fan.advance() < fan.cardWidth());
-        assertTrue(mark.outlineWidthPx(density) * 2 < indexWidthPx);
+        assertTrue(mark.strokeWidthPx(density) * 2 < indexWidthPx);
         assertTrue(indexWidthPx <= fan.advance());
     }
 
     private static Set<String> markedCards(RentzMatch.Observation view, RentzUiText copy) {
         return RentzTableContent.hand(view, copy, false).stream()
-                .filter(card -> RentzTableContent.handMark(view.contract(), card).isPresent())
+                .filter(card -> RentzTableContent.highlightPlayable(view.contract(), card))
                 .map(card -> card.id()).collect(Collectors.toSet());
     }
 

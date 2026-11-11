@@ -14,19 +14,22 @@ public final class CardUiAdoptionTest {
     @Test public void pinnedArchiveAndLoadedPresentationTypesHaveTheQualifiedBytesWithoutGameOrAtfClasses() throws Exception {
         Path root = Path.of(System.getProperty("rentz.uiRepository"));
         var provenance = JsonParser.parseString(new String(Files.readAllBytes(root.resolve("provenance.json")), java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
-        audit.equal("Adopted UI coordinate", "ro.cardtable:card-table-ui:0.1.7", provenance.get("coordinate").getAsString());
+        audit.equal("Adopted UI coordinate", "ro.cardtable:card-table-ui:0.1.9", provenance.get("coordinate").getAsString());
         audit.equal("Adopted Java coordinate", "ro.cardtable:card-table-names:0.1.0", provenance.get("namesCoordinate").getAsString());
         for (var file : provenance.getAsJsonArray("files")) {
             var value = file.getAsJsonObject(); audit.equal("Pinned " + value.get("path").getAsString(), value.get("sha256").getAsString(), hash(Files.readAllBytes(root.resolve(value.get("path").getAsString()))));
         }
-        Path aar = root.resolve("ro/cardtable/card-table-ui/0.1.7/card-table-ui-0.1.7.aar");
+        Path aar = root.resolve("ro/cardtable/card-table-ui/0.1.9/card-table-ui-0.1.9.aar");
         byte[] classes;
         try (var zip = new ZipFile(aar.toFile())) { classes = zip.getInputStream(zip.getEntry("classes.jar")).readAllBytes(); }
         verifyClassBytes(classes, ro.cardtable.ui.seat.SeatContent.class, ro.cardtable.ui.animation.TrickCollectionRun.class,
                 ro.cardtable.ui.table.BoardLayout.class, ro.cardtable.ui.table.TableGeometry.class,
                 ro.cardtable.ui.table.TableSeatLayout.class, ro.cardtable.ui.table.TableSizing.class,
                 ro.cardtable.ui.table.PlayedCardMetrics.class, ro.cardtable.ui.table.PlayedCardsView.class,
-                ro.cardtable.ui.table.TableViewportPolicy.class, ro.cardtable.ui.turn.TurnPacing.class);
+                ro.cardtable.ui.table.TableViewportPolicy.class, ro.cardtable.ui.turn.TurnPacing.class,
+                ro.cardtable.ui.achievements.AchievementScreen.class, ro.cardtable.ui.achievements.AchievementNoticeView.class,
+                ro.cardtable.ui.cards.CardHighlight.class, ro.cardtable.ui.cards.CardHighlightView.class,
+                ro.cardtable.ui.table.TableGeometry.VerticalBand.class);
         verifyClassBytes(Files.readAllBytes(root.resolve("ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar")),
                 ro.cardtable.names.PlayerNames.class);
         audit.rejects("No Whist engine on Android JVM classpath", ClassNotFoundException.class, () -> Class.forName("ro.whistlab.core.session.GameSession"));

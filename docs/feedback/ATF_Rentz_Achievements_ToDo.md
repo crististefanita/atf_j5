@@ -114,14 +114,14 @@ Probele ușoare transversale folosesc repere de 1–3 acțiuni, sub-jocuri sau c
 | ACH-05 | P1 | Zilele se calculează după un fus de profil explicit, cu evenimente persistente UTC și fus salvat pe eveniment. Schimbarea orei, importul aceleiași distribuiri și două dispozitive care retrimit aceeași dovadă nu pot fabrica zile sau mâini distincte. |
 | ACH-06 | P2 | Catalogul și progresul au versiuni separate. Pragurile schimbate se migrează explicit, insignele acordate sunt monotone, iar datele importate păstrează dovada și nivelul de încredere. |
 
-Pilotul folosește [decontarea motorului](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/HandScoring.java). [Jurnalul Android](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/GameSession.java) distinge comenzile manuale, delegate și automate; o comandă veche fără origine rămâne necunoscută. Criteriile de import, sincronizare între dispozitive și migrare a pragurilor rămân pentru extindere.
+ACH-02–ACH-04 au baza locală în producție. Rămân verificarea aceleiași identități după import, sincronizarea între dispozitive și migrarea pragurilor. [Contractul de integrare](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
 
 ## Meniu și accesibilitate
 
 Meniul, filtrarea și detaliul de eligibilitate sunt descrise în [integrarea realizărilor](../rentz/ATF_UiIntegration.md#realizări-și-profil-local).
 
 - Adăugați ruta inversă din profil și, dacă se introduce importul, extindeți verificările de restabilire a stării.
-- Folosiți o listă virtualizată cu identități stabile. Verificați 800 de intrări, text mărit, navigarea TalkBack, starea offline și încărcarea după migrarea profilului.
+- Lista virtualizată folosește identități stabile. Calificați cele 800 de intrări cu text mărit și navigare TalkBack. Verificați încărcarea după migrarea profilului când apare importul.
 - Extindeți acceptanța Android a panoului la ultima mână a partidei. Traseul curent verifică o deblocare simultană cu progres parțial, închiderea manuală și reluarea fără repetarea panoului.
 
 ## Verificări pentru extindere

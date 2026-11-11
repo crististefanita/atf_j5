@@ -351,6 +351,18 @@ function OpenHandDetails($Point){
     TapNode $hand[0] "Hand $($Point.hand) scoring details"
 }
 function SeatName([int]$Seat){if($Seat-eq0){'You'}else{$script:historyOpponents[$Seat-1]}}
+function MoveToLastHistoryPlayer($Tree,[int[]]$Box,[int]$FullScoreWidth){
+    $name=SeatName 5
+    for($attempt=0;$attempt-lt12;$attempt++){
+        $heading=@($Tree|Where-Object text -CEQ $name)
+        if($heading.Count-eq1){
+            $bounds=Bounds $heading[0]
+            if($bounds[2]-$bounds[0]-eq$FullScoreWidth){return}
+        }
+        HistorySwipe $Box -Across -Duration 200
+        $Tree=@(Ui)
+    }
+}
 function DetailSeat($Nodes,$Point,[int]$Place){
     $seat=$Point.finishOrder[$Place-1]
     $label="$Place. $(SeatName $seat)"
@@ -402,18 +414,14 @@ function RunShortHistory([int]$FullScoreWidth,[int]$FullRowHeight,[int]$FullLege
         Check 'Short window keeps the history heading' 1 @($nodes|Where-Object{$_.text-ceq'Hand · game'}).Count
     }
     $columnBox=Bounds $heading
-    for($attempt=0;$attempt-lt8;$attempt++){
-        $lastHeading=@($tree|Where-Object{$_.text-ceq(SeatName 5)})
-        if($lastHeading.Count-eq1){$b=Bounds $lastHeading[0];if($b[2]-$b[0]-eq$FullScoreWidth){break}}
-        HistorySwipe $columnBox -Across -Duration 200
-        $tree=@(Ui)
-    }
+    MoveToLastHistoryPlayer $tree $columnBox $FullScoreWidth
     Observe 'Short window reaches the full last player heading' {param($nodes)
         $lastHeading=@($nodes|Where-Object{$_.text-ceq(SeatName 5)})
         Check 'Last player is visible in the short header' 1 $lastHeading.Count
         if($lastHeading.Count-eq1){$b=Bounds $lastHeading[0];Check 'Full last player heading width' $FullScoreWidth ($b[2]-$b[0])}
     }
-    $bodyBox=Bounds $outer;$bodyBox[2]=$columnBox[0]
+    # Score cells are read-only; the pinned hand labels open details on touch.
+    $bodyBox=Bounds $outer;$bodyBox[0]=$columnBox[0];$bodyBox[2]=$columnBox[2]
     for($attempt=0;$attempt-lt96;){
         $last=@(HistoryHand $tree $fixture.last)
         if($last.Count-eq1){
@@ -512,17 +520,11 @@ function RunHistorySanity {
     $ownHeading=Bounds (@($tree|Where-Object{$_.text-ceq'You'})[0])
     $fullWidth=$ownHeading[2]-$ownHeading[0]
     $scoresBox=Bounds (@($tree|Where-Object{$_.'resource-id'-like'*:id/history_scores'})[0])
-    for($attempt=0;$attempt-lt8-and-not($tree.text-contains(SeatName 5));$attempt++){
-        HistorySwipe $scoresBox -Across
-        $tree=@(Ui)
-    }
-    HistorySwipe $scoresBox -Across
+    MoveToLastHistoryPlayer $tree $scoresBox $fullWidth
+    $tree=@(Ui)
     Observe 'Horizontal swipe reaches the last player under its own heading' {param($nodes) HistoryPoint $nodes $fixture.first 5 $corner $fullWidth}
-    $bodyBox=Bounds (@($tree|Where-Object{$_.'resource-id'-like'*:id/history_body'})[0])
-    # Use the pinned side for vertical gestures to exercise the shared row viewport.
-    $bodyBox[2]=$scoresBox[0]
-    $lastCaption="$($fixture.last.hand) · $($fixture.last.label)"
-    for($attempt=0;$attempt-lt12-and-not(@($tree|Where-Object{([string]$_.text).StartsWith($lastCaption)}).Count);$attempt++){
+    $bodyBox=Bounds (HistoryElement $tree 'history_scores')
+    for($attempt=0;$attempt-lt12-and-not(@(HistoryHand $tree $fixture.last).Count);$attempt++){
         if($HistoryMatrix){HistorySwipe $bodyBox -Duration 160 -Repeat 4}else{HistorySwipe $bodyBox}
         $tree=@(Ui)
     }
@@ -639,15 +641,15 @@ function RentzMarkChecks($Nodes,$State,[string]$Png){
             for($y=[int][Math]::Ceiling([Math]::Max($box[1],$box[3]-90)*$sy);$y-lt[Math]::Min($bitmap.Height,$box[3]*$sy);$y++){
                 for($x=[int][Math]::Ceiling($left*$sx);$x-lt($right-1)*$sx-and$x-lt$bitmap.Width;$x++){
                     $pixel=$bitmap.GetPixel($x,$y);$sampled++
-                    if([Math]::Abs($pixel.R-78)-le9-and[Math]::Abs($pixel.G-128)-le9-and[Math]::Abs($pixel.B-92)-le9){$outline++}
-                    if([Math]::Abs($pixel.R-241)-le4-and[Math]::Abs($pixel.G-248)-le4-and[Math]::Abs($pixel.B-236)-le4){$fill++}
+                    if([Math]::Abs($pixel.R-201)-le9-and[Math]::Abs($pixel.G-149)-le9-and[Math]::Abs($pixel.B-55)-le9){$outline++}
+                    if([Math]::Abs($pixel.R-255)-le4-and[Math]::Abs($pixel.G-246)-le4-and[Math]::Abs($pixel.B-215)-le4){$fill++}
                 }
             }
             # A few antialiased pixels on an unmarked card can match the fill palette.
             $tinted=$sampled-gt0-and$fill-ge0.15*$sampled
             $on=$outline-ge3-and$tinted
             if($on){$marked.Add($label)}
-            [pscustomobject]@{name="Native pixels for $label";expected=$(if($label-in$legal){'Green outline and tinted face'}else{'No green outline or tint'});actual="outline=$outline; tint=$fill/$sampled";passed=($sampled-gt0-and$(if($label-in$legal){$on}else{$outline-lt3-and-not$tinted}))}
+            [pscustomobject]@{name="Native pixels for $label";expected=$(if($label-in$legal){'Gold outline and cream face'}else{'No gold outline or cream tint'});actual="outline=$outline; tint=$fill/$sampled";passed=($sampled-gt0-and$(if($label-in$legal){$on}else{$outline-lt3-and-not$tinted}))}
         }
     }finally{$bitmap.Dispose()}
     Check 'Exactly the playable cards have the visible Rentz mark' ($legal-join' ') (($marked|Sort-Object)-join' ')
@@ -777,16 +779,15 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
         if($state.view.phase-ne'PLAY'){throw "Subgame $deal did not enter PLAY."}
         $contract=[string]$state.view.contract;$selectedContracts.Add($contract)
         if($deal-eq1-and$contract-ne'RENTZ'){throw 'The first visible subgame must be Rentz.'}
-        $nodes=@(Ui);$seatGeometry=SeatGeometry $nodes $state
-        if($deal-eq1){$baseSeats=$seatGeometry}
+        if($deal-eq1){$baseSeats=SeatGeometry @(Ui) $state}
         $title="Consecutive subgame $deal starts: $contract"
         Observe $title {param($captured)
             TableChecks $captured $state
             GameHeadingChecks $captured $state
-            Check 'Four-player table uses the same seat rectangles in this viewport' $baseSeats $seatGeometry
+            Check 'Four-player table uses the same seat rectangles in this viewport' $baseSeats (SeatGeometry $captured $state)
             Check 'Visible subgame matches the public actor state' $contract $state.view.contract
             if($contract-eq'RENTZ'){RentzSequenceChecks $captured $state}
-            else{Check 'A non-sequence contract is available for geometry comparison' $true $true}
+            else{Check 'Trick table exposes no empty Rentz slots' 0 @($captured|Where-Object description -CLike 'Empty slot *').Count}
         }
         $steps=0;$firstOwnMoveCaptured=$false;$delegatedPlays=0
         while($state.view.phase-eq'PLAY'){

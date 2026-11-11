@@ -1,45 +1,31 @@
 package ro.rentzlab.app.ui.screens;
 
 import android.app.AlertDialog;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.RippleDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.InputFilter;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import ro.cardtable.ui.achievements.AchievementScreen;
 import ro.cardtable.ui.screens.ScreenViews;
-import ro.cardtable.ui.theme.TablePalette;
 import ro.rentzlab.app.achievements.AchievementCatalog;
 import ro.rentzlab.app.achievements.AchievementHand;
 import ro.rentzlab.app.achievements.AchievementProgress;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.core.Contract;
 
-/** Native, virtualized achievement browser with a scrollable filter sheet and readable details. */
+/** Rentz projection and filters for the shared achievement screen. */
 public final class RentzAchievementsScreen {
     public static final class State {
         private AchievementBrowser.Query query = AchievementBrowser.Query.empty();
-        private int position;
-        private String selected;
+        private final AchievementScreen.State screen = new AchievementScreen.State();
 
         public void save(Bundle bundle) {
             bundle.putString("achievementQuery", query.text());
@@ -47,8 +33,7 @@ public final class RentzAchievementsScreen {
             bundle.putString("achievementContract", enumName(query.contract()));
             bundle.putString("achievementStatus", enumName(query.status()));
             bundle.putString("achievementMode", enumName(query.mode()));
-            bundle.putInt("achievementPosition", position);
-            bundle.putString("achievementSelected", selected);
+            screen.save(bundle);
         }
 
         public void restore(Bundle bundle) {
@@ -57,8 +42,7 @@ public final class RentzAchievementsScreen {
                     choice(Contract.class, bundle.getString("achievementContract")),
                     choice(AchievementBrowser.Status.class, bundle.getString("achievementStatus")),
                     choice(AchievementCatalog.PlayMode.class, bundle.getString("achievementMode")));
-            position = bundle.getInt("achievementPosition");
-            selected = bundle.getString("achievementSelected");
+            screen.restore(bundle);
         }
 
         private static String enumName(Enum<?> value) { return value == null ? null : value.name(); }
@@ -68,89 +52,54 @@ public final class RentzAchievementsScreen {
     }
 
     private final ScreenViews views;
+    private AchievementScreen screen;
 
     public RentzAchievementsScreen(ScreenViews views) { this.views = views; }
 
     public void show(RentzUiText copy, String name, AchievementProgress progress, AchievementHand latest, State state,
             AchievementBrowser.Collection collection, AchievementBrowser.Table table, Runnable profile,
             Runnable training, Runnable back) {
-        views.applyTableWindowChrome();
-        var page = views.gamePage();
         boolean isTraining = collection == AchievementBrowser.Collection.TRAINING;
         var browser = new AchievementBrowser(copy, progress, latest, collection, table);
-        views.addText(page, isTraining ? copy.training() : copy.achievements(), 22, Color.WHITE, true, 8, 4);
-        tableAction(page, copy.text("Local profile", "Profil local") + " · " + name, profile);
-        views.addText(page, copy.text("Unlocked ", "Deblocate ") + browser.unlocked() + "/" + browser.total(),
-                15, TablePalette.ACTIVE_SEAT_FILL, true, 3, 2);
-        var progressBar = new ProgressBar(views.activity(), null, android.R.attr.progressBarStyleHorizontal);
-        progressBar.setMax(browser.total());
-        progressBar.setProgress((int) browser.unlocked());
-        progressBar.setProgressTintList(ColorStateList.valueOf(TablePalette.ACTIVE_SEAT_STROKE));
-        progressBar.setProgressBackgroundTintList(ColorStateList.valueOf(TablePalette.IDLE_SEAT_STROKE));
-        progressBar.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        page.addView(progressBar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, views.dp(4)));
-        var list = new ListView(views.activity());
-        list.setDivider(new ColorDrawable(TablePalette.TABLE_FELT));
-        list.setDividerHeight(views.dp(5));
-        var empty = views.text(copy.text("No matching achievements", "Nicio realizare găsită"), 15, Color.WHITE, false);
-        empty.setGravity(android.view.Gravity.CENTER);
-        var body = new android.widget.FrameLayout(views.activity());
-        var searchLabel = copy.text("Search and filters", "Caută și filtrează");
-        var filterLabel = views.text("", 13, TablePalette.IDLE_SEAT_TEXT, true);
-        var rows = new Rows();
-        list.setAdapter(rows);
-        list.setContentDescription(copy.text("Learning path", "Parcurs de învățare"));
-        list.setOnItemClickListener((parent, view, position, id) ->
-                details(copy, browser, rows.getItem(position).badge(), state));
-        list.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override public void onScrollStateChanged(AbsListView view, int status) { }
-            @Override public void onScroll(AbsListView view, int first, int visible, int total) {
-                if (visible > 0) state.position = first;
-            }
-        });
-        if (isTraining) tableAction(page, searchLabel, () -> filters(copy, browser, state,
-                () -> refresh(state, browser, list, empty, filterLabel, rows, copy)));
-        else tableAction(page, copy.training(), training);
-        page.addView(filterLabel, views.matchWrap());
-        body.addView(list, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        body.addView(empty, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        page.addView(body, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        tableAction(page, copy.back(), back);
-        refresh(state, browser, list, empty, filterLabel, rows, copy);
-        if (state.selected != null) {
-            rows.items.stream().filter(row -> !row.heading() && row.badge().id().equals(state.selected))
-                    .findFirst().ifPresent(row -> details(copy, browser, row.badge(), state));
-        }
+        int earned = (int) browser.unlocked();
+        var labels = new AchievementScreen.Copy(isTraining ? copy.training() : copy.achievements(),
+                copy.text("Unlocked ", "Deblocate ") + earned + "/" + browser.total(),
+                copy.text("No matching achievements", "Nicio realizare găsită"),
+                copy.text("Learning path", "Parcurs de învățare"), copy.close());
+        var profileAction = new AchievementScreen.Action(copy.text("Local profile", "Profil local") + " · " + name, profile);
+        var collectionAction = isTraining
+                ? new AchievementScreen.Action(copy.text("Search and filters", "Caută și filtrează"),
+                        () -> filters(copy, browser, state, () -> refresh(copy, browser, state)))
+                : new AchievementScreen.Action(copy.training(), training);
+        screen = new AchievementScreen(views, state.screen, labels, earned, browser.total(),
+                List.of(profileAction, collectionAction), new AchievementScreen.Action(copy.back(), back));
+        refresh(copy, browser, state);
+        screen.restoreDetail();
     }
 
-    private void tableAction(LinearLayout page, String label, Runnable action) {
-        var button = new Button(views.activity());
-        button.setText(label);
-        button.setAllCaps(false);
-        button.setTextColor(Color.WHITE);
-        button.setTextSize(14);
-        button.setMinHeight(views.dp(44));
-        button.setPadding(views.dp(10), views.dp(5), views.dp(10), views.dp(5));
-        button.setBackground(new RippleDrawable(ColorStateList.valueOf(0x28ffffff),
-                views.roundedBackground(TablePalette.IDLE_SEAT_FILL, TablePalette.IDLE_SEAT_STROKE, 12), null));
-        button.setOnClickListener(view -> action.run());
-        var layout = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        layout.setMargins(0, views.dp(4), 0, views.dp(4));
-        page.addView(button, layout);
+    private void refresh(RentzUiText copy, AchievementBrowser browser, State state) {
+        var rows = browser.rows(state.query);
+        String summary = state.query.active()
+                ? copy.text("Matching achievements ", "Realizări găsite ")
+                        + rows.stream().filter(row -> !row.heading()).count()
+                : "";
+        screen.update(rows.stream().map(row -> present(copy, browser, row)).collect(Collectors.toList()), summary);
     }
 
-    private void refresh(State state, AchievementBrowser browser, ListView list, TextView empty, TextView filterLabel,
-            Rows rows, RentzUiText copy) {
-        var filtered = browser.rows(state.query);
-        int position = Math.min(state.position, Math.max(0, filtered.size() - 1));
-        rows.items = filtered;
-        rows.notifyDataSetChanged();
-        list.setVisibility(filtered.isEmpty() ? View.GONE : View.VISIBLE);
-        empty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
-        if (!filtered.isEmpty()) list.setSelection(position);
-        filterLabel.setVisibility(state.query.active() ? View.VISIBLE : View.GONE);
-        filterLabel.setText(copy.text("Matching achievements ", "Realizări găsite ")
-                + filtered.stream().filter(row -> !row.heading()).count());
+    private static AchievementScreen.Row present(RentzUiText copy, AchievementBrowser browser, AchievementBrowser.Row row) {
+        if (row.heading()) return AchievementScreen.Row.heading(row.itemId(), row.title());
+        var badge = row.badge();
+        return new AchievementScreen.Row(row.itemId(), badge.id(), row.title(), row.subtitle(),
+                row.status() == AchievementBrowser.Status.UNLOCKED, () -> {
+                    var detail = browser.details(badge);
+                    var contextTitle = badge.mode() == AchievementCatalog.PlayMode.MANUAL_MATCH
+                            ? copy.text("Current match", "Partida curentă")
+                            : copy.text("Last completed hand", "Ultima mână încheiată");
+                    return new AchievementScreen.Detail(detail.progress(), List.of(
+                            new AchievementScreen.Section(copy.text("Eligibility", "Eligibilitate"), detail.rule()),
+                            new AchievementScreen.Section("", detail.context()),
+                            new AchievementScreen.Section(contextTitle, detail.latest())));
+                });
     }
 
     private void filters(RentzUiText copy, AchievementBrowser browser, State state, Runnable refresh) {
@@ -197,7 +146,7 @@ public final class RentzAchievementsScreen {
 
     private static void apply(State state, AchievementBrowser.Query query, Runnable refresh) {
         state.query = query;
-        state.position = 0;
+        state.screen.resetPosition();
         refresh.run();
     }
 
@@ -219,64 +168,4 @@ public final class RentzAchievementsScreen {
         return new Filter<>(spinner, values);
     }
 
-    private void details(RentzUiText copy, AchievementBrowser browser, AchievementCatalog.Badge badge, State state) {
-        if (badge == null) return;
-        state.selected = badge.id();
-        var detail = browser.details(badge);
-        var content = new LinearLayout(views.activity());
-        content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(views.dp(20), views.dp(4), views.dp(20), views.dp(12));
-        views.addText(content, detail.progress(), 14, ScreenViews.ACCENT, true, 4, 6);
-        views.addText(content, copy.text("Eligibility", "Eligibilitate"), 14, ScreenViews.PINE, true, 8, 2);
-        views.addText(content, detail.rule(), 14, ScreenViews.INK, false, 0, 4);
-        views.addText(content, detail.context(), 13, ScreenViews.INK, false, 0, 4);
-        var contextTitle = badge.mode() == AchievementCatalog.PlayMode.MANUAL_MATCH
-                ? copy.text("Current match", "Partida curentă")
-                : copy.text("Last completed hand", "Ultima mână încheiată");
-        views.addText(content, contextTitle, 14, ScreenViews.PINE, true, 8, 2);
-        views.addText(content, detail.latest(), 13, ScreenViews.INK, false, 0, 0);
-        var scroll = new ScrollView(views.activity());
-        scroll.addView(content);
-        var dialog = new AlertDialog.Builder(views.activity()).setTitle(detail.title()).setView(scroll)
-                .setPositiveButton(copy.text("Close", "Închide"), null).create();
-        dialog.setOnDismissListener(d -> state.selected = null);
-        dialog.show();
-    }
-
-    private final class Rows extends BaseAdapter {
-        private List<AchievementBrowser.Row> items = List.of();
-        @Override public int getCount() { return items.size(); }
-        @Override public AchievementBrowser.Row getItem(int position) { return items.get(position); }
-        @Override public long getItemId(int position) { return valid(position) ? getItem(position).itemId() : AdapterView.INVALID_ROW_ID; }
-        @Override public boolean hasStableIds() { return true; }
-        @Override public boolean areAllItemsEnabled() { return false; }
-        @Override public boolean isEnabled(int position) { return valid(position) && !getItem(position).heading(); }
-        private boolean valid(int position) { return position >= 0 && position < items.size(); }
-        @Override public View getView(int position, View reusable, ViewGroup parent) {
-            LinearLayout item;
-            if (reusable instanceof LinearLayout existing) {
-                item = existing;
-            } else {
-                item = new LinearLayout(views.activity());
-                item.setOrientation(LinearLayout.VERTICAL);
-                item.setPadding(views.dp(16), views.dp(8), views.dp(16), views.dp(8));
-                item.addView(views.text("", 15, ScreenViews.PINE, true), views.matchWrap());
-                item.addView(views.text("", 13, ScreenViews.INK, false), views.matchWrap());
-            }
-            var row = getItem(position);
-            var title = (TextView) item.getChildAt(0);
-            var detail = (TextView) item.getChildAt(1);
-            boolean unlocked = row.status() == AchievementBrowser.Status.UNLOCKED;
-            item.setBackground(row.heading() ? null : views.roundedBackground(
-                    unlocked ? TablePalette.ACTIVE_SEAT_FILL : TablePalette.IDLE_SEAT_FILL,
-                    unlocked ? TablePalette.ACTIVE_SEAT_STROKE : TablePalette.IDLE_SEAT_STROKE, 12));
-            title.setText(row.title());
-            title.setTextColor(row.heading() ? TablePalette.ACTIVE_SEAT_FILL : unlocked ? ScreenViews.PINE : Color.WHITE);
-            if (Build.VERSION.SDK_INT >= 28) title.setAccessibilityHeading(row.heading());
-            detail.setText(row.subtitle());
-            detail.setTextColor(unlocked ? ScreenViews.PINE : TablePalette.IDLE_SEAT_TEXT);
-            detail.setVisibility(row.heading() ? View.GONE : View.VISIBLE);
-            return item;
-        }
-    }
 }

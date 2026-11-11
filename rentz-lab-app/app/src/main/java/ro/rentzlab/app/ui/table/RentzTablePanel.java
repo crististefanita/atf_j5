@@ -12,7 +12,6 @@ import android.view.*;
 import android.widget.*;
 import ro.cardtable.ui.animation.CollectionTarget;
 import ro.cardtable.ui.animation.TrickCollectionAnimator;
-import ro.cardtable.ui.cards.CardFaceDrawable;
 import ro.cardtable.ui.hand.*;
 import ro.cardtable.ui.seat.*;
 import ro.cardtable.ui.table.*;
@@ -56,7 +55,7 @@ public final class RentzTablePanel extends LinearLayout {
                         if (sequence) return sequence(view, actions, RentzCardSpace.sequence(view.players(), widthPx,
                                 budgetPx - footer, density, fontScale));
                         if (cards) return playedCards(visible, names, holding, viewport,
-                                RentzCardSpace.fitTrick(trick, (int) (budgetPx / density)));
+                                RentzCardSpace.fitTrick(trick, budgetPx, density));
                         View controls = center(view, actions, 0);
                         controls.setLayoutParams(new FrameLayout.LayoutParams(Math.min(dp(220), widthPx),
                                 ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
@@ -79,20 +78,9 @@ public final class RentzTablePanel extends LinearLayout {
         var boardParams = new LayoutParams(dp(width), 0, 1f); boardParams.gravity = Gravity.CENTER_HORIZONTAL;
         addView(board, boardParams);
         var handCards = RentzTableContent.hand(view, copy, paused);
-        var fan = new HandFan(context, handCards, viewport.handClearanceDp(false), viewport.isCompact(), actions.card());
-        var hand = new CenteredHandView(context, dp(HandLayoutMetrics.maxViewportWidthDp()), widthPx -> {
-            View rendered = fan.build(widthPx);
-            for (var card : handCards) {
-                RentzTableContent.handMark(view.contract(), card).ifPresent(mark -> {
-                    var slot = rendered.<ViewGroup>findViewWithTag("hand-card:" + card.id());
-                    if (slot != null && slot.getChildAt(0).getBackground() instanceof CardFaceDrawable face) {
-                        face.setColor(mark.fill());
-                        face.setStroke(mark.outlineWidthPx(density), mark.outline());
-                    }
-                });
-            }
-            return rendered;
-        });
+        var fan = new HandFan(context, handCards, viewport.handClearanceDp(false), viewport.isCompact(),
+                actions.card(), card -> RentzTableContent.highlightPlayable(view.contract(), card));
+        var hand = new CenteredHandView(context, dp(HandLayoutMetrics.maxViewportWidthDp()), fan::build);
         hand.setTag("player-hand"); hand.setContentDescription(copy.text("Your hand", "Mâna ta") + ": " + handCards.size());
         addView(hand, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(HandLayoutMetrics.reservedHandHeightDp())));
     }

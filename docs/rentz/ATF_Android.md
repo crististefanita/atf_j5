@@ -43,11 +43,18 @@ Fișierul debug este numai citit pentru sincronizare și decizie. Adaptorul nu i
 
 - Sanity-ul UI comun instalează varianta izolată `ro.rentzlab.app.uisanity` și verifică meniul, profilul, limbile, o mână, istoricul și restart-ul. Opțiunea `-SeatExtremes` adaugă probele de afișaj la 3 și 6 locuri. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1) · [Protocolul integrării](ATF_UiIntegration.md)
 - `-ConsecutiveSubgames` joacă cinci mâini consecutive în aceeași partidă. Segmentul începe cu Rentz și include cel puțin trei contracte distincte. Capturile compară chenarele la fiecare limită de mână, iar auditul verifică grila, istoricul după restart și jurnalul prin replay independent. Extent păstrează capturile Android native inline. Componentele acoperă 3–6 locuri, iar proba de release folosește patru locuri la profilul compact.
-- Opțiunea `-HistoryOnly` verifică istoricul gol și încărcarea unui jurnal de 48 de mâini produs de componente. Gesturile ating ultimul jucător și ultima mână, cu verificări de aliniere și de conservare a reviziei. Android califică gesturile și afișarea pe profilul executat, iar jocul din jurnal provine din execuția de componentă. [Contractul istoricului](ATF_UiIntegration.md#istoricul-adaptiv-rentz)
+- Opțiunea `-HistoryOnly` verifică istoricul gol și încărcarea unui jurnal de 48 de mâini produs de componente. Gesturile urmăresc lățimea completă a ultimei coloane, apoi ultima mână, cu verificări de aliniere și de conservare a reviziei. Android califică gesturile și afișarea pe profilul executat, iar jocul din jurnal provine din execuția de componentă. [Contractul istoricului](ATF_UiIntegration.md#istoricul-adaptiv-rentz)
 - `-HistoryOnly -HistoryMatrix` folosește fontul 1,5 la 360 dpi. Proba scurtează dialogul deschis, verifică schimbarea containerului derulabil și readuce fereastra la înălțimea inițială. Lansatorul salvează și restaurează dimensiunea, densitatea și fontul emulatorului în cadrul aceleiași rezervări. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 - Dialogul Android System UI permite cel mult două acțiuni **Wait** identificate din ierarhia de sistem. Fiecare acțiune păstrează captura și ierarhia, iar runnerul cere o observație proaspătă înainte de a evalua aplicația. Un dialog persistent oprește rularea cu `ANDROID_SYSTEM_UI_ANR` și dovezile capturate.
 - Rezervarea reîncearcă un conflict de partajare pentru cel mult patru secunde. Eliberarea confruntă identificatorul și dispozitivul sub același lock exclusiv, iar erorile de curățare se păstrează separat.
 - `-HistoryOnly -HistoryDetails` deschide două mâini din jurnalul restaurat. Verifică dublarea la levate, locurile Rentz cu premii egale și revenirea la poziția din grilă. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1)
+
+| Ce se verifică | Nivelul potrivit |
+|---|---|
+| Încadrarea levatei și a cărților în centru, pentru 3–6 locuri, fonturi și densități | Componente JVM cu dimensiuni măsurate controlat. Oracolul compară limita în pixeli cu dimensiunea din formula folosită de randare. |
+| Cărțile rămase după finalul secvenței | Componenta confruntă sloturile afișate cu evenimentele publice de joc ale motorului. |
+| Tranzițiile între contracte și reluarea sesiunii | Un traseu nativ cu cinci mâini. Dreptunghiurile locurilor și starea tablei se verifică în cadrele atașate aceluiași raport. |
+| Raster, fonturi și gesturi | Probe native focalizate pe tabla Rentz sau istoricul compact, după zona modificată. |
 
 [Lansatorul prototipului](../../atf-tests/tools/run-android-sanity.ps1) păstrează contractul UI anterior și refuză receipt-ul `card-table-ui-v1` înainte de ADB. Traseul actual folosește [oracolul Java](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) pentru replay și confruntarea proiecției publice. U09 păstrează separat eventuala migrare a deciziei externe din suita veche.
 

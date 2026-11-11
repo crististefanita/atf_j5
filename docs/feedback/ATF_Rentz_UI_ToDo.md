@@ -40,7 +40,7 @@ Admiterea U08 este documentată în [contractul bibliotecilor UI](../rentz/ATF_U
 | **U04 · PARȚIAL** | **Aceeași compoziție a mesei.** Omul rămâne jos, chenarele și cărțile depuse păstrează identitatea locului și ordinea motorului la 3–6 jucători. Indicatorul marchează actorul efectiv; asul, săritura și jucătorul terminat din secvențe interzic deducerea turei numai prin incrementarea locului. Fără spatele cărților adverse, etichete redundante sau scroll vertical al mesei în profilurile declarate. |
 | **U05 · PARȚIAL** | **Același desen al cărții și aceeași mână centrată.** Proporție, dimensiune la același viewport, suprapunere, indici lizibili și reacție la atingere conforme reperului. Opt cărți Rentz pe un rând, o carte centrată și mână goală reprezentată corect; cartea ridicată nu mută chenarul și nu ascunde indicii vecinilor. Legalitatea și comanda aparțin motorului, cu o singură aplicare. În alegerea pe nevăzute nu se dezvăluie mâna înainte de `REVEAL`. |
 | **U06 · PARȚIAL** | **Depunere și continuitate inspectabile.** Cartea publică apare în dreptul actorului, iar levata completă rămâne inspectabilă potrivit politicii de timp a reperului înainte de colectare. Masa nu dispare în timpul AI; fluxul de prezentare folosește evenimente publice identificate, fără repetarea calculului sau a comenzii. Pauza, istoricul, meniul și callback-urile întârziate nu avansează încă o dată jocul. |
-| **U07 · PARȚIAL** | **Clasamentul și rezumatul de final.** S01 și S07 completează [istoricul adaptiv](../rentz/ATF_UiIntegration.md#istoricul-adaptiv-rentz). |
+| **U07 · PARȚIAL** | **Clasamentul și rezumatul de final.** S01 și S04 urmăresc acoperirea nativă rămasă pentru [istoricul adaptiv](../rentz/ATF_UiIntegration.md#istoricul-adaptiv-rentz). |
 
 **Distribuire și depunere sunt criterii separate.** Reperul consultat compune mâna din snapshot; animatorul `TrickCollection` colectează levata și nu demonstrează o animație de distribuire. Copiați comportamentul vizual demonstrat, iar o animație nouă se tratează ca funcționalitate distinctă, fără a o introduce în refactorizarea Whist.
 
@@ -80,7 +80,7 @@ Ordinea livrării este contractul producătorului, componentele, consumul pe art
 | **R02 · PARȚIAL** | **Patru rânduri stabile între locurile de joc.** Pentru 3–6 jucători, pozițiile urmează geometria Whist de joc pe toată lățimea. Cărțile se suprapun pe rândurile dense, cu rangul și culoarea în fâșia vizibilă. Rămân calificarea rasterului compact la 3, 5 și 6 locuri, ordinea culorilor și opțiunea din R01. |
 | **R03 · PARȚIAL** | **Slotul gol nu este carte jucată.** Proiecția distinge ancora și cărțile publice, iar legalitatea vine din motor. Rămân marcarea ultimei mutări și indicii explicabili pentru continuare, fără dezvăluirea deținătorilor necunoscuți. |
 | **R04 · PARȚIAL** | **Tabla și comanda explicită de continuare există.** Calculul blochează comenzile și păstrează masa; la încheiere rămâne tabla publică. Rămân sosirile, explicațiile pentru pas/săritură și calificarea nativă a închiderii secvențelor. |
-| **R05 · PARȚIAL** | **Cărțile publice sunt proiectate exact.** Componentele confruntă tabla reală fără umplerea fictivă a sloturilor. Adăugați cazul terminal independent și contorul lizibil; modelul poate încheia cu cărți nejucate, iar orice schimbare a terminării rămâne regulă separată. |
+| **R05 · PARȚIAL** | **Contorul de cărți rămase la final.** Tabla terminală este verificată prin evenimentele publice de joc pentru 3–6 locuri. Mai rămâne un contor accesibil pentru cărțile nejucate, verificat pe o închidere cu sloturi rămase libere. |
 
 Schema stabilește relația rangurilor, fără a reprezenta o distribuire de antrenament:
 
@@ -157,7 +157,19 @@ La limita lizibilității se alege un mod explicit de derulare sau o dispunere a
 3. O probă de istoric derulează vertical și până la ultimul jucător, confruntă toate valorile vizibile și verifică revenirea și reluarea, fără linii duplicate.
 4. Rularea păstrează extern identitatea APK-ului, configurația efectivă, expected/actual și capturile native originale inline base64 în stilul proiectului. O masă sau o rezoluție nu califică întreaga matrice.
 
-**Ordine de lucru.** U01 → refactorizarea UI în producător → U02–U05 și adaptoarele Rentz prin componente → U06–U07, R02–R05 și S01/S04/S07 → calibrare nativă și E2E selectiv. R01 rămâne regula separată pentru disponibilitatea opțiunii „Valet mereu”. Închideți criteriile cu implementare identificată și probă relevantă.
+**Ordine de lucru.** U01 → refactorizarea UI în producător → U02–U05 și adaptoarele Rentz prin componente → U06–U07, R02–R05 și S01/S04 → calibrare nativă și E2E selectiv. R01 rămâne regula separată pentru disponibilitatea opțiunii „Valet mereu”. Închideți criteriile cu implementare identificată și probă relevantă.
+
+## P1 · Adoptarea checkbox-ului comun „Automat”
+
+**Responsabil · adaptorul Rentz**
+
+Adoptați `GameTitleBar` din următoarea versiune AAR a modulului `atf-card-table-ui`. Eticheta devine „Automat” în RO și rămâne „Auto play” în EN. Puneți bifa la dreapta liniei „Mâna x/y” când încape, iar contractul pe rândul de dedesubt. [Antetul și starea curentă](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/MainActivity.java) · [Guvernanța bibliotecii](../../rentz-lab-app/ui-library/README.md)
+
+La lățime insuficientă, păstrați „Mâna x/y” integral și bifa aliniată la dreapta pe un rând propriu, înaintea contractului. Verificați trecerea de la selector la un contract cu denumire lungă, la aceeași lățime și același font. Apăsați bifa o dată și verificați o singură comandă.
+
+- Legați starea de fazele CHOOSE și PLAY și opriți delegarea la finalul mâinii. Debifarea continuă să apeleze `cancelHumanAutomation`; mutările confirmate și pasul obligatoriu rămân distincte în jurnal. [Controlerul sesiunii](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/lifecycle/SessionController.java)
+- Extindeți componentele cu răspuns întârziat după debifare și reafișare cu aceeași stare. Păstrați distincția dintre creditul manual, mutarea delegată și pasul obligatoriu. Verificați o singură intenție pentru fiecare atingere.
+- În traseul compact cu sub-jocuri consecutive, verificați poziția, valoarea bifată, cel puțin o mutare delegată și revenirea la debifat la mână nouă. Ancorele și accesul la cărți se compară în cadrele capturate. Matricea de dimensiuni și fonturi rămâne în componente. [Proba Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 
 ## Tura automată — probă nativă rămasă
 
@@ -171,6 +183,11 @@ Pentru patru jucători, mecanismul comun de alocare a spațiului este descris î
 
 | Prioritate | Criteriu verificabil |
 |---|---|
-| P1 | Comparați chenarele Rentz și levată la 3, 5 și 6 jucători în aceleași condiții de afișaj. Măsurați banda rămasă pentru cărți și documentați diferențele deliberate de distanțare. |
-| P1 | Evaluați o reprezentare etajată a cărților Rentz. Fiecare slot trebuie să își păstreze rangul, culoarea și o singură descriere accesibilă. |
-| P2 | Verificați la nivel de componentă ancorele și banda disponibilă în profiluri compacte, înalte, cu text mărit și în ferestre scunde. |
+| P1 | În probe native scurte la 3, 5 și 6 jucători, comparați chenarele Rentz și levată în același profil compact. Măsurați banda și confirmați că indicele celui mai lung rang și simbolul culorii rămân lizibile în fâșia vizibilă. |
+| P2 | Confirmați pe profilul scund schimbarea de la grila Rentz la levată și accesul la comanda de continuare. Păstrați în Extent densitatea, fontul și cadrele comparate. |
+
+## P2 · Gesturile pe etichetele istoricului
+
+O serie de gesturi ADB rapide pe coloana fixă a deschis detaliul unei mâini în timpul derulării. Proba de parcurgere a istoricului folosește celulele de scor pentru gestul vertical. [Captura nativă](../../../../rentz_back/ui-review/j5-live-ui-history-matrix-20261111-gesture-2/android-extent.html)
+
+Verificați separat pe dispozitiv o tragere verticală pornită de pe eticheta activă, la viteză obișnuită și după un fling. Tragerea trebuie să mute rândurile, iar o atingere să deschidă un singur detaliu.

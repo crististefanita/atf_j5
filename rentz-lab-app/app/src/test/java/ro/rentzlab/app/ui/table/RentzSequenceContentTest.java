@@ -10,6 +10,32 @@ import java.util.List;
 @AndroidComponentLayer
 public final class RentzSequenceContentTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
+
+    @Test public void terminalProjectionKeepsOnlyCardsFromPublicPlayEvents() {
+        for (int players = 3; players <= 6; players++) {
+            var match = new RentzMatch(players, 31, ScoreProfile.laboratory());
+            match.choose(0, Contract.RENTZ, false);
+            int turns = 0;
+            while (match.observe(0).phase() == RentzMatch.Phase.PLAY) {
+                var actor = match.observe(match.observe(0).turn());
+                if (actor.legal().isEmpty()) match.pass(actor.seat());
+                else match.play(actor.seat(), actor.legal().get(0));
+                if (++turns > 128) throw new AssertionError("Fixture did not complete within its action budget");
+            }
+            var terminal = match.observe(0);
+            var played = terminal.events().stream().filter(event -> event.action() == RentzMatch.Action.PLAY)
+                    .map(RentzMatch.TurnEvent::card).collect(java.util.stream.Collectors.toSet());
+            var cells = RentzSequenceContent.rows(terminal).stream().flatMap(List::stream).toList();
+            audit.equal("Terminal Rentz phase " + players, RentzMatch.Phase.DEAL_END, terminal.phase());
+            audit.equal("Four fixed rows at settlement " + players, 8 * players, cells.size());
+            audit.equal("Public play events are the only rendered cards " + players, played,
+                    cells.stream().filter(RentzSequenceContent.Cell::played).map(RentzSequenceContent.Cell::card)
+                            .collect(java.util.stream.Collectors.toSet()));
+            audit.equal("Unused positions stay empty " + players, 8 * players - played.size(),
+                    (int) cells.stream().filter(cell -> !cell.played()).count());
+            audit.truth("Fixture preserves at least one unplayed card " + players, played.size() < 8 * players);
+        }
+    }
     @Test public void everyTableSizeKeepsItsActualOpeningRankAndStableSlotsWithoutInventingPlayedCards() {
         for (int count = 3; count <= 6; count++) {
             var session = new GameSession(count, 31, RentzPlayer.Difficulty.NORMAL);

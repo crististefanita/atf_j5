@@ -38,7 +38,7 @@ exclusiveContent {
 Dependența se declară în modulul aplicației, după admitere:
 
 ```groovy
-implementation 'ro.cardtable:card-table-ui:0.1.7'
+implementation 'ro.cardtable:card-table-ui:0.1.9'
 implementation 'ro.cardtable:card-table-names:0.1.0'
 ```
 
@@ -80,14 +80,14 @@ Modelele UI păstrează date vizibile neutre. În Rentz, componentele acoperă m
 
 ### Marcajul cărților jucabile în Rentz
 
-În tura manuală, cărțile legale primesc fundal verde pal și contur verde. Marcajul se recalculează la fiecare tură, inclusiv după mutare și după pasul automat. Geometria și zonele de atingere rămân cele ale mâinii, iar descrierile accesibile indică acțiunea permisă în română și engleză.
+În tura manuală de Rentz, cărțile legale primesc fundal crem și contur auriu din biblioteca comună. Marcajul se recalculează după mutare, pas și schimbarea turei. Cărțile rămân în același loc în evantai, iar descrierile accesibile indică acțiunea permisă în română și engleză.
 
 Componentele confruntă setul marcat cu regulile motorului. Proba `-RentzCardMarksOnly` verifică pe emulator acțiunile accesibile și culorile capturate pentru o carte, mai multe cărți, după mutare și după pas. [Componentele de geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) · [Runner Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 
 ### Schimbarea contractului la masa de patru jucători
 
-- Secvența Rentz, levata și rezultatul folosesc aceeași bandă între chenare. Masa măsoară locurile înainte de a adapta conținutul central.
-- Pe un ecran scund, levata reduce mai întâi distanța dintre rânduri și păstrează ordinea cărților.
+- Secvența Rentz, levata și rezultatul folosesc aceeași bandă între chenare, calculată de geometria comună din ancorele de joc. Masa măsoară locurile înainte de a adapta conținutul central.
+- Pe un ecran scund, levata reduce mai întâi distanța dintre rânduri și păstrează ordinea cărților. Bugetul se verifică în pixeli, cu aceeași rotunjire separată a poziției și a înălțimii ultimului rând ca la randarea Android.
 - Masa și ecranul de punctaj afișează progresul `Mâna x/y` pe primul rând și contractul pe rândul următor. Marcajul `×2` rămâne lângă contract.
 
 [Componentele de geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) verifică încadrarea pe dimensiuni controlate. [Acceptanța de release](ATF_Release.md#ordinea-calificării-android-curente) compară dreptunghiurile native înainte și după schimbarea contractului, după mutări și după reluare.
@@ -138,11 +138,12 @@ Pentru acest increment, `-HelpAwardsOnly` parcurge ajutorul în ambele limbi. `-
 - Obiectivele pe zile folosesc fusul salvat și cer o distribuire distinctă pentru fiecare zi numărată. Ora provine din dispozitiv.
 - Căutarea recunoaște titlul și regula în română sau engleză, inclusiv când lipsesc diacriticele. Filtrele se combină și păstrează ordinea de învățare. Rândurile spun explicit dacă obiectivul este blocat, în progres sau deblocat.
 - Ecranul folosește verdele tablei și paleta locurilor la masă. Cartonașele deblocate au fundal crem și text de stare, iar bara din antet arată progresul total.
+- Lista virtualizată, fereastra de detaliu și panoul de progres sunt randate de `card-table-ui`. Rentz furnizează ordinea, textele, eligibilitatea, filtrele și datele deja confirmate.
 - Detaliul folosește aceeași evaluare ca acordarea creditului. El arată criteriul, tipul dovezii și ce a lipsit din ultima mână a partidei curente. O mână eligibilă poate avea deja credit dacă dovada a mai fost înregistrată.
 - Clasările din Realizări folosesc rezultatul terminal Rentz. Egalitățile păstrează locul comun. O partidă integral manuală cere decizii manuale confirmate de la început și permite pasul automat obligatoriu.
 - Testele cu mâini simulate verifică ordinea, pragurile, proveniența și reluarea. Partidele offline verifică disponibilitatea obiectivelor pe loturi separate. Rularea nativă are puncte distincte pentru Realizări și Antrenament.
 
-[Catalogul și calibrarea](../feedback/ATF_Rentz_Achievements_ToDo.md) · [Catalogul executabil](../../rentz-lab-app/app/src/main/achievement-rules/rentz-gameplay-achievements.yaml) · [Componentele Realizări](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/GameplayAchievementComponentTest.java)
+[Catalogul executabil](../../rentz-lab-app/app/src/main/achievement-rules/rentz-gameplay-achievements.yaml) · [Planul calibrării](../../rentz-lab-app/config/rentz-achievement-calibration.yaml) · [Componentele Realizări](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/GameplayAchievementComponentTest.java) · [Extinderi și acceptanță](../feedback/ATF_Rentz_Achievements_ToDo.md)
 
 ## Clasamentul final
 

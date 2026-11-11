@@ -102,8 +102,8 @@ public final class MainActivity extends Activity {
             case "ACHIEVEMENTS" -> showAchievements(copy, AchievementBrowser.Collection.GAMEPLAY);
             case "TRAINING" -> showAchievements(copy, AchievementBrowser.Collection.TRAINING);
             default -> menus.home(copy, profile.preferredName(), controller.session() != null, new HomeMenuContent.Actions(
-                    this::profile, () -> route("SETUP"), this::resume, this::openHistory, () -> route("HELP")), language,
-                    () -> route("ACHIEVEMENTS"));
+                    this::profile, () -> route("SETUP"), this::resume, this::openHistory,
+                    () -> route("ACHIEVEMENTS"), () -> route("HELP")), language);
         }
         publish();
     }
