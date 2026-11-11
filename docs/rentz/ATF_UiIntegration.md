@@ -80,9 +80,11 @@ Modelele UI păstrează date vizibile neutre. În Rentz, componentele acoperă m
 
 ### Marcajul cărților jucabile în Rentz
 
-În tura manuală de Rentz, cărțile legale primesc fundal crem și contur auriu din biblioteca comună. Marcajul se recalculează după mutare, pas și schimbarea turei. Cărțile rămân în același loc în evantai, iar descrierile accesibile indică acțiunea permisă în română și engleză.
+În tura proprie din sub-jocul Rentz, toate cărțile legale primesc fundal crem și contur auriu. Marcajul vine din observația motorului și se păstrează când tura este delegată. Atingerea rămâne disponibilă numai când jucătorul controlează tura.
 
-Componentele confruntă setul marcat cu regulile motorului. Proba `-RentzCardMarksOnly` verifică pe emulator acțiunile accesibile și culorile capturate pentru o carte, mai multe cărți, după mutare și după pas. [Componentele de geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) · [Runner Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
+Adaptorul aplică stilul comun fețelor identificate în evantai. Componentele confruntă setul marcat cu regulile după mutare manuală sau delegată, după pas și la schimbarea turei.
+
+Proba `-RentzCardMarksOnly` verifică pe emulator acțiunile accesibile și culorile capturate pentru o carte, mai multe cărți, după mutare și după pas. [Componentele de geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) · [Runner Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 
 ### Schimbarea contractului la masa de patru jucători
 

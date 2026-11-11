@@ -11,6 +11,8 @@ import ro.rentzlab.app.ui.score.RentzScoreContent;
 import ro.rentzlab.core.*;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /** Public Rentz observation to neutral visual content; no Whist bids, trump or scoring. */
@@ -47,20 +49,24 @@ public final class RentzTableContent {
     public static List<HandCard> hand(RentzMatch.Observation view, RentzUiText copy, boolean paused) {
         if (!view.revealed()) return List.of();
         return view.hand().stream().sorted(HAND_ORDER).map(card -> {
-            boolean legal = !paused && view.phase() == RentzMatch.Phase.PLAY && view.turn() == view.seat() && view.legal().contains(card);
+            boolean legal = !paused && isPlayerTurn(view) && view.legal().contains(card);
             return new HandCard(id(card), face(card), legal ? copy.play(card.label()) : card.label() + copy.text(". Unavailable", ". Indisponibilă"), legal);
         }).collect(immutable());
     }
     public static Card selected(RentzMatch.Observation view, String id) {
-        if (view.phase() != RentzMatch.Phase.PLAY || view.turn() != view.seat()) throw new IllegalStateException("Not the actor's play phase");
+        if (!isPlayerTurn(view)) throw new IllegalStateException("Not the actor's play phase");
         return view.legal().stream().filter(card -> id(card).equals(id)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Card is not currently legal"));
     }
     static String turnLabel(RentzMatch.Observation view, RentzUiText copy, boolean passing) {
         return passing ? copy.text("Passing", "Pasează") : copy.seatTurn(view.phase() == RentzMatch.Phase.CHOOSE);
     }
-    static boolean highlightPlayable(Contract contract, HandCard card) {
-        return contract == Contract.RENTZ && card.playable();
+    static Set<String> highlightedCards(RentzMatch.Observation view) {
+        if (!view.revealed() || view.contract() != Contract.RENTZ || !isPlayerTurn(view)) return Set.of();
+        return view.legal().stream().map(RentzTableContent::id).collect(Collectors.toSet());
+    }
+    private static boolean isPlayerTurn(RentzMatch.Observation view) {
+        return view.phase() == RentzMatch.Phase.PLAY && view.turn() == view.seat();
     }
     public static List<PlayedCardContent> plays(List<TrickRules.Play> plays, List<String> names) {
         return plays.stream().map(play -> new PlayedCardContent(play.seat(), play.card().label(), face(play.card()).red(),

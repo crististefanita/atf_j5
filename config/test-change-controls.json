@@ -96,10 +96,10 @@
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java",
       "owner": "Rentz UI",
       "reason": "Check Rentz contract-choice and play geometry in one measured table.",
-      "criterion": "The chooser fits its controls and play fits every card row at the same measured seat anchors across 3 to 6 players.",
+      "criterion": "Keep the measured seat anchors across 3 to 6 players. Verify the Rentz outline for single and multiple legal cards during manual and delegated turns, with taps disabled during delegation and with marks refreshed after moves and passes.",
       "proof": "docs/rentz/ATF_UiIntegration.md",
       "expires": "2026-11-20",
-      "sha256": "b3604ec055c562225eb19d464279f70fbafba5c231d25d2a78f2113a07a81983",
+      "sha256": "864cc60ddd661cae001cbdd9870404dac6cbe31f6ce6796f3ee84188b8fe91aa",
       "allowDelete": false
     },
     {

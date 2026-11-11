@@ -12,6 +12,9 @@ import android.view.*;
 import android.widget.*;
 import ro.cardtable.ui.animation.CollectionTarget;
 import ro.cardtable.ui.animation.TrickCollectionAnimator;
+import ro.cardtable.ui.cards.CardFaceDrawable;
+import ro.cardtable.ui.cards.CardHighlight;
+import ro.cardtable.ui.cards.CardHighlightView;
 import ro.cardtable.ui.hand.*;
 import ro.cardtable.ui.seat.*;
 import ro.cardtable.ui.table.*;
@@ -20,6 +23,7 @@ import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.app.ui.window.WindowContent;
 import ro.rentzlab.core.*;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /** Rentz central modes compose neutral seats, public cards and a single shared hand renderer. */
@@ -74,11 +78,25 @@ public final class RentzTablePanel extends LinearLayout {
         var boardParams = new LayoutParams(dp(width), 0, 1f); boardParams.gravity = Gravity.CENTER_HORIZONTAL;
         addView(board, boardParams);
         var handCards = RentzTableContent.hand(view, copy, paused);
-        var fan = new HandFan(context, handCards, viewport.handClearanceDp(false), viewport.isCompact(),
-                actions.card(), card -> RentzTableContent.highlightPlayable(view.contract(), card));
-        var hand = new CenteredHandView(context, dp(HandLayoutMetrics.maxViewportWidthDp()), fan::build);
+        var fan = new HandFan(context, handCards, viewport.handClearanceDp(false), viewport.isCompact(), actions.card());
+        var highlightedCards = RentzTableContent.highlightedCards(view);
+        var hand = new CenteredHandView(context, dp(HandLayoutMetrics.maxViewportWidthDp()),
+                widthPx -> highlightHand(fan.build(widthPx), highlightedCards, density));
         hand.setTag("player-hand"); hand.setContentDescription(copy.text("Your hand", "Mâna ta") + ": " + handCards.size());
         addView(hand, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(HandLayoutMetrics.cardHeightDp()) + dp(HandLayoutMetrics.LIFT_CLEARANCE_DP)));
+    }
+    private static View highlightHand(View fan, Set<String> cardIds, float density) {
+        // HandFan owns input. Apply the shared style to its identified card faces independently.
+        for (String id : cardIds) {
+            if (!(fan.findViewWithTag("hand-card:" + id) instanceof ViewGroup slot)) continue;
+            for (int index = 0; index < slot.getChildCount(); index++) {
+                if (slot.getChildAt(index).getBackground() instanceof CardFaceDrawable face) {
+                    CardHighlightView.paint(face, CardHighlight.IN_PLACE, density);
+                    break;
+                }
+            }
+        }
+        return fan;
     }
     private View playedCards(List<TrickRules.Play> visible, List<String> names, boolean holding,
             TableViewportPolicy viewport, PlayedCardMetrics.Layout trick) {
