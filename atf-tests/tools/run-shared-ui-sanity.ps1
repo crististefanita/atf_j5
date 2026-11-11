@@ -561,6 +561,11 @@ function TableChecks($nodes,$state){
         if($matches.Count-eq1-and$hand.Count-eq1){
             $cardBox=Bounds $matches[0];$handBox=Bounds $hand[0]
             Check "Card remains in hand bounds $label" $true ($cardBox[0]-ge$handBox[0]-and$cardBox[2]-le$handBox[2]-and$cardBox[1]-ge$handBox[1]-and$cardBox[3]-le$handBox[3])
+            if($CompactConsecutive){
+                $scale=[double]$effectiveDisplay.density/160
+                $fullHeight=[int][Math]::Round(88*$scale)+[int][Math]::Round(28*$scale)
+                Check "Complete native height for own card $label" $fullHeight ($cardBox[3]-$cardBox[1])
+            }
         }
     }
     $expectedOrder=@($state.view.hand | Sort-Object @{Expression={@('SPADES','HEARTS','CLUBS','DIAMONDS').IndexOf([string]$_.suit)}}, @{Expression={[int]$_.rank}} | ForEach-Object{
@@ -761,10 +766,16 @@ function ReadConsecutiveHistory([string]$Title,[string[]]$Contracts){
     return $seen.Count
 }
 function RunConsecutiveSubgames($state,[string]$journalFile){
-    $selectedContracts=[Collections.Generic.List[string]]::new();$baseSeats=''
+    $selectedContracts=[Collections.Generic.List[string]]::new();$baseSeats='';$chooserSeats=''
     for($deal=1;$deal-le$consecutiveGameCount;$deal++){
         if($deal-eq1){
             if($state.view.phase-ne'CHOOSE'-or$state.view.turn-ne0){throw 'The first subgame must begin at the human chooser.'}
+            if(-not$state.view.revealed){$revision=$state.revision;Tap 'Show cards';$state=State -After $revision}
+            $chooserSeats=SeatGeometry @(Ui) $state
+            Observe 'Choosing the opening contract keeps the table seats and private hand' {param($captured)
+                TableChecks $captured $state
+                Check 'The human is the one visible chooser' 1 @($captured|Where-Object text -CEQ 'CHOOSING').Count
+            }
             $state=ChooseHumanSubgame $state -ForceRentz
         }else{
             if($state.view.phase-ne'DEAL_END'){throw "Subgame $($deal-1) did not reach a completed deal."}
@@ -786,6 +797,10 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
             GameHeadingChecks $captured $state
             Check 'Four-player table uses the same seat rectangles in this viewport' $baseSeats (SeatGeometry $captured $state)
             Check 'Visible subgame matches the public actor state' $contract $state.view.contract
+            if($deal-eq1){
+                Check 'Choosing and play keep exactly the same four seat rectangles' $chooserSeats (SeatGeometry $captured $state)
+                Check 'One player has the active play indicator' 1 @($captured|Where-Object {$_.text -cin @('PLAYING','PASSING')}).Count
+            }
             if($contract-eq'RENTZ'){RentzSequenceChecks $captured $state}
             else{Check 'Trick table exposes no empty Rentz slots' 0 @($captured|Where-Object description -CLike 'Empty slot *').Count}
         }

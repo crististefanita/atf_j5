@@ -15,6 +15,7 @@ import java.util.function.BiFunction;
 final class RentzCardBoard extends ViewGroup {
     private final int players;
     private final int footerPx;
+    private final int chooserHeightPx;
     private final TableViewportPolicy viewport;
     private final PlayedCardMetrics.Layout trick;
     private final BiFunction<Integer, Integer, View> render;
@@ -23,11 +24,13 @@ final class RentzCardBoard extends ViewGroup {
     private int previousWidth = -1;
     private int previousBudget = -1;
 
-    RentzCardBoard(Context context, int players, int footerPx, TableViewportPolicy viewport, PlayedCardMetrics.Layout trick,
+    RentzCardBoard(Context context, int players, int footerPx, int chooserHeightPx,
+                   TableViewportPolicy viewport, PlayedCardMetrics.Layout trick,
                    BiFunction<Integer, Integer, View> render) {
         super(context);
         this.players = players;
         this.footerPx = footerPx;
+        this.chooserHeightPx = chooserHeightPx;
         this.viewport = viewport;
         this.trick = trick;
         this.render = render;
@@ -52,8 +55,8 @@ final class RentzCardBoard extends ViewGroup {
 
         int gap = Math.round(viewport.regionGapDp() * density);
         int reference = RentzCardSpace.trickHeightPx(density, trick);
-        int minimumCenter = Math.max(4, RentzCardSpace.minimumTrickHeightPx(density, trick.rows()));
-        int minimum = TableGeometry.minimumHeight(players, seatHeight, minimumCenter + footerPx, gap);
+        int minimum = RentzCardSpace.boardMinimumHeight(players, seatHeight, gap, chooserHeightPx,
+                RentzCardSpace.minimumTrickHeightPx(density, trick.rows()), footerPx);
         int offered = MeasureSpec.getMode(heightSpec) == MeasureSpec.UNSPECIFIED
                 ? Math.max(Math.round(viewport.minimumBoardHeightDp() * density),
                         TableGeometry.minimumHeight(players, seatHeight, reference, gap)) : MeasureSpec.getSize(heightSpec);

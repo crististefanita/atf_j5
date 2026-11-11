@@ -49,6 +49,12 @@ final class RentzCardSpace {
                 cell + (trick.rows() - 1) * stride, trick.slots());
     }
 
+    static int boardMinimumHeight(int players, int seatHeight, int gap,
+            int chooserHeight, int minimumTrickHeight, int footerHeight) {
+        int centerHeight = Math.max(chooserHeight, Math.max(4, minimumTrickHeight) + footerHeight);
+        return TableGeometry.minimumHeight(players, seatHeight, centerHeight, gap);
+    }
+
     static Plan plan(int width, int height, int players, int seatWidth, int seatHeight, int gap, int trickHeight) {
         int maximumCenter = height - TableGeometry.minimumHeight(players, seatHeight, 0, gap);
         var layout = TableGeometry.arrangeDisplay(width, height, players, seatWidth, seatHeight,

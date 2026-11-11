@@ -119,6 +119,32 @@ public final class RentzCardSpaceTest {
         }
     }
 
+    @Test public void choiceControlsAndPlayCardsFitTheSameSeatPlanAcrossNativeWidths() {
+        for (int players = 3; players <= 6; players++) {
+            for (int widthDp : new int[]{280, 320, 393, 600}) {
+                for (float density : new float[]{1f, 2.25f, 2.625f}) {
+                    var viewport = new TableViewportPolicy(520, 1.5f);
+                    int width = Math.round(widthDp * density);
+                    int seatWidth = Math.round(TableSizing.seatWidthDp(widthDp, true) * density);
+                    int seatHeight = Math.round(82 * density);
+                    int gap = Math.round(density);
+                    var trick = PlayedCardMetrics.forTable(players, widthDp, 1.5f, viewport);
+                    int controls = 2 * (Math.round(48 * density) + Math.round(3 * density));
+                    int height = RentzCardSpace.boardMinimumHeight(players, seatHeight, gap, controls,
+                            RentzCardSpace.minimumTrickHeightPx(density, trick.rows()), 0);
+                    var table = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap,
+                            RentzCardSpace.trickHeightPx(density, trick));
+                    assertTrue("Both chooser controls fit at the minimum measured height", table.band().height() >= controls);
+                    var displayed = RentzCardSpace.fitTrick(trick, table.band().height(), density);
+                    assertTrue("Every public card row fits its band",
+                            RentzCardSpace.trickHeightPx(density, displayed) <= table.band().height());
+                    assertTrue("Full lower seat and the private hand remain separate",
+                            table.seats().get(0).bottom() <= height);
+                }
+            }
+        }
+    }
+
     @Test public void denseSuitRowsOverlapFacesWhileKeepingEveryIndexAndBothEdgesVisible() {
         float density = 2.25f;
         int width = 630;

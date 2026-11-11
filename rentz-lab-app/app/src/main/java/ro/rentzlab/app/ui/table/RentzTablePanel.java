@@ -48,26 +48,22 @@ public final class RentzTablePanel extends LinearLayout {
         boolean cards = view.phase() == RentzMatch.Phase.PLAY && view.contract() != Contract.RENTZ || holding;
         boolean sequence = view.contract() == Contract.RENTZ && view.phase() != RentzMatch.Phase.CHOOSE;
         var trick = PlayedCardMetrics.forTable(view.players(), width, fontScale, viewport);
-        if (view.phase() != RentzMatch.Phase.CHOOSE) {
-            int footer = sequence && view.phase() == RentzMatch.Phase.DEAL_END ? dp(CHOICE_HEIGHT_DP) + dp(CHOICE_MARGIN_DP) : 0;
-            var cardBoard = new RentzCardBoard(context, view.players(), footer, viewport, trick,
-                    (widthPx, budgetPx) -> {
-                        if (sequence) return sequence(view, actions, RentzCardSpace.sequence(view.players(), widthPx,
-                                budgetPx - footer, density, fontScale));
-                        if (cards) return playedCards(visible, names, holding, viewport,
-                                RentzCardSpace.fitTrick(trick, budgetPx, density));
-                        View controls = center(view, actions, 0);
-                        controls.setLayoutParams(new FrameLayout.LayoutParams(Math.min(dp(220), widthPx),
-                                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
-                        return controls;
-                    });
-            board = cardBoard;
-            center = cardBoard.center();
-        } else {
-            board = new BoardLayout(context, view.players(), cards ? width : Math.min(width, 220),
-                    viewport, cards, TableGeometry.CenterAlignment.BALANCED);
-            center = cards ? playedCards(visible, names, holding, viewport, trick) : center(view, actions, dp(1));
-        }
+        int choiceRowPx = dp(CHOICE_HEIGHT_DP) + dp(CHOICE_MARGIN_DP);
+        int footer = sequence && view.phase() == RentzMatch.Phase.DEAL_END ? choiceRowPx : 0;
+        // Keep the measured seat plan across contract selection, play and the turn indicators.
+        var cardBoard = new RentzCardBoard(context, view.players(), footer, 2 * choiceRowPx, viewport, trick,
+                (widthPx, budgetPx) -> {
+                    if (sequence) return sequence(view, actions, RentzCardSpace.sequence(view.players(), widthPx,
+                            budgetPx - footer, density, fontScale));
+                    if (cards) return playedCards(visible, names, holding, viewport,
+                            RentzCardSpace.fitTrick(trick, budgetPx, density));
+                    View controls = center(view, actions);
+                    controls.setLayoutParams(new FrameLayout.LayoutParams(Math.min(dp(220), widthPx),
+                            ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+                    return controls;
+                });
+        board = cardBoard;
+        center = cardBoard.center();
         board.setTag("game-board"); board.setContentDescription(copy.text("Rentz table", "Masa Rentz"));
         String turnBadge = RentzTableContent.turnLabel(view, copy, forcedPass).toUpperCase(java.util.Locale.ROOT);
         for (var seat : RentzTableContent.seats(view, copy, names, holding, forcedPass)) {
@@ -82,7 +78,7 @@ public final class RentzTablePanel extends LinearLayout {
                 actions.card(), card -> RentzTableContent.highlightPlayable(view.contract(), card));
         var hand = new CenteredHandView(context, dp(HandLayoutMetrics.maxViewportWidthDp()), fan::build);
         hand.setTag("player-hand"); hand.setContentDescription(copy.text("Your hand", "Mâna ta") + ": " + handCards.size());
-        addView(hand, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(HandLayoutMetrics.reservedHandHeightDp())));
+        addView(hand, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(HandLayoutMetrics.cardHeightDp()) + dp(HandLayoutMetrics.LIFT_CLEARANCE_DP)));
     }
     private View playedCards(List<TrickRules.Play> visible, List<String> names, boolean holding,
             TableViewportPolicy viewport, PlayedCardMetrics.Layout trick) {
@@ -136,9 +132,8 @@ public final class RentzTablePanel extends LinearLayout {
         nativeCollection.cancel();
         nativeCollection = null;
     }
-    private View center(RentzMatch.Observation view, Actions actions, int minimumHeightPx) {
+    private View center(RentzMatch.Observation view, Actions actions) {
         var box = new LinearLayout(context); box.setOrientation(VERTICAL); box.setGravity(Gravity.CENTER);
-        box.setMinimumHeight(minimumHeightPx);
         if (view.phase() == RentzMatch.Phase.CHOOSE) {
             if (view.turn() != view.seat()) return box;
             if (!view.revealed()) {
