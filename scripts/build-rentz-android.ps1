@@ -130,8 +130,14 @@ if($passed){
     $hash=(Get-FileHash -LiteralPath $apk -Algorithm SHA256).Hash
     & (Join-Path $Sdk 'build-tools/36.0.0/apksigner.bat') verify --verbose --print-certs $apk *> (Join-Path $RunRoot 'apk-signature.txt');$signed=$LASTEXITCODE-eq0
     & (Join-Path $Sdk 'build-tools/36.0.0/aapt.exe') dump badging $apk *> (Join-Path $RunRoot 'apk-badging.txt');$identified=$LASTEXITCODE-eq0
-    $productPackage=[regex]::Match((Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'apk-badging.txt')),"(?m)^package: name='([^']+)'")
+    $badging=Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'apk-badging.txt')
+    $productPackage=[regex]::Match($badging,"(?m)^package: name='([^']+)'")
     if($productPackage.Success){$applicationId=$productPackage.Groups[1].Value}else{$identified=$false}
+    if($Configuration-eq'Release'){
+        $installedVersion=[regex]::Match($badging,"(?m)^package: [^\r\n]*\bversionName='([^'\r\n]+)'")
+        $identified=$identified -and $installedVersion.Success -and ($installedVersion.Groups[1].Value -ceq $version.versionName)
+        $identified=$identified -and $version.versionName -cmatch '^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)$'
+    }
     $certificate=@(Get-Content -LiteralPath (Join-Path $RunRoot 'apk-signature.txt')|Where-Object{$_-match'certificate SHA-256 digest:'})
     $passed=$passed-and$signed-and$identified-and$applicationId-eq'ro.rentzlab.app'-and$certificate.Count-eq1
     & (Join-Path $Sdk 'build-tools/36.0.0/zipalign.exe') -c -P 16 -v 4 $apk *> (Join-Path $RunRoot 'apk-alignment.txt')

@@ -349,7 +349,7 @@
       "criterion": "A missing or partial Rentz-plus-two-games receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "574760daad0396d3a01af4855812d45f16b3cde16fec659227733373b1ad3a31",
+      "sha256": "1c0d7aa4d25810ff375dfe97ad591a0ce7c3cc2a0decf5b2404cafa88018feb4",
       "allowDelete": false
     },
     {
@@ -519,7 +519,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "f009f70bc62561f502c95e06acb8fc0ada0cc3b84ba31b9cd6097ed1c2d40931",
+      "sha256": "53825e889237af7406737d5d09d96205fcf20434f5a6cb285e2525a6b7ad34af",
       "allowDelete": false
     },
     {
@@ -1199,7 +1199,7 @@
       "criterion": "Commit, source manifest, package, version, signing certificate, APK bytes, and reporting tools match receipts.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "ffef12bd889732e8ef229b4ec5fe276b3468dee03d9349864d8e704ef9811cd4",
+      "sha256": "3192b8229f72be1d524ef13799a2a8fb2c85d50701d051c1c35a3bb1cbcbe52b",
       "allowDelete": false
     },
     {

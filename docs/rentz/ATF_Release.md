@@ -179,12 +179,13 @@ Distribuiți candidatul numai după calificarea RAG locală și verificarea semn
 
 ### APK de test
 
-Un APK de test verificat poate ocupa singur secțiunea **Jocul**. Legătura indică direct pachetul candidat din depozitul GitHub privat. Înregistrarea din catalog leagă versiunea de candidatul declarat și păstrează dovada accesului.
+Intrarea existentă către APK-ul de test poate rămâne în **Jocul** până la calificarea următoarei ediții. Pentru următoarea descărcare, secțiunea indică APK-ul de produs cu versiunea numerică și numele `RentzLab-<versiune>.apk`.
 
 - Verificați regresia offline, semnătura și identitatea Android izolată înainte de distribuție.
 - Descărcați binarul cu un cont autorizat și confirmați că accesul anonim este refuzat.
 - Păstrați ultimul APK descărcabil în README până când succesorul trece verificarea. Ediția de producție se găsește în catalogul tehnic.
-- La promovarea ediției de producție, eliminați înregistrarea de test din intrarea principală.
+- Citiți `versionName` din APK-ul semnat și confruntați-l cu versiunea declarată. Poarta RAG `release-build` cere aceeași versiune numerică și numele exact al fișierului.
+- Păstrați sufixul `-ui-sanity` pentru pachetul izolat folosit la verificări. La promovarea ediției de producție, eliminați înregistrarea de test din intrarea principală.
 
 ### Proba Android a APK-ului livrat
 

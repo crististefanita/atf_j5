@@ -206,6 +206,7 @@ public final class ReleaseReadinessRag {
             gate.put("actual", "RAG-ul este read-only și nu a primit un receipt verificabil pentru această poartă.");
             gate.put("receipt", "");
         }
+        gate(gates, "release-build").put("expected", "The signed product APK has the numeric candidate version and exact filename RentzLab-<version>.apk.");
         gate(gates, "release-retirement").put("expected", "The latest qualified release must download from the pushed README with an authorized account before prior releases are retired. Preserve source tags and audit evidence.");
         attachLocalCatalog(root, gates);
         if (componentRun != null) attachRegressionReceipt(root, git, gates, componentRun);
@@ -504,7 +505,7 @@ public final class ReleaseReadinessRag {
             String version = receipt.path("productVersionName").asText();
             JsonNode releaseIndex = readSafeJson(root, "release/index.json", 65_536);
             String candidateVersion = releaseIndex.path("candidate").path("version").asText(releaseIndex.path("currentVersion").asText());
-            if (!version.equals(candidateVersion))
+            if (!VERSION.matcher(version).matches() || !version.equals(candidateVersion))
                 throw new IOException("RAG-BUILD-VERSION");
             verifyAndroidSourceManifest(run, componentRun, receipt);
             Path apk = Path.of(receipt.path("productApk").asText()).toAbsolutePath().normalize();

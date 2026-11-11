@@ -128,7 +128,7 @@ class ReleaseGovernanceTest {
             assertEquals("RELEASE-MAIN-LINKS", failure.getMessage(), "Only the exact qualified download is linked");
         }
     }
-    @ParameterizedTest @ValueSource(strings={"duplicate","folder","old","latest","raw","missing","reversed"})
+    @ParameterizedTest @ValueSource(strings={"duplicate","folder","old","latest","raw","missing","reversed","sanity","underscore-sanity"})
     void staleOrRedundantDownloadRoutesAreRejected(String defect) throws Exception {
         String original=guide("PUBLISHED"),candidate=switch(defect) {
             case "duplicate" -> original.replace("\n## Documentație", "\n- [Again](https://github.com/example/game/releases/tag/v1.2.0)\n## Documentație");
@@ -136,6 +136,8 @@ class ReleaseGovernanceTest {
             case "old" -> original.replace("/v1.2.0/","/v1.1.0/");
             case "latest" -> original.replace("tag/v1.2.0","latest");
             case "raw" -> original.replace("github.com/example/game/releases/download/v1.2.0","raw.githubusercontent.com/example/game/master");
+            case "sanity" -> original.replace("RentzLab-1.2.0.apk", "RentzLab-1.2.0-ui-sanity.apk");
+            case "underscore-sanity" -> original.replace("RentzLab-1.2.0.apk", "RentzLab-1.2.0_sanity.apk");
             case "missing" -> original.replace("- [APK](https://github.com/example/game/releases/download/v1.2.0/RentzLab-1.2.0.apk)","");
             case "reversed" -> original.replace("tag/v1.2.0","temporary").replace("download/v1.2.0/RentzLab-1.2.0.apk","tag/v1.2.0")
                     .replace("temporary","download/v1.2.0/RentzLab-1.2.0.apk");
@@ -539,6 +541,17 @@ class ReleaseGovernanceTest {
 
         Path productReceipt = build.resolve("build-qualification.json");
         byte[] productReceiptBytes = Files.readAllBytes(productReceipt);
+        for (String invalidVersion : List.of("1.3.0-ui-sanity", "1.3.0_sanity")) {
+            Files.write(productReceipt, JSON().writeValueAsBytes(buildReceipt.deepCopy().put("productVersionName", invalidVersion)));
+            var rejected = gate(ReleaseReadinessRag.evaluate(root, "gate:release-build APK version", component, build, null), "release-build");
+            assertEquals("BLOCKED", rejected.path("status").asText(), invalidVersion);
+            assertEquals("RAG-BUILD-VERSION", rejected.path("actual").asText(), invalidVersion);
+        }
+        Path suffixedApk = Files.copy(product, build.resolve("RentzLab-1.3.0-ui-sanity.apk"));
+        Files.write(productReceipt, JSON().writeValueAsBytes(buildReceipt.deepCopy().put("productApk", suffixedApk.toString())));
+        var rejectedName = gate(ReleaseReadinessRag.evaluate(root, "gate:release-build APK filename", component, build, null), "release-build");
+        assertEquals("BLOCKED", rejectedName.path("status").asText());
+        assertEquals("RAG-BUILD-APK-BOUNDARY", rejectedName.path("actual").asText());
         Files.delete(productReceipt);
         var beforeProduct = ReleaseReadinessRag.evaluate(root, "gate:native-ui consecutive games", component, null, ui, build);
         assertEquals("PASS", gate(beforeProduct, "native-ui").path("status").asText());
