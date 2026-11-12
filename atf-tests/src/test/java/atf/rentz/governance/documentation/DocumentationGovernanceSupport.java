@@ -50,6 +50,7 @@ public final class DocumentationGovernanceSupport {
         Path normalized = path.toAbsolutePath().normalize();
         if (!normalized.startsWith(project) || !Files.isRegularFile(normalized)) return false;
         String relative = project.relativize(normalized).toString().replace('\\', '/');
+        if (isImmutableReleaseSnapshot(relative)) return false;
         try {
             var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             var layout = mapper.readTree(project.resolve("config/java-source-layout.json").toFile());
@@ -66,5 +67,9 @@ public final class DocumentationGovernanceSupport {
         return isReadme(normalized)
                 || relative.startsWith("lib/README.") && relative.endsWith(".md")
                 || relative.startsWith("docs/") && relative.endsWith(".md");
+    }
+
+    static boolean isImmutableReleaseSnapshot(String relative) {
+        return relative.replace('\\', '/').matches("release/[0-9]+\\.[0-9]+\\.[0-9]+/.+");
     }
 }

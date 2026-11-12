@@ -35,7 +35,8 @@
     "onboarding",
     "policy-evolution",
     "rules-clarification",
-    "ui-review"
+    "ui-review",
+    "validation"
   ],
   "infrastructureDirectories": [
     "workspaces",

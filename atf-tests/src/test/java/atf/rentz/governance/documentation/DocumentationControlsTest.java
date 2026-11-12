@@ -123,7 +123,7 @@ class DocumentationControlsTest {
                 boolean active = file.getFileName().toString().equalsIgnoreCase("README.md")
                         || relative.startsWith("docs/") && relative.endsWith(".md")
                         || relative.startsWith("lib/README.") && relative.endsWith(".md");
-                if (active && !excluded) expected.add(file);
+                if (active && !excluded && !DocumentationGovernanceSupport.isImmutableReleaseSnapshot(relative)) expected.add(file);
             }
         }
         assertFalse(expected.isEmpty());
@@ -133,5 +133,24 @@ class DocumentationControlsTest {
         }
         assertTrue(DocumentationGovernanceSupport.isGovernedMarkdown(project, project.resolve("lib/README.TestKit.md")));
         assertTrue(DocumentationGovernanceSupport.isGovernedMarkdown(project, project.resolve("docs/rentz/ATF_Learning.md")));
+    }
+
+    @Test void immutableVersionedReleaseSnapshotsAreCheckedByTheReleaseCatalogInsteadOfActiveDocLint() throws Exception {
+        Path project = Files.createDirectory(root.resolve("release-snapshot-scope"));
+        Files.createDirectories(project.resolve("config"));
+        Files.writeString(project.resolve("config/java-source-layout.json"), "{\"excludedTrees\":[]}\n");
+        Files.writeString(project.resolve("config/documentation-policy.json"), "{\"historical\":[]}\n");
+        Path snapshot = project.resolve("release/0.21.0/reports/README.md");
+        Path releaseGuide = project.resolve("release/README.md");
+        Path ownerGuide = project.resolve("docs/rentz/ATF_Release.md");
+        Files.createDirectories(snapshot.getParent());
+        Files.createDirectories(ownerGuide.getParent());
+        Files.writeString(snapshot, "# Immutable release receipt\n\nC:\\work\\rentz_back\n");
+        Files.writeString(releaseGuide, "# Active release guide\n");
+        Files.writeString(ownerGuide, "# Release owner guide\n");
+
+        assertFalse(DocumentationGovernanceSupport.isGovernedMarkdown(project, snapshot));
+        assertTrue(DocumentationGovernanceSupport.isGovernedMarkdown(project, releaseGuide));
+        assertTrue(DocumentationGovernanceSupport.isGovernedMarkdown(project, ownerGuide));
     }
 }

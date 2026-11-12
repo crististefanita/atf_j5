@@ -96,7 +96,20 @@ function Get-AtfDataRoot {
     param([string]$ProjectRoot=(Split-Path -Parent $PSScriptRoot))
     $project=[IO.Path]::GetFullPath($ProjectRoot)
     $configured=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT')
-    $data=if($configured){[IO.Path]::GetFullPath($configured)}else{Join-Path (Split-Path -Parent (Split-Path -Parent $project)) 'rentz_back'}
+    if($configured){
+        $data=[IO.Path]::GetFullPath($configured)
+    }else{
+        $top=git -C $project rev-parse --show-toplevel
+        if($LASTEXITCODE-ne0-or-not$top-or[IO.Path]::GetFullPath([string]$top)-cne$project){throw 'Default data root requires the ATF repository root.'}
+        $common=Get-AtfGitCommonDirectory -RepositoryRoot $project
+        Assert-AtfPhysicalPath -Path $common
+        $checkout=Split-Path -Parent $common
+        Assert-AtfPhysicalPath -Path $checkout
+        if((Split-Path -Leaf $checkout)-cne'atf_j5'-or-not(Test-Path -LiteralPath (Join-Path $checkout 'config/infrastructure-workspaces.json') -PathType Leaf)){
+            throw 'Default data root requires a verified atf_j5 Git common directory.'
+        }
+        $data=Join-Path (Split-Path -Parent (Split-Path -Parent $checkout)) 'rentz_back'
+    }
     $forbidden=@($project,[IO.Path]::GetTempPath().TrimEnd('\','/'))
     foreach($boundary in $forbidden){if($data.Equals($boundary,[StringComparison]::OrdinalIgnoreCase)-or$data.StartsWith($boundary+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Data root must be outside sources and the operating-system temporary directory.'}}
     return $data

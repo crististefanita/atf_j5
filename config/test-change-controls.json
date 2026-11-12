@@ -415,11 +415,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationControlsTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
-      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "3efda81f72eed8669a90aafad6d4a01d3259f91c4e20e481bc0ffe85017fed9d",
+      "reason": "Keep versioned release receipts outside active guide lint while retaining exact catalog integrity checks.",
+      "criterion": "The active documentation inventory excludes immutable versioned release payloads, includes unversioned release guides, and keeps each published payload bound to its declared hash.",
+      "proof": "docs/rentz/ATF_Documentation.md",
+      "expires": "2026-12-12",
+      "sha256": "02c3caa5f22b3d43dbb9bca0502338f01b3d5048f4b4ac46176a9a0b0e24c4ea",
       "allowDelete": false
     },
     {
@@ -435,11 +435,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationGovernanceSupport.java",
       "owner": "Rentz consumer",
-      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
-      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "21bba45d299538028fbba71a7a41a962ed045adb3f9c9fbd784e8f2c648e8d88",
+      "reason": "Separate active documentation from immutable, hash-bound versioned release payloads.",
+      "criterion": "Only README files below release/<semantic-version>/ are excluded; active release guides and project documentation remain governed, while ReleaseCatalog checks the published payload digest.",
+      "proof": "docs/rentz/ATF_Documentation.md",
+      "expires": "2026-12-12",
+      "sha256": "edaf9e890fbb78b6d64375cb9334453ed48053cb3e150f017a5684b17d3f668d",
       "allowDelete": false
     },
     {
@@ -765,21 +765,21 @@
     {
       "path": "config/documentation-validators.json",
       "owner": "Rentz consumer",
-      "reason": "Bind the portable link validator to its reviewed adapter bytes.",
-      "criterion": "Keep the upstream source digest and verify the local adapter digest. The checkout alone determines whether an active link is valid.",
-      "proof": "docs/rentz/ATF_Documentation.md#revizuire-și-guvernanță",
-      "expires": "2026-11-20",
-      "sha256": "1d712ccd9bc6d1969c29fffe162a8dc3b65d8117bd4f85f60345745aa676c4f7",
+      "reason": "Keep the reviewed documentation validators bound to their adapted source bytes.",
+      "criterion": "The upstream source digests remain intact and the local adapter digest matches the versioned-snapshot scope rule; active project docs remain fully governed.",
+      "proof": "docs/rentz/ATF_Documentation.md",
+      "expires": "2026-12-12",
+      "sha256": "f3a621a39cd8d290f731216c5b99736bf40715af4ad20818dff09e643ad559a1",
       "allowDelete": false
     },
     {
       "path": "config/infrastructure-workspaces.json",
       "owner": "Rentz release",
-      "reason": "Register the existing atf_j7 sibling checkout alongside the other ATF projects.",
-      "criterion": "The declared sibling is admitted while arbitrary sibling directories, unregistered workspaces and forbidden system-TEMP outputs still fail.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-achievements-20261111-green/governance.json",
-      "expires": "2026-11-20",
-      "sha256": "173cdc4adb23ca2ce801f4d80dbab5a5f43ebbf85b7fe8dab2c1b6c3aa983af5",
+      "reason": "Register the atf_j7 sibling and the external validation collection used for retained governance evidence.",
+      "criterion": "The declared sibling and validation collection are admitted while arbitrary sibling directories, unregistered workspaces and forbidden system-TEMP outputs still fail.",
+      "proof": "docs/rentz/ATF_Infrastructure.md",
+      "expires": "2026-12-12",
+      "sha256": "94036cf537efd446ab5e11a7d27473ca61c6a3e0749d99a41a2ac7d3d5dd1ff5",
       "allowDelete": false
     },
     {
@@ -1205,21 +1205,21 @@
     {
       "path": "atf-tests/tools/test-workspace-governance.ps1",
       "owner": "Rentz release",
-      "reason": "Cover worktree source identity variation without weakening workspace owner checks.",
-      "criterion": "A same-project registered worktree passes; missing, malformed, mismatched, or foreign owner descriptors fail.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "ceb0e5804a21557774024e171feea3311802559ef69fc38bc1320da9461fd814",
+      "reason": "Cover default data-root resolution and worktree source identity without weakening workspace owner checks.",
+      "criterion": "Nested worktrees resolve the shared root, unverified source paths fail closed, and same-project registered worktrees pass while foreign descriptors fail.",
+      "proof": "docs/rentz/ATF_Infrastructure.md",
+      "expires": "2026-12-12",
+      "sha256": "7b260e133ec888c98434b648fdd7027c972d2f77c758c1c3d721d2198a7248a4",
       "allowDelete": false
     },
     {
       "path": "scripts/InfrastructureWorkspaces.psm1",
       "owner": "Rentz release",
-      "reason": "Allow multiple registered worktrees for the same J5 repository while retaining strict workspace identity.",
-      "criterion": "Descriptor owner, ID, source-root identity, physical path, and Git common directory are validated; another repository fails.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "0bb8e4c9a5ec9d8c51786e3037c5f7afb9caa63b3211f5d5b41e236e6652bf4c",
+      "reason": "Anchor the default external data root to the shared Git common directory for nested worktrees.",
+      "criterion": "A linked worktree resolves the canonical rentz_back root; an unverified source fails closed. Workspace owner, ID, source identity and physical path stay validated; the explicit override remains supported.",
+      "proof": "docs/rentz/ATF_Infrastructure.md",
+      "expires": "2026-12-12",
+      "sha256": "2dca0f5114fd79a3a935d8e4b19f10bdef7dfdcd0581dcc166db1cb989d729b2",
       "allowDelete": false
     },
     {

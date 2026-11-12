@@ -84,6 +84,35 @@ Case 'Registered candidate uses its declared checkout layout for cross-project l
 Case 'POM-selected reporting artifact and provenance resolve by exact version' {$actual=Get-AtfReportingLibrary -ProjectRoot $project;[xml]$pom=Get-Content -Raw (Join-Path $project 'pom.xml');$expected='atf-reporting-'+$pom.SelectSingleNode("/*[local-name()='project']/*[local-name()='properties']/*[local-name()='atf.reporting.version']").InnerText.Trim();Require ($actual.name-ceq$expected-and(Test-Path -LiteralPath $actual.jar)-and(Test-Path -LiteralPath $actual.pom)-and$actual.sha256-eq(Get-FileHash -LiteralPath $actual.jar -Algorithm SHA256).Hash.ToLowerInvariant()) 'Reporting binary identity is not tied to the root Maven property'}
 Case 'A future reporting patch selects its own artifact instead of a pinned JAR' {$fixture=Join-Path $RunRoot 'reporting-version-fixture';New-Item -ItemType Directory -Force -Path (Join-Path $fixture 'lib')|Out-Null;'<project><properties><atf.reporting.version>1.0.0-j99</atf.reporting.version></properties></project>'|Set-Content -LiteralPath (Join-Path $fixture 'pom.xml') -Encoding utf8NoBOM;'fixture-jar'|Set-Content -LiteralPath (Join-Path $fixture 'lib/atf-reporting-1.0.0-j99.jar') -Encoding utf8NoBOM;'fixture-pom'|Set-Content -LiteralPath (Join-Path $fixture 'lib/atf-reporting-1.0.0-j99.pom') -Encoding utf8NoBOM;$actual=Get-AtfReportingLibrary -ProjectRoot $fixture;Require ($actual.name-ceq'atf-reporting-1.0.0-j99') 'A future POM version resolved a pinned artifact'}
 Case 'Data root cannot point inside operating-system Temp' {$saved=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT');try{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',(Join-Path ([IO.Path]::GetTempPath()) 'atf-bypass'));try{Get-AtfDataRoot -ProjectRoot $project|Out-Null;throw 'Temporary data root accepted'}catch{Require ($_.Exception.Message-match'must be outside') 'Wrong data-root failure'}}finally{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$saved)}}
+Case 'Default data root stays anchored to the shared checkout in a nested worktree' {
+    $base=Join-Path $fixture 'default-data-root-layout';$canonical=Join-Path $base 'checkout-group/atf_j5';$expected=Join-Path $base 'rentz_back'
+    $nested=Join-Path $expected ('infrastructure/workspaces/fixture-'+[guid]::NewGuid().ToString('N')+'/atf_j5')
+    New-Item -ItemType Directory -Force -Path (Join-Path $canonical 'config'),(Split-Path -Parent $nested)|Out-Null
+    '{}'|Set-Content -LiteralPath (Join-Path $canonical 'config/infrastructure-workspaces.json') -Encoding utf8NoBOM
+    & git -C $canonical init --quiet
+    Require ($LASTEXITCODE-eq0) 'Canonical fixture repository could not be initialized'
+    & git -C $canonical add config/infrastructure-workspaces.json
+    Require ($LASTEXITCODE-eq0) 'Canonical fixture source could not be staged'
+    & git -C $canonical -c user.name='ATF Fixture' -c user.email='atf-fixture@example.invalid' commit --quiet -m 'fixture root'
+    Require ($LASTEXITCODE-eq0) 'Canonical fixture commit could not be created'
+    & git -C $canonical worktree add --detach --quiet $nested HEAD
+    Require ($LASTEXITCODE-eq0) 'Nested fixture worktree could not be created'
+    $saved=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT')
+    try{
+        [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$null)
+        $actual=Get-AtfDataRoot -ProjectRoot $nested
+        Require ($actual-ceq[IO.Path]::GetFullPath($expected)) 'Default data root followed the nested worktree path instead of the shared checkout'
+    }finally{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$saved)}
+}
+Case 'Default data root refuses an unverified non-Git source path' {
+    $untracked=Join-Path $fixture 'unverified-source/atf_j5';New-Item -ItemType Directory -Force -Path $untracked|Out-Null
+    $saved=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT')
+    try{
+        [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$null)
+        try{Get-AtfDataRoot -ProjectRoot $untracked|Out-Null;throw 'Unverified source path received a default data root'}
+        catch{Require ($_.Exception.Message-match'Default data root requires') 'Wrong unverified-source failure'}
+    }finally{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$saved)}
+}
 Case 'Registry paths cannot escape through parent segments' {$c=Setup 'escape';$c.policy.producerScripts=@('../outside.ps1');$c.policy|ConvertTo-Json -Depth 6|Set-Content -LiteralPath "$($c.project)/config/infrastructure-workspaces.json";try{Get-AtfWorkspacePolicy -ProjectRoot $c.project|Out-Null;throw 'Escape accepted'}catch{Require ($_.Exception.Message-match'must stay inside') 'Wrong escape failure'}}
 Case 'Unknown registry properties fail closed' {$c=Setup 'unknown';$c.policy|Add-Member -NotePropertyName allowEverything -NotePropertyValue $true;$c.policy|ConvertTo-Json -Depth 6|Set-Content -LiteralPath "$($c.project)/config/infrastructure-workspaces.json";try{Get-AtfWorkspacePolicy -ProjectRoot $c.project|Out-Null;throw 'Unknown field accepted'}catch{Require ($_.Exception.Message-match'Unknown or missing') 'Wrong unknown-field failure'}}
 Case 'Duplicate JSON properties are rejected' {$c=Setup 'duplicate-property';$file="$($c.project)/config/infrastructure-workspaces.json";$raw=[IO.File]::ReadAllText($file);[IO.File]::WriteAllText($file,$raw.Replace('"schemaVersion": 1','"schemaVersion": 1, "schemaVersion": 1'));try{Get-AtfWorkspacePolicy -ProjectRoot $c.project|Out-Null;throw 'Duplicate property accepted'}catch{Require ($_.Exception.Message-match'Duplicate registry properties') 'Wrong duplicate-property failure'}}
