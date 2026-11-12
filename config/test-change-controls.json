@@ -1245,11 +1245,11 @@
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Record the exact private preview presented in the main guide.",
-      "criterion": "Bind the main README to the qualified 0.18.0 asset and verified access while preserving the production catalog.",
-      "proof": "docs/rentz/ATF_Release.md",
-      "expires": "2026-11-20",
-      "sha256": "00eb16612a55d6cc14a53436726b7319d5b1c0b135467cfa7b43aa6b125acf18",
+      "reason": "Publish Rentz Lab 0.21.0 after the local RAG gates and authenticated GitHub download pass.",
+      "criterion": "Bind the single main README download, active catalog, private GitHub receipt and signed APK bytes to source v0.21.0; preserve old tags and external audit.",
+      "proof": "docs/rentz/ATF_Release.md#publicare-și-descărcare",
+      "expires": "2027-02-12",
+      "sha256": "a8e498ca0ceb53254eb7772b3ca198f8aafbdb5c2722d4b78f76710e0152846d",
       "allowDelete": false
     },
     {

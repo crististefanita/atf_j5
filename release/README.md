@@ -2,22 +2,22 @@
 
 ## Pe scurt
 
-Catalogul tehnic păstrează ediția publicată, identitatea APK-ului și rezultatele calificării.
+Catalogul tehnic păstrează ediția curentă, identitatea APK-ului și calificarea ei.
 
 ## Versiunea curentă
 
-[Rentz Lab 0.20.0](0.20.0/README.md) este disponibil conturilor autorizate pe GitHub. [Descărcare](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.20.0/RentzLab-0.20.0.apk) · [Dovada accesului](restricted-0.20.0.json)
+[Rentz Lab 0.21.0](0.21.0/README.md) este disponibilă conturilor autorizate. [Descarcă](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.21.0/RentzLab-0.21.0.apk) · [Dovada accesului](restricted-0.21.0.json)
 
 ## Organizare
 
 | Zonă | Rol |
 |---|---|
-| Dosarul versiunii | APK, checksum, manifest și prezentarea aceleiași ediții. |
-| reports | Ultimele dovezi relevante, cu identitatea snapshot-ului și limitele selecției. |
-| GitHub Release | Asset-ul APK și checksum-ul; documentația trimite la dovezi într-un commit identificat. |
+| Dosarul versiunii | Note, manifest, checksum local și proveniența calificării. |
+| Rapoarte | Locația externă și limitele dovezilor Extent. |
+| GitHub Release | APK-ul semnat și checksum-ul în repository privat. |
 
-- APK-ul și checksum-ul local sunt excluse din Git; nu se descarcă prin Raw sau dintr-un folder de surse.
-- README-ul principal indică o singură versiune descărcabilă. Catalogul păstrează accesul la ediția de producție și evidența ei.
-- Catalogul indică o singură ediție curentă. O ediție înlocuită rămâne disponibilă până la îndeplinirea regulii de retragere. Tagurile de sursă și dovezile istorice se păstrează pentru trasabilitate.
+- README-ul principal oferă o singură descărcare directă.
+- Binarele și rapoartele voluminoase rămân în dosarele de distribuție externe; sursele păstrează identitatea, checksum-urile și proveniența.
+- Tagurile de sursă și arhivele de audit istorice se păstrează separat.
 
 [Procesul livrării](../docs/rentz/ATF_Release.md) · [Calificarea componentelor](../docs/rentz/ATF_Qualification.md)
