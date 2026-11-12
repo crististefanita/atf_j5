@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -44,7 +45,11 @@ public final class ComponentSuiteExtentReport {
     public record Summary(int suites, int tests, int failures, int errors, int skipped,
                           String reportSha256, boolean qualified) { }
     private record Case(String className, String name, String outcome, String detail) { }
-    private record ParsedSuite(String name, List<Case> cases, int failures, int errors, int skipped) { }
+    private record ParsedSuite(String name, List<Case> cases, int failures, int errors, int skipped) {
+        boolean passed() {
+            return !cases.isEmpty() && failures == 0 && errors == 0 && skipped == 0;
+        }
+    }
 
     private ComponentSuiteExtentReport() { }
 
@@ -98,11 +103,14 @@ public final class ComponentSuiteExtentReport {
             String suiteKey = input.module() + "\u0000" + input.suiteName();
             if (!suiteKeys.add(suiteKey)) throw new IOException("COMPONENT-EXTENT-DUPLICATE-SUITE");
             Path xml = input.xmlFile().toAbsolutePath().normalize();
-            if (Files.isSymbolicLink(xml) || !Files.isRegularFile(xml, LinkOption.NOFOLLOW_LINKS)
-                    || Files.size(xml) == 0 || Files.size(xml) > MAX_XML_BYTES)
-                throw new IOException("COMPONENT-EXTENT-XML-MISSING");
-            if (!sha256(Files.readAllBytes(xml)).equalsIgnoreCase(input.sha256())) throw new IOException("COMPONENT-EXTENT-XML-HASH");
-            ParsedSuite suite = parse(xml);
+            if (!Files.isRegularFile(xml, LinkOption.NOFOLLOW_LINKS)) throw new IOException("COMPONENT-EXTENT-XML-MISSING");
+            byte[] xmlBytes;
+            try (var stream = Files.newInputStream(xml, LinkOption.NOFOLLOW_LINKS)) {
+                xmlBytes = stream.readNBytes((int) MAX_XML_BYTES + 1);
+            }
+            if (xmlBytes.length == 0 || xmlBytes.length > MAX_XML_BYTES) throw new IOException("COMPONENT-EXTENT-XML-MISSING");
+            if (!sha256(xmlBytes).equalsIgnoreCase(input.sha256())) throw new IOException("COMPONENT-EXTENT-XML-HASH");
+            ParsedSuite suite = parse(xmlBytes);
             if (!suite.name().equals(input.suiteName()) || suite.cases().size() != input.tests()
                     || suite.failures() != input.failures() || suite.errors() != input.errors()
                     || suite.skipped() != input.skipped()) throw new IOException("COMPONENT-EXTENT-POPULATION-MISMATCH");
@@ -118,22 +126,22 @@ public final class ComponentSuiteExtentReport {
         Path parent = output.toAbsolutePath().getParent();
         if (parent == null || !Files.isDirectory(parent, LinkOption.NOFOLLOW_LINKS) || Files.isSymbolicLink(parent))
             throw new IOException("COMPONENT-EXTENT-PARENT");
-        boolean qualified = !parsed.isEmpty() && testCount > 0 && processExitCode == 0
-                && failureCount == 0 && errorCount == 0 && skippedCount == 0;
+        boolean hasDiagnostic = executionFailure != null && !executionFailure.isBlank();
+        long emptySuites = parsed.stream().filter(suite -> suite.cases().isEmpty()).count();
+        boolean qualified = processExitCode == 0 && !hasDiagnostic && !parsed.isEmpty()
+                && parsed.stream().allMatch(ParsedSuite::passed);
+        String description = rootDescription(sourceCommit, sourceManifestSha256, collection, executionFailure);
         try (AtfReportPorts.Session report = new ExtentReportSession(output, new ReportingSettings(240, 500))) {
             try (AtfReportPorts.Scenario scenario = report.startScenario("Component suite receipt",
-                    rootDescription(executionFailure),
+                    description,
                     List.of("component", "surefire", "atf-reporting"));
                  AtfReportPorts.Phase phase = scenario.startPhase("Candidate and population")) {
-                String expected = "commit=" + sourceCommit + "; sourceManifestSha256=" + sourceManifestSha256 + "; collection=" + collection;
-                String actual = "commit=" + sourceCommit + "; sourceManifestSha256=" + sourceManifestSha256
-                        + "; collection=" + collection + "; suites=" + parsed.size() + "; tests=" + testCount
+                String actual = "suites=" + parsed.size() + "; emptySuites=" + emptySuites + "; tests=" + testCount
                         + "; failures=" + failureCount + "; errors=" + errorCount + "; skipped=" + skippedCount
-                        + "; processExitCode=" + processExitCode
-                        + (executionFailure == null || executionFailure.isBlank() ? "" : "; executionFailure=" + safeText(executionFailure));
+                        + "; exitCode=" + processExitCode + "; diagnostic=" + (hasDiagnostic ? "present" : "none");
                 AtfReportStatus status = qualified ? AtfReportStatus.PASS : AtfReportStatus.FAIL;
                 try (AtfReportPorts.AssertionStep checks = phase.startAssertionStep("Reconciliere receipt")) {
-                    checks.assertions(List.of(new AtfAssertion("Component population", "non-empty; zero failure/error/skip; exitCode=0",
+                    checks.assertions(List.of(new AtfAssertion("Component population", "non-empty suites; zero failure/error/skip; exitCode=0; no diagnostic",
                             actual, qualified, status)));
                     checks.complete(status);
                 }
@@ -142,39 +150,35 @@ public final class ComponentSuiteExtentReport {
                 phase.detail("Collection", collection);
                 phase.detail("Receipt suites", Integer.toString(parsed.size()));
                 phase.detail("Testcases", Integer.toString(testCount));
-                if (executionFailure != null && !executionFailure.isBlank()) phase.detail("Execution diagnostic", safeText(executionFailure));
+                if (hasDiagnostic) phase.detail("Execution diagnostic", safeText(executionFailure));
                 phase.complete(status); scenario.complete(status);
             }
-            for (int i = 0; i < inputs.size(); i++) publishSuite(report, inputs.get(i), parsed.get(i), caseKeys);
+            for (int i = 0; i < inputs.size(); i++) publishSuite(report, inputs.get(i), parsed.get(i));
         }
-        ReportArtifactProfile profile = profile(sourceCommit, sourceManifestSha256, collection, processExitCode,
-                executionFailure, inputs, parsed, testCount, failureCount, errorCount, skippedCount, qualified);
+        ReportArtifactProfile profile = profile(description, inputs, parsed, qualified);
         var inspection = ReportArtifactInspector.inspect(output, profile);
         if (!inspection.isCompliant()) throw new IOException("COMPONENT-EXTENT-INSPECTOR: " + inspection.violations());
         return new Summary(parsed.size(), testCount, failureCount, errorCount, skippedCount, sha256(Files.readAllBytes(output)), qualified);
     }
 
-    private static String rootDescription(String executionFailure) {
-        String base = "Selected component suites reconciled against original Surefire XML and the candidate source identity.";
+    private static String rootDescription(String commit, String manifest, String collection, String executionFailure) {
+        String base = "Selected component suites reconciled against original Surefire XML. Source commit " + commit
+                + ". Source manifest SHA-256 " + manifest + ". Collection " + collection + ".";
         return executionFailure == null || executionFailure.isBlank() ? base : base + " Execution diagnostic: " + safeText(executionFailure);
     }
 
-    private static ReportArtifactProfile profile(String commit, String manifestSha256, String collection, int processExitCode,
-                                                  String executionFailure,
-                                                  List<SuiteInput> inputs, List<ParsedSuite> parsed, int tests,
-                                                  int failures, int errors, int skipped, boolean qualified) {
+    private static ReportArtifactProfile profile(String rootDescription, List<SuiteInput> inputs,
+                                                 List<ParsedSuite> parsed, boolean qualified) {
         List<ReportArtifactProfile.Scenario> scenarios = new ArrayList<>();
         AtfReportStatus totalStatus = qualified ? AtfReportStatus.PASS : AtfReportStatus.FAIL;
         String rootName = "Component suite receipt";
-        String rootDescription = rootDescription(executionFailure);
         scenarios.add(new ReportArtifactProfile.Scenario(rootName, rootDescription, totalStatus, List.of(
                 new ReportArtifactProfile.Phase("Candidate and population", totalStatus, List.of(
                         new ReportArtifactProfile.Assertions("Reconciliere receipt", List.of(
                                 new ReportArtifactProfile.Comparison("Component population", totalStatus))))))));
         for (int i = 0; i < inputs.size(); i++) {
             SuiteInput input = inputs.get(i); ParsedSuite suite = parsed.get(i);
-            AtfReportStatus suiteStatus = suite.failures() == 0 && suite.errors() == 0 && suite.skipped() == 0 && !suite.cases().isEmpty()
-                    ? AtfReportStatus.PASS : AtfReportStatus.FAIL;
+            AtfReportStatus suiteStatus = suite.passed() ? AtfReportStatus.PASS : AtfReportStatus.FAIL;
             String suiteName = input.module() + " :: " + suite.name();
             String source = input.xmlFile().getFileName() + " · SHA-256 " + input.sha256();
             String description = "Surefire XML is bound to the selected component receipt. " + source;
@@ -199,9 +203,8 @@ public final class ComponentSuiteExtentReport {
         return new ReportArtifactProfile(ReportArtifactProfile.Renderer.EXTENT, scenarios);
     }
 
-    private static void publishSuite(AtfReportPorts.Session report, SuiteInput input, ParsedSuite suite, Set<String> caseKeys) {
-        AtfReportStatus suiteStatus = suite.failures() == 0 && suite.errors() == 0 && suite.skipped() == 0 && !suite.cases().isEmpty()
-                ? AtfReportStatus.PASS : AtfReportStatus.FAIL;
+    private static void publishSuite(AtfReportPorts.Session report, SuiteInput input, ParsedSuite suite) {
+        AtfReportStatus suiteStatus = suite.passed() ? AtfReportStatus.PASS : AtfReportStatus.FAIL;
         String source = input.xmlFile().getFileName() + " · SHA-256 " + input.sha256();
         try (AtfReportPorts.Scenario scenario = report.startScenario(input.module() + " :: " + suite.name(),
                 "Surefire XML is bound to the selected component receipt. " + source,
@@ -240,7 +243,7 @@ public final class ComponentSuiteExtentReport {
         }
     }
 
-    private static ParsedSuite parse(Path file) throws IOException {
+    private static ParsedSuite parse(byte[] xml) throws IOException {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -248,7 +251,7 @@ public final class ComponentSuiteExtentReport {
             factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             factory.setXIncludeAware(false); factory.setExpandEntityReferences(false);
-            Element root = factory.newDocumentBuilder().parse(file.toFile()).getDocumentElement();
+            Element root = factory.newDocumentBuilder().parse(new ByteArrayInputStream(xml)).getDocumentElement();
             if (!root.getTagName().equals("testsuite")) throw new IOException("COMPONENT-EXTENT-XML-ROOT");
             String suiteName = required(root, "name");
             int expectedTests = nonnegative(root, "tests"), expectedFailures = nonnegative(root, "failures");

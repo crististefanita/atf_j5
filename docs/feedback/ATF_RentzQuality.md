@@ -60,7 +60,7 @@ O modificare de structură se verifică față de reperul compilat. Împachetare
 
 ## Proveniența livrării și populația testelor
 
-- **P2:** formalizați reconcilierea diferențelor exclusiv documentare într-un compositor versionat, cu controale negative. Receipt-ul original FAIL se păstrează, iar calificarea compusă identifică explicit execuțiile și diferența acceptată.
+- **P2:** calificarea unei revizii strict editoriale cere un compositor versionat. Acesta trebuie să dovedească identitatea intrărilor executate și să indice documentele schimbate. Receipt-ul original rămâne verificabil. [Calificarea curentă](../rentz/ATF_Qualification.md) păstrează verdictul fiecărei rulări.
 
 ## Inventar executabil și admitere a evaluării
 

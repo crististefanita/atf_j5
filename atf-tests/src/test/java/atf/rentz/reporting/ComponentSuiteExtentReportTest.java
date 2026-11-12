@@ -1,15 +1,20 @@
 package atf.rentz.reporting;
 
+import atf.rentz.RentzRulePublication;
 import atf.testkit.AtfComponentTest;
+import atf.testkit.assertions.ComponentAuditExtension;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
+import static atf.testkit.assertions.AuditedAssertions.*;
 
 @AtfComponentTest
 class ComponentSuiteExtentReportTest {
+    @RegisterExtension static final ComponentAuditExtension AUDIT = RentzRulePublication.scoped(
+            ComponentSuiteExtentReportTest.class, "suite-reporting-contract.html", "Selected suite and Extent artifact integrity");
     @TempDir Path temporary;
 
     @Test void publishesAnExplicitFailArtifactWhenExecutionStopsBeforeSurefireXml() throws Exception {
@@ -46,7 +51,8 @@ class ComponentSuiteExtentReportTest {
         String html = Files.readString(report);
         assertTrue(html.contains("legal action is accepted"));
         assertTrue(html.contains("illegal action is rejected"));
-        assertTrue(html.contains("sourceManifestSha256=d" + "d".repeat(63)));
+        assertTrue(html.contains("Source manifest SHA-256") && html.contains("d".repeat(64)),
+                "The candidate manifest digest is visible in the report");
         assertEquals(summary.reportSha256(), sha(report));
     }
 
@@ -90,6 +96,43 @@ class ComponentSuiteExtentReportTest {
         assertThrows(java.io.IOException.class, () -> ComponentSuiteExtentReport.publish(report, "a".repeat(40), "b".repeat(64),
                 "regression", 0, List.of(new ComponentSuiteExtentReport.SuiteInput("atf-tests", "sample.EmptyTest", xml,
                         sha(xml), 1, 0, 0, 0))));
+    }
+
+    @Test void aZeroCaseSuiteCannotHideBehindAHealthySuite() throws Exception {
+        Path xml = temporary.resolve("TEST-sample.EmptyTest.xml");
+        Files.writeString(xml, "<testsuite name=\"sample.EmptyTest\" tests=\"0\" failures=\"0\" errors=\"0\" skipped=\"0\"/>");
+        var empty = new ComponentSuiteExtentReport.SuiteInput("atf-tests", "sample.EmptyTest", xml, sha(xml), 0, 0, 0, 0);
+        Path report = temporary.resolve("mixed-population.html");
+
+        var summary = ComponentSuiteExtentReport.publish(report, "a".repeat(40), "b".repeat(64), "regression", 0,
+                List.of(passingSuite(), empty));
+
+        assertFalse(summary.qualified(), "Every reported suite must execute at least one case");
+        assertEquals(2, summary.suites());
+        assertEquals(1, summary.tests());
+        assertTrue(Files.readString(report).contains("emptySuites=1"));
+    }
+
+    @Test void aPassingXmlCannotEraseTheRunnerDiagnostic() throws Exception {
+        Path report = temporary.resolve("diagnosed-execution.html");
+        String diagnostic = "Android JVM ended before validating its selected population";
+
+        var summary = ComponentSuiteExtentReport.publish(report, "a".repeat(40), "b".repeat(64), "regression", 0,
+                diagnostic, List.of(passingSuite()));
+
+        assertFalse(summary.qualified(), "An execution diagnostic prevents qualification even with a zero exit code");
+        assertEquals(1, summary.tests());
+        assertTrue(Files.readString(report).contains(diagnostic));
+    }
+
+    private ComponentSuiteExtentReport.SuiteInput passingSuite() throws Exception {
+        Path xml = temporary.resolve("TEST-sample.PassingTest.xml");
+        Files.writeString(xml, """
+                <testsuite name="sample.PassingTest" tests="1" failures="0" errors="0" skipped="0">
+                  <testcase classname="sample.PassingTest" name="valid"/>
+                </testsuite>
+                """);
+        return new ComponentSuiteExtentReport.SuiteInput("game-core", "sample.PassingTest", xml, sha(xml), 1, 0, 0, 0);
     }
 
     private static String sha(Path path) throws Exception {

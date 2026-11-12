@@ -77,11 +77,12 @@ Lansatorul copiază sursele și bibliotecile, verifică populațiile Maven și A
 
 | Dovadă | Ce poate verifica cititorul |
 |---|---|
-| `component-suite-extent.html` | Suitele și cazurile din XML-urile Maven și Android JVM, cu identități, totaluri, verdict și amprentele XML. |
+| `component-suite-extent.html` | Suitele și cazurile din XML-urile Maven și Android JVM. Antetul păstrează proveniența, iar comparația arată totalurile, suitele goale și starea runnerului. |
+| `release-contracts/suite-reporting-contract.html` | Probe pentru coerența Extent cu XML, inclusiv refuzul unei suite goale și al unei rulări care are diagnostic de execuție. |
 | `release-contracts/documentation-governance.html` | Comparațiile efective ale controalelor de documentație, inclusiv diagnosticul unei legături neportabile și vecinul valid. |
 | Rapoartele contractelor de domeniu și release | Așteptarea, rezultatul observat și diagnosticul capturate de adaptorul Test Kit în testele care îl folosesc. |
 
-Distribuirile generate păstrează identitatea testului care le exercită. XML-ul reflectă populația executabilă, iar rapoartele de contract explică oracolul și comparațiile efective.
+Distribuirile generate păstrează identitatea testului care le exercită. Publicatorul calculează SHA-256 și parsează aceiași octeți XML. Calificarea cere cel puțin un caz în fiecare suită, zero eșecuri, erori și omisiuni și execuție încheiată fără diagnostic de eșec.
 
 ## Interpretarea rezultatului
 

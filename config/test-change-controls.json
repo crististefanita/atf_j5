@@ -1116,10 +1116,10 @@
       "path": "atf-tests/src/main/java/atf/rentz/reporting/ComponentSuiteExtentReport.java",
       "owner": "Rentz release",
       "reason": "Publish the selected Maven and Android JVM component population through the pinned reporting library.",
-      "criterion": "Every testcase and suite is reconciled against original Surefire XML, totals, source identity and report artifact inspector.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "criterion": "Reconcile the hashed XML bytes with the case and suite totals. Empty suites and runner diagnostics prevent qualification.",
+      "proof": "docs/rentz/ATF_Components.md#execuție",
       "expires": "2026-11-20",
-      "sha256": "4f814b56c548135f394ec59cafde011082fd511d0b666e88605e30cb5a06b255",
+      "sha256": "a039aca6998dcd7b915f4c3e4a617c6c36c7d7c1647ad637f9dbe8cba8ebc77c",
       "allowDelete": false
     },
     {
@@ -1156,10 +1156,10 @@
       "path": "atf-tests/src/test/java/atf/rentz/reporting/ComponentSuiteExtentReportTest.java",
       "owner": "Rentz release",
       "reason": "Add component coverage for auditable Extent publication and empty failure artifacts.",
-      "criterion": "Extent lists original testcases, reconciles totals and hashes, and does not qualify empty or failed populations.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "criterion": "Audit the source digest, selected case outcomes and explicit failure for a single empty suite or a runner diagnostic.",
+      "proof": "docs/rentz/ATF_Components.md#execuție",
       "expires": "2026-11-20",
-      "sha256": "9eab1f5b6008951f9f8e33ba5a69e321ea807ea2e2692e1653cff86352a15410",
+      "sha256": "f0570b7cd1a36cd03b81d203df47cb881303056ee1e4bcd3fda38192f2e3f974",
       "allowDelete": false
     },
     {
