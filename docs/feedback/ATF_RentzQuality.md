@@ -62,8 +62,6 @@ Nivelurile testelor, corpusul documentar și revizuirea diferențelor Git au con
 
 ## Proveniența livrării și populația testelor
 
-- **P2:** unele invocări Gradle parametrizate au același display name în aceeași clasă. Introduceți identități XML neambigue; păstrați toate invocările originale și nu deduceți metode unice din etichete.
-
 - **P2:** formalizați reconcilierea diferențelor exclusiv documentare într-un compositor versionat, cu controale negative. Receipt-ul original FAIL se păstrează, iar calificarea compusă identifică explicit execuțiile și diferența acceptată.
 
 ## Inventar executabil și admitere a evaluării
@@ -77,25 +75,3 @@ Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; 
 - Moștenirea din dependențe externe necunoscute cere surse disponibile ori o interfață testată ca lipsită de teste; o excepție nominală fără probă nu este un mecanism de descoperire.
 - Admiterea unui rezumat coerent nu autentifică expeditorul și nu înlocuiește auditul tranzițiilor sau verificarea fișierelor jurnal.
 - Progresul strategic și integrarea nativă păstrează criteriile separate de mai sus; remedierea porților nu promovează profilul AI.
-
-## Închideri și documente responsabile
-
-<details>
-<summary>Urme de audit pentru criteriile închise</summary>
-
-| Cerințe | Mecanism permanent | Dovezi |
-|---|---|---|
-| Q09 | [Infrastructură](../rentz/ATF_Infrastructure.md), [calificare](../rentz/ATF_Qualification.md) și [arhivă](../history/contract-whist/README.md) | [Audit Q09](../../../../rentz_back/infrastructure/governance/20261106-q08-q09-ff1d7846/TDD.md) |
-| Q17–Q19 | [Containere Jupiter](../rentz/ATF_Qualification.md#containere-jupiter-imbricate), [evaluare](../rentz/ATF_Learning.md#admiterea-rezultatelor-reluate) și [scoruri în registru](../rentz/ATF_Architecture.md#admiterea-scorurilor-din-registru) | [Q17–Q18](../../../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md) · [Q19](../../../../rentz_back/infrastructure/governance/20261107-q19/TDD.md) |
-| Q20–Q25 | [Identitatea distribuirii](../rentz/ATF_Learning.md#identitatea-distribuirii-și-expunerea) și [guvernanța](../rentz/ATF_Qualification.md) | [Q20](../../../../rentz_back/infrastructure/governance/20261107-q20/TDD.md) · [Q21–Q22](../../../../rentz_back/infrastructure/governance/20261107-q21-q22/TDD.md) · [Q23–Q25](../../../../rentz_back/infrastructure/governance/20261107-q23-q25/TDD.md) |
-| Q26–Q28 | [Scor și expunere](../rentz/ATF_Learning.md) și [identitatea invocărilor](../rentz/ATF_Qualification.md#containere-jupiter-imbricate) | [Q26–Q28](../../../../rentz_back/infrastructure/governance/20261107-q26-q28/TDD.md) |
-| Q29–Q31 | [Deficitul adversarilor și expunerea nativă](../rentz/ATF_Learning.md), plus [structura XML](../rentz/ATF_Qualification.md#containere-jupiter-imbricate) | [Q29–Q31](../../../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md) |
-| Q33 | [Limitele punctajului la admitere](../rentz/ATF_Learning.md#admiterea-rezultatelor-reluate) | [Regresii de frontieră și partidă reală](../../atf-tests/src/test/java/atf/rentz/ArenaAdmissionTest.java) |
-| Descărcarea din README | [Identitatea livrării și canalele de descărcare](../rentz/ATF_Release.md) | [Receipt de browser autentificat](https://github.com/crististefanita/atf_j5/blob/cf740288acbebd13b67a9f0d69f18e4d9f94518f/release/0.1.2/reports/distribution/download-readme.json) |
-
-<a id="calificarea-integrării-ui-pentru-012"></a>
-
-[Dovezile istorice ale calificării UI 0.1.2](https://github.com/crististefanita/atf_j5/blob/cf740288acbebd13b67a9f0d69f18e4d9f94518f/release/0.1.2/reports/README.md) · [Calificarea curentă](../rentz/ATF_Qualification.md)
-
-</details>
-

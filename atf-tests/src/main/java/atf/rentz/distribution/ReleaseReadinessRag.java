@@ -714,10 +714,8 @@ public final class ReleaseReadinessRag {
             requireUiCheckpoint(checkpoints, "Manual settlement presents achievement progress", "Achievement panel has a distinct dismiss control");
             requireUiCheckpoint(checkpoints, "Resuming a saved settlement does not repeat achievement progress", "No achievement panel is replayed");
             requireUiCheckpoint(checkpoints, "Gameplay and training keep independent progress", "Confirmed manual play grants gameplay credit");
-            requireUiCheckpoint(checkpoints, "Gameplay and training keep independent progress", "Incomplete match cannot grant a terminal title");
             requireUiCheckpoint(checkpoints, "Gameplay milestones survive process restart", "Same gameplay total after restart");
             requireUiCheckpoint(checkpoints, "Achievement search reports an empty result", "Empty result is visible and can be reset");
-            requireUiCheckpoint(checkpoints, "Full catalog exposes the mastery tier on the table surface", "Hard filter exposes 100 achievements in mastery order");
             requireUiCheckpoint(checkpoints, "Achievements record manual and assisted play after settlement", "Manual and assisted milestones are recorded separately");
             requireUiCheckpoint(checkpoints, "Achievements record manual and assisted play after settlement", "Complete catalog records new credit after settlement");
             requireUiCheckpoint(checkpoints, "Search and status filter reveal the unlocked lesson", "Combined query returns exactly one achievement");

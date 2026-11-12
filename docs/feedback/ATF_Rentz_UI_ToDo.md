@@ -1,4 +1,4 @@
-# ToDo: interfața Rentz aliniată cu Whist Lab
+# Feedback activ pentru interfața Rentz
 
 ## Pe scurt
 
@@ -76,7 +76,7 @@ Ordinea livrării este contractul producătorului, componentele, consumul pe art
 
 | ID și stare | Cerință și criteriu de acceptanță |
 |---|---|
-| **R01 · TODO** | **J trebuie să fie regula și ancora reală a modului cerut.** La patru jucători, motorul actual deschide deja din J. Pentru celelalte mese, opțiunea explicită „Valet mereu” trebuie propagată prin configurație, motor, observație, simulare, oracol și salvare; varianta existentă „Mijlocul pachetului” rămâne identificată distinct. Este interzis ca UI să arate J în timp ce motorul așteaptă Q, 10 sau 9. |
+| **R01 · DESCHIS** | **J trebuie să fie regula și ancora reală a modului cerut.** La patru jucători, motorul actual deschide deja din J. Pentru celelalte mese, opțiunea explicită „Valet mereu” trebuie propagată prin configurație, motor, observație, simulare, oracol și salvare; varianta existentă „Mijlocul pachetului” rămâne identificată distinct. Este interzis ca UI să arate J în timp ce motorul așteaptă Q, 10 sau 9. |
 | **R02 · PARȚIAL** | **Patru rânduri stabile între locurile de joc.** Pentru 3–6 jucători, pozițiile urmează geometria Whist de joc pe toată lățimea. Cărțile se suprapun pe rândurile dense, cu rangul și culoarea în fâșia vizibilă. Rămân calificarea rasterului compact la 3, 5 și 6 locuri, ordinea culorilor și opțiunea din R01. |
 | **R03 · PARȚIAL** | **Slotul gol nu este carte jucată.** Proiecția distinge ancora și cărțile publice, iar legalitatea vine din motor. Rămân marcarea ultimei mutări și indicii explicabili pentru continuare, fără dezvăluirea deținătorilor necunoscuți. |
 | **R04 · PARȚIAL** | **Tabla și comanda explicită de continuare există.** Calculul blochează comenzile și păstrează masa; la încheiere rămâne tabla publică. Rămân sosirile, explicațiile pentru pas/săritură și calificarea nativă a închiderii secvențelor. |
@@ -191,7 +191,3 @@ Pentru patru jucători, mecanismul comun de alocare a spațiului este descris î
 O serie de gesturi ADB rapide pe coloana fixă a deschis detaliul unei mâini în timpul derulării. Proba de parcurgere a istoricului folosește celulele de scor pentru gestul vertical. [Captura nativă](../../../../rentz_back/ui-review/j5-live-ui-history-matrix-20261111-gesture-2/android-extent.html)
 
 Verificați separat pe dispozitiv o tragere verticală pornită de pe eticheta activă, la viteză obișnuită și după un fling. Tragerea trebuie să mute rândurile, iar o atingere să deschidă un singur detaliu.
-
-## Profilul de punctaj în probele native
-
-Proba de istoric confruntă profilul curent din jurnalul calificat și păstrează ordinea reală a sosirii, inclusiv singurul zero. Proba de ajutor verifică premiile fiecărei mese, în română și engleză. Acceptanța rămâne deschisă până când ambele probe trec pe același candidat. [Contractul verificării](../rentz/ATF_UiIntegration.md)

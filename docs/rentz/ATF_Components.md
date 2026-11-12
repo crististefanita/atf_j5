@@ -2,7 +2,7 @@
 
 ## Alegerea nivelului
 
-O regulă se verifică prin API-ul minim care îi observă efectul. Partida virtuală verifică integrarea motorului și terminarea; nu este o partidă nouă prin interfața aplicației originale.
+O regulă se verifică prin API-ul minim care îi observă efectul. Partida virtuală verifică integrarea motorului și terminarea. [Strategia de testare](ATF_TestingStrategy.md) descrie criteriile pentru mutarea verificărilor dintre niveluri.
 
 | Familie | Proprietăți și frontiere | Sursă |
 |---|---|---|

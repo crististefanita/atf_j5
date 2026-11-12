@@ -244,6 +244,13 @@ public final class GameplayAchievementComponentTest {
         var saved = SessionJson.saved(new GameSession(4, 29, Difficulty.NORMAL), state).toString();
         var restored = SessionJson.restoreCheckpoint(saved).progress();
         audit.equal("Old training proof round-trips alongside gameplay", state, restored);
+        audit.equal("A lead in an incomplete match does not persist a victory mark",
+                false, restored.marks().containsKey("play-first-win"));
+        var finalResult = hand(Contract.TRICKS, true, true, Difficulty.NORMAL, List.of(0, -10, -50, -20), Set.of());
+        var finalState = AchievementProgress.empty(PROFILE).record(4, 29, finalResult, NOW);
+        var finalSaved = SessionJson.saved(new GameSession(4, 29, Difficulty.NORMAL), finalState).toString();
+        audit.truth("A confirmed first-place finish persists the victory mark",
+                SessionJson.restoreCheckpoint(finalSaved).progress().marks().containsKey("play-first-win"));
         audit.truth("The legacy first-hand key still has progress", restored.marks().containsKey("first-hand"));
         var copy = new RentzUiText(RentzUiText.Language.RO);
         var gameplay = new AchievementBrowser(copy, restored, result, AchievementBrowser.Collection.GAMEPLAY);

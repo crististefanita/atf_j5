@@ -66,6 +66,8 @@ Pentru migrarea în loc, indicați chiar registrul v1 existent. Păstrați refer
 
 ## Colecții și porți offline
 
+[Strategia de testare Rentz](../docs/rentz/ATF_TestingStrategy.md) definește nivelurile, responsabilitatea și dovada necesară când o verificare trece din E2E la componentă.
+
 [Calificarea consumatorului](../docs/rentz/ATF_Qualification.md) deține contractele binare, selecțiile și probele de eșec. [Registrul colecțiilor](../config/test-collections.json) selectează etapele, iar lansatorul confruntă populația executată cu sursele înghețate.
 
 | Intrare | Utilizare |

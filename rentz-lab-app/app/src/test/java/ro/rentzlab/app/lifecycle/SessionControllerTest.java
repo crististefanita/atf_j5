@@ -237,6 +237,10 @@ public class SessionControllerTest {
             controller.deactivate();
             controller.activate();
             assertEquals(RentzMatch.Phase.DEAL_END, controller.session().view().phase());
+            var progress = ro.rentzlab.app.SessionJson.restoreCheckpoint(storage.read()).progress();
+            assertTrue("A settled manual hand persists its gameplay credit", progress.marks().containsKey("play-first-hand"));
+            assertFalse("The restored incomplete match cannot persist a victory mark",
+                    progress.marks().containsKey("play-first-win"));
             assertNull(controller.takeAchievementNotice(1));
         }
     }
