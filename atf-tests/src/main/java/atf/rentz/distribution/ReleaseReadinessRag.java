@@ -1,5 +1,7 @@
 package atf.rentz.distribution;
 
+import atf.rentz.distribution.editorial.DocumentationReconciliation;
+
 import atf.reporting.evidence.ui.ExtentUiEvidenceMarkup;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -62,12 +64,16 @@ public final class ReleaseReadinessRag {
     private record Document(String path, String sourceClass, String owner, String gate, String sha256, int bytes, List<String> lines) { }
     private record Chunk(Document document, int firstLine, int lastLine, String section, String body) { }
     private record Hit(Chunk chunk, double score) { }
-    private record GitIdentity(String branch, String commit, String tree, boolean available, int dirtyFiles) { }
+    public record GitIdentity(String branch, String commit, String tree, boolean available, int dirtyFiles) { }
     private record RetrievalQuery(String text, String gate, String sourceClass, String version, boolean versionMatches) { }
 
     private ReleaseReadinessRag() { }
 
     public static void main(String[] args) throws Exception {
+        if (args.length == 5 && args[0].equals("--reconcile-documentation")) {
+            DocumentationReconciliation.write(Path.of(args[1]), Path.of(args[2]), Path.of(args[3]), Path.of(args[4]));
+            return;
+        }
         if (args.length < 3 || args.length > 7) throw new IllegalArgumentException(
                 "Usage: ReleaseReadinessRag <project-root> <fresh-external-run-directory> <question> [component-run] [build-run|-] [native-ui-run] [ui-build-run]");
         Path root = Path.of(args[0]).toRealPath();
@@ -209,7 +215,7 @@ public final class ReleaseReadinessRag {
         gate(gates, "release-build").put("expected", "The signed product APK has the numeric candidate version and exact filename RentzLab-<version>.apk.");
         gate(gates, "release-retirement").put("expected", "The latest qualified release must download from the pushed README with an authorized account before prior releases are retired. Preserve source tags and audit evidence.");
         attachLocalCatalog(root, gates);
-        if (componentRun != null) attachRegressionReceipt(root, git, gates, componentRun);
+        if (componentRun != null) attachComponentReceipt(root, git, gates, componentRun, "regression");
         if (buildRun != null) attachReleaseBuildReceipt(root, git, gates, componentRun, buildRun);
         if (nativeUiRun != null) attachNativeUiReceipt(root, git, gates, componentRun, uiBuildRun, nativeUiRun);
 
@@ -299,7 +305,17 @@ public final class ReleaseReadinessRag {
         }
     }
 
-    private static void attachRegressionReceipt(Path root, GitIdentity git, ArrayNode gates, Path suppliedRun) {
+    public static ArrayNode offlineEvidence(Path root, GitIdentity git, Path run, String collection) {
+        ArrayNode gates = JSON.createArrayNode();
+        for (String id : List.of("offline-regression", "component-extent-report", "android-jvm")) {
+            gates.addObject().put("id", id).put("status", "NOT_RUN");
+        }
+        attachComponentReceipt(root, git, gates, run, collection);
+        return gates;
+    }
+
+    private static void attachComponentReceipt(Path root, GitIdentity git, ArrayNode gates, Path suppliedRun, String collection) {
+        boolean regressionCollection = collection.equals("regression");
         String identityFailure = "";
         String verifiedReceiptHash = "";
         Path run = null;
@@ -323,7 +339,7 @@ public final class ReleaseReadinessRag {
             result = JSON.readTree(receiptBytes);
             String source = result.path("source").asText();
             if (!Path.of(source).toRealPath().equals(root)) throw new IOException("RAG-RECEIPT-SOURCE");
-            if (!result.path("collection").path("name").asText().equals("regression")) throw new IOException("RAG-RECEIPT-COLLECTION");
+            if (!result.path("collection").path("name").asText().equals(collection)) throw new IOException("RAG-RECEIPT-COLLECTION");
             if (!Set.of("PASS", "FAIL").contains(result.path("status").asText())) throw new IOException("RAG-RECEIPT-STATUS");
             if (!result.path("sourceManifestSha256").asText().equalsIgnoreCase(sha256(manifestBytes)))
                 throw new IOException("RAG-RECEIPT-MANIFEST");
@@ -333,7 +349,7 @@ public final class ReleaseReadinessRag {
                     || result.path("drift").size() != 0 || result.path("populationChanges").size() != 0)
                 throw new IOException("RAG-RECEIPT-DRIFT");
             if (!result.path("results").isArray() || result.path("results").isEmpty()
-                    || (result.path("status").asText().equals("PASS")
+                    || (regressionCollection && result.path("status").asText().equals("PASS")
                     && (!result.path("androidJvm").isTextual() || result.path("androidJvm").asText().isBlank())))
                 throw new IOException("RAG-RECEIPT-POPULATION");
             JsonNode sourceRows = JSON.readTree(manifestBytes);
@@ -383,7 +399,7 @@ public final class ReleaseReadinessRag {
         boolean mavenFail = result.path("status").asText().equals("FAIL") || !result.path("componentExtentQualified").asBoolean(false)
                 || !result.path("runtimeQualificationFailure").asText().isBlank()
                 || !result.path("selectedPopulationFailure").asText().isBlank();
-        if (!result.path("androidJvm").isTextual() || result.path("androidJvm").asText().isBlank()) {
+        if (regressionCollection && (!result.path("androidJvm").isTextual() || result.path("androidJvm").asText().isBlank())) {
             androidGate.put("status", "NOT_RUN"); androidGate.put("actual", "The Android JVM stage did not produce a receipt.");
             return;
         }
@@ -404,6 +420,7 @@ public final class ReleaseReadinessRag {
         regression.put("actual", mavenPass ? "Surefire regression receipts are non-empty and have zero failures, errors and skips."
                 : mavenFail ? "A Surefire regression receipt reports a failure, error, skip or zero-test suite."
                 : "No complete Surefire regression population is present.");
+        if (!regressionCollection) return;
 
         try {
             Path suppliedAndroid = Path.of(result.path("androidJvm").asText()).toAbsolutePath().normalize();
@@ -804,7 +821,7 @@ public final class ReleaseReadinessRag {
         return readExternalFile(raw.resolve(name), limit);
     }
 
-    private static Path externalRun(Path root, Path supplied) throws IOException {
+    public static Path externalRun(Path root, Path supplied) throws IOException {
         if (supplied == null) throw new IOException("RAG-RECEIPT-MISSING");
         assertNoSymlinkPath(supplied.toAbsolutePath().normalize());
         Path run = supplied.toRealPath();
@@ -838,7 +855,7 @@ public final class ReleaseReadinessRag {
                 && realStage.getFileName().toString().equals("components-" + id);
     }
 
-    private static byte[] readExternalFile(Path file, long maxBytes) throws IOException {
+    public static byte[] readExternalFile(Path file, long maxBytes) throws IOException {
         assertNoSymlinkPath(file.toAbsolutePath().normalize());
         if (Files.isSymbolicLink(file) || !Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)
                 || Files.size(file) == 0 || Files.size(file) > maxBytes) throw new IOException("RAG-RECEIPT-FILE");
@@ -1083,7 +1100,7 @@ public final class ReleaseReadinessRag {
         }
     }
 
-    private static void assertExternalDestination(Path root, Path output, boolean requireFresh) throws IOException {
+    public static void assertExternalDestination(Path root, Path output, boolean requireFresh) throws IOException {
         Path absolute = output.toAbsolutePath().normalize();
         if (absolute.startsWith(root) || absolute.equals(root)) throw new IllegalArgumentException("RAG-OUTPUT: destination inside source tree");
         assertNoSymlinkPath(absolute);
@@ -1106,7 +1123,7 @@ public final class ReleaseReadinessRag {
         return Set.copyOf(terms);
     }
 
-    private static GitIdentity gitIdentity(Path root) {
+    public static GitIdentity gitIdentity(Path root) {
         try {
             String branch = git(root, "branch", "--show-current").strip();
             String commit = git(root, "rev-parse", "HEAD").strip();
@@ -1118,14 +1135,26 @@ public final class ReleaseReadinessRag {
         }
     }
 
-    private static String git(Path root, String... arguments) throws Exception {
+    public static String git(Path root, String... arguments) throws Exception {
         var command = new ArrayList<String>(); command.add("git"); command.add("-C"); command.add(root.toString());
         command.addAll(List.of(arguments));
         var process = new ProcessBuilder(command).redirectErrorStream(true).start();
-        if (!process.waitFor(10, TimeUnit.SECONDS)) { process.destroyForcibly(); throw new IOException("RAG-GIT-TIMEOUT"); }
-        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        var output = new java.util.concurrent.FutureTask<>(() -> {
+            try (var stream = process.getInputStream()) {
+                return stream.readNBytes(4 * 1024 * 1024 + 1);
+            }
+        });
+        Thread.startVirtualThread(output);
+        byte[] bytes;
+        try {
+            bytes = output.get(10, TimeUnit.SECONDS);
+            if (bytes.length > 4 * 1024 * 1024) throw new IOException("RAG-GIT-OUTPUT-LIMIT");
+            if (!process.waitFor(10, TimeUnit.SECONDS)) throw new IOException("RAG-GIT-TIMEOUT");
+        } finally {
+            if (process.isAlive()) process.destroyForcibly();
+        }
         if (process.exitValue() != 0) throw new IOException("RAG-GIT-IDENTITY");
-        return output;
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     private static String indexHash(List<Document> documents) throws IOException {
@@ -1155,7 +1184,7 @@ public final class ReleaseReadinessRag {
         } catch (Exception invalid) { return false; }
     }
 
-    private static String sha256(byte[] bytes) throws IOException {
+    public static String sha256(byte[] bytes) throws IOException {
         try { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes)); }
         catch (java.security.NoSuchAlgorithmException impossible) { throw new IOException("SHA-256 unavailable", impossible); }
     }

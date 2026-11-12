@@ -741,6 +741,118 @@ class ReleaseGovernanceTest {
                 "An existing run directory is never overwritten");
     }
 
+    @Test void editorialReconciliationKeepsBothReceiptsAndShowsTheExactDocumentDiff() throws Exception {
+        Path original = ragProject();
+        Path regression = passingComponentRun(original, "editorial-baseline");
+        Path revised = editorialCheckout(original, "revised-documentation", "README.md");
+        Path documentation = editorialInfrastructureRun(revised, "revised-documentation-run");
+        Path result = temporary.resolve("editorial-evidence");
+        String originalReceipt = sha(regression.resolve("result.json"));
+        String originalReport = sha(regression.resolve("component-suite-extent.html"));
+
+        assertDoesNotThrow(() -> reconcileEditorial(revised, regression, documentation, result),
+                "A proven documentation-only revision produces a separate reconciliation");
+
+        var proof = JSON().readTree(result.resolve("documentation-reconciliation.json").toFile());
+        assertEquals("PASS", proof.required("status").asText(), proof.toPrettyString());
+        assertEquals("README.md", proof.required("changedDocuments").get(0).required("path").asText());
+        assertEquals(originalReceipt, proof.required("original").required("receiptSha256").asText());
+        assertEquals(originalReport, proof.required("original").required("extentSha256").asText());
+        assertEquals(originalReceipt, sha(regression.resolve("result.json")));
+        assertEquals(originalReport, sha(regression.resolve("component-suite-extent.html")));
+        assertTrue(Files.readString(result.resolve("documentation-reconciliation.html")).contains("Identical tested inputs"));
+        assertEquals("BLOCKED", gate(ReleaseReadinessRag.evaluate(revised, "gate:offline-regression release", regression),
+                "offline-regression").path("status").asText(), "The exact-snapshot release gate still sees the original mismatch");
+    }
+
+    @Test void editorialReconciliationRefusesChangedCodeMissingGuardsAndFailedOriginalEvidence() throws Exception {
+        Path original = ragProject();
+        Path regression = passingComponentRun(original, "editorial-refusal-original");
+        Path revised = editorialCheckout(original, "editorial-refusal-docs", "README.md");
+        Path docs = editorialInfrastructureRun(revised, "editorial-refusal-docs-run");
+
+        Path originalReceipt = regression.resolve("result.json");
+        byte[] healthy = Files.readAllBytes(originalReceipt);
+        var failed = (com.fasterxml.jackson.databind.node.ObjectNode) JSON().readTree(healthy);
+        failed.put("status", "FAIL");
+        JSON().writeValue(originalReceipt.toFile(), failed);
+        String failedDigest = sha(originalReceipt);
+        assertEditorialBlocked(revised, regression, docs, "original-failed", "EDITORIAL-ORIGINAL-QUALIFICATION");
+        assertEquals(failedDigest, sha(originalReceipt), "The failed original receipt must not be rewritten");
+        Files.write(originalReceipt, healthy);
+
+        Path docsReceipt = docs.resolve("result.json");
+        var incomplete = (com.fasterxml.jackson.databind.node.ObjectNode) JSON().readTree(docsReceipt.toFile());
+        ((com.fasterxml.jackson.databind.node.ArrayNode) incomplete.required("results")).remove(0);
+        JSON().writeValue(docsReceipt.toFile(), incomplete);
+        assertEditorialBlocked(revised, regression, docs, "missing-doc-suite", "EDITORIAL-DOCUMENTATION-POPULATION");
+
+        Path changed = editorialCheckout(original, "editorial-refusal-code", "scripts/build.ps1");
+        Path codeRun = editorialInfrastructureRun(changed, "editorial-refusal-code-run");
+        assertEditorialBlocked(changed, regression, codeRun, "changed-code", "EDITORIAL-NON-DOCUMENTATION");
+        assertEquals(sha(regression.resolve("result.json")),
+                HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(healthy)));
+    }
+
+    private void assertEditorialBlocked(Path candidate, Path regression, Path docs, String folder, String code) throws Exception {
+        Path output = temporary.resolve(folder);
+        reconcileEditorial(candidate, regression, docs, output);
+        var proof = JSON().readTree(output.resolve("documentation-reconciliation.json").toFile());
+        assertEquals("BLOCKED", proof.required("status").asText(), folder);
+        assertEquals(code, proof.required("reason").asText(), folder);
+        assertTrue(Files.readString(output.resolve("documentation-reconciliation.html")).contains(code));
+    }
+
+    private void reconcileEditorial(Path root, Path regression, Path documentation, Path output) throws Exception {
+        ReleaseReadinessRag.main(new String[]{"--reconcile-documentation", root.toString(), output.toString(),
+                regression.toString(), documentation.toString()});
+    }
+
+    private Path editorialCheckout(Path original, String folder, String changedFile) throws Exception {
+        Path target = temporary.resolve(folder);
+        git(original, "worktree", "add", "--detach", target.toString(), "HEAD");
+        Files.writeString(target.resolve(changedFile), "\nEditorial test fixture.\n", java.nio.file.StandardOpenOption.APPEND);
+        git(target, "add", "--", changedFile);
+        git(target, "-c", "user.name=RAG Test", "-c", "user.email=rag@example.test", "commit", "-m", "change fixture");
+        return target;
+    }
+
+    private Path editorialInfrastructureRun(Path source, String name) throws Exception {
+        Path run = passingComponentRun(source, name);
+        Path receiptPath = run.resolve("result.json");
+        var receipt = (com.fasterxml.jackson.databind.node.ObjectNode) JSON().readTree(receiptPath.toFile());
+        receipt.putObject("collection").put("name", "infrastructure");
+        receipt.remove("androidJvm");
+        var suites = receipt.putArray("results");
+        var inputs = new java.util.ArrayList<atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput>();
+        for (String nameOfSuite : List.of("DocumentationContractTest", "DocumentationControlsTest",
+                "DocumentationDiagramGovernanceTest", "DocumentationLinkGovernanceTest", "DocumentationProseGovernanceTest",
+                "DocumentationReadmeStructureGovernanceTest", "DocumentationStyleGovernanceTest",
+                "DocumentationTargetGovernanceTest", "DynamicPathDocumentationArchitectureTest")) {
+            String full = switch (nameOfSuite) {
+                case "DocumentationContractTest" -> "atf.rentz.governance." + nameOfSuite;
+                case "DocumentationLinkGovernanceTest" -> "atf.rentz.governance.documentation.links." + nameOfSuite;
+                default -> "atf.rentz.governance.documentation." + nameOfSuite;
+            };
+            Path xml = run.resolve("atf-tests/TEST-" + full + ".xml");
+            Files.writeString(xml, """
+                    <testsuite name="%s" tests="1" failures="0" errors="0" skipped="0">
+                      <testcase classname="%s" name="editorial guard"/>
+                    </testsuite>
+                    """.formatted(full, full));
+            inputs.add(new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput("atf-tests", full, xml, sha(xml), 1, 0, 0, 0));
+            suites.addObject().put("module", "atf-tests").put("name", full)
+                    .put("tests", 1).put("failed", 0).put("errors", 0).put("skipped", 0);
+        }
+        Path extent = run.resolve("component-suite-extent.html");
+        Files.delete(extent);
+        var report = atf.rentz.reporting.ComponentSuiteExtentReport.publish(extent, receipt.required("sourceCommit").asText(),
+                receipt.required("sourceManifestSha256").asText(), "infrastructure", 0, inputs);
+        receipt.put("componentExtentReportSha256", report.reportSha256());
+        JSON().writeValue(receiptPath.toFile(), receipt);
+        return run;
+    }
+
     private Path ragProject() throws Exception {
         Path root=Files.createDirectories(temporary.resolve("rag-source-"+java.util.UUID.randomUUID()));
         Files.createDirectories(root.resolve("config"));Files.createDirectories(root.resolve("docs"));
@@ -770,7 +882,7 @@ class ReleaseGovernanceTest {
                  {"path":"release/index.json","class":"release-index","owner":"release","gate":"local-catalog"},
                  {"path":"release/{currentVersion}/release-validation.json","class":"manifest","owner":"release","gate":"local-catalog"}]}
                 """);
-        git(root,"init","-b","main");git(root,"add",".");
+        git(root,"init","-b","main");git(root,"config","core.autocrlf","false");git(root,"add",".");
         git(root,"-c","user.name=RAG Test","-c","user.email=rag@example.test","commit","-m","fixture");
         return root;
     }

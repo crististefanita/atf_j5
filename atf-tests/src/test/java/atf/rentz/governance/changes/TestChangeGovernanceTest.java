@@ -89,6 +89,7 @@ class TestChangeGovernanceTest {
                 || path.equals("rentz-lab-app/app/build.gradle") || path.equals("release/index.json")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java")
+                || path.equals("atf-tests/src/main/java/atf/rentz/distribution/editorial/DocumentationReconciliation.java")
                 || path.startsWith("atf-tests/src/main/java/atf/rentz/reporting/")
                 || path.equals("atf-tests/tools/run-arena.ps1") || path.equals("atf-tests/tools/run-android-sanity.ps1")
                 || path.equals("atf-tests/tools/test-runtime-controls.ps1")
@@ -105,6 +106,7 @@ class TestChangeGovernanceTest {
         assertTrue(protectedPath("scripts/run-release-rag.ps1"));
         assertTrue(protectedPath("scripts/verify-release-readme.ps1"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java"));
+        assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/editorial/DocumentationReconciliation.java"));
     }
 
     @Test void releaseArtifactsReportingAndWorkspaceBoundariesAreProtected() {

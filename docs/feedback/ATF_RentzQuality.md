@@ -58,10 +58,6 @@ O modificare de structură se verifică față de reperul compilat. Împachetare
 
 [Procesul livrării](../rentz/ATF_Release.md) separă DRAFT, PREPARED și PUBLISHED; o pregătire validă nu este un APK calificat.
 
-## Proveniența livrării și populația testelor
-
-- **P2:** calificarea unei revizii strict editoriale cere un compositor versionat. Acesta trebuie să dovedească identitatea intrărilor executate și să indice documentele schimbate. Receipt-ul original rămâne verificabil. [Calificarea curentă](../rentz/ATF_Qualification.md) păstrează verdictul fiecărei rulări.
-
 ## Inventar executabil și admitere a evaluării
 
 [Calificarea tehnică](../rentz/ATF_Qualification.md#inventarul-sursei-executabile) deține rezolvarea ierarhiei, interfețele externe revizuite și confruntarea cu Jupiter. [Admiterea evaluării](../rentz/ATF_Learning.md#admiterea-rezultatelor-reluate) deține contextul independent, populația completă și recalcularea agregărilor.

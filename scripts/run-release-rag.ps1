@@ -2,6 +2,7 @@ param(
     [Parameter(Mandatory)][string]$Question,
     [Parameter(Mandatory)][string]$ComponentRun,
     [Parameter(Mandatory)][string]$RunRoot,
+    [string]$DocumentationRun='',
     [string]$BuildRun='',
     [string]$NativeUiRun='',
     [string]$UiBuildRun='',
@@ -11,13 +12,15 @@ param(
 )
 $ErrorActionPreference='Stop'
 if($RestrictedPublication-and-not$PublicationEvidence){throw 'RestrictedPublication requires PublicationEvidence.'}
+if($DocumentationRun-and($BuildRun-or$NativeUiRun-or$UiBuildRun-or$PublicationEvidence)){throw 'Documentation reconciliation only verifies offline evidence.'}
 $project=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'RuntimeQualification.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
-foreach($path in @($ComponentRun,$BuildRun,$NativeUiRun,$UiBuildRun,$PublicationEvidence)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
+foreach($path in @($ComponentRun,$DocumentationRun,$BuildRun,$NativeUiRun,$UiBuildRun,$PublicationEvidence)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
 $ComponentRun=[IO.Path]::GetFullPath($ComponentRun);$RunRoot=[IO.Path]::GetFullPath($RunRoot)
+if($DocumentationRun){$DocumentationRun=[IO.Path]::GetFullPath($DocumentationRun)}
 if($BuildRun){$BuildRun=[IO.Path]::GetFullPath($BuildRun)}
 if($NativeUiRun){$NativeUiRun=[IO.Path]::GetFullPath($NativeUiRun)}
 if($UiBuildRun){$UiBuildRun=[IO.Path]::GetFullPath($UiBuildRun)}
@@ -36,7 +39,7 @@ if($component.status-notin@('PASS','FAIL')-or$component.collection.name-cne'regr
 }
 $null=New-Item -ItemType Directory -Path $RunRoot
 $source=[IO.Path]::GetFullPath($component.source)
-if(-not$source.Equals($project,[StringComparison]::OrdinalIgnoreCase)){throw 'RAG source root and invoked source snapshot differ.'}
+if(!$DocumentationRun-and-not$source.Equals($project,[StringComparison]::OrdinalIgnoreCase)){throw 'RAG source root and invoked source snapshot differ.'}
 Assert-AtfPhysicalPath -Path $source
 $stage=[IO.Path]::GetFullPath($component.stage)
 Assert-AtfPhysicalPath -Path $stage
@@ -64,6 +67,16 @@ if($component.status-eq'PASS'){
         if($candidate){if($classpath-and$classpath-cne$candidate){throw 'Failed-run Surefire classpaths disagree'};$classpath=$candidate;break}
     }
     if(-not$classpath){throw 'Failed component run has no compiled Surefire classpath for offline RAG inspection.'}
+}
+
+if($DocumentationRun){
+    & $Java -Xmx256m -cp $classpath $ragClass '--reconcile-documentation' $project $reportRoot $ComponentRun $DocumentationRun
+    if($LASTEXITCODE-ne0){throw "Documentation reconciliation could not read its evidence: $RunRoot"}
+    $proof=Join-Path $reportRoot 'documentation-reconciliation.json'
+    $verdict=Get-Content -LiteralPath $proof -Raw|ConvertFrom-Json
+    if($verdict.status-cne'PASS'){throw "Documentation reconciliation blocked ($($verdict.reason)): $proof"}
+    Write-Output $proof
+    return
 }
 
 $arguments=[Collections.Generic.List[string]]::new()

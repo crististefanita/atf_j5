@@ -58,6 +58,28 @@ Comanda pornește din rădăcina proiectului în PowerShell 7, cu JDK 21, Maven,
 - Asamblarea APK cere calificarea `regression`, inclusiv Android JVM; o colecție focalizată nu devine acceptanță integrală prin redenumirea rezultatului.
 - Arena și adaptorul nativ cer descriptorul clasei compilate și componenta lor calificată; nu depind de existența unui scenariu narativ fără legătură.
 
+## Reconcilierea unei revizii editoriale
+
+Păstrați checkout-ul curat și rularea `regression` care au produs dovada originală. Dintr-un al doilea worktree înregistrat, pe commitul editorial, rulați colecția `infrastructure`. Compositorul cere controalele de documentație și verifică fiecare receipt împotriva sursei sale.
+
+```powershell
+.\scripts\run-rentz-components.ps1 -Collection infrastructure -SourceRoot $candidate -RunRoot $documentationRun
+.\scripts\run-release-rag.ps1 -Question "reconciliere editorială" -ComponentRun $originalRegression -DocumentationRun $documentationRun -RunRoot $reviewRun
+```
+
+Apelați a doua comandă din worktree-ul editorial. Folosiți același depozit de artefacte și directoare de rulare distincte.
+
+| Verificare | Ce apare în dovadă |
+|---|---|
+| Commituri curate din același repository | Commitul testat trebuie să fie strămoșul reviziei editoriale. |
+| Diferența Git | Căile modificate, adăugate sau eliminate sunt fișiere Markdown obișnuite din `docs/rentz`, `docs/feedback`, `docs/README.md` sau `README.md`. |
+| Intrări înghețate | Setul căilor diferite din cele două manifeste coincide cu diferența Git. SHA-256 agregat identifică toate intrările comune, în ordinea căilor. |
+| Dovezi păstrate | Compoziția înregistrează căile și hash-urile receipt-urilor, manifestelor și rapoartelor Extent originale. Documentele diferite au hash înainte și după. |
+
+- Rezultatele sunt `documentation-reconciliation.json` și `documentation-reconciliation.html`.
+- Un rezultat original eșuat sau o diferență executabilă blochează compoziția.
+- Această dovadă acoperă echivalența intrărilor offline și guvernanța documentelor. Pentru APK, Android nativ și promovare rămân aplicabile porțile pe commit exact. [Procesul de release](ATF_Release.md)
+
 ## Legăturile manifestelor către teste
 
 [Catalogul regulilor](../../atf-tests/src/main/java/atf/rentz/RuleCatalog.java) leagă fiecare regulă de implementare și de o declarație de test eligibilă. Referința metodei are forma clasei și a numelui ei; metoda trebuie să fie declarată direct, fără supraîncărcare ambiguă, în clasa și pachetul așteptate.
