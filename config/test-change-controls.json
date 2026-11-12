@@ -399,7 +399,7 @@
       "criterion": "Only external fresh report roots and source-bound component/build/UI receipts are accepted; publishAllowed remains false.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "e0644f883de78712b2b0d96900dd65347a052bfdd0418069bf7fab4781fbadbf",
+      "sha256": "1c19f81ce4c0672e289943b8bead99ff47d424c7f2153e9149a1f31cdd0baabe",
       "allowDelete": false
     },
     {
@@ -739,7 +739,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry. Remote README fixtures exercise both distribution channels and reject extra copy or routes. The offline launcher fixture requires reservation, binding of the captured bytes and completion in that order.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a0e78eabdf387e6ac95f65d7187178837fca689ad5992aff48a514a4622a6787",
+      "sha256": "c09b8a210331f7f44372260de3ab5d97a5af287883a8d285e06528b59739ce65",
       "allowDelete": false
     },
     {

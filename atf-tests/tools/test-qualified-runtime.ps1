@@ -73,6 +73,7 @@ function FailedRagContext([string]$Name){
     if($Name-ceq'rag-no-atf'){$rows=@($rows[0])}
     Json "$($c.component)/result.json" ([ordered]@{status='FAIL';collection=@{name='regression'};source=$project;stage=$c.stage;results=$rows})
     @('@echo off',('echo invoked > "'+$c.root+'\invoked.txt"'),
+        ('echo %RENTZ_DATA_ROOT% > "'+$c.root+'\data-root-argument.txt"'),
         ('if not "%~3"=="'+$c.classes+'" exit /b 19'),'exit /b 0')|Set-Content $c.spy -Encoding ascii
     return $c
 }
@@ -86,6 +87,18 @@ Case 'Failed RAG uses the ATF classpath when game-core comes first' {
     $c=FailedRagContext 'rag-module-order'
     $r=Launch-FailedRag $c
     Require (-not$r.failed-and$r.invoked) 'The failed RAG did not launch with the ATF classpath'
+}
+Case 'Release RAG passes the canonical external data root to its Java evaluator' {
+    $previousRoot=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT','Process')
+    try{
+        [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$null,'Process')
+        $c=FailedRagContext 'rag-data-root'
+        $expected=Get-AtfDataRoot -ProjectRoot $project
+        $r=Launch-FailedRag $c
+        $actual=Get-Content -Raw -LiteralPath "$($c.root)/data-root-argument.txt" -ErrorAction SilentlyContinue
+        $restoredRoot=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT','Process')
+        Require (-not$r.failed-and$r.invoked-and$actual.Trim()-ceq$expected-and$restoredRoot-ceq$previousRoot) 'RAG Java did not receive the canonical external artifact root or leaked it to the caller'
+    }finally{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$previousRoot,'Process')}
 }
 Case 'Failed RAG refuses conflicting ATF classpaths before Java' {
     $c=FailedRagContext 'rag-disagreement'

@@ -17,6 +17,7 @@ $project=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'RuntimeQualification.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
+$ragDataRoot=Get-AtfDataRoot -ProjectRoot $project
 foreach($path in @($ComponentRun,$DocumentationRun,$BuildRun,$NativeUiRun,$UiBuildRun,$PublicationEvidence)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
 $ComponentRun=[IO.Path]::GetFullPath($ComponentRun);$RunRoot=[IO.Path]::GetFullPath($RunRoot)
@@ -97,7 +98,13 @@ if($BuildRun-or$NativeUiRun){$arguments.Add($(if($BuildRun){$BuildRun}else{'-'})
 if($NativeUiRun){$arguments.Add($NativeUiRun)}
 if($UiBuildRun){$arguments.Add($UiBuildRun)}
 $ragArguments=@('-Xmx256m','-cp',$classpath,$ragClass)+$arguments.ToArray()
-& $Java @ragArguments
+$previousDataRoot=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT','Process')
+try{
+    [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$ragDataRoot,'Process')
+    & $Java @ragArguments
+}finally{
+    [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$previousDataRoot,'Process')
+}
 if($LASTEXITCODE-ne0){throw "Local release RAG failed: $RunRoot"}
 $reportFile=Join-Path $reportRoot 'release-rag-report.json'
 if($PublicationEvidence){
