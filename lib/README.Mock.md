@@ -55,4 +55,4 @@ Adresa `offline.test` este contextul cererii pentru transportul mock. Reușita p
 
 ---
 
-Mentenanța codului și testelor Mock aparține proiectului separat `atf_j0/atf-mock`; [feedback-ul și sincronizarea](README.md#mentenanță-și-feedback) pornesc de la J0.
+Acest ghid descrie folosirea JAR-ului, nu sursa lui. Proveniența și hash-urile binarului sunt în [manifestul local](../library-provenance.json); lacunele și acceptanța consumerului J5 sunt în [registrul local](../docs/feedback/README.md#biblioteci-comune).

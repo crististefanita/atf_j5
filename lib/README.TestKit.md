@@ -35,4 +35,4 @@ public static void verifyState(RecordedAssertions audit, String actual) {
 
 ---
 
-Mentenanță, cod, teste și feedback: [atf_j0](README.md#mentenanță-și-feedback).
+Acest ghid descrie folosirea JAR-ului, nu sursa lui. Proveniența și hash-urile binarului sunt în [manifestul local](../library-provenance.json); lacunele și acceptanța consumerului J5 sunt în [registrul local](../docs/feedback/README.md#biblioteci-comune).
