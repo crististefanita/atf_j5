@@ -36,20 +36,20 @@
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/GameplayAchievementComponentTest.java",
       "owner": "Rentz Android",
       "reason": "Qualify the gameplay milestones separately from training.",
-      "criterion": "Cover the exact YAML order and thresholds, terminal ranking, provenance, replay and persistence.",
-      "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
+      "criterion": "Cover the exact YAML order and thresholds, terminal ranking, provenance, replay and persistence. An incomplete leading match persists no victory mark. The confirmed first-place neighbor persists the mark across the production codec.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-12-09",
-      "sha256": "1c1863d7872d2cd6e264652a14f643c3f7ba2183dce423985ae06fbf3600294a",
+      "sha256": "be584c2f76bfc60108a8bc602b813e6953d9a84c18a1ae7e3e03dc90164be1f0",
       "allowDelete": false
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/AchievementFullCatalogComponentTest.java",
       "owner": "Rentz Android",
       "reason": "Qualify the complete 800 achievement catalog and its saved evidence.",
-      "criterion": "Measure independent legal batches, reject redundant and unreachable rules, and prove the visible table collection states.",
-      "proof": "docs/rentz/ATF_UiIntegration.md#realizări-și-profil-local",
+      "criterion": "Measure independent legal batches, reject redundant and unreachable rules, and prove the visible table collection states. The Hard projection has exactly 100 rows in catalog order, excludes other tiers and preserves row identities with the expected Romanian and English headings.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-12-09",
-      "sha256": "169b0e8a525d8bed56947bbee7e729602588cf58e1db8fc7b120a3e99ef34041",
+      "sha256": "06f3a69fd51ce609889071554aa40506575139bbe5388a8a4908891e2fd8a586",
       "allowDelete": false
     },
     {
@@ -346,10 +346,10 @@
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java",
       "owner": "Rentz release",
       "reason": "Make five-game native acceptance a mandatory candidate-promotion gate; bind complete deals, display evidence, learning isolation and Extent to the pinned APK source.",
-      "criterion": "A missing or partial Rentz-plus-two-games receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "criterion": "A missing or partial Rentz-plus-two-games receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged. The release still requires five native games, geometry, history, restart and original Extent evidence. Catalog breadth and terminal victory eligibility run in the mandatory Android JVM population.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "1c0d7aa4d25810ff375dfe97ad591a0ce7c3cc2a0decf5b2404cafa88018feb4",
+      "sha256": "ee335a70e6e996eeb28ef0f213e780a6198b7c1fa2adb73d3c74a9c8f4d9bbd4",
       "allowDelete": false
     },
     {
@@ -516,10 +516,10 @@
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz release",
       "reason": "Govern release-state, five complete game deals, display layout, learning isolation, source identity and Extent evidence.",
-      "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access. The native fixture qualifies the representative search and progress journey while preserving the existing rejection controls for incomplete games, geometry, source identity and corrupt evidence.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "4be7cbb0525001a370caf91f3975adc24d99299393c1e6b52241631fd9623dde",
+      "sha256": "d81b7965df32b823ddf630629f7af517d6f81fb4862c4179e4c8a7c416c9fb3b",
       "allowDelete": false
     },
     {
@@ -806,10 +806,10 @@
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/SessionControllerTest.java",
       "owner": "Rentz consumer",
       "reason": "Replace automatic batch execution with checkpoints for one visible bot turn.",
-      "criterion": "Each production turn is isolated until authorized delivery. The owner retries a transient read failure and stale callbacks cannot commit.",
-      "proof": "../../rentz_back/ui-review/turn-pacing-j5/README.md",
+      "criterion": "Each production turn is isolated until authorized delivery. The owner retries a transient read failure and stale callbacks cannot commit. A manually completed but nonterminal hand persists its gameplay credit and keeps the victory mark absent through an actual controller restore.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "8b1ecdb0e2002624460e738129d4689b4b8e1e0e7f54b9aab3d714738ad0a829",
+      "sha256": "c5205f293ac459a9cc552421c022ae40c0019a571a009fde9c5b0b9d9f22672c",
       "allowDelete": false
     },
     {
@@ -1166,10 +1166,10 @@
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz release",
       "reason": "Verify identical seat rectangles through the first real chooser transition.",
-      "criterion": "Capture the chooser and game frames, check the active actor and full hand height, and preserve the five-deal native contract.",
-      "proof": "docs/rentz/ATF_Android.md",
+      "criterion": "Capture the chooser and game frames, check the active actor and full hand height, and preserve the five-deal native contract. Retain native search, empty results and reset, eligibility, progress and restart. Run exact Hard catalog breadth and terminal victory eligibility offline.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "137488959ae96088493baba53ea9f05e4d1a01d0ac9111e373c903349e598c01",
+      "sha256": "7fd9bc8aa219213d7c94f609a843ec964fa8d0571c3a7768ba83f42c8288fab6",
       "allowDelete": false
     },
     {

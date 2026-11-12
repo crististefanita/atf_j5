@@ -43,10 +43,18 @@ public final class AchievementFullCatalogComponentTest {
         var browser = new AchievementBrowser(COPY, null, null);
         audit.equal("The browser exposes all objective rows", 800L,
                 browser.rows(Query.empty()).stream().filter(row -> row.badge() != null).count());
-        var hard = browser.rows(new Query("", Level.HARD, null, null, null));
-        audit.equal("The mastery filter exposes the complete hard tier", 100L,
-                hard.stream().filter(row -> row.badge() != null).count());
-        audit.equal("The filtered catalog begins with the mastery section", "4 · Stăpânește jocul", hard.get(0).title());
+        var hardQuery = new Query("", Level.HARD, null, null, null);
+        var hard = browser.rows(hardQuery);
+        var hardBadges = hard.stream().filter(row -> row.badge() != null).map(AchievementBrowser.Row::badge).toList();
+        audit.equal("The mastery filter exposes the complete hard tier", 100, hardBadges.size());
+        audit.equal("The filter preserves the published order and excludes other tiers",
+                badges.stream().filter(badge -> badge.level() == Level.HARD).toList(), hardBadges);
+        audit.equal("The Romanian projection starts with mastery", "4 · Stăpânește jocul", hard.get(0).title());
+        var english = new AchievementBrowser(new RentzUiText(RentzUiText.Language.EN), null, null).rows(hardQuery);
+        audit.equal("The English projection starts with mastery", "4 · Master the game", english.get(0).title());
+        audit.equal("Changing language preserves every filtered row identity",
+                hard.stream().map(AchievementBrowser.Row::itemId).toList(),
+                english.stream().map(AchievementBrowser.Row::itemId).toList());
         audit.equal("The rare own-ten achievement keeps its published identifier", Level.HARD,
                 badge("s2-ten_clubs-own_ten-once").level());
         audit.equal("The rare king discard moves to Medium", Level.MEDIUM,

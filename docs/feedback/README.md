@@ -6,7 +6,7 @@
 
 - [Interfața Rentz](ATF_Rentz_UI_ToDo.md) urmărește diferențele rămase de interacțiune, geometrie și scor, cu probe de componentă și acceptanță nativă selectivă. [Producătorul UI](../../../atf_j4/docs/feedback/ATF_CardUi_Extraction.md) deține extragerea prin refactorizare; adaptarea nu importă motorul sau regulile Whist.
 - [Integritate și calitate](ATF_RentzQuality.md) deține criteriile strategice și documentare încă deschise. Validarea, lifecycle-ul, guvernanța sursei și [calificarea consumatorului](../rentz/ATF_Qualification.md) au contracte și probe proprii; calificarea nativă rămâne separată.
-- [Criteriile RAG rămase](ATF_Release_RAG.md) urmăresc probele de acceptanță suplimentare. [Ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) descrie fluxul curent și porțile deschise.
+- [Criteriile RAG rămase](ATF_Release_RAG.md) urmăresc probele de acceptanță suplimentare. [Ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) descrie porțile curente.
 - [Extinderea realizărilor](ATF_Rentz_Achievements_ToDo.md) urmărește obiectivele candidate, sincronizarea și probele de accesibilitate rămase. [Integrarea actuală](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
 
 ## Închidere și transfer

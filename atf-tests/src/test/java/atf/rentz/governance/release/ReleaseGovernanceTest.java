@@ -501,10 +501,9 @@ class ReleaseGovernanceTest {
         addUiCheckpoint(checkpoints,"Achievements open at the beginning of the learning path","Onboarding comes before contract goals");
         addUiCheckpoint(checkpoints,"Gameplay catalog opens","Gameplay starts with the first manual hand");
         addUiCheckpoint(checkpoints,"Gameplay and training keep independent progress",
-                "Confirmed manual play grants gameplay credit","Incomplete match cannot grant a terminal title");
+                "Confirmed manual play grants gameplay credit");
         addUiCheckpoint(checkpoints,"Gameplay milestones survive process restart","Same gameplay total after restart");
         addUiCheckpoint(checkpoints,"Achievement search reports an empty result","Empty result is visible and can be reset");
-        addUiCheckpoint(checkpoints,"Full catalog exposes the mastery tier on the table surface","Hard filter exposes 100 achievements in mastery order");
         addUiCheckpoint(checkpoints,"Achievements record manual and assisted play after settlement",
                 "Manual and assisted milestones are recorded separately","Complete catalog records new credit after settlement");
         addUiCheckpoint(checkpoints,"Search and status filter reveal the unlocked lesson","Combined query returns exactly one achievement");

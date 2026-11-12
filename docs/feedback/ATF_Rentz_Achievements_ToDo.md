@@ -4,30 +4,6 @@
 
 **Realizări** prezintă cele 18 obiective de joc din catalogul executabil, câte șase pe nivel. **Antrenament** păstrează cele 800 de obiective și progresul lor salvat. Acest registru urmărește extinderea, importul și probele native rămase. [Integrarea ecranelor și testele](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
 
-## Realizările de joc
-
-| Nivel | Parcurs | Dovadă |
-|---|---|---|
-| Ușor | Prima mână și prima țintă, varietate, două alegeri personale, extinderea unui șir Rentz și prima levată de Whist. | Mâini confirmate, contracte distincte și mutări acceptate de motor. |
-| Mediu | Ținte în patru contracte, partidă completă, clasări la Rentz și la general, plus captura unui 10♣ advers. | La trei locuri, podiumul cere clasarea în primii doi. La mesele mai mari, contează primii trei. |
-| Greu | Mâini curate la Totale, toate țintele, titluri repetate, performanțe la mese mari și serii de levate la Whist. | Praguri de scor, mâini sau partide distincte și proveniența deciziilor. |
-
-- YAML-ul declară nivelul, ordinea, pragul și textele. Gradle validează și generează tabelul tipizat pentru Android.
-- Motorul confirmă rezultatul, iar catalogul acordă credit în paralel. Partida și actualizările profilului se salvează în aceeași operație.
-- Simularea folosește semințe disjuncte pentru calibrare și verificare. Înregistrează prima deblocare pe mână și partidă pentru fiecare profil, apoi compară ordinea, deblocările simultane și configurațiile eligibile.
-- Ordinea recomandată arată o progresie de la regulile comune la performanțele specializate. O deblocare în altă ordine rămâne validă. Suprapunerea dintre două repere se păstrează când aceeași mână dovedește două lucruri distincte.
-- Cohorta Normal folosește politica produsului. Cohorta Greu folosește motorul de căutare cu buget redus declarat în plan. Cohorta mixtă rotește și o politică aleatorie care alege numai mutări legale.
-
-[Catalogul executabil](../../rentz-lab-app/app/src/main/achievement-rules/rentz-gameplay-achievements.yaml) · [Planul simulării](../../rentz-lab-app/config/rentz-achievement-calibration.yaml) · [Lansatorul offline](../../scripts/run-achievement-calibration.ps1) · [Ghidul reutilizabil din Hold’em](https://github.com/crististefanita/atf_j6/blob/feature/j6-gameplay-achievements/docs/design/achievements/README.md)
-
-| Nivel | Ritm orientativ de joc activ | Ce validează |
-|---|---|---|
-| Ușor | O mână sau câteva mâini într-o sesiune | Descoperirea unei reguli, o mutare bună sau progres imediat vizibil. |
-| Mediu | Câteva sesiuni, realizabile în aceeași zi | Repetarea controlată a unei tactici și schimbarea contextului. |
-| Greu | Mai multe sesiuni pe 3–5 zile active | Rezultate pe distribuiri diferite, adaptare și stăpânirea contractelor. |
-
-Duratele sunt ipoteze de calibrare. Publicarea fiecărei familii cere măsurarea timpului activ și a ocaziilor întâlnite, separat de timpul de așteptare și de viteza dispozitivului.
-
 ## Cercetare și decizii
 
 | Reper | Aplicare în Rentz |
@@ -38,15 +14,9 @@ Duratele sunt ipoteze de calibrare. Publicarea fiecărei familii cere măsurarea
 | Catalog Android propriu | Păstrați cele 800 de obiective în Antrenament. Un eventual subset Play Games Services are propriul buget. Google documentează maximum 400 de realizări pe durata de viață a jocului și 2.000 de puncte în total. [Puncte și realizări Android](https://developer.android.com/games/pgs/achievements) |
 | Contracte Rentz | Folosiți profilul de reguli activ pentru măsurare. Jocurile de evitare, captură și secvență au obiective diferite. [Regulile modelului](../rentz/ATF_Rules.md) · [Catalogul jocurilor românești](https://www.pagat.com/national/romania.html) |
 
-## Matrice pentru extindere
+## Extinderea catalogului
 
-| Familie | Ușoare | Medii | Grele |
-|---|---:|---:|---:|
-| Opt contracte, cu 50 / 20 / 10 repere fiecare | 400 | 160 | 80 |
-| Cinci familii transversale, cu 20 / 8 / 4 repere fiecare | 100 | 40 | 20 |
-| **Total** | **500** | **200** | **100** |
-
-Distribuția din tabel descrie Antrenamentul. La extinderea Realizărilor, fiecare obiectiv nou cere un ID stabil, texte RO/EN, prag, dovadă și profil de reguli compatibil.
+Fiecare obiectiv nou cere un ID stabil, texte RO/EN, prag, dovadă și profil de reguli compatibil. [Catalogul implementat și testele](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
 
 ### Ordinea de învățare
 

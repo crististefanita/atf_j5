@@ -927,7 +927,6 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
     Observe 'Gameplay and training keep independent progress' {param($captured)
         Check 'Confirmed manual play grants gameplay credit' $true ($gameplayEarned.Length-gt0-and
             @($progress.marks.'play-first-hand').Count-eq1-and$null-ne$progress.marks.'play-first-hand')
-        Check 'Incomplete match cannot grant a terminal title' $true ($null-eq$progress.marks.'play-first-win')
         Check 'Training has its own route' 1 @($captured|Where-Object text -CEQ 'Training').Count
     }
     Tap 'Training';$null=State -Screen 'TRAINING'
@@ -1087,11 +1086,6 @@ try{
                 (Text $nodes).Contains('First completed hand'))
         }
         Tap 'Training'
-        Observe 'Achievements open at the beginning of the learning path' {param($nodes)
-            Check 'Fresh profile has zero unlocked achievements' 1 @($nodes|Where-Object text -CEQ 'Unlocked 0/800').Count
-            $ordered=@($nodes|Where-Object text -CIn @('1 · Learn the table','First choice','First card')|ForEach-Object text)
-            Check 'Onboarding comes before contract goals' '1 · Learn the table|First choice|First card' ($ordered-join'|')
-        }
         Tap 'Search and filters';EnterAchievementSearch 'zzznomatch'
         Tap 'Apply'
         Observe 'Achievement search reports an empty result' {param($nodes)
@@ -1099,12 +1093,12 @@ try{
                 (Text $nodes).Contains('Search and filters'))
         }
         Tap 'Search and filters';Tap 'Reset'
-        Tap 'Search and filters';Tap 'Difficulty filter' 'android.widget.Spinner';Tap 'Hard';Tap 'Apply'
-        Observe 'Full catalog exposes the mastery tier on the table surface' {param($nodes)
-            Check 'Hard filter exposes 100 achievements in mastery order' $true ((Text $nodes).Contains('Matching achievements 100')-and
-                (Text $nodes).Contains('4 · Master the game'))
-        }
-        Tap 'Search and filters';Tap 'Reset'
+        Observe 'Achievements open at the beginning of the learning path' {
+            param($nodes)
+            Check 'Fresh profile has zero unlocked achievements' 1 @($nodes|Where-Object text -CEQ 'Unlocked 0/800').Count
+            $ordered=@($nodes|Where-Object text -CIn @('1 · Learn the table','First choice','First card')|ForEach-Object text)
+            Check 'Onboarding comes before contract goals' '1 · Learn the table|First choice|First card' ($ordered-join'|')
+        } -UntilText '1 · Learn the table'
         Tap 'Back'
         Tap 'Back'
     }
