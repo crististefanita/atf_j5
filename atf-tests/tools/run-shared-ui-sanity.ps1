@@ -899,7 +899,13 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
             seatGeometryVerified=$true;firstHumanMoveVerified=(ConfirmNativeCheck $points $moveTitle 'The same seat geometry survives a card play');completionVerified=($terminal.view.phase-eq'DEAL_END');
             rentzFinishOrderVerified=($contract-eq'RENTZ'-and$terminal.view.finishOrder.Count-eq$terminal.view.players)})
     }
-    if(@($selectedContracts | Sort-Object -Unique).Count -lt 3){throw 'At least three distinct native contracts are required.'}
+    $rentzGames=@($selectedContracts|Where-Object{$_-ceq'RENTZ'}).Count
+    $standardGames=@($selectedContracts|Where-Object{$_-cne'RENTZ'})
+    if($selectedContracts.Count-ne$consecutiveGameCount){throw "Expected exactly $consecutiveGameCount completed UI games."}
+    if($rentzGames-ne1-or$standardGames.Count-ne($consecutiveGameCount-1)){
+        throw 'The three-game flow must contain one Rentz game and two standard games.'
+    }
+    if(@($selectedContracts|Sort-Object -Unique).Count-lt2){throw 'The completed flow must cover Rentz and at least one standard contract.'}
     $journal=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/session.json') 'consecutive-subgames-journal'
     $journalPath=Join-Path $raw 'consecutive-subgames-journal.json';[IO.File]::WriteAllText($journalPath,$journal.Output,[Text.UTF8Encoding]::new($false))
     $actor=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/actor-view.json') 'consecutive-subgames-actor'
@@ -1225,7 +1231,7 @@ $minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}
 if($HistoryDetails){$minimum+=4}
 if($CompactScores){$minimum++}
 if(-not$failure-and($cleanup.Count-or-not$released-or-not$preserved-or$points.Count-lt$minimum)){$failure='Native closeout failed or the declared checkpoint population is incomplete.'}
-$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: Rentz first, then two distinct contracts, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
+$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: Rentz first, then two standard games, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
 if($HistoryDetails){$scope+='; confirmed blind trick contributions and the actual Rentz finishing places after journal restore'}
 if($ConsecutiveSubgames){$scope+='; learning order, search, filters, eligibility, local profile and durable achievement progress'}
 if($CompactConsecutive){$scope+='; compact 720x1280, density 360, font scale 1.5'}
