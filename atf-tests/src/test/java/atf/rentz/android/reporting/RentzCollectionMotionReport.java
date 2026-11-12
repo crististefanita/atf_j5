@@ -49,15 +49,11 @@ public final class RentzCollectionMotionReport {
     }
 
     private static void register(Path journal, Path ledger, Path output) throws Exception {
-        var fixture = read(journal);
-        var seats = fixture.required("players");
-        var seed = fixture.required("seed");
-        if (!seats.isInt() || !seed.isIntegralNumber() || !seed.canConvertToLong())
-            throw new IllegalArgumentException("Exact fixture players and seed are required");
         String sha = hash(journal);
         String token = UUID.randomUUID().toString().replace("-", "");
         EvaluationRegistry.beginNativeExposure(ledger, token);
-        EvaluationRegistry.completeNativeExposure(ledger, token, seats.intValue(), seed.longValue());
+        EvaluationRegistry.bindNativeExposure(ledger, token, sha);
+        EvaluationRegistry.completeNativeExposure(ledger, token, journal);
         if (!sha.equals(hash(journal))) throw new IllegalArgumentException("Fixture changed during exposure registration");
         JSON.writeValue(output.toFile(), JSON.createObjectNode().put("sha256", sha).put("token", token));
     }

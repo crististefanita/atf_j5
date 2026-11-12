@@ -34,9 +34,14 @@ public final class RentzNativeFlow {
             case "decide" -> decide(Path.of(args[1]));
             case "audit" -> audit(Path.of(args[1]), Path.of(args[2]));
             case "begin-exposure" -> atf.rentz.EvaluationRegistry.beginNativeExposure(Path.of(args[1]), args[2]);
-            case "expose", "complete-exposure" -> recordExposure(args);
+            case "bind-exposure" -> atf.rentz.EvaluationRegistry.bindNativeExposure(Path.of(args[1]), args[2], args[3]);
+            case "complete-exposure" -> {
+                atf.rentz.EvaluationRegistry.completeNativeExposure(Path.of(args[2]), args[3], Path.of(args[1]));
+                System.out.println("{\"exposure\":\"DEVELOPMENT_RECORDED\"}");
+            }
+            case "expose" -> recordExposure(args);
             case "report" -> report(Path.of(args[1]));
-            default -> throw new IllegalArgumentException("decide, audit, begin-exposure, expose, complete-exposure or report");
+            default -> throw new IllegalArgumentException("decide, audit, begin-exposure, bind-exposure, expose, complete-exposure or report");
         }
     }
 
@@ -47,12 +52,8 @@ public final class RentzNativeFlow {
         if (!players.isInt() || !seed.isIntegralNumber() || !seed.canConvertToLong())
             throw new IllegalArgumentException("Native journal exposure needs exact players and seed");
         Path registry = Path.of(args[2]);
-        if (args[0].equals("complete-exposure")) {
-            atf.rentz.EvaluationRegistry.completeNativeExposure(registry, args[3], players.intValue(), seed.longValue());
-        } else {
-            atf.rentz.EvaluationRegistry.expose(registry, players.intValue(), List.of(seed.longValue()),
-                    "DEVELOPMENT", "native-rentz-sanity", "android-native-laboratory-v1");
-        }
+        atf.rentz.EvaluationRegistry.expose(registry, players.intValue(), List.of(seed.longValue()),
+                "DEVELOPMENT", "native-rentz-sanity", "android-native-laboratory-v1");
         System.out.println("{\"exposure\":\"DEVELOPMENT_RECORDED\"}");
     }
     private static RentzMatch.Observation view(Path file)throws Exception{return JSON.treeToValue(JSON.readTree(file.toFile()).required("view"),RentzMatch.Observation.class);}

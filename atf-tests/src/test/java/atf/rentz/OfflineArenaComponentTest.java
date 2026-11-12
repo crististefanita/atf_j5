@@ -206,28 +206,109 @@ class OfflineArenaComponentTest {
         assertFalse(Files.exists(output));
 
         byte[] before = Files.readAllBytes(registry);
-        assertThrows(IllegalArgumentException.class, () -> atf.rentz.android.RentzNativeFlow.main(
-                new String[]{"complete-exposure", journal.toString(), registry.toString(), otherToken}));
+        Path marker = registry.resolveSibling("native-exposure.json.native-pending");
+        byte[] unbound = Files.readAllBytes(marker);
+        Path foreign = Files.writeString(directory.resolve("foreign-journal.json"), "{\"players\":3,\"seed\":488}");
+        assertThrows(IllegalArgumentException.class, () -> completeNativeExposure(registry, token, foreign));
+        assertArrayEquals(unbound, Files.readAllBytes(marker));
+
+        bindNativeExposure(registry, token, journal);
+        byte[] bound = Files.readAllBytes(marker);
+        bindNativeExposure(registry, token, journal);
+        assertArrayEquals(bound, Files.readAllBytes(marker), "Binding the same captured bytes is idempotent");
+        assertThrows(IllegalArgumentException.class, () -> bindNativeExposure(registry, token, foreign));
+        assertThrows(IllegalArgumentException.class, () -> completeNativeExposure(registry, otherToken, journal));
+        assertThrows(IllegalArgumentException.class, () -> completeNativeExposure(registry, token, foreign));
+        Path altered = Files.writeString(directory.resolve("altered-capture.json"), Files.readString(journal) + "\n");
+        assertThrows(IllegalArgumentException.class, () -> completeNativeExposure(registry, token, altered));
         assertArrayEquals(before, Files.readAllBytes(registry));
-        atf.rentz.android.RentzNativeFlow.main(new String[]{"complete-exposure", journal.toString(), registry.toString(), token});
+        assertArrayEquals(bound, Files.readAllBytes(marker));
+        assertThrows(IllegalStateException.class, () ->
+                OfflineArena.run(alias, scoring, settings, output, registry, "source-a"));
+
+        completeNativeExposure(registry, token, journal);
+        assertFalse(Files.exists(marker));
         var refused = assertThrows(IllegalArgumentException.class, () ->
                 OfflineArena.run(alias, scoring, settings, output, registry, "source-a"));
         assertTrue(refused.getMessage().contains("Distribution already exposed"));
         assertFalse(Files.exists(output));
 
-        // Reproduce an interruption after the ledger write, while the same marker remains.
-        byte[] committed = Files.readAllBytes(registry);
-        EvaluationRegistry.beginNativeExposure(registry, token);
-
-        assertThrows(IllegalArgumentException.class, () ->
-                EvaluationRegistry.completeNativeExposure(registry, token, 3, 488L));
-        assertArrayEquals(committed, Files.readAllBytes(registry));
-        atf.rentz.android.RentzNativeFlow.main(new String[]{"complete-exposure", journal.toString(), registry.toString(), token});
-        assertArrayEquals(committed, Files.readAllBytes(registry));
         var distinct = new OfflineArena.Protocol("distinct", "FRESH_EVALUATION", 3, List.of(488L),
                 List.of(OfflineArena.Kind.BASELINE), OfflineArena.Kind.NORMAL, 1, 0);
         assertEquals(3, OfflineArena.run(distinct, scoring, settings, directory.resolve("distinct"), registry, "source-a")
                 .games().size());
+    }
+
+    @Test void nativeExposureRetriesOnlyTheCommittedCaptureAndPreservesOtherReservations() throws Exception {
+        Path registry = directory.resolve("recovery.json");
+        Path marker = directory.resolve("recovery.json.native-pending");
+        String token = "a".repeat(32);
+        Path journal = Files.writeString(directory.resolve("captured.json"), "{\"players\":3,\"seed\":487}");
+        Path altered = Files.writeString(directory.resolve("altered.json"), Files.readString(journal) + "\n");
+        EvaluationRegistry.beginNativeExposure(registry, token);
+        bindNativeExposure(registry, token, journal);
+        byte[] bound = Files.readAllBytes(marker);
+        completeNativeExposure(registry, token, journal);
+        byte[] committed = Files.readAllBytes(registry);
+        assertThrows(IllegalArgumentException.class, () -> EvaluationRegistry.beginNativeExposure(registry, token));
+
+        // Simulate interruption after the atomic ledger write and before marker deletion.
+        Files.write(marker, bound);
+        assertThrows(IllegalArgumentException.class, () -> completeNativeExposure(registry, token, altered));
+        assertArrayEquals(committed, Files.readAllBytes(registry));
+        assertArrayEquals(bound, Files.readAllBytes(marker));
+        completeNativeExposure(registry, token, journal);
+        assertFalse(Files.exists(marker));
+        assertArrayEquals(committed, Files.readAllBytes(registry));
+
+        completeNativeExposure(registry, token, journal);
+        assertThrows(IllegalArgumentException.class, () -> completeNativeExposure(registry, token, altered));
+        String nextToken = "b".repeat(32);
+        EvaluationRegistry.beginNativeExposure(registry, nextToken);
+        bindNativeExposure(registry, nextToken, altered);
+        byte[] nextMarker = Files.readAllBytes(marker);
+        completeNativeExposure(registry, token, journal);
+        assertArrayEquals(nextMarker, Files.readAllBytes(marker));
+        assertArrayEquals(committed, Files.readAllBytes(registry));
+    }
+
+    @Test void legacyPendingCommitRequiresTheVerifiedCaptureBeforeItCanBeResumed() throws Exception {
+        var json = new ObjectMapper();
+        Path registry = directory.resolve("legacy.json");
+        Path marker = directory.resolve("legacy.json.native-pending");
+        String token = "a".repeat(32);
+        Path journal = Files.writeString(directory.resolve("verified.json"), "{\"players\":3,\"seed\":487}");
+        var legacy = json.createObjectNode().put("schemaVersion", 1).put("domain", "rentz")
+                .put("generator", "jvm-shuffle-eight-cards-v1");
+        legacy.putArray("exposures").addObject().put("players", 3).put("seed", 487)
+                .put("phase", "DEVELOPMENT").put("batch", "native-shared-ui-" + token)
+                .put("sourceIdentity", "android-native-laboratory-v1").put("state", "EXPOSED_BEFORE_EXECUTION");
+        json.writeValue(registry.toFile(), legacy);
+        Files.writeString(marker, token);
+
+        assertThrows(IllegalArgumentException.class, () -> completeNativeExposure(registry, token, journal));
+        assertEquals(token, Files.readString(marker));
+        assertEquals(legacy, json.readTree(registry.toFile()));
+        bindNativeExposure(registry, token, journal);
+        completeNativeExposure(registry, token, journal);
+        assertFalse(Files.exists(marker));
+        var exposures = json.readTree(registry.toFile()).required("exposures");
+        assertEquals(1, exposures.size());
+        assertTrue(exposures.get(0).required("sourceIdentity").asText().startsWith("android-native-laboratory-v1:sha256:"));
+        byte[] committed = Files.readAllBytes(registry);
+        completeNativeExposure(registry, token, journal);
+        assertArrayEquals(committed, Files.readAllBytes(registry));
+    }
+
+    private static void bindNativeExposure(Path registry, String token, Path journal) throws Exception {
+        byte[] digest = java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(journal));
+        atf.rentz.android.RentzNativeFlow.main(new String[]{"bind-exposure", registry.toString(), token,
+                HexFormat.of().formatHex(digest)});
+    }
+
+    private static void completeNativeExposure(Path registry, String token, Path journal) throws Exception {
+        atf.rentz.android.RentzNativeFlow.main(
+                new String[]{"complete-exposure", journal.toString(), registry.toString(), token});
     }
 
     @Test void promotionRefusesAGenuineRunWithDifferentScoring() throws Exception {

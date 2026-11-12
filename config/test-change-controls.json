@@ -135,11 +135,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/android/reporting/RentzCollectionMotionReport.java",
       "owner": "Rentz UI",
-      "reason": "Native collection, score page and human contract advice.",
-      "criterion": "Keep captured Android comparisons and presentation-only choices independently reproducible.",
+      "reason": "Native collection, score page and human contract advice. Q32 adds capture binding.",
+      "criterion": "Keep captured Android comparisons and presentation-only choices independently reproducible. Bind the qualified fixture digest before completing the exposure in the installation ledger.",
       "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "7ac533db47ca9e46a8692a58818b923c5334487709b756c0d639f834521b7571",
+      "sha256": "846eb16fd7c8bd91dfc032765ff7514d276b4b89ea263abae427c04ecb3843e0",
       "allowDelete": false
     },
     {
@@ -275,11 +275,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java",
       "owner": "Rentz release",
-      "reason": "Rentz release · Require the consecutive-game Android acceptance to be explicit in the native report.",
-      "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim.",
+      "reason": "Rentz release · Require the consecutive-game Android acceptance to be explicit in the native report. Q32 adds capture binding.",
+      "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim. Capture binding and completion use the registry contract. An arbitrary journal with the correct token cannot complete a bound reservation.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "e57ee650e5c8a9a431b6fc2ba8b17c6f2b2c37b141e6a139880bf1c4ea7857ee",
+      "sha256": "7ae4199909bc5156133018cabba1c6429b739fb6a2d051c563cce2ad58726046",
       "allowDelete": false
     },
     {
@@ -635,11 +635,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/OfflineArenaComponentTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting.",
-      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry.",
+      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting. Q32 adds capture binding.",
+      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry. The captured bytes refuse a foreign journal and same-seed edits before commit. The exact capture resumes after either interruption boundary, keeps other reservations, and blocks aliases.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "d90851db2fa74ebed0c428e4b4c9edef17e77880377575222eacbd0968d20e5d",
+      "sha256": "63cd4ea8982696d092b1c8b5cbc7a049a93a5c4a4ff83850025c0b1b5e94cc19",
       "allowDelete": false
     },
     {
@@ -705,11 +705,11 @@
     {
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz consumer",
-      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting.",
-      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry. Remote README fixtures exercise both distribution channels and reject extra copy or routes.",
+      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting. Q32 adds capture binding.",
+      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry. Remote README fixtures exercise both distribution channels and reject extra copy or routes. The offline launcher fixture requires reservation, binding of the captured bytes and completion in that order.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "93719ee8a9ac3887aaf8241bfe8d5058002b3312c53c62f00865f5a49c72db4d",
+      "sha256": "6a53c8a0863a826819dcfaaad2b71b1903fdd5755152d80fe667896c536b3adc",
       "allowDelete": false
     },
     {
@@ -1165,11 +1165,11 @@
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz release",
-      "reason": "Verify identical seat rectangles through the first real chooser transition.",
-      "criterion": "Capture the chooser and game frames, check the active actor and full hand height, and preserve the five-deal native contract.",
+      "reason": "Verify identical seat rectangles through the first real chooser transition. Q32 adds capture binding.",
+      "criterion": "Capture the chooser and game frames, check the active actor and full hand height, and preserve the five-deal native contract. Bind the digest taken at the capture before completing the same native reservation through the qualified runtime.",
       "proof": "docs/rentz/ATF_Android.md",
       "expires": "2026-11-20",
-      "sha256": "137488959ae96088493baba53ea9f05e4d1a01d0ac9111e373c903349e598c01",
+      "sha256": "9cc4e8524c8a3935da92530b67aed450f5f8a93a9fa29d6c808af2c175e01caf",
       "allowDelete": false
     },
     {

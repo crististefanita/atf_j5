@@ -13,7 +13,6 @@ Registrul separă mecanismele implementate de promovarea strategică și de inte
 
 | ID | Prioritate | Statut și impact | Responsabil |
 |---|---|---|---|
-| Q32 | P1 | Recuperarea poate debloca un lot rezervat fără a înregistra distribuirea din jurnalul capturat. | Adaptorul și registrul expunerilor. |
 | Q08 | P2 | Obiective și continuare completă implementate offline; promovarea produsului cere progres independent și integrare proprie. | Politicile și protocolul AI. |
 
 
@@ -78,14 +77,6 @@ Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; 
 - Moștenirea din dependențe externe necunoscute cere surse disponibile ori o interfață testată ca lipsită de teste; o excepție nominală fără probă nu este un mecanism de descoperire.
 - Admiterea unui rezumat coerent nu autentifică expeditorul și nu înlocuiește auditul tranzițiilor sau verificarea fișierelor jurnal.
 - Progresul strategic și integrarea nativă păstrează criteriile separate de mai sus; remedierea porților nu promovează profilul AI.
-
-## Constatări deschise
-
-| ID | Reproducere și impact | Criteriu de închidere |
-|---|---|---|
-| Q32 | [Adaptorul](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) acceptă un jurnal valid din altă rulare la prima completare cu tokenul corect. Registrul înregistrează distribuirea străină, iar un alias al distribuirii capturate poate intra în lotul rezervat. Proba offline acoperă recuperarea, nu traseul normal din interfață. | Legați marcajul de identitatea rulării și de dovada capturii înainte de a permite prima completare. Cu două jurnale valide, cel străin trebuie refuzat fără ștergerea marcajului; cel corect trebuie să blocheze toate aliasurile. Păstrați reluarea idempotentă după scriere. |
-
-[Reproducerea offline](../../../../rentz_back/infrastructure/governance/20261107-post-q31-review/findings.log) folosește registre temporare și nu modifică loturile active. Închideți întâi Q32: integritatea lotului este precondiție pentru orice rezultat de forță.
 
 ## Închideri și documente responsabile
 

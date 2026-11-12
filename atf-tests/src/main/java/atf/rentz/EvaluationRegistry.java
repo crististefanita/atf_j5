@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.*;
 import java.io.IOException;
 import java.nio.channels.*;
 import java.nio.file.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import ro.rentzlab.core.deal.DealSeed;
 
@@ -18,6 +20,12 @@ public final class EvaluationRegistry {
     private static final Set<String> V2_FIELDS = Set.of("schemaVersion", "domain", "generator", "exposures", "review");
     private static final Set<String> ENTRY_FIELDS = Set.of("players", "seed", "phase", "batch", "sourceIdentity", "state");
     private static final Set<String> PHASES = Set.of("DEVELOPMENT", "FRESH_EVALUATION");
+    private static final String NATIVE_BATCH = "native-shared-ui-";
+    private static final String NATIVE_SOURCE = "android-native-laboratory-v1";
+    private record NativeCapture(String token, String sha256) {
+        String marker() { return token + "\n" + sha256; }
+        String source() { return NATIVE_SOURCE + ":sha256:" + sha256; }
+    }
 
     private EvaluationRegistry() { }
 
@@ -79,18 +87,65 @@ public final class EvaluationRegistry {
         checkPhysicalPath(target);
         Files.createDirectories(target.getParent());
         try (var channel = lockChannel(target); var lock = acquire(channel)) {
-            try {
-                Files.writeString(pendingFile(target), token, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
-            } catch (FileAlreadyExistsException pending) {
-                throw new IllegalStateException("An unresolved native exposure already exists", pending);
-            }
+            Path pending = pendingFile(target);
+            if (Files.exists(pending, LinkOption.NOFOLLOW_LINKS))
+                throw new IllegalStateException("An unresolved native exposure already exists");
+            if (Files.exists(target) && recordedCapture(read(target).required("exposures"), token) != null)
+                throw new IllegalArgumentException("Native exposure token was already committed");
+            write(pending, token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         }
     }
 
-    public static void completeNativeExposure(Path registry, String token, int players, long seed) throws IOException {
+    public static void bindNativeExposure(Path registry, String token, String captureSha256) throws IOException {
         requireNativeToken(token);
-        expose(registry, players, List.of(seed), "DEVELOPMENT", "native-shared-ui-" + token,
-                "android-native-laboratory-v1", false, token);
+        if (captureSha256 == null || !captureSha256.matches("[a-fA-F0-9]{64}"))
+            throw new IllegalArgumentException("Invalid native capture SHA-256");
+        var capture = new NativeCapture(token, captureSha256.toLowerCase(Locale.ROOT));
+        Path target = registry.toAbsolutePath().normalize();
+        checkPhysicalPath(target);
+        try (var channel = lockChannel(target); var lock = acquire(channel)) {
+            Path pending = pendingFile(target);
+            String marker = readPending(pending);
+            if (marker.equals(capture.marker())) return;
+            if (!marker.equals(token))
+                throw new IllegalArgumentException("Native exposure cannot be rebound to another capture or token");
+            write(pending, capture.marker().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        }
+    }
+
+    public static void completeNativeExposure(Path registry, String token, Path journal) throws IOException {
+        requireNativeToken(token);
+        byte[] bytes = Files.readAllBytes(journal);
+        var saved = JSON.readTree(bytes);
+        if (saved == null || !saved.isObject()) throw new IllegalArgumentException("Native journal object required");
+        var players = saved.required("players");
+        var seed = saved.required("seed");
+        if (!players.isInt() || !seed.isIntegralNumber() || !seed.canConvertToLong())
+            throw new IllegalArgumentException("Native journal exposure needs exact players and seed");
+        var capture = new NativeCapture(token, sha256(bytes));
+        expose(registry, players.intValue(), List.of(seed.longValue()), "DEVELOPMENT", NATIVE_BATCH + token,
+                capture.source(), false, capture);
+    }
+
+    private static String sha256(byte[] bytes) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+        } catch (NoSuchAlgorithmException unavailable) {
+            throw new IllegalStateException("SHA-256 unavailable", unavailable);
+        }
+    }
+
+    private static String readPending(Path marker) throws IOException {
+        if (!Files.exists(marker, LinkOption.NOFOLLOW_LINKS)) return "";
+        if (!Files.isRegularFile(marker, LinkOption.NOFOLLOW_LINKS))
+            throw new IllegalArgumentException("Invalid native exposure marker");
+        return Files.readString(marker);
+    }
+
+    private static ObjectNode recordedCapture(JsonNode exposures, String token) {
+        for (var prior : exposures)
+            if (prior.path("batch").asText().equals(NATIVE_BATCH + token)) return (ObjectNode) prior;
+        return null;
     }
 
     private static Path pendingFile(Path target) {
@@ -103,10 +158,11 @@ public final class EvaluationRegistry {
     }
 
     private static void expose(Path registry, int players, List<Long> seeds, String phase, String batch,
-                               String sourceIdentity, boolean requireReview, String nativeToken) throws IOException {
+                               String sourceIdentity, boolean requireReview, NativeCapture capture) throws IOException {
         var batchSeeds = List.copyOf(seeds);
         if (players < 3 || players > 6 || batchSeeds.isEmpty() || !PHASES.contains(phase)
-                || batch.isBlank() || sourceIdentity.isBlank()) throw new IllegalArgumentException("Exposure identity");
+                || batch.isBlank() || sourceIdentity.isBlank() || (capture == null && batch.startsWith(NATIVE_BATCH)))
+            throw new IllegalArgumentException("Exposure identity");
         var requested = DealSeed.requireDistinct(batchSeeds);
         Path target = registry.toAbsolutePath().normalize();
         if (requireReview && !Files.isRegularFile(target, LinkOption.NOFOLLOW_LINKS))
@@ -117,25 +173,15 @@ public final class EvaluationRegistry {
             Path pending = pendingFile(target);
             if (requireReview && Files.exists(pending, LinkOption.NOFOLLOW_LINKS))
                 throw new IllegalStateException("Fresh evaluation blocked by unresolved native exposure");
-            if (nativeToken != null && (!Files.isRegularFile(pending, LinkOption.NOFOLLOW_LINKS)
-                    || !nativeToken.equals(Files.readString(pending))))
-                throw new IllegalArgumentException("Native exposure token differs from the pending marker");
             ObjectNode root = Files.exists(target) ? read(target) : emptyHistory();
             if (requireReview && !root.has("review"))
                 throw new IllegalArgumentException("Fresh evaluation requires an initialized exposure registry");
             if (root.has("review") && !Path.of(text(root.required("review"), "registry")).equals(target))
                 throw new IllegalArgumentException("Reviewed exposure registry is bound to another path");
             var exposed = (ArrayNode) root.required("exposures");
+            if (capture != null && resumeCapture(target, pending, root, capture, players, batchSeeds.getFirst()))
+                return;
             for (var prior : exposed) {
-                if (nativeToken != null && prior.path("batch").asText().equals(batch)) {
-                    if (prior.path("players").intValue() != players || prior.path("seed").longValue() != batchSeeds.getFirst()
-                            || !phase.equals(prior.path("phase").asText())
-                            || !sourceIdentity.equals(prior.path("sourceIdentity").asText()))
-                        throw new IllegalArgumentException("Native exposure token was recorded for another deal");
-                    // A previous process may have stopped after the atomic registry write.
-                    Files.delete(pending);
-                    return;
-                }
                 if (prior.path("players").intValue() != players) continue;
                 long previousSeed = prior.path("seed").longValue();
                 Long seed = requested.get(DealSeed.effective(previousSeed));
@@ -150,8 +196,35 @@ public final class EvaluationRegistry {
                         .put("sourceIdentity", sourceIdentity).put("state", "EXPOSED_BEFORE_EXECUTION");
             }
             write(target, root);
-            if (nativeToken != null) Files.delete(pending);
+            if (capture != null) Files.delete(pending);
         }
+    }
+
+    /** Verifies the reservation or reconciles an already committed capture under the registry lock. */
+    private static boolean resumeCapture(Path target, Path pending, ObjectNode root, NativeCapture capture,
+                                         int players, long seed) throws IOException {
+        String marker = readPending(pending);
+        boolean matches = marker.equals(capture.marker());
+        var prior = recordedCapture(root.required("exposures"), capture.token());
+        if (prior == null) {
+            if (!matches) throw new IllegalArgumentException("Native journal differs from the bound capture");
+            return false;
+        }
+        if (prior.path("players").intValue() != players || prior.path("seed").longValue() != seed
+                || !prior.path("phase").asText().equals("DEVELOPMENT"))
+            throw new IllegalArgumentException("Native exposure token was recorded for another deal");
+        String original = prior.path("sourceIdentity").asText();
+        if (matches && original.equals(NATIVE_SOURCE)) {
+            // A legacy write can be reconciled only while its verified capture is still reserved.
+            prior.put("sourceIdentity", capture.source());
+            write(target, root);
+        } else if (!original.equals(capture.source())) {
+            throw new IllegalArgumentException("Native journal differs from the committed capture");
+        }
+        if (matches) Files.delete(pending);
+        else if (marker.equals(capture.token()) || marker.startsWith(capture.token() + "\n"))
+            throw new IllegalArgumentException("Native journal differs from the pending capture");
+        return true;
     }
 
     private static ObjectNode emptyHistory() {
@@ -213,9 +286,13 @@ public final class EvaluationRegistry {
     }
 
     private static void write(Path target, ObjectNode root) throws IOException {
+        write(target, JSON.writerWithDefaultPrettyPrinter().writeValueAsBytes(root));
+    }
+
+    private static void write(Path target, byte[] bytes) throws IOException {
         Path temporary = Files.createTempFile(target.getParent(), "rentz-exposure-", ".tmp");
         try {
-            JSON.writerWithDefaultPrettyPrinter().writeValue(temporary.toFile(), root);
+            Files.write(temporary, bytes);
             Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         } finally {
             Files.deleteIfExists(temporary);

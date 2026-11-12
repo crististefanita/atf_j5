@@ -127,8 +127,11 @@ Case 'Shared native exposure completes at capture without starting a report' {
     $journal=Join-Path $fixture 'shared-development-journal.json'
     '{"players":3,"seed":487}'|Set-Content -LiteralPath $journal -Encoding utf8NoBOM
     Complete-DevelopmentExposure $journal $token
-    Require ($requests.Count -eq 2 -and $requests[1][0] -ceq 'complete-exposure' -and $requests[1][2] -eq $developmentLedger) 'Capture must commit to the shared ledger'
-    Require ($requests[1][3] -ceq $token -and $developmentExposures.Count -eq 1 -and $developmentExposures[0].sha256 -eq (Hash $journal)) 'Captured journal evidence differs'
+    $sha256=Hash $journal
+    Require ($requests.Count -eq 3 -and $requests[1][0] -ceq 'bind-exposure' -and $requests[2][0] -ceq 'complete-exposure') 'Capture must bind before completing'
+    Require ($requests[1][1] -eq $developmentLedger -and $requests[1][2] -ceq $token -and $requests[1][3] -eq $sha256) 'Reservation must bind the captured bytes'
+    Require ($requests[2][1] -eq $journal -and $requests[2][2] -eq $developmentLedger -and $requests[2][3] -ceq $token) 'Completion must use the bound reservation'
+    Require ($developmentExposures.Count -eq 1 -and $developmentExposures[0].sha256 -eq $sha256) 'Captured journal evidence differs'
 }
 if(-not$NativePublicationScript){$NativePublicationScript=Join-Path $project 'atf-tests/tools/run-android-sanity.ps1'}
 $publicationTokens=$null;$publicationErrors=$null

@@ -228,13 +228,16 @@ La schimbarea generatorului, definiți întâi echivalența distribuirilor și t
 | Etapă | Contract |
 |---|---|
 | Înaintea distribuirii | Lansatorul obține un marcaj în registrul comun, sub același lock. O evaluare rezervată refuză pornirea cât timp există o expunere nativă nerezolvată. |
-| Jurnal disponibil | Adaptorul înregistrează seed-ul și numărul de jucători. După scrierea atomică a registrului, eliberează marcajul. Jurnalul de istoric cunoscut este înregistrat înainte de încărcare. |
+| Jurnal disponibil | La captură, lansatorul asociază SHA-256 cu tokenul prin `bind-exposure`. `complete-exposure` verifică octeții jurnalului și înregistrează seed-ul, numărul de jucători și hash-ul. Marcajul se eliberează după scrierea atomică. Jurnalul de istoric este înregistrat înainte de încărcare. |
 | Publicare | Receipt-ul păstrează numele, SHA-256 și tokenul jurnalului. Raportorul verifică dovezile și păstrează accesul la receipt-urile istorice. |
 
 Pentru un traseu care pornește o partidă sau încarcă un jurnal, folosiți un rezultat de componente care califică adaptorul nativ. Indicați directorul prin ComponentRun dacă build-ul nu îl declară. Traseul de ajutor rămâne fără expunere de distribuiri.
 
-- **Reluare.** Pentru un jurnal verificat, reexecutați comanda adaptorului complete-exposure cu jurnalul, registrul și tokenul original, prin classpath-ul calificat. O scriere deja confirmată pentru același token este recunoscută.
-- **Întrerupere.** Dacă jurnalul lipsește sau proveniența lui nu poate fi verificată, păstrați marcajul. Adaptorul respinge un token străin și, după prima scriere, un seed care contrazice înregistrarea aceluiași token. Înaintea primei scrieri, asocierea cu jurnalul rulării trebuie verificată separat; [feedback-ul tehnic](../feedback/ATF_RentzQuality.md#constatări-deschise) urmărește automatizarea acestei verificări.
+- **Reluare.** Reexecutați `complete-exposure <jurnal> <registru> <token>` prin classpath-ul calificat. O înregistrare cu același token și SHA-256 este recunoscută inclusiv după eliberarea marcajului. Reluarea păstrează rezervările altor rulări.
+- **Întrerupere înainte de asociere.** Verificați jurnalul original în dovezile rulării, apoi folosiți `bind-exposure <registru> <token> <sha256>`. Păstrați marcajul când captura lipsește sau identitatea ei rămâne incertă.
+- **Recuperarea unui marcaj vechi.** Un marcaj cu token simplu urmează aceeași verificare a capturii. Dacă registrul conține deja o expunere pentru token, asocierea verificată trebuie să confirme și seed-ul și numărul de jucători înregistrate.
+
+[Componentele registrului](../../atf-tests/src/test/java/atf/rentz/OfflineArenaComponentTest.java) verifică jurnalul străin, octeții modificați, blocarea aliasului distribuirii și reluarea după scriere.
 
 | Interpretare | Regulă |
 |---|---|

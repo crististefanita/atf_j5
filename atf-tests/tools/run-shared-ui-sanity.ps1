@@ -68,6 +68,7 @@ function Start-DevelopmentExposure {
 }
 function Complete-DevelopmentExposure([string]$Journal,[string]$Token){
     $sha256=(Get-FileHash -LiteralPath $Journal).Hash
+    Invoke-DevelopmentExposure @('bind-exposure',$developmentLedger,$Token,$sha256)
     Invoke-DevelopmentExposure @('complete-exposure',$Journal,$developmentLedger,$Token)
     if((Get-FileHash -LiteralPath $Journal).Hash -ne $sha256){throw 'Native exposure journal changed during registration.'}
     $developmentExposures.Add([ordered]@{journal=[IO.Path]::GetFileName($Journal);sha256=$sha256;token=$Token})
