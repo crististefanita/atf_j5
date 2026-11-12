@@ -124,12 +124,20 @@ public final class SessionController implements AutoCloseable {
         if(pending!=null)return false;
         var origin=requireSession();var input=origin.save();long ticket=++generation;
         var task=new FutureTask<Void>(()->{
-            try{var candidate=GameSession.restore(input);turn.bots(candidate);dispatch(ticket,origin,input,candidate,null);}
-            catch(Exception error){dispatch(ticket,origin,input,null,error);}
+            long started=System.nanoTime();
+            trace("worker-start",ticket,input.commands().size());
+            try{
+                var candidate=GameSession.restore(input);
+                turn.bots(candidate);
+                trace("worker-ready",ticket,candidate.save().commands().size(),started);
+                dispatch(ticket,origin,input,candidate,null);
+            }
+            catch(Exception error){trace("worker-failed",ticket,input.commands().size());dispatch(ticket,origin,input,null,error);}
             return null;
         });
         pending=task;
         pendingHumanAutomation=humanAutomation;
+        trace("submit",ticket,input.commands().size());
         try{worker.execute(task);return true;}
         catch(RuntimeException error){
             if(pending==task){clearPending();generation++;}
@@ -138,6 +146,7 @@ public final class SessionController implements AutoCloseable {
     }
     private void dispatch(long ticket,GameSession origin,GameSession.Saved input,GameSession candidate,Exception failure){
         synchronized(this){if(closed||!active||ticket!=generation||pending==null)return;}
+        trace("dispatch",ticket,candidate==null?input.commands().size():candidate.save().commands().size());
         try{delivery.execute(()->accept(ticket,origin,input,candidate,failure));}
         catch(RuntimeException rejected){synchronized(this){if(ticket==generation){clearPending();generation++;}}}
     }
@@ -145,12 +154,22 @@ public final class SessionController implements AutoCloseable {
         if(closed||!active||ticket!=generation||pending==null)return;
         clearPending();
         if(session!=origin||!session.save().equals(input))return;
+        trace("accept",ticket,candidate==null?input.commands().size():candidate.save().commands().size());
         owner.runIfCurrent(()->{
             if(failure!=null){listener.failed(failure);return;}
             try{if(!candidate.save().equals(input))commit(candidate);}
             catch(Exception error){listener.failed(error);return;}
             listener.ready();
         });
+    }
+    private static void trace(String stage,long ticket,int revision){
+        if(ro.rentzlab.app.BuildConfig.DEBUG)
+            TurnTrace.record("controller-"+stage+" ticket="+ticket+" revision="+revision);
+    }
+    private static void trace(String stage,long ticket,int revision,long started){
+        if(ro.rentzlab.app.BuildConfig.DEBUG)
+            TurnTrace.record("controller-"+stage+" ticket="+ticket+" revision="+revision
+                    +" elapsedMillis="+((System.nanoTime()-started)/1_000_000L));
     }
     public synchronized void publish(String screen) throws Exception {
         publish(screen, false);

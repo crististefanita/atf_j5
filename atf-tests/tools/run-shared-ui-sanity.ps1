@@ -1182,7 +1182,7 @@ try{
     $failure=$_.Exception.ToString()+"
 Invocation: "+$_.InvocationInfo.PositionMessage+"
 ScriptStackTrace: "+$_.ScriptStackTrace
-    if($owned){try{Adb @('shell','logcat','-d','-t','150','-s','AndroidRuntime:E') 'failure-logcat'|Out-Null}catch{$cleanup.Add($_.Exception.ToString())}}
+    if($owned){try{Adb @('shell','logcat','-d','-t','300','-s','RentzTurn:D','RentzLab:E','AndroidRuntime:E') 'failure-logcat'|Out-Null}catch{$cleanup.Add($_.Exception.ToString())}}
 }finally{
     if($owned){
         if($displayChanged){

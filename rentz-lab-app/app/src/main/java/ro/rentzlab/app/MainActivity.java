@@ -13,6 +13,7 @@ import ro.cardtable.ui.menu.HomeMenuContent;
 import ro.cardtable.ui.profile.PlayerNameDialog;
 import ro.cardtable.ui.screens.ScreenViews;
 import ro.rentzlab.app.lifecycle.SessionController;
+import ro.rentzlab.app.lifecycle.TurnTrace;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.app.ui.navigation.*;
 import ro.rentzlab.app.ui.profile.*;
@@ -50,6 +51,7 @@ public final class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
+        if (BuildConfig.DEBUG) TurnTrace.install(message -> android.util.Log.d("RentzTurn", message));
         profile = new ProfileSettings(new AndroidPreferences(this));
         views = new ScreenViews(this, id -> copy().selector(id), WindowContent::protect);
         picker = new RentzContractPicker(this);
@@ -251,6 +253,7 @@ public final class MainActivity extends Activity {
             });
             else animateCollection(panel, frame);
         } else if (automaticTurn && !controller.isBusy()) {
+            traceTurn("schedule-request", frame);
             Runnable move;
             if (forcedPass) {
                 move = () -> command(permit, () -> new GameSession.Command(GameSession.Action.PASS, 0, null, null, false));
@@ -262,7 +265,19 @@ public final class MainActivity extends Activity {
             TurnPacing.afterVisibleFrame(automaticTurn,
                     preview.remaining(SystemClock.uptimeMillis()) > 0,
                     action -> afterFirstFrame(panel, frame, action),
-                    () -> gameFrame(frame) && !controller.isBusy(), display::postDelayed, move);
+                    () -> gameFrame(frame) && !controller.isBusy(),
+                    (action, delay) -> {
+                        traceTurn("delay-scheduled-" + delay, frame);
+                        display.postDelayed(() -> {
+                            traceTurn("delay-fired", frame);
+                            action.run();
+                        }, delay);
+                    },
+                    () -> {
+                        traceTurn("automatic-action-start", frame);
+                        move.run();
+                        traceTurn("automatic-action-return", frame);
+                    });
         }
     }
     private void stopAutoPlay() {
@@ -274,12 +289,22 @@ public final class MainActivity extends Activity {
         observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override public boolean onPreDraw() {
                 (observer.isAlive() ? observer : panel.getViewTreeObserver()).removeOnPreDrawListener(this);
+                traceTurn("first-frame", frame);
                 if (gameFrame(frame)) action.run();
                 return true;
             }
         });
     }
     private boolean gameFrame(long frame) { return active && generation == frame && screen.equals("GAME"); }
+    private void traceTurn(String stage, long frame) {
+        if (!BuildConfig.DEBUG) return;
+        var current = controller == null ? null : controller.session();
+        var view = current == null ? null : current.view();
+        TurnTrace.record(stage + " frame=" + frame + " current=" + gameFrame(frame)
+                + " controllerBusy=" + (controller != null && controller.isBusy())
+                + " phase=" + (view == null ? "none" : view.phase())
+                + " turn=" + (view == null ? -1 : view.turn()));
+    }
     private void animateCollection(RentzTablePanel panel, long frame) {
         Runnable refresh = () -> { if (gameFrame(frame)) redraw(); };
         long attachedAt = SystemClock.uptimeMillis();

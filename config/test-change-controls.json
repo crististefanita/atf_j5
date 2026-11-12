@@ -1193,13 +1193,23 @@
       "allowDelete": false
     },
     {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/TurnTraceTest.java",
+      "owner": "Rentz release",
+      "reason": "Verify the turn-scheduling diagnostic sink remains optional and safe for Android JVM components.",
+      "criterion": "Prove the default trace path is a no-op, injected sinks receive stages, and reset prevents cross-test leakage.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#componenta",
+      "expires": "2026-11-20",
+      "sha256": "f9f57a2f2e10ce24a8422370cbff3d0d390bf60faaee9d9496377285334e8128",
+      "allowDelete": false
+    },
+    {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz release",
-      "reason": "Verify identical seat rectangles through the first real chooser transition and bind the captured native journal to its reservation.",
-      "criterion": "Preserve three complete deals, native geometry, search, empty results and reset, eligibility, progress and restart. Require the capture digest before completing the native reservation. Qualify Hard catalog breadth and terminal victory eligibility in Android JVM.",
+      "reason": "Verify identical seat rectangles through the first real chooser transition, bind the captured native journal to its reservation, and expose debug-only turn-scheduling stages when a UI action stalls.",
+      "criterion": "Preserve three complete deals, native geometry, search, empty results and reset, eligibility, progress and restart. Require the capture digest before completing the native reservation. On a stalled turn retain frame, timer, controller worker and acceptance stages in failure evidence. Qualify Hard catalog breadth and terminal victory eligibility in Android JVM.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "353f5c68579a16a3b0d23c62f69b7027a5aaa65bb56f8b00c8a8b1099d005080",
+      "sha256": "430459f0e0341ab4300e49ce60c563ddef2095a7518f3d2e228945985db4d357",
       "allowDelete": false
     },
     {
