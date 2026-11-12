@@ -351,6 +351,49 @@ class ReleaseGovernanceTest {
         assertEquals("BLOCKED",gate(wrongCandidate,"android-jvm").path("status").asText());
     }
 
+    @Test void failedMavenRetainsItsVerdictWhenAndroidJvmWasNotRun() throws Exception {
+        Path root = ragProject();
+        Path run = passingComponentRun(root, "rag-failed-maven");
+        Path result = run.resolve("result.json");
+        var receipt = (com.fasterxml.jackson.databind.node.ObjectNode) JSON().readTree(result.toFile());
+        receipt.put("status", "FAIL").put("androidJvm", "");
+        Files.delete(run.resolve("android-jvm/TEST-app.xml"));
+        Files.delete(run.resolve("android-jvm/result.json"));
+        Files.delete(run.resolve("component-suite-extent.html"));
+
+        Path gameCore = Files.createDirectory(run.resolve("rentz-lab-app-game-core"));
+        Path failingXml = gameCore.resolve("TEST-sample.CoreTest.xml");
+        Files.writeString(failingXml, """
+                <testsuite name="sample.CoreTest" tests="1" failures="1" errors="0" skipped="0">
+                  <testcase classname="sample.CoreTest" name="scores"><failure message="fixture failure"/></testcase>
+                </testsuite>
+                """);
+        var rows = (com.fasterxml.jackson.databind.node.ArrayNode) receipt.required("results");
+        rows.insert(0, JSON().createObjectNode().put("module", "rentz-lab-app/game-core")
+                .put("name", "sample.CoreTest").put("tests", 1).put("failed", 1).put("errors", 0).put("skipped", 0));
+        Path atfXml = run.resolve("atf-tests/TEST-sample.ComponentTest.xml");
+        writeSuiteEvidence(run, receipt, List.of(
+                new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput(
+                        "rentz-lab-app/game-core", "sample.CoreTest", failingXml, sha(failingXml), 1, 1, 0, 0),
+                new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput(
+                        "atf-tests", "sample.ComponentTest", atfXml, sha(atfXml), 1, 0, 0, 0)), 1);
+        String original = sha(result);
+
+        Path output = temporary.resolve("rag-failed-maven-report");
+        ReleaseReadinessRag.main(new String[]{root.toString(), output.toString(), "APK build release", run.toString()});
+        var report = JSON().readTree(output.resolve("release-rag-report.json").toFile());
+        assertEquals("FAIL", gate(report, "offline-regression").path("status").asText(), "Maven retains the original failure");
+        assertEquals("NOT_RUN", gate(report, "android-jvm").path("status").asText(), "No Android JVM result is invented");
+        assertEquals("PASS", gate(report, "component-extent-report").path("status").asText(), "Extent matches the failed execution");
+        assertEquals("BLOCKED", report.path("aggregate").asText(), "The release gate stays blocked");
+        assertFalse(report.path("releaseWorkflow").path("readyForProductBuild").asBoolean());
+        assertFalse(report.path("mayPublish").asBoolean());
+        assertEquals(original, sha(result), "The original failed receipt is preserved byte for byte");
+        String html = Files.readString(output.resolve("release-rag-failure-extent.html"));
+        for (String value : List.of("Maven regression", "Android JVM", "NOT_RUN", "BLOCKED", original))
+            assertTrue(html.contains(value), "Failure Extent includes " + value);
+    }
+
     @Test void androidJvmAcceptsOnlyARegisteredComponentsWorkspaceForTheSameCheckout() throws Exception {
         Path root=ragProject();
         Path dataRoot=Files.createDirectories(temporary.resolve("rag external data"));
@@ -986,11 +1029,17 @@ class ReleaseGovernanceTest {
 
     private void writeSuiteEvidence(Path run, com.fasterxml.jackson.databind.node.ObjectNode receipt,
                                     List<atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput> suites) throws Exception {
+        writeSuiteEvidence(run, receipt, suites, 0);
+    }
+
+    private void writeSuiteEvidence(Path run, com.fasterxml.jackson.databind.node.ObjectNode receipt,
+                                    List<atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput> suites,
+                                    int processExitCode) throws Exception {
         var input = JSON().createObjectNode().put("schemaVersion", 1)
                 .put("sourceCommit", receipt.required("sourceCommit").asText())
                 .put("sourceManifestSha256", receipt.required("sourceManifestSha256").asText())
                 .put("collection", receipt.required("collection").required("name").asText())
-                .put("processExitCode", 0).put("executionFailure", "");
+                .put("processExitCode", processExitCode).put("executionFailure", processExitCode == 0 ? "" : "Maven exited with code " + processExitCode);
         var rows = input.putArray("suites");
         for (var suite : suites)
             rows.addObject().put("module", suite.module()).put("name", suite.suiteName())
@@ -1002,7 +1051,7 @@ class ReleaseGovernanceTest {
         receipt.put("componentSuiteInputSha256", sha(file));
         Path extent = run.resolve("component-suite-extent.html");
         var report = atf.rentz.reporting.ComponentSuiteExtentReport.publish(extent, input.path("sourceCommit").asText(),
-                input.path("sourceManifestSha256").asText(), input.path("collection").asText(), 0, suites);
+                input.path("sourceManifestSha256").asText(), input.path("collection").asText(), processExitCode, input.path("executionFailure").asText(), suites);
         receipt.put("componentExtentReport", extent.toString()).put("componentExtentReportSha256", report.reportSha256())
                 .put("componentExtentReportFailure", "").put("componentExtentQualified", report.qualified());
         JSON().writeValue(run.resolve("result.json").toFile(), receipt);

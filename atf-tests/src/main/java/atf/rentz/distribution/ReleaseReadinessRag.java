@@ -2,6 +2,7 @@ package atf.rentz.distribution;
 
 import atf.rentz.distribution.editorial.DocumentationReconciliation;
 import atf.rentz.distribution.evidence.ComponentSuiteEvidence;
+import atf.rentz.distribution.evidence.MavenFailureExtent;
 
 import atf.reporting.evidence.ui.ExtentUiEvidenceMarkup;
 import com.fasterxml.jackson.core.JsonParser;
@@ -105,6 +106,7 @@ public final class ReleaseReadinessRag {
         byte[] indexBytes = JSON.writerWithDefaultPrettyPrinter().writeValueAsBytes(indexFile);
         Files.write(output.resolve("release-rag-report.json"), reportBytes, java.nio.file.StandardOpenOption.CREATE_NEW);
         Files.write(output.resolve("release-rag-index.json"), indexBytes, java.nio.file.StandardOpenOption.CREATE_NEW);
+        MavenFailureExtent.publish(output.resolve("release-rag-failure-extent.html"), report, sha256(reportBytes));
         System.out.println("RAG-" + report.path("aggregate").asText() + ": " + output.resolve("release-rag-report.json"));
     }
 
@@ -403,10 +405,6 @@ public final class ReleaseReadinessRag {
         boolean mavenFail = result.path("status").asText().equals("FAIL") || !result.path("componentExtentQualified").asBoolean(false)
                 || !result.path("runtimeQualificationFailure").asText().isBlank()
                 || !result.path("selectedPopulationFailure").asText().isBlank();
-        if (regressionCollection && (!result.path("androidJvm").isTextual() || result.path("androidJvm").asText().isBlank())) {
-            androidGate.put("status", "NOT_RUN"); androidGate.put("actual", "The Android JVM stage did not produce a receipt.");
-            return;
-        }
         try {
             for (JsonNode suite : maven) {
                 int tests = exactCount(suite.path("tests")), failures = failureCount(suite);
@@ -425,6 +423,10 @@ public final class ReleaseReadinessRag {
                 : mavenFail ? "A Surefire regression receipt reports a failure, error, skip or zero-test suite."
                 : "No complete Surefire regression population is present.");
         if (!regressionCollection) return;
+        if (!result.path("androidJvm").isTextual() || result.path("androidJvm").asText().isBlank()) {
+            androidGate.put("status", "NOT_RUN"); androidGate.put("actual", "The Android JVM stage did not produce a receipt.");
+            return;
+        }
 
         try {
             Path suppliedAndroid = Path.of(result.path("androidJvm").asText()).toAbsolutePath().normalize();

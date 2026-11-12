@@ -57,16 +57,28 @@ if($component.status-eq'PASS'){
     $qualified=Assert-RentzQualifiedRuntime -Descriptor $descriptor -DescriptorSha256 (Get-FileHash -LiteralPath $descriptor -Algorithm SHA256).Hash -MainClass $ragClass -Stage $stage
     $classpath=$qualified.classpath
 }else{
-    foreach($row in $component.results){
-        $relativeModule=([string]$row.module).Replace('/','-')
-        $xmlPath=Join-Path (Join-Path $ComponentRun $relativeModule) ('TEST-'+$row.name+'.xml')
+    foreach($row in $component.results | Where-Object module -CEQ 'atf-tests'){
+        if($row.name-cnotmatch '^[\p{L}\p{N}_$]+(?:[.][\p{L}\p{N}_$]+)*$'){throw 'Invalid ATF Surefire suite name.'}
+        $xmlPath=Join-Path $ComponentRun ('atf-tests/TEST-'+$row.name+'.xml')
+        Assert-AtfPhysicalPath -Path $xmlPath
         if(-not(Test-Path -LiteralPath $xmlPath -PathType Leaf)){continue}
         $settings=[Xml.XmlReaderSettings]::new();$settings.DtdProcessing=[Xml.DtdProcessing]::Prohibit;$settings.XmlResolver=$null
         $xml=[Xml.XmlDocument]::new();$reader=[Xml.XmlReader]::Create($xmlPath,$settings);try{$xml.Load($reader)}finally{$reader.Dispose()}
-        $candidate=[string](($xml.testsuite.properties.property|Where-Object name -EQ 'java.class.path'|Select-Object -First 1).value)
-        if($candidate){if($classpath-and$classpath-cne$candidate){throw 'Failed-run Surefire classpaths disagree'};$classpath=$candidate;break}
+        $properties=@($xml.SelectNodes('/testsuite/properties/property[@name="java.class.path"]'))
+        if($properties.Count-gt1){throw 'Duplicate ATF Surefire classpath property.'}
+        if(!$properties.Count){continue}
+        $candidate=$properties[0].GetAttribute('value').TrimEnd([IO.Path]::PathSeparator)
+        if(!$candidate){continue}
+        if($classpath-and$classpath-cne$candidate){throw 'Failed-run ATF Surefire classpaths disagree.'}
+        $classpath=$candidate
     }
-    if(-not$classpath){throw 'Failed component run has no compiled Surefire classpath for offline RAG inspection.'}
+    if(-not$classpath){throw 'Failed component run has no ATF Surefire classpath for offline RAG inspection.'}
+    $entries=$classpath.Split([IO.Path]::PathSeparator)
+    if(@($entries|Where-Object{-not[IO.Path]::IsPathFullyQualified($_)}).Count){throw 'Failed-run ATF classpath contains a non-absolute entry.'}
+    $classes=[IO.Path]::GetFullPath((Join-Path $stage 'atf-tests/target/classes'))
+    if($classes-notin@($entries|ForEach-Object{[IO.Path]::GetFullPath($_)})){
+        throw 'Failed-run ATF classpath does not identify the staged RAG classes.'
+    }
 }
 
 if($DocumentationRun){

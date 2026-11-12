@@ -45,6 +45,59 @@ function Launch($c, [string]$Registry){
     try{& (Join-Path $project 'atf-tests/tools/run-arena.ps1') -ComponentRun $c.component -Protocol "$($c.root)/protocol.json" -RunRoot $c.run -Java $c.spy @registryOption *> "$($c.root)/launcher.log"}catch{$failed=$true;$_.Exception.Message|Add-Content "$($c.root)/launcher.log"}
     return [pscustomobject]@{failed=$failed;invoked=(Test-Path -LiteralPath "$($c.root)/invoked.txt")}
 }
+function FailedRagContext([string]$Name){
+    $c=Context $Name
+    $c.component=Join-Path $product ($Name+'-component')
+    New-Item -ItemType Directory -Path $c.component|Out-Null
+    $entry=Join-Path $c.classes 'atf/rentz/distribution/ReleaseReadinessRag.class'
+    New-Item -ItemType Directory -Path (Split-Path -Parent $entry) -Force|Out-Null
+    [IO.File]::WriteAllText($entry,'fixture RAG class')
+    $gameCore=Join-Path $c.stage 'rentz-lab-app/game-core/target/classes'
+    New-Item -ItemType Directory -Path $gameCore -Force|Out-Null
+    $rows=@(
+        [ordered]@{module='rentz-lab-app/game-core';name='sample.CoreTest'}
+        [ordered]@{module='atf-tests';name='sample.FirstTest'}
+        [ordered]@{module='atf-tests';name='sample.SecondTest'}
+    )
+    for($i=0;$i-lt$rows.Count;$i++){
+        $row=$rows[$i]
+        $directory=Join-Path $c.component ($row.module.Replace('/','-'))
+        New-Item -ItemType Directory -Path $directory -Force|Out-Null
+        $path=if($i-eq0){$gameCore}else{$c.classes}
+        if($i-eq2-and$Name-ceq'rag-disagreement'){$path+=[IO.Path]::PathSeparator+"$($c.root)/dependency.jar"}
+        if($i-gt0){$path+=[IO.Path]::PathSeparator}
+        $escaped=[Security.SecurityElement]::Escape($path)
+        $content='<testsuite><properties><property name="java.class.path" value="'+$escaped+'"/></properties></testsuite>'
+        [IO.File]::WriteAllText((Join-Path $directory ('TEST-'+$row.name+'.xml')),$content)
+    }
+    if($Name-ceq'rag-no-atf'){$rows=@($rows[0])}
+    Json "$($c.component)/result.json" ([ordered]@{status='FAIL';collection=@{name='regression'};source=$project;stage=$c.stage;results=$rows})
+    @('@echo off',('echo invoked > "'+$c.root+'\invoked.txt"'),
+        ('if not "%~3"=="'+$c.classes+'" exit /b 19'),'exit /b 0')|Set-Content $c.spy -Encoding ascii
+    return $c
+}
+function Launch-FailedRag($c){
+    $failed=$false
+    try{& (Join-Path $project 'scripts/run-release-rag.ps1') -Question 'APK build release' -ComponentRun $c.component -RunRoot $c.run -Java $c.spy *> "$($c.root)/launcher.log"}
+    catch{$failed=$true;$_.Exception.Message|Add-Content "$($c.root)/launcher.log"}
+    [pscustomobject]@{failed=$failed;invoked=(Test-Path -LiteralPath "$($c.root)/invoked.txt")}
+}
+Case 'Failed RAG uses the ATF classpath when game-core comes first' {
+    $c=FailedRagContext 'rag-module-order'
+    $r=Launch-FailedRag $c
+    Require (-not$r.failed-and$r.invoked) 'The failed RAG did not launch with the ATF classpath'
+}
+Case 'Failed RAG refuses conflicting ATF classpaths before Java' {
+    $c=FailedRagContext 'rag-disagreement'
+    $r=Launch-FailedRag $c
+    Require ($r.failed-and-not$r.invoked) 'Conflicting ATF evidence reached Java'
+}
+Case 'Failed RAG refuses game-core as the sole classpath' {
+    $c=FailedRagContext 'rag-no-atf'
+    $r=Launch-FailedRag $c
+    Require ($r.failed-and-not$r.invoked) 'A game-core-only receipt reached Java'
+}
+
 Case 'Unchanged qualified runtime reaches only the injected recorder' {
     $c=Context valid;$r=Launch $c
     Require (-not$r.failed-and$r.invoked) 'Valid neighboring runtime was rejected'

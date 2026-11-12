@@ -90,7 +90,7 @@ class TestChangeGovernanceTest {
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/editorial/DocumentationReconciliation.java")
-                || path.equals("atf-tests/src/main/java/atf/rentz/distribution/evidence/ComponentSuiteEvidence.java")
+                || path.startsWith("atf-tests/src/main/java/atf/rentz/distribution/evidence/")
                 || path.startsWith("atf-tests/src/main/java/atf/rentz/reporting/")
                 || path.equals("atf-tests/tools/run-arena.ps1") || path.equals("atf-tests/tools/run-android-sanity.ps1")
                 || path.equals("atf-tests/tools/test-runtime-controls.ps1")
@@ -109,6 +109,7 @@ class TestChangeGovernanceTest {
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/editorial/DocumentationReconciliation.java"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/evidence/ComponentSuiteEvidence.java"));
+        assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/evidence/MavenFailureExtent.java"));
     }
 
     @Test void releaseArtifactsReportingAndWorkspaceBoundariesAreProtected() {
