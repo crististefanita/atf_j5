@@ -91,37 +91,11 @@ public final class ComponentSuiteExtentReport {
         if (output == null || output.getFileName() == null || Files.exists(output, LinkOption.NOFOLLOW_LINKS)
                 || Files.isSymbolicLink(output.toAbsolutePath().normalize())) throw new IOException("COMPONENT-EXTENT-OUTPUT");
 
-        List<ParsedSuite> parsed = new ArrayList<>();
-        Set<String> suiteKeys = new HashSet<>();
-        Set<String> caseKeys = new HashSet<>();
-        int testCount = 0, failureCount = 0, errorCount = 0, skippedCount = 0;
-        for (SuiteInput input : inputs) {
-            if (input == null || input.module() == null || input.module().isBlank() || input.suiteName() == null
-                    || input.suiteName().isBlank() || input.tests() < 0 || input.failures() < 0
-                    || input.errors() < 0 || input.skipped() < 0 || !SHA256.matcher(input.sha256()).matches())
-                throw new IOException("COMPONENT-EXTENT-SUITE-IDENTITY");
-            String suiteKey = input.module() + "\u0000" + input.suiteName();
-            if (!suiteKeys.add(suiteKey)) throw new IOException("COMPONENT-EXTENT-DUPLICATE-SUITE");
-            Path xml = input.xmlFile().toAbsolutePath().normalize();
-            if (!Files.isRegularFile(xml, LinkOption.NOFOLLOW_LINKS)) throw new IOException("COMPONENT-EXTENT-XML-MISSING");
-            byte[] xmlBytes;
-            try (var stream = Files.newInputStream(xml, LinkOption.NOFOLLOW_LINKS)) {
-                xmlBytes = stream.readNBytes((int) MAX_XML_BYTES + 1);
-            }
-            if (xmlBytes.length == 0 || xmlBytes.length > MAX_XML_BYTES) throw new IOException("COMPONENT-EXTENT-XML-MISSING");
-            if (!sha256(xmlBytes).equalsIgnoreCase(input.sha256())) throw new IOException("COMPONENT-EXTENT-XML-HASH");
-            ParsedSuite suite = parse(xmlBytes);
-            if (!suite.name().equals(input.suiteName()) || suite.cases().size() != input.tests()
-                    || suite.failures() != input.failures() || suite.errors() != input.errors()
-                    || suite.skipped() != input.skipped()) throw new IOException("COMPONENT-EXTENT-POPULATION-MISMATCH");
-            for (Case test : suite.cases()) {
-                String caseKey = input.module() + "\u0000" + test.className() + "\u0000" + test.name();
-                if (!caseKeys.add(caseKey)) throw new IOException("COMPONENT-EXTENT-DUPLICATE-CASE");
-            }
-            parsed.add(suite);
-            testCount += suite.cases().size(); failureCount += suite.failures();
-            errorCount += suite.errors(); skippedCount += suite.skipped();
-        }
+        List<ParsedSuite> parsed = reconcile(inputs);
+        int testCount = parsed.stream().mapToInt(suite -> suite.cases().size()).sum();
+        int failureCount = parsed.stream().mapToInt(ParsedSuite::failures).sum();
+        int errorCount = parsed.stream().mapToInt(ParsedSuite::errors).sum();
+        int skippedCount = parsed.stream().mapToInt(ParsedSuite::skipped).sum();
 
         Path parent = output.toAbsolutePath().getParent();
         if (parent == null || !Files.isDirectory(parent, LinkOption.NOFOLLOW_LINKS) || Files.isSymbolicLink(parent))
@@ -155,10 +129,56 @@ public final class ComponentSuiteExtentReport {
             }
             for (int i = 0; i < inputs.size(); i++) publishSuite(report, inputs.get(i), parsed.get(i));
         }
-        ReportArtifactProfile profile = profile(description, inputs, parsed, qualified);
-        var inspection = ReportArtifactInspector.inspect(output, profile);
-        if (!inspection.isCompliant()) throw new IOException("COMPONENT-EXTENT-INSPECTOR: " + inspection.violations());
+        requireCompliant(output, profile(description, inputs, parsed, qualified));
         return new Summary(parsed.size(), testCount, failureCount, errorCount, skippedCount, sha256(Files.readAllBytes(output)), qualified);
+    }
+
+    public static boolean verify(Path report, String commit, String sourceManifest, String collection, int exitCode,
+                                 String diagnostic, List<SuiteInput> inputs) throws IOException {
+        List<ParsedSuite> parsed = reconcile(inputs);
+        boolean qualified = exitCode == 0 && diagnostic.isBlank() && !parsed.isEmpty()
+                && parsed.stream().allMatch(ParsedSuite::passed);
+        requireCompliant(report, profile(rootDescription(commit, sourceManifest, collection, diagnostic),
+                inputs, parsed, qualified));
+        return qualified;
+    }
+
+    private static void requireCompliant(Path report, ReportArtifactProfile profile) throws IOException {
+        var inspection = ReportArtifactInspector.inspect(report, profile);
+        if (!inspection.isCompliant()) throw new IOException("COMPONENT-EXTENT-INSPECTOR: " + inspection.violations());
+    }
+
+    private static List<ParsedSuite> reconcile(List<SuiteInput> inputs) throws IOException {
+        List<ParsedSuite> parsed = new ArrayList<>();
+        Set<String> suiteKeys = new HashSet<>();
+        Set<String> caseKeys = new HashSet<>();
+        for (SuiteInput input : inputs) {
+            if (input == null || input.module() == null || input.module().isBlank() || input.suiteName() == null
+                    || input.suiteName().isBlank() || input.tests() < 0 || input.failures() < 0
+                    || input.errors() < 0 || input.skipped() < 0 || !SHA256.matcher(input.sha256()).matches())
+                throw new IOException("COMPONENT-EXTENT-SUITE-IDENTITY");
+            String suiteKey = input.module() + "\u0000" + input.suiteName();
+            if (!suiteKeys.add(suiteKey)) throw new IOException("COMPONENT-EXTENT-DUPLICATE-SUITE");
+            Path xml = input.xmlFile().toAbsolutePath().normalize();
+            if (!Files.isRegularFile(xml, LinkOption.NOFOLLOW_LINKS)) throw new IOException("COMPONENT-EXTENT-XML-MISSING");
+            byte[] xmlBytes;
+            try (var stream = Files.newInputStream(xml, LinkOption.NOFOLLOW_LINKS)) {
+                xmlBytes = stream.readNBytes((int) MAX_XML_BYTES + 1);
+            }
+            if (xmlBytes.length == 0 || xmlBytes.length > MAX_XML_BYTES) throw new IOException("COMPONENT-EXTENT-XML-MISSING");
+            if (!sha256(xmlBytes).equalsIgnoreCase(input.sha256())) throw new IOException("COMPONENT-EXTENT-XML-HASH");
+            ParsedSuite suite = parse(xmlBytes);
+            if (!suite.name().equals(input.suiteName()) || suite.cases().size() != input.tests()
+                    || suite.failures() != input.failures() || suite.errors() != input.errors()
+                    || suite.skipped() != input.skipped()) throw new IOException("COMPONENT-EXTENT-POPULATION-MISMATCH");
+            for (Case test : suite.cases()) {
+                String caseKey = input.module() + "\u0000" + test.className() + "\u0000" + test.name();
+                if (!caseKeys.add(caseKey)) throw new IOException("COMPONENT-EXTENT-DUPLICATE-CASE");
+            }
+            parsed.add(suite);
+        }
+
+        return parsed;
     }
 
     private static String rootDescription(String commit, String manifest, String collection, String executionFailure) {

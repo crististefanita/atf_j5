@@ -155,7 +155,7 @@ if($healthy-and@($results|Where-Object name -EQ 'atf.rentz.OfflineArenaComponent
 }
 $sourceManifestSha256=(Get-FileHash -LiteralPath "$RunRoot\source-identity.json").Hash.ToLowerInvariant()
 $componentExtentReport=Join-Path $RunRoot 'component-suite-extent.html'
-$componentExtentReportSha256='';$componentExtentReportFailure='';$componentExtentQualified=$false
+$componentSuiteInputSha256='';$componentExtentReportSha256='';$componentExtentReportFailure='';$componentExtentQualified=$false
 $extentSuites=[Collections.Generic.List[object]]::new()
 $extentInputFailures=[Collections.Generic.List[string]]::new()
 foreach($row in $results){
@@ -193,9 +193,11 @@ if(-not$componentExtentReportFailure){
         $reportExitCode=if($androidFailure-or$runtimeQualificationFailure-or$populationFailure-or$extentInputFailures.Count-or$exit-ne0){1}else{0}
         $reportInput=Join-Path $RunRoot 'component-suite-input.json'
         [ordered]@{schemaVersion=1;sourceCommit=$sourceCommitForReport.ToLowerInvariant();sourceManifestSha256=$sourceManifestSha256;collection=$plan.name;processExitCode=$reportExitCode;executionFailure=$executionDiagnostic;suites=@($extentSuites)}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath $reportInput -Encoding utf8NoBOM
+        $componentSuiteInputSha256=(Get-FileHash -LiteralPath $reportInput -Algorithm SHA256).Hash.ToLowerInvariant()
         $javaReport=Join-Path $JavaHome 'bin/java.exe'
         & $javaReport -Xmx256m -cp $reportClasspath atf.rentz.reporting.ComponentSuiteExtentReport $reportInput $componentExtentReport *> (Join-Path $RunRoot 'component-suite-extent.log')
         if($LASTEXITCODE-ne0){throw 'atf-reporting suite report publisher failed'}
+        if((Get-FileHash -LiteralPath $reportInput -Algorithm SHA256).Hash.ToLowerInvariant()-cne$componentSuiteInputSha256){throw 'Suite execution receipt changed during Extent publication'}
         $extentSummary=Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'component-suite-extent.log')|Select-Object -Last 1|ConvertFrom-Json
         if(-not(Test-Path -LiteralPath $componentExtentReport -PathType Leaf)-or-not$extentSummary.reportSha256){throw 'Extent output or digest is missing'}
         $componentExtentReportSha256=(Get-FileHash -LiteralPath $componentExtentReport -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -204,7 +206,7 @@ if(-not$componentExtentReportFailure){
     }catch{$componentExtentReportFailure=$_.Exception.Message}
 }
 if($componentExtentReportFailure){$healthy=$false}else{$healthy=$healthy-and$componentExtentQualified}
-$resultReceipt=[ordered]@{status=$(if($healthy){'PASS'}else{'FAIL'});collection=$plan;source=$source;sourceCommit=$sourceCommit;sourceManifestSha256=$sourceManifestSha256;checkoutLayout=$checkoutLayout;stage=$stage;repository=$repository;infrastructureControls=$infrastructureControls;runtimeControls=$runtimeControls;discoveryControls=$discoveryControls;qualifiedRuntimeControls=$qualifiedRuntimeControls;runtimeQualificationFailure=$runtimeQualificationFailure;nativeRuntime=$nativeRuntime;nativeRuntimeSha256=$nativeRuntimeSha256;arenaRuntime=$arenaRuntime;arenaRuntimeSha256=$arenaRuntimeSha256;androidJvm=$androidRun;androidFailure=$androidFailure;selectedPopulationFailure=$populationFailure;componentExtentReport=$componentExtentReport;componentExtentReportSha256=$componentExtentReportSha256;componentExtentReportFailure=$componentExtentReportFailure;componentExtentQualified=$componentExtentQualified;componentExtentReportingLibrary=$reportingLibrary.name;componentExtentReportingLibrarySha256=$reportingLibrary.sha256;results=$results;drift=$drift;populationChanges=$populationChanges;scope='Selected offline components; reference parity and Android E2E are not qualified.'}
+$resultReceipt=[ordered]@{status=$(if($healthy){'PASS'}else{'FAIL'});collection=$plan;source=$source;sourceCommit=$sourceCommit;sourceManifestSha256=$sourceManifestSha256;checkoutLayout=$checkoutLayout;stage=$stage;repository=$repository;infrastructureControls=$infrastructureControls;runtimeControls=$runtimeControls;discoveryControls=$discoveryControls;qualifiedRuntimeControls=$qualifiedRuntimeControls;runtimeQualificationFailure=$runtimeQualificationFailure;nativeRuntime=$nativeRuntime;nativeRuntimeSha256=$nativeRuntimeSha256;arenaRuntime=$arenaRuntime;arenaRuntimeSha256=$arenaRuntimeSha256;androidJvm=$androidRun;androidFailure=$androidFailure;selectedPopulationFailure=$populationFailure;componentSuiteInputSha256=$componentSuiteInputSha256;componentExtentReport=$componentExtentReport;componentExtentReportSha256=$componentExtentReportSha256;componentExtentReportFailure=$componentExtentReportFailure;componentExtentQualified=$componentExtentQualified;componentExtentReportingLibrary=$reportingLibrary.name;componentExtentReportingLibrarySha256=$reportingLibrary.sha256;results=$results;drift=$drift;populationChanges=$populationChanges;scope='Selected offline components; reference parity and Android E2E are not qualified.'}
 $resultReceipt | ConvertTo-Json -Depth 7 | Set-Content -LiteralPath "$RunRoot\result.json" -Encoding utf8NoBOM
 if (-not $healthy) { throw "Component run not qualified; inspect $RunRoot" }
 Write-Output $RunRoot

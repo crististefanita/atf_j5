@@ -78,11 +78,14 @@ Lansatorul copiază sursele și bibliotecile, verifică populațiile Maven și A
 | Dovadă | Ce poate verifica cititorul |
 |---|---|
 | `component-suite-extent.html` | Suitele și cazurile din XML-urile Maven și Android JVM. Antetul păstrează proveniența, iar comparația arată totalurile, suitele goale și starea runnerului. |
+| `component-suite-input.json` | Pentru fiecare suită, modulul, numele, calea XML, SHA-256 și totalurile. Identitatea sursei și colecția sunt comune întregii selecții. |
 | `release-contracts/suite-reporting-contract.html` | Probe pentru coerența Extent cu XML, inclusiv refuzul unei suite goale și al unei rulări care are diagnostic de execuție. |
 | `release-contracts/documentation-governance.html` | Comparațiile efective ale controalelor de documentație, inclusiv diagnosticul unei legături neportabile și vecinul valid. |
 | Rapoartele contractelor de domeniu și release | Așteptarea, rezultatul observat și diagnosticul capturate de adaptorul Test Kit în testele care îl folosesc. |
 
 Distribuirile generate păstrează identitatea testului care le exercită. Publicatorul calculează SHA-256 și parsează aceiași octeți XML. Calificarea cere cel puțin un caz în fiecare suită, zero eșecuri, erori și omisiuni și execuție încheiată fără diagnostic de eșec.
+
+La calificare, RAG verifică SHA-256 al manifestului și al receipt-ului de execuție, apoi confruntă exact suitele selectate cu rezultatele Maven și Android JVM. Reface profilul de audit din XML-urile originale și verifică identitatea și rezultatul fiecărei suite și al fiecărui caz în HTML-ul existent. Dovezile se citesc din directoarele canonice ale rulării.
 
 ## Interpretarea rezultatului
 

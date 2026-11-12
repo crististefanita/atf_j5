@@ -44,7 +44,7 @@ public final class DocumentationReconciliation {
             "atf.rentz.governance.documentation.links.DocumentationLinkGovernanceTest");
 
     private record Evidence(Path run, Path root, GitIdentity git, JsonNode receipt, String receiptSha,
-                            Map<String, String> manifest, String manifestSha, String extentSha, String androidSha) { }
+                            Map<String, String> manifest, String manifestSha, String extentSha, String suiteReceiptSha, String androidSha) { }
 
     private DocumentationReconciliation() { }
 
@@ -154,7 +154,8 @@ public final class DocumentationReconciliation {
                 throw new IOException("EDITORIAL-MANIFEST-IDENTITY");
         }
         return new Evidence(run, root, git, receipt, receiptHash, manifest, manifestHash,
-                extent.path("receiptSha256").asText(), original ? jvm.path("receiptSha256").asText() : "");
+                extent.path("receiptSha256").asText(), extent.path("suiteExecutionReceiptSha256").asText(),
+                original ? jvm.path("receiptSha256").asText() : "");
     }
 
     private static JsonNode findGate(JsonNode gates, String id) throws IOException {
@@ -200,6 +201,7 @@ public final class DocumentationReconciliation {
         if (!now.equals(evidence.git()) || !digest(run.resolve("result.json"), MAX_RECEIPT).equals(evidence.receiptSha())
                 || !digest(run.resolve("source-identity.json"), MAX_RECEIPT).equals(evidence.manifestSha())
                 || !digest(run.resolve("component-suite-extent.html"), MAX_EXTENT).equals(evidence.extentSha())
+                || !digest(run.resolve("component-suite-input.json"), 5L * 1024 * 1024).equals(evidence.suiteReceiptSha())
                 || (!evidence.androidSha().isEmpty() && !digest(run.resolve("android-jvm/result.json"), MAX_RECEIPT).equals(evidence.androidSha())))
             throw new IOException("EDITORIAL-EVIDENCE-DRIFT");
     }
@@ -208,7 +210,7 @@ public final class DocumentationReconciliation {
         target.put("run", source.run().toString()).put("commit", source.git().commit())
                 .put("tree", source.git().tree()).put("status", source.receipt().path("status").asText())
                 .put("receiptSha256", source.receiptSha()).put("manifestSha256", source.manifestSha())
-                .put("extentSha256", source.extentSha());
+                .put("extentSha256", source.extentSha()).put("suiteExecutionReceiptSha256", source.suiteReceiptSha());
         if (!source.androidSha().isEmpty()) target.put("androidJvmReceiptSha256", source.androidSha());
     }
 

@@ -326,40 +326,8 @@ class ReleaseGovernanceTest {
 
     @Test void onlyARegressionAndAndroidJvmReceiptForTheSameSourceCanPopulateThoseGates() throws Exception {
         Path root=ragProject();
-        Path run=Files.createDirectories(temporary.resolve("rag receipts/components"));
-        Path android=Files.createDirectories(run.resolve("android-jvm"));
-        var rows=new com.fasterxml.jackson.databind.node.ArrayNode(new com.fasterxml.jackson.databind.node.JsonNodeFactory(false));
-        for(String relative:List.of("README.md","config/release-rag-corpus.json","docs/ATF_Release.md","release/index.json",
-                "release/1.2.0/release-validation.json","scripts/build.ps1","pom.xml","lib/atf-reporting-1.0.0-j24.jar")) {
-            rows.addObject().put("path",relative).put("sha256",sha(root.resolve(relative)));
-        }
-        byte[] manifest=JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(rows);
-        Files.write(run.resolve("source-identity.json"),manifest);
-        Path stage=Files.createDirectories(run.resolve("stage"));
-        Path mavenReports=Files.createDirectories(run.resolve("atf-tests"));
-        Path componentXml=mavenReports.resolve("TEST-sample.ComponentTest.xml");
-        Files.writeString(componentXml,"<testsuite name=\"sample.ComponentTest\" tests=\"1\" failures=\"0\" errors=\"0\" skipped=\"0\"><testcase classname=\"sample.ComponentTest\" name=\"passes\"/></testsuite>");
-        Path componentExtent=run.resolve("component-suite-extent.html");
-        var extentSummary=atf.rentz.reporting.ComponentSuiteExtentReport.publish(componentExtent,
-                git(root,"rev-parse","HEAD").strip(),sha(run.resolve("source-identity.json")),"regression",0,
-                List.of(new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput("atf-tests","sample.ComponentTest",componentXml,
-                        sha(componentXml),1,0,0,0)));
-        Files.writeString(android.resolve("result.json"),"""
-                {"status":"PASS","exitCode":0,"source":"%s","drift":[],"populationChanges":[],
-                 "tests":[{"name":"app","tests":1,"failures":0,"errors":0,"skipped":0}]}
-                """.formatted(stage.toString().replace("\\","\\\\")));
-        var component=JSON().createObjectNode().put("status","PASS").put("source",root.toString())
-                .put("sourceCommit",git(root,"rev-parse","HEAD").strip())
-                .put("sourceManifestSha256",sha(run.resolve("source-identity.json"))).put("stage",stage.toString())
-                .put("androidJvm",android.toString());
-        component.putObject("collection").put("name","regression");
-        component.putArray("drift");component.putArray("populationChanges");
-        component.putArray("results").addObject().put("tests",1).put("failed",0).put("errors",0).put("skipped",0);
-        component.put("componentExtentReport",componentExtent.toString()).put("componentExtentReportSha256",sha(componentExtent))
-                .put("componentExtentReportFailure","").put("componentExtentQualified",extentSummary.qualified())
-                .put("componentExtentReportingLibrary","atf-reporting-1.0.0-j24")
-                .put("componentExtentReportingLibrarySha256",sha(root.resolve("lib/atf-reporting-1.0.0-j24.jar")));
-        Files.write(run.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(component));
+        Path run=passingComponentRun(root,"rag-receipts");
+        var component=(com.fasterxml.jackson.databind.node.ObjectNode)JSON().readTree(run.resolve("result.json").toFile());
 
         var report=ReleaseReadinessRag.evaluate(root,"APK build release",run);
         assertEquals("PASS",gate(report,"offline-regression").path("status").asText());
@@ -741,6 +709,64 @@ class ReleaseGovernanceTest {
                 "An existing run directory is never overwritten");
     }
 
+    @Test void releaseRagRefusesAnExtentReboundToTheWrongSuiteOrSourceManifest() throws Exception {
+        Path root = ragProject();
+        Path run = passingComponentRun(root, "suite-provenance");
+        Path receiptPath = run.resolve("result.json");
+        var receipt = (com.fasterxml.jackson.databind.node.ObjectNode) JSON().readTree(receiptPath.toFile());
+        Path extent = run.resolve("component-suite-extent.html");
+        byte[] valid = Files.readAllBytes(extent);
+        String validHash = sha(extent);
+        String question = "APK build release";
+
+        assertEquals("PASS", gate(ReleaseReadinessRag.evaluate(root, question, run), "component-extent-report").path("status").asText());
+
+        for (var change : java.util.Map.of("sample.ComponentTest", "sample.ReplacedTest",
+                receipt.required("sourceManifestSha256").asText(), "a".repeat(64)).entrySet()) {
+            String replacement = new String(valid, StandardCharsets.UTF_8).replace(change.getKey(), change.getValue());
+            Files.writeString(extent, replacement, StandardCharsets.UTF_8);
+            receipt.put("componentExtentReportSha256", sha(extent));
+            JSON().writeValue(receiptPath.toFile(), receipt);
+            var blocked = ReleaseReadinessRag.evaluate(root, question, run);
+            assertEquals("BLOCKED", gate(blocked, "component-extent-report").path("status").asText(), change.getValue());
+            assertEquals("BLOCKED", gate(blocked, "offline-regression").path("status").asText());
+            assertFalse(blocked.path("mayPublish").asBoolean());
+        }
+
+        Files.write(extent, valid);
+        receipt.put("componentExtentReportSha256", validHash);
+        Path execution = run.resolve("component-suite-input.json");
+        byte[] originalExecution = Files.readAllBytes(execution);
+        var rewritten = (com.fasterxml.jackson.databind.node.ObjectNode) JSON().readTree(originalExecution);
+        rewritten.put("sourceManifestSha256", "b".repeat(64));
+        JSON().writeValue(execution.toFile(), rewritten);
+        receipt.put("componentSuiteInputSha256", sha(execution));
+        JSON().writeValue(receiptPath.toFile(), receipt);
+        var foreign = ReleaseReadinessRag.evaluate(root, question, run);
+        assertEquals("RAG-COMPONENT-SUITE-SOURCE", gate(foreign, "component-extent-report").path("actual").asText());
+        Files.write(execution, originalExecution);
+        receipt.put("componentSuiteInputSha256", sha(execution));
+        JSON().writeValue(receiptPath.toFile(), receipt);
+
+        Path xml = run.resolve("android-jvm/TEST-app.xml");
+        byte[] originalXml = Files.readAllBytes(xml);
+        Files.writeString(xml, new String(originalXml, StandardCharsets.UTF_8).replace("passes", "different"));
+        var changedXml = ReleaseReadinessRag.evaluate(root, question, run);
+        assertEquals("RAG-COMPONENT-SUITE-EXTENT", gate(changedXml, "component-extent-report").path("actual").asText());
+        Files.write(xml, originalXml);
+        Path extra = xml.resolveSibling("TEST-extra.xml");
+        Files.copy(xml, extra);
+        var unlisted = ReleaseReadinessRag.evaluate(root, question, run);
+        assertEquals("RAG-COMPONENT-SUITE-XML-POPULATION", gate(unlisted, "component-extent-report").path("actual").asText());
+        Files.delete(extra);
+
+        var suites = (com.fasterxml.jackson.databind.node.ArrayNode) receipt.required("results");
+        suites.add(suites.get(0).deepCopy());
+        JSON().writeValue(receiptPath.toFile(), receipt);
+        var duplicate = ReleaseReadinessRag.evaluate(root, question, run);
+        assertEquals("BLOCKED", gate(duplicate, "component-extent-report").path("status").asText(), "duplicate suite receipt");
+    }
+
     @Test void editorialReconciliationKeepsBothReceiptsAndShowsTheExactDocumentDiff() throws Exception {
         Path original = ragProject();
         Path regression = passingComponentRun(original, "editorial-baseline");
@@ -758,6 +784,7 @@ class ReleaseGovernanceTest {
         assertEquals("README.md", proof.required("changedDocuments").get(0).required("path").asText());
         assertEquals(originalReceipt, proof.required("original").required("receiptSha256").asText());
         assertEquals(originalReport, proof.required("original").required("extentSha256").asText());
+        assertEquals(sha(regression.resolve("component-suite-input.json")), proof.required("original").required("suiteExecutionReceiptSha256").asText());
         assertEquals(originalReceipt, sha(regression.resolve("result.json")));
         assertEquals(originalReport, sha(regression.resolve("component-suite-extent.html")));
         assertTrue(Files.readString(result.resolve("documentation-reconciliation.html")).contains("Identical tested inputs"));
@@ -781,11 +808,9 @@ class ReleaseGovernanceTest {
         assertEquals(failedDigest, sha(originalReceipt), "The failed original receipt must not be rewritten");
         Files.write(originalReceipt, healthy);
 
-        Path docsReceipt = docs.resolve("result.json");
-        var incomplete = (com.fasterxml.jackson.databind.node.ObjectNode) JSON().readTree(docsReceipt.toFile());
-        ((com.fasterxml.jackson.databind.node.ArrayNode) incomplete.required("results")).remove(0);
-        JSON().writeValue(docsReceipt.toFile(), incomplete);
-        assertEditorialBlocked(revised, regression, docs, "missing-doc-suite", "EDITORIAL-DOCUMENTATION-POPULATION");
+        Path incomplete = editorialInfrastructureRun(revised, "editorial-refusal-docs-incomplete",
+                "DocumentationContractTest");
+        assertEditorialBlocked(revised, regression, incomplete, "missing-doc-suite", "EDITORIAL-DOCUMENTATION-POPULATION");
 
         Path changed = editorialCheckout(original, "editorial-refusal-code", "scripts/build.ps1");
         Path codeRun = editorialInfrastructureRun(changed, "editorial-refusal-code-run");
@@ -818,17 +843,24 @@ class ReleaseGovernanceTest {
     }
 
     private Path editorialInfrastructureRun(Path source, String name) throws Exception {
+        return editorialInfrastructureRun(source, name, "");
+    }
+
+    private Path editorialInfrastructureRun(Path source, String name, String omittedSuite) throws Exception {
         Path run = passingComponentRun(source, name);
         Path receiptPath = run.resolve("result.json");
         var receipt = (com.fasterxml.jackson.databind.node.ObjectNode) JSON().readTree(receiptPath.toFile());
         receipt.putObject("collection").put("name", "infrastructure");
         receipt.remove("androidJvm");
+        Files.delete(run.resolve("android-jvm/TEST-app.xml"));
+        Files.delete(run.resolve("atf-tests/TEST-sample.ComponentTest.xml"));
         var suites = receipt.putArray("results");
         var inputs = new java.util.ArrayList<atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput>();
         for (String nameOfSuite : List.of("DocumentationContractTest", "DocumentationControlsTest",
                 "DocumentationDiagramGovernanceTest", "DocumentationLinkGovernanceTest", "DocumentationProseGovernanceTest",
                 "DocumentationReadmeStructureGovernanceTest", "DocumentationStyleGovernanceTest",
                 "DocumentationTargetGovernanceTest", "DynamicPathDocumentationArchitectureTest")) {
+            if (omittedSuite.equals(nameOfSuite)) continue;
             String full = switch (nameOfSuite) {
                 case "DocumentationContractTest" -> "atf.rentz.governance." + nameOfSuite;
                 case "DocumentationLinkGovernanceTest" -> "atf.rentz.governance.documentation.links." + nameOfSuite;
@@ -846,10 +878,7 @@ class ReleaseGovernanceTest {
         }
         Path extent = run.resolve("component-suite-extent.html");
         Files.delete(extent);
-        var report = atf.rentz.reporting.ComponentSuiteExtentReport.publish(extent, receipt.required("sourceCommit").asText(),
-                receipt.required("sourceManifestSha256").asText(), "infrastructure", 0, inputs);
-        receipt.put("componentExtentReportSha256", report.reportSha256());
-        JSON().writeValue(receiptPath.toFile(), receipt);
+        writeSuiteEvidence(run, receipt, inputs);
         return run;
     }
 
@@ -936,9 +965,8 @@ class ReleaseGovernanceTest {
         byte[] manifest=JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(rows);Files.write(run.resolve("source-identity.json"),manifest);
         Path xml=run.resolve("atf-tests/TEST-sample.ComponentTest.xml");Files.createDirectories(xml.getParent());
         Files.writeString(xml,"<testsuite name=\"sample.ComponentTest\" tests=\"1\" failures=\"0\" errors=\"0\" skipped=\"0\"><testcase classname=\"sample.ComponentTest\" name=\"passes\"/></testsuite>");
-        Path extent=run.resolve("component-suite-extent.html");
-        var extentSummary=atf.rentz.reporting.ComponentSuiteExtentReport.publish(extent,git(root,"rev-parse","HEAD").strip(),sha(run.resolve("source-identity.json")),
-                "regression",0,List.of(new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput("atf-tests","sample.ComponentTest",xml,sha(xml),1,0,0,0)));
+        Path androidXml=android.resolve("TEST-app.xml");
+        Files.writeString(androidXml, "<testsuite name=\"app\" tests=\"1\" failures=\"0\" errors=\"0\" skipped=\"0\"><testcase classname=\"app\" name=\"passes\"/></testsuite>");
         Files.writeString(android.resolve("result.json"),"""
                 {\"status\":\"PASS\",\"exitCode\":0,\"source\":\"%s\",\"drift\":[],\"populationChanges\":[],\"tests\":[{\"name\":\"app\",\"tests\":1,\"failures\":0,\"errors\":0,\"skipped\":0}]}
                 """.formatted(stage.toString().replace("\\","\\\\")));
@@ -946,13 +974,38 @@ class ReleaseGovernanceTest {
         var receipt=JSON().createObjectNode().put("status","PASS").put("source",root.toString()).put("sourceCommit",commit)
                 .put("sourceManifestSha256",sha(run.resolve("source-identity.json"))).put("stage",stage.toString()).put("androidJvm",android.toString());
         receipt.putObject("collection").put("name","regression");receipt.putArray("drift");receipt.putArray("populationChanges");
-        receipt.putArray("results").addObject().put("tests",1).put("failed",0).put("errors",0).put("skipped",0);
-        receipt.put("componentExtentReport",extent.toString()).put("componentExtentReportSha256",sha(extent))
-                .put("componentExtentReportFailure","").put("componentExtentQualified",extentSummary.qualified())
-                .put("componentExtentReportingLibrary","atf-reporting-1.0.0-j24")
+        receipt.putArray("results").addObject().put("module","atf-tests").put("name","sample.ComponentTest")
+                .put("tests",1).put("failed",0).put("errors",0).put("skipped",0);
+        receipt.put("componentExtentReportingLibrary","atf-reporting-1.0.0-j24")
                 .put("componentExtentReportingLibrarySha256",sha(root.resolve("lib/atf-reporting-1.0.0-j24.jar")));
-        Files.write(run.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(receipt));
+        writeSuiteEvidence(run, receipt, List.of(
+                new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput("atf-tests","sample.ComponentTest",xml,sha(xml),1,0,0,0),
+                new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput("android-jvm","app",androidXml,sha(androidXml),1,0,0,0)));
         return run;
+    }
+
+    private void writeSuiteEvidence(Path run, com.fasterxml.jackson.databind.node.ObjectNode receipt,
+                                    List<atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput> suites) throws Exception {
+        var input = JSON().createObjectNode().put("schemaVersion", 1)
+                .put("sourceCommit", receipt.required("sourceCommit").asText())
+                .put("sourceManifestSha256", receipt.required("sourceManifestSha256").asText())
+                .put("collection", receipt.required("collection").required("name").asText())
+                .put("processExitCode", 0).put("executionFailure", "");
+        var rows = input.putArray("suites");
+        for (var suite : suites)
+            rows.addObject().put("module", suite.module()).put("name", suite.suiteName())
+                    .put("xml", suite.xmlFile().toString()).put("sha256", suite.sha256())
+                    .put("tests", suite.tests()).put("failures", suite.failures())
+                    .put("errors", suite.errors()).put("skipped", suite.skipped());
+        Path file = run.resolve("component-suite-input.json");
+        JSON().writeValue(file.toFile(), input);
+        receipt.put("componentSuiteInputSha256", sha(file));
+        Path extent = run.resolve("component-suite-extent.html");
+        var report = atf.rentz.reporting.ComponentSuiteExtentReport.publish(extent, input.path("sourceCommit").asText(),
+                input.path("sourceManifestSha256").asText(), input.path("collection").asText(), 0, suites);
+        receipt.put("componentExtentReport", extent.toString()).put("componentExtentReportSha256", report.reportSha256())
+                .put("componentExtentReportFailure", "").put("componentExtentQualified", report.qualified());
+        JSON().writeValue(run.resolve("result.json").toFile(), receipt);
     }
 
     private static String git(Path root,String... arguments) throws Exception {

@@ -74,10 +74,10 @@ Apelați a doua comandă din worktree-ul editorial. Folosiți același depozit d
 | Commituri curate din același repository | Commitul testat trebuie să fie strămoșul reviziei editoriale. |
 | Diferența Git | Căile modificate, adăugate sau eliminate sunt fișiere Markdown obișnuite din `docs/rentz`, `docs/feedback`, `docs/README.md` sau `README.md`. |
 | Intrări înghețate | Setul căilor diferite din cele două manifeste coincide cu diferența Git. SHA-256 agregat identifică toate intrările comune, în ordinea căilor. |
-| Dovezi păstrate | Compoziția înregistrează căile și hash-urile receipt-urilor, manifestelor și rapoartelor Extent originale. Documentele diferite au hash înainte și după. |
+| Dovezi păstrate | Compoziția înregistrează căile și hash-urile receipt-urilor, inclusiv ale execuției pe suite, ale manifestelor și ale rapoartelor Extent originale. Documentele diferite au hash înainte și după. |
 
 - Rezultatele sunt `documentation-reconciliation.json` și `documentation-reconciliation.html`.
-- Un rezultat original eșuat sau o diferență executabilă blochează compoziția.
+- Un rezultat original eșuat sau o diferență executabilă blochează compoziția. Arhivele dinaintea receipt-ului pe suite rămân dovezi istorice. Pentru o calificare nouă, rulează colecția pe sursa fixată.
 - Această dovadă acoperă echivalența intrărilor offline și guvernanța documentelor. Pentru APK, Android nativ și promovare rămân aplicabile porțile pe commit exact. [Procesul de release](ATF_Release.md)
 
 ## Legăturile manifestelor către teste

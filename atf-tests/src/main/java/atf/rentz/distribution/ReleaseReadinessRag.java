@@ -1,6 +1,7 @@
 package atf.rentz.distribution;
 
 import atf.rentz.distribution.editorial.DocumentationReconciliation;
+import atf.rentz.distribution.evidence.ComponentSuiteEvidence;
 
 import atf.reporting.evidence.ui.ExtentUiEvidenceMarkup;
 import com.fasterxml.jackson.core.JsonParser;
@@ -380,18 +381,21 @@ public final class ReleaseReadinessRag {
         ObjectNode androidGate = gate(gates, "android-jvm");
         if (!identityFailure.isBlank()) {
             regression.put("status", "BLOCKED"); regression.put("actual", identityFailure);
-            extentGate.put("status", "BLOCKED"); extentGate.put("actual", "The component Extent receipt identity is invalid or missing.");
+            extentGate.put("status", "BLOCKED"); extentGate.put("actual", identityFailure);
             androidGate.put("status", "BLOCKED"); androidGate.put("actual", "The parent regression receipt identity is invalid.");
             return;
         }
         Path receipt = run.resolve("result.json");
         if (verifiedReceiptHash.isBlank()) { regression.put("status", "BLOCKED"); regression.put("actual", "RAG-RECEIPT-INVALID"); return; }
         regression.put("receipt", "result.json"); regression.put("receiptSha256", verifiedReceiptHash);
-        extentGate.put("status", "PASS"); extentGate.put("actual", "The complete component Extent artifact is present, source-bound and hash-verified.");
+        extentGate.put("status", "PASS"); extentGate.put("actual", "Every component suite matches the execution receipt, original Surefire cases and source-bound Extent.");
         extentGate.put("receipt", "component-suite-extent.html");
         extentGate.put("receiptSha256", result.path("componentExtentReportSha256").asText().toLowerCase(Locale.ROOT));
         extentGate.put("artifactBytes", componentExtentBytes);
         extentGate.put("artifactSourceCommit", git.commit());
+        extentGate.put("suiteExecutionReceipt", "component-suite-input.json");
+        extentGate.put("suiteExecutionReceiptSha256", result.path("componentSuiteInputSha256").asText());
+        extentGate.put("sourceManifestSha256", result.path("sourceManifestSha256").asText());
         JsonNode maven = result.path("results"); boolean hasSuites = maven.isArray() && !maven.isEmpty();
         boolean mavenPass = hasSuites && result.path("status").asText().equals("PASS")
                 && result.path("componentExtentQualified").asBoolean(false) && result.path("runtimeQualificationFailure").asText().isBlank()
@@ -488,6 +492,10 @@ public final class ReleaseReadinessRag {
         if (!receipt.path("componentExtentReportingLibrary").asText().equals(reporting.artifactName())
                 || !receipt.path("componentExtentReportingLibrarySha256").asText().equalsIgnoreCase(reporting.sha256()))
             throw new IOException("RAG-COMPONENT-REPORTING-LIBRARY");
+        ComponentSuiteEvidence.verify(run, report, receipt);
+        if (!sha256(readExternalFile(report, 128L * 1024 * 1024))
+                .equalsIgnoreCase(receipt.path("componentExtentReportSha256").asText()))
+            throw new IOException("RAG-COMPONENT-EXTENT-HASH");
         return html.length;
     }
 
