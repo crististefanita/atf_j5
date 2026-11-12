@@ -1205,11 +1205,11 @@
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz release",
-      "reason": "Verify identical seat rectangles through the first real chooser transition, bind the captured native journal to its reservation, and expose debug-only turn-scheduling stages when a UI action stalls.",
-      "criterion": "Preserve three complete deals, native geometry, search, empty results and reset, eligibility, progress and restart. Require the capture digest before completing the native reservation. On a stalled turn retain frame, timer, controller worker and acceptance stages in failure evidence. Qualify Hard catalog breadth and terminal victory eligibility in Android JVM.",
+      "reason": "Verify identical seat rectangles through the first real chooser transition, bind the captured native journal to its reservation, expose debug-only turn-scheduling stages when a UI action stalls, and qualify the shorter three-game release flow.",
+      "criterion": "Complete exactly three deals: one Rentz and two standard games, allowing the contract to repeat when an AI seat is chooser. Retain native geometry, search, empty results and reset, eligibility, progress and restart. Require the capture digest before completing the native reservation. On a stalled turn retain frame, timer, controller worker and acceptance stages in failure evidence. Qualify Hard catalog breadth and terminal victory eligibility in Android JVM.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "430459f0e0341ab4300e49ce60c563ddef2095a7518f3d2e228945985db4d357",
+      "sha256": "4d2e9c44c73ba322a44d9e393095838b4e2547c39660392e208d943f302c0139",
       "allowDelete": false
     },
     {
