@@ -52,7 +52,7 @@ RAG-ul aplică domeniul declarat: pentru o ediție numai pentru Android, iOS est
 flowchart LR
     SOURCE[Snapshot identificat] -->|testează fără dispozitiv| CHECK[Componente și guvernanță]
     CHECK -->|construiește| ARTIFACT[APK izolat de test]
-    ARTIFACT -->|rulează| UIE2E[5 jocuri și Extent nativ]
+    ARTIFACT -->|rulează| UIE2E[3 jocuri și Extent nativ]
     UIE2E -->|furnizează dovezi| RAG[Verdict RAG]
     RAG -->|permite semnarea| READY[Dosar calificat]
     RAG -->|oprește buildul| BLOCKED[Diagnostic în staging]
@@ -78,7 +78,7 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 .\scripts\run-rentz-components.ps1 -Collection regression -SourceRoot <worktree-J5-inregistrat>
 .\scripts\build-rentz-android.ps1 -UiSanityOnly -ComponentRun <regresie-trecuta> -RunRoot <build-izolat>
 .\atf-tests\tools\run-shared-ui-sanity.ps1 -BuildQualification <build-izolat>\ui-sanity-build-qualification.json -ComponentRun <regresie-trecuta> -ConsecutiveSubgames -CompactConsecutive -RunRoot <rulare-nativa>
-.\scripts\run-release-rag.ps1 -Question 'gate:native-ui Rentz cinci jocuri consecutive' -ComponentRun <regresie-trecuta> -UiBuildRun <build-izolat> -NativeUiRun <rulare-nativa> -RunRoot <RAG-prebuild>
+.\scripts\run-release-rag.ps1 -Question 'gate:native-ui Rentz trei jocuri consecutive' -ComponentRun <regresie-trecuta> -UiBuildRun <build-izolat> -NativeUiRun <rulare-nativa> -RunRoot <RAG-prebuild>
 ```
 
 După verdictul `readyForProductBuild=true`, construiți produsul cu identitatea de semnare provisionată. Builderul primește cele două dosare de acceptanță și recalculează verdictul pe sursa calificată înainte de staging Android și semnare.
@@ -95,7 +95,7 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 - Publicarea și probele de descărcare au porți proprii.
 
 - **Calificare locală:** regresie, Extent, Android JVM, build și acceptanța nativă obligatorie trebuie legate de același commit.
-- **Jocuri și display:** pentru fiecare APK candidat, varianta `ro.rentzlab.app.uisanity` execută prin interfață cinci deal-uri complete în aceeași partidă. Începe cu Rentz și acoperă cel puțin trei contracte distincte. Fiecare deal ajunge la `DEAL_END`. Profilul compact folosește 720 × 1280 pixeli, densitate 360 și text la 150%. Raportul verifică locurile la fiecare joc și după reluare, scorurile și istoricul, replay-ul independent și capturile native inline Base64. Poarta este impusă de [`attachNativeUiReceipt`](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java) și protejată de [regresia mutantelor de release](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java). Traseul califică segmentul de cinci deal-uri, de la pornire până la reluarea sesiunii după repornirea procesului.
+- **Jocuri și display:** pentru fiecare APK candidat, varianta `ro.rentzlab.app.uisanity` execută prin interfață trei deal-uri complete consecutive în aceeași partidă: Rentz și încă două contracte distincte. Fiecare deal ajunge la `DEAL_END`. Profilul compact folosește 720 × 1280 pixeli, densitate 360 și text la 150%. Raportul verifică locurile la fiecare joc și după reluare, scorurile și istoricul, replay-ul independent și capturile native inline Base64. Poarta este impusă de [`attachNativeUiReceipt`](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java) și protejată de [regresia mutantelor de release](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java). Traseul califică toate cele trei deal-uri, de la pornire până la reluarea sesiunii după repornirea procesului.
 - **Legătura cu produsul:** RAG confruntă commitul și manifestul sursei, APK-ul de produs, APK-ul UI-sanity, raportul Extent și runnerul. Varianta UI-sanity este pachet de test distinct; hash-ul ei nu este raportat drept hash-ul APK-ului produs.
 - **Profil de acceptanță:** runnerul citește dimensiunea logică, densitatea și scala de font din Android. RAG cere profilul compact efectiv și dimensiunea logică la fiecare checkpoint. Pierderea temporară a rădăcinii UI Automator se reîncearcă în limite, iar fiecare tap cere ierarhie proaspătă.
 - **Realizări:** acceptanța verifică panoul de progres la primul punctaj manual, închiderea și reluarea fără o notificare repetată. Totalul de obiective vine din catalog. În Antrenament verifică separat filtrul Greu, căutarea și eligibilitatea. Traseul include repornirea și redenumirea profilului.
@@ -120,7 +120,7 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 - **Intrări Android:** build-ul Release preia automat sursa din receipt-ul regresiei. Confruntă întregul inventar Android JVM, inclusiv configurația Gradle, resursele și biblioteca UI. Opțiunea `-UiSanity` produce separat varianta izolată și comparațiile pentru Extent din același snapshot.
 - **Teste:** se păstrează populațiile Maven și Android JVM, fără FAIL, erori sau skip-uri; o selecție scurtă nu se redenumește regresie. Testele de guvernanță și controalele negative ale descărcării se execută offline înainte de publicare.
 - **Build:** verifică sursa calificată, pachetul, versiunea, SDK-urile, caracterul nedebuggable, certificatul și alinierea. Numele final este `RentzLab-<versiune>.apk`.
-- **Produs:** acceptanța nativă cu cinci jocuri consecutive complete este obligatorie pentru fiecare APK candidat, inclusiv pentru refactorizări. Are rezervare proprie, registru de expuneri izolat și Extent auditat; registrul comun de învățare rămâne nemodificat. Lipsa ei nu devine PASS.
+- **Produs:** acceptanța nativă cu trei jocuri consecutive complete este obligatorie pentru fiecare APK candidat, inclusiv pentru refactorizări. Include Rentz și două contracte distincte, are rezervare proprie, registru de expuneri izolat și Extent auditat; registrul comun de învățare rămâne nemodificat. Lipsa ei nu devine PASS.
 - **Date:** primul APK semnat are o identitate de cheie separată de prototipurile Debug. Nu dezinstalați automat un prototip cu date pentru a forța instalarea release-ului; migrarea datelor este o operație distinctă.
 
 ## Semnare și păstrarea cheii

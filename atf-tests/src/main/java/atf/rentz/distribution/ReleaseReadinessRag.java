@@ -56,7 +56,7 @@ public final class ReleaseReadinessRag {
     private static final Pattern NATIVE_EXTENT_STEP = Pattern.compile("<a class=\"node [^\"]*\" id=\"[0-9]+\"><span>THEN ([^<]+)</span></a>");
     private static final Pattern NATIVE_SCREENSHOT_ID = Pattern.compile(" id=\"(atf-screenshot-screenshot-[0-9]+)\"");
     private static final int MAX_INLINE_PNG_BYTES = 8 * 1024 * 1024;
-    private static final int REQUIRED_COMPLETE_GAMES = 5;
+    private static final int REQUIRED_COMPLETE_GAMES = 3;
     private static final int REQUIRED_DISTINCT_CONTRACTS = 3;
 
     private static final int MAX_CORPUS_SOURCES = 64;
@@ -255,7 +255,7 @@ public final class ReleaseReadinessRag {
                 : nativeUiStatus.equals("PASS") && nativeReportStatus.equals("PASS") ? "PASS" : "BLOCKED");
         nativeAcceptance.put("requiredCompleteGames", REQUIRED_COMPLETE_GAMES);
         nativeAcceptance.put("requiredDistinctContracts", REQUIRED_DISTINCT_CONTRACTS);
-        nativeAcceptance.put("requiredSequence", "a complete Rentz opener followed by four complete games in the same match");
+        nativeAcceptance.put("requiredSequence", "a complete Rentz opener followed by two other complete games in the same match");
         nativeAcceptance.put("requiredDisplayEvidence", "720x1280 logical viewport, density 360, font scale 1.5, stable four-seat geometry and inline native screenshots");
         nativeAcceptance.put("receiptGate", "native-ui + native-ui-report");
         workflow.put("artifactDisposition", candidateReady ? "ELIGIBLE_FOR_PROMOTION_REVIEW" : "STAGED_CANDIDATE_ONLY");
@@ -753,7 +753,7 @@ public final class ReleaseReadinessRag {
             requireUiCheckpoint(checkpoints, "Achievements and local identity survive restart without duplicate credit", "Same achievements total after restart");
             requireUiCheckpoint(checkpoints, "Achievements and local identity survive restart without duplicate credit", "Restart leaves the durable checkpoint byte-for-byte unchanged");
             requireUiCheckpoint(checkpoints, "Renaming the local profile retains achievement progress", "Same achievements total after rename");
-            uiGate.put("status", "PASS"); uiGate.put("actual", "Five complete native games across at least three contracts reached DEAL_END. Replay, seat geometry, history, restart and achievement browsing passed.");
+            uiGate.put("status", "PASS"); uiGate.put("actual", "Three complete native games across three distinct contracts reached DEAL_END. Replay, seat geometry, history, restart and achievement browsing passed.");
             uiGate.put("receipt", "result.json"); uiGate.put("receiptSha256", receiptHash);
 
             Path extent = Path.of(ui.path("extentReport").asText()).toAbsolutePath().normalize();

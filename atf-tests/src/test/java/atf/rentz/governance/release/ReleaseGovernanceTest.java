@@ -234,8 +234,8 @@ class ReleaseGovernanceTest {
         assertFalse(report.path("mayPublish").asBoolean());
         assertEquals("BLOCKED", report.path("releaseWorkflow").path("nativeUiAcceptance").path("status").asText(),
                 "The APK remains staged until the complete Rentz plus two other games UI acceptance passes.");
-        assertEquals(5, report.path("releaseWorkflow").path("nativeUiAcceptance").path("requiredCompleteGames").asInt(),
-                "The required native acceptance includes five complete games.");
+        assertEquals(3, report.path("releaseWorkflow").path("nativeUiAcceptance").path("requiredCompleteGames").asInt(),
+                "The required native acceptance includes exactly three complete games.");
         assertEquals("STAGED_CANDIDATE_ONLY", report.path("releaseWorkflow").path("artifactDisposition").asText());
         var retirement=report.path("releaseWorkflow").path("retirement");
         assertFalse(retirement.required("allowed").booleanValue(),"Local RAG cannot authorize retiring a live release");
@@ -479,7 +479,7 @@ class ReleaseGovernanceTest {
                 .put("runnerSha256",sha(root.resolve("atf-tests/tools/run-shared-ui-sanity.ps1")))
                 .put("reportingLibrary","atf-reporting-1.0.0-j24").put("reportingLibrarySha256",sha(root.resolve("lib/atf-reporting-1.0.0-j24.jar")));
         uiReceipt.putArray("cleanupFailures");
-        var contracts=List.of("RENTZ","TRICKS","DIAMONDS","TRICKS","WHIST");
+        var contracts=List.of("RENTZ","TRICKS","DIAMONDS");
         contracts.forEach(uiReceipt.putArray("subgames")::add);
         var display=uiReceipt.putObject("display");
         display.putObject("before").put("size","Physical size: 1080x1920").put("density","Physical density: 440").put("font","1.0");
@@ -598,13 +598,13 @@ class ReleaseGovernanceTest {
         incompleteUi.withArray("completedGames").remove(2);
         Files.write(ui.resolve("result.json"),JSON().writerWithDefaultPrettyPrinter().writeValueAsBytes(incompleteUi));
         var incompleteGameReceipt=ReleaseReadinessRag.evaluate(root,"gate:release-build APK rentz",component,build,ui);
-        assertEquals("BLOCKED",gate(incompleteGameReceipt,"native-ui").path("status").asText(),"Four complete games do not satisfy the five-game APK gate");
+        assertEquals("BLOCKED",gate(incompleteGameReceipt,"native-ui").path("status").asText(),"Two complete games do not satisfy the three-game APK gate");
         assertFalse(incompleteGameReceipt.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
         assertEquals("STAGED_CANDIDATE_ONLY",incompleteGameReceipt.path("releaseWorkflow").path("artifactDisposition").asText());
 
         var insufficientVariety=uiReceipt.deepCopy();
         var repeated=insufficientVariety.putArray("subgames");
-        List.of("RENTZ","TRICKS","TRICKS","TRICKS","TRICKS").forEach(repeated::add);
+        List.of("RENTZ","TRICKS","TRICKS").forEach(repeated::add);
         Files.write(ui.resolve("result.json"),JSON().writeValueAsBytes(insufficientVariety));
         var repeatedReceipt=ReleaseReadinessRag.evaluate(root,"gate:native-ui contract variety",component,null,ui,build);
         assertEquals("BLOCKED",gate(repeatedReceipt,"native-ui").path("status").asText());

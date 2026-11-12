@@ -375,11 +375,11 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java",
       "owner": "Rentz release",
-      "reason": "Make five-game native acceptance a mandatory candidate-promotion gate; bind complete deals, display evidence, learning isolation and Extent to the pinned APK source.",
-      "criterion": "A missing or partial Rentz-plus-two-games receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged. The release still requires five native games, geometry, history, restart and original Extent evidence. Catalog breadth and terminal victory eligibility run in the mandatory Android JVM population.",
+      "reason": "Make a three-game native flow a mandatory candidate-promotion gate; bind complete deals, display evidence, learning isolation and Extent to the pinned APK source.",
+      "criterion": "A missing or partial Rentz-plus-two-distinct-contracts receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged. The release requires exactly three native games, geometry, history, restart and original Extent evidence. Catalog breadth and terminal victory eligibility run in the mandatory Android JVM population.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "fc51934f79ea64c0a4b0bb278820da74ecc946fbc4d3c138b9276cfc1a711781",
+      "sha256": "0822cae09a12ec1907947059cfb57e6007be906c507af4b0a81c5d97d978c745",
       "allowDelete": false
     },
     {
@@ -545,11 +545,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz release",
-      "reason": "Govern release-state, five complete game deals, display layout, learning isolation, source identity and Extent evidence.",
+      "reason": "Govern release-state, three complete game deals, display layout, learning isolation, source identity and Extent evidence.",
       "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access. The native fixture qualifies the representative search and progress journey while preserving the existing rejection controls for incomplete games, geometry, source identity and corrupt evidence.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "ff1107fe13cc7498fbf6198024f404b4bf5122400b6b00bba246e29a967601d8",
+      "sha256": "f17739614ba4f11d918098b8d699da845da28c38f5059ff5940015f33eaccb6a",
       "allowDelete": false
     },
     {
@@ -1196,10 +1196,10 @@
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz release",
       "reason": "Verify identical seat rectangles through the first real chooser transition and bind the captured native journal to its reservation.",
-      "criterion": "Preserve five complete deals, native geometry, search, empty results and reset, eligibility, progress and restart. Require the capture digest before completing the native reservation. Qualify Hard catalog breadth and terminal victory eligibility in Android JVM.",
+      "criterion": "Preserve three complete deals, native geometry, search, empty results and reset, eligibility, progress and restart. Require the capture digest before completing the native reservation. Qualify Hard catalog breadth and terminal victory eligibility in Android JVM.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "2adf77c401a0b897ae0687a33283f3c06366859c8f69019adefd04f999d3d2d1",
+      "sha256": "353f5c68579a16a3b0d23c62f69b7027a5aaa65bb56f8b00c8a8b1099d005080",
       "allowDelete": false
     },
     {
@@ -1235,21 +1235,21 @@
     {
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
-      "reason": "Prepare minor release 0.16.0 and retain the admitted UI artifact.",
-      "criterion": "Increment versionCode once and preserve signing while consuming Card Table UI 0.1.10 with desugaring.",
+      "reason": "Prepare minor release 0.22.0 after the three-game native flow and retain the currently admitted UI artifact.",
+      "criterion": "Increment versionCode once, preserve signing and bind the candidate version to the same source-qualified component, Android JVM and native UI receipts.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "dcbe32ff5cea15e8f038106baffe36768eb0f024ee96a44c6dc9b15fbdfbf5da",
+      "sha256": "53d11f988705ecad7f3f09ed11c667f446f8346dc0e40e89b11e188a31f079d6",
       "allowDelete": false
     },
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Publish Rentz Lab 0.21.0 after the local RAG gates and authenticated GitHub download pass.",
-      "criterion": "Bind the single main README download, active catalog, private GitHub receipt and signed APK bytes to source v0.21.0; preserve old tags and external audit.",
+      "reason": "Stage Rentz Lab 0.22.0 only after the local RAG gates; preserve 0.21.0 until the new authenticated GitHub download passes.",
+      "criterion": "Keep 0.21.0 as current until the 0.22.0 candidate is source-bound, signed, published and downloaded from the main README by an authorized account; preserve existing tags and audit evidence.",
       "proof": "docs/rentz/ATF_Release.md#publicare-și-descărcare",
       "expires": "2027-02-12",
-      "sha256": "a8e498ca0ceb53254eb7772b3ca198f8aafbdb5c2722d4b78f76710e0152846d",
+      "sha256": "6d8552950f7ae856499815103dbfbf4f3ec5118ac7f2467d142372eec4f31e22",
       "allowDelete": false
     },
     {

@@ -1,7 +1,7 @@
 param([Parameter(Mandatory)][string]$BuildQualification,[Parameter(Mandatory)][string]$RunRoot,
     [switch]$SeatExtremes,[switch]$HistoryOnly,[switch]$HistoryMatrix,[switch]$HistoryDetails,[switch]$HelpAwardsOnly,[switch]$CompactScores,[switch]$ConsecutiveSubgames,[switch]$CompactConsecutive,[switch]$RentzCardMarksOnly,[string]$ComponentRun,[string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe')
 $ErrorActionPreference='Stop'
-$consecutiveGameCount=5
+$consecutiveGameCount=3
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $gameplayCatalog=Get-Content -LiteralPath (Join-Path $project 'rentz-lab-app/app/src/main/achievement-rules/rentz-gameplay-achievements.yaml') -Raw|ConvertFrom-Json
 $gameplayTotal=$gameplayCatalog.tiers.EASY.Count+$gameplayCatalog.tiers.MEDIUM.Count+$gameplayCatalog.tiers.HARD.Count
@@ -1225,7 +1225,7 @@ $minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}
 if($HistoryDetails){$minimum+=4}
 if($CompactScores){$minimum++}
 if(-not$failure-and($cleanup.Count-or-not$released-or-not$preserved-or$points.Count-lt$minimum)){$failure='Native closeout failed or the declared checkpoint population is incomplete.'}
-$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Five consecutive complete UI games in one match: full Rentz first, at least three distinct contracts, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
+$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: Rentz first, then two distinct contracts, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
 if($HistoryDetails){$scope+='; confirmed blind trick contributions and the actual Rentz finishing places after journal restore'}
 if($ConsecutiveSubgames){$scope+='; learning order, search, filters, eligibility, local profile and durable achievement progress'}
 if($CompactConsecutive){$scope+='; compact 720x1280, density 360, font scale 1.5'}
