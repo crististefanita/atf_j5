@@ -14,32 +14,31 @@ public final class DocumentationLocalLinks {
 
     public static void validate(Path path, Path root, List<String> lines,
                                            List<DocumentationGovernanceSupport.Violation> violations) {
+        Path checkout = root.toAbsolutePath().normalize();
         lines = MarkdownAnchorIndex.withoutFences(lines);
         for (int index = 0; index < lines.size(); index++) {
             Matcher matcher = MARKDOWN_LINK.matcher(lines.get(index));
             while (matcher.find()) {
-                if (matcher.start() > 0 && lines.get(index).charAt(matcher.start() - 1) == '!') continue;
                 String destination = matcher.group(1).trim();
                 String target = destination.replaceFirst("^<", "").replaceFirst(">$", "");
-                if (isExternalOrConfigured(target)) continue;
+                if (isWebLink(target)) continue;
                 int fragment = target.indexOf('#');
                 String anchor = fragment < 0 ? "" : target.substring(fragment + 1);
                 String file = fragment < 0 ? target : target.substring(0, fragment);
                 Path resolved;
                 try {
-                    resolved = file.isBlank() ? path : path.getParent().resolve(decode(file)).normalize();
-                    Path stage = root.toAbsolutePath().normalize();
-                    String sourceRoot = System.getProperty("rentz.governance.sourceRoot");
-                    if (!resolved.toAbsolutePath().normalize().startsWith(stage) && sourceRoot != null
-                            && Files.isRegularFile(stage.resolve("config/java-source-layout.json"))) {
-                        Path source = Path.of(sourceRoot).toAbsolutePath().normalize();
-                        Path originalDocument = source.resolve(stage.relativize(path.toAbsolutePath().normalize()));
-                        if (Files.mismatch(path, originalDocument) != -1) {
-                            throw new IllegalArgumentException("Document differs from its explicit source root");
-                        }
-                        String checkoutLayout = System.getProperty("rentz.governance.checkoutLayout", sourceRoot);
-                        Path origin = Path.of(checkoutLayout).resolve(stage.relativize(path.toAbsolutePath().normalize()));
-                        resolved = origin.getParent().resolve(decode(file)).normalize();
+                    String local = decode(file);
+                    if (local.regionMatches(true, 0, "file:", 0, 5)) {
+                        violations.add(outsideCheckout(root, path, index + 1, destination));
+                        continue;
+                    }
+                    Path relative = Path.of(local);
+                    resolved = file.isBlank() ? path.toAbsolutePath().normalize()
+                            : path.toAbsolutePath().getParent().resolve(relative).normalize();
+                    if (relative.getRoot() != null || !resolved.startsWith(checkout)
+                            || Files.exists(resolved) && !resolved.toRealPath().startsWith(checkout.toRealPath())) {
+                        violations.add(outsideCheckout(root, path, index + 1, destination));
+                        continue;
                     }
                     anchor = decode(anchor);
                 } catch (IllegalArgumentException | java.io.IOException invalid) {
@@ -81,13 +80,18 @@ public final class DocumentationLocalLinks {
         return java.net.URLDecoder.decode(text.replace("+", "%2B"), java.nio.charset.StandardCharsets.UTF_8);
     }
 
-    private static boolean isExternalOrConfigured(String destination) {
+    private static DocumentationGovernanceSupport.Violation outsideCheckout(Path root, Path path, int line,
+                                                                            String destination) {
+        return DocumentationGovernanceSupport.violation("DOC-LINK-PORTABILITY", root, path, line,
+                "local link leaves the portable checkout: " + destination,
+                "active documentation uses relative links whose resolved files stay in the repository",
+                "link to the local contract or cite a published web address");
+    }
+
+    private static boolean isWebLink(String destination) {
         String normalized = destination.toLowerCase(java.util.Locale.ROOT);
         return normalized.startsWith("http://")
                 || normalized.startsWith("https://")
-                || normalized.startsWith("mailto:")
-                || normalized.startsWith("file:")
-                || destination.contains("${")
-                || destination.contains("<configured");
+                || normalized.startsWith("mailto:");
     }
 }

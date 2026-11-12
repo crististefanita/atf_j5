@@ -11,16 +11,16 @@
 
 ## Diferențele față de reperul Whist Lab
 
-Registrul este confruntat cu sursele, componentele și încercările native identificate în dosarul integrării. [Refactorizarea cerută producătorului UI](../../../atf_j4/docs/feedback/ATF_CardUi_Extraction.md) trebuie să păstreze comportamentul Whist; acest registru deține adaptarea Rentz.
+Registrul este confruntat cu sursele, componentele și încercările native identificate în dosarul integrării. [Adopția grafică](../rentz/ATF_UiIntegration.md) explică granița dintre biblioteca partajată și regulile Rentz.
 
 | Suprafață | Reper verificabil în Whist Lab | Lacună Rentz și efect |
 |---|---|---|
-| Pornire | [MenuScreens](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/screens/MenuScreens.java), [SetupScreen](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/screens/SetupScreen.java): pagini separate, dropdown RO/EN, profil, reluare și scoruri. | Integrat prin `HomeMenu` și `RentzMenus`: configurare separată, RO/EN, profil și reluare vizibilă. Rămân verificările native ale rutelor negative și ale textului mărit. |
-| Nume și preferințe | [PlayerSettingsDialog](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/profile/PlayerSettingsDialog.java), [PlayerPreferences](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/profile/PlayerPreferences.java). | Editor comun și preferințe Rentz durabile, fără schimbarea identității locului. Filtrul Android UTF-16 și politica de puncte de cod cer reconciliere în producătorul comun. |
-| Masă și navigare | [GameScreen](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/screens/GameScreen.java), [AppNavigation](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/navigation/AppNavigation.java). | Masa folosește `BoardLayout`, chenarele comune și meniul discret. Inițializarea 3/6 locuri a trecut pe același viewport API 28; fontul mărit și profilul compact cer probe distincte. |
-| Mână și depunere | [CenteredHandView](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/hand/CenteredHandView.java), [GameTablePanel](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/table/GameTablePanel.java). | `HandFan` și `PlayedCardsView` sunt comune; `RentzTableContent` păstrează reveal și legalitatea. Indicii, o carte și mâna goală trebuie urmărite pe probele native, separat de datele JVM. |
+| Pornire | Modelul de navigare folosește pagini separate, dropdown RO/EN, profil, reluare și scoruri. | Integrat prin `HomeMenu` și `RentzMenus`: configurare separată, RO/EN, profil și reluare vizibilă. Rămân verificările native ale rutelor negative și ale textului mărit. |
+| Nume și preferințe | Dialog de editare și preferințe persistente. | Editor comun și preferințe Rentz durabile, fără schimbarea identității locului. Filtrul Android UTF-16 și politica de puncte de cod cer reconciliere în producătorul comun. |
+| Masă și navigare | Masă și rute de navigare separate. | Masa folosește `BoardLayout`, chenarele comune și meniul discret. Inițializarea 3/6 locuri a trecut pe același viewport API 28; fontul mărit și profilul compact cer probe distincte. |
+| Mână și depunere | Mână centrată și zonă de depunere distinctă. | `HandFan` și `PlayedCardsView` sunt comune; `RentzTableContent` păstrează reveal și legalitatea. Indicii, o carte și mâna goală trebuie urmărite pe probele native, separat de datele JVM. |
 | Continuitate | Modelele de navigare, reafișare și colectare păstrează masa și invalidează evenimentele depășite. | Controllerul livrează o tură pe cadru, iar `TrickPreview` păstrează levata completă. Cadrele individuale și marcajul pe dispozitiv rămân de calificat pentru APK-ul candidat. |
-| Scor | [Proiecția istoricului](../../../atf_j4/whist-lab-app/app/src/main/java/ro/whistlab/app/score/ScoreHistoryColumn.java) este distinctă de geometrie și randare. | J5 măsoară textul, aliniază Δ și Σ și păstrează antetul și identitatea mâinii în timpul derulării. |
+| Scor | Proiecția istoricului este distinctă de geometrie și randare. | J5 măsoară textul, aliniază Δ și Σ și păstrează antetul și identitatea mâinii în timpul derulării. |
 
 Componentele existente de sesiune, codec și lifecycle se păstrează. Cazurile UI noi folosesc motorul Rentz real și comparații capturate în execuție; selectorii nativi au probe separate pentru item AdapterView, vecin dezactivat și ambiguitate.
 
@@ -50,8 +50,8 @@ Reutilizarea testelor înseamnă aceleași invariante și oracole independente, 
 
 | Familie și reper | Componente de introdus în Rentz |
 |---|---|
-| Meniu, profil și [MatchSetup](../../../atf_j4/whist-lab-app/app/src/test/java/ro/whistlab/app/screens/MatchSetupComponentTest.java) | RO/EN, limbă schimbată pe fiecare rută, alegeri reținute, nume valid/invalid/resetat, eșec de salvare și reluare. Separat, binding Android: dropdown, tastatură, buton și semantica accesibilă. |
-| [Ordinea locurilor](../../../atf_j4/whist-lab-app/app/src/test/java/ro/whistlab/app/table/TableSeatOrderComponentTest.java) | Aceeași mapare loc → chenar → carte la 3–6 jucători; secvențe cu as, săritură, pas și actor terminat, comparate cu motorul Rentz real. |
+| Meniu, profil și configurare | RO/EN, limbă schimbată pe fiecare rută, alegeri reținute, nume valid/invalid/resetat, eșec de salvare și reluare. Separat, binding Android: dropdown, tastatură, buton și semantica accesibilă. |
+| [Ordinea locurilor](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) | Aceeași mapare loc → chenar → carte la 3–6 jucători; secvențe cu as, săritură, pas și actor terminat, comparate cu motorul Rentz real. |
 | Mână, carte, viewport și fereastră | Opt, una și zero cărți; indici, ridicare, z-order, centrare, insets și text mărit. Cele 13 cărți pot verifica rendererul comun pentru Whist, dar nu devin o distribuire legală Rentz: [OpeningDeal](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/OpeningDeal.java) cere opt cărți per loc. |
 | Evenimente și lifecycle | Mutări AI individuale, levată completă, calcul anulat, reluare, dialoguri suprapuse și rezultat depășit. Ceas și coadă controlate. |
 | Scor și raster | Zero, negativ, egalități, 3–6 locuri și istoric până la 48 de mâini; sumă independentă a deltelor, text, clipping și primul/ultimul rând după restaurare. Rasterul JVM nu substituie fontul Android. |
@@ -97,7 +97,7 @@ Schema stabilește relația rangurilor, fără a reprezenta o distribuire de ant
 
 | ID și stare | Cerință și criteriu de acceptanță |
 |---|---|
-| **S01 · MATRICE NATIVĂ** | [Clasamentul final](../rentz/ATF_UiIntegration.md#clasamentul-final) este verificat la componentă pentru 3–6 locuri. [Proba terminală](../../../../rentz_back/ui-review/j5-070-final-standings-20261109-02/android-extent.html) acoperă șase locuri pe profil compact, cu text mărit și revenire din istoric. Rămân egalitățile randate nativ și verificările celorlalte mărimi de masă. |
+| **S01 · MATRICE NATIVĂ** | [Clasamentul final](../rentz/ATF_UiIntegration.md#clasamentul-final) este verificat la componentă pentru 3–6 locuri. Rămân egalitățile randate nativ și verificările celorlalte mărimi de masă. |
 | **S04 · PARȚIAL** | **Delta și totalul confirmat sunt separate.** Componentele verifică o mână în curs și totalurile tuturor locurilor. Sanity-ul confruntă totalurile finale și revizia după derulare. Rămâne proba cu sosire în Rentz înaintea decontării. |
 
 ## Arhitectură de prezentare și refolosire
@@ -188,6 +188,6 @@ Pentru patru jucători, mecanismul comun de alocare a spațiului este descris î
 
 ## P2 · Gesturile pe etichetele istoricului
 
-O serie de gesturi ADB rapide pe coloana fixă a deschis detaliul unei mâini în timpul derulării. Proba de parcurgere a istoricului folosește celulele de scor pentru gestul vertical. [Captura nativă](../../../../rentz_back/ui-review/j5-live-ui-history-matrix-20261111-gesture-2/android-extent.html)
+O serie de gesturi ADB rapide pe coloana fixă a deschis detaliul unei mâini în timpul derulării. Proba de parcurgere a istoricului folosește celulele de scor pentru gestul vertical.
 
 Verificați separat pe dispozitiv o tragere verticală pornită de pe eticheta activă, la viteză obișnuită și după un fling. Tragerea trebuie să mute rândurile, iar o atingere să deschidă un singur detaliu.

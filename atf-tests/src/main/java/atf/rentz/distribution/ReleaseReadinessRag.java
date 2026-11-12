@@ -304,6 +304,7 @@ public final class ReleaseReadinessRag {
         String verifiedReceiptHash = "";
         Path run = null;
         JsonNode result = null;
+        long componentExtentBytes = 0;
         try {
             assertNoSymlinkPath(suppliedRun.toAbsolutePath().normalize());
             run = suppliedRun.toRealPath();
@@ -336,7 +337,7 @@ public final class ReleaseReadinessRag {
                     && (!result.path("androidJvm").isTextual() || result.path("androidJvm").asText().isBlank())))
                 throw new IOException("RAG-RECEIPT-POPULATION");
             JsonNode sourceRows = JSON.readTree(manifestBytes);
-            validateComponentExtent(root, run, result);
+            componentExtentBytes = validateComponentExtent(root, run, result);
             if (!sourceRows.isArray() || sourceRows.isEmpty()) throw new IOException("RAG-RECEIPT-MANIFEST-EMPTY");
             AtfReportingLibrary reporting = AtfReportingLibrary.resolve(root);
             String reportingHash = reporting.sha256();
@@ -372,7 +373,9 @@ public final class ReleaseReadinessRag {
         regression.put("receipt", "result.json"); regression.put("receiptSha256", verifiedReceiptHash);
         extentGate.put("status", "PASS"); extentGate.put("actual", "The complete component Extent artifact is present, source-bound and hash-verified.");
         extentGate.put("receipt", "component-suite-extent.html");
-        extentGate.put("receiptSha256", result.path("componentExtentReportSha256").asText());
+        extentGate.put("receiptSha256", result.path("componentExtentReportSha256").asText().toLowerCase(Locale.ROOT));
+        extentGate.put("artifactBytes", componentExtentBytes);
+        extentGate.put("artifactSourceCommit", git.commit());
         JsonNode maven = result.path("results"); boolean hasSuites = maven.isArray() && !maven.isEmpty();
         boolean mavenPass = hasSuites && result.path("status").asText().equals("PASS")
                 && result.path("componentExtentQualified").asBoolean(false) && result.path("runtimeQualificationFailure").asText().isBlank()
@@ -453,22 +456,22 @@ public final class ReleaseReadinessRag {
         return code.matches("RAG-[A-Z0-9-]+") ? code : fallback;
     }
 
-    private static void validateComponentExtent(Path root, Path run, JsonNode receipt) throws IOException {
+    private static long validateComponentExtent(Path root, Path run, JsonNode receipt) throws IOException {
         if (!receipt.path("componentExtentReportFailure").asText().isBlank()) throw new IOException("RAG-COMPONENT-EXTENT-FAILED");
         if (!receipt.path("componentExtentReport").isTextual() || !receipt.path("componentExtentReportSha256").asText().matches("(?i)[a-f0-9]{64}"))
             throw new IOException("RAG-COMPONENT-EXTENT-MISSING");
         Path report = Path.of(receipt.path("componentExtentReport").asText()).toAbsolutePath().normalize();
-        assertNoSymlinkPath(report);
-        if (!report.startsWith(run) || Files.isSymbolicLink(report) || !Files.isRegularFile(report, LinkOption.NOFOLLOW_LINKS)
-                || Files.size(report) < 1024 || Files.size(report) > 128L * 1024 * 1024)
-            throw new IOException("RAG-COMPONENT-EXTENT-BOUNDARY");
-        if (!sha256(Files.readAllBytes(report)).equalsIgnoreCase(receipt.path("componentExtentReportSha256").asText()))
+        if (!report.equals(run.resolve("component-suite-extent.html"))) throw new IOException("RAG-COMPONENT-EXTENT-BOUNDARY");
+        byte[] html = readExternalFile(report, 128L * 1024 * 1024);
+        if (html.length < 1024) throw new IOException("RAG-COMPONENT-EXTENT-BOUNDARY");
+        if (!sha256(html).equalsIgnoreCase(receipt.path("componentExtentReportSha256").asText()))
             throw new IOException("RAG-COMPONENT-EXTENT-HASH");
         if (!receipt.path("componentExtentQualified").isBoolean()) throw new IOException("RAG-COMPONENT-EXTENT-STATUS");
         AtfReportingLibrary reporting = AtfReportingLibrary.resolve(root);
         if (!receipt.path("componentExtentReportingLibrary").asText().equals(reporting.artifactName())
                 || !receipt.path("componentExtentReportingLibrarySha256").asText().equalsIgnoreCase(reporting.sha256()))
             throw new IOException("RAG-COMPONENT-REPORTING-LIBRARY");
+        return html.length;
     }
 
     private static void attachReleaseBuildReceipt(Path root, GitIdentity git, ArrayNode gates, Path componentRun, Path suppliedRun) {
@@ -735,6 +738,8 @@ public final class ReleaseReadinessRag {
             verifyNativeExtent(html, externalRun(root, Path.of(ui.required("rawRoot").asText())), checkpoints);
             reportGate.put("status", "PASS"); reportGate.put("actual", "Each native Extent checkpoint preserves its original inline PNG and every expected/actual comparison in order.");
             reportGate.put("receipt", run.relativize(extent).toString().replace('\\', '/')); reportGate.put("receiptSha256", sha256(htmlBytes));
+            reportGate.put("artifactBytes", htmlBytes.length);
+            reportGate.put("artifactSourceCommit", git.commit());
         } catch (Exception invalid) {
             if (!uiGate.path("status").asText().equals("PASS") && !uiGate.path("status").asText().equals("FAIL")) {
                 uiGate.put("status", "BLOCKED");

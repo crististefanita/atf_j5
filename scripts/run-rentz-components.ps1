@@ -70,7 +70,7 @@ try {
     Push-Location $stage
     try {
         New-Item -ItemType Directory -Path "$stage/runtime"|Out-Null
-        $arguments=@('-B','-o',"-Drentz.runtime.inventory=$runtimeInventory","-Drentz.runtime.attestation=$runtimeAttestation","-Drentz.runtime.token=$qualificationToken","-Drentz.governance.sourceRoot=$source","-Drentz.governance.checkoutLayout=$checkoutLayout","-Dmaven.repo.local=$repository","-Djava.io.tmpdir=$stage/runtime",'-Datf.test.heap.max=256m',"-Drentz.report.output=$RunRoot\rentz-rules-extent.html","-Drentz.release.report.directory=$RunRoot\release-contracts")
+        $arguments=@('-B','-o',"-Drentz.runtime.inventory=$runtimeInventory","-Drentz.runtime.attestation=$runtimeAttestation","-Drentz.runtime.token=$qualificationToken","-Drentz.governance.sourceRoot=$source","-Dmaven.repo.local=$repository","-Djava.io.tmpdir=$stage/runtime",'-Datf.test.heap.max=256m',"-Drentz.report.output=$RunRoot\rentz-rules-extent.html","-Drentz.release.report.directory=$RunRoot\release-contracts")
         if($plan.selectors.Count){$arguments+=@('-Dsurefire.failIfNoSpecifiedTests=false',('-Dtest='+($plan.selectors-join',')),'test')}else{$arguments+=@('-N','validate')}
         & $Maven @arguments *> "$RunRoot\maven.log"
         $exit=$LASTEXITCODE

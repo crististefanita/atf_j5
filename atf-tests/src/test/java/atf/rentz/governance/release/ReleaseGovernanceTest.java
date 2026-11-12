@@ -562,6 +562,12 @@ class ReleaseGovernanceTest {
         var beforeProduct = ReleaseReadinessRag.evaluate(root, "gate:native-ui consecutive games", component, null, ui, build);
         assertEquals("PASS", gate(beforeProduct, "native-ui").path("status").asText());
         assertEquals("PASS", gate(beforeProduct, "native-ui-report").path("status").asText());
+        var componentReport = gate(beforeProduct, "component-extent-report");
+        var nativeReport = gate(beforeProduct, "native-ui-report");
+        assertEquals(Files.size(component.resolve("component-suite-extent.html")), componentReport.required("artifactBytes").longValue());
+        assertEquals(Files.size(extent), nativeReport.required("artifactBytes").longValue());
+        assertEquals(uiReceipt.path("build").path("sourceCommit").asText(), componentReport.required("artifactSourceCommit").asText());
+        assertEquals(componentReport.required("artifactSourceCommit").asText(), nativeReport.required("artifactSourceCommit").asText());
         assertEquals("NOT_RUN", gate(beforeProduct, "release-build").path("status").asText());
         assertFalse(beforeProduct.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
         Files.write(productReceipt, productReceiptBytes);

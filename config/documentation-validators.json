@@ -6,7 +6,7 @@
     "package names and explicit project root",
     "configured active inventory; retained history is checked separately",
     "all named library guides join the same active inventory",
-    "external local links resolve only via the explicit original source and byte-identical staged document"
+    "active local links are confined to the staged checkout, including real-path validation"
   ],
   "sources": [
     {
@@ -47,7 +47,7 @@
     {
       "path": "links/DocumentationLocalLinks.java",
       "sha256": "b2164a28761f69658009cdd93b99041937f51474d526d73be21831529797c2ea",
-      "adaptedSha256": "5724ced816393c478623c423eb1c6c20619203f7211d5a28ff83b598e115c7ad"
+      "adaptedSha256": "202456b4e19fa28afc9f8add6d16e95ba32e7e5029a634130ef4b373fc4f21b5"
     },
     {
       "path": "links/MarkdownAnchorIndex.java",

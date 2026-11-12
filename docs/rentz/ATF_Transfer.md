@@ -73,10 +73,10 @@ Definiți pachetul, regulile, rolurile, observația, acțiunile, terminarea și 
 
 ## Aplicare la Hold’em
 
-[Contractul Hold’em](../../../atf_j6/docs/requirements/README.md) stabilește ordinea de lucru. Punctele de intrare permit verificări mici înainte de motorul complet, evaluator și meciurile pereche:
+Folosiți regulile Hold’em pentru a defini observația actorului și oracolul de decontare. Începeți cu verificări mici înaintea partidelor pereche.
 
-- [Observația actorului](../../../atf_j6/holdem-core/src/main/java/ro/atf/holdem/core/HoldemObservation.java) expune mâna proprie, masa, stivele, acțiunile și istoricul textual.
-- [Arena locală](../../../atf_j6/holdem-arena/src/main/java/ro/atf/holdem/arena/ArenaRun.java) apelează o singură politică.
+- Observația actorului expune mâna proprie, masa, stivele, acțiunile și istoricul textual.
+- Arena locală invocă politica actorului din observația lui, cu seed și buget controlate.
 
 ```mermaid
 flowchart LR
@@ -101,8 +101,6 @@ Motorul aplică regula; oracolul confruntă rezultatul. Arena poate vedea distri
 | 3. Componente | [Fixture mic și control negativ](ATF_Components.md#oracol-și-control-negativ), proprietăți și evaluator separat de AI. | Verificați conservarea jetoanelor la fiecare tranziție, refuzul fără schimbarea stării, clasarea celor mai bune cinci cărți cu un oracol independent și decontarea poturilor. Verificați invarianța la redenumirea culorilor și digestul replay-ului. |
 | 4. Politică | [Ponderi contextualizate](ATF_Learning.md#reguli-tactice-și-ponderi), limite explicite, rezervă legală și reper fix. | Porniți de la decizii legale și deterministe. Separați clasificarea mâinii, pot odds, textură și poziție de estimarea equity și de distribuția ponderată a mâinilor adverse. Pe stări mici, confruntați samplingul cu enumerarea exactă. |
 | 5. Evaluare | [Separarea distribuirilor](ATF_Learning.md#identitatea-distribuirii-și-expunerea), comparație pereche și refuz înainte de execuție. | Înghețați regulile, generatorul, politica, bugetul și metrica. Rejucați aceeași distribuire la poziții echivalente cu aceiași adversari; agregați întâi la nivelul distribuirii sau al sesiunii dacă stivele trec între mâini. Raportați big blinds la 100 de mâini, incertitudinea, drawdown-ul și costul. |
-
-[Cerințele domeniului](../../../atf_j6/docs/requirements/DOMAIN_REQUIREMENTS.md), [criteriile AI](../../../atf_j6/docs/requirements/AI_REQUIREMENTS.md) și [strategia testelor](../../../atf_j6/docs/testing/TEST_STRATEGY.md) dețin contractele Hold’em.
 
 Transferați prin bibliotecile comune și adaptoare locale. Pragurile, ponderile, scorurile, seed-urile, replay-urile, codul Android și regulile Rentz rămân în jocul lor. Începeți local; eventualul transport se verifică separat cu mock-uri.
 

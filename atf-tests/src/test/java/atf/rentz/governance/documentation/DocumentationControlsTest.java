@@ -1,6 +1,8 @@
 package atf.rentz.governance.documentation;
 
+import atf.rentz.RentzRulePublication;
 import atf.testkit.AtfComponentTest;
+import atf.testkit.assertions.ComponentAuditExtension;
 import atf.rentz.governance.documentation.links.DocumentationLinkGovernanceTest;
 import atf.rentz.governance.source.GovernanceProject;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,11 +11,15 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
+import static atf.testkit.assertions.AuditedAssertions.*;
 
 @AtfComponentTest
 class DocumentationControlsTest {
+    @RegisterExtension static final ComponentAuditExtension AUDIT = RentzRulePublication.scoped(
+            DocumentationControlsTest.class, "documentation-governance.html", "Portable documentation contracts and negative controls");
+
     @TempDir Path root;
     private List<DocumentationGovernanceSupport.Violation> inspect(String text) throws Exception {
         Path file = root.resolve("README.md");
@@ -53,6 +59,28 @@ class DocumentationControlsTest {
         assertTrue(violations.stream().allMatch(issue -> issue.code().equals("DOC-README-ANCHOR")
                 && issue.file().equals(Path.of("README.md")) && issue.line() == 5
                 && issue.fix().contains("restore the destination heading")), violations::toString);
+    }
+
+    @Test void existingFilesOutsideTheCheckoutCannotSatisfyTheDocumentationContract() throws Exception {
+        Path project = Files.createDirectory(root.resolve("project"));
+        Path guide = project.resolve("README.md");
+        Path owner = Files.writeString(project.resolve("owner.md"), "## Stable heading\n");
+        Path external = Files.writeString(root.resolve("sibling.md"), "## Stable heading\n");
+        for (String target : List.of("../sibling.md#stable-heading", "%2e%2e/sibling.md",
+                external.toString().replace('\\', '/'), external.toUri().toString())) {
+            Files.writeString(guide, "# Contract\n\n[External](" + target + ")\n");
+            var violations = new ArrayList<DocumentationGovernanceSupport.Violation>();
+            DocumentationLinkGovernanceTest.validate(guide, project, violations);
+            assertEquals(1, violations.size(), target);
+            assertEquals("DOC-LINK-PORTABILITY", violations.getFirst().code(), target);
+            assertEquals(3, violations.getFirst().line(), target);
+        }
+
+        Files.writeString(guide, "# Contract\n\n[Owner](" + owner.getFileName() + "#stable-heading)\n"
+                + "~~~md\n[Example](../sibling.md)\n~~~\n");
+        var violations = new ArrayList<DocumentationGovernanceSupport.Violation>();
+        DocumentationLinkGovernanceTest.validate(guide, project, violations);
+        assertTrue(violations.isEmpty(), violations::toString);
     }
 
     @Test void adaptedValidatorsKeepTheirDeclaredSourceIdentity() throws Exception {

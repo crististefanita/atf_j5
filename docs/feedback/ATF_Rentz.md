@@ -47,7 +47,7 @@ Kitul și JAR-urile au responsabilități comune, iar legalitatea și scorul apa
 
 | Prioritate | Cerință rămasă | Criteriu de închidere |
 |---|---|---|
-| P2 | Retenția copiilor istorice referite de receipt-uri și classpath-uri trebuie reconciliată înaintea unei curățări mai largi. | Inventar cu proprietar și dovada utilizării, arhivă portabilă verificată și eliminare numai după eliberarea proceselor; nu redenumiți proveniența istorică pentru a obține verde. |
+| P2 | Copiile istorice încă referite de receipt-uri sau classpath-uri cer reconciliere înainte de retragere. | Inventar cu proprietar și dovada utilizării, arhivă portabilă verificată și eliminare numai după eliberarea proceselor; nu redenumiți proveniența istorică pentru a obține verde. |
 
 ## Prezentare și tabelă de scor
 
@@ -57,6 +57,6 @@ Kitul și JAR-urile au responsabilități comune, iar legalitatea și scorul apa
 
 ## Adopția Test Kit
 
-[Responsabilul Kit](../../../atf_j0/docs/feedback/ATF_Common_Test_Support_Feedback.md#kit-library-151--distribuție-unică-fără-surse-paralele) deține pachetul și API-ul. Consumatorul păstrează proba Rentz și lansatorul izolat.
+Producătorul Test Kit deține API-ul și pachetul. [Adopția locală](../../lib/README.TestKit.md) explică proba Rentz și rularea izolată.
 
 Identitatea copiei inițiale rămâne în istoricul provenienței; adopția Kit are identitate proprie la consumator. Componentele Rentz verifică binarul, iar scriptul păstrează inventarul reactorului fără surse Kit; acceptanța Android rămâne separată.

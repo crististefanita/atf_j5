@@ -76,7 +76,7 @@ Modelele UI păstrează date vizibile neutre. În Rentz, componentele acoperă m
 | Nume adversari | Pentru 3–6 locuri, selecția comună rezervă numele uman, iar restaurarea păstrează ordinea locurilor și a numelor. Jurnalul vechi folosește seed-ul. |
 | Mână vizibilă | Ordinea este ♠ ♥ ♣ ♦, apoi rang crescător. Proiecția păstrează identitatea și legalitatea; proba nativă verifică ordinea fizică și centrajul ultimei cărți. |
 
-[Componentele mâinii](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java) · [Dovezile native pentru chenare, nume și mână](../../../../rentz_back/ui-review/shared-seats-collection-j5/README.md)
+[Componentele mâinii](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java)
 
 ### Marcajul cărților jucabile în Rentz
 
@@ -119,7 +119,7 @@ Varianta izolată are receipt propriu. Runnerul curent folosește replay-ul inde
 ## Auditul cititorului Extent
 
 - [Driverul focalizat](../../atf-tests/tools/run-trick-collection-sanity.ps1) execută ultima mutare legală și reia mâna după oprirea procesului. Înregistrați fixture-ul de dezvoltare înainte de a-l expune emulatorului.
-- [Analiza cadrelor](../../atf-tests/tools/analyze-trick-collection.mjs) măsoară timestamp-urile, centrele cărților și apropierea de chenarul câștigător. Extent include cadrele și hash-urile înregistrărilor. [Dosarul de verificare](../../../../rentz_back/ui-review/restart-collection-j5/README.md)
+- [Analiza cadrelor](../../atf-tests/tools/analyze-trick-collection.mjs) măsoară timestamp-urile, centrele cărților și apropierea de chenarul câștigător. Extent include cadrele și hash-urile înregistrărilor.
 
 - `-CompactScores` verifică în română chenarul la font 1,5 și confruntă ordinea cărților vizibile cu observația motorului.
 - `-HelpAwardsOnly` verifică în ambele limbi premiile distincte pentru mesele de 3–6 jucători.
@@ -159,7 +159,7 @@ Varianta izolată are receipt propriu. Runnerul curent folosește replay-ul inde
 
 ## Istoricul adaptiv Rentz
 
-J4 oferă reperul pentru lățimile măsurate, subcoloanele aliniate și antetul fix. J5 arată numărul mâinii, sub-jocul, alegătorul și marcajul ×2 în coloana fixă. Grupurile de scor arată **Δ** pentru mână și **Σ** pentru totalul confirmat. [Reperul J4](../../../atf_j4/docs/game/ATF_ScoreHistory.md)
+Grila folosește lățimi măsurate, subcoloane aliniate și antet fix. Coloana fixă arată numărul mâinii, sub-jocul, alegătorul și marcajul ×2. Grupurile de scor arată **Δ** pentru mână și **Σ** pentru totalul confirmat.
 
 | Situație | Comportament |
 |---|---|
@@ -171,8 +171,8 @@ J4 oferă reperul pentru lățimile măsurate, subcoloanele aliniate și antetul
 
 - Testele de componentă confruntă lățimile și înălțimile și reconstruiesc toate cele 48 de mâini ale unei mese de șase din jurnalul canonic. Punctele provin din motor, iar oracolul adună separat deltele pe fiecare loc. [Componentele istoricului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/)
 - Sanity-ul `-HistoryOnly` citește `historyFixture` și `historyFixtureSha256` din receipt. Fixture-ul identifică jurnalul și valorile publice de la cele două capete ale istoricului. Traseul nativ deschide dialogul, derulează pe ambele axe și confruntă revizia și totalurile la întoarcerea în meniu. [Lansatorul Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
-- Adaugă `-HistoryMatrix` pentru profilul J4 de 720 × 1280 și fereastra scundă de 720 × 740, ambele la 360 dpi, font 1,5 și interfață EN. Proba API 28 măsoară ultimul grup de scor și rândul 48, verifică legenda la capăt și mărește din nou dialogul deschis. [Matricea nativă și lecțiile](../../../../rentz_back/ui-review/history-native-matrix-j5/README.md)
-- Reperul de bază păstrează rularea inițială. Invariantele grilei și capcanele la extinderea testelor sunt lângă cod. [Rularea de bază](../../../../rentz_back/ui-review/adaptive-history-j5/README.md) · [README-ul grilei](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md)
+- Adaugă `-HistoryMatrix` pentru profilul compact de 720 × 1280 și fereastra scundă de 720 × 740, ambele la 360 dpi, font 1,5 și interfață EN. Proba API 28 măsoară ultimul grup de scor și rândul 48, verifică legenda la capăt și mărește din nou dialogul deschis.
+- Invariantele grilei și capcanele la extinderea testelor sunt lângă cod. [README-ul grilei](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md)
 
 ### Detaliul unei mâini
 
@@ -185,7 +185,7 @@ J4 oferă reperul pentru lățimile măsurate, subcoloanele aliniate și antetul
 
 Ajutorul afișează grila pentru 3–6 jucători din profilul efectiv, verificat și cu profil alternativ. Probele Android în RO/EN confruntă ajutorul și ordinea locurilor cu premiu zero după reluare.
 
-[README-ul grilei și al detaliului](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md) · [Dovezile S05/S06](../../../../rentz_back/ui-review/settlement-details-j5/README.md)
+[README-ul grilei și al detaliului](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md)
 
 ### Spațiul dintre chenare
 
@@ -203,9 +203,6 @@ Ajutorul afișează grila pentru 3–6 jucători din profilul efectiv, verificat
 - Bugetul începe la primul desen al mesei: 1.000 ms pentru cărțile nemișcate și 500 ms pentru deplasare și estompare la câștigător. La o pornire rece, checkpoint-ul aflat exact la final de levată permite o singură reluare vizuală. O levată nouă începută păstrează cărțile ei; jurnalul nu primește comenzi pentru animație.
 - Un checkpoint deja punctat se deschide direct, fără o sarcină AI care să redeseneze masa. Termenul absolut este verificat și înainte de desen. Cărțile expirate dispar din masa curentă înainte de construirea paginii de punctaj.
 - Pe ferestre accelerate hardware cu scara implicită, Rentz programează mișcarea, micșorarea și estomparea pe rendererul Android, în aceeași fereastră de 1.500 ms. Cărțile ajung la câștigător înainte de estompare. Traseul software folosește animatorul comun.
-- Pe API 28, confirmarea cu același APK a trecut în joc la 1.491 ms și după restart la 1.433 ms. Dosarul de dovezi păstrează și rularea inițială în care primul cadru animat din joc a depășit pragul cu 20 ms. [Cadre și verificări](../../../../rentz_back/ui-review/restart-collection-j5/README.md)
 - După colectarea ultimei levate, ecranul „Punctajul mâinii” preia contractul, multiplicatorul, contribuțiile, **Δ** și **Σ** din același rezultat confirmat ca istoricul. Jocul așteaptă acțiunea „Mâna următoare”; masa și istoricul rămân accesibile.
 - În alegerea normală, după dezvăluirea cărților, jucătorul poate cere o sugestie AI calculată pe opțiunile legale, cu profilul și dificultatea partidei. Alegerea oarbă nu afișează sugestii. O recomandare nu selectează și nu confirmă automat sub-jocul.
-- Separăm termenul exact verificat în componente de intervalul observabil în înregistrarea emulatorului. Extent păstrează și măsurătorile care ies din toleranță. [Dovezi și limita instrumentării](../../../../rentz_back/ui-review/restart-collection-j5/README.md)
-
-[Dovezile integrării curente](../../../../rentz_back/ui-review/shared-ui-cb695c1461/README.md) păstrează selecțiile, limitele și încercările originale; strategia de aici se aplică și versiunilor următoare.
+- Separăm termenul exact verificat în componente de intervalul observabil în înregistrarea emulatorului. Extent păstrează și măsurătorile care ies din toleranță.

@@ -4,7 +4,7 @@
 
 [Registrul Rentz](ATF_Rentz.md) păstrează lacunele active ale regulilor, modelului și integrării. O regulă stabilă are document responsabil în [aria Rentz](../rentz/README.md); rezultatele concrete rămân în depozitul extern.
 
-- [Interfața Rentz](ATF_Rentz_UI_ToDo.md) urmărește diferențele rămase de interacțiune, geometrie și scor, cu probe de componentă și acceptanță nativă selectivă. [Producătorul UI](../../../atf_j4/docs/feedback/ATF_CardUi_Extraction.md) deține extragerea prin refactorizare; adaptarea nu importă motorul sau regulile Whist.
+- [Interfața Rentz](ATF_Rentz_UI_ToDo.md) urmărește diferențele rămase de interacțiune, geometrie și scor, cu probe de componentă și acceptanță nativă selectivă. [Biblioteca grafică](../../rentz-lab-app/ui-library/README.md) și adaptoarele Rentz au verificări separate.
 - [Integritate și calitate](ATF_RentzQuality.md) deține criteriile strategice și documentare încă deschise. Validarea, lifecycle-ul, guvernanța sursei și [calificarea consumatorului](../rentz/ATF_Qualification.md) au contracte și probe proprii; calificarea nativă rămâne separată.
 - [Criteriile RAG rămase](ATF_Release_RAG.md) urmăresc probele de acceptanță suplimentare. [Ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) descrie porțile curente.
 - [Extinderea realizărilor](ATF_Rentz_Achievements_ToDo.md) urmărește obiectivele candidate, sincronizarea și probele de accesibilitate rămase. [Integrarea actuală](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
@@ -17,7 +17,7 @@
 
 ## Biblioteci comune
 
-`atf_j0` deține codul, testele native și împachetarea bibliotecilor comune. [Feedback-ul responsabilului](../../../atf_j0/docs/feedback/README.md) primește cerințele generice, cu JAR/hash, reproducere, așteptat/observat și criteriu de acceptanță; consumatorul păstrează verificarea sa locală.
+Producătorul ATF deține codul, testele native și împachetarea bibliotecilor comune. O cerință către producător include versiunea JAR, SHA-256, reproducerea, așteptarea, observația și criteriul de acceptanță. [Contractele binare și probele locale](../../lib/README.md)
 
 ## Materiale istorice
 

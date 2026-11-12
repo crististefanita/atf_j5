@@ -75,7 +75,13 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 
 Lansatorul copiază sursele și bibliotecile, verifică populațiile Maven și Android JVM și păstrează XML-urile în afara proiectului. [Calificarea offline](ATF_Qualification.md) deține colecțiile și porțile; Test Kit înregistrează comparațiile efectiv evaluate, iar [publicatorul](../../atf-tests/src/test/java/atf/rentz/RentzRulePublication.java) transmite rezultatul bibliotecii Extent.
 
-XML-urile păstrează întreaga populație executată. Raportul narativ publică selecția de contracte ATF auditate, fără multiplicarea fiecărei distribuiri generate într-un scenariu separat; populațiile și scopurile nu se confundă.
+| Dovadă | Ce poate verifica cititorul |
+|---|---|
+| `component-suite-extent.html` | Suitele și cazurile din XML-urile Maven și Android JVM, cu identități, totaluri, verdict și amprentele XML. |
+| `release-contracts/documentation-governance.html` | Comparațiile efective ale controalelor de documentație, inclusiv diagnosticul unei legături neportabile și vecinul valid. |
+| Rapoartele contractelor de domeniu și release | Așteptarea, rezultatul observat și diagnosticul capturate de adaptorul Test Kit în testele care îl folosesc. |
+
+Distribuirile generate păstrează identitatea testului care le exercită. XML-ul reflectă populația executabilă, iar rapoartele de contract explică oracolul și comparațiile efective.
 
 ## Interpretarea rezultatului
 

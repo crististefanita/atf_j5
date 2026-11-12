@@ -55,4 +55,4 @@ Verificați întâi compilarea pe perechile fizice JAR/POM, apoi comportamentul 
 
 ## Mentenanță și feedback
 
-Codul, testele native și feedback-ul bibliotecilor aparțin `atf_j0` (`atf_j0/docs/feedback/README.md`). Remedierea și regresia în J0 preced sincronizarea și acceptanța locală; feedback-ul include JAR/hash, reproducere și așteptat/observat.
+Producătorul ATF deține codul, testele native și împachetarea. [Manifestul de proveniență](../library-provenance.json) identifică sursa și octeții livrați. [Feedbackul local](../docs/feedback/README.md#biblioteci-comune) descrie datele necesare pentru transfer.

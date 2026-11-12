@@ -26,10 +26,10 @@
       "path": "scripts/verify-release-readme.ps1",
       "owner": "Rentz release",
       "reason": "Close the authenticated distribution channel after the qualified source and README reach the remote.",
-      "criterion": "Require the authenticated artifact bytes and SHA-256, explicit provider permissions and exact source tag. The pushed Jocul section accepts only the two canonical links in order on both channels.",
+      "criterion": "Require the qualified routes and authenticated APK bytes. Retirement requires both Extent artifacts to match the RAG source, length and SHA-256.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-09",
-      "sha256": "da7a129167cfd1a3adbcaec74dc4a47fee66551f1fff7bb42048fc21414aa174",
+      "sha256": "d3b21e010a38502852dc8975fa12cad85c9aa0ecd4634fb8ed6157cc179d4902",
       "allowDelete": false
     },
     {
@@ -349,7 +349,7 @@
       "criterion": "A missing or partial Rentz-plus-two-games receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged. The release still requires five native games, geometry, history, restart and original Extent evidence. Catalog breadth and terminal victory eligibility run in the mandatory Android JVM population.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "ee335a70e6e996eeb28ef0f213e780a6198b7c1fa2adb73d3c74a9c8f4d9bbd4",
+      "sha256": "0eaf94ce3e230609ac7d195ea634be7e075cce2cc98f158328d8a3441d4e90aa",
       "allowDelete": false
     },
     {
@@ -369,7 +369,7 @@
       "criterion": "Only external fresh report roots and source-bound component/build/UI receipts are accepted; publishAllowed remains false.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "c544be1c971bd3aded04816417cea8057edd9b079676f66126f5c95c1ebb1f12",
+      "sha256": "153b60357c0642cdff768bece397f888bfb0fd555f863e7f87f194b932bd5059",
       "allowDelete": false
     },
     {
@@ -389,7 +389,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "bd2879fd08d68fdc53c108474c19f5febeeb32e4cae6fdb71e0c50e420ea728c",
+      "sha256": "3efda81f72eed8669a90aafad6d4a01d3259f91c4e20e481bc0ffe85017fed9d",
       "allowDelete": false
     },
     {
@@ -466,10 +466,10 @@
       "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/links/DocumentationLocalLinks.java",
       "owner": "Rentz release",
       "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Check the immutable document bytes against their source, then resolve external relative links against the project layout.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "criterion": "Resolve links entirely inside the checkout, with independent rejection of existing external targets and file URLs.",
+      "proof": "docs/rentz/ATF_Documentation.md#revizuire-și-guvernanță",
       "expires": "2026-11-20",
-      "sha256": "5724ced816393c478623c423eb1c6c20619203f7211d5a28ff83b598e115c7ad",
+      "sha256": "202456b4e19fa28afc9f8add6d16e95ba32e7e5029a634130ef4b373fc4f21b5",
       "allowDelete": false
     },
     {
@@ -519,7 +519,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access. The native fixture qualifies the representative search and progress journey while preserving the existing rejection controls for incomplete games, geometry, source identity and corrupt evidence.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "d81b7965df32b823ddf630629f7af517d6f81fb4862c4179e4c8a7c416c9fb3b",
+      "sha256": "ac702dd39ce3a7373ab5252ddd1822e39c321b50319495a855d9d1c09308c564",
       "allowDelete": false
     },
     {
@@ -709,7 +709,7 @@
       "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry. Remote README fixtures exercise both distribution channels and reject extra copy or routes. The offline launcher fixture requires reservation, binding of the captured bytes and completion in that order.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "6a53c8a0863a826819dcfaaad2b71b1903fdd5755152d80fe667896c536b3adc",
+      "sha256": "8b8421bc9209c1f4e68501fab782fe86ffb3ba9a753e66a26510d778b3d5b668",
       "allowDelete": false
     },
     {
@@ -735,11 +735,11 @@
     {
       "path": "config/documentation-validators.json",
       "owner": "Rentz consumer",
-      "reason": "0.1.2 · Bind the adapted external link resolver to its reviewed bytes.",
-      "criterion": "Immutable document bytes are checked before relative external references resolve against the live layout.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
+      "reason": "Bind the portable link validator to its reviewed adapter bytes.",
+      "criterion": "Keep the upstream source digest and verify the local adapter digest. The checkout alone determines whether an active link is valid.",
+      "proof": "docs/rentz/ATF_Documentation.md#revizuire-și-guvernanță",
       "expires": "2026-11-20",
-      "sha256": "774f4e497bfdc2782b543dec47a65a1e0671be7192d519ef184b72d477149be8",
+      "sha256": "1d712ccd9bc6d1969c29fffe162a8dc3b65d8117bd4f85f60345745aa676c4f7",
       "allowDelete": false
     },
     {
@@ -1069,7 +1069,7 @@
       "criterion": "All selected Surefire XML is hashed and reconciled; the publisher uses the atf-tests runtime classpath; failed or empty runs remain FAIL.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "006ddaa9125ebe7705fa697bbaacf1cfcbfcf52e6705daf4dff4b94bc8a55663",
+      "sha256": "25379f2dbbff3830be471c65a9c872fb48e3fc4b7e8471e908396ff53cec4d49",
       "allowDelete": false
     },
     {

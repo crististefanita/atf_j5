@@ -43,13 +43,11 @@ Registrul separă mecanismele implementate de promovarea strategică și de inte
 
 Calificați separat progresul strategic Q08, integrarea nativă și prezentarea. [Regresia standard](../rentz/ATF_Qualification.md) păstrează verificarea mecanismelor stabilizate.
 
-[Auditul bugetelor egale](../../../../rentz_back/infrastructure/governance/20261106-hard-equal-24c98bb8/TDD.md) păstrează comparațiile și verdictul pe lotul nou.
-
 ## Guvernanță și coeziune
 
 Nivelurile testelor, corpusul documentar și revizuirea diferențelor Git au controale permanente în [calificarea consumatorului](../rentz/ATF_Qualification.md#guvernanța-permanentă). [Mecanismele AI](../rentz/ATF_Learning.md#separarea-mecanismelor-și-refactorizarea-sigură) separă registrul public, tranziția, estimările și agregarea experimentelor.
 
-[Auditul Q11–Q12](../../../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md) păstrează probele RED/GREEN și comparația cu reperul compilat; o modificare de structură nu promovează profilul AI. Împachetarea API-ului generic de guvernanță rămâne [cerință comună separată](README.md#contract-generic-pentru-guvernanță).
+O modificare de structură se verifică față de reperul compilat. Împachetarea API-ului generic rămâne [cerință comună separată](README.md#contract-generic-pentru-guvernanță).
 
 ## Distribuția APK
 
@@ -68,7 +66,7 @@ Nivelurile testelor, corpusul documentar și revizuirea diferențelor Git au con
 
 [Calificarea tehnică](../rentz/ATF_Qualification.md#inventarul-sursei-executabile) deține rezolvarea ierarhiei, interfețele externe revizuite și confruntarea cu Jupiter. [Admiterea evaluării](../rentz/ATF_Learning.md#admiterea-rezultatelor-reluate) deține contextul independent, populația completă și recalcularea agregărilor.
 
-Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; modificarea sursei, a JAR-urilor ori a schemei cere recalificare. [Auditul extern](../../../../rentz_back/infrastructure/governance/20261107-q15-q16-8e2c2092/TDD.md) păstrează RED/GREEN și identitatea exactă, fără copierea rezultatelor în ghidurile de mecanism.
+Cerințele Q15 și Q16 sunt protejate prin componente și controale permanente; modificarea sursei, a JAR-urilor ori a schemei cere recalificare.
 
 ### Limite păstrate explicit
 

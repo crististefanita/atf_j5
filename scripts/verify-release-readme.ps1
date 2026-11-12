@@ -2,7 +2,9 @@ param(
     [Parameter(Mandatory)][string]$RagReport,
     [Parameter(Mandatory)][string]$PublicationEvidence,
     [Parameter(Mandatory)][string]$RunRoot,
-    [switch]$Restricted
+    [switch]$Restricted,
+    [string]$ComponentExtent = '',
+    [string]$NativeExtent = ''
 )
 $ErrorActionPreference = 'Stop'
 $project = Split-Path -Parent $PSScriptRoot
@@ -84,6 +86,46 @@ function Confirm-ReadmeGameLinks([string]$Readme, [string]$ReleaseUrl, [string]$
         if ($link.Groups[1].Value -match '/releases/(tag|download)/|\.apk(?:[?#].*)?$') {
             throw 'The pushed README contains another release or download link outside Jocul.'
         }
+    }
+}
+
+function Confirm-RetirementReports($Gates,[string]$Source,[string]$ComponentExtent,[string]$NativeExtent,[string]$ProjectRoot) {
+    $reports = [ordered]@{'component-extent-report'=$ComponentExtent;'native-ui-report'=$NativeExtent}
+    foreach($id in $reports.Keys){
+        $file = $reports[$id]
+        $record = [ordered]@{gate=$id;status='BLOCKED';sourceCommit=$Source;path=$file}
+        try {
+            $claims = @($Gates | Where-Object {$_.id -ceq $id})
+            if($claims.Count -ne 1 -or $claims[0].status -cne 'PASS'){
+                throw 'Missing qualified report gate.'
+            }
+            $claim = $claims[0]
+            if($claim.artifactSourceCommit -cne $Source -or
+                $claim.receiptSha256 -cnotmatch '^[a-f0-9]{64}$' -or
+                ($claim.artifactBytes -isnot [int] -and $claim.artifactBytes -isnot [long]) -or
+                $claim.artifactBytes -le 0 -or $claim.artifactBytes -gt 128MB){
+                throw 'Missing qualified report identity.'
+            }
+            if(!$file){throw 'Missing report file.'}
+            $full = [IO.Path]::GetFullPath($file)
+            Assert-AtfArtifactPath -Path $full -ProjectRoot $ProjectRoot
+            if([IO.Path]::GetFileName($full) -cne [IO.Path]::GetFileName([string]$claim.receipt)){
+                throw 'Report filename differs from the qualified artifact.'
+            }
+            $record.path = $full
+            $stream = [IO.File]::Open($full,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+            try {
+                if($stream.Length -ne $claim.artifactBytes){throw 'Report length differs from the qualified artifact.'}
+                $digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($stream)).ToLowerInvariant()
+                if($digest -cne $claim.receiptSha256){throw 'Report SHA-256 differs from the qualified artifact.'}
+                $record.bytes = $stream.Length
+                $record.sha256 = $digest
+                $record.status = 'PASS'
+            } finally {$stream.Dispose()}
+        } catch {
+            $record.reason = $_.Exception.Message
+        }
+        [pscustomobject]$record
     }
 }
 
@@ -186,8 +228,13 @@ if($Restricted){
 
 $null = New-Item -ItemType Directory -Path $RunRoot
 $report = Join-Path $RunRoot 'readme-publication.json'
-$retirementAllowed = $Restricted -and $proof.authenticated.provider -ceq 'GitHub' -and
+$latestAuthenticated = $Restricted -and $proof.authenticated.provider -ceq 'GitHub' -and
     $catalog.currentVersion -ceq $version -and $proof.latestTag -ceq $tag -and $proof.readmeCommit -ceq $head
+$extentEvidence = @(if($latestAuthenticated){
+    Confirm-RetirementReports $rag.gates $source $ComponentExtent $NativeExtent $project
+})
+$retirementAllowed = $latestAuthenticated -and $extentEvidence.Count -eq 2 -and
+    @($extentEvidence | Where-Object status -CNE 'PASS').Count -eq 0
 [ordered]@{
     gate = 'readme-publication'
     status = 'PASS'
@@ -204,6 +251,7 @@ $retirementAllowed = $Restricted -and $proof.authenticated.provider -ceq 'GitHub
         allowed = [bool]$retirementAllowed
         latestTag = $(if($retirementAllowed){$tag}else{$null})
         qualificationSha256 = (Get-FileHash -LiteralPath $RagReport -Algorithm SHA256).Hash.ToLowerInvariant()
+        extentEvidence = $extentEvidence
         preserveSourceTags = $true
         preserveAuditEvidence = $true
     }

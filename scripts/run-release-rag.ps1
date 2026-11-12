@@ -77,7 +77,11 @@ if($LASTEXITCODE-ne0){throw "Local release RAG failed: $RunRoot"}
 $reportFile=Join-Path $reportRoot 'release-rag-report.json'
 if($PublicationEvidence){
     $inputs=@{RagReport=$reportFile;PublicationEvidence=$PublicationEvidence;RunRoot=(Join-Path $RunRoot 'publication')}
-    if($RestrictedPublication){$inputs.Restricted=$true}
+    if($RestrictedPublication){
+        $inputs.Restricted=$true
+        $inputs.ComponentExtent=Join-Path $ComponentRun 'component-suite-extent.html'
+        if($NativeUiRun){$inputs.NativeExtent=Join-Path $NativeUiRun 'android-extent.html'}
+    }
     & (Join-Path $PSScriptRoot 'verify-release-readme.ps1') @inputs
 }
 Write-Output $reportFile

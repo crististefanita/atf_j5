@@ -466,6 +466,49 @@ Case 'Pushed README requires one clean game section for each distribution channe
         }
     }
 }
+Case 'Retirement reopens both qualified Extent files and rejects missing or foreign evidence' {
+    $scriptPath = Join-Path $project 'scripts/verify-release-readme.ps1'
+    $tokens = $null
+    $errors = $null
+    $ast = [Management.Automation.Language.Parser]::ParseFile($scriptPath, [ref]$tokens, [ref]$errors)
+    Require (-not $errors) 'README verifier does not parse'
+    $definition = $ast.Find({ param($node)
+        $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -ceq 'Confirm-RetirementReports'
+    }, $true)
+    Require ($null -ne $definition) 'The retirement report verifier is missing'
+    . ([scriptblock]::Create($definition.Extent.Text))
+
+    $source = 'a' * 40
+    $component = Join-Path $product 'component-suite-extent.html'
+    $native = Join-Path $product 'android-extent.html'
+    [IO.File]::WriteAllText($component,'<html>component</html>')
+    [IO.File]::WriteAllText($native,'<html>native pass</html>')
+    $claims = @(
+        [pscustomobject]@{id='component-extent-report';status='PASS';receipt='component-suite-extent.html';receiptSha256=(Hash $component);artifactBytes=(Get-Item -LiteralPath $component).Length;artifactSourceCommit=$source},
+        [pscustomobject]@{id='native-ui-report';status='PASS';receipt='android-extent.html';receiptSha256=(Hash $native);artifactBytes=(Get-Item -LiteralPath $native).Length;artifactSourceCommit=$source}
+    )
+    $gate = $ast.Find({ param($node)
+        $node -is [Management.Automation.Language.AssignmentStatementAst] -and $node.Left.Extent.Text -ceq '$retirementAllowed'
+    }, $true)
+    Require ($null -ne $gate) 'The retirement authorization assignment is missing'
+    $authorize = [scriptblock]::Create($gate.Extent.Text)
+    $latestAuthenticated = $true
+    $extentEvidence = @(Confirm-RetirementReports $claims $source $component $native $project)
+    . $authorize
+    Require ($retirementAllowed -and $extentEvidence.Count -eq 2) 'Both exact Extent artifacts should permit retirement'
+    $missing = @(Confirm-RetirementReports $claims $source $component '' $project)
+    Require ($missing[1].status -ceq 'BLOCKED' -and $missing[1].reason -ceq 'Missing report file.') 'Missing report allowed retirement'
+    [IO.File]::WriteAllText($native,'<html>native fail</html>')
+    $modified = @(Confirm-RetirementReports $claims $source $component $native $project)
+    $extentEvidence = $modified
+    . $authorize
+    Require (!$retirementAllowed -and $modified[0].status -ceq 'PASS' -and $modified[1].status -ceq 'BLOCKED' -and
+        $modified[1].reason -cmatch 'SHA-256') 'Same-length replacement did not block retirement'
+    [IO.File]::WriteAllText($native,'<html>native pass</html>')
+    $claims[1].artifactSourceCommit = 'b' * 40
+    $foreign = @(Confirm-RetirementReports $claims $source $component $native $project)
+    Require ($foreign[1].status -ceq 'BLOCKED' -and $foreign[1].reason -cmatch 'identity') 'Report from another candidate allowed retirement'
+}
 $failed=@($results|Where-Object status -EQ FAIL)
 [ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;productFixtures=$product;scope='Byte fixtures, injected Java recorder and extracted publication block; no real JVM body, game, full native launcher or device';results=$results}|ConvertTo-Json -Depth 7|Set-Content "$RunRoot/controls.json" -Encoding utf8NoBOM
 $results|Format-Table name,status -AutoSize
