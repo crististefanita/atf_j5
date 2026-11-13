@@ -5,6 +5,7 @@ import ro.rentzlab.ai.*;
 import ro.cardtable.names.PlayerNames;
 import ro.rentzlab.app.achievements.AchievementHand;
 import ro.rentzlab.core.*;
+import ro.rentzlab.core.sequence.SequenceOpening;
 import java.util.*;
 
 /** Transport/lifecycle boundary. The dealing seed and journal never enter a player decision. */
@@ -27,17 +28,22 @@ public final class GameSession {
         public Command from(Origin source) { return new Command(action, seat, card, contract, blind, source); }
     }
     public record Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands,List<String> opponents,
-                        RentzMatch.DealEnding dealEnding) {
+                        RentzMatch.DealEnding dealEnding, SequenceOpening sequenceOpening) {
         public Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands) {
-            this(schema,players,seed,difficulty,commands,List.of());
+            this(schema,players,seed,difficulty,commands,List.of(),RentzMatch.DealEnding.UNIQUE_LAST,SequenceOpening.ACTIVE_MIDDLE);
         }
         public Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands,List<String> opponents) {
-            this(schema,players,seed,difficulty,commands,opponents,RentzMatch.DealEnding.UNIQUE_LAST);
+            this(schema,players,seed,difficulty,commands,opponents,RentzMatch.DealEnding.UNIQUE_LAST,SequenceOpening.ACTIVE_MIDDLE);
+        }
+        public Saved(int schema,int players,long seed,RentzPlayer.Difficulty difficulty,List<Command> commands,List<String> opponents,
+                     RentzMatch.DealEnding dealEnding) {
+            this(schema,players,seed,difficulty,commands,opponents,dealEnding,SequenceOpening.ACTIVE_MIDDLE);
         }
         public Saved {
             commands=Card.immutable(commands);
             opponents=Card.immutable(opponents);
             Objects.requireNonNull(dealEnding);
+            Objects.requireNonNull(sequenceOpening);
             if(schema!=1)throw new IllegalArgumentException("Saved session schema");
         }
     }
@@ -46,19 +52,21 @@ public final class GameSession {
     private final RentzPlayer.Difficulty difficulty;
     private final RentzMatch match;
     private final RentzMatch.DealEnding dealEnding;
+    private final SequenceOpening sequenceOpening;
     private final RentzPlayer player;
     private final List<String> opponents;
     private final List<Command> commands=new ArrayList<>();
     private final AchievementHand.Recorder achievementRecorder;
     private final List<AchievementHand> achievementHands = new ArrayList<>();
     public GameSession(int players,long seed,RentzPlayer.Difficulty difficulty) {
-        this(players,seed,difficulty,List.of(),RentzMatch.DealEnding.UNIQUE_LAST);
+        this(players,seed,difficulty,List.of(),RentzMatch.DealEnding.UNIQUE_LAST,SequenceOpening.JACK);
     }
     public GameSession(int players,long seed,RentzPlayer.Difficulty difficulty,String rosterName) {
-        this(players,seed,difficulty,PlayerNames.forMatch(players,rosterName,seed).subList(1,players),RentzMatch.DealEnding.UNIQUE_LAST);
+        this(players,seed,difficulty,PlayerNames.forMatch(players,rosterName,seed).subList(1,players),
+                RentzMatch.DealEnding.UNIQUE_LAST,SequenceOpening.JACK);
     }
     private GameSession(int players,long seed,RentzPlayer.Difficulty difficulty,List<String> savedOpponents,
-                        RentzMatch.DealEnding dealEnding) {
+                        RentzMatch.DealEnding dealEnding, SequenceOpening sequenceOpening) {
         this.players=players; this.seed=seed; this.difficulty=Objects.requireNonNull(difficulty);
         if (!savedOpponents.isEmpty() && (savedOpponents.size()!=players-1
                 || savedOpponents.stream().map(name->name.toLowerCase(Locale.ROOT)).distinct().count()!=savedOpponents.size()
@@ -66,14 +74,15 @@ public final class GameSession {
             throw new IllegalArgumentException("Saved opponents");
         opponents=savedOpponents.isEmpty()?defaultOpponents(players,seed):Card.immutable(savedOpponents);
         this.dealEnding=dealEnding;
+        this.sequenceOpening=Objects.requireNonNull(sequenceOpening);
         var scoring = dealEnding.laboratoryScoring();
-        match=new RentzMatch(players,seed,scoring,0,dealEnding);
-        achievementRecorder = new AchievementHand.Recorder(players);
+        match=new RentzMatch(players,seed,scoring,0,dealEnding,sequenceOpening);
+        achievementRecorder = new AchievementHand.Recorder(players,sequenceOpening);
         player=new RentzPlayer(difficulty,scoring,PolicySettings.defaults());
     }
     public static ScoreProfile scoringProfile(){return SCORING;}
     public static GameSession restore(Saved saved){
-        var session=new GameSession(saved.players(),saved.seed(),saved.difficulty(),saved.opponents(),saved.dealEnding());
+        var session=new GameSession(saved.players(),saved.seed(),saved.difficulty(),saved.opponents(),saved.dealEnding(),saved.sequenceOpening());
         for(var command:saved.commands())session.apply(command);
         return session;
     }
@@ -152,5 +161,5 @@ public final class GameSession {
         result.addAll(opponents);
         return Collections.unmodifiableList(result);
     }
-    public Saved save(){return new Saved(1,players,seed,difficulty,commands,opponents,dealEnding);}
+    public Saved save(){return new Saved(1,players,seed,difficulty,commands,opponents,dealEnding,sequenceOpening);}
 }

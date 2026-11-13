@@ -5,11 +5,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/RentzRuleComponentTest.java",
       "owner": "Rentz AI",
-      "reason": "Qualify the opt-in victory profile and its declared search budget.",
-      "criterion": "Parse the live YAML, resolve rule bindings and enforce matching worlds and transitions against the shipped factory.",
-      "proof": "docs/rentz/ATF_Learning.md",
+      "reason": "Qualify the opt-in victory profile and bind the Rentz opening policy to its live engine rule.",
+      "criterion": "Parse the live YAML, resolve rule bindings, enforce the search budget, and require an explicit legacy-replay status for the all-table Jack opener.",
+      "proof": "docs/rentz/ATF_Rules.md",
       "expires": "2026-12-10",
-      "sha256": "82e5b146f1054128ea372db45362f5cf7d9394af79a8b3d90af556b0a34893d5",
+      "sha256": "2ff1acd6f96354a898d23c2a6179fc73ffe94be06ae0188194e61cc3c078ca53",
       "allowDelete": false
     },
     {
@@ -335,9 +335,9 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/changes/GitTestChanges.java",
       "owner": "Rentz consumer",
-      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
-      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "reason": "Preserve journal replay while distinguishing historical sequence openings from the current new-game rule.",
+      "criterion": "A journal without an opening-policy field restores the explicit historical midpoint and reproduces the same commands, observation and scored history; current sessions persist their policy.",
+      "proof": "docs/rentz/ATF_Rules.md",
       "expires": "2026-11-20",
       "sha256": "e16bcd026dc5eb93dbe0359157401be8f73a704f9aa0cfe67c5e890c067d3495",
       "allowDelete": false
@@ -819,7 +819,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "a25cc8d13829fa8e1d391df1d255097889da154a8dc148420fd0324519ee0463",
+      "sha256": "edfa312a9d601561f6a1fca5fc557fff97adbfcb7f2ae9629ff169cb0180eab2",
       "allowDelete": false
     },
     {
@@ -945,11 +945,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzHistoryReplayTest.java",
       "owner": "Rentz UI",
-      "reason": "S05/S06 · Qualify the actual categories and finish order for confirmed hands.",
-      "criterion": "Derive the per-seat breakdown from observed plays. Distinguish equal awards and preserve every result after restoring the canonical journal.",
-      "proof": "../../rentz_back/ui-review/settlement-details-j5/README.md",
+      "reason": "Qualify score history and keep generated replay fixtures explicit about the historical opening policy.",
+      "criterion": "Derive each seat's categories and finish order from observed plays; preserve equal awards, all history values and the explicitly selected opening policy after canonical journal restore.",
+      "proof": "docs/rentz/ATF_Rules.md",
       "expires": "2026-11-20",
-      "sha256": "410e02a544fce14f6db8a2a4ead6c5ccb31137c81dd586887399d59b14fbf596",
+      "sha256": "e898fb74d2a21a841be15ca0642d2dcdca28a01080100971d40e7c002d1e395c",
       "allowDelete": false
     },
     {
@@ -965,11 +965,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzSequenceContentTest.java",
       "owner": "Rentz release",
-      "reason": "Move terminal board truth into the component suite.",
-      "criterion": "For three through six seats, render only confirmed public play events and keep all unused terminal slots empty.",
-      "proof": "docs/rentz/ATF_Android.md",
+      "reason": "Verify the sequence projection against both the current opener and saved legacy sessions.",
+      "criterion": "For three through six seats, new sessions mark J as the opening rank; legacy sessions retain the active midpoint. Render only confirmed public play events and keep unused terminal slots empty.",
+      "proof": "docs/rentz/ATF_Rules.md",
       "expires": "2026-11-20",
-      "sha256": "d20939c636b9e678a27c51170a377fa11f27806f586fd4aa65f1f7f2fda06f87",
+      "sha256": "93d55d56ac6cfcf2674f2ed022d611584b813a1c2e5e67e2724f796afdb5de73",
       "allowDelete": false
     },
     {
@@ -995,9 +995,9 @@
     {
       "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/ai/search/DecisionMomentsTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
-      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "reason": "Ensure public-information AI reconstruction preserves the opening policy recorded by a legacy session.",
+      "criterion": "An AI view reconstructed from historical state uses the same midpoint policy as the journal while remaining limited to public evidence and the actor's own hand.",
+      "proof": "docs/rentz/ATF_Learning.md",
       "expires": "2026-11-20",
       "sha256": "ed4c3a6cbb550ca1f541aea2f84eb3f1279b89055080d125798e40dcce1669d8",
       "allowDelete": false
@@ -1019,15 +1019,15 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "418f17912822dd992d105e79cc132df7f0fa103b8ef9af5a76027657ba4d1ac1",
+      "sha256": "014a5677527e1917de012dedd114761ef14b4782679b511357001c9934470c9d",
       "allowDelete": false
     },
     {
       "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/RentzBoundaryTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
-      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "reason": "Pin the current sequence-opening rule and its compatibility-only midpoint policy.",
+      "criterion": "New Rentz games open every suit at J for all supported table sizes; each legacy rank remains selectable only when an explicit or migrated legacy policy is present, and adjacent-card legality remains enforced.",
+      "proof": "docs/rentz/ATF_Rules.md",
       "expires": "2026-11-20",
       "sha256": "b348f294562942e43fc763f3217db5bf45fd3ed26a39b1dd08b5d1ad1bd527fe",
       "allowDelete": false
@@ -1059,7 +1059,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "130d6d7b1a4099364aab0ce3845857e01d1d04fcfb439d16a223c1a897741d8c",
+      "sha256": "9740e1a54c1662acb6997b8940688af3c074e57a2ba0a03f61bbc7244264f528",
       "allowDelete": false
     },
     {
@@ -1255,11 +1255,11 @@
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Stage Rentz Lab 0.22.0 only after the local RAG gates; preserve 0.21.0 until the new authenticated GitHub download passes.",
-      "criterion": "Keep 0.21.0 as current until the 0.22.0 candidate is source-bound, signed, published and downloaded from the main README by an authorized account; preserve existing tags and audit evidence.",
+      "reason": "Record Rentz Lab 0.22.0 as the verified current release after the restricted GitHub download; preserve its source tag and audit evidence.",
+      "criterion": "The published catalog identifies 0.22.0 as current and retains only that download entry; the authenticated APK and checksum match the publication receipt, while source tags and archived audit evidence remain preserved.",
       "proof": "docs/rentz/ATF_Release.md#publicare-și-descărcare",
       "expires": "2027-02-12",
-      "sha256": "6d8552950f7ae856499815103dbfbf4f3ec5118ac7f2467d142372eec4f31e22",
+      "sha256": "14f882382451d607d70bdb53d45703eb23ca811b33f0ad73b42b7009147b389a",
       "allowDelete": false
     },
     {

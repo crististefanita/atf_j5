@@ -1,5 +1,6 @@
 package ro.rentzlab.core;
 
+import ro.rentzlab.core.sequence.SequenceOpening;
 import ro.rentzlab.testing.RentzComponentLayer;
 
 import ro.rentzlab.ai.*;
@@ -220,6 +221,30 @@ class RentzAiTest {
         assertFalse(sampler.allows(0,c("D10")));assertFalse(sampler.allows(0,c("DA")));
         assertTrue(sampler.allows(0,c("D9")),"D9 was not adjacent at the observed pass; it can become legal later");
         for(int seed=0;seed<4;seed++)assertEquals(1,replay(game.observe(1),sampler.sample(seed)).observe(1).turn());
+    }
+    @Test void publicMemoryReconstructsTheOpeningPolicySavedByALegacySession() {
+        var deck = new ArrayList<>(Card.deck(3));
+        var opener = c("CQ");
+        deck.remove(opener);
+        List<List<Card>> hands = new ArrayList<>();
+        hands.add(new ArrayList<>(List.of(opener)));
+        hands.add(new ArrayList<>());
+        hands.add(new ArrayList<>());
+        hands.get(0).addAll(deck.subList(0, 7));
+        hands.get(1).addAll(deck.subList(7, 15));
+        hands.get(2).addAll(deck.subList(15, 23));
+        var game = RentzMatch.fromOpeningDeal(new OpeningDeal(hands), 17, scoring, 0,
+                SequenceOpening.ACTIVE_MIDDLE);
+        game.reveal(0);
+        game.choose(0, Contract.RENTZ, false);
+        assertTrue(game.observe(0).legal().contains(opener));
+        game.play(0, opener);
+        var observed = game.observe(0);
+        assertEquals(SequenceOpening.ACTIVE_MIDDLE, observed.sequenceOpening());
+        assertEquals(List.of(opener), observed.board());
+        var memory = new KnowledgeSampler(observed);
+        assertTrue(memory.unknownCards().size() < Card.deck(3).size());
+        assertTrue(memory.allows(1, opener));
     }
     @ParameterizedTest @ValueSource(ints={3,4,5,6})
     void sampledWorldsReplayPublicStateAndPreserveActorCards(int players) {

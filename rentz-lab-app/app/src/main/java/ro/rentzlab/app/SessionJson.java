@@ -6,6 +6,7 @@ import ro.rentzlab.app.achievements.*;
 import org.json.*;
 import ro.rentzlab.app.profile.LocalProfile;
 import ro.rentzlab.core.*;
+import ro.rentzlab.core.sequence.SequenceOpening;
 import java.util.*;
 
 /** Explicit Android/JVM JSON contract; public actor view and private replay data are different objects. */
@@ -23,7 +24,7 @@ public final class SessionJson {
         var events=new JSONArray();for(var event:v.events())events.put(new JSONObject().put("sequence",event.sequence()).put("seat",event.seat()).put("action",event.action().name()).put("card",card(event.card())).put("boardCardCount",event.boardCardCount()));
         var available=new JSONArray();for(var contract:Contract.values())if(v.available().contains(contract))available.put(contract.name());
         var view=new JSONObject().put("seat",v.seat()).put("players",v.players()).put("turn",v.turn()).put("chooser",v.chooser()).put("handNumber",v.handNumber()).put("phase",v.phase().name()).put("contract",v.contract()==null?JSONObject.NULL:v.contract().name()).put("blind",v.blind()).put("revealed",v.revealed())
-                .put("hand",cards(v.hand())).put("legal",cards(v.legal())).put("handSizes",new JSONArray(v.handSizes())).put("dealPoints",new JSONArray(v.dealPoints())).put("totals",new JSONArray(v.totals())).put("finishOrder",new JSONArray(v.finishOrder())).put("trick",trick).put("seen",cards(v.seen())).put("events",events).put("board",cards(v.board())).put("available",available);
+                .put("hand",cards(v.hand())).put("legal",cards(v.legal())).put("handSizes",new JSONArray(v.handSizes())).put("dealPoints",new JSONArray(v.dealPoints())).put("totals",new JSONArray(v.totals())).put("finishOrder",new JSONArray(v.finishOrder())).put("trick",trick).put("seen",cards(v.seen())).put("events",events).put("board",cards(v.board())).put("available",available).put("sequenceOpening",v.sequenceOpening().name());
         return new JSONObject().put("schema",1).put("screen",screen).put("busy",busy).put("revision",session.save().commands().size()).put("difficulty",session.difficulty().name())
                 .put("opponents",new JSONArray(session.opponentNames())).put("view",view);
     }
@@ -33,7 +34,7 @@ public final class SessionJson {
             if(command.origin()!=GameSession.Origin.UNKNOWN)row.put("origin",command.origin().name());
             commands.put(row);
         }
-        var json = new JSONObject().put("schema",saved.schema()).put("players",saved.players()).put("seed",saved.seed()).put("difficulty",saved.difficulty().name()).put("profile",saved.dealEnding().laboratoryProfileId()).put("policy","RENTZ_PUBLIC_LOOKAHEAD_V1").put("rules",saved.dealEnding().journalVersion()).put("commands",commands);
+        var json = new JSONObject().put("schema",saved.schema()).put("players",saved.players()).put("seed",saved.seed()).put("difficulty",saved.difficulty().name()).put("profile",saved.dealEnding().laboratoryProfileId()).put("policy","RENTZ_PUBLIC_LOOKAHEAD_V1").put("rules",saved.dealEnding().journalVersion()).put("sequenceOpening",saved.sequenceOpening().name()).put("commands",commands);
         if (!saved.opponents().equals(GameSession.defaultOpponents(saved.players(),saved.seed()))) json.put("opponents",new JSONArray(saved.opponents()));
         return json;
     }
@@ -57,8 +58,11 @@ public final class SessionJson {
     }
     public static Checkpoint restoreCheckpoint(String text)throws JSONException{
         var json=SavedJson.read(text);
-        SavedJson.fields(json,Set.of("schema","players","seed","difficulty","profile","policy","commands"),Set.of("rules","opponents","achievements"));
+        SavedJson.fields(json,Set.of("schema","players","seed","difficulty","profile","policy","commands"),Set.of("rules","opponents","achievements","sequenceOpening"));
         var dealEnding=RentzMatch.DealEnding.fromJournal(json.has("rules")?SavedJson.text(json,"rules"):"RENTZ_RULES_V1");
+        var sequenceOpening = json.has("sequenceOpening")
+                ? SequenceOpening.valueOf(SavedJson.text(json, "sequenceOpening"))
+                : SequenceOpening.ACTIVE_MIDDLE;
         if(!SavedJson.text(json,"profile").equals(dealEnding.laboratoryProfileId())||!SavedJson.text(json,"policy").equals("RENTZ_PUBLIC_LOOKAHEAD_V1")){
             throw new IllegalArgumentException("Saved profile identity");
         }
@@ -77,7 +81,7 @@ public final class SessionJson {
             }
         }
         var session = GameSession.restore(new GameSession.Saved(SavedJson.intValue(json,"schema"),players,SavedJson.integer(json,"seed"),
-                RentzPlayer.Difficulty.valueOf(SavedJson.text(json,"difficulty")),commands,opponents,dealEnding));
+                RentzPlayer.Difficulty.valueOf(SavedJson.text(json,"difficulty")),commands,opponents,dealEnding,sequenceOpening));
         return new Checkpoint(session, json.has("achievements") ? progress(json.getJSONObject("achievements")) : null);
     }
 

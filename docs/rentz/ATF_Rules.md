@@ -16,12 +16,15 @@ Modelul de bază are opt sub-jocuri și mese de trei până la șase jucători. 
 
 | Jucători | Cărți totale | Ranguri modelate | Deschiderea secvențelor |
 |---:|---:|---|---|
-| 3 | 24 | 9–A | Q |
+| 3 | 24 | 9–A | J |
 | 4 | 32 | 7–A | J |
-| 5 | 40 | 5–A | 10 |
-| 6 | 48 | 3–A | 9 |
+| 5 | 40 | 5–A | J |
+| 6 | 48 | 3–A | J |
 
-Fiecare jucător primește opt cărți distincte, fără atu întors sau rest în pachetul activ. Instrucțiunile din APK declară rangurile superioare din tabel; primul alegător și indexarea sensului rotației rămân limite separate ale modelului.
+- Fiecare jucător primește opt cărți distincte; nu există atu întors sau rest în pachetul activ.
+- Jocurile Rentz noi deschid fiecare culoare cu J, pentru toate mărimile mesei.
+- Jurnalele vechi fără câmp de politică se redau cu rangul median istoric, ca să păstreze comenzile salvate.
+- Primul alegător și sensul rotației rămân reguli separate de rangul de deschidere.
 
 ## Alegerea și programul
 
@@ -69,7 +72,7 @@ O carte de altă culoare poate contribui la penalizare, dar nu câștigă levata
 
 ## Rentz: secvențe fără levate
 
-Fiecare culoare are un șir propriu, deschis cu rangul mesei. Apoi se poate pune numai vecinul imediat inferior sau superior al intervalului deja deschis.
+Fiecare culoare are un șir propriu, deschis cu J în jocurile noi. Apoi se poate pune numai vecinul imediat inferior sau superior al intervalului deja deschis. O sesiune veche restaurată poate folosi rangul median salvat implicit în jurnalul istoric.
 
 | Situație | Efect în model |
 |---|---|

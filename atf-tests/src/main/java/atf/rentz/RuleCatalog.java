@@ -6,6 +6,7 @@ import java.nio.file.*;
 import java.util.*;
 import atf.rentz.bindings.TestVerification;
 import ro.rentzlab.core.*;
+import ro.rentzlab.core.sequence.SequenceOpening;
 import ro.rentzlab.ai.*;
 import ro.rentzlab.ai.search.DecisionEvaluator;
 import ro.rentzlab.ai.search.RolloutBudget;
@@ -15,7 +16,7 @@ import ro.rentzlab.ai.tactics.TargetTactics;
 public final class RuleCatalog {
     private RuleCatalog() { }
     private static final Map<String,Class<?>> IMPLEMENTATIONS=java.util.stream.Stream.of(
-            Card.class,Contract.class,OpeningDeal.class,RentzMatch.class,RentzBoard.class,ScoreProfile.class,TrickRules.class,
+            Card.class,Contract.class,OpeningDeal.class,RentzMatch.class,RentzBoard.class,SequenceOpening.class,ScoreProfile.class,TrickRules.class,
             KnowledgeSampler.class,LabPolicy.class,PolicySettings.class,RentzPlayer.class,SearchPolicy.class,TacticalPolicy.class,MatchUtility.class,FullMatchRollout.class,DecisionEvaluator.class,RolloutBudget.class,TargetTactics.class)
             .collect(java.util.stream.Collectors.toUnmodifiableMap(Class::getSimpleName,type->type));
     public enum Certainty { PUBLISHER_SCREENSHOT_OBSERVED, UNCONFIRMED }
@@ -24,6 +25,7 @@ public final class RuleCatalog {
     public record Claim(String id,String status,String source,String implementation,String verification) { }
     private static final Set<String> METRICS=Set.of("trickPenalty","queenPenalty","diamondPenalty","kingHeartsPenalty","tenClubsReward","firstFinishReward","whistTrickReward","otherFinishRewards");
     private static final Set<String> STATUSES=Set.of("PUBLISHER_DECLARED","PUBLISHER_APK_DECLARED","LAB_VARIANT_REQUIRES_REFERENCE_CONFIRMATION",
+            "LAB_RULE_IMPLEMENTED_WITH_LEGACY_REPLAY",
             "PUBLISHER_DECLARED_WITH_SETTLEMENT_INTERPRETATION","PUBLISHER_DECLARED_WITH_ELIGIBILITY_INTERPRETATION","PUBLISHER_DECLARED_WITH_OPENING_INTERPRETATION");
 
     public static Evidence evidence(Path file) throws IOException {

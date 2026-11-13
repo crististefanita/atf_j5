@@ -7,7 +7,7 @@ import ro.rentzlab.app.achievements.AchievementFullCatalog.Context;
 import ro.rentzlab.app.achievements.AchievementTactics.Fact;
 import ro.rentzlab.core.Contract;
 
-/** Lower observed whole-percent rates from two disjoint legal-play batches. */
+    /** Lower observed whole-percent rates from two disjoint legal-play batches using the current Jack opening. */
 final class AchievementRateFloor {
     // Columns follow Context: any, 3, 4, 5, 6, 3–4, 5–6, Normal, Hard, own, opponent, open, blind.
     private static final String MEASURED = """
@@ -46,11 +46,11 @@ final class AchievementRateFloor {
             TEN_CLUBS OWN_TEN 1 1 1 1 0 1 0 1 1 1 0 1 1
             TEN_CLUBS TEN_ON_LEAD 10 9 6 5 5 11 6 10 10 11 8 9 8
             TEN_CLUBS TEN_AFTER_LOSS 17 23 19 11 11 21 12 17 17 19 15 17 17
-            RENTZ OPEN 65 84 70 54 46 77 51 65 65 64 66 65 61
-            RENTZ EXTEND_LOW 99 98 100 97 97 99 98 99 99 98 99 98 99
-            RENTZ EXTEND_HIGH 97 95 96 97 96 97 97 97 97 96 97 97 96
-            RENTZ ACE_RETAINS_TURN 51 70 50 48 36 60 42 51 51 53 50 52 50
-            RENTZ TOP_TWO 45 67 40 36 32 54 34 45 45 45 40 47 42
+            RENTZ OPEN 65 75 70 62 53 72 58 65 65 63 68 68 63
+            RENTZ EXTEND_LOW 99 97 100 100 100 98 100 99 99 98 99 98 99
+            RENTZ EXTEND_HIGH 95 100 96 94 91 98 93 95 95 94 95 95 96
+            RENTZ ACE_RETAINS_TURN 54 64 50 55 46 58 51 54 54 57 52 54 54
+            RENTZ TOP_TWO 44 66 40 35 36 53 35 44 44 49 38 47 41
             """;
     private static final Map<Contract, Map<Fact, int[]>> RATES = load();
 

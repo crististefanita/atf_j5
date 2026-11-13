@@ -16,7 +16,7 @@ public final class KnowledgeSampler {
         if(!view.revealed()||view.hand().size()!=view.handSizes().get(view.seat()))throw new IllegalArgumentException("Visible own hand required");
         var deck=Card.deck(view.players());
         for(int seat=0;seat<view.players();seat++){played.add(new ArrayList<>());forbidden.add(new HashSet<>());}
-        var publicTrick=new ArrayList<Card>();var board=new RentzBoard(view.players());var seen=new ArrayList<Card>();
+        var publicTrick=new ArrayList<Card>();var board=new RentzBoard(view.players(), view.sequenceOpening());var seen=new ArrayList<Card>();
         int sequence=0;
         for(var event:view.events()) {
             if(event.sequence()!=++sequence||event.seat()<0||event.seat()>=view.players())throw new IllegalArgumentException("Public event sequence");

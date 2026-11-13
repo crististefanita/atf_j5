@@ -156,7 +156,7 @@ Colecția de infrastructură execută porțile pe copia înghețată. [Inventaru
 
 1. Fixați un commit de bază existent și strămoș al HEAD; nu substituiți baza cu numele unei rulări.
 2. Citiți diferențele comise, pregătite, nepregătite și fișierele noi, inclusiv testele ignorate de Git.
-3. Păstrați pentru fiecare cale protejată motivul, criteriul independent, responsabilul, proba, expirarea și hash-ul octeților revizuiți. Ștergerea cere permisiune explicită în control.
+3. Păstrați pentru fiecare cale protejată motivul, criteriul independent, responsabilul, proba, expirarea și hash-ul octeților revizuiți. După publicare, înlocuiți controlul de staging al `release/index.json` cu motivul și criteriul catalogului publicat, receipt-ul descărcării și retenția tagurilor/dovezilor, apoi recalculați hash-ul exact. Ștergerea cere permisiune explicită în control.
 4. Rulați defectul urmărit înaintea remedierii și păstrați separat erorile de compilare sau infrastructură.
 5. Calificați sursa înghețată; o modificare paralelă sau o schimbare după revizie refuză rezultatul și cere reconciliere.
 

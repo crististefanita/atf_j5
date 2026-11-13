@@ -21,6 +21,7 @@ import ro.rentzlab.core.Card;
 import ro.rentzlab.core.HandScoring;
 import ro.rentzlab.core.RentzMatch;
 import ro.rentzlab.core.ScoreProfile;
+import ro.rentzlab.core.sequence.SequenceOpening;
 
 @AndroidComponentLayer
 public final class RentzHistoryReplayTest {
@@ -37,7 +38,8 @@ public final class RentzHistoryReplayTest {
     private void verifyCompleteSixSeatHistory(RentzMatch.DealEnding rules, List<Integer> awards) throws Exception {
         int seats = 6;
         long seed = 0x52454E545A4835L;
-        var match = new RentzMatch(seats, seed, rules.laboratoryScoring(), 0, rules);
+        var match = new RentzMatch(seats, seed, rules.laboratoryScoring(), 0, rules,
+                SequenceOpening.ACTIVE_MIDDLE);
         var commands = new ArrayList<GameSession.Command>();
         var copy = new RentzUiText(RentzUiText.Language.EN);
         var rom = new RentzUiText(RentzUiText.Language.RO);
@@ -97,7 +99,7 @@ public final class RentzHistoryReplayTest {
             audit.equal("Equal awards include a finish order different from seat order", true, equalAwards);
         }
         var session = GameSession.restore(new GameSession.Saved(1, seats, seed, RentzPlayer.Difficulty.NORMAL,
-                commands, List.of(), rules));
+                commands, List.of(), rules, SequenceOpening.ACTIVE_MIDDLE));
         String journal = SessionJson.saved(session).toString();
         var restored = SessionJson.restore(journal);
         var expected = RentzScoreContent.rows(match.history(), copy);

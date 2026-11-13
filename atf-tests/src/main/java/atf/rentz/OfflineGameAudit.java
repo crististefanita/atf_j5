@@ -2,6 +2,7 @@ package atf.rentz;
 
 import java.util.*;
 import ro.rentzlab.core.*;
+import ro.rentzlab.core.sequence.SequenceOpening;
 
 /** Independent public-transition checks. Does not call the engine's winner, scorer or board helpers. */
 public final class OfflineGameAudit {
@@ -17,7 +18,7 @@ public final class OfflineGameAudit {
         require(after.seen().size()+after.handSizes().stream().mapToInt(Integer::intValue).sum()==before.players()*8,"Card conservation");
         var expectedPoints=new ArrayList<>(before.dealPoints());boolean terminal=false;int next;
         if(before.contract()==Contract.RENTZ) {
-            require(fits(before.board(),card,before.players()),"Sequence adjacency");
+            require(fits(before.board(),card,before.players(),openingRank(before.sequenceOpening(),before.players())),"Sequence adjacency");
             var board=new ArrayList<>(before.board());board.add(card);require(board.equals(after.board()),"Sequence board");
             var finished=new ArrayList<>(before.finishOrder());if(sizes.get(before.seat())==0)finished.add(before.seat());
             terminal=finished.size()==before.players()-1;
@@ -57,7 +58,9 @@ public final class OfflineGameAudit {
         };
     }
     public static void pass(RentzMatch.Observation before,RentzMatch.Observation after) {
-        require(before.contract()==Contract.RENTZ&&before.hand().stream().noneMatch(c->fits(before.board(),c,before.players())),"Mandatory play before pass");
+        require(before.contract()==Contract.RENTZ&&before.hand().stream().noneMatch(
+                c->fits(before.board(),c,before.players(),openingRank(before.sequenceOpening(),before.players()))),
+                "Mandatory play before pass");
         require(before.handSizes().equals(after.handSizes())&&before.board().equals(after.board())&&before.seen().equals(after.seen())&&before.dealPoints().equals(after.dealPoints()),"Pass cannot change cards or score");
         require(after.turn()==nextActive(before.seat(),before.handSizes()),"Pass turn");
     }
@@ -67,7 +70,8 @@ public final class OfflineGameAudit {
         return switch(contract){case TRICKS->-p.trickPenalty();case QUEENS->-queens*p.queenPenalty();case DIAMONDS->-diamonds*p.diamondPenalty();case KING_HEARTS->-king;case TOTALS->-p.trickPenalty()-queens*p.queenPenalty()-diamonds*p.diamondPenalty()-king;case WHIST->p.trickReward();case TEN_CLUBS->has(cards,Card.Suit.CLUBS,10)?p.tenReward():0;case RENTZ->throw new IllegalArgumentException("No trick in Rentz");};
     }
     private static boolean has(List<TrickRules.Play> cards,Card.Suit suit,int rank){return cards.stream().anyMatch(c->c.card().suit()==suit&&c.card().rank()==rank);}
-    private static boolean fits(List<Card> board,Card card,int players){if(card.rank()<15-2*players||board.contains(card))return false;int low=15,high=0;for(Card placed:board)if(placed.suit()==card.suit()){low=Math.min(low,placed.rank());high=Math.max(high,placed.rank());}return high==0?card.rank()==15-players:card.rank()==low-1||card.rank()==high+1;}
+    private static boolean fits(List<Card> board,Card card,int players,int openingRank){if(card.rank()<15-2*players||board.contains(card))return false;int low=15,high=0;for(Card placed:board)if(placed.suit()==card.suit()){low=Math.min(low,placed.rank());high=Math.max(high,placed.rank());}return high==0?card.rank()==openingRank:card.rank()==low-1||card.rank()==high+1;}
+    private static int openingRank(SequenceOpening opening,int players){return switch(opening){case JACK->11;case ACTIVE_MIDDLE->15-players;};}
     private static int nextActive(int actor,List<Integer> sizes){for(int n=1;n<=sizes.size();n++){int next=(actor+n)%sizes.size();if(sizes.get(next)>0)return next;}throw new IllegalArgumentException("No active actor");}
     private static void require(boolean condition,String finding){if(!condition)throw new IllegalStateException("OFFLINE_ORACLE: "+finding);}
 }

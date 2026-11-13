@@ -12,7 +12,7 @@ public final class FullMatchRollout {
     }
     public static RentzMatch restore(RentzMatch.Observation view,OpeningDeal world,long hypotheticalSeed,ScoreProfile scoring,Contract selected,RolloutBudget budget){
         if(view.completedHands().size()+1!=view.handNumber())throw new IllegalArgumentException("Complete public match progress required");
-        var game=RentzMatch.fromPublicProgress(world,hypotheticalSeed,scoring,view.chooser(),view.completedHands());
+        var game=RentzMatch.fromPublicProgress(world,hypotheticalSeed,scoring,view.chooser(),view.completedHands(),view.sequenceOpening());
         if(!game.observe(view.seat()).totals().equals(view.totals()))throw new IllegalArgumentException("Public score ledger differs from totals");
         budget.spend();game.choose(view.chooser(),selected,view.blind());
         if(view.phase()==RentzMatch.Phase.PLAY){

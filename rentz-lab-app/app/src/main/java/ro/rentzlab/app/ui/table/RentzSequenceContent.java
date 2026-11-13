@@ -12,7 +12,8 @@ public final class RentzSequenceContent {
     private RentzSequenceContent() { }
     public static List<List<Cell>> rows(RentzMatch.Observation view) {
         if (view.contract() != Contract.RENTZ) throw new IllegalArgumentException("A sequence board needs the Rentz contract");
-        var policy = new RentzBoard(view.players());
+        var policy = new RentzBoard(view.players(), view.sequenceOpening());
+
         return java.util.Arrays.stream(Card.Suit.values()).map(suit -> IntStream.rangeClosed(policy.lowestRank(), 14)
                 .mapToObj(rank -> { var card = new Card(suit, rank); return new Cell(card, view.board().contains(card), rank == policy.startRank()); }).collect(immutable())).collect(immutable());
     }

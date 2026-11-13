@@ -1,5 +1,6 @@
 package ro.rentzlab.core;
 
+import ro.rentzlab.core.sequence.SequenceOpening;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -93,12 +94,25 @@ public final class RentzMatch {
             List<TurnEvent> events,
             List<Card> board,
             Set<Contract> available,
-            List<HandResult> completedHands) {
+            List<HandResult> completedHands,
+            SequenceOpening sequenceOpening) {
         public Observation {
             completedHands =
                     completedHands == null
                             ? Collections.emptyList()
                             : Card.immutable(completedHands);
+            java.util.Objects.requireNonNull(sequenceOpening);
+        }
+
+        public Observation(
+                int seat, int players, int turn, int chooser, int handNumber, Phase phase, Contract contract,
+                boolean blind, boolean revealed, List<Card> hand, List<Card> legal, List<Integer> handSizes,
+                List<Integer> dealPoints, List<Integer> totals, List<Integer> finishOrder,
+                List<TrickRules.Play> trick, List<Card> seen, List<TurnEvent> events, List<Card> board,
+                Set<Contract> available, List<HandResult> completedHands) {
+            this(seat, players, turn, chooser, handNumber, phase, contract, blind, revealed, hand, legal, handSizes,
+                    dealPoints, totals, finishOrder, trick, seen, events, board, available, completedHands,
+                    SequenceOpening.JACK);
         }
 
         public Observation(
@@ -143,7 +157,8 @@ public final class RentzMatch {
                     events,
                     board,
                     available,
-                    Collections.emptyList());
+                    Collections.emptyList(),
+                    SequenceOpening.JACK);
         }
     }
 
@@ -151,6 +166,7 @@ public final class RentzMatch {
     private final int firstChooser;
     private final ScoreProfile scoring;
     private final DealEnding dealEnding;
+    private final SequenceOpening sequenceOpening;
     private final Random shuffle;
     private final List<EnumSet<Contract>> remaining = new ArrayList<>();
     private final List<HandResult> history = new ArrayList<>();
@@ -178,13 +194,25 @@ public final class RentzMatch {
     }
 
     public RentzMatch(int players, long seed, ScoreProfile scoring, int firstChooser, DealEnding dealEnding) {
-        this(players, seed, scoring, firstChooser, null, dealEnding);
+        this(players, seed, scoring, firstChooser, dealEnding, SequenceOpening.JACK);
+    }
+
+    public RentzMatch(int players, long seed, ScoreProfile scoring, int firstChooser, DealEnding dealEnding,
+            SequenceOpening sequenceOpening) {
+        this(players, seed, scoring, firstChooser, null, dealEnding, sequenceOpening);
     }
 
     public static RentzMatch fromOpeningDeal(
             OpeningDeal opening, long continuationSeed, ScoreProfile scoring, int firstChooser) {
+        return fromOpeningDeal(opening, continuationSeed, scoring, firstChooser, SequenceOpening.JACK);
+    }
+
+    public static RentzMatch fromOpeningDeal(
+            OpeningDeal opening, long continuationSeed, ScoreProfile scoring, int firstChooser,
+            SequenceOpening sequenceOpening) {
         java.util.Objects.requireNonNull(opening);
-        return new RentzMatch(opening.players(), continuationSeed, scoring, firstChooser, opening, DealEnding.SCORING_CARDS);
+        return new RentzMatch(opening.players(), continuationSeed, scoring, firstChooser, opening,
+                DealEnding.SCORING_CARDS, sequenceOpening);
     }
 
     /**
@@ -197,6 +225,17 @@ public final class RentzMatch {
             ScoreProfile scoring,
             int currentChooser,
             List<HandResult> completed) {
+        return fromPublicProgress(opening, hypotheticalSeed, scoring, currentChooser, completed,
+                SequenceOpening.JACK);
+    }
+
+    public static RentzMatch fromPublicProgress(
+            OpeningDeal opening,
+            long hypotheticalSeed,
+            ScoreProfile scoring,
+            int currentChooser,
+            List<HandResult> completed,
+            SequenceOpening sequenceOpening) {
         var progress =
                 ro.rentzlab.core.progress.PublicProgress.restore(
                         opening.players(), scoring, currentChooser, completed);
@@ -207,7 +246,8 @@ public final class RentzMatch {
                         scoring,
                         progress.firstChooser(),
                         opening,
-                        DealEnding.SCORING_CARDS);
+                        DealEnding.SCORING_CARDS,
+                        sequenceOpening);
         for (int seat = 0; seat < game.players; seat++) {
             game.totals[seat] = progress.totals().get(seat);
             var schedule = EnumSet.noneOf(Contract.class);
@@ -222,7 +262,8 @@ public final class RentzMatch {
     }
 
     private RentzMatch(
-            int players, long seed, ScoreProfile scoring, int firstChooser, OpeningDeal opening, DealEnding dealEnding) {
+            int players, long seed, ScoreProfile scoring, int firstChooser, OpeningDeal opening, DealEnding dealEnding,
+            SequenceOpening sequenceOpening) {
         Card.deck(players);
         if (firstChooser < 0 || firstChooser >= players)
             throw new IllegalArgumentException("First chooser");
@@ -230,6 +271,7 @@ public final class RentzMatch {
         this.players = players;
         this.scoring = java.util.Objects.requireNonNull(scoring);
         this.dealEnding = java.util.Objects.requireNonNull(dealEnding);
+        this.sequenceOpening = java.util.Objects.requireNonNull(sequenceOpening);
         scoring.assertMatchSafe(players);
         shuffle = new Random(DealSeed.effective(seed));
         totals = new int[players];
@@ -255,7 +297,7 @@ public final class RentzMatch {
         seen.clear();
         events.clear();
         finishOrder.clear();
-        board = new RentzBoard(players);
+        board = new RentzBoard(players, sequenceOpening);
         java.util.Arrays.fill(points, 0);
         for (var seatCounts : counts) java.util.Arrays.fill(seatCounts, 0);
         java.util.Arrays.fill(revealed, false);
@@ -315,7 +357,8 @@ public final class RentzMatch {
                 Card.immutable(events),
                 board.played(),
                 Collections.unmodifiableSet(EnumSet.copyOf(remaining.get(seat))),
-                publicHistory);
+                publicHistory,
+                sequenceOpening);
     }
 
     public List<HandResult> history() {

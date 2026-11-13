@@ -72,26 +72,14 @@ Ordinea livrării este contractul producătorului, componentele, consumul pe art
 | P2 | Grila de secvențe este măsurată între chenarele jocului, cu probe pentru 3–6 locuri. | Confirmați pe APK-ul candidat grila la 3, 5 și 6 locuri, cu profil compact, profil înalt și font mărit. Verificați lizibilitatea celui mai lung rang, marcajul „Pasează” și stabilitatea grilei înainte și după pas. |
 | P2 | U09: lansatorul prototipului are navigare proprie și refuză noul UI înainte de ADB. | Evaluați migrarea deciziei externe pe baza actorului public. Traseul curent acoperă deja replay-ul independent, delegarea din produs și emiterea receipt-ului. |
 
-## P1: Rentz organizat în jurul lui J
+## P1: Afișarea și terminarea secvențelor Rentz
 
 | ID și stare | Cerință și criteriu de acceptanță |
 |---|---|
-| **R01 · DESCHIS** | **J trebuie să fie regula și ancora reală a modului cerut.** La patru jucători, motorul actual deschide deja din J. Pentru celelalte mese, opțiunea explicită „Valet mereu” trebuie propagată prin configurație, motor, observație, simulare, oracol și salvare; varianta existentă „Mijlocul pachetului” rămâne identificată distinct. Este interzis ca UI să arate J în timp ce motorul așteaptă Q, 10 sau 9. |
-| **R02 · PARȚIAL** | **Patru rânduri stabile între locurile de joc.** Pentru 3–6 jucători, pozițiile urmează geometria Whist de joc pe toată lățimea. Cărțile se suprapun pe rândurile dense, cu rangul și culoarea în fâșia vizibilă. Rămân calificarea rasterului compact la 3, 5 și 6 locuri, ordinea culorilor și opțiunea din R01. |
+| **R02 · PARȚIAL** | **Patru rânduri stabile între locurile de joc.** Pentru 3–6 jucători, pozițiile urmează geometria Whist de joc pe toată lățimea. Cărțile se suprapun pe rândurile dense, cu rangul și culoarea în fâșia vizibilă. Rămân calificarea rasterului compact la 3, 5 și 6 locuri și ordinea culorilor. |
 | **R03 · PARȚIAL** | **Slotul gol nu este carte jucată.** Proiecția distinge ancora și cărțile publice, iar legalitatea vine din motor. Rămân marcarea ultimei mutări și indicii explicabili pentru continuare, fără dezvăluirea deținătorilor necunoscuți. |
 | **R04 · PARȚIAL** | **Tabla și comanda explicită de continuare există.** Calculul blochează comenzile și păstrează masa; la încheiere rămâne tabla publică. Rămân sosirile, explicațiile pentru pas/săritură și calificarea nativă a închiderii secvențelor. |
 | **R05 · PARȚIAL** | **Contorul de cărți rămase la final.** Tabla terminală este verificată prin evenimentele publice de joc pentru 3–6 locuri. Mai rămâne un contor accesibil pentru cărțile nejucate, verificat pe o închidere cu sloturi rămase libere. |
-
-Schema stabilește relația rangurilor, fără a reprezenta o distribuire de antrenament:
-
-| Rând | Ranguri sub J | Ancoră | Ranguri peste J |
-|---|---|---|---|
-| ♣ | Rangurile active până la 10 | J♣ | Q♣, K♣, A♣ |
-| ♦ | Rangurile active până la 10 | J♦ | Q♦, K♦, A♦ |
-| ♥ | Rangurile active până la 10 | J♥ | Q♥, K♥, A♥ |
-| ♠ | Rangurile active până la 10 | J♠ | Q♠, K♠, A♠ |
-
-**Dependența critică R01:** [RentzBoard](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/core/RentzBoard.java) calculează acum deschiderea numai din numărul jucătorilor. [Memoria și eșantionarea](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/ai/KnowledgeSampler.java), [căutarea](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/ai/SearchPolicy.java) și [oracolul](../../atf-tests/src/main/java/atf/rentz/OfflineGameAudit.java) trebuie să consume aceeași variantă publică; o schimbare doar de etichetă sau de desen este insuficientă.
 
 ## P1: tabelă de scor elegantă și utilă
 
@@ -132,7 +120,7 @@ Proiecțiile și adaptoarele existente sunt identificate în atlasul UI. Diagram
 
 | Familie | Cazuri și comparații obligatorii |
 |---|---|
-| Regula deschiderii | J la fiecare culoare, vecini legali și refuz atomic; mese de 3–6 jucători, opțiunea J și varianta mijloc separate. Aceeași configurație după reluare și în lumile AI. |
+| Regula deschiderii | Pentru jocurile noi, J deschide fiecare culoare la 3–6 jucători; testele verifică vecinii legali și refuzul atomic. Jurnalele vechi își păstrează rangul median la reluare, iar lumile AI folosesc politica înregistrată. |
 | Tabla | Culoare nedeschisă, numai J, extindere în ambele direcții, interval maxim, as, carte minimă, pas și ultimul loc. Reordonarea colecției de cărți nu schimbă geometria finală. |
 | Limita închiderii | Tabla terminală păstrează exact cărțile publice, inclusiv spațiile rămase; nu apar cărți noi la intrarea în istoricul scorului. |
 | Scor | Istoric gol, prima mână, program complet și reluare; delta zero, puncte negative, valori mari, premiile profilului curent și egalitățile din jurnalele istorice. Pentru fiecare jucător, Σ este suma deltelor înregistrate. |
@@ -157,7 +145,7 @@ La limita lizibilității se alege un mod explicit de derulare sau o dispunere a
 3. O probă de istoric derulează vertical și până la ultimul jucător, confruntă toate valorile vizibile și verifică revenirea și reluarea, fără linii duplicate.
 4. Rularea păstrează extern identitatea APK-ului, configurația efectivă, expected/actual și capturile native originale inline base64 în stilul proiectului. O masă sau o rezoluție nu califică întreaga matrice.
 
-**Ordine de lucru.** U01 → refactorizarea UI în producător → U02–U05 și adaptoarele Rentz prin componente → U06–U07, R02–R05 și S01/S04 → calibrare nativă și E2E selectiv. R01 rămâne regula separată pentru disponibilitatea opțiunii „Valet mereu”. Închideți criteriile cu implementare identificată și probă relevantă.
+**Ordine de lucru.** U01 → refactorizarea UI în producător → U02–U05 și adaptoarele Rentz prin componente → U06–U07, R02–R05 și S01/S04 → calibrare nativă și E2E selectiv. Jocurile noi folosesc J, iar reluarea veche păstrează politica din jurnal; UI-ul nu expune selector pentru politica de compatibilitate. Închideți criteriile cu implementare identificată și probă relevantă.
 
 ## P1 · Adoptarea checkbox-ului comun „Automat”
 

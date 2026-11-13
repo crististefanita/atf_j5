@@ -5,6 +5,7 @@ import ro.rentzlab.app.testing.*;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.ai.RentzPlayer;
 import ro.rentzlab.core.*;
+import ro.rentzlab.core.sequence.SequenceOpening;
 import java.util.List;
 
 @AndroidComponentLayer
@@ -43,7 +44,7 @@ public final class RentzSequenceContentTest {
             var rows = RentzSequenceContent.rows(session.view());
             audit.equal("Four suits " + count, 4, rows.size());
             audit.equal("Active ranks " + count, count * 2, rows.get(0).size());
-            audit.equal("Actual opener " + count, List.of(15 - count), rows.get(0).stream().filter(cell -> cell.opening()).map(cell -> cell.card().rank()).toList());
+            audit.equal("New-game Jack opener " + count, List.of(11), rows.get(0).stream().filter(cell -> cell.opening()).map(cell -> cell.card().rank()).toList());
             audit.truth("No fictional opening cards " + count, rows.stream().flatMap(List::stream).noneMatch(cell -> cell.played()));
             var view = session.view();
             session.apply(new GameSession.Command(view.legal().isEmpty() ? GameSession.Action.PASS : GameSession.Action.PLAY, 0, view.legal().isEmpty() ? null : view.legal().get(0), null, false));
@@ -51,6 +52,19 @@ public final class RentzSequenceContentTest {
             var after = session.view();
             audit.equal("Exact public board " + count, java.util.Set.copyOf(after.board()),
                     java.util.Set.copyOf(RentzSequenceContent.rows(after).stream().flatMap(List::stream).filter(cell -> cell.played()).map(cell -> cell.card()).toList()));
+        }
+    }
+    @Test public void compatibilityProjectionRetainsTheOpeningOfAnOlderSavedSession() {
+        for (int count = 3; count <= 6; count++) {
+            var saved = new GameSession.Saved(1, count, 31, RentzPlayer.Difficulty.NORMAL, List.of(), List.of(),
+                    RentzMatch.DealEnding.UNIQUE_LAST, SequenceOpening.ACTIVE_MIDDLE);
+            var session = GameSession.restore(saved);
+            session.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null, Contract.RENTZ, false));
+            var rows = RentzSequenceContent.rows(session.view());
+            audit.equal("Stored opening policy " + count, SequenceOpening.ACTIVE_MIDDLE, session.view().sequenceOpening());
+            audit.equal("Legacy opener remains explicit " + count, List.of(15 - count),
+                    rows.get(0).stream().filter(RentzSequenceContent.Cell::opening)
+                            .map(cell -> cell.card().rank()).toList());
         }
     }
 }

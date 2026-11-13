@@ -7,6 +7,7 @@ import atf.testkit.assertions.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import ro.rentzlab.core.*;
+import ro.rentzlab.core.sequence.SequenceOpening;
 import java.nio.file.*;
 import java.util.*;
 import static atf.testkit.assertions.AuditedAssertions.*;
@@ -31,6 +32,29 @@ class RentzRuleComponentTest {
         var led=new TrickRules.Play(0,new Card(Card.Suit.CLUBS,10));
         assertEquals(0,TrickRules.winner(List.of(led,new TrickRules.Play(1,new Card(Card.Suit.HEARTS,14)),new TrickRules.Play(2,new Card(Card.Suit.DIAMONDS,14)))),"Off-suit aces cannot trump");
         assertEquals(8,Contract.values().length,"Base model contains eight game choices, no trick bids");
+    }
+    @Test void independentOracleUsesThePublicOpeningPolicyForPassAndCardLegality() {
+        for (int players = 3; players <= 6; players++) {
+            int openingRank = 15 - players;
+            var jackGame = RentzMatch.fromOpeningDeal(deal(players, false), 7,
+                    ScoreProfile.laboratory(), 0, SequenceOpening.JACK);
+            jackGame.choose(0, Contract.RENTZ, false);
+            var beforePass = jackGame.observe(0);
+            assertTrue(beforePass.legal().isEmpty(), "No J is held at " + players + " seats");
+            jackGame.pass(0);
+            OfflineGameAudit.pass(beforePass, jackGame.observe(0));
+
+            var legacyGame = RentzMatch.fromOpeningDeal(deal(players, true), 7,
+                    ScoreProfile.laboratory(), 0, SequenceOpening.ACTIVE_MIDDLE);
+            legacyGame.choose(0, Contract.RENTZ, false);
+            var beforePlay = legacyGame.observe(0);
+            assertFalse(beforePlay.legal().isEmpty(), "Legacy midpoint is held at " + players + " seats");
+            assertTrue(beforePlay.legal().stream().allMatch(card -> card.rank() == openingRank),
+                    "Only the historical opening rank is legal at " + players + " seats");
+            var opener = beforePlay.legal().get(0);
+            legacyGame.play(0, opener);
+            OfflineGameAudit.card(beforePlay, opener, legacyGame.observe(0), ScoreProfile.laboratory());
+        }
     }
     @Test void blindCannotBeRequestedAfterSeeingTheHand() {
         var game=new RentzMatch(4,41,ScoreProfile.laboratory());game.reveal(0);var before=game.observe(0);
@@ -87,6 +111,11 @@ class RentzRuleComponentTest {
         var chooser=claims.stream().filter(c->c.id().equals("CHOOSER-LEADS")).findFirst().orElseThrow();
         assertEquals("PUBLISHER_DECLARED",chooser.status(),"The publisher explicitly states who leads the deal");
         assertEquals("PUBLISHER_DESCRIPTION",chooser.source());
+        var opening=claims.stream().filter(c->c.id().equals("SEQUENCE-OPENING-RANK")).findFirst().orElseThrow();
+        assertEquals("LAB_RULE_IMPLEMENTED_WITH_LEGACY_REPLAY",opening.status());
+        assertEquals("LAB_CONTRACT",opening.source());
+        assertEquals("SequenceOpening.rankFor",opening.implementation());
+        assertEquals("RentzRulesTest.rentzAlwaysOpensFromJackAtEveryTableSize",opening.verification());
         var bad=new RuleCatalog.Claim("BROKEN","LAB_VARIANT_REQUIRES_REFERENCE_CONFIRMATION","LAB_CONTRACT","RentzMatch.nonexistentMethod",chooser.verification());
         assertThrows(IllegalArgumentException.class,()->RuleCatalog.verifyBindings(Path.of(".."),List.of(bad)),"Renamed or missing API must fail the binding audit");
         var badTest=new RuleCatalog.Claim("BROKEN","LAB_VARIANT_REQUIRES_REFERENCE_CONFIRMATION","LAB_CONTRACT","RentzMatch.choose","RentzBoundaryTest.nonexistentCase");
@@ -137,6 +166,25 @@ class RentzRuleComponentTest {
         assertEquals(PolicySettings.Tactic.PUBLIC_CAPTURE_AWARE, candidate.tactic());
         assertEquals(reference.worlds(), candidate.worlds());
         assertEquals(reference.maxTransitions(), candidate.maxTransitions());
+    }
+
+    private static OpeningDeal deal(int players, boolean includeLegacyMiddle) {
+        var remaining = new ArrayList<>(Card.deck(players));
+        var first = new ArrayList<Card>();
+        if (includeLegacyMiddle) {
+            int rank = 15 - players;
+            first.add(remaining.stream().filter(card -> card.rank() == rank).findFirst().orElseThrow());
+        }
+        for (var card : remaining) {
+            if (first.size() == 8) break;
+            if ((includeLegacyMiddle || card.rank() != 11) && !first.contains(card)) first.add(card);
+        }
+        remaining.removeAll(first);
+        var hands = new ArrayList<List<Card>>();
+        hands.add(List.copyOf(first));
+        for (int offset = 0; offset < remaining.size(); offset += 8)
+            hands.add(List.copyOf(remaining.subList(offset, offset + 8)));
+        return new OpeningDeal(hands);
     }
 
     @Test void hardDecisionUsesTheSameAllowedObservationForDifferentRealDeals() {

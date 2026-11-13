@@ -60,7 +60,7 @@ public final class TacticalPolicy {
         var ace=view.legal().stream().filter(c->c.rank()==14).min(order());if(ace.isPresent())return ace.get();
         Card best=null;double bestValue=Double.NEGATIVE_INFINITY;
         for(Card card:view.legal()) {
-            var board=new RentzBoard(view.players());for(Card old:view.board())board.play(old);board.play(card);
+            var board=new RentzBoard(view.players(), view.sequenceOpening());for(Card old:view.board())board.play(old);board.play(card);
             var remaining=new ArrayList<>(view.hand());remaining.remove(card);
             int chain=0;boolean changed;
             do {changed=false;for(Card own:new ArrayList<>(remaining))if(board.fits(own)){board.play(own);remaining.remove(own);chain++;changed=true;}}while(changed);
@@ -69,7 +69,7 @@ public final class TacticalPolicy {
                 int next=nextActive(view.seat(),view.handSizes());
                 value+=settings.skipThreatWeight()/(double)view.handSizes().get(next);
             }
-            int exposed=0;var actual=new RentzBoard(view.players());for(Card old:view.board())actual.play(old);actual.play(card);
+            int exposed=0;var actual=new RentzBoard(view.players(), view.sequenceOpening());for(Card old:view.board())actual.play(old);actual.play(card);
             for(Card unknown:Card.deck(view.players()))if(!view.hand().contains(unknown)&&!view.seen().contains(unknown)&&actual.fits(unknown))exposed++;
             value-=settings.releaseWeight()*exposed;
             if(value>bestValue+1e-9||Math.abs(value-bestValue)<=1e-9&&(best==null||order().compare(card,best)<0)){best=card;bestValue=value;}

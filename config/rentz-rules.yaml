@@ -93,6 +93,12 @@ claims:
     rule: The chooser starts the sequencing deal; no forced clubs opening is modelled.
     implementation: RentzMatch.choose
     verification: RentzBoundaryTest.chooserLeadsEachBaseContractAtEveryTableSize
+  - id: SEQUENCE-OPENING-RANK
+    status: LAB_RULE_IMPLEMENTED_WITH_LEGACY_REPLAY
+    source: LAB_CONTRACT
+    rule: New games open every Rentz suit at J for three to six players; journals without an explicit policy replay with their former active-rank midpoint.
+    implementation: SequenceOpening.rankFor
+    verification: RentzRulesTest.rentzAlwaysOpensFromJackAtEveryTableSize
   - id: PUBLIC-SCORE-SETTLEMENT
     status: LAB_VARIANT_REQUIRES_REFERENCE_CONFIRMATION
     source: LAB_CONTRACT
@@ -120,7 +126,6 @@ claims:
 notImplemented:
   - Original Classic and Traditional numerical presets until independently confirmed.
   - Optional Totals-plus and disabling selected contracts.
-  - Configurable sequence opening from the jack at every table size.
   - Refusing a Rentz deal or compulsory blind final choices from other rule families.
   - Daily deals, ranking, advertisements, achievements and undo.
   - Reference-app parity or expert-strength AI claims.

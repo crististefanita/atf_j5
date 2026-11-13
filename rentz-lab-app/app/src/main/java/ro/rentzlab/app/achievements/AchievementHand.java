@@ -8,6 +8,7 @@ import ro.rentzlab.app.GameSession;
 import ro.rentzlab.core.Contract;
 import ro.rentzlab.core.RentzBoard;
 import ro.rentzlab.core.RentzMatch;
+import ro.rentzlab.core.sequence.SequenceOpening;
 
 public record AchievementHand(RentzMatch.HandResult result, boolean manualChoice, boolean manualPlay,
         boolean delegated, boolean unknownPlay, boolean opened, boolean extended, boolean complete,
@@ -31,7 +32,11 @@ public record AchievementHand(RentzMatch.HandResult result, boolean manualChoice
         private Contract contract;
 
         public Recorder(int players) {
-            openingRank = new RentzBoard(players).startRank();
+            this(players, SequenceOpening.JACK);
+        }
+
+        public Recorder(int players, SequenceOpening sequenceOpening) {
+            openingRank = new RentzBoard(players, sequenceOpening).startRank();
             matchHands = players * Contract.values().length;
         }
 

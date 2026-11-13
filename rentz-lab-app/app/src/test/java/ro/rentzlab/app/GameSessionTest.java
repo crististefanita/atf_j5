@@ -5,6 +5,7 @@ import ro.rentzlab.app.testing.AndroidComponentLayer;
 import ro.rentzlab.ai.*;
 import org.junit.Test;
 import ro.rentzlab.core.*;
+import ro.rentzlab.core.sequence.SequenceOpening;
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.Assert.*;
@@ -38,10 +39,31 @@ public class GameSessionTest {
     }
     @Test public void incompatibleSavedIdentitiesAreRejected()throws Exception{
         var session=new GameSession(4,31,RentzPlayer.Difficulty.NORMAL);
-        for(String key:new String[]{"schema","profile","policy","rules"}){
+        for(String key:new String[]{"schema","profile","policy","rules","sequenceOpening"}){
             var json=SessionJson.saved(session);json.put(key,key.equals("schema")?2:"UNKNOWN");
             try{SessionJson.restore(json.toString());fail("Accepted incompatible "+key);}catch(IllegalArgumentException expected){}
         }
+    }
+    @Test public void legacyRentzJournalWithoutOpeningPolicyKeepsItsOldTableMiddle()throws Exception {
+        for (long seed = 0; seed < 96; seed++) {
+            var saved = new GameSession.Saved(1, 3, seed, RentzPlayer.Difficulty.NORMAL, List.of(), List.of(),
+                    RentzMatch.DealEnding.UNIQUE_LAST, SequenceOpening.ACTIVE_MIDDLE);
+            var session = GameSession.restore(saved);
+            session.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null, Contract.RENTZ, false));
+            var opening = session.view().legal().stream().filter(card -> card.rank() == 12).findFirst();
+            if (opening.isEmpty()) continue;
+            session.apply(new GameSession.Command(GameSession.Action.PLAY, 0, opening.get(), null, false));
+            var before = session.view();
+            var journal = SessionJson.saved(session);
+            assertEquals("ACTIVE_MIDDLE", journal.getString("sequenceOpening"));
+            journal.remove("sequenceOpening");
+            var restored = SessionJson.restore(journal.toString());
+            assertEquals(SequenceOpening.ACTIVE_MIDDLE, restored.view().sequenceOpening());
+            assertEquals(before, restored.view());
+            assertEquals(session.save().commands(), restored.save().commands());
+            return;
+        }
+        fail("A deterministic fixture must expose the legacy Q opener");
     }
     @Test public void blindEligibilityDisappearsBeforeTheLastChoice()throws Exception{
         var session=new GameSession(3,31,RentzPlayer.Difficulty.NORMAL);assertTrue(session.blindChoiceAvailable());
@@ -65,7 +87,8 @@ public class GameSessionTest {
         for(var contract:List.of(Contract.QUEENS,Contract.DIAMONDS)) {
             boolean exercised=false;
             for(long seed=0;seed<32&&!exercised;seed++) {
-                var oldGame=new RentzMatch(4,seed,score,0,RentzMatch.DealEnding.LEGACY);
+                var oldGame=new RentzMatch(4,seed,score,0,RentzMatch.DealEnding.LEGACY,
+                        SequenceOpening.ACTIVE_MIDDLE);
                 oldGame.choose(0,contract,false);
                 var commands=new ArrayList<GameSession.Command>();
                 commands.add(new GameSession.Command(GameSession.Action.CHOOSE,0,null,contract,false));
@@ -81,14 +104,17 @@ public class GameSessionTest {
                         frontier=commands.size();
                 }
                 if(frontier==0||frontier==commands.size())continue;
-                var legacy=GameSession.restore(new GameSession.Saved(1,4,seed,difficulty,commands,List.of(),RentzMatch.DealEnding.LEGACY));
+                var legacy=GameSession.restore(new GameSession.Saved(1,4,seed,difficulty,commands,List.of(),
+                        RentzMatch.DealEnding.LEGACY,SequenceOpening.ACTIVE_MIDDLE));
                 var saved=SessionJson.saved(legacy);
                 assertEquals("RENTZ_RULES_V2",saved.getString("rules"));
                 assertEquals(oldGame.observe(0),SessionJson.restore(saved.toString()).view());
                 saved.remove("rules");
                 assertEquals(oldGame.history(),SessionJson.restore(saved.toString()).history());
 
-                var current=GameSession.restore(new GameSession.Saved(1,4,seed,difficulty,commands.subList(0,frontier)));
+                var current=GameSession.restore(new GameSession.Saved(1,4,seed,difficulty,
+                        commands.subList(0,frontier),List.of(),RentzMatch.DealEnding.UNIQUE_LAST,
+                        SequenceOpening.ACTIVE_MIDDLE));
                 var newJournal=SessionJson.saved(current);
                 assertEquals("RENTZ_RULES_V4",newJournal.getString("rules"));
                 assertEquals(RentzMatch.Phase.DEAL_END,current.view().phase());
