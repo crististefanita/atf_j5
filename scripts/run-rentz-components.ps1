@@ -27,7 +27,7 @@ if (Test-Path -LiteralPath $RunRoot) { throw 'A fresh run directory is required.
 Import-Module (Join-Path $PSScriptRoot 'AtfMavenCache.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 $repository = Resolve-AtfJ5MavenRepository -Repository $MavenRepository
-$stage = New-AtfWorkspace -Kind components -ProjectRoot $root
+$stage = New-AtfWorkspace -Kind components -ProjectRoot $source
 New-Item -ItemType Directory -Path $RunRoot | Out-Null
 $infrastructureControls=Join-Path (Get-AtfInfrastructurePath -Area governance -ProjectRoot $root) ('component-controls-'+[guid]::NewGuid().ToString('N'))
 & (Join-Path $root 'atf-tests/tools/test-workspace-governance.ps1') -RunRoot $infrastructureControls *> (Join-Path $RunRoot 'infrastructure-controls.log')

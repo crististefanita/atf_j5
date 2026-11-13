@@ -1161,10 +1161,10 @@
       "path": "scripts/run-rentz-components.ps1",
       "owner": "Rentz release",
       "reason": "Generate an auditable atf-reporting Extent for the full selected component suite.",
-      "criterion": "All selected Surefire XML is hashed and reconciled; the publisher uses the atf-tests runtime classpath; failed or empty runs remain FAIL.",
+      "criterion": "Hash and reconcile all selected Surefire XML. Use the ATF runtime classpath for Extent and register the workspace against the tested source for Android JVM evidence. Failed or empty runs remain FAIL.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "1b4e070e2e77f1f6f8b5b51de77f4eb9cc7dbef02dc991a041c525eb87bed2d4",
+      "sha256": "f1f9a02e1fffabd83cbc5b9227979a86d0fb7c7457d9e9a7e357606f03d83a0a",
       "allowDelete": false
     },
     {
@@ -1281,10 +1281,10 @@
       "path": "atf-tests/tools/test-workspace-governance.ps1",
       "owner": "Rentz release",
       "reason": "Cover default data-root resolution and worktree source identity without weakening workspace owner checks.",
-      "criterion": "Nested worktrees resolve the shared root, unverified source paths fail closed, and same-project registered worktrees pass while foreign descriptors fail.",
+      "criterion": "Nested worktrees resolve the shared root. Component stages name the tested checkout when the runner is invoked elsewhere. Unverified source paths and foreign descriptors fail closed.",
       "proof": "docs/rentz/ATF_Infrastructure.md",
       "expires": "2026-12-12",
-      "sha256": "94a7880fe70f5751ce8bc641bcc79e03a5806ef9da7873bd0f1e67cd8cc1c5d9",
+      "sha256": "b198b498df38a9ad5c01ae83d62f345b96bafaa7f6227a467c9838f8d1aa6f9a",
       "allowDelete": false
     },
     {

@@ -90,7 +90,7 @@ După verdictul `readyForProductBuild=true`, construiți produsul cu identitatea
 
 RAG citește dovezile originale, aplică verificările de calificare și înregistrează verdictul.
 
-- Evaluatorul Java primește rădăcina externă `rentz_back` calculată din Git common directory sau din `RENTZ_DATA_ROOT`. Astfel validează workspace-ul Android JVM și dintr-un worktree imbricat.
+- Evaluatorul Java primește rădăcina externă `rentz_back` calculată din Git common directory sau din `RENTZ_DATA_ROOT`. Workspace-ul de componente se înregistrează pe rădăcina sursei testate. RAG validează aceeași rădăcină la citirea dovezii Android JVM, inclusiv când scriptul este lansat din alt checkout.
 - `READY_FOR_MAIN_PROMOTION_REVIEW` permite revizuirea operatorului.
 - Publicarea și probele de descărcare au porți proprii.
 

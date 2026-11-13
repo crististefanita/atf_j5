@@ -80,6 +80,27 @@ Case 'Discovery refuses a nested junction without following its scripts' {
 Case 'Duplicate registry names are rejected' {$c=Setup 'duplicate';$c.policy.sourceDirectories+=@('scripts');$c.policy|ConvertTo-Json -Depth 6|Set-Content -LiteralPath "$($c.project)/config/infrastructure-workspaces.json";try{Get-AtfWorkspacePolicy -ProjectRoot $c.project|Out-Null;throw 'Duplicate accepted'}catch{Require ($_.Exception.Message-match'Invalid or duplicate') 'Wrong duplicate failure'}}
 Case 'Allocator rejects traversal kinds' {try{New-AtfWorkspace -Kind '../escape' -ProjectRoot $project|Out-Null;throw 'Traversal accepted'}catch{Require ($_.Exception.Message-match'not registered') 'Wrong traversal failure'}}
 Case 'Allocator uses owned location and matching identity' {$w=New-AtfWorkspace -Kind governance -ProjectRoot $project;$record=Get-Content -Raw -LiteralPath (Join-Path $w '.atf-workspace.json')|ConvertFrom-Json;Require ($w.StartsWith((Get-AtfInfrastructurePath -Area workspaces -ProjectRoot $project)+'\',[StringComparison]::OrdinalIgnoreCase)-and$record.owner-eq'atf_j5'-and(Split-Path $w -Leaf)-eq($record.kind+'-'+$record.id)) 'Allocator escaped declared root'}
+Case 'Component runner registers the tested source when invoked from a different checkout' {
+    $root=$project
+    $source=(Setup 'component-runner-source').project
+    $data=Get-AtfDataRoot -ProjectRoot $root
+    $tokens=$null
+    $errors=$null
+    $runner=Join-Path $root 'scripts/run-rentz-components.ps1'
+    $ast=[Management.Automation.Language.Parser]::ParseFile($runner,[ref]$tokens,[ref]$errors)
+    $allocator=@($ast.FindAll({
+        param($node)
+        $node -is [Management.Automation.Language.CommandAst] -and $node.GetCommandName() -eq 'New-AtfWorkspace'
+    },$false))
+    Require ($errors.Count-eq0 -and $allocator.Count-eq1) 'Expected one valid component workspace allocator'
+    $saved=$env:RENTZ_DATA_ROOT
+    try {
+        $env:RENTZ_DATA_ROOT=$data
+        $stage=& ([scriptblock]::Create($allocator[0].Extent.Text))
+        $descriptor=Get-Content -LiteralPath (Join-Path $stage '.atf-workspace.json') -Raw|ConvertFrom-Json
+        Require ($descriptor.kind-ceq'components' -and $descriptor.sourceRoot-ceq$source) 'RAG provenance must identify the tested source, not the checkout that invoked the runner'
+    } finally { $env:RENTZ_DATA_ROOT=$saved }
+}
 Case 'Registered candidate uses its declared checkout layout for cross-project links' {$layout=Get-AtfCheckoutLayoutRoot -ProjectRoot $project;$descriptorPath=Join-Path (Split-Path -Parent $project) '.atf-workspace.json';$expected=$project;if(Test-Path -LiteralPath $descriptorPath){$descriptor=Get-Content -Raw -LiteralPath $descriptorPath|ConvertFrom-Json;$expected=[IO.Path]::GetFullPath([string]$descriptor.sourceRoot)};Require ($layout-ceq$expected) 'Candidate link checks ignored the registered checkout layout'}
 Case 'POM-selected reporting artifact and provenance resolve by exact version' {$actual=Get-AtfReportingLibrary -ProjectRoot $project;[xml]$pom=Get-Content -Raw (Join-Path $project 'pom.xml');$expected='atf-reporting-'+$pom.SelectSingleNode("/*[local-name()='project']/*[local-name()='properties']/*[local-name()='atf.reporting.version']").InnerText.Trim();Require ($actual.name-ceq$expected-and(Test-Path -LiteralPath $actual.jar)-and(Test-Path -LiteralPath $actual.pom)-and$actual.sha256-eq(Get-FileHash -LiteralPath $actual.jar -Algorithm SHA256).Hash.ToLowerInvariant()) 'Reporting binary identity is not tied to the root Maven property'}
 Case 'A future reporting patch selects its own artifact instead of a pinned JAR' {$fixture=Join-Path $RunRoot 'reporting-version-fixture';New-Item -ItemType Directory -Force -Path (Join-Path $fixture 'lib')|Out-Null;'<project><properties><atf.reporting.version>1.0.0-j99</atf.reporting.version></properties></project>'|Set-Content -LiteralPath (Join-Path $fixture 'pom.xml') -Encoding utf8NoBOM;'fixture-jar'|Set-Content -LiteralPath (Join-Path $fixture 'lib/atf-reporting-1.0.0-j99.jar') -Encoding utf8NoBOM;'fixture-pom'|Set-Content -LiteralPath (Join-Path $fixture 'lib/atf-reporting-1.0.0-j99.pom') -Encoding utf8NoBOM;$actual=Get-AtfReportingLibrary -ProjectRoot $fixture;Require ($actual.name-ceq'atf-reporting-1.0.0-j99') 'A future POM version resolved a pinned artifact'}
