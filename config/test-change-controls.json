@@ -1245,21 +1245,21 @@
     {
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
-      "reason": "Prepare minor release 0.22.0 after the three-game native flow and retain the currently admitted UI artifact.",
-      "criterion": "Increment versionCode once, preserve signing and bind the candidate version to the same source-qualified component, Android JVM and native UI receipts.",
+      "reason": "Prepare minor release 0.23.0 for the all-table J opener after component and native qualification.",
+      "criterion": "Advance versionCode from 26 to 27, preserve the existing signing identity, and bind the candidate to source-matched regression, Android JVM, three-game native and RAG receipts.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "53d11f988705ecad7f3f09ed11c667f446f8346dc0e40e89b11e188a31f079d6",
+      "sha256": "ca000f6cf711ed32394b26dd687f7a7b53b6323ecd33d195c60e55323a072d35",
       "allowDelete": false
     },
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Record Rentz Lab 0.22.0 as the verified current release after the restricted GitHub download; preserve its source tag and audit evidence.",
-      "criterion": "The published catalog identifies 0.22.0 as current and retains only that download entry; the authenticated APK and checksum match the publication receipt, while source tags and archived audit evidence remain preserved.",
+      "reason": "Stage Rentz Lab 0.23.0 without replacing the verified 0.22.0 download before all release gates pass.",
+      "criterion": "Keep 0.22.0 current and add only candidate 0.23.0/versionCode 27; require the same-source native, signed APK and authenticated README download before promoting currentVersion, while retaining prior tags and audit evidence.",
       "proof": "docs/rentz/ATF_Release.md#publicare-și-descărcare",
       "expires": "2027-02-12",
-      "sha256": "14f882382451d607d70bdb53d45703eb23ca811b33f0ad73b42b7009147b389a",
+      "sha256": "8cf01d6e8bfc71058409dc2cb7365b720883ade79ff7a817d42e4f8bd7eef2cd",
       "allowDelete": false
     },
     {
