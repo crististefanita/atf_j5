@@ -38,7 +38,7 @@ Scorul este prioritatea de remediere, nu nota calității sau procentul de acope
 
 **Citirea scorurilor:** 90–100 cere atenție imediată; 75–89 indică risc mare sau impact extins; 50–74 indică remediere planificabilă; sub 50 indică impact sau lucrabilitate redusă în comparația curentă. Nota nu închide cerința: aceasta se închide numai prin criteriul din documentul ownerului și receipt-ul aferent.
 
-**Starea release-ului separat:** RAG-ul de cod și guvernanță nu are ToDo de remediere deschis în [registrul RAG](ATF_Release_RAG.md). Cea mai recentă evaluare disponibilă confirmă regresia offline, Extent-ul componentelor, Android JVM și catalogul local; acceptanța nativă este `NOT_RUN`, deci acel snapshot nu autorizează un release nou.
+**Guvernanța release-ului:** Registrul RAG nu are ToDo activ pentru remedierea evaluatorului. Fiecare ediție rămâne condiționată de dovezi proaspete pentru regresie, Extent-ul componentelor, Android JVM, acceptanța nativă, APK-ul semnat, catalog și publicarea canalului declarat. RAG-ul local și poarta post-push pentru README/descărcare se verifică separat; un raport dintr-o rulare anterioară nu califică o ediție nouă.
 
 ## Închidere și transfer
 
