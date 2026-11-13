@@ -8,8 +8,11 @@ RAG-ul local citează sursele și explică porțile. Verificatoarele determinist
 
 ## Retenția spațiilor de lucru
 
-**P2 · Responsabil: infrastructura J5.** Controalele creează fixture-uri și copii de compilare în depozitul comun. După rulare, inventarul curent verifică înregistrarea lor, dar nu arată care mai sunt necesare pentru reproducerea dovezii.
+**P2 · Responsabil: infrastructura J5.** Extindeți inventarul read-only la cache-uri și fixture-uri, cu aceleași motive de păstrare și dovezi pe fiecare cale. Inventarul pentru `target` are deja un contract propriu.
 
-- Inventariați spațiile de lucru și cache-urile folosite de receipte, classpath-uri, procese active și worktree-uri Git.
-- Lansatorul RAG își curăță directorul de lucru JVM. Extindeți inventarul la buildurile și fixture-urile vechi, cu proprietar și criteriu explicit pentru fiecare retragere.
-- Verificați prin fixture-uri un director regenerabil, un director referit de un receipt, o rulare activă și o cale care traversează un link. [Contractul de retenție](../rentz/ATF_Infrastructure.md#curățare-și-probe)
+- Dovediți că nicio intrare de classpath atestată nu dispare când retrageți un cache duplicat.
+- Diferențiați un fixture de guvernanță cu receipt util de o copie regenerabilă. Includeți o sursă de dovezi inaccesibilă și un producător care scrie în timpul inventarierii. [Contractul de retenție](../rentz/ATF_Infrastructure.md#inventarul-țintelor-maven)
+
+## Reconcilierea documentară
+
+**P2 · Responsabil: release J5.** Reconcilierea editorială păstrează o listă fixă de suite documentare. Includeți verificarea factuală a traseului Android în populația obligatorie și demonstrați că un receipt fără ea sau cu verdict roșu este respins. [Oracolul factual](../../atf-tests/src/test/java/atf/rentz/governance/documentation/factual/DocumentationNativeFlowTest.java)

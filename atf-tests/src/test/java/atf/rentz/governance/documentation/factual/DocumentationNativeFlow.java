@@ -10,13 +10,13 @@ import java.util.regex.Pattern;
 
 final class DocumentationNativeFlow {
     private static final String RUNNER = "atf-tests/tools/run-shared-ui-sanity.ps1";
-    private static final String RAG = "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java";
+    private static final String RAG = "atf-tests/src/main/java/atf/rentz/distribution/evidence/NativeUiEvidence.java";
     private static final List<String> GUIDES = List.of("README.md", "atf-tests/README.md",
             "docs/rentz/ATF_Android.md", "docs/rentz/ATF_Release.md", "docs/rentz/ATF_TestingStrategy.md");
     private static final Pattern COUNT = Pattern.compile("(?m)^\\h*\\$consecutiveGameCount\\h*=\\h*([1-9][0-9]*)\\h*$");
     private static final Pattern LOOP = Pattern.compile("(?m)^\\h*for\\(\\$deal=1;\\$deal-le\\$consecutiveGameCount;\\$deal\\+\\+\\)\\{");
     private static final Pattern FIRST = Pattern.compile("(?m)^\\h*if\\(\\$deal-eq1-and\\$contract-ne'([A-Z_]+)'\\)\\{throw ");
-    private static final Pattern RAG_COUNT = Pattern.compile("(?m)^\\h*private static final int REQUIRED_COMPLETE_GAMES = ([1-9][0-9]*);\\h*$");
+    private static final Pattern RAG_COUNT = Pattern.compile("(?m)^\\h*public static final int REQUIRED_COMPLETE_GAMES = ([1-9][0-9]*);\\h*$");
     private static final Pattern RAG_FIRST = Pattern.compile("contracts\\.get\\(0\\)\\.asText\\(\\)\\.equals\\(\"([A-Z_]+)\"\\)");
     private static final String LABEL = "**Traseul Android de release.** ";
     private static final Pattern CLAIM = Pattern.compile("(?:- )?" + Pattern.quote(LABEL)

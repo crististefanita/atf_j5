@@ -12,6 +12,8 @@ Acest pachet verifică identitatea declarată și achiziția APK-ului; nu implem
 | ApkDownloadTarget | Repository, versiune, bytes integrali și SHA-256 declarate înaintea accesului. |
 | ReleaseDownloadAcceptance | Intrare CLI live explicită, cu șase comparații și Extent; nu se execută implicit în regresie. |
 | GitHubApkDownload | Metadata, redirecturi limitate și transfer complet; credentiala rămâne numai la originea API. |
+| NativeUiEvidence și AndroidSourceEvidence | Califică receipt-ul de joc și leagă APK-ul și manifestul Android de sursa calificată. |
+| NativeExtentEvidence | Confruntă capturile PNG originale, ordinea pașilor și fiecare comparație expected/actual cu raportul nativ. |
 | ApkPayload și ReleasePaths | Hash, CRC pentru toate intrările ZIP și căi canonice, fără promovarea textului de eroare la APK. |
 
 Componentele folosesc transport loopback real și martori ZIP mici; acestea nu sunt APK-uri instalabile. Acceptanța live se selectează explicit după publicare, iar [procesul release](../../../../../../../docs/rentz/ATF_Release.md) separă dovada Android și browserul.

@@ -1,10 +1,12 @@
 package atf.rentz.distribution;
 
 import atf.rentz.distribution.editorial.DocumentationReconciliation;
+import atf.rentz.distribution.evidence.AndroidSourceEvidence;
 import atf.rentz.distribution.evidence.ComponentSuiteEvidence;
 import atf.rentz.distribution.evidence.MavenFailureExtent;
+import atf.rentz.distribution.evidence.NativeUiEvidence;
+import atf.rentz.distribution.evidence.ReleaseEvidenceFiles;
 
-import atf.reporting.evidence.ui.ExtentUiEvidenceMarkup;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,23 +18,20 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.security.MessageDigest;
 import java.text.Normalizer;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.zip.CRC32;
-import ro.rentzlab.core.Contract;
+
+import static atf.rentz.distribution.evidence.ReleaseEvidenceFiles.assertNoSymlinkPath;
+import static atf.rentz.distribution.evidence.ReleaseEvidenceFiles.safeFailure;
 
 /** Local, deterministic retrieval for release review. It never runs or promotes a release gate. */
 public final class ReleaseReadinessRag {
@@ -52,13 +51,6 @@ public final class ReleaseReadinessRag {
     private static final Pattern SECRET_ASSIGNMENT = Pattern.compile("(?i)\\b(?:password|passwd|secret|token|api[_-]?key|access[_-]?token)\\s*[:=]\\s*\\S+");
     private static final Pattern SECRET_CONTENT = Pattern.compile("(?i)(?:\\bgh[pousr]_[a-z0-9]{20,}\\b|\\bgithub_pat_[a-z0-9_]{30,}\\b|\\bAKIA[0-9A-Z]{16}\\b|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\\b(?:password|client_secret|api[_-]?key|access[_-]?token)\\s*[:=]\\s*[\"'][^\"'\\r\\n]{12,}[\"'])");
     private static final Pattern VERSION = Pattern.compile("(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)");
-    private static final Pattern INLINE_PNG = Pattern.compile("data:image/png;base64,([^\\\"'\\s<>]+)");
-    private static final Pattern NATIVE_EXTENT_STEP = Pattern.compile("<a class=\"node [^\"]*\" id=\"[0-9]+\"><span>THEN ([^<]+)</span></a>");
-    private static final Pattern NATIVE_SCREENSHOT_ID = Pattern.compile(" id=\"(atf-screenshot-screenshot-[0-9]+)\"");
-    private static final int MAX_INLINE_PNG_BYTES = 8 * 1024 * 1024;
-    private static final int REQUIRED_COMPLETE_GAMES = 3;
-    private static final int REQUIRED_DISTINCT_CONTRACTS = 3;
-
     private static final int MAX_CORPUS_SOURCES = 64;
     private static final long MAX_CORPUS_BYTES = 4L * 1024 * 1024;
 
@@ -220,7 +212,8 @@ public final class ReleaseReadinessRag {
         attachLocalCatalog(root, gates);
         if (componentRun != null) attachComponentReceipt(root, git, gates, componentRun, "regression");
         if (buildRun != null) attachReleaseBuildReceipt(root, git, gates, componentRun, buildRun);
-        if (nativeUiRun != null) attachNativeUiReceipt(root, git, gates, componentRun, uiBuildRun, nativeUiRun);
+        if (nativeUiRun != null) NativeUiEvidence.attach(root, git.commit(), version, gate(gates, "native-ui"),
+                gate(gates, "native-ui-report"), componentRun, uiBuildRun, nativeUiRun);
 
         ArrayNode conflicts = report.putArray("conflicts");
         if (!git.available()) conflicts.add("Git identity unavailable; candidate source cannot be pinned.");
@@ -253,8 +246,8 @@ public final class ReleaseReadinessRag {
         String nativeReportStatus = status(gates, "native-ui-report");
         nativeAcceptance.put("status", nativeUiStatus.equals("FAIL") || nativeReportStatus.equals("FAIL") ? "FAIL"
                 : nativeUiStatus.equals("PASS") && nativeReportStatus.equals("PASS") ? "PASS" : "BLOCKED");
-        nativeAcceptance.put("requiredCompleteGames", REQUIRED_COMPLETE_GAMES);
-        nativeAcceptance.put("requiredDistinctContracts", REQUIRED_DISTINCT_CONTRACTS);
+        nativeAcceptance.put("requiredCompleteGames", NativeUiEvidence.REQUIRED_COMPLETE_GAMES);
+        nativeAcceptance.put("requiredDistinctContracts", NativeUiEvidence.REQUIRED_DISTINCT_CONTRACTS);
         nativeAcceptance.put("requiredSequence", "a complete Rentz opener followed by two other complete games in the same match");
         nativeAcceptance.put("requiredDisplayEvidence", "720x1280 logical viewport, density 360, font scale 1.5, stable four-seat geometry and inline native screenshots");
         nativeAcceptance.put("receiptGate", "native-ui + native-ui-report");
@@ -471,14 +464,6 @@ public final class ReleaseReadinessRag {
         }
     }
 
-    private static String safeFailure(Exception failure, String fallback) {
-        String message = failure.getMessage();
-        if (message == null) return fallback;
-        int separator = message.indexOf(':');
-        String code = separator < 0 ? message : message.substring(0, separator);
-        return code.matches("RAG-[A-Z0-9-]+") ? code : fallback;
-    }
-
     private static long validateComponentExtent(Path root, Path run, JsonNode receipt) throws IOException {
         if (!receipt.path("componentExtentReportFailure").asText().isBlank()) throw new IOException("RAG-COMPONENT-EXTENT-FAILED");
         if (!receipt.path("componentExtentReport").isTextual() || !receipt.path("componentExtentReportSha256").asText().matches("(?i)[a-f0-9]{64}"))
@@ -537,7 +522,7 @@ public final class ReleaseReadinessRag {
             String candidateVersion = releaseIndex.path("candidate").path("version").asText(releaseIndex.path("currentVersion").asText());
             if (!VERSION.matcher(version).matches() || !version.equals(candidateVersion))
                 throw new IOException("RAG-BUILD-VERSION");
-            verifyAndroidSourceManifest(run, componentRun, receipt);
+            AndroidSourceEvidence.verify(run, componentRun, receipt);
             Path apk = Path.of(receipt.path("productApk").asText()).toAbsolutePath().normalize();
             if (!apk.startsWith(run) || !Files.isRegularFile(apk, LinkOption.NOFOLLOW_LINKS)
                     || !apk.getFileName().toString().equals("RentzLab-" + version + ".apk")) throw new IOException("RAG-BUILD-APK-BOUNDARY");
@@ -561,282 +546,6 @@ public final class ReleaseReadinessRag {
             buildGate.put("status", "BLOCKED"); buildGate.put("actual", safeFailure(invalid, "RAG-BUILD-RECEIPT-INVALID"));
             if (!receiptHash.isBlank()) { buildGate.put("receipt", "build-qualification.json"); buildGate.put("receiptSha256", receiptHash); }
         }
-    }
-
-    private static void requireUiCheckpoint(JsonNode checkpoints, String title, String assertion) throws IOException {
-        for (JsonNode checkpoint : checkpoints) {
-            if (!checkpoint.path("title").asText().equals(title)) continue;
-            for (JsonNode check : checkpoint.path("checks"))
-                if (check.path("name").asText().equals(assertion) && check.path("passed").asBoolean(false)
-                        && check.path("expected").asText().equals(check.path("actual").asText())) return;
-            throw new IOException("RAG-UI-CHECKPOINT-EVIDENCE: " + title);
-        }
-        throw new IOException("RAG-UI-CHECKPOINT-MISSING: " + title);
-    }
-
-    private static void verifyAndroidSourceManifest(Path run, Path componentRun, JsonNode receipt) throws IOException {
-        Path sourceManifest = receipt.path("sourceManifest").isTextual() ? Path.of(receipt.path("sourceManifest").asText()) : run.resolve("source-identity.json");
-        if (!sourceManifest.toRealPath().startsWith(run) || !sha256(readExternalFile(sourceManifest, 4L * 1024 * 1024))
-                .equalsIgnoreCase(receipt.path("sourceManifestSha256").asText())) throw new IOException("RAG-BUILD-MANIFEST");
-        JsonNode androidSourceRows = JSON.readTree(readExternalFile(sourceManifest, 4L * 1024 * 1024));
-        JsonNode qualifiedSourceRows = JSON.readTree(readExternalFile(componentRun.toRealPath().resolve("source-identity.json"), 4L * 1024 * 1024));
-        if (!androidSourceRows.isArray() || androidSourceRows.isEmpty() || !qualifiedSourceRows.isArray())
-            throw new IOException("RAG-BUILD-MANIFEST-SCHEMA");
-        Set<String> seenAndroidPaths = new HashSet<>();
-        int qualifiedAndroidFiles = 0;
-        for (JsonNode row : qualifiedSourceRows) if (row.path("path").asText().startsWith("rentz-lab-app/")) qualifiedAndroidFiles++;
-        if (androidSourceRows.size() != qualifiedAndroidFiles) throw new IOException("RAG-BUILD-MANIFEST-POPULATION");
-        for (JsonNode row : androidSourceRows) {
-            String path = ReleasePaths.relative(row.path("path").asText());
-            if (!seenAndroidPaths.add(path) || !row.path("sha256").asText().matches("(?i)[a-f0-9]{64}"))
-                throw new IOException("RAG-BUILD-MANIFEST-ROW");
-            String expected = "";
-            for (JsonNode sourceRow : qualifiedSourceRows) if (sourceRow.path("path").asText().equals("rentz-lab-app/" + path)) {
-                expected = sourceRow.path("sha256").asText(); break;
-            }
-            if (expected.isBlank() || !expected.equalsIgnoreCase(row.path("sha256").asText()))
-                throw new IOException("RAG-BUILD-MANIFEST-DRIFT");
-        }
-    }
-
-    private static void attachNativeUiReceipt(Path root, GitIdentity git, ArrayNode gates, Path componentRun, Path suppliedBuildRun, Path suppliedUiRun) {
-        ObjectNode uiGate = gate(gates, "native-ui"), reportGate = gate(gates, "native-ui-report");
-        if (suppliedBuildRun == null) { uiGate.put("status", "BLOCKED"); uiGate.put("actual", "A source-bound UI-sanity build receipt is required."); return; }
-        Path run = null; String receiptHash = ""; JsonNode ui = null;
-        try {
-            Path buildRun = externalRun(root, suppliedBuildRun);
-            JsonNode build = JSON.readTree(readExternalFile(buildRun.resolve("ui-sanity-build-qualification.json"), 4L * 1024 * 1024));
-            JsonNode releaseIndex = readSafeJson(root, "release/index.json", 65_536);
-            String candidateVersion = releaseIndex.path("candidate").path("version").asText(releaseIndex.path("currentVersion").asText());
-            if (!build.path("status").asText().equals("PASS") || !build.path("sourceCommit").asText().equals(git.commit())
-                    || !build.path("uiSanity").asBoolean(false) || !build.path("applicationId").asText().equals("ro.rentzlab.app.uisanity")
-                    || exactCount(build.path("newAuditedCases")) < 1
-                    || !build.path("versionName").asText().equals(candidateVersion)
-                    || componentRun == null || !Path.of(build.path("componentRun").asText()).toRealPath().equals(componentRun.toRealPath()))
-                throw new IOException("RAG-UI-BUILD-IDENTITY");
-            verifyAndroidSourceManifest(buildRun, componentRun, build);
-            Path builder = root.resolve("scripts/build-rentz-android.ps1").normalize();
-            assertNoSymlinkPath(builder);
-            if (!builder.startsWith(root) || !Files.isRegularFile(builder, LinkOption.NOFOLLOW_LINKS)
-                    || !sha256(Files.readAllBytes(builder)).equalsIgnoreCase(build.path("builderSha256").asText()))
-                throw new IOException("RAG-UI-BUILD-TOOL-IDENTITY");
-            Path uiApk = Path.of(build.path("apk").asText()).toAbsolutePath().normalize();
-            if (!uiApk.startsWith(buildRun) || !Files.isRegularFile(uiApk, LinkOption.NOFOLLOW_LINKS)
-                    || !uiApk.getFileName().toString().equals("rentz-lab-ui-sanity.apk"))
-                throw new IOException("RAG-UI-APK-BOUNDARY");
-            byte[] uiApkBytes = readExternalFile(uiApk, 256L * 1024 * 1024);
-            if (!sha256(uiApkBytes).equalsIgnoreCase(build.path("apkSha256").asText())
-                    || exactCount(build.path("apkBytes")) != uiApkBytes.length) throw new IOException("RAG-UI-APK-HASH");
-            Path runner = root.resolve("atf-tests/tools/run-shared-ui-sanity.ps1").normalize();
-            assertNoSymlinkPath(runner);
-            if (!runner.startsWith(root) || !Files.isRegularFile(runner, LinkOption.NOFOLLOW_LINKS)) throw new IOException("RAG-UI-TOOL-IDENTITY");
-            run = externalRun(root, suppliedUiRun);
-            byte[] bytes = readExternalFile(run.resolve("result.json"), 8L * 1024 * 1024);
-            receiptHash = sha256(bytes); ui = JSON.readTree(bytes);
-            if (!ui.path("developmentLedgerScope").asText().equals("RUN_ISOLATED_COPY"))
-                throw new IOException("RAG-UI-LEARNING-ISOLATION");
-            Path learningLedger = Path.of(ui.path("developmentLedger").asText()).toAbsolutePath().normalize();
-            if (!learningLedger.startsWith(run) || !Files.isRegularFile(learningLedger, LinkOption.NOFOLLOW_LINKS)
-                    || Files.exists(learningLedger.resolveSibling(learningLedger.getFileName() + ".native-pending"), LinkOption.NOFOLLOW_LINKS)
-                    || !ui.path("sharedDevelopmentLedgerUnchanged").asBoolean(false)
-                    || !ui.path("sharedDevelopmentLedgerSha256Before").asText().matches("[a-f0-9]{64}")
-                    || !ui.path("sharedDevelopmentLedgerSha256Before").asText().equals(ui.path("sharedDevelopmentLedgerSha256After").asText()))
-                throw new IOException("RAG-UI-LEARNING-ISOLATION");
-            byte[] learningBytes = readExternalFile(learningLedger, 8L * 1024 * 1024);
-            if (!sha256(learningBytes).equalsIgnoreCase(ui.path("isolatedDevelopmentLedgerSha256After").asText())
-                    || !ui.path("isolatedDevelopmentLedgerSha256Before").asText().matches("[a-f0-9]{64}")
-                    || !ui.path("isolatedDevelopmentLedgerSha256Before").asText().equals(ui.path("sharedDevelopmentLedgerSha256Before").asText()))
-                throw new IOException("RAG-UI-LEARNING-ISOLATION");
-            if (!sha256(Files.readAllBytes(runner)).equalsIgnoreCase(ui.path("runnerSha256").asText()))
-                throw new IOException("RAG-UI-TOOL-IDENTITY");
-            AtfReportingLibrary reporting = AtfReportingLibrary.resolve(root);
-            if (!ui.path("reportingLibrary").asText().equals(reporting.artifactName())
-                    || !ui.path("reportingLibrarySha256").asText().equalsIgnoreCase(reporting.sha256()))
-                throw new IOException("RAG-UI-REPORTING-LIBRARY");
-            if (!ui.path("build").path("sourceCommit").asText().equals(git.commit())
-                    || !ui.path("build").path("apkSha256").asText().equalsIgnoreCase(build.path("apkSha256").asText())
-                    || !ui.path("apkSha256").asText().equalsIgnoreCase(build.path("apkSha256").asText()))
-                throw new IOException("RAG-UI-SOURCE-APK");
-            String status = ui.path("status").asText();
-            if (status.equals("FAIL")) {
-                uiGate.put("status", "FAIL"); uiGate.put("actual", safeUiFailure(ui));
-                uiGate.put("receipt", "result.json"); uiGate.put("receiptSha256", receiptHash);
-                reportGate.put("status", "BLOCKED"); reportGate.put("actual", "A failing UI receipt cannot qualify its Extent artifact."); return;
-            }
-            if (!status.equals("PASS") || !ui.path("consecutiveSubgames").asBoolean(false)
-                    || !ui.path("package").asText().equals("ro.rentzlab.app.uisanity")
-                    || !ui.path("displayAndPackagesPreserved").asBoolean(false) || !ui.path("leaseReleased").asBoolean(false)
-                    || !ui.path("cleanupFailures").isArray() || !ui.path("cleanupFailures").isEmpty())
-                throw new IOException("RAG-UI-CLOSEOUT");
-            JsonNode contracts = ui.path("subgames");
-            if (!contracts.isArray() || contracts.size() != REQUIRED_COMPLETE_GAMES || !contracts.get(0).asText().equals("RENTZ"))
-                throw new IOException("RAG-UI-SUBGAMES");
-            var distinct = new HashSet<Contract>();
-            for (JsonNode contract : contracts) distinct.add(Contract.valueOf(contract.asText()));
-            if (distinct.size() < REQUIRED_DISTINCT_CONTRACTS) throw new IOException("RAG-UI-CONTRACT-VARIETY");
-            JsonNode audit = ui.path("gameAudit");
-            if (!audit.path("status").asText().equals("PASS") || exactCount(audit.path("completedDeals")) != REQUIRED_COMPLETE_GAMES
-                    || exactCount(audit.path("auditedTransitions")) < 1 || !audit.path("phase").asText().equals("DEAL_END"))
-                throw new IOException("RAG-UI-ORACLE");
-            JsonNode display = ui.path("display"), before = display.path("before"), after = display.path("after");
-            JsonNode effective = display.path("effective"), compact = ui.path("compactConsecutive");
-            if (!compact.isBoolean() || !compact.booleanValue() || !effective.path("viewport").asText().equals("720x1280")
-                    || !effective.path("density").asText().equals("360") || !effective.path("fontScale").asText().equals("1.5"))
-                throw new IOException("RAG-UI-COMPACT-PROFILE");
-            if (!before.path("size").asText().matches("Physical size: [1-9][0-9]*x[1-9][0-9]*")
-                    || !before.path("density").asText().matches("Physical density: [1-9][0-9]*")
-                    || !before.path("font").asText().matches("[0-9]+(?:\\.[0-9]+)?")
-                    || !before.equals(after)) throw new IOException("RAG-UI-DISPLAY-PRESERVATION");
-            JsonNode checkpoints = ui.path("checkpoints");
-            if (!checkpoints.isArray() || checkpoints.size() < REQUIRED_COMPLETE_GAMES * 3 + 4) throw new IOException("RAG-UI-CHECKPOINTS");
-            for (JsonNode checkpoint : checkpoints) {
-                if (checkpoint.path("title").asText().isBlank() || !checkpoint.path("image").asText().endsWith(".png")
-                        || !checkpoint.path("hierarchy").asText().endsWith(".txt") || !checkpoint.path("checks").isArray()
-                        || checkpoint.path("checks").isEmpty()) throw new IOException("RAG-UI-CHECKPOINT-SCHEMA");
-                if (!checkpoint.path("logicalViewport").asText().equals("720x1280"))
-                    throw new IOException("RAG-UI-CHECKPOINT-VIEWPORT");
-                for (JsonNode check : checkpoint.path("checks"))
-                    if (check.path("name").asText().isBlank() || !check.path("passed").asBoolean(false)
-                            || !check.path("expected").isTextual() || !check.path("actual").isTextual())
-                        throw new IOException("RAG-UI-CHECKPOINT-FAILED");
-            }
-            JsonNode completedGames = ui.path("completedGames");
-            JsonNode auditHistory = audit.path("history");
-            if (!completedGames.isArray() || completedGames.size() != REQUIRED_COMPLETE_GAMES
-                    || !auditHistory.isArray() || auditHistory.size() != REQUIRED_COMPLETE_GAMES)
-                throw new IOException("RAG-UI-COMPLETE-GAMES");
-            for (int i = 0; i < REQUIRED_COMPLETE_GAMES; i++) {
-                String contract = contracts.get(i).asText();
-                JsonNode game = completedGames.get(i), history = auditHistory.get(i);
-                if (exactCount(game.path("number")) != i + 1 || !game.path("contract").asText().equals(contract)
-                        || !game.path("phase").asText().equals("DEAL_END") || exactCount(game.path("handNumber")) != i + 1
-                        || exactCount(game.path("scoreCount")) != 4 || !game.path("seatGeometryVerified").asBoolean(false)
-                        || !game.path("firstHumanMoveVerified").isBoolean() || !game.path("firstHumanMoveVerified").booleanValue()
-                        || !game.path("completionVerified").asBoolean(false)
-                        || !history.path("contract").asText().equals(contract) || exactCount(history.path("number")) != i + 1
-                        || !history.path("points").isArray() || history.path("points").size() != 4)
-                    throw new IOException("RAG-UI-COMPLETE-GAME-IDENTITY");
-                requireUiCheckpoint(checkpoints, "Consecutive subgame " + (i + 1) + " starts: " + contract,
-                        "Four-player table uses the same seat rectangles in this viewport");
-                requireUiCheckpoint(checkpoints, "Consecutive subgame " + (i + 1) + " starts: " + contract,
-                        "Contract is directly below hand progress");
-                requireUiCheckpoint(checkpoints, "Subgame " + (i + 1) + " first human move remains visible",
-                        "The same seat geometry survives a card play");
-                requireUiCheckpoint(checkpoints, "Subgame " + (i + 1) + " completed: " + contract,
-                        "One score value per player");
-                requireUiCheckpoint(checkpoints, "Subgame " + (i + 1) + " completed: " + contract,
-                        "Contract is directly below hand progress");
-                if (contract.equals("RENTZ")) {
-                    if (!game.path("rentzFinishOrderVerified").asBoolean(false))
-                        throw new IOException("RAG-UI-RENTZ-COMPLETE");
-                    requireUiCheckpoint(checkpoints, "Subgame " + (i + 1) + " completed: RENTZ", "Rentz finishing order contains each player");
-                }
-            }
-            requireUiCheckpoint(checkpoints, "Score history contains the consecutive subgames", "All completed history rows are reachable");
-            requireUiCheckpoint(checkpoints, "The match remains resumable", "Resume remains enabled");
-            requireUiCheckpoint(checkpoints, "The match restores its final contract and scores", "Restored seat geometry");
-            requireUiCheckpoint(checkpoints, "The confirmed rows remain after process restart", "Restarted history retains all completed subgames");
-            requireUiCheckpoint(checkpoints, "Achievements open at the beginning of the learning path", "Onboarding comes before contract goals");
-            requireUiCheckpoint(checkpoints, "Gameplay catalog opens", "Gameplay starts with the first manual hand");
-            requireUiCheckpoint(checkpoints, "Manual settlement presents achievement progress", "First manually completed hand is unlocked");
-            requireUiCheckpoint(checkpoints, "Manual settlement presents achievement progress", "The same panel includes partial progress");
-            requireUiCheckpoint(checkpoints, "Manual settlement presents achievement progress", "The score title stays above the achievement panel");
-            requireUiCheckpoint(checkpoints, "Manual settlement presents achievement progress", "Achievement panel has a distinct dismiss control");
-            requireUiCheckpoint(checkpoints, "Resuming a saved settlement does not repeat achievement progress", "No achievement panel is replayed");
-            requireUiCheckpoint(checkpoints, "Gameplay and training keep independent progress", "Confirmed manual play grants gameplay credit");
-            requireUiCheckpoint(checkpoints, "Gameplay milestones survive process restart", "Same gameplay total after restart");
-            requireUiCheckpoint(checkpoints, "Achievement search reports an empty result", "Empty result is visible and can be reset");
-            requireUiCheckpoint(checkpoints, "Achievements record manual and assisted play after settlement", "Manual and assisted milestones are recorded separately");
-            requireUiCheckpoint(checkpoints, "Achievements record manual and assisted play after settlement", "Complete catalog records new credit after settlement");
-            requireUiCheckpoint(checkpoints, "Search and status filter reveal the unlocked lesson", "Combined query returns exactly one achievement");
-            requireUiCheckpoint(checkpoints, "Achievement details explain eligibility for the recent hand", "Eligibility contains rule, counting unit and recent context");
-            requireUiCheckpoint(checkpoints, "Achievements and local identity survive restart without duplicate credit", "Same achievements total after restart");
-            requireUiCheckpoint(checkpoints, "Achievements and local identity survive restart without duplicate credit", "Restart leaves the durable checkpoint byte-for-byte unchanged");
-            requireUiCheckpoint(checkpoints, "Renaming the local profile retains achievement progress", "Same achievements total after rename");
-            uiGate.put("status", "PASS"); uiGate.put("actual", "Three complete native games across three distinct contracts reached DEAL_END. Replay, seat geometry, history, restart and achievement browsing passed.");
-            uiGate.put("receipt", "result.json"); uiGate.put("receiptSha256", receiptHash);
-
-            Path extent = Path.of(ui.path("extentReport").asText()).toAbsolutePath().normalize();
-            if (!extent.startsWith(run)) throw new IOException("RAG-UI-REPORT-BOUNDARY");
-            byte[] htmlBytes = readExternalFile(extent, 128L * 1024 * 1024);
-            if (!sha256(htmlBytes).equalsIgnoreCase(ui.path("extentReportSha256").asText())) throw new IOException("RAG-UI-REPORT-HASH");
-            String html = new String(htmlBytes, StandardCharsets.UTF_8);
-            validateInlinePngs(html);
-            verifyNativeExtent(html, externalRun(root, Path.of(ui.required("rawRoot").asText())), checkpoints);
-            reportGate.put("status", "PASS"); reportGate.put("actual", "Each native Extent checkpoint preserves its original inline PNG and every expected/actual comparison in order.");
-            reportGate.put("receipt", run.relativize(extent).toString().replace('\\', '/')); reportGate.put("receiptSha256", sha256(htmlBytes));
-            reportGate.put("artifactBytes", htmlBytes.length);
-            reportGate.put("artifactSourceCommit", git.commit());
-        } catch (Exception invalid) {
-            if (!uiGate.path("status").asText().equals("PASS") && !uiGate.path("status").asText().equals("FAIL")) {
-                uiGate.put("status", "BLOCKED");
-                uiGate.put("actual", safeFailure(invalid, "RAG-UI-RECEIPT-INVALID"));
-            }
-            reportGate.put("status", "BLOCKED"); reportGate.put("actual", safeFailure(invalid, "RAG-UI-REPORT-INVALID"));
-            if (!receiptHash.isBlank()) { uiGate.put("receipt", "result.json"); uiGate.put("receiptSha256", receiptHash); }
-        }
-    }
-
-    private static void verifyNativeExtent(String html, Path raw, JsonNode checkpoints) throws IOException {
-        var steps = NATIVE_EXTENT_STEP.matcher(html);
-        var files = new HashSet<String>();
-        var capturesByDigest = new HashMap<String, String>();
-        var captureIds = new HashSet<String>();
-        boolean hasStep = steps.find();
-        for (JsonNode checkpoint : checkpoints) {
-            if (!hasStep || !steps.group(1).equals(ExtentUiEvidenceMarkup.escape(checkpoint.required("title").asText())))
-                throw new IOException("RAG-UI-REPORT-CHECKPOINT");
-            int start = steps.end();
-            hasStep = steps.find();
-            int end = hasStep ? steps.start() : html.length();
-            byte[] image = nativeCapture(raw, checkpoint.required("image").asText(), files, MAX_INLINE_PNG_BYTES);
-            nativeCapture(raw, checkpoint.required("hierarchy").asText(), files, 4L * 1024 * 1024);
-            verifyNativeScreenshot(html, start, end, image, capturesByDigest, captureIds);
-            int assertions = html.indexOf("<div class=\"atf-ui-assertions\"", start, end);
-            if (assertions < 0) throw new IOException("RAG-UI-REPORT-COMPARISONS");
-            int tableStart = html.indexOf("<tbody>", assertions, end);
-            if (tableStart < 0) throw new IOException("RAG-UI-REPORT-COMPARISONS");
-            int tableEnd = html.indexOf("</tbody>", tableStart, end);
-            var rows = new StringBuilder("<tbody>");
-            for (JsonNode check : checkpoint.required("checks")) {
-                rows.append("<tr><td>").append(ExtentUiEvidenceMarkup.escape(check.required("name").asText()))
-                        .append("</td><td>").append(ExtentUiEvidenceMarkup.escape(check.required("expected").asText()))
-                        .append("</td><td>").append(ExtentUiEvidenceMarkup.escape(check.required("actual").asText()))
-                        .append("</td><td>✅</td></tr>");
-            }
-            if (tableEnd != tableStart + rows.length() || !html.startsWith(rows.toString(), tableStart))
-                throw new IOException("RAG-UI-REPORT-COMPARISONS");
-        }
-        if (hasStep) throw new IOException("RAG-UI-REPORT-CHECKPOINT");
-    }
-
-    private static void verifyNativeScreenshot(String html, int start, int end, byte[] image,
-                                               Map<String, String> capturesByDigest, Set<String> captureIds) throws IOException {
-        String digest = sha256(image);
-        String previousCapture = capturesByDigest.get(digest);
-        if (previousCapture != null && html.indexOf("href=\"#" + previousCapture + "\"", start, end) >= 0) return;
-        String screenshot = "href=\"data:image/png;base64," + Base64.getEncoder().encodeToString(image) + "\"";
-        int href = html.indexOf(screenshot, start, end);
-        if (href < 0) throw new IOException("RAG-UI-REPORT-CAPTURE-MISMATCH");
-        int linkEnd = html.indexOf(">", href + screenshot.length(), end);
-        if (linkEnd < 0) throw new IOException("RAG-UI-REPORT-CAPTURE-MISMATCH");
-        var id = NATIVE_SCREENSHOT_ID.matcher(html).region(href + screenshot.length(), linkEnd);
-        if (!id.find() || !captureIds.add(id.group(1))) throw new IOException("RAG-UI-REPORT-CAPTURE-ID");
-        capturesByDigest.put(digest, id.group(1));
-    }
-
-    private static byte[] nativeCapture(Path raw, String name, Set<String> files, long limit) throws IOException {
-        if (!name.matches("[A-Za-z0-9_-]+\\.(?:png|txt)") || !files.add(name.toLowerCase(Locale.ROOT)))
-            throw new IOException("RAG-UI-REPORT-CAPTURE-PATH");
-        return readExternalFile(raw.resolve(name), limit);
-    }
-
-    public static Path externalRun(Path root, Path supplied) throws IOException {
-        if (supplied == null) throw new IOException("RAG-RECEIPT-MISSING");
-        assertNoSymlinkPath(supplied.toAbsolutePath().normalize());
-        Path run = supplied.toRealPath();
-        if (run.startsWith(root) || !Files.isDirectory(run, LinkOption.NOFOLLOW_LINKS)) throw new IOException("RAG-RECEIPT-BOUNDARY");
-        return run;
     }
 
     private static boolean registeredComponentsWorkspace(Path root, Path stage) throws IOException {
@@ -863,90 +572,6 @@ public final class ReleaseReadinessRag {
                 && workspace.path("sourceRoot").asText().equals(root.toRealPath().toString())
                 && id.matches("[a-fA-F0-9]{32}")
                 && realStage.getFileName().toString().equals("components-" + id);
-    }
-
-    public static byte[] readExternalFile(Path file, long maxBytes) throws IOException {
-        assertNoSymlinkPath(file.toAbsolutePath().normalize());
-        if (Files.isSymbolicLink(file) || !Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)
-                || Files.size(file) == 0 || Files.size(file) > maxBytes) throw new IOException("RAG-RECEIPT-FILE");
-        byte[] bytes = Files.readAllBytes(file);
-        if (bytes.length == 0 || bytes.length > maxBytes) throw new IOException("RAG-RECEIPT-LIMIT");
-        return bytes;
-    }
-
-    private static int countOccurrences(String value, String token) {
-        int count = 0, offset = 0;
-        while ((offset = value.indexOf(token, offset)) >= 0) { count++; offset += token.length(); }
-        return count;
-    }
-
-    static int validateInlinePngs(String html) throws IOException {
-        String marker = "data:image/png;base64,";
-        int declared = countOccurrences(html, marker), valid = 0;
-        var matcher = INLINE_PNG.matcher(html);
-        while (matcher.find()) {
-            String encoded = matcher.group(1);
-            if (encoded.length() > ((MAX_INLINE_PNG_BYTES + 2L) / 3L) * 4L)
-                throw new IOException("RAG-UI-REPORT-PNG-LIMIT");
-            byte[] png;
-            try { png = Base64.getDecoder().decode(encoded); }
-            catch (IllegalArgumentException invalid) { throw new IOException("RAG-UI-REPORT-PNG-BASE64", invalid); }
-            validatePngChunks(png);
-            valid++;
-        }
-        if (declared != valid) throw new IOException("RAG-UI-REPORT-PNG-URI");
-        return valid;
-    }
-
-    private static void validatePngChunks(byte[] png) throws IOException {
-        byte[] signature = {(byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1a, '\n'};
-        if (png.length < 45 || png.length > MAX_INLINE_PNG_BYTES) throw new IOException("RAG-UI-REPORT-PNG-LIMIT");
-        for (int i = 0; i < signature.length; i++) if (png[i] != signature[i]) throw new IOException("RAG-UI-REPORT-PNG-SIGNATURE");
-        int offset = signature.length, chunks = 0, width = 0, height = 0;
-        boolean ihdr = false, idat = false, ended = false;
-        while (offset < png.length) {
-            if (png.length - offset < 12 || ++chunks > 10_000) throw new IOException("RAG-UI-REPORT-PNG-CHUNK");
-            long length = Integer.toUnsignedLong(java.nio.ByteBuffer.wrap(png, offset, 4).getInt());
-            long end = (long) offset + 12L + length;
-            if (length > MAX_INLINE_PNG_BYTES || end > png.length) throw new IOException("RAG-UI-REPORT-PNG-CHUNK");
-            String type = new String(png, offset + 4, 4, StandardCharsets.US_ASCII);
-            if (!type.matches("[A-Za-z]{4}")) throw new IOException("RAG-UI-REPORT-PNG-CHUNK-TYPE");
-            if (!ihdr) {
-                if (!type.equals("IHDR") || length != 13) throw new IOException("RAG-UI-REPORT-PNG-IHDR");
-                width = java.nio.ByteBuffer.wrap(png, offset + 8, 4).getInt();
-                height = java.nio.ByteBuffer.wrap(png, offset + 12, 4).getInt();
-                if (width < 1 || height < 1 || (long) width * height > 24_000_000L)
-                    throw new IOException("RAG-UI-REPORT-PNG-DIMENSIONS");
-                ihdr = true;
-            } else if (type.equals("IHDR")) throw new IOException("RAG-UI-REPORT-PNG-IHDR");
-            if (type.equals("IDAT")) idat = true;
-            CRC32 crc = new CRC32(); crc.update(png, offset + 4, Math.toIntExact(length) + 4);
-            long expectedCrc = Integer.toUnsignedLong(java.nio.ByteBuffer.wrap(png, offset + 8 + Math.toIntExact(length), 4).getInt());
-            if (crc.getValue() != expectedCrc) throw new IOException("RAG-UI-REPORT-PNG-CRC");
-            offset = Math.toIntExact(end);
-            if (type.equals("IEND")) {
-                if (length != 0 || !idat || offset != png.length) throw new IOException("RAG-UI-REPORT-PNG-END");
-                ended = true; break;
-            }
-        }
-        if (!ihdr || !idat || !ended) throw new IOException("RAG-UI-REPORT-PNG-INCOMPLETE");
-    }
-
-    private static String safeUiFailure(JsonNode ui) {
-        String value = ui.path("failure").asText("UI run failed without a diagnostic.").replaceAll("\\s+", " ").trim();
-        return value.length() <= 300 ? value : value.substring(0, 300) + "…";
-    }
-
-    /** Reads numeric receipt fields without Jackson's truncating asInt conversions. */
-    static int exactCount(JsonNode value) throws IOException {
-        if (value == null || !value.isNumber()) throw new IOException("RAG-RECEIPT-COUNT");
-        try {
-            int parsed = value.decimalValue().intValueExact();
-            if (parsed < 0) throw new ArithmeticException("negative count");
-            return parsed;
-        } catch (ArithmeticException invalid) {
-            throw new IOException("RAG-RECEIPT-COUNT", invalid);
-        }
     }
 
     private static int failureCount(JsonNode suite) throws IOException {
@@ -1100,16 +725,6 @@ public final class ReleaseReadinessRag {
         return JSON.readTree(bytes);
     }
 
-    private static void assertNoSymlinkPath(Path path) throws IOException {
-        Path absolute = path.toAbsolutePath().normalize();
-        Path cursor = absolute.getRoot();
-        for (Path part : absolute) {
-            cursor = cursor.resolve(part);
-            if (Files.exists(cursor, LinkOption.NOFOLLOW_LINKS) && Files.isSymbolicLink(cursor))
-                throw new IOException("RAG-SYMLINK-PATH: " + cursor);
-        }
-    }
-
     public static void assertExternalDestination(Path root, Path output, boolean requireFresh) throws IOException {
         Path absolute = output.toAbsolutePath().normalize();
         if (absolute.startsWith(root) || absolute.equals(root)) throw new IllegalArgumentException("RAG-OUTPUT: destination inside source tree");
@@ -1194,8 +809,19 @@ public final class ReleaseReadinessRag {
         } catch (Exception invalid) { return false; }
     }
 
+    public static Path externalRun(Path root, Path supplied) throws IOException {
+        return ReleaseEvidenceFiles.externalRun(root, supplied);
+    }
+
+    public static byte[] readExternalFile(Path file, long maxBytes) throws IOException {
+        return ReleaseEvidenceFiles.readExternalFile(file, maxBytes);
+    }
+
+    static int exactCount(JsonNode value) throws IOException {
+        return ReleaseEvidenceFiles.exactCount(value);
+    }
+
     public static String sha256(byte[] bytes) throws IOException {
-        try { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes)); }
-        catch (java.security.NoSuchAlgorithmException impossible) { throw new IOException("SHA-256 unavailable", impossible); }
+        return ReleaseEvidenceFiles.sha256(bytes);
     }
 }

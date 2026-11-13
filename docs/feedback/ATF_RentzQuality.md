@@ -16,10 +16,6 @@ Registrul separă mecanismele implementate de promovarea strategică și de inte
 - Profilul contextual rămâne separat de candidatul cu dovadă publică. Reguli locale plauzibile sau componente verzi nu justifică păstrarea lor într-un candidat care pierde comparația pereche.
 - Integrarea Android trebuie să transporte registrul public complet și să alinieze codec-ul, identitatea politicii și APK-ul înaintea calificării native. Componentele JVM nu închid această frontieră.
 
-## Guvernanță și coeziune
-
-**P2 · Responsabil: verificarea release J5.** `ReleaseReadinessRag` concentrează citarea, legarea receipt-urilor și verificarea dovezilor native. Extrageți verificarea nativă într-o unitate testabilă, păstrând ordinea porților, diagnosticele și refuzul acelorași dovezi modificate. [Probe de calificare](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java)
-
 ## Distribuția APK
 
 | Prioritate | Lacună delimitată | Criteriu de închidere |

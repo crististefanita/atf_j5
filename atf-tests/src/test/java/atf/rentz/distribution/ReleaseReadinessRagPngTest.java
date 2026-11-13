@@ -1,5 +1,7 @@
 package atf.rentz.distribution;
 
+import atf.rentz.distribution.evidence.NativeExtentEvidence;
+
 import atf.testkit.AtfComponentTest;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -15,17 +17,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReleaseReadinessRagPngTest {
     @Test void acceptsCompleteInlinePngChunksAndCountsEachImageOnce() throws Exception {
         String uri = pngDataUri();
-        assertEquals(2, ReleaseReadinessRag.validateInlinePngs("<img src=\"" + uri + "\"/><img src='" + uri + "'/>") );
-        assertEquals(16, ReleaseReadinessRag.validateInlinePngs("<body>" + ("<img src=\"" + uri + "\"/>").repeat(16) + "</body>"));
+        assertEquals(2, NativeExtentEvidence.validateInlinePngs("<img src=\"" + uri + "\"/><img src='" + uri + "'/>") );
+        assertEquals(16, NativeExtentEvidence.validateInlinePngs("<body>" + ("<img src=\"" + uri + "\"/>").repeat(16) + "</body>"));
     }
 
     @Test void rejectsMalformedUriCorruptCrcAndExcessiveDimensions() throws Exception {
-        assertThrows(IOException.class, () -> ReleaseReadinessRag.validateInlinePngs("<img src=\"data:image/png;base64,AAAA\"/>"));
+        assertThrows(IOException.class, () -> NativeExtentEvidence.validateInlinePngs("<img src=\"data:image/png;base64,AAAA\"/>"));
         byte[] corrupt = Base64.getDecoder().decode(pngDataUri().substring("data:image/png;base64,".length()));
         corrupt[corrupt.length - 5] ^= 0x01;
         String damaged = "data:image/png;base64," + Base64.getEncoder().encodeToString(corrupt);
-        assertThrows(IOException.class, () -> ReleaseReadinessRag.validateInlinePngs("<img src=\"" + damaged + "\"/>"));
-        assertThrows(IOException.class, () -> ReleaseReadinessRag.validateInlinePngs("<img src=\"" + pngDataUri(16_000, 16_000) + "\"/>"));
+        assertThrows(IOException.class, () -> NativeExtentEvidence.validateInlinePngs("<img src=\"" + damaged + "\"/>"));
+        assertThrows(IOException.class, () -> NativeExtentEvidence.validateInlinePngs("<img src=\"" + pngDataUri(16_000, 16_000) + "\"/>"));
     }
 
     private static String pngDataUri() throws IOException { return pngDataUri(1, 1); }

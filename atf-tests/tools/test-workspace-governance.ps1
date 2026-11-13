@@ -120,6 +120,25 @@ Case 'Runtime output cannot escape into an unregistered collection' {try{Assert-
 Case 'Runtime output cannot target system Temp' {try{Assert-AtfArtifactPath -Path (Join-Path ([IO.Path]::GetTempPath()) 'random-output') -ProjectRoot $project;throw 'Output escape accepted'}catch{Require ($_.Exception.Message-match'outside the registered data root') 'Wrong output-boundary failure'}}
 Case 'Junction escape is detected without following its destination' {$c=Setup 'junction';$outside=Join-Path $fixture 'junction-destination';New-Item -ItemType Directory -Path $outside|Out-Null;$link=Join-Path $c.project 'linked-output';New-Item -ItemType Junction -Path $link -Value $outside|Out-Null;Require (((Findings $c).code)-contains'INFRA-REPARSE-POINT') 'Junction was not diagnosed';try{Assert-AtfPhysicalPath -Path (Join-Path $link 'new-output');throw 'Junction accepted'}catch{Require ($_.Exception.Message-match'reparse point') 'Wrong junction failure'};Require (@(Get-ChildItem -LiteralPath $outside -Force).Count-eq0) 'Junction destination was modified'}
 Case 'The execution gate stops on an undocumented directory' {$c=Setup 'gate';New-Item -ItemType Directory -Path "$($c.project)/unregistered"|Out-Null;$saved=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT');try{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$c.data);try{Assert-AtfInfrastructure -ProjectRoot $c.project;throw 'Execution gate accepted invalid source'}catch{Require ($_.Exception.Message-match'Infrastructure governance refused execution') 'Wrong execution-gate failure'}}finally{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$saved)};Require (-not(Test-Path -LiteralPath "$($c.data)/infrastructure/workspaces")) 'The gate allocated output before refusing'}
+Case 'Retention inventory keeps referenced, active, linked and Git targets' {
+    $scope=Join-Path $fixture 'retention'
+    $evidence=Join-Path $scope 'evidence'
+    $names=@('unused','receipt','classpath','active','worktree','linked')
+    $targets=@($names|ForEach-Object { Join-Path $scope "$_/target" })
+    New-Item -ItemType Directory -Path ($targets+@($evidence)) -Force|Out-Null
+    $receipt=[ordered]@{stage=(Split-Path -Parent $targets[1]);status='PASS'}
+    $receipt|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $evidence 'result.json')
+    $classes=Join-Path $targets[2] 'classes'
+    "<property name=`"java.class.path`" value=`"$classes;other.jar`"/>"|Set-Content -LiteralPath (Join-Path $evidence 'TEST-runtime.xml')
+    $null=New-Item -ItemType Junction -Path (Join-Path $targets[5] 'out') -Target $evidence
+    Import-Module (Join-Path $project 'scripts/BuildRetention.psm1') -Force
+    $rows=@(Get-RentzBuildRetention -Target $targets -EvidenceRoot $evidence -ActiveCommandLine @("java -cp $($targets[3])/classes") -GitWorktree @((Split-Path -Parent $targets[4])))
+    Require (($rows.status -join ',')-ceq'REVIEW,KEEP,KEEP,KEEP,KEEP,KEEP') 'Retention did not distinguish an unreferenced target from dependencies'
+    Require ($rows[1].reasons -contains 'evidence' -and $rows[2].reasons -contains 'evidence' -and $rows[3].reasons -contains 'process' -and $rows[4].reasons -contains 'worktree' -and $rows[5].reasons -contains 'linked-path') 'Retention reasons were not independently attributable'
+    $unknown=@(Get-RentzBuildRetention -Target $targets[0] -EvidenceRoot (Join-Path $scope 'unavailable'))
+    Require ($unknown[0].status-ceq'KEEP'-and$unknown[0].reasons-contains'inventory-incomplete') 'An unreadable inventory boundary was treated as clean'
+    Require (@($targets|Where-Object {Test-Path -LiteralPath $_}).Count-eq$targets.Count) 'Inventory unexpectedly deleted a target'
+}
 $failed=@($results|Where-Object{$_.status-ne'PASS'})
 [ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;results=$results}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $RunRoot 'controls.json') -Encoding utf8NoBOM
 Write-Output ("Controls: {0}/{1} passed"-f($results.Count-$failed.Count),$results.Count)

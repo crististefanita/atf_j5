@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AtfComponentTest
 class DocumentationNativeFlowTest {
     private static final String RUNNER = "atf-tests/tools/run-shared-ui-sanity.ps1";
-    private static final String RAG = "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java";
+    private static final String RAG = "atf-tests/src/main/java/atf/rentz/distribution/evidence/NativeUiEvidence.java";
     private static final List<String> GUIDES = List.of("README.md", "atf-tests/README.md",
             "docs/rentz/ATF_Android.md", "docs/rentz/ATF_Release.md", "docs/rentz/ATF_TestingStrategy.md");
     private static final String CLAIM = "**Traseul Android de release.** 3 mâini complete, cu Rentz prima.";

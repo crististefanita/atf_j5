@@ -75,6 +75,12 @@ Copiile istorice indicate de receipt-uri nu se rebotează și nu se șterg în m
 
 - Lansatorul RAG alocă JVM-ului `java-scratch` în directorul rulării. La ieșire încearcă să elimine acest director și scrie `scratch-cleanup.json`, inclusiv dacă evaluatorul eșuează. Rezultatul curățării are propriul statut. [Lansatorul RAG](../../scripts/run-release-rag.ps1) · [Controalele runtime](../../atf-tests/tools/test-qualified-runtime.ps1)
 
+### Inventarul țintelor Maven
+
+- Furnizați căile exacte `target`, rădăcinile receiptelelor, comenzile proceselor active și căile worktree-urilor Git. Pentru țintele dintr-un workspace înregistrat, furnizați și rădăcina workspace-ului prin `WorkspaceByTarget`.
+- `KEEP` indică o dependență, dovezi aflate în țintă sau un perimetru incomplet. `REVIEW` înseamnă că inventarul a terminat scanarea fără o dependență observată.
+- Operatorul verifică din nou căile, referințele și procesele imediat înainte de ștergere. Salvează inventarul și rezultatul curățării cu rularea. [Inventarul read-only](../../scripts/BuildRetention.psm1) · [Controalele](../../atf-tests/tools/test-workspace-governance.ps1)
+
 ## Dosarul selectat al livrării
 
 Directorul sursă `release` este catalogul documentar și copia selectată a livrării, nu o destinație pentru rulările curente. [Procesul APK](ATF_Release.md) permite numai promovarea explicită a dovezilor calificate; toate rulările și build-urile intermediare folosesc în continuare colecțiile externe înregistrate.

@@ -433,6 +433,16 @@ class ReleaseGovernanceTest {
         }
     }
 
+    @Test void nativeVerificationIsOwnedOutsideTheRagOrchestrator() throws Exception {
+        Path root = ReleaseCatalog.root();
+        String sources = "atf-tests/src/main/java/atf/rentz/distribution/";
+        String rag = Files.readString(root.resolve(sources + "ReleaseReadinessRag.java"));
+        assertTrue(rag.contains("NativeUiEvidence.attach("), "RAG delegates native receipts to their owner");
+        assertFalse(rag.contains("RAG-UI-COMPLETE-GAME-IDENTITY"), "The orchestrator must not validate gameplay details");
+        assertFalse(rag.contains("RAG-UI-REPORT-CAPTURE-MISMATCH"), "The orchestrator must not parse native Extent");
+        assertTrue(Files.isRegularFile(root.resolve(sources + "evidence/NativeExtentEvidence.java")));
+    }
+
     @Test void releaseBuildAndNativeUiGatesRequireBoundToolsArtifactsAndExtentEvidence() throws Exception {
         Path root=ragProject();
         Path component=passingComponentRun(root,"release-ui-components");
@@ -582,6 +592,22 @@ class ReleaseGovernanceTest {
         assertEquals("NOT_RUN", gate(beforeProduct, "release-build").path("status").asText());
         assertFalse(beforeProduct.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
         Files.write(productReceipt, productReceiptBytes);
+
+        var failedRun = uiReceipt.deepCopy().put("status", "FAIL").put("failure", "Flow stopped at a card play");
+        Path uiResult = ui.resolve("result.json");
+        Files.write(uiResult, JSON().writeValueAsBytes(failedRun));
+        var failed = ReleaseReadinessRag.evaluate(root, "gate:native-ui consecutive games", component, null, ui, build);
+        assertEquals("FAIL", gate(failed, "native-ui").path("status").asText());
+        assertEquals("Flow stopped at a card play", gate(failed, "native-ui").path("actual").asText());
+        assertEquals(sha(uiResult), gate(failed, "native-ui").path("receiptSha256").asText());
+        assertEquals("BLOCKED", gate(failed, "native-ui-report").path("status").asText());
+        Files.write(uiResult, JSON().writeValueAsBytes(uiReceipt));
+
+        var missingBuild = ReleaseReadinessRag.evaluate(root, "gate:native-ui consecutive games", component, null, ui, null);
+        assertEquals("BLOCKED", gate(missingBuild, "native-ui").path("status").asText());
+        assertEquals("A source-bound UI-sanity build receipt is required.", gate(missingBuild, "native-ui").path("actual").asText());
+        assertEquals("NOT_RUN", gate(missingBuild, "native-ui-report").path("status").asText());
+
 
         for (var invalid : java.util.List.of(com.fasterxml.jackson.databind.node.NullNode.getInstance(),
                 com.fasterxml.jackson.databind.node.TextNode.valueOf("true"))) {

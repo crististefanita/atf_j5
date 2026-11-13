@@ -96,6 +96,8 @@ RAG citește dovezile originale, aplică verificările de calificare și înregi
 
 - **Calificare locală:** regresie, Extent, Android JVM, build și acceptanța nativă obligatorie trebuie legate de același commit.
 - **Traseul Android de release.** 3 mâini complete, cu Rentz prima.
+
+Verificatorul nativ stabilește verdictul execuției din receipt. Validarea Extent confruntă separat capturile și comparațiile originale. Un raport alterat păstrează verdictul execuției și blochează calificarea. [Contractele distribuției](../../atf-tests/src/main/java/atf/rentz/distribution/README.md)
 - **Jocuri și afișaj.** Varianta `ro.rentzlab.app.uisanity` joacă în aceeași partidă contracte distincte până la `DEAL_END`. Profilul compact folosește 720 × 1280 pixeli, densitate 360 și text la 150%. Raportul verifică locurile, scorurile, istoricul după reluare și replay-ul independent, cu capturi native inline Base64. [Poarta RAG](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java) · [Probe de release](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java)
 - **Legătura cu produsul:** RAG confruntă commitul și manifestul sursei, APK-ul de produs, APK-ul UI-sanity, raportul Extent și runnerul. Varianta UI-sanity este pachet de test distinct; hash-ul ei nu este raportat drept hash-ul APK-ului produs.
 - **Profil de acceptanță:** runnerul citește dimensiunea logică, densitatea și scala de font din Android. RAG cere profilul compact efectiv și dimensiunea logică la fiecare checkpoint. Pierderea temporară a rădăcinii UI Automator se reîncearcă în limite, iar fiecare tap cere ierarhie proaspătă.

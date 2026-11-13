@@ -80,7 +80,7 @@ class TestChangeGovernanceTest {
                 || path.equals("config/infrastructure-workspaces.json")
                 || path.equals("config/release-rag-corpus.json") || path.equals("scripts/run-release-rag.ps1")
                 || path.equals("scripts/verify-release-readme.ps1")
-                || path.equals("scripts/InfrastructureWorkspaces.psm1")
+                || path.equals("scripts/InfrastructureWorkspaces.psm1") || path.equals("scripts/BuildRetention.psm1")
                 || path.equals("library-provenance.json") || path.startsWith("lib/atf-reporting-")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/AtfReportingLibrary.java")
                 || path.equals("scripts/build-rentz-android.ps1")

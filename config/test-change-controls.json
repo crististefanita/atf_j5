@@ -3,13 +3,58 @@
   "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
   "controls": [
     {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/evidence/AndroidSourceEvidence.java",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Separate native evidence qualification and inventory older build dependencies.",
+      "criterion": "Existing native decisions, evidence integrity and diagnostics remain enforced; referenced or incomplete retention inventory never permits cleanup.",
+      "proof": "ReleaseGovernanceTest, ReleaseReadinessRagPngTest and test-workspace-governance.ps1",
+      "expires": "2026-12-10",
+      "sha256": "9fe79531f892caf63800d034ee26bad5df730da0e1f3d8ead6f568496fde6401"
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/evidence/NativeExtentEvidence.java",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Separate native evidence qualification and inventory older build dependencies.",
+      "criterion": "Existing native decisions, evidence integrity and diagnostics remain enforced; referenced or incomplete retention inventory never permits cleanup.",
+      "proof": "ReleaseGovernanceTest, ReleaseReadinessRagPngTest and test-workspace-governance.ps1",
+      "expires": "2026-12-10",
+      "sha256": "d8aff8661e447eb2a5a5a52bf872269bbb9a3a7e0f6f1fba95ff24a421ff9122"
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/evidence/NativeUiEvidence.java",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Separate native evidence qualification and inventory older build dependencies.",
+      "criterion": "Existing native decisions, evidence integrity and diagnostics remain enforced; referenced or incomplete retention inventory never permits cleanup.",
+      "proof": "ReleaseGovernanceTest, ReleaseReadinessRagPngTest and test-workspace-governance.ps1",
+      "expires": "2026-12-10",
+      "sha256": "f3faef0e918dbd7fa225a044c7a35604a4c2225735d615523d0cc4694d503bf4"
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/evidence/ReleaseEvidenceFiles.java",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Separate native evidence qualification and inventory older build dependencies.",
+      "criterion": "Existing native decisions, evidence integrity and diagnostics remain enforced; referenced or incomplete retention inventory never permits cleanup.",
+      "proof": "ReleaseGovernanceTest, ReleaseReadinessRagPngTest and test-workspace-governance.ps1",
+      "expires": "2026-12-10",
+      "sha256": "19c234df03a6a98caab8a21038513c95b277cfbe55c6f246abba388bf8c65198"
+    },
+    {
+      "path": "scripts/BuildRetention.psm1",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Separate native evidence qualification and inventory older build dependencies.",
+      "criterion": "Existing native decisions, evidence integrity and diagnostics remain enforced; referenced or incomplete retention inventory never permits cleanup.",
+      "proof": "ReleaseGovernanceTest, ReleaseReadinessRagPngTest and test-workspace-governance.ps1",
+      "expires": "2026-12-10",
+      "sha256": "6339fd79ef3e75cac7378feca46b8d09aa70e7b60ba65f908728a318be69e7a7"
+    },
+    {
       "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/factual/DocumentationNativeFlowTest.java",
       "owner": "Rentz documentation",
       "reason": "Cover false factual claims and drift in the runner.",
       "criterion": "Pass the live guides and reject wrong count, opener, missing or duplicate claims and divergent executable facts.",
       "proof": "docs/rentz/ATF_Documentation.md#verificarea-afirmațiilor",
       "expires": "2026-12-10",
-      "sha256": "80a05c54326d7167f47a8e7818cce25e96d6d5d6452dd70533f2bc48a574118b",
+      "sha256": "296a1ff6aa5fe9705ce4192e23d01807b0a6c23cc5f4863269720af75beb4294",
       "allowDelete": false
     },
     {
@@ -19,7 +64,7 @@
       "criterion": "Compare the runner count and opener, RAG expectations and exactly one visible claim per scoped guide.",
       "proof": "docs/rentz/ATF_Documentation.md#verificarea-afirmațiilor",
       "expires": "2026-12-10",
-      "sha256": "361f77a8a317cf204aec3c54d88db20bcd5f925f4db20f06191b414cacdd908a",
+      "sha256": "d8c1a545afb5a51b7940f9c6815706a60f6619d4aecad72cfcc5fb48d1a073f4",
       "allowDelete": false
     },
     {
@@ -399,7 +444,7 @@
       "criterion": "A missing or partial Rentz-plus-two-distinct-contracts receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged. The release requires exactly three native games, geometry, history, restart and original Extent evidence. Catalog breadth and terminal victory eligibility run in the mandatory Android JVM population.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "0822cae09a12ec1907947059cfb57e6007be906c507af4b0a81c5d97d978c745",
+      "sha256": "03b1b279f3cff5f89f259fece50aac6b3667d659b8bddf98fee648a7021d38aa",
       "allowDelete": false
     },
     {
@@ -429,7 +474,7 @@
       "criterion": "New protected paths are asserted; the actual Git diff must have one current review control per protected change.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "776f8567ca47f2114ee35cfcea6423185f588462e6bef818f6a9731ffea30340",
+      "sha256": "1c77b81e5c364bee85efa2698df37e8988304cc4373230bb8276cc8b4e46c9ca",
       "allowDelete": false
     },
     {
@@ -569,7 +614,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access. The native fixture qualifies the representative search and progress journey while preserving the existing rejection controls for incomplete games, geometry, source identity and corrupt evidence.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "f17739614ba4f11d918098b8d699da845da28c38f5059ff5940015f33eaccb6a",
+      "sha256": "d7192f7da58c7ea5cc99a25ba13d55ba2946966016136b3e5601673c6f8db808",
       "allowDelete": false
     },
     {
@@ -799,7 +844,7 @@
       "criterion": "The declared sibling and validation collection are admitted while arbitrary sibling directories, unregistered workspaces and forbidden system-TEMP outputs still fail.",
       "proof": "docs/rentz/ATF_Infrastructure.md",
       "expires": "2026-12-12",
-      "sha256": "94036cf537efd446ab5e11a7d27473ca61c6a3e0749d99a41a2ac7d3d5dd1ff5",
+      "sha256": "7f4491ef73b6e52600d6e52c2f94cdea64c07447aaa957d23bdbb5f178d4b02d",
       "allowDelete": false
     },
     {
@@ -1199,7 +1244,7 @@
       "criterion": "Valid PNG chunks, CRC, size, and completion pass; malformed or truncated payloads block.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "d072826d67bc330a41445fd7240c33a19eeef72eaacb66a2302f0342d790cbc9",
+      "sha256": "6de5728205aa2f068cb25f8492ec050e02ff8229e37a12f7ca573ba15db5d4f6",
       "allowDelete": false
     },
     {
@@ -1239,7 +1284,7 @@
       "criterion": "Nested worktrees resolve the shared root, unverified source paths fail closed, and same-project registered worktrees pass while foreign descriptors fail.",
       "proof": "docs/rentz/ATF_Infrastructure.md",
       "expires": "2026-12-12",
-      "sha256": "7b260e133ec888c98434b648fdd7027c972d2f77c758c1c3d721d2198a7248a4",
+      "sha256": "94a7880fe70f5751ce8bc641bcc79e03a5806ef9da7873bd0f1e67cd8cc1c5d9",
       "allowDelete": false
     },
     {
