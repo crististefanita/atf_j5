@@ -1255,11 +1255,11 @@
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Stage Rentz Lab 0.23.0 without replacing the verified 0.22.0 download before all release gates pass.",
-      "criterion": "Keep 0.22.0 current and add only candidate 0.23.0/versionCode 27; require the same-source native, signed APK and authenticated README download before promoting currentVersion, while retaining prior tags and audit evidence.",
+      "reason": "Promote the authenticated-only 0.23.0 APK after private publication, exact-byte verification and three-game native acceptance.",
+      "criterion": "Keep exactly one current edition; bind source v0.23.0, private Release IDs, APK identity and authenticated-only link to matching receipts. Retain historical source tags and external audit evidence.",
       "proof": "docs/rentz/ATF_Release.md#publicare-și-descărcare",
       "expires": "2027-02-12",
-      "sha256": "8cf01d6e8bfc71058409dc2cb7365b720883ade79ff7a817d42e4f8bd7eef2cd",
+      "sha256": "c24452b2059564b15495f53cf42dc1533e67e422ce3dc5af773a08a4c825c9b4",
       "allowDelete": false
     },
     {

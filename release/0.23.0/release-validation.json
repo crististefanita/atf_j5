@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "versionName": "0.23.0",
+    "versionCode": 27,
+    "applicationId": "ro.rentzlab.app",
+    "sourceCommit": "0c8fb052d8558208bba122ca6591e67bd28d2b68",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "apkName": "RentzLab-0.23.0.apk",
+    "apkBytes": 926590,
+    "sha256": "f1980ec41744c71abed0a2851c14fede6c6d1b3d0f639fce31bdf28a0a6b2fd5",
+    "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+    "debuggable": false
+  },
+  "publication": {
+    "state": "PUBLISHED",
+    "channel": "authenticated-only",
+    "sourceCommit": "0c8fb052d8558208bba122ca6591e67bd28d2b68",
+    "sourceTag": "v0.23.0",
+    "releaseId": 444108248,
+    "provider": "GitHub",
+    "releaseRepository": "crististefanita/atf_j5_releases",
+    "assetId": 743271635,
+    "checksumAssetId": 743271696,
+    "link": "https://github.com/crististefanita/atf_j5_releases/releases/download/v0.23.0/RentzLab-0.23.0.apk",
+    "authenticatedDownload": "PASS",
+    "anonymousDownload": "DENIED",
+    "latestTag": "v0.23.0"
+  },
+  "qualification": {
+    "status": "PASS",
+    "scope": "maven-components-android-jvm-components-and-native-three-distinct-games",
+    "e2e": "PASS",
+    "tests": 584,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": {
+      "maven": 45,
+      "mavenTests": 461,
+      "androidJvm": 25,
+      "androidJvmTests": 123,
+      "nativeGames": 3,
+      "distinctContracts": 3,
+      "nativeCheckpoints": 34
+    },
+    "evidence": {
+      "components": {
+        "path": "components/20261113-j5-0.23-regression-final/component-suite-extent.html",
+        "bytes": 7047220,
+        "sha256": "b640479bbfbd9560797f90b35550be4f0b3bb1b825d2753c3b37f0311313895e"
+      },
+      "componentResult": {
+        "path": "components/20261113-j5-0.23-regression-final/result.json",
+        "bytes": 27086,
+        "sha256": "aedc0df0e48db30d0cc3bddee34388f151ad927ec8685e0e337f95979c180b0c"
+      },
+      "androidJvm": {
+        "path": "components/20261113-j5-0.23-regression-final/android-jvm/result.json",
+        "bytes": 4453,
+        "sha256": "0512b576a2ffc18521207fa90251d8bf6e75538dee73d6f51ca49b983de32cd8"
+      },
+      "native": {
+        "path": "android-acceptance/20261113-j5-0.23-three-games-retry/android-extent.html",
+        "bytes": 13528370,
+        "sha256": "00e36b531b280b3a199dc150e4f912b32e31c5f5ebda5ec0110a988a148c8d0b"
+      },
+      "nativeReceipt": {
+        "path": "android-acceptance/20261113-j5-0.23-three-games-retry/result.json",
+        "bytes": 120396,
+        "sha256": "d11471862501ad0a48dbd3b82983021e3d58f74d84848060086057b9039a17f6"
+      },
+      "build": {
+        "path": "android-acceptance/20261113-j5-0.23-release-build/build-qualification.json",
+        "bytes": 8429,
+        "sha256": "6166073ec419197bcd5ba1181de700ef0e7ffd8f8c17da2863c6c3661506a59c"
+      },
+      "rag": {
+        "path": "validation/20261113-j5-0.23-rag-final/report/release-rag-report.json",
+        "bytes": 17081,
+        "sha256": "19e1e2407190fdab954c13f96ab18f1d10a48db719e217438f58e076f7c276be"
+      }
+    },
+    "display": {
+      "logicalViewport": "720x1280",
+      "density": 360,
+      "fontScale": 1.5,
+      "initialSettingsRestored": true
+    },
+    "reportingLibrary": "atf-reporting-1.0.0-j24"
+  },
+  "integrity": {
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 453,
+        "sha256": "8bff036e0749c5f6b761d34c78c8e8e90f04b9da9b8f38fe4b4cda374af8f447"
+      },
+      {
+        "path": "release-notes.md",
+        "bytes": 693,
+        "sha256": "b0d183fd8fe71ce8e57000f10189ea82a108274b2cd9d8fccda61b79c1e491cd"
+      },
+      {
+        "path": "reports/README.md",
+        "bytes": 1653,
+        "sha256": "3de5f92462676f900f32ebffaeda8dc1c3760ba6c7cda6bba4b1e4d5c9a3e9fb"
+      },
+      {
+        "path": "RentzLab-0.23.0.apk",
+        "bytes": 926590,
+        "sha256": "f1980ec41744c71abed0a2851c14fede6c6d1b3d0f639fce31bdf28a0a6b2fd5"
+      },
+      {
+        "path": "RentzLab-0.23.0.apk.sha256",
+        "bytes": 86,
+        "sha256": "6d3961d8846bce7d082d745d440971fbfc7d0c2fcdfb8474db82bd0e4a1b92bb"
+      }
+    ]
+  },
+  "verifiedUtc": "2026-11-13T10:52:21.344078Z"
+}
