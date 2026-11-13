@@ -12,7 +12,3 @@ RAG-ul local citează sursele și explică porțile. Verificatoarele determinist
 
 - Dovediți că nicio intrare de classpath atestată nu dispare când retrageți un cache duplicat.
 - Diferențiați un fixture de guvernanță cu receipt util de o copie regenerabilă. Includeți o sursă de dovezi inaccesibilă și un producător care scrie în timpul inventarierii. [Contractul de retenție](../rentz/ATF_Infrastructure.md#inventarul-țintelor-maven)
-
-## Reconcilierea documentară
-
-**P2 · Responsabil: release J5.** Reconcilierea editorială păstrează o listă fixă de suite documentare. Includeți verificarea factuală a traseului Android în populația obligatorie și demonstrați că un receipt fără ea sau cu verdict roșu este respins. [Oracolul factual](../../atf-tests/src/test/java/atf/rentz/governance/documentation/factual/DocumentationNativeFlowTest.java)

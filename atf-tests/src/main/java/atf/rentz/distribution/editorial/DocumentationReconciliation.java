@@ -41,6 +41,7 @@ public final class DocumentationReconciliation {
             "atf.rentz.governance.documentation.DocumentationStyleGovernanceTest",
             "atf.rentz.governance.documentation.DocumentationTargetGovernanceTest",
             "atf.rentz.governance.documentation.DynamicPathDocumentationArchitectureTest",
+            "atf.rentz.governance.documentation.factual.DocumentationNativeFlowTest",
             "atf.rentz.governance.documentation.links.DocumentationLinkGovernanceTest");
 
     private record Evidence(Path run, Path root, GitIdentity git, JsonNode receipt, String receiptSha,

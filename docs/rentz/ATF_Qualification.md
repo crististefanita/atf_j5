@@ -72,6 +72,7 @@ Apelați a doua comandă din worktree-ul editorial. Folosiți același depozit d
 | Verificare | Ce apare în dovadă |
 |---|---|
 | Commituri curate din același repository | Commitul testat trebuie să fie strămoșul reviziei editoriale. |
+| Guvernanță documentară | Colecția `infrastructure` include `DocumentationNativeFlowTest` cu rezultat PASS. Proba verifică trei mâini complete, cu Rentz prima. Dacă lipsește sau eșuează, reconcilierea este blocată. |
 | Diferența Git | Căile modificate, adăugate sau eliminate sunt fișiere Markdown obișnuite din `docs/rentz`, `docs/feedback`, `docs/README.md` sau `README.md`. |
 | Intrări înghețate | Setul căilor diferite din cele două manifeste coincide cu diferența Git. SHA-256 agregat identifică toate intrările comune, în ordinea căilor. |
 | Dovezi păstrate | Compoziția înregistrează căile și hash-urile receipt-urilor, inclusiv ale execuției pe suite, ale manifestelor și ale rapoartelor Extent originale. Documentele diferite au hash înainte și după. |

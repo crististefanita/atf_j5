@@ -888,6 +888,22 @@ class ReleaseGovernanceTest {
                 HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(healthy)));
     }
 
+    @Test void editorialReconciliationRequiresPassingAndroidFlowDocumentationEvidence() throws Exception {
+        Path original = ragProject();
+        Path regression = passingComponentRun(original, "android-editorial-baseline");
+        Path revised = editorialCheckout(original, "android-editorial-revision", "README.md");
+        Path missing = editorialInfrastructureRun(revised, "android-editorial-missing", "DocumentationNativeFlowTest");
+        Path failing = editorialInfrastructureRun(revised, "android-editorial-failing", "", true);
+        String originalDigest = sha(regression.resolve("result.json"));
+
+        assertAll(
+                () -> assertEditorialBlocked(revised, regression, missing, "android-flow-missing",
+                        "EDITORIAL-DOCUMENTATION-POPULATION"),
+                () -> assertEditorialBlocked(revised, regression, failing, "android-flow-failing",
+                        "EDITORIAL-DOCUMENTATION-QUALIFICATION"),
+                () -> assertEquals(originalDigest, sha(regression.resolve("result.json"))));
+    }
+
     private void assertEditorialBlocked(Path candidate, Path regression, Path docs, String folder, String code) throws Exception {
         Path output = temporary.resolve(folder);
         reconcileEditorial(candidate, regression, docs, output);
@@ -916,6 +932,11 @@ class ReleaseGovernanceTest {
     }
 
     private Path editorialInfrastructureRun(Path source, String name, String omittedSuite) throws Exception {
+        return editorialInfrastructureRun(source, name, omittedSuite, false);
+    }
+
+    private Path editorialInfrastructureRun(Path source, String name, String omittedSuite,
+                                            boolean failingAndroidFlow) throws Exception {
         Path run = passingComponentRun(source, name);
         Path receiptPath = run.resolve("result.json");
         var receipt = (com.fasterxml.jackson.databind.node.ObjectNode) JSON().readTree(receiptPath.toFile());
@@ -926,28 +947,33 @@ class ReleaseGovernanceTest {
         var suites = receipt.putArray("results");
         var inputs = new java.util.ArrayList<atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput>();
         for (String nameOfSuite : List.of("DocumentationContractTest", "DocumentationControlsTest",
-                "DocumentationDiagramGovernanceTest", "DocumentationLinkGovernanceTest", "DocumentationProseGovernanceTest",
+                "DocumentationDiagramGovernanceTest", "DocumentationLinkGovernanceTest", "DocumentationNativeFlowTest",
+                "DocumentationProseGovernanceTest",
                 "DocumentationReadmeStructureGovernanceTest", "DocumentationStyleGovernanceTest",
                 "DocumentationTargetGovernanceTest", "DynamicPathDocumentationArchitectureTest")) {
             if (omittedSuite.equals(nameOfSuite)) continue;
             String full = switch (nameOfSuite) {
                 case "DocumentationContractTest" -> "atf.rentz.governance." + nameOfSuite;
                 case "DocumentationLinkGovernanceTest" -> "atf.rentz.governance.documentation.links." + nameOfSuite;
+                case "DocumentationNativeFlowTest" -> "atf.rentz.governance.documentation.factual." + nameOfSuite;
                 default -> "atf.rentz.governance.documentation." + nameOfSuite;
             };
+            boolean failed = failingAndroidFlow && nameOfSuite.equals("DocumentationNativeFlowTest");
+            int failures = failed ? 1 : 0;
+            String outcome = failed ? "<failure message=\"Incorrect Android flow\">Expected three complete hands with Rentz first</failure>" : "";
             Path xml = run.resolve("atf-tests/TEST-" + full + ".xml");
             Files.writeString(xml, """
-                    <testsuite name="%s" tests="1" failures="0" errors="0" skipped="0">
-                      <testcase classname="%s" name="editorial guard"/>
+                    <testsuite name="%s" tests="1" failures="%d" errors="0" skipped="0">
+                      <testcase classname="%s" name="editorial guard">%s</testcase>
                     </testsuite>
-                    """.formatted(full, full));
-            inputs.add(new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput("atf-tests", full, xml, sha(xml), 1, 0, 0, 0));
+                    """.formatted(full, failures, full, outcome));
+            inputs.add(new atf.rentz.reporting.ComponentSuiteExtentReport.SuiteInput("atf-tests", full, xml, sha(xml), 1, failures, 0, 0));
             suites.addObject().put("module", "atf-tests").put("name", full)
-                    .put("tests", 1).put("failed", 0).put("errors", 0).put("skipped", 0);
+                    .put("tests", 1).put("failed", failures).put("errors", 0).put("skipped", 0);
         }
-        Path extent = run.resolve("component-suite-extent.html");
-        Files.delete(extent);
-        writeSuiteEvidence(run, receipt, inputs);
+        Files.delete(run.resolve("component-suite-extent.html"));
+        if (failingAndroidFlow) receipt.put("status", "FAIL");
+        writeSuiteEvidence(run, receipt, inputs, failingAndroidFlow ? 1 : 0);
         return run;
     }
 

@@ -34,8 +34,7 @@ Scorul este prioritatea de remediere, nu nota calității sau procentul de acope
 | 12 | **P2 · Împachetarea guvernanței reutilizabile** · [contractul generic](README.md#contract-generic-pentru-guvernanță) | 61 (20+18+15+8) | Adaptorul local și probele există; lipsește API-ul comun împachetat și acceptanța într-un consumator mixt Maven/Gradle. |
 | 13 | **P2 · Lansatorul de prototip și ruta UI** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 60 (20+18+14+8) | Evaluați migrarea selecției la actorul public și păstrați replay-ul independent și refuzul controlat al rutei fără ADB. |
 | 14 | **P2 · Reconcilierea copiilor externe** · [retenția spațiilor de lucru](ATF_Release_RAG.md#retenția-spațiilor-de-lucru) | 56 (16+20+12+8) | Extindeți inventarul țintelor la cache-uri și fixture-uri. Dovediți păstrarea receiptelelor și a classpath-urilor atestate. |
-| 15 | **P2 · Populația reconcilierii documentare** · [RAG](ATF_Release_RAG.md#reconcilierea-documentară) | 55 (18+17+15+5) | Cereți oracolul factual Android și respingeți receiptele fără dovada sa. |
-| 16 | **P3 · Portabilitatea exemplului Test Kit** · [adopția Test Kit](../../lib/README.TestKit.md) | 54 (15+16+15+8) | Verificați exemplul într-un consumator autonom și prin import IntelliJ cu același cache izolat. |
+| 15 | **P3 · Portabilitatea exemplului Test Kit** · [adopția Test Kit](../../lib/README.TestKit.md) | 54 (15+16+15+8) | Verificați exemplul într-un consumator autonom și prin import IntelliJ cu același cache izolat. |
 
 **Citirea scorurilor:** 90–100 cere atenție imediată; 75–89 indică risc mare sau impact extins; 50–74 indică remediere planificabilă; sub 50 indică impact sau lucrabilitate redusă în comparația curentă. Nota nu închide cerința: aceasta se închide numai prin criteriul din documentul ownerului și receipt-ul aferent.
 

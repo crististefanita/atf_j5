@@ -411,10 +411,10 @@
       "path": "atf-tests/src/main/java/atf/rentz/distribution/editorial/DocumentationReconciliation.java",
       "owner": "Rentz release",
       "reason": "Prove byte equivalence for a documentation-only revision while retaining the original regression receipt.",
-      "criterion": "Git diff, input hashes and passing documentation controls agree. Failures cannot grant promotion or modify original evidence.",
+      "criterion": "Git diff and input hashes agree. Fresh documentation evidence must include a passing Android flow factual suite. Missing or failed evidence cannot grant promotion or modify original receipts.",
       "proof": "docs/rentz/ATF_Qualification.md#reconcilierea-unei-revizii-editoriale",
       "expires": "2026-11-30",
-      "sha256": "400eee556c88f3f0b5e34341ffc679223ac11d8a73bca2e8df70dbd1df011185",
+      "sha256": "2d117f1ec2394312cfda9f287fc8fcbb6aef36f99af6fadf9dfea6fe3972b1d7",
       "allowDelete": false
     },
     {
@@ -614,7 +614,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access. The native fixture qualifies the representative search and progress journey while preserving the existing rejection controls for incomplete games, geometry, source identity and corrupt evidence.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "d7192f7da58c7ea5cc99a25ba13d55ba2946966016136b3e5601673c6f8db808",
+      "sha256": "4392c274e3f95600cb64e057c08963c870bd2eba5ac69868c87cc7223795382d",
       "allowDelete": false
     },
     {
