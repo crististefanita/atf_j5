@@ -74,7 +74,7 @@
       "rag": {
         "path": "C:/work/rentz_back/validation/20261113-j5-0.22-final-rag-a12e238/report/release-rag-report.json",
         "bytes": 16703,
-        "sha256": "06a25f4c45b0e2ea5edc80027bd111865a590c40928af952beac1b08e6733210"
+        "sha256": "06a25f4c92cb1ca3efcd5fa3e704a93e9a71cc9f72e72f368eef5ff429410662"
       }
     },
     "display": {
@@ -89,18 +89,18 @@
     "files": [
       {
         "path": "README.md",
-        "bytes": 442,
-        "sha256": "c9539da78864bb89bf125095faf2aeb88e62c96c17794b90b1b096d49f005a28"
+        "bytes": 441,
+        "sha256": "1a5f31ccc449dad665c4d90a86b4e404a84eae38479a5222b8b21de8fbce1eed"
       },
       {
         "path": "release-notes.md",
-        "bytes": 665,
-        "sha256": "47fec012d854e9741196a919c40d8cf314a0c4c4ad142457cffdefa319c19765"
+        "bytes": 664,
+        "sha256": "789a28724fc43fabf7a52e0d6efebb75aa140e8189c9352fb187738fa15c652e"
       },
       {
         "path": "reports/README.md",
-        "bytes": 1595,
-        "sha256": "7483b66a3bf72441e4ac8bdd4bf49696122bde76e241b30921a11095f7dacd71"
+        "bytes": 1594,
+        "sha256": "cd021904fa700b304b835c496b46a48018b5bddd3fb3889a40e484dfc6838b6e"
       },
       {
         "path": "RentzLab-0.22.0.apk",
