@@ -13,7 +13,7 @@ public final class RentzBoard {
     private final int[] low=new int[4],high=new int[4];
     private final boolean[][] present=new boolean[4][15];
     public RentzBoard(int players) {
-        this(players, SequenceOpening.JACK);
+        this(players, SequenceOpening.ACTIVE_MIDDLE);
     }
     public RentzBoard(int players, SequenceOpening opening) {
         if(players<3||players>6)throw new IllegalArgumentException("Players must be 3..6");

@@ -112,7 +112,7 @@ public final class RentzMatch {
                 Set<Contract> available, List<HandResult> completedHands) {
             this(seat, players, turn, chooser, handNumber, phase, contract, blind, revealed, hand, legal, handSizes,
                     dealPoints, totals, finishOrder, trick, seen, events, board, available, completedHands,
-                    SequenceOpening.JACK);
+                    SequenceOpening.ACTIVE_MIDDLE);
         }
 
         public Observation(
@@ -158,7 +158,7 @@ public final class RentzMatch {
                     board,
                     available,
                     Collections.emptyList(),
-                    SequenceOpening.JACK);
+                    SequenceOpening.ACTIVE_MIDDLE);
         }
     }
 
@@ -194,7 +194,7 @@ public final class RentzMatch {
     }
 
     public RentzMatch(int players, long seed, ScoreProfile scoring, int firstChooser, DealEnding dealEnding) {
-        this(players, seed, scoring, firstChooser, dealEnding, SequenceOpening.JACK);
+        this(players, seed, scoring, firstChooser, dealEnding, SequenceOpening.ACTIVE_MIDDLE);
     }
 
     public RentzMatch(int players, long seed, ScoreProfile scoring, int firstChooser, DealEnding dealEnding,
@@ -204,7 +204,7 @@ public final class RentzMatch {
 
     public static RentzMatch fromOpeningDeal(
             OpeningDeal opening, long continuationSeed, ScoreProfile scoring, int firstChooser) {
-        return fromOpeningDeal(opening, continuationSeed, scoring, firstChooser, SequenceOpening.JACK);
+        return fromOpeningDeal(opening, continuationSeed, scoring, firstChooser, SequenceOpening.ACTIVE_MIDDLE);
     }
 
     public static RentzMatch fromOpeningDeal(
@@ -226,7 +226,7 @@ public final class RentzMatch {
             int currentChooser,
             List<HandResult> completed) {
         return fromPublicProgress(opening, hypotheticalSeed, scoring, currentChooser, completed,
-                SequenceOpening.JACK);
+                SequenceOpening.ACTIVE_MIDDLE);
     }
 
     public static RentzMatch fromPublicProgress(

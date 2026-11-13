@@ -120,7 +120,6 @@ Proiecțiile și adaptoarele existente sunt identificate în atlasul UI. Diagram
 
 | Familie | Cazuri și comparații obligatorii |
 |---|---|
-| Regula deschiderii | Pentru jocurile noi, J deschide fiecare culoare la 3–6 jucători; testele verifică vecinii legali și refuzul atomic. Jurnalele vechi își păstrează rangul median la reluare, iar lumile AI folosesc politica înregistrată. |
 | Tabla | Culoare nedeschisă, numai J, extindere în ambele direcții, interval maxim, as, carte minimă, pas și ultimul loc. Reordonarea colecției de cărți nu schimbă geometria finală. |
 | Limita închiderii | Tabla terminală păstrează exact cărțile publice, inclusiv spațiile rămase; nu apar cărți noi la intrarea în istoricul scorului. |
 | Scor | Istoric gol, prima mână, program complet și reluare; delta zero, puncte negative, valori mari, premiile profilului curent și egalitățile din jurnalele istorice. Pentru fiecare jucător, Σ este suma deltelor înregistrate. |

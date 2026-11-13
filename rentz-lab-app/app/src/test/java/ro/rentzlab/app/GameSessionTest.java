@@ -65,6 +65,24 @@ public class GameSessionTest {
         }
         fail("A deterministic fixture must expose the legacy Q opener");
     }
+    @Test public void explicitJackJournalRetainsItsPlayedCardAtFiveSeats() throws Exception {
+        for (long seed = 0; seed < 32; seed++) {
+            var saved = new GameSession.Saved(1, 5, seed, RentzPlayer.Difficulty.NORMAL, List.of(), List.of(),
+                    RentzMatch.DealEnding.UNIQUE_LAST, SequenceOpening.JACK);
+            var session = GameSession.restore(saved);
+            session.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null, Contract.RENTZ, false));
+            var legal = session.view().legal();
+            if (legal.isEmpty()) continue;
+            assertTrue(legal.stream().allMatch(card -> card.rank() == 11));
+            session.apply(new GameSession.Command(GameSession.Action.PLAY, 0, legal.get(0), null, false));
+            var journal = SessionJson.saved(session);
+            assertEquals("JACK", journal.getString("sequenceOpening"));
+            assertEquals(session.view(), SessionJson.restore(journal.toString()).view());
+            return;
+        }
+        fail("A deterministic fixture must expose a Jack at five seats");
+    }
+
     @Test public void blindEligibilityDisappearsBeforeTheLastChoice()throws Exception{
         var session=new GameSession(3,31,RentzPlayer.Difficulty.NORMAL);assertTrue(session.blindChoiceAvailable());
         int actions=0;

@@ -129,7 +129,7 @@ public final class DecisionEvaluator {
 
     static RentzMatch restore(RentzMatch.Observation view, OpeningDeal world, Contract contract,
                               ScoreProfile scoring, RolloutBudget budget) {
-        var game = RentzMatch.fromOpeningDeal(world, 0, scoring, view.chooser());
+        var game = RentzMatch.fromOpeningDeal(world, 0, scoring, view.chooser(), view.sequenceOpening());
         budget.spend();
         game.choose(view.chooser(), contract, view.blind());
         if (view.phase() == RentzMatch.Phase.PLAY) {

@@ -115,7 +115,7 @@ class RentzRuleComponentTest {
         assertEquals("LAB_RULE_IMPLEMENTED_WITH_LEGACY_REPLAY",opening.status());
         assertEquals("LAB_CONTRACT",opening.source());
         assertEquals("SequenceOpening.rankFor",opening.implementation());
-        assertEquals("RentzRulesTest.rentzAlwaysOpensFromJackAtEveryTableSize",opening.verification());
+        assertEquals("RentzRulesTest.rentzOpensFromTheUpperMiddleAtEveryTableSize",opening.verification());
         var bad=new RuleCatalog.Claim("BROKEN","LAB_VARIANT_REQUIRES_REFERENCE_CONFIRMATION","LAB_CONTRACT","RentzMatch.nonexistentMethod",chooser.verification());
         assertThrows(IllegalArgumentException.class,()->RuleCatalog.verifyBindings(Path.of(".."),List.of(bad)),"Renamed or missing API must fail the binding audit");
         var badTest=new RuleCatalog.Claim("BROKEN","LAB_VARIANT_REQUIRES_REFERENCE_CONFIRMATION","LAB_CONTRACT","RentzMatch.choose","RentzBoundaryTest.nonexistentCase");

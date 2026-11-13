@@ -59,11 +59,11 @@ public final class GameSession {
     private final AchievementHand.Recorder achievementRecorder;
     private final List<AchievementHand> achievementHands = new ArrayList<>();
     public GameSession(int players,long seed,RentzPlayer.Difficulty difficulty) {
-        this(players,seed,difficulty,List.of(),RentzMatch.DealEnding.UNIQUE_LAST,SequenceOpening.JACK);
+        this(players,seed,difficulty,List.of(),RentzMatch.DealEnding.UNIQUE_LAST,SequenceOpening.ACTIVE_MIDDLE);
     }
     public GameSession(int players,long seed,RentzPlayer.Difficulty difficulty,String rosterName) {
         this(players,seed,difficulty,PlayerNames.forMatch(players,rosterName,seed).subList(1,players),
-                RentzMatch.DealEnding.UNIQUE_LAST,SequenceOpening.JACK);
+                RentzMatch.DealEnding.UNIQUE_LAST,SequenceOpening.ACTIVE_MIDDLE);
     }
     private GameSession(int players,long seed,RentzPlayer.Difficulty difficulty,List<String> savedOpponents,
                         RentzMatch.DealEnding dealEnding, SequenceOpening sequenceOpening) {

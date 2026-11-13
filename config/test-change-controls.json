@@ -71,10 +71,10 @@
       "path": "atf-tests/src/test/java/atf/rentz/RentzRuleComponentTest.java",
       "owner": "Rentz AI",
       "reason": "Qualify the opt-in victory profile and bind the Rentz opening policy to its live engine rule.",
-      "criterion": "Parse the live YAML, resolve rule bindings, enforce the search budget, and require an explicit legacy-replay status for the all-table Jack opener.",
+      "criterion": "Parse the live YAML, resolve rule bindings, enforce the search budget, and require an explicit replay contract for historical journals and the upper-middle opening.",
       "proof": "docs/rentz/ATF_Rules.md",
       "expires": "2026-12-10",
-      "sha256": "2ff1acd6f96354a898d23c2a6179fc73ffe94be06ae0188194e61cc3c078ca53",
+      "sha256": "c223308fb4c12dcf9be40766c3fe38540aff175a686cff88632b7bec5e333e19",
       "allowDelete": false
     },
     {
@@ -884,7 +884,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "edfa312a9d601561f6a1fca5fc557fff97adbfcb7f2ae9629ff169cb0180eab2",
+      "sha256": "ca723f94a2515ea96cd4bfa8fa51583110d0111b6c25cbdd0d49c36b9ca39ebd",
       "allowDelete": false
     },
     {
@@ -1031,10 +1031,10 @@
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzSequenceContentTest.java",
       "owner": "Rentz release",
       "reason": "Verify the sequence projection against both the current opener and saved legacy sessions.",
-      "criterion": "For three through six seats, new sessions mark J as the opening rank; legacy sessions retain the active midpoint. Render only confirmed public play events and keep unused terminal slots empty.",
+      "criterion": "For three through six seats, new sessions mark Q, J, 10 and 9 respectively. Saved Jack sessions keep their original rank. Render only confirmed public play events and keep unused terminal slots empty.",
       "proof": "docs/rentz/ATF_Rules.md",
       "expires": "2026-11-20",
-      "sha256": "93d55d56ac6cfcf2674f2ed022d611584b813a1c2e5e67e2724f796afdb5de73",
+      "sha256": "b34c191132a0fadb614660bed760942619cb4e4169a6075bfdaa47465e738dba",
       "allowDelete": false
     },
     {
@@ -1064,7 +1064,7 @@
       "criterion": "An AI view reconstructed from historical state uses the same midpoint policy as the journal while remaining limited to public evidence and the actor's own hand.",
       "proof": "docs/rentz/ATF_Learning.md",
       "expires": "2026-11-20",
-      "sha256": "ed4c3a6cbb550ca1f541aea2f84eb3f1279b89055080d125798e40dcce1669d8",
+      "sha256": "933d464805a4b631040ba446b57d8e475f6d7167c494997b6ea7775febff7597",
       "allowDelete": false
     },
     {
@@ -1124,7 +1124,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "9740e1a54c1662acb6997b8940688af3c074e57a2ba0a03f61bbc7244264f528",
+      "sha256": "c71b283401810f0479d9841d581dc639acbc604063d514196656e4a924045947",
       "allowDelete": false
     },
     {
@@ -1310,11 +1310,11 @@
     {
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
-      "reason": "Prepare minor release 0.23.0 for the all-table J opener after component and native qualification.",
-      "criterion": "Advance versionCode from 26 to 27, preserve the existing signing identity, and bind the candidate to source-matched regression, Android JVM, three-game native and RAG receipts.",
+      "reason": "Prepare minor release 0.24.0 for the upper-middle opener.",
+      "criterion": "Advance versionCode from 27 to 28, preserve the existing signing identity, and bind the candidate to source-matched regression, Android JVM, three-game native and RAG receipts.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "ca000f6cf711ed32394b26dd687f7a7b53b6323ecd33d195c60e55323a072d35",
+      "sha256": "fbedaac09be90b065a8d871ce3c2c8093d0fc57f09a6561d52650a6e1c7803e7",
       "allowDelete": false
     },
     {
@@ -1324,7 +1324,7 @@
       "criterion": "Keep exactly one current edition; bind source v0.23.0, private Release IDs, APK identity and authenticated-only link to matching receipts. Retain historical source tags and external audit evidence.",
       "proof": "docs/rentz/ATF_Release.md#publicare-și-descărcare",
       "expires": "2027-02-12",
-      "sha256": "c24452b2059564b15495f53cf42dc1533e67e422ce3dc5af773a08a4c825c9b4",
+      "sha256": "7f587230989b6d08c7edb6fd37c4a1705ad88154ac5ad01286fedfd545e1075e",
       "allowDelete": false
     },
     {

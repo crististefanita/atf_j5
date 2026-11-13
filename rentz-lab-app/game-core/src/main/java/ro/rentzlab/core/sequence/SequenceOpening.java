@@ -2,9 +2,9 @@ package ro.rentzlab.core.sequence;
 
 /** Opening-card rules for the Rentz sequence contract. */
 public enum SequenceOpening {
-    /** Current product rule: each suit opens with its Jack. */
+    /** Recorded rule for games that opened every suit with a Jack. */
     JACK,
-    /** Replay rule for sessions saved before the all-table Jack rule was introduced. */
+    /** Upper middle of the ranks in each suit, used in new games and legacy journals without a policy. */
     ACTIVE_MIDDLE;
 
     public int rankFor(int players) {

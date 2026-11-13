@@ -20,15 +20,37 @@ class RentzRulesTest {
         assertEquals(Map.of(3,9,4,7,5,5,6,3).get(players),deck.stream().mapToInt(Card::rank).min().orElseThrow());
         assertTrue(deck.contains(c(Card.Suit.HEARTS,13)));assertTrue(deck.contains(c(Card.Suit.CLUBS,10)));
     }
-    @ParameterizedTest @ValueSource(ints={3,4,5,6}) void rentzAlwaysOpensFromJackAtEveryTableSize(int players){
-        var board=new RentzBoard(players);
-        assertEquals(11,board.startRank(),"The published Rentz mode opens at J regardless of active deck size");
-        for(var suit:Card.Suit.values())assertTrue(board.fits(c(suit,11)),"J must open each suit at " + players + " players");
-        assertFalse(board.fits(c(Card.Suit.CLUBS,10)),"A non-J neighbor cannot replace an unopened suit's J");
-        assertFalse(board.fits(c(Card.Suit.CLUBS,12)),"The upper neighbor cannot replace an unopened suit's J");
+    @ParameterizedTest @ValueSource(ints={3,4,5,6}) void rentzOpensFromTheUpperMiddleAtEveryTableSize(int players){
+        int opener = Map.of(3, 12, 4, 11, 5, 10, 6, 9).get(players);
+        var board = new RentzBoard(players);
+        assertEquals(opener, board.startRank());
+        for (var suit : Card.Suit.values()) {
+            assertTrue(board.fits(c(suit, opener)));
+            assertFalse(board.fits(c(suit, opener - 1)));
+            assertFalse(board.fits(c(suit, opener + 1)));
+        }
+        var clubs = Card.Suit.CLUBS;
+        assertThrows(IllegalArgumentException.class, () -> board.play(c(clubs, opener - 1)));
+        assertTrue(board.played().isEmpty());
+        board.play(c(clubs, opener));
+        assertTrue(board.fits(c(clubs, opener - 1)));
+        assertTrue(board.fits(c(clubs, opener + 1)));
+        assertFalse(board.fits(c(clubs, opener + 2)));
+        assertFalse(board.fits(c(Card.Suit.HEARTS, opener + 1)));
+
+        var match = new RentzMatch(players, 31, ScoreProfile.laboratory());
+        match.choose(0, Contract.RENTZ, false);
+        var view = match.observe(0);
+        assertEquals(SequenceOpening.ACTIVE_MIDDLE, view.sequenceOpening());
+        assertEquals(view.hand().stream().filter(card -> card.rank() == opener).toList(), view.legal());
     }
-    @ParameterizedTest @ValueSource(ints={3,4,5,6}) void legacySavedOpeningRemainsExplicitAndReplayable(int players){
-        assertEquals(15-players,new RentzBoard(players,SequenceOpening.ACTIVE_MIDDLE).startRank());
+
+    @ParameterizedTest @ValueSource(ints={3,4,5,6}) void savedJackOpeningRemainsExplicitAndReplayable(int players){
+        var board = new RentzBoard(players, SequenceOpening.JACK);
+        assertEquals(11, board.startRank());
+        assertTrue(board.fits(c(Card.Suit.CLUBS, 11)));
+        assertFalse(board.fits(c(Card.Suit.CLUBS, 10)));
+        assertFalse(board.fits(c(Card.Suit.CLUBS, 12)));
     }
     @Test void followSuitIsMandatoryAndThereIsNoTrump(){
         var hand=List.of(c(Card.Suit.CLUBS,7),c(Card.Suit.HEARTS,14));

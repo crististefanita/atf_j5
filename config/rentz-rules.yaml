@@ -96,9 +96,9 @@ claims:
   - id: SEQUENCE-OPENING-RANK
     status: LAB_RULE_IMPLEMENTED_WITH_LEGACY_REPLAY
     source: LAB_CONTRACT
-    rule: New games open every Rentz suit at J for three to six players; journals without an explicit policy replay with their former active-rank midpoint.
+    rule: New games open each suit at the higher central rank (Q, J, 10, 9 for three to six players). Saved journals retain their explicit policy; an absent policy replays with the historical upper middle.
     implementation: SequenceOpening.rankFor
-    verification: RentzRulesTest.rentzAlwaysOpensFromJackAtEveryTableSize
+    verification: RentzRulesTest.rentzOpensFromTheUpperMiddleAtEveryTableSize
   - id: PUBLIC-SCORE-SETTLEMENT
     status: LAB_VARIANT_REQUIRES_REFERENCE_CONFIRMATION
     source: LAB_CONTRACT

@@ -51,7 +51,7 @@ Un rezultat din simulator nu promovează statutul unei surse. O captură nu conf
 | Levate | Aplicarea în execuție și eventualele restricții suplimentare; urmarea culorii și lipsa atuului sunt declarate în APK. |
 | Închidere | Frontierele pentru dame și carouri; terminarea la ținta 10♣ este declarată. |
 | Secvențe | Asul fără continuare, actorii terminați și ultimul loc; pasul fără carte legală este declarat. |
-| Variante | Totale plus și dezactivarea sub-jocurilor rămân neimplementate. Deschiderea J este contractul jocurilor Rentz noi din laborator; jurnalele istorice fără politică salvată păstrează deschiderea mediană anterioară. Aceasta nu confirmă că aplicația originală oferă aceeași regulă ca preset sau opțiune. |
+| Variante | Totale plus și dezactivarea sub-jocurilor rămân neimplementate. Jocurile noi folosesc rangul central superior din [regulile laboratorului](ATF_Rules.md#pregătirea-mesei). Jurnalele păstrează politica de la începutul partidei. Presetul și opțiunile aplicației originale cer o confirmare separată. |
 
 [O altă platformă Rentz](https://rentz.doizece.ro/rentz/help) descrie propria variantă. Ea poate sugera întrebări și cazuri, dar punctajele sau excepțiile ei nu devin contractul pachetului BoonWiz.
 

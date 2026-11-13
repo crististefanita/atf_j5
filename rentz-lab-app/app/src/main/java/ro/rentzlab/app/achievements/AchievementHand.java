@@ -32,7 +32,7 @@ public record AchievementHand(RentzMatch.HandResult result, boolean manualChoice
         private Contract contract;
 
         public Recorder(int players) {
-            this(players, SequenceOpening.JACK);
+            this(players, SequenceOpening.ACTIVE_MIDDLE);
         }
 
         public Recorder(int players, SequenceOpening sequenceOpening) {
