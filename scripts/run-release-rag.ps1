@@ -82,30 +82,53 @@ if($component.status-eq'PASS'){
     }
 }
 
-if($DocumentationRun){
-    & $Java -Xmx256m -cp $classpath $ragClass '--reconcile-documentation' $project $reportRoot $ComponentRun $DocumentationRun
-    if($LASTEXITCODE-ne0){throw "Documentation reconciliation could not read its evidence: $RunRoot"}
-    $proof=Join-Path $reportRoot 'documentation-reconciliation.json'
-    $verdict=Get-Content -LiteralPath $proof -Raw|ConvertFrom-Json
-    if($verdict.status-cne'PASS'){throw "Documentation reconciliation blocked ($($verdict.reason)): $proof"}
-    Write-Output $proof
-    return
-}
-
-$arguments=[Collections.Generic.List[string]]::new()
-$arguments.Add($source);$arguments.Add($reportRoot);$arguments.Add($Question);$arguments.Add($ComponentRun)
-if($BuildRun-or$NativeUiRun){$arguments.Add($(if($BuildRun){$BuildRun}else{'-'}))}
-if($NativeUiRun){$arguments.Add($NativeUiRun)}
-if($UiBuildRun){$arguments.Add($UiBuildRun)}
-$ragArguments=@('-Xmx256m','-cp',$classpath,$ragClass)+$arguments.ToArray()
-$previousDataRoot=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT','Process')
+$scratch=Join-Path $RunRoot 'java-scratch'
+Assert-AtfArtifactPath -Path $scratch -ProjectRoot $project
+$null=New-Item -ItemType Directory -Path $scratch
+$jvm=@('-Xmx256m','-cp',$classpath,"-Djava.io.tmpdir=$scratch",$ragClass)
 try{
-    [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$ragDataRoot,'Process')
-    & $Java @ragArguments
+    if($DocumentationRun){
+        & $Java @jvm '--reconcile-documentation' $project $reportRoot $ComponentRun $DocumentationRun
+        if($LASTEXITCODE-ne0){throw "Documentation reconciliation could not read its evidence: $RunRoot"}
+        $proof=Join-Path $reportRoot 'documentation-reconciliation.json'
+        $verdict=Get-Content -LiteralPath $proof -Raw|ConvertFrom-Json
+        if($verdict.status-cne'PASS'){throw "Documentation reconciliation blocked ($($verdict.reason)): $proof"}
+        Write-Output $proof
+        return
+    }
+
+    $arguments=[Collections.Generic.List[string]]::new()
+    $arguments.Add($source);$arguments.Add($reportRoot);$arguments.Add($Question);$arguments.Add($ComponentRun)
+    if($BuildRun-or$NativeUiRun){$arguments.Add($(if($BuildRun){$BuildRun}else{'-'}))}
+    if($NativeUiRun){$arguments.Add($NativeUiRun)}
+    if($UiBuildRun){$arguments.Add($UiBuildRun)}
+    $previousDataRoot=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT','Process')
+    try{
+        [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$ragDataRoot,'Process')
+        & $Java @jvm @arguments
+    }finally{
+        [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$previousDataRoot,'Process')
+    }
+    if($LASTEXITCODE-ne0){throw "Local release RAG failed: $RunRoot"}
 }finally{
-    [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$previousDataRoot,'Process')
+    $cleanup=[ordered]@{status='PASS';path=$scratch;detail='Owned Java scratch removed.'}
+    try{
+        Assert-AtfArtifactPath -Path $scratch -ProjectRoot $project
+        $resolved=(Resolve-Path -LiteralPath $scratch).Path
+        if($resolved -cne $scratch -or (Split-Path -Parent $resolved) -cne $RunRoot -or
+            @(Get-ChildItem -LiteralPath $resolved -Recurse -Force | Where-Object {
+                $_.Attributes -band [IO.FileAttributes]::ReparsePoint
+            }).Count){throw 'Scratch path or contents are no longer safe to remove.'}
+        Remove-Item -LiteralPath $resolved -Recurse -Force
+    }catch{
+        $cleanup.status='FAIL'
+        $cleanup.detail=$_.Exception.Message
+        Write-Warning "RAG scratch cleanup failed: $($cleanup.detail)"
+    }
+    try{
+        $cleanup|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $RunRoot 'scratch-cleanup.json') -Encoding utf8NoBOM
+    }catch{Write-Warning "RAG scratch cleanup receipt could not be saved: $($_.Exception.Message)"}
 }
-if($LASTEXITCODE-ne0){throw "Local release RAG failed: $RunRoot"}
 $reportFile=Join-Path $reportRoot 'release-rag-report.json'
 if($PublicationEvidence){
     $inputs=@{RagReport=$reportFile;PublicationEvidence=$PublicationEvidence;RunRoot=(Join-Path $RunRoot 'publication')}

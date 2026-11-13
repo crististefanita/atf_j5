@@ -145,19 +145,18 @@ La limita lizibilității se alege un mod explicit de derulare sau o dispunere a
 3. O probă de istoric derulează vertical și până la ultimul jucător, confruntă toate valorile vizibile și verifică revenirea și reluarea, fără linii duplicate.
 4. Rularea păstrează extern identitatea APK-ului, configurația efectivă, expected/actual și capturile native originale inline base64 în stilul proiectului. O masă sau o rezoluție nu califică întreaga matrice.
 
-**Ordine de lucru.** U01 → refactorizarea UI în producător → U02–U05 și adaptoarele Rentz prin componente → U06–U07, R02–R05 și S01/S04 → calibrare nativă și E2E selectiv. Jocurile noi folosesc J, iar reluarea veche păstrează politica din jurnal; UI-ul nu expune selector pentru politica de compatibilitate. Închideți criteriile cu implementare identificată și probă relevantă.
+**Ordine de lucru.** Verificați întâi geometria și scorul în componente, apoi folosiți probe native scurte pentru criteriile rămase. [Strategia de testare](../rentz/ATF_TestingStrategy.md)
 
 ## P1 · Adoptarea checkbox-ului comun „Automat”
 
 **Responsabil · adaptorul Rentz**
 
-Adoptați `GameTitleBar` din următoarea versiune AAR a modulului `atf-card-table-ui`. Eticheta devine „Automat” în RO și rămâne „Auto play” în EN. Puneți bifa la dreapta liniei „Mâna x/y” când încape, iar contractul pe rândul de dedesubt. [Antetul și starea curentă](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/MainActivity.java) · [Guvernanța bibliotecii](../../rentz-lab-app/ui-library/README.md)
+Antetul curent construiește bifa în `MainActivity`. Rămâne adoptarea lui `GameTitleBar` după admiterea unei versiuni AAR compatibile, cu „Automat” în RO și „Auto play” în EN. [Antetul curent](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/MainActivity.java) · [Admiterea bibliotecii](../../rentz-lab-app/ui-library/README.md)
 
 La lățime insuficientă, păstrați „Mâna x/y” integral și bifa aliniată la dreapta pe un rând propriu, înaintea contractului. Verificați trecerea de la selector la un contract cu denumire lungă, la aceeași lățime și același font. Apăsați bifa o dată și verificați o singură comandă.
 
-- Legați starea de fazele CHOOSE și PLAY și opriți delegarea la finalul mâinii. Debifarea continuă să apeleze `cancelHumanAutomation`; mutările confirmate și pasul obligatoriu rămân distincte în jurnal. [Controlerul sesiunii](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/lifecycle/SessionController.java)
-- Extindeți componentele cu răspuns întârziat după debifare și reafișare cu aceeași stare. Păstrați distincția dintre creditul manual, mutarea delegată și pasul obligatoriu. Verificați o singură intenție pentru fiecare atingere.
-- În traseul compact cu sub-jocuri consecutive, verificați poziția, valoarea bifată, cel puțin o mutare delegată și revenirea la debifat la mână nouă. Ancorele și accesul la cărți se compară în cadrele capturate. Matricea de dimensiuni și fonturi rămâne în componente. [Proba Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
+- Acoperiți adaptorul antetului cu o singură intenție pentru fiecare atingere și cu redarea stării după reafișare. Scenariile de anulare a calculului delegat sunt deja în [componentele lifecycle](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java).
+- În proba compactă, verificați poziția bifei, revenirea la debifat la mâna nouă și ancorele cărților. Traseul actual exercită delegarea după o mutare manuală. [Poarta Android](../rentz/ATF_Release.md#ordinea-calificării-android-curente)
 
 ## Tura automată — probă nativă rămasă
 
@@ -167,7 +166,7 @@ La lățime insuficientă, păstrați „Mâna x/y” integral și bifa aliniat�
 
 ## P1 — Geometria mesei Rentz la 3, 5 și 6 jucători
 
-Pentru patru jucători, mecanismul comun de alocare a spațiului este descris în [integrarea UI](../rentz/ATF_UiIntegration.md#schimbarea-contractului-la-masa-de-patru-jucători). Traseul pentru cele cinci jocuri consecutive și derularea istoricului aparțin [calificării APK](../rentz/ATF_Release.md#ordinea-calificării-android-curente).
+Proba compactă de release acoperă masa de patru jucători, trei mâini și reluarea istoricului. Verificarea la alte dimensiuni de masă rămâne focalizată pe geometrie și lizibilitate. [Integrarea UI](../rentz/ATF_UiIntegration.md#schimbarea-contractului-la-masa-de-patru-jucători) · [Calificarea APK](../rentz/ATF_Release.md#ordinea-calificării-android-curente)
 
 | Prioritate | Criteriu verificabil |
 |---|---|

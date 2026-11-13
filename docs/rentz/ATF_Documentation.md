@@ -26,3 +26,14 @@ Folosește un titlu principal, secțiuni în ordine și blocuri de cod tipizate.
 Guvernanța refuză căile care ies din checkout, inclusiv când ținta există pe mașina autorului. Instantaneele istorice au inventar și hash proprii. Probele mutante verifică și un document valid în aceeași rulare. [Politica documentelor](../../config/documentation-policy.json) · [Controalele](../../atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationControlsTest.java)
 
 Validatorii de stil și relocabilitate acoperă ghidurile active. Snapshot-urile din `release/<versiune>/` rămân imuabile după publicare și sunt validate prin hash-ul payloadului din catalogul release-ului; nu se rescriu pentru a satisface reguli editoriale introduse ulterior.
+
+## Verificarea afirmațiilor
+
+| Afirmație | Sursă de adevăr | Control local |
+|---|---|---|
+| Module și dependențe | [Reactorul Maven](../../pom.xml) și [modulele Gradle](../../rentz-lab-app/settings.gradle) | Inventarul sursei și verificările de adopție binară. |
+| Comandă și selecție offline | [Colecțiile declarate](../../config/test-collections.json) și [lansatorul](../../scripts/run-rentz-components.ps1) | Contractul documentar verifică lansatoarele declarate. |
+| Numărul mâinilor și ordinea nativă | [Runnerul Android](../../atf-tests/tools/run-shared-ui-sanity.ps1) și [evaluatorul RAG](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java) | [Verificarea factuală](../../atf-tests/src/test/java/atf/rentz/governance/documentation/factual/DocumentationNativeFlowTest.java) confruntă afirmația din README și ghiduri cu numărul și primul contract din sursă. |
+| Linkul APK și ediția activă | [Catalogul ediției](../../release/index.json) și [verificatorul README](../../scripts/verify-release-readme.ps1) | Catalogul verifică forma locală, iar poarta post-publicare confruntă README-ul remote și descărcarea. |
+
+Folosește o singură afirmație vizibilă cu eticheta **Traseul Android de release** în README-ul principal, README-ul testelor și ghidurile Android, release și strategie. Celelalte explicații trimit la contractul de release. Probele resping o afirmație absentă, duplicată, greșită sau ascunsă într-un exemplu de cod.

@@ -108,4 +108,6 @@ Rezultatul roșu se păstrează înaintea curățării, iar aceleași criterii s
 | [Guvernanța sursei](src/test/java/atf/rentz/governance/SourceLayoutTest.java) | Verifică [inventarul declarat](../config/java-source-layout.json): source-set-uri mixte, acoperirea fișierelor active, coeziune și limite de import. |
 | [Protocolul Android](../docs/rentz/ATF_Android.md) | Delimitează distribuirea completă, istoricul și reluarea față de o partidă completă sau echivalența cu aplicația originală. |
 
-Cu `-ConsecutiveSubgames`, runnerul joacă cinci mâini complete în aceeași partidă. Începe cu Rentz și cere cel puțin trei contracte distincte. Raportul păstrează geometria chenarelor, istoricul după restart și replay-ul independent al jurnalului. [Profilul compact și poarta de release](../docs/rentz/ATF_Release.md#ordinea-calificării-android-curente)
+**Traseul Android de release.** 3 mâini complete, cu Rentz prima.
+
+`-ConsecutiveSubgames` rulează traseul în aceeași partidă. Raportul păstrează geometria chenarelor, istoricul după restart și replay-ul independent al jurnalului. [Profilul compact și poarta de release](../docs/rentz/ATF_Release.md#ordinea-calificării-android-curente)

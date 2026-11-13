@@ -111,6 +111,33 @@ Case 'Failed RAG refuses game-core as the sole classpath' {
     Require ($r.failed-and-not$r.invoked) 'A game-core-only receipt reached Java'
 }
 
+Case 'RAG removes only its Java scratch after success and failure' {
+    foreach($exitCode in @(0,19)){
+        $c=FailedRagContext "rag-scratch-$exitCode"
+        $c.spy=Join-Path $c.root 'ScratchSpy.ps1'
+        @'
+$property=$args[3]
+if($property -cnotmatch '^-Djava\.io\.tmpdir=(.+)$'){exit 27}
+$scratch=$Matches[1]
+if(-not(Test-Path -LiteralPath $scratch -PathType Container)){exit 28}
+'invoked'|Set-Content -LiteralPath (Join-Path $PSScriptRoot 'invoked.txt')
+$scratch|Set-Content -LiteralPath (Join-Path $PSScriptRoot 'scratch.txt')
+New-Item -ItemType Directory -Path (Join-Path $scratch 'target')|Out-Null
+'generated'|Set-Content -LiteralPath (Join-Path $scratch 'target/transient.txt')
+exit __EXIT_CODE__
+'@.Replace('__EXIT_CODE__',[string]$exitCode)|Set-Content -LiteralPath $c.spy -Encoding utf8NoBOM
+        $r=Launch-FailedRag $c
+        Require $r.invoked 'The recorder did not receive a dedicated Java scratch directory'
+        $scratch=(Get-Content -LiteralPath "$($c.root)/scratch.txt" -Raw).Trim()
+        Require ((Split-Path -Parent $scratch)-ceq$c.run) 'Scratch escaped the RAG run'
+        Require (-not(Test-Path -LiteralPath $scratch)) 'Java scratch was retained'
+        Require (Test-Path -LiteralPath "$($c.component)/result.json") 'The input receipt was removed'
+        $cleanup=Get-Content -Raw -LiteralPath "$($c.run)/scratch-cleanup.json"|ConvertFrom-Json
+        Require ($cleanup.status-ceq'PASS'-and$cleanup.path-ceq$scratch) 'Cleanup receipt did not identify the removed scratch'
+        Require ($r.failed-eq($exitCode-ne0)) 'Cleanup changed the evaluator verdict'
+    }
+}
+
 Case 'Unchanged qualified runtime reaches only the injected recorder' {
     $c=Context valid;$r=Launch $c
     Require (-not$r.failed-and$r.invoked) 'Valid neighboring runtime was rejected'

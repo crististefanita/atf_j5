@@ -155,7 +155,7 @@ Varianta izolată are receipt propriu. Runnerul curent folosește replay-ul inde
 - Sortarea este numerică, descrescătoare. Totalurile egale au același loc și păstrează ordinea locurilor la masă. Următorul loc ține cont de numărul jucătorilor aflați la egalitate.
 - Clasamentul se calculează din totaluri la afișare. Istoricul confirmat și ordinea mesei rămân stabile după reluare.
 
-[Componentele clasamentului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java) acoperă egalitățile, scorurile negative și cele patru mărimi de masă. [Acceptanța terminală](../feedback/ATF_Rentz_UI_ToDo.md#p1-tabelă-de-scor-elegantă-și-utilă) rămâne distinctă de traseul de release cu cinci mâini.
+[Componentele clasamentului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java) acoperă egalitățile, scorurile negative și cele patru mărimi de masă. [Acceptanța terminală](../feedback/ATF_Rentz_UI_ToDo.md#p1-tabelă-de-scor-elegantă-și-utilă) completează traseul de release cu trei mâini.
 
 ## Istoricul adaptiv Rentz
 

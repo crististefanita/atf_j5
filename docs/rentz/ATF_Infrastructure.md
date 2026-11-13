@@ -71,6 +71,10 @@ Analiza AST protejează formele declarate și recunoscute, nu reprezintă un san
 
 Copiile istorice indicate de receipt-uri nu se rebotează și nu se șterg în masă pentru a obține verde. Datele și procesele altui proprietar se păstrează; restricția unei familii vechi nu este o permisiune de a curăța întregul director temporar.
 
+- Regresia și buildul Android compilează în `infrastructure/workspaces`. Un `target` dintr-un astfel de spațiu poate conține clase pe care se bazează classpath-ul atestat al raportului sau al probei Android. Înainte de retragere, verificați receiptele, runtime-ul, worktree-urile Git și semnarea. [Retenția spațiilor de lucru în feedback](../feedback/ATF_Release_RAG.md#retenția-spațiilor-de-lucru)
+
+- Lansatorul RAG alocă JVM-ului `java-scratch` în directorul rulării. La ieșire încearcă să elimine acest director și scrie `scratch-cleanup.json`, inclusiv dacă evaluatorul eșuează. Rezultatul curățării are propriul statut. [Lansatorul RAG](../../scripts/run-release-rag.ps1) · [Controalele runtime](../../atf-tests/tools/test-qualified-runtime.ps1)
+
 ## Dosarul selectat al livrării
 
 Directorul sursă `release` este catalogul documentar și copia selectată a livrării, nu o destinație pentru rulările curente. [Procesul APK](ATF_Release.md) permite numai promovarea explicită a dovezilor calificate; toate rulările și build-urile intermediare folosesc în continuare colecțiile externe înregistrate.

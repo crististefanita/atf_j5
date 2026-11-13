@@ -6,7 +6,7 @@
 
 - [Interfața Rentz](ATF_Rentz_UI_ToDo.md) urmărește diferențele rămase de interacțiune, geometrie și scor, cu probe de componentă și acceptanță nativă selectivă. [Biblioteca grafică](../../rentz-lab-app/ui-library/README.md) și adaptoarele Rentz au verificări separate.
 - [Integritate și calitate](ATF_RentzQuality.md) deține criteriile strategice și documentare încă deschise. Validarea, lifecycle-ul, guvernanța sursei și [calificarea consumatorului](../rentz/ATF_Qualification.md) au contracte și probe proprii; calificarea nativă rămâne separată.
-- [Guvernanța RAG](ATF_Release_RAG.md) păstrează verificările de regresie remediate; [ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) deține porțile încă necesare pentru fiecare APK.
+- [Feedback-ul RAG](ATF_Release_RAG.md) urmărește retenția spațiilor de lucru și calificarea multiplatformă, dacă aceasta intră în scop. [Ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) deține porțile Android.
 - [Extinderea realizărilor](ATF_Rentz_Achievements_ToDo.md) urmărește obiectivele candidate, sincronizarea și probele de accesibilitate rămase. [Integrarea actuală](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
 
 ## ToDo-uri active: prioritate /100
@@ -20,7 +20,7 @@ Scorul este prioritatea de remediere, nu nota calității sau procentul de acope
 
 | Ordine | Prioritate și criteriu | Prioritate /100 | Restanță concretă |
 |---:|---|---:|---|
-| 1 | **P1 · Acceptanță nativă a mesei, turei și scorului** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 92 (40+30+14+8) | Închideți U01–U07, R02–R05 și S01/S04: compact/font mărit, 3/5/6 locuri, o mutare vizibilă per actor, sosiri, tabla terminală, egalități, contoare și derularea istoricului pe APK-ul candidat. |
+| 1 | **P1 · Acceptanță nativă a mesei, turei și scorului** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 86 (39+25+14+8) | Traseul compact acoperă patru locuri, istoricul și tabla finală. Rămân probele focalizate pentru 3/5/6 locuri, ritmul actorului, sosirile înaintea decontării, contoarele și egalitățile la final. |
 | 2 | **P1 · Regulile și valorile versiunii originale** · [registrul regulilor](ATF_Rentz.md) | 84 (36+26+14+8) | Confirmați independent preset-ul, valorile neetichetate și frontierele execuției originale; declarațiile din instrucțiuni nu țin loc de rulare verificată. |
 | 3 | **P1 · Bifa Automat și ritmul delegării** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 81 (33+25+15+8) | Adoptați contractul comun al antetului, confirmați reluarea după anulare și o singură mutare per cadru, apoi calificați cadrul nativ al actorului și anularea la navigare. |
 | 4 | **P1 · Pornirea aplicației de referință** · [registrul regulilor](ATF_Rentz.md) | 74 (31+28+9+6) | Investigația ecranului WebView negru încă cere cauză și probă reproductibilă de pornire funcțională. |
@@ -32,13 +32,12 @@ Scorul este prioritatea de remediere, nu nota calității sau procentul de acope
 | 10 | **P2 · Compatibilitatea sesiunilor și migrarea scorului** · [registrul regulilor](ATF_Rentz.md) | 67 (23+20+16+8) | Sesiunile vechi și opțiunile/profilurile noi au nevoie de migrare fără pierderea sau reinterpretarea datelor. |
 | 11 | **P2 · Gesturile pe antetul fix al istoricului** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 65 (24+18+15+8) | Verificați tragerea și fling-ul pornite de pe antet fix; tragerea derulează, iar atingerea deschide exact un singur detaliu. |
 | 12 | **P2 · Împachetarea guvernanței reutilizabile** · [contractul generic](README.md#contract-generic-pentru-guvernanță) | 61 (20+18+15+8) | Adaptorul local și probele există; lipsește API-ul comun împachetat și acceptanța într-un consumator mixt Maven/Gradle. |
-| 13 | **P2 · Lansatorul de prototip și ruta UI** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 60 (20+18+14+8) | Evaluați migrarea selecției la actorul public; păstrați replay-ul independent și refuzul controlat al rutei fără ADB. |
-| 14 | **P2 · Reconcilierea copiilor istorice externe** · [guvernanța infrastructurii](ATF_Rentz.md) | 56 (16+20+12+8) | Faceți inventarul proprietarilor și referințelor, verificați arhiva și dovediți că niciun receipt sau classpath activ nu depinde de copia retrasă. |
-| 15 | **P3 · Portabilitatea exemplului Test Kit** · [adopția Test Kit](../../lib/README.TestKit.md) | 54 (15+16+15+8) | Verificați exemplul într-un consumator autonom și prin import IntelliJ cu același cache izolat. |
+| 13 | **P2 · Lansatorul de prototip și ruta UI** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 60 (20+18+14+8) | Evaluați migrarea selecției la actorul public și păstrați replay-ul independent și refuzul controlat al rutei fără ADB. |
+| 14 | **P2 · Reconcilierea copiilor externe** · [retenția spațiilor de lucru](ATF_Release_RAG.md#retenția-spațiilor-de-lucru) | 56 (16+20+12+8) | Inventariați proprietarii, receiptele, classpath-urile și procesele. Retrageți numai fișierele regenerabile după verificarea referințelor. |
+| 15 | **P2 · Separarea verificării native din RAG** · [calitate](ATF_RentzQuality.md#guvernanță-și-coeziune) | 55 (18+17+15+5) | Extrageți verificarea dovezii native și demonstrați aceleași verdicte și diagnostice în cazurile pozitive și negative. |
+| 16 | **P3 · Portabilitatea exemplului Test Kit** · [adopția Test Kit](../../lib/README.TestKit.md) | 54 (15+16+15+8) | Verificați exemplul într-un consumator autonom și prin import IntelliJ cu același cache izolat. |
 
 **Citirea scorurilor:** 90–100 cere atenție imediată; 75–89 indică risc mare sau impact extins; 50–74 indică remediere planificabilă; sub 50 indică impact sau lucrabilitate redusă în comparația curentă. Nota nu închide cerința: aceasta se închide numai prin criteriul din documentul ownerului și receipt-ul aferent.
-
-**Guvernanța release-ului:** Registrul RAG nu are ToDo activ pentru remedierea evaluatorului. Fiecare ediție rămâne condiționată de dovezi proaspete pentru regresie, Extent-ul componentelor, Android JVM, acceptanța nativă, APK-ul semnat, catalog și publicarea canalului declarat. RAG-ul local și poarta post-push pentru README/descărcare se verifică separat; un raport dintr-o rulare anterioară nu califică o ediție nouă.
 
 ## Închidere și transfer
 

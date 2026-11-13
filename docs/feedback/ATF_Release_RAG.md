@@ -6,10 +6,10 @@ RAG-ul local citează sursele și explică porțile. Verificatoarele determinist
 
 **La introducerea unui release multiplatformă.** RAG-ul citează contractul platformei declarate și cere dovezile sale. Proba negativă prezintă numai APK și receipte Android pentru o livrare care declară și iOS. Răspunsul identifică platforma și dovada lipsă. [Contractul iOS](../rentz/ATF_Release.md#calificarea-ios) · [Feedback-ul iOS](ATF_Rentz.md#platforma-ios)
 
-## Raportarea eșecului înainte de APK
+## Retenția spațiilor de lucru
 
-| Prioritate | Contract și stare | Probă permanentă |
-|---|---|---|
-| P1 · Închis | La Maven `FAIL` înainte de Android JVM, păstrează `NOT_RUN`, release `BLOCKED` și Extent, inclusiv cu `game-core` primul. | `ReleaseGovernanceTest.failedMavenRetainsItsVerdictWhenAndroidJvmWasNotRun` |
-| P1 · Închis | Evaluatorul RAG primește rădăcina externă canonică; un receipt Android JVM valid din worktree nu mai este clasificat eronat `BLOCKED`. | `test-qualified-runtime.ps1` și `ReleaseGovernanceTest.androidJvmAcceptsOnlyARegisteredComponentsWorkspaceForTheSameCheckout` |
-| P2 · Închis | Worktree-urile împart rădăcina Git canonică; `validation` este colecție externă înregistrată; payloadurile versionate rămân hash-bound, în afara lintului de ghiduri active. | `test-workspace-governance.ps1`, inventarul infrastructurii și `ReleaseCatalog` |
+**P2 · Responsabil: infrastructura J5.** Controalele creează fixture-uri și copii de compilare în depozitul comun. După rulare, inventarul curent verifică înregistrarea lor, dar nu arată care mai sunt necesare pentru reproducerea dovezii.
+
+- Inventariați spațiile de lucru și cache-urile folosite de receipte, classpath-uri, procese active și worktree-uri Git.
+- Lansatorul RAG își curăță directorul de lucru JVM. Extindeți inventarul la buildurile și fixture-urile vechi, cu proprietar și criteriu explicit pentru fiecare retragere.
+- Verificați prin fixture-uri un director regenerabil, un director referit de un receipt, o rulare activă și o cale care traversează un link. [Contractul de retenție](../rentz/ATF_Infrastructure.md#curățare-și-probe)

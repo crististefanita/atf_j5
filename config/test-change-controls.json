@@ -3,6 +3,26 @@
   "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
   "controls": [
     {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/factual/DocumentationNativeFlowTest.java",
+      "owner": "Rentz documentation",
+      "reason": "Cover false factual claims and drift in the runner.",
+      "criterion": "Pass the live guides and reject wrong count, opener, missing or duplicate claims and divergent executable facts.",
+      "proof": "docs/rentz/ATF_Documentation.md#verificarea-afirmațiilor",
+      "expires": "2026-12-10",
+      "sha256": "80a05c54326d7167f47a8e7818cce25e96d6d5d6452dd70533f2bc48a574118b",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/factual/DocumentationNativeFlow.java",
+      "owner": "Rentz documentation",
+      "reason": "Bind documentation claims to the executable release flow.",
+      "criterion": "Compare the runner count and opener, RAG expectations and exactly one visible claim per scoped guide.",
+      "proof": "docs/rentz/ATF_Documentation.md#verificarea-afirmațiilor",
+      "expires": "2026-12-10",
+      "sha256": "361f77a8a317cf204aec3c54d88db20bcd5f925f4db20f06191b414cacdd908a",
+      "allowDelete": false
+    },
+    {
       "path": "atf-tests/src/test/java/atf/rentz/RentzRuleComponentTest.java",
       "owner": "Rentz AI",
       "reason": "Qualify the opt-in victory profile and bind the Rentz opening policy to its live engine rule.",
@@ -395,11 +415,11 @@
     {
       "path": "scripts/run-release-rag.ps1",
       "owner": "Rentz release",
-      "reason": "Consume release receipts without executing, promoting, or publishing gates.",
-      "criterion": "Only external fresh report roots and source-bound component/build/UI receipts are accepted; publishAllowed remains false.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "1c19f81ce4c0672e289943b8bead99ff47d424c7f2153e9149a1f31cdd0baabe",
+      "reason": "Contain and retire scratch created by the RAG evaluator.",
+      "criterion": "Create JVM scratch within the owned run, remove it after exit, and keep original evidence and the evaluator verdict.",
+      "proof": "docs/rentz/ATF_Infrastructure.md#curățare-și-probe",
+      "expires": "2026-12-10",
+      "sha256": "a0b6a9a6f1db65caa4e54b38701b3c2e128e8ebbfb01e46bf8350c5b7572ed7c",
       "allowDelete": false
     },
     {
@@ -735,11 +755,11 @@
     {
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz consumer",
-      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting. Q32 adds capture binding.",
-      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry. Remote README fixtures exercise both distribution channels and reject extra copy or routes. The offline launcher fixture requires reservation, binding of the captured bytes and completion in that order.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "c09b8a210331f7f44372260de3ab5d97a5af287883a8d285e06528b59739ce65",
+      "reason": "Add the owned RAG scratch lifecycle regression.",
+      "criterion": "Exercise a successful and a failed evaluator with nested generated files, verify cleanup receipts and retain component inputs.",
+      "proof": "docs/rentz/ATF_Infrastructure.md#curățare-și-probe",
+      "expires": "2026-12-10",
+      "sha256": "c5d9636a796557ab405a94164dee97177a11f4da1d037c56d6612e628cafca59",
       "allowDelete": false
     },
     {
