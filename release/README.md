@@ -2,22 +2,20 @@
 
 ## Pe scurt
 
-Catalogul tehnic păstrează ediția curentă, identitatea APK-ului și calificarea ei.
+Catalogul identifică ediția curentă și trimite la APK-ul semnat și la proveniența calificării. Rapoartele originale și copiile de audit rămân în depozitul extern de dovezi.
 
-## Versiunea curentă
+## Ediția curentă
 
-[Rentz Lab 0.21.0](0.21.0/README.md) este disponibilă conturilor autorizate. [Descarcă](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.21.0/RentzLab-0.21.0.apk) · [Dovada accesului](restricted-0.21.0.json)
+[Rentz Lab 0.22.0](0.22.0/README.md) — [descarcă APK-ul](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.22.0/RentzLab-0.22.0.apk).
 
 ## Organizare
 
 | Zonă | Rol |
 |---|---|
-| Dosarul versiunii | Note, manifest, checksum local și proveniența calificării. |
-| Rapoarte | Locația externă și limitele dovezilor Extent. |
-| GitHub Release | APK-ul semnat și checksum-ul în repository privat. |
+| Dosarul versiunii curente | Note, manifest și proveniența calificării. |
+| Rapoarte | Rulări Extent și receipts păstrate în depozitul extern de audit. |
+| GitHub Releases privat | APK semnat și checksum, disponibile conturilor autorizate. |
 
-- README-ul principal oferă o singură descărcare directă.
-- Binarele și rapoartele voluminoase rămân în dosarele de distribuție externe; sursele păstrează identitatea, checksum-urile și proveniența.
-- Tagurile de sursă și arhivele de audit istorice se păstrează separat.
+Catalogul surselor păstrează doar versiunea curentă; tagurile istorice și dovezile de audit sunt arhivate separat.
 
 [Procesul livrării](../docs/rentz/ATF_Release.md) · [Calificarea componentelor](../docs/rentz/ATF_Qualification.md)

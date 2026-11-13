@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "versionName": "0.22.0",
+    "versionCode": 26,
+    "applicationId": "ro.rentzlab.app",
+    "sourceCommit": "a12e2388a6430ab5315daae31c27742b8b8b8008",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "apkName": "RentzLab-0.22.0.apk",
+    "apkBytes": 925834,
+    "sha256": "f2c1a7f6c3abbd9ae86215fa432be34f6def5da3a882f998adfd283e614445f3",
+    "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+    "debuggable": false
+  },
+  "publication": {
+    "state": "PUBLISHED",
+    "channel": "authenticated-only",
+    "sourceCommit": "a12e2388a6430ab5315daae31c27742b8b8b8008",
+    "sourceTag": "v0.22.0",
+    "releaseId": 443667948,
+    "provider": "GitHub",
+    "releaseRepository": "crististefanita/atf_j5_releases",
+    "assetId": 741634053,
+    "checksumAssetId": 741634118,
+    "link": "https://github.com/crististefanita/atf_j5_releases/releases/download/v0.22.0/RentzLab-0.22.0.apk",
+    "authenticatedDownload": "PASS",
+    "anonymousDownload": "DENIED",
+    "latestTag": "v0.22.0"
+  },
+  "qualification": {
+    "status": "PASS",
+    "scope": "maven-components-android-jvm-components-and-native-three-distinct-games",
+    "e2e": "PASS",
+    "tests": 572,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": {
+      "maven": 45,
+      "mavenTests": 451,
+      "androidJvm": 25,
+      "androidJvmTests": 121,
+      "nativeGames": 3,
+      "distinctContracts": 3,
+      "nativeCheckpoints": 34
+    },
+    "evidence": {
+      "components": {
+        "path": "C:/work/rentz_back/components/20261113-j5-022-pinned-a12e238/component-suite-extent.html",
+        "bytes": 6963158,
+        "sha256": "159ff618e73a99e75cf1e2776d09efda483d8b64437e157b0bb433e66fc9672e"
+      },
+      "androidJvm": {
+        "path": "C:/work/rentz_back/components/20261113-j5-022-pinned-a12e238/android-jvm/result.json",
+        "bytes": 4452,
+        "sha256": "fe467ad500576537c68391c952c5d2fa10f2a6fdca1d4a7699b9c92d35be3ce1"
+      },
+      "native": {
+        "path": "C:/work/rentz_back/android-acceptance/20261113-j5-0.22-three-game-e2e-a12e238/android-extent.html",
+        "bytes": 13004450,
+        "sha256": "a53eadc01bd30898fb59b71140ca20fc6ea06176bf6b92fd3fa0e17bd1728067"
+      },
+      "nativeReceipt": {
+        "path": "C:/work/rentz_back/android-acceptance/20261113-j5-0.22-three-game-e2e-a12e238/result.json",
+        "bytes": 120056,
+        "sha256": "7892a26b38966f846f8159c3979e46f6846c91f98f0ef86e59dd13705e836f2e"
+      },
+      "build": {
+        "path": "C:/work/rentz_back/android-acceptance/20261113-j5-0.22-product-build-a12e238/build-qualification.json",
+        "bytes": 8449,
+        "sha256": "73e1029fd68685580cd18772618e1c26f3d4972db33616a190dfd6eebbd5dc97"
+      },
+      "rag": {
+        "path": "C:/work/rentz_back/validation/20261113-j5-0.22-final-rag-a12e238/report/release-rag-report.json",
+        "bytes": 16703,
+        "sha256": "06a25f4c45b0e2ea5edc80027bd111865a590c40928af952beac1b08e6733210"
+      }
+    },
+    "display": {
+      "logicalViewport": "720x1280",
+      "density": 360,
+      "fontScale": 1.5,
+      "initialSettingsRestored": true
+    },
+    "reportingLibrary": "atf-reporting-1.0.0-j24"
+  },
+  "integrity": {
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 442,
+        "sha256": "c9539da78864bb89bf125095faf2aeb88e62c96c17794b90b1b096d49f005a28"
+      },
+      {
+        "path": "release-notes.md",
+        "bytes": 665,
+        "sha256": "47fec012d854e9741196a919c40d8cf314a0c4c4ad142457cffdefa319c19765"
+      },
+      {
+        "path": "reports/README.md",
+        "bytes": 1595,
+        "sha256": "7483b66a3bf72441e4ac8bdd4bf49696122bde76e241b30921a11095f7dacd71"
+      },
+      {
+        "path": "RentzLab-0.22.0.apk",
+        "bytes": 925834,
+        "sha256": "f2c1a7f6c3abbd9ae86215fa432be34f6def5da3a882f998adfd283e614445f3"
+      },
+      {
+        "path": "RentzLab-0.22.0.apk.sha256",
+        "bytes": 86,
+        "sha256": "cf91ce779df54d6facf94c6514c5ec76915dbcc3fb3e2185ed612b95f2704f1f"
+      }
+    ]
+  }
+}
