@@ -2,17 +2,17 @@
 
 ## Pe scurt
 
-Catalogul identifică ediția curentă și trimite la APK-ul semnat și la proveniența calificării. Rapoartele originale și copiile de audit rămân în depozitul extern de dovezi.
+Catalogul identifică ediția curentă și trimite la APK-ul semnat și la proveniența verificărilor. Rapoartele originale și copiile de audit rămân în depozitul extern de dovezi.
 
 ## Ediția curentă
 
-[Rentz Lab 0.23.0](0.23.0/README.md) — [descarcă APK-ul](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.23.0/RentzLab-0.23.0.apk).
+[Rentz Lab 0.24.0](0.24.0/README.md) — [descarcă APK-ul](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.24.0/RentzLab-0.24.0.apk).
 
 ## Organizare
 
 | Zonă | Rol |
 |---|---|
-| Dosarul versiunii curente | Note, manifest și proveniența calificării. |
+| Dosarul versiunii curente | Note, manifest și proveniența verificărilor. |
 | Rapoarte | Rulări Extent și receipts păstrate în depozitul extern de audit. |
 | GitHub Releases privat | APK semnat și checksum, disponibile conturilor autorizate. |
 

@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "versionName": "0.24.0",
+    "versionCode": 28,
+    "applicationId": "ro.rentzlab.app",
+    "sourceCommit": "ee49854594acdcbd8d8541072795f7c4613ef909",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "apkName": "RentzLab-0.24.0.apk",
+    "apkBytes": 926546,
+    "sha256": "16626ec6c93c9936d9e571313ddd2ee0a380e4531c41861898cabc1f71a22656",
+    "certificateSha256": "5a4605343bf27f41cdb9e6f8bdf2f4087b0b080779bea250b823307da5666b68",
+    "debuggable": false
+  },
+  "publication": {
+    "state": "PUBLISHED",
+    "channel": "authenticated-only",
+    "sourceCommit": "ee49854594acdcbd8d8541072795f7c4613ef909",
+    "sourceTag": "v0.24.0",
+    "releaseId": 444480070,
+    "provider": "GitHub",
+    "releaseRepository": "crististefanita/atf_j5_releases",
+    "assetId": 744399338,
+    "checksumAssetId": 744399397,
+    "link": "https://github.com/crististefanita/atf_j5_releases/releases/download/v0.24.0/RentzLab-0.24.0.apk",
+    "authenticatedDownload": "PASS",
+    "anonymousDownload": "DENIED",
+    "latestTag": "v0.24.0"
+  },
+  "qualification": {
+    "status": "PASS",
+    "scope": "maven-components-and-android-jvm-components",
+    "e2e": "NOT_RUN",
+    "ragPublication": "EXCEPTION",
+    "tests": 591,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": {
+      "maven": 46,
+      "mavenTests": 467,
+      "androidJvm": 25,
+      "androidJvmTests": 124
+    },
+    "evidence": {
+      "components": {
+        "path": "components/opening-024-regression/component-suite-extent.html",
+        "bytes": 7105143,
+        "sha256": "07b36c6343d010e1e6e80e5bb3326cc719fa737c88225d490bf8e401c6a1a596"
+      },
+      "componentResult": {
+        "path": "components/opening-024-regression/result.json",
+        "bytes": 27793,
+        "sha256": "75996a6739aa325f79443605c062c482a506a43b0f31dc975d18e43f3346cc3e"
+      },
+      "androidJvm": {
+        "path": "components/opening-024-regression/android-jvm/result.json",
+        "bytes": 4487,
+        "sha256": "b750e6abc0d41f35a8ea08bbf3b2b68357e71f64e6e618c12bdd190fc94edc22"
+      },
+      "build": {
+        "path": "distribution/0.24.0-offline-exception/exception-build.json",
+        "bytes": 716,
+        "sha256": "36db902bcb1fe893e2a3703829b50dc56e58aceb5ab2e411531424eca1d556ce"
+      },
+      "distribution": {
+        "path": "distribution/0.24.0-offline-exception/restricted-publication.json",
+        "bytes": 1091,
+        "sha256": "146b013989bd2ae22ba97607c4544531fdbe7a3d1c48f6b440c8cfe89eacd861"
+      }
+    }
+  },
+  "integrity": {
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 414,
+        "sha256": "e970ec6ab7f3e2992a831003e3b39784344db78e75c016d565ab313b32763e52"
+      },
+      {
+        "path": "release-notes.md",
+        "bytes": 488,
+        "sha256": "3a0c1ece942d95e832fa01c0cf359fed89d9dcd98be95b62115bd771e8762123"
+      },
+      {
+        "path": "reports/README.md",
+        "bytes": 901,
+        "sha256": "952f73a74f223407602125efd63831fcba91ac300bc029f9d028cdf14a374830"
+      },
+      {
+        "path": "RentzLab-0.24.0.apk",
+        "bytes": 926546,
+        "sha256": "16626ec6c93c9936d9e571313ddd2ee0a380e4531c41861898cabc1f71a22656"
+      },
+      {
+        "path": "RentzLab-0.24.0.apk.sha256",
+        "bytes": 87,
+        "sha256": "af9efadcad38d86080384fdc6bfac85a943040593f97a64f45f8ba373e8baf80"
+      }
+    ]
+  },
+  "verifiedUtc": "2026-11-13T16:46:40.2909708Z"
+}
