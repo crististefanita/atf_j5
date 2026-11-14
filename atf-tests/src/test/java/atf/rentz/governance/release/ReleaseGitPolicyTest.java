@@ -54,7 +54,7 @@ class ReleaseGitPolicyTest {
         var arguments = new ArrayList<>(List.of("--git-dir=" + attributeRepository.resolve(".git"),
                 "--work-tree=" + root, "-c", "core.autocrlf=true", "check-attr", "-z", "text", "--"));
         arguments.addAll(paths);
-        String[] records = git(attributeRepository, arguments).split("\\x00");
+        String[] records = git(root, arguments).split("\\x00");
         if (records.length != paths.size() * 3) throw new IllegalStateException("RELEASE-GIT-ATTR: incomplete Git output");
         var errors = new ArrayList<String>();
         for (int index = 0; index < paths.size(); index++) {

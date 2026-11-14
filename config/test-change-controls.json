@@ -604,7 +604,7 @@
       "criterion": "Retain exact DRAFT/PREPARED/PUBLISHED navigation and release identities; preserve raw JAR/POM bytes; reject truncated or empty evidence bodies while accepting the complete neighboring body.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-rentz-0.3.0/README.md",
       "expires": "2026-11-20",
-      "sha256": "568f7c644ad54942639748d4d1c987bd983b3e8b234df083743ad5446b2c45cc",
+      "sha256": "721b1c69c54b9bc202191f670db4783c0c80d91d99c15280f7ba47942cdbcf01",
       "allowDelete": false
     },
     {
