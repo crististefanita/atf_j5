@@ -92,7 +92,7 @@ try{
     $runtime=New-Item -ItemType Directory -Path (Join-Path $stage 'runtime')
     $env:JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=$($runtime.FullName)"
     if($Configuration-eq'Release'){
-        $signing=Get-AtfInfrastructurePath -Area signing -ProjectRoot $root
+        $signing=Get-AtfSigningDirectory -ProjectRoot $root
         $identity=Get-Content -Raw -LiteralPath (Join-Path $signing 'identity.json')|ConvertFrom-Json
         $secure=(Get-Content -Raw -LiteralPath $identity.credential).Trim()|ConvertTo-SecureString
         $env:RENTZ_STORE_PASSWORD=[Net.NetworkCredential]::new('rentz',$secure).Password

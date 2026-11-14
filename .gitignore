@@ -1,4 +1,5 @@
 /.atf-data/
+/.atf-signing/
 /atf-tests/target/
 /rentz-lab-app/game-core/target/
 /rentz-lab-app/.gradle/

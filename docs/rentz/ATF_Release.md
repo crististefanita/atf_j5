@@ -90,7 +90,7 @@ După verdictul `readyForProductBuild=true`, construiți produsul cu identitatea
 
 RAG citește dovezile originale, aplică verificările de calificare și înregistrează verdictul.
 
-- Evaluatorul Java primește rădăcina externă `rentz_back` calculată din Git common directory sau din `RENTZ_DATA_ROOT`. Workspace-ul de componente se înregistrează pe rădăcina sursei testate. RAG validează aceeași rădăcină la citirea dovezii Android JVM, inclusiv când scriptul este lansat din alt checkout.
+- Evaluatorul Java primește rădăcina externă `rentz_back/j5-active` calculată din Git common directory sau din `RENTZ_DATA_ROOT`. Workspace-ul de componente se înregistrează pe rădăcina sursei testate. RAG validează aceeași rădăcină la citirea dovezii Android JVM, inclusiv când scriptul este lansat din alt checkout.
 - `READY_FOR_MAIN_PROMOTION_REVIEW` permite revizuirea operatorului.
 - Publicarea și probele de descărcare au porți proprii.
 
@@ -128,7 +128,7 @@ Verificatorul nativ stabilește verdictul execuției din receipt. Validarea Exte
 
 ## Semnare și păstrarea cheii
 
-- Cheia Rentz este persistentă în zona privată `infrastructure/signing` a depozitului extern; nu aparține cache-ului, sursei sau dosarului release.
+- Cheia Rentz se păstrează în `.atf-signing` din checkout-ul principal. Toate worktree-urile folosesc această locație. Directorul este privat și exclus din Git.
 - Parola aleatoare este protejată cu Windows DPAPI pentru utilizatorul curent. Procesul Java o primește prin mediu, fără argumente, loguri sau valori în Gradle.
 - Inițializarea refuză o identitate parțială și nu rotește automat cheia. Pierderea cheii afectează actualizările: păstrați backup-ul cheii și o recuperare securizată a credențialei, inclusiv pentru schimbarea contului sau a calculatorului.
 - [Contractul Android de semnare](https://developer.android.com/studio/publish/app-signing) deține compatibilitatea actualizărilor; `targetSdk` nu demonstrează singur funcționarea pe toate versiunile Android.

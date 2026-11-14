@@ -844,7 +844,7 @@
       "criterion": "The declared sibling and validation collection are admitted while arbitrary sibling directories, unregistered workspaces and forbidden system-TEMP outputs still fail.",
       "proof": "docs/rentz/ATF_Infrastructure.md",
       "expires": "2026-12-12",
-      "sha256": "7f4491ef73b6e52600d6e52c2f94cdea64c07447aaa957d23bdbb5f178d4b02d",
+      "sha256": "67c19ad309dd1c1565b7f09e4b3eba3e333c4c47e4b7305238bb1c47aa01dfab",
       "allowDelete": false
     },
     {
@@ -1284,7 +1284,7 @@
       "criterion": "Nested worktrees resolve the shared root. Component stages name the tested checkout when the runner is invoked elsewhere. Unverified source paths and foreign descriptors fail closed.",
       "proof": "docs/rentz/ATF_Infrastructure.md",
       "expires": "2026-12-12",
-      "sha256": "b198b498df38a9ad5c01ae83d62f345b96bafaa7f6227a467c9838f8d1aa6f9a",
+      "sha256": "5379bf45d0ea1e997467ec5e5ae206a6acd927050811287e062f7d0542f65184",
       "allowDelete": false
     },
     {
@@ -1294,7 +1294,7 @@
       "criterion": "A linked worktree resolves the canonical rentz_back root; an unverified source fails closed. Workspace owner, ID, source identity and physical path stay validated; the explicit override remains supported.",
       "proof": "docs/rentz/ATF_Infrastructure.md",
       "expires": "2026-12-12",
-      "sha256": "2dca0f5114fd79a3a935d8e4b19f10bdef7dfdcd0581dcc166db1cb989d729b2",
+      "sha256": "728ba49dfff87a67b0514a9e88510197d1a7df2461c71d9eecd38cb1d6eb7d78",
       "allowDelete": false
     },
     {
@@ -1304,7 +1304,7 @@
       "criterion": "Commit, source manifest, package, version, signing certificate, APK bytes, and reporting tools match receipts.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "6fc17810640da0efefbc73ae914b8054b4255af7867616295bad26d135ed3ccf",
+      "sha256": "ef60602961b48d8f331f70805608f2491cf5ac80b62c6f2a8885658336b6b9b6",
       "allowDelete": false
     },
     {

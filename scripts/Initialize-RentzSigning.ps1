@@ -4,7 +4,7 @@ $ErrorActionPreference='Stop'
 $project=Split-Path -Parent $PSScriptRoot
 Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
-$directory=Get-AtfInfrastructurePath -Area signing -ProjectRoot $project
+$directory=Get-AtfSigningDirectory -ProjectRoot $project
 $store=Join-Path $directory 'rentz-release.p12'
 $credential=Join-Path $directory 'password.dpapi'
 $identity=Join-Path $directory 'identity.json'

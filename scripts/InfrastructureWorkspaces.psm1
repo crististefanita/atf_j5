@@ -108,7 +108,7 @@ function Get-AtfDataRoot {
         if((Split-Path -Leaf $checkout)-cne'atf_j5'-or-not(Test-Path -LiteralPath (Join-Path $checkout 'config/infrastructure-workspaces.json') -PathType Leaf)){
             throw 'Default data root requires a verified atf_j5 Git common directory.'
         }
-        $data=Join-Path (Split-Path -Parent (Split-Path -Parent $checkout)) 'rentz_back'
+        $data=Join-Path (Split-Path -Parent (Split-Path -Parent $checkout)) 'rentz_back/j5-active'
     }
     $forbidden=@($project,[IO.Path]::GetTempPath().TrimEnd('\','/'))
     foreach($boundary in $forbidden){if($data.Equals($boundary,[StringComparison]::OrdinalIgnoreCase)-or$data.StartsWith($boundary+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Data root must be outside sources and the operating-system temporary directory.'}}
@@ -148,6 +148,17 @@ function Get-AtfInfrastructurePath {
     $path=Join-Path (Get-AtfDataRoot -ProjectRoot $ProjectRoot) ('infrastructure/'+$Area)
     Assert-AtfPhysicalPath -Path $path
     return $path
+}
+
+function Get-AtfSigningDirectory {
+    param([Parameter(Mandatory)][string]$ProjectRoot)
+    $checkout=Split-Path -Parent (Get-AtfGitCommonDirectory -RepositoryRoot $ProjectRoot)
+    if((Split-Path -Leaf $checkout)-cne'atf_j5'){throw 'Rentz signing requires the canonical atf_j5 checkout.'}
+    $directory=Join-Path $checkout '.atf-signing'
+    Assert-AtfPhysicalPath -Path $directory
+    $null=git -C $checkout check-ignore -- .atf-signing/rentz-release.p12
+    if($LASTEXITCODE){throw 'The canonical signing directory must be ignored by Git.'}
+    return $directory
 }
 
 function New-AtfWorkspace {
@@ -313,4 +324,4 @@ function Get-AtfReportingLibrary {
     return [pscustomobject]@{version=$version;name=$name;jar=$jar;sha256=(Get-FileHash -LiteralPath $jar -Algorithm SHA256).Hash.ToLowerInvariant();pom=$artifactPom;pomSha256=(Get-FileHash -LiteralPath $artifactPom -Algorithm SHA256).Hash.ToLowerInvariant()}
 }
 
-Export-ModuleMember -Function Get-AtfWorkspacePolicy,Get-AtfDataRoot,Assert-AtfPhysicalPath,Assert-AtfArtifactPath,Get-AtfInfrastructurePath,New-AtfWorkspace,Get-AtfWorkspaceFindings,Assert-AtfInfrastructure,Get-AtfReleaseSourceCommit,Get-AtfCheckoutLayoutRoot,Get-AtfReportingLibrary
+Export-ModuleMember -Function Get-AtfWorkspacePolicy,Get-AtfDataRoot,Assert-AtfPhysicalPath,Assert-AtfArtifactPath,Get-AtfInfrastructurePath,Get-AtfSigningDirectory,New-AtfWorkspace,Get-AtfWorkspaceFindings,Assert-AtfInfrastructure,Get-AtfReleaseSourceCommit,Get-AtfCheckoutLayoutRoot,Get-AtfReportingLibrary

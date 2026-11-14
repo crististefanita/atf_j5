@@ -15,6 +15,7 @@
     ".git",
     ".idea",
     ".mvn",
+    ".atf-signing",
     "atf-test-kit",
     "atf-tests",
     "config",
