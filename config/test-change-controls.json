@@ -1324,7 +1324,7 @@
       "criterion": "Preserve the current published edition until the candidate passes offline, native, signed build and authenticated distribution checks.",
       "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
       "expires": "2027-02-12",
-      "sha256": "5104e5c3d59b38aa4a52cab44f6fdfb923d69b4978484a21b1cf359b72b11184",
+      "sha256": "dacbcd0759332081e80cbd5799df4a30ba6aa95062aab8f6ee2f725b131818d9",
       "allowDelete": false
     },
     {
