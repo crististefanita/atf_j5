@@ -804,7 +804,7 @@
       "criterion": "Exercise a successful and a failed evaluator with nested generated files, verify cleanup receipts and retain component inputs.",
       "proof": "docs/rentz/ATF_Infrastructure.md#curățare-și-probe",
       "expires": "2026-12-10",
-      "sha256": "3d653c5ecd796fd46997d76f285b5c80694eced98b4a2bc49fbd1670705c46dd",
+      "sha256": "15bea3ca27e54d66d955b7b7504ae3d94ca3e4726958864ab8cc7a0c3db3f83c",
       "allowDelete": false
     },
     {
