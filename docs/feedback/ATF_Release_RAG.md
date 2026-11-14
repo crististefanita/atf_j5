@@ -19,3 +19,10 @@ RAG-ul local citează sursele și explică porțile. Verificatoarele determinist
 
 - Introduceți o reluare verificabilă pornind de la commit, tag, release ID și hash-urile APK/checksum. Folosiți răspunsuri simulate pentru tag existent, draft parțial, asset identic și push refuzat.
 - Refuzați un asset cu octeți diferiți. Ieșirea trebuie să indice pasul reluabil și ultima dovadă confirmată, cu o singură intrare APK în README. [Contractul publicării](../rentz/ATF_Release.md#publicare-și-descărcare)
+
+## Octeții sursei după recrearea worktree-ului
+
+**P2 · Responsabil: calificarea J5.** Pe Windows, o revenire la tag într-un checkout cu autocrlf poate rescrie terminatorii din documentele incluse în manifest. Git poate raporta worktree curat, iar RAG blochează corect recitirea acelui receipt cu RAG-RECEIPT-SOURCE-DRIFT.
+
+- Verificați materializarea aceleiași revizii în două worktree-uri noi, cu configurații Git diferite. Folosiți intrări canonice pentru snapshot și păstrați verificarea pe octeți a dovezii originale.
+- Proba negativă schimbă un fișier cu impact în snapshot și cere refuz. Pentru edițiile existente, documentați recuperarea prin confruntarea octeților atestați cu bloburile commitului. [Calificarea offline](../rentz/ATF_Qualification.md)
