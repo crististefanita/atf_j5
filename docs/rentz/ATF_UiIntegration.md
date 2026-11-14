@@ -53,6 +53,19 @@ Aceste intrări sunt active în configurația live. [Repository-ul admis](../../
 
 [Backlog-ul UI](../feedback/ATF_Rentz_UI_ToDo.md) deține criteriile rămase. [Calificarea offline](ATF_Qualification.md) și [acceptanța Android](ATF_Android.md) păstrează identitățile și limitele execuției.
 
+### Matricea de afișaj
+
+| Parametru | Selecție pentru componente |
+|---|---|
+| Lățime utilă | 320, 360, 393, 412, 600 și 800 dp; o lățime în pixeli nu înlocuiește măsurarea în dp. |
+| Orientare | Portret și peisaj, inclusiv spațiul redus de barele sistemului. |
+| Scala fontului | 1,0 / 1,3 / 2,0. |
+| Conținut | Mese de 3–6 jucători, opt cărți proprii, tablă completă și până la 48 de mâini în istoric. |
+
+La limita lizibilității se alege un mod explicit de derulare sau o dispunere adaptată. Nu micșorați nelimitat textul și nu eliminați jucători, valori sau cărți pentru a face testul să treacă; țintele interactive păstrează minimum 48 × 48 dp, separat de cărțile doar informative, conform [recomandării Android pentru accesibilitate](https://developer.android.com/guide/topics/ui/accessibility/apps).
+
+[Ghidul Android pentru layout-uri adaptive cu Views](https://developer.android.com/develop/ui/views/layout/responsive-adaptive-design-with-views) fundamentează adaptarea la spațiul disponibil. Dimensiunile matricei sunt selecția de testare a proiectului.
+
 ## Componente comune și oracole Rentz
 
 | Comun, fără reguli | Rămâne în consumator |

@@ -118,8 +118,8 @@ Verificatorul nativ stabilește verdictul execuției din receipt. Validarea Exte
 - Buildul folosește numai sursa fixată din receipt-ul regresiei. [Criteriile RAG rămase](../feedback/ATF_Release_RAG.md)
 
 - **Cache concurent:** folosiți `-MavenRepository <cache-dedicat>` la calificare când alte procese pot încărca aceleași JAR-uri; calea rămâne în `infrastructure/cache`. Nu opriți procesele altui proprietar și nu transformați eroarea de înlocuire într-un rezultat verde.
-- **Izolare:** staging-ul este workspace-ul temporar înregistrat de J5, în afara sursei și a TEMP-ului Windows. Rulările intermediare rămân în depozitul extern; numai dosarul selectat se copiază în `release/<versiune>`.
-- **Istoric:** arhivați dovezile în `distribution/archives` înainte de înlocuirea dosarului activ. Păstrați tagurile de sursă. Retrageți intrările GitHub Release înlocuite după verificarea ediției noi.
+- **Izolare:** staging-ul este workspace-ul temporar înregistrat de J5, în afara sursei și a TEMP-ului Windows. APK-ul, rapoartele și dovada originală rămân în depozitul extern. În `release/<versiune>` se publică documentele și manifestul.
+- **Istoric:** Păstrați la căile originale dovezile citite de RAG și tagurile de sursă. Retragerea unei intrări GitHub Release urmează verificarea ediției noi. [Verificarea după curățare](ATF_Infrastructure.md#verificare-după-curățare)
 - **Commit fixat:** pregătiți candidatul DRAFT într-un worktree `atf_j5` dintr-un workspace alocat de J5. Regresia refuză un worktree modificat și verifică din nou commit-ul, populația și hash-urile la final.
 - **Intrări Android:** build-ul Release preia automat sursa din receipt-ul regresiei. Confruntă întregul inventar Android JVM, inclusiv configurația Gradle, resursele și biblioteca UI. Opțiunea `-UiSanity` produce separat varianta izolată și comparațiile pentru Extent din același snapshot.
 - **Teste:** se păstrează populațiile Maven și Android JVM, fără FAIL, erori sau skip-uri; o selecție scurtă nu se redenumește regresie. Testele de guvernanță și controalele negative ale descărcării se execută offline înainte de publicare.

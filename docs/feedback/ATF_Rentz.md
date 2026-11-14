@@ -22,7 +22,7 @@
 | Prioritate | Responsabil și diferență | Criteriu de închidere |
 |---|---|---|
 | P1 | Referința: pornirea poate produce WebView negru pe configurația Android inspectată. | Identificați runtime-ul și cauza prin probe delimitate; un ecran utilizabil și instrucțiuni lizibile preced calificarea regulilor. Instalarea sau PID-ul procesului nu constituie succes funcțional. |
-| P1 | Android local: integrarea mesei și a istoricului este livrată; motorul deschide acum jocurile noi din J la 3–6 locuri. Rămân probele native pentru geometrie compactă, ritmul actorilor și clasamentul final. | Închideți probele de componentă și de acceptanță nativă selectivă din [backlog-ul UI](ATF_Rentz_UI_ToDo.md). Contractele livrate sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md). |
+| P1 | Android local: integrarea mesei și a istoricului este livrată; motorul alege deschiderea din pachetul activ. Rămân probele native pentru geometrie compactă, ritmul actorilor și clasamentul final. | Închideți probele de componentă și de acceptanță nativă selectivă din [backlog-ul UI](ATF_Rentz_UI_ToDo.md). Contractele livrate sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md). |
 | P2 | Persistență: versiunea regulilor este explicită; compatibilitatea veche este limitată la reluarea validată a comenzilor, fără migrarea scorului sau a opțiunilor noi. | Calificați migrări reprezentative și refuzul sesiunilor incompatibile, cu păstrarea fișierului original. Orice schimbare de profil sau candidat cere identitate și strategie explicită. |
 | P1 | iOS: cererea de suport iPhone nu are încă țintă, build sau calificare proprie în J5. | Contractul actual [descrie livrarea Android](../rentz/ATF_Release.md). Dacă iOS rămâne în scop, adăugați criterii și receipte de release proprii; APK-ul și testele Android nu îl califică. |
 
@@ -37,26 +37,8 @@ Păstrați contractele de domeniu și calificați separat implementarea nativă.
 - **Aplicație:** UI-ul, ciclul de viață și stocarea nativă au teste și identitate de release proprii.
 - **Suport declarat:** fixați matricea versiunilor stabile, treceți testele offline/componente și verificați instalarea pe un dispozitiv fizic.
 
-## Transferul generic
+## Contracte înrudite
 
-Kitul și JAR-urile au responsabilități comune, iar legalitatea și scorul aparțin domeniului Rentz. API-ul de guvernanță reutilizabil trebuie să accepte rădăcină, inventar și module mixte Maven/Gradle explicit, fără impunerea motorului altui joc.
-
-## Guvernanța infrastructurii
-
-[Contractul implementat](../rentz/ATF_Infrastructure.md) păstrează registrul, allocatorul și probele roșu/verde la consumator. Extinderea către alte proiecte trebuie să adopte explicit rădăcinile, proprietarii și producătorii lor; o rulare trecută aici nu certifică toate directoarele temporare ale celorlalte proiecte sau ale sistemului.
-
-| Prioritate | Cerință rămasă | Criteriu de închidere |
-|---|---|---|
-| P2 | Copiile istorice încă referite de receipt-uri sau classpath-uri cer reconciliere înainte de retragere. | Inventar cu proprietar și dovada utilizării, arhivă portabilă verificată și eliminare numai după eliberarea proceselor; nu redenumiți proveniența istorică pentru a obține verde. |
-
-## Prezentare și tabelă de scor
-
-[Ghidul integrării](../rentz/ATF_UiIntegration.md#istoricul-adaptiv-rentz) păstrează dovada accesului la coloane după derulare. [Backlog-ul UI](ATF_Rentz_UI_ToDo.md) păstrează criteriile deschise pentru clasament, lizibilitatea mesei și tabla terminală.
-
-[Contractul regulilor](../rentz/ATF_Rules.md) · [Lecțiile transferului](../rentz/ATF_Transfer.md) · [Rutarea bibliotecilor](README.md)
-
-## Adopția Test Kit
-
-Producătorul Test Kit deține API-ul și pachetul. [Adopția locală](../../lib/README.TestKit.md) explică proba Rentz și rularea izolată.
-
-Identitatea copiei inițiale rămâne în istoricul provenienței; adopția Kit are identitate proprie la consumator. Componentele Rentz verifică binarul, iar scriptul păstrează inventarul reactorului fără surse Kit; acceptanța Android rămâne separată.
+- [Guvernanță reutilizabilă și adopția Kit](README.md#contract-generic-pentru-guvernanță)
+- [Retenția probelor](ATF_Release_RAG.md#retenția-spațiilor-de-lucru)
+- [Prezentare și scor](ATF_Rentz_UI_ToDo.md)

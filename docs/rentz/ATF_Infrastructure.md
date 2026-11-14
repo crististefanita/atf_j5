@@ -75,6 +75,10 @@ Copiile istorice indicate de receipt-uri nu se rebotează și nu se șterg în m
 
 - Lansatorul RAG alocă JVM-ului `java-scratch` în directorul rulării. La ieșire încearcă să elimine acest director și scrie `scratch-cleanup.json`, inclusiv dacă evaluatorul eșuează. Rezultatul curățării are propriul statut. [Lansatorul RAG](../../scripts/run-release-rag.ps1) · [Controalele runtime](../../atf-tests/tools/test-qualified-runtime.ps1)
 
+### Verificare după curățare
+
+Reluați RAG din worktree-ul commitului calificat, cu receiptele originale de componente, de build și de acceptanță nativă. Confirmați din nou porțile Extent pentru componente și Android, apoi verificați README-ul remote cu o descărcare autentificată proaspătă. O ediție deja publicată își păstrează manifestul și dovezile inițiale. [Porțile release-ului](ATF_Release.md#ordinea-calificării-android-curente)
+
 ### Inventarul țintelor Maven
 
 - Furnizați căile exacte `target`, rădăcinile receiptelelor, comenzile proceselor active și căile worktree-urilor Git. Pentru țintele dintr-un workspace înregistrat, furnizați și rădăcina workspace-ului prin `WorkspaceByTarget`.
@@ -83,7 +87,7 @@ Copiile istorice indicate de receipt-uri nu se rebotează și nu se șterg în m
 
 ## Dosarul selectat al livrării
 
-Directorul sursă `release` este catalogul documentar și copia selectată a livrării, nu o destinație pentru rulările curente. [Procesul APK](ATF_Release.md) permite numai promovarea explicită a dovezilor calificate; toate rulările și build-urile intermediare folosesc în continuare colecțiile externe înregistrate.
+Directorul `release` păstrează catalogul, documentele ediției active și manifestele cu digesturi. APK-ul și checksum-ul verificat se descarcă în `distribution/incoming/<versiune>`. Rapoartele, XML-urile, capturile și intrările atestate rămân în locațiile externe ale rulării. [Procesul APK](ATF_Release.md)
 
 ## Bootstrap și calificare executabilă
 
