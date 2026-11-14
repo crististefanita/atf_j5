@@ -1324,7 +1324,7 @@
       "criterion": "Keep exactly one current edition and bind v0.24.0, private asset IDs and authenticated bytes to the published manifest. Record offline test scope and native NOT_RUN without changing the standard release gate.",
       "proof": "docs/rentz/ATF_Release.md#publicare-și-descărcare",
       "expires": "2027-02-12",
-      "sha256": "76093c74a30c1d46de8bbacc65d76118d6099fa7c7fe53c850b76b0d2efd4fc4",
+      "sha256": "c28da57cb90ee75419409abb9cd77ba8073da3b346b3c1e7f822d63cbf8385ed",
       "allowDelete": false
     },
     {
