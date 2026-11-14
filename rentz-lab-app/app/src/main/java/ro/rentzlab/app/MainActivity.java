@@ -143,7 +143,10 @@ public final class MainActivity extends Activity {
             return;
         }
         String name = copy().humanName(profile.preferredName());
-        if (controller.newGame(setup.players(), System.currentTimeMillis(), setup.difficulty(), name)) {
+        long seed = BuildConfig.NATIVE_ACCEPTANCE_SEED != 0L
+                && getIntent().getBooleanExtra("rentz.nativeAcceptance", false)
+                ? BuildConfig.NATIVE_ACCEPTANCE_SEED : System.currentTimeMillis();
+        if (controller.newGame(setup.players(), seed, setup.difficulty(), name)) {
             restorePreviewPending = false;
             preview.reset(controller.session().view()); route("GAME");
         }

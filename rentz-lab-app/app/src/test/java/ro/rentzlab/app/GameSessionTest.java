@@ -11,6 +11,45 @@ import java.util.List;
 import static org.junit.Assert.*;
 @AndroidComponentLayer
 public class GameSessionTest {
+    @Test public void isolatedAcceptanceReplaysThreeDistinctContractsFromTheSameSeed() {
+        long seed = Long.parseLong(System.getProperty("rentz.nativeAcceptanceSeed"));
+        assertEquals(0L, BuildConfig.NATIVE_ACCEPTANCE_SEED);
+        var first = playAcceptanceSegment(seed);
+        var second = playAcceptanceSegment(seed);
+        assertEquals(List.of(Contract.RENTZ, Contract.TRICKS, Contract.WHIST),
+                first.history().stream().map(RentzMatch.HandResult::contract).toList());
+        assertEquals(first.history(), second.history());
+        assertEquals(first.save().commands(), second.save().commands());
+    }
+
+    private static GameSession playAcceptanceSegment(long seed) {
+        var session = new GameSession(4, seed, RentzPlayer.Difficulty.NORMAL);
+        session.apply(new GameSession.Command(GameSession.Action.REVEAL, 0, null, null, false));
+        session.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null, Contract.RENTZ, false));
+        for (int deal = 0; deal < 3; deal++) {
+            if (deal > 0) {
+                session.apply(new GameSession.Command(GameSession.Action.NEXT_HAND, 0, null, null, false));
+            }
+            boolean explicitPlay = false;
+            for (int actions = 0; session.view().phase() != RentzMatch.Phase.DEAL_END; actions++) {
+                assertTrue("Hand must settle within the action budget", actions < 128);
+                var view = session.view();
+                if (view.turn() != 0) {
+                    session.advanceBotTurn();
+                } else if (session.hasForcedHumanPass()) {
+                    session.apply(new GameSession.Command(GameSession.Action.PASS, 0, null, null, false));
+                } else if (deal == 0 && explicitPlay) {
+                    session.advanceHumanTurn();
+                } else {
+                    session.apply(new GameSession.Command(
+                            GameSession.Action.PLAY, 0, view.legal().get(0), null, false));
+                    explicitPlay = true;
+                }
+            }
+            assertTrue("Every hand must include an explicit play", explicitPlay);
+        }
+        return session;
+    }
     @Test public void savedRentzScoringKeepsTheVersionUsedAtSettlement() throws Exception {
         var legacy = RentzMatch.DealEnding.SCORING_CARDS;
         var current = RentzMatch.DealEnding.UNIQUE_LAST;

@@ -1,8 +1,12 @@
 plugins { id 'com.android.application' }
+def nativeAcceptanceSeed = '20261117L'
 android {
     namespace 'ro.rentzlab.app'
     compileSdk 36
-    defaultConfig { applicationId 'ro.rentzlab.app'; minSdk 26; targetSdk 36; versionCode 29; versionName '0.25.0' }
+    defaultConfig {
+        applicationId 'ro.rentzlab.app'; minSdk 26; targetSdk 36; versionCode 30; versionName '0.26.0'
+        buildConfigField 'long', 'NATIVE_ACCEPTANCE_SEED', '0L'
+    }
     buildFeatures { buildConfig true }
     signingConfigs {
         release {
@@ -21,6 +25,7 @@ android {
             applicationIdSuffix '.uisanity'
             versionNameSuffix '-ui-sanity'
             matchingFallbacks = ['debug']
+            buildConfigField 'long', 'NATIVE_ACCEPTANCE_SEED', nativeAcceptanceSeed
         }
         release {
             debuggable false
@@ -34,6 +39,7 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     testOptions.unitTests.all {
+        systemProperty 'rentz.nativeAcceptanceSeed', nativeAcceptanceSeed.dropRight(1)
         systemProperty 'rentz.uiRepository', rootProject.file('ui-library').absolutePath
         def evidence = providers.gradleProperty('rentz.uiEvidence').orNull
         if (evidence) systemProperty 'rentz.uiEvidence', rootProject.file(evidence).absolutePath

@@ -783,6 +783,12 @@ function ReadConsecutiveHistory([string]$Title,[string[]]$Contracts){
     }
     return $seen.Count
 }
+function Assert-ConsecutiveContracts([string[]]$Contracts){
+    if($Contracts.Count-ne$consecutiveGameCount-or$Contracts[0]-cne'RENTZ'-or
+        @($Contracts|Sort-Object -Unique).Count-ne$consecutiveGameCount){
+        throw "ANDROID-CONTRACT-SEQUENCE: expected $consecutiveGameCount distinct contracts, Rentz first; got $($Contracts -join ', ')."
+    }
+}
 function RunConsecutiveSubgames($state,[string]$journalFile){
     $selectedContracts=[Collections.Generic.List[string]]::new();$baseSeats='';$chooserSeats=''
     for($deal=1;$deal-le$consecutiveGameCount;$deal++){
@@ -902,28 +908,27 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
             seatGeometryVerified=$true;firstHumanMoveVerified=(ConfirmNativeCheck $points $moveTitle 'The same seat geometry survives a card play');completionVerified=($terminal.view.phase-eq'DEAL_END');
             rentzFinishOrderVerified=($contract-eq'RENTZ'-and$terminal.view.finishOrder.Count-eq$terminal.view.players)})
     }
-    $rentzGames=@($selectedContracts|Where-Object{$_-ceq'RENTZ'}).Count
-    $standardGames=@($selectedContracts|Where-Object{$_-cne'RENTZ'})
-    if($selectedContracts.Count-ne$consecutiveGameCount){throw "Expected exactly $consecutiveGameCount completed UI games."}
-    if($rentzGames-ne1-or$standardGames.Count-ne($consecutiveGameCount-1)){
-        throw 'The three-game flow must contain one Rentz game and two standard games.'
-    }
-    if(@($selectedContracts|Sort-Object -Unique).Count-lt2){throw 'The completed flow must cover Rentz and at least one standard contract.'}
+    $script:consecutiveContracts=$selectedContracts.ToArray()
     $journal=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/session.json') 'consecutive-subgames-journal'
     $journalPath=Join-Path $raw 'consecutive-subgames-journal.json';[IO.File]::WriteAllText($journalPath,$journal.Output,[Text.UTF8Encoding]::new($false))
     $actor=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/actor-view.json') 'consecutive-subgames-actor'
     $actorPath=Join-Path $raw 'consecutive-subgames-actor.json';[IO.File]::WriteAllText($actorPath,$actor.Output,[Text.UTF8Encoding]::new($false))
     $oracle=Invoke-DevelopmentAudit $journalPath $actorPath
     if($oracle.status-ne'PASS'-or$oracle.completedDeals-ne$consecutiveGameCount-or$oracle.phase-ne'DEAL_END'){throw 'Independent journal replay did not match the consecutive UI games.'}
-    $script:consecutiveContracts=$selectedContracts.ToArray();$script:consecutiveOracle=$oracle
+    $script:consecutiveOracle=$oracle
+    $openingSeed=(Get-Content -LiteralPath $journalFile -Raw|ConvertFrom-Json).seed
+    $finalSeed=($journal.Output|ConvertFrom-Json).seed
+    Assert-ConsecutiveContracts $consecutiveContracts
     $oracleContracts=@($oracle.history|ForEach-Object{$_.contract})
     Tap 'Score history';$history=State -Screen 'HISTORY'
     $historyCount=ReadConsecutiveHistory 'Score history' $selectedContracts.ToArray()
     Observe 'Score history contains the consecutive subgames' {param($captured)
         Check 'All completed history rows are reachable' $consecutiveGameCount $historyCount
         Check 'Independent journal replay preserves the visible contracts' ($selectedContracts -join ',') ($oracleContracts -join ',')
-        Check 'Rentz occurs in the independently replayed match segment' $true ($oracleContracts -contains 'RENTZ')
-        Check 'At least one standard contract occurs in the same segment' $true (@($oracleContracts|Where-Object{$_-ne'RENTZ'}).Count-gt0)
+        Check 'Independent replay opens with Rentz' 'RENTZ' $oracleContracts[0]
+        Check 'Independent replay contains three distinct contracts' $consecutiveGameCount @($oracleContracts|Sort-Object -Unique).Count
+        Check 'The test APK used the documented native acceptance seed' $nativeAcceptanceSeed $openingSeed
+        Check 'The same seed belongs to the completed journal' $openingSeed $finalSeed
         Check 'Independent audit saw all human-visible commands' $true ($oracle.auditedTransitions-gt0)
         Check 'Score history state belongs to the final application revision' $terminal.revision $history.revision
     }
@@ -1086,7 +1091,15 @@ try{
     $existing=Adb @('shell','pm','path','ro.rentzlab.app.uisanity') 'sanity-existing' -Allowed @(0,1)
     if($existing.Output-match'package:'){throw 'The isolated test package already exists; identity and data need reconciliation before reuse.'}
     Adb @('install',$build.apk) 'install'|Out-Null;$installed=$true
-    Adb @('shell','am','start','-W','-n','ro.rentzlab.app.uisanity/ro.rentzlab.app.MainActivity') 'launch'|Out-Null
+    $launch=@('shell','am','start','-W','-n','ro.rentzlab.app.uisanity/ro.rentzlab.app.MainActivity')
+    if($ConsecutiveSubgames){
+        $gradle=Get-Content -LiteralPath (Join-Path $project 'rentz-lab-app/app/build.gradle') -Raw
+        $seedDeclaration=[regex]::Match($gradle,"(?m)^def nativeAcceptanceSeed = '([1-9][0-9]*)L'\r?$")
+        if(!$seedDeclaration.Success){throw 'The native acceptance seed is missing from the qualified Android build configuration.'}
+        $nativeAcceptanceSeed=[long]$seedDeclaration.Groups[1].Value
+        $launch+=@('--ez','rentz.nativeAcceptance','true')
+    }
+    Adb $launch 'launch'|Out-Null
     if($HelpAwardsOnly){RunHelpAwardsSanity}elseif($HistoryOnly){RunHistorySanity}else{
     Observe 'English shared home and disabled resume' {param($nodes) $t=Text $nodes;Check 'Rentz home' $true ($t.Contains('Rentz'));Check 'English first launch' $true ($t.Contains('New game'));Check 'Resume disabled' 1 @($nodes|Where-Object{$_.text-eq'Resume game'-and$_.enabled-eq'false'}).Count}
     if($ConsecutiveSubgames){
@@ -1234,7 +1247,7 @@ $minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}
 if($HistoryDetails){$minimum+=4}
 if($CompactScores){$minimum++}
 if(-not$failure-and($cleanup.Count-or-not$released-or-not$preserved-or$points.Count-lt$minimum)){$failure='Native closeout failed or the declared checkpoint population is incomplete.'}
-$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: Rentz first, then two standard games, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
+$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: Rentz first, then two distinct standard games, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
 if($HistoryDetails){$scope+='; confirmed blind trick contributions and the actual Rentz finishing places after journal restore'}
 if($ConsecutiveSubgames){$scope+='; learning order, search, filters, eligibility, local profile and durable achievement progress'}
 if($CompactConsecutive){$scope+='; compact 720x1280, density 360, font scale 1.5'}

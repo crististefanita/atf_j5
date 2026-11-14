@@ -800,11 +800,11 @@
     {
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz consumer",
-      "reason": "Add the owned RAG scratch lifecycle regression.",
-      "criterion": "Exercise a successful and a failed evaluator with nested generated files, verify cleanup receipts and retain component inputs.",
-      "proof": "docs/rentz/ATF_Infrastructure.md#curățare-și-probe",
-      "expires": "2026-12-10",
-      "sha256": "15bea3ca27e54d66d955b7b7504ae3d94ca3e4726958864ab8cc7a0c3db3f83c",
+      "reason": "Add the native contract sequence control to the qualified runtime fixtures.",
+      "criterion": "Accept the valid three-contract sequence and reject repeats, a wrong opener, an incomplete sequence, or an extra contract.",
+      "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
+      "expires": "2027-02-12",
+      "sha256": "644aa2450555359b3a8011ce6fc66db3d4e407e8112a96af60317dfcabd2fbb5",
       "allowDelete": false
     },
     {
@@ -880,11 +880,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/GameSessionTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
-      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "ca723f94a2515ea96cd4bfa8fa51583110d0111b6c25cbdd0d49c36b9ca39ebd",
+      "reason": "Verify the deterministic acceptance deal with the real normal-opponent policy.",
+      "criterion": "Two fresh sessions on the configured acceptance seed produce the same journal and three distinct complete contracts, Rentz first. Ordinary debug builds keep the fixed seed guard disabled.",
+      "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
+      "expires": "2027-02-12",
+      "sha256": "c5b42a4e6664370b99ee20d72901aa5df30c5358470c19bc1c5ca8931a721769",
       "allowDelete": false
     },
     {
@@ -1270,11 +1270,11 @@
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz release",
-      "reason": "Verify identical seat rectangles through the first real chooser transition, bind the captured native journal to its reservation, expose debug-only turn-scheduling stages when a UI action stalls, and qualify the shorter three-game release flow.",
-      "criterion": "Complete exactly three deals: one Rentz and two standard games, allowing the contract to repeat when an AI seat is chooser. Retain native geometry, search, empty results and reset, eligibility, progress and restart. Require the capture digest before completing the native reservation. On a stalled turn retain frame, timer, controller worker and acceptance stages in failure evidence. Qualify Hard catalog breadth and terminal victory eligibility in Android JVM.",
-      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
-      "expires": "2026-11-20",
-      "sha256": "614cbe3351eb865d5048a44218b507267c59e268b28f589113575bfd650453cd",
+      "reason": "Keep the consecutive native scenario reproducible without changing gameplay policy.",
+      "criterion": "The isolated package uses the configured seed, each deal completes through the UI, and duplicates block PASS. Keep capture, replay, history, restart, and cleanup.",
+      "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
+      "expires": "2027-02-12",
+      "sha256": "99e4112400582ae4b793e7ad76cf5d1d7968f5b6d9126095c6bda926483fffaa",
       "allowDelete": false
     },
     {
@@ -1310,21 +1310,21 @@
     {
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
-      "reason": "Prepare minor release 0.24.0 for the upper-middle opener.",
-      "criterion": "Advance versionCode from 27 to 28, preserve the existing signing identity, and bind the candidate to source-matched regression, Android JVM, three-game native and RAG receipts.",
-      "proof": "docs/rentz/ATF_Release.md",
-      "expires": "2026-11-20",
-      "sha256": "9e879d1ab87006df44d2a9f91d592fb0a6bcfdbd3005cd3961426b7a3e9f51aa",
+      "reason": "Declare the fixture seed for UI acceptance and prepare Rentz Lab 0.26.0.",
+      "criterion": "Only uiSanity can use the declared fixed seed. The release remains 0.x, versionCode 30, and normal game starts keep the clock seed.",
+      "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
+      "expires": "2027-02-12",
+      "sha256": "d3bfdeebfd840a3e8fd0fa56d589305bf89a86a58705df1cdd6401b8df88f278",
       "allowDelete": false
     },
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Publish the authenticated-only 0.24.0 APK with a one-time offline exception authorized for the Rentz opening rule.",
-      "criterion": "Keep exactly one current edition and bind v0.24.0, private asset IDs and authenticated bytes to the published manifest. Record offline test scope and native NOT_RUN without changing the standard release gate.",
-      "proof": "docs/rentz/ATF_Release.md#publicare-și-descărcare",
+      "reason": "Stage Rentz Lab 0.26.0 for same-commit qualification.",
+      "criterion": "Preserve the current published edition until the candidate passes offline, native, signed build and authenticated distribution checks.",
+      "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
       "expires": "2027-02-12",
-      "sha256": "c28da57cb90ee75419409abb9cd77ba8073da3b346b3c1e7f822d63cbf8385ed",
+      "sha256": "5104e5c3d59b38aa4a52cab44f6fdfb923d69b4978484a21b1cf359b72b11184",
       "allowDelete": false
     },
     {

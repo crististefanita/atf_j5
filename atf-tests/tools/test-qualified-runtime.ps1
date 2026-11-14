@@ -431,6 +431,22 @@ Case 'Achievement query retries corrupted native input and requires an exact foc
         Require ($failed-and$state.writes-eq$expected) 'Unconfirmed input must fail within the retry budget'
     }
 }
+Case 'Consecutive native acceptance rejects repeated or reordered contracts' {
+    $tokens=$null;$errors=$null
+    $ast=[Management.Automation.Language.Parser]::ParseFile((Join-Path $project 'atf-tests/tools/run-shared-ui-sanity.ps1'),[ref]$tokens,[ref]$errors)
+    Require (-not$errors) 'Shared UI runner does not parse'
+    $definition=$ast.Find({param($node) $node-is [Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-ceq'Assert-ConsecutiveContracts'},$true)
+    Require ($null-ne$definition) 'Runner lacks an executable contract check'
+    . ([scriptblock]::Create($definition.Extent.Text))
+    $consecutiveGameCount=3
+    Assert-ConsecutiveContracts @('RENTZ','TRICKS','WHIST')
+    foreach($bad in @('RENTZ,TRICKS,TRICKS','TRICKS,RENTZ,WHIST','RENTZ,TRICKS','RENTZ,TRICKS,WHIST,QUEENS')){
+        $refused=$false
+        try{Assert-ConsecutiveContracts ($bad.Split(','))}catch{$refused=$_.Exception.Message -like 'ANDROID-CONTRACT-SEQUENCE:*'}
+        Require $refused "Runner admitted an invalid sequence: $bad"
+    }
+}
+
 Case 'Direct Release build rejects missing native evidence before staging' {
     $output=Join-Path $fixture 'release-without-native-evidence'
     $component=Join-Path $fixture 'component-not-read-before-preflight'
