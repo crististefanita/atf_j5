@@ -202,7 +202,11 @@ git -C $project merge-base --is-ancestor $source $head
 if($LASTEXITCODE){throw 'The pushed README must descend from the qualified source.'}
 $readme = (git -C $project show ($head+':README.md')) -join "`n"
 if($LASTEXITCODE){throw 'The pushed README is missing.'}
-$readmeReleaseUrl = if (!$Restricted) { $releaseUrl }
+$readmeReleaseUrl = if ($Restricted) { "release/$version/README.md" } else { $releaseUrl }
+if ($Restricted) {
+    git -C $project cat-file -e "${head}:$readmeReleaseUrl"
+    if ($LASTEXITCODE) { throw 'The pushed edition documentation is missing.' }
+}
 Confirm-ReadmeGameLinks $readme $readmeReleaseUrl $direct
 $catalog = (git -C $project show ($head+':release/index.json')) -join "`n"
 if($LASTEXITCODE){throw 'The pushed release catalog is missing.'}

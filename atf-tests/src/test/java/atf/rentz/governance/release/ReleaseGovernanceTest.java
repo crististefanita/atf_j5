@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
@@ -69,12 +68,20 @@ class ReleaseGovernanceTest {
                     () -> ReleaseCatalog.verifyMainGuide(noisy, "example/game", "1.2.0", "PUBLISHED"));
         }
     }
-    @Test void restrictedEditionRequiresOneDirectApkLink() throws Exception {
+    @Test void restrictedEditionRequiresItsDocumentationBeforeTheOnlyApkLink() throws Exception {
         String twoLinks=guide("PUBLISHED").replace("example/game","example/private-editions");
-        String restricted=twoLinks.replaceAll("(?m)^- \\[[^\\n]+/releases/tag/[^\\n]+\\n", "");
+        String restricted=twoLinks.replace("https://github.com/example/private-editions/releases/tag/v1.2.0",
+                "release/1.2.0/README.md");
         assertDoesNotThrow(()->ReleaseCatalog.verifyRestrictedGuide(restricted,"example/private-editions","1.2.0"));
         assertEquals("RELEASE-MAIN-LINKS",assertThrows(IOException.class,
                 ()->ReleaseCatalog.verifyRestrictedGuide(twoLinks,"example/private-editions","1.2.0")).getMessage());
+        for (String invalid : List.of(
+                restricted.replace("- [Release](release/1.2.0/README.md)\n", ""),
+                restricted.replace("release/1.2.0/README.md", "release/1.1.0/README.md"),
+                restricted.replaceAll("(?m)^(- \\[Release\\].*\\n)(- \\[APK\\].*\\n)", "$2$1"))) {
+            assertEquals("RELEASE-MAIN-LINKS", assertThrows(IOException.class,
+                    () -> ReleaseCatalog.verifyRestrictedGuide(invalid, "example/private-editions", "1.2.0")).getMessage());
+        }
         assertEquals("RELEASE-MAIN-LINKS",assertThrows(IOException.class,
                 ()->ReleaseCatalog.verifyRestrictedGuide(restricted.replace(".apk","_sanity.apk"),
                         "example/private-editions","1.2.0")).getMessage());
@@ -89,7 +96,8 @@ class ReleaseGovernanceTest {
                         "example/private-editions", "1.2.0")).getMessage());
     }
     @Test void theMainGuideRejectsASecondReleaseHiddenBehindALocalDocumentationLink() {
-        String guide = guide("PUBLISHED").replaceAll("(?m)^- \\[[^\\n]+/releases/tag/[^\\n]+\\n", "")
+        String guide = guide("PUBLISHED").replace("https://github.com/example/game/releases/tag/v1.2.0",
+                "release/1.2.0/README.md")
                 + "\n## APK de test\n\n"
                 + "- [Rentz Lab 1.3.0](docs/rentz/ATF_Release.md#apk-de-test)\n";
         var failure = assertThrows(IOException.class, () -> ReleaseCatalog.verifyRestrictedGuide(guide, "example/game", "1.2.0"));
@@ -1006,8 +1014,11 @@ class ReleaseGovernanceTest {
                  {"path":"release/index.json","class":"release-index","owner":"release","gate":"local-catalog"},
                  {"path":"release/{currentVersion}/release-validation.json","class":"manifest","owner":"release","gate":"local-catalog"}]}
                 """);
-        git(root,"init","-b","main");git(root,"config","core.autocrlf","false");git(root,"add",".");
-        git(root,"-c","user.name=RAG Test","-c","user.email=rag@example.test","commit","-m","fixture");
+        git(root, "init", "--quiet", "-b", "main");
+        git(root, "config", "core.autocrlf", "false");
+        git(root, "config", "commit.gpgsign", "false");
+        git(root, "add", "--", ".");
+        git(root, "-c", "user.name=RAG Test", "-c", "user.email=rag@example.test", "commit", "--quiet", "-m", "fixture");
         return root;
     }
 
@@ -1110,12 +1121,7 @@ class ReleaseGovernanceTest {
     }
 
     private static String git(Path root,String... arguments) throws Exception {
-        var command=new java.util.ArrayList<String>(List.of("git","-C",root.toString()));command.addAll(List.of(arguments));
-        var process=new ProcessBuilder(command).redirectErrorStream(true).start();
-        if(!process.waitFor(10,TimeUnit.SECONDS)){process.destroyForcibly();throw new IOException("fixture Git command timed out");}
-        String output=new String(process.getInputStream().readAllBytes(),StandardCharsets.UTF_8);
-        if(process.exitValue()!=0)throw new IOException("fixture Git command failed: "+output);
-        return output;
+        return ReleaseReadinessRag.git(root, arguments);
     }
     private static String pngDataUri(int red) throws IOException {
         var png=new java.io.ByteArrayOutputStream();

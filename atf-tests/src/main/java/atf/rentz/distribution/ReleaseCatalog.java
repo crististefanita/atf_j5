@@ -85,14 +85,16 @@ public final class ReleaseCatalog {
             return new Edition(folder,manifest,null,state);
         }
         ApkDownloadTarget target=new ApkDownloadTarget(downloadRepository,version,number(identity,"apkBytes"),identity.path("sha256").asText());
-        Path apk=folder.resolve(target.fileName());ApkPayload.verify(apk,target.bytes(),target.sha256());
-        require(Files.readString(folder.resolve(target.fileName()+".sha256")).trim().equals(target.sha256()+"  "+target.fileName()),"RELEASE-CHECKSUM");
+        Path binaries=editionBinaries(root, folder, version, target.fileName());
+        Path apk=binaries.resolve(target.fileName());
+        ApkPayload.verify(apk,target.bytes(),target.sha256());
+        require(Files.readString(binaries.resolve(target.fileName()+".sha256")).trim().equals(target.sha256()+"  "+target.fileName()),"RELEASE-CHECKSUM");
         JsonNode qualification=manifest.path("qualification");
         require(qualification.path("status").asText().equals("PASS") && number(qualification,"tests")>0
                 && number(qualification,"failures")==0 && number(qualification,"errors")==0 && number(qualification,"skipped")==0,"RELEASE-QUALIFICATION");
         require(identity.path("debuggable").isBoolean() && !identity.path("debuggable").booleanValue()
                 && identity.path("certificateSha256").asText().matches("[a-f0-9]{64}"),"RELEASE-SIGNING");
-        verifyPayload(folder,manifest);
+        verifyPayload(folder, binaries, target.fileName(), manifest);
         if(state.equals("PUBLISHED"))require(number(manifest.path("publication"),"releaseId")>0
                 && manifest.path("publication").path("sourceCommit").asText().matches("[a-f0-9]{40}"),"RELEASE-PUBLISHED-IDENTITY");
         return new Edition(folder,manifest,target,state);
@@ -128,8 +130,24 @@ public final class ReleaseCatalog {
     }
 
     public static void verifyRestrictedGuide(String guide,String repository,String version) throws IOException {
-        verifyGuide(guide, List.of("https://github.com/" + repository + "/releases/download/v" + version
+        verifyGuide(guide, List.of("release/" + version + "/README.md",
+                "https://github.com/" + repository + "/releases/download/v" + version
                 + "/RentzLab-" + version + ".apk"));
+    }
+
+    private static Path editionBinaries(Path root, Path edition, String version, String apkName) throws IOException {
+        String configured = System.getenv("RENTZ_DATA_ROOT");
+        if (configured == null || configured.isBlank()) return edition;
+        Path data = Path.of(configured).toAbsolutePath().normalize();
+        Path incoming = data.resolve("distribution/incoming").resolve(version);
+        if (Files.exists(edition.resolve(apkName)) || Files.exists(edition.resolve(apkName + ".sha256"))) return edition;
+        for (Path path : List.of(data, data.resolve("distribution"), incoming.getParent(), incoming,
+                incoming.resolve(apkName), incoming.resolve(apkName + ".sha256"))) {
+            require(!Files.isSymbolicLink(path), "RELEASE-PHYSICAL-PATH");
+        }
+        require(Files.isDirectory(incoming) && !incoming.toRealPath().startsWith(root.toRealPath())
+                && incoming.toRealPath().startsWith(data.toRealPath()), "RELEASE-BINARY-BOUNDARY");
+        return incoming;
     }
     public static void verifyMainGuide(String guide,String repository,String version,String state) throws IOException {
         verifyMainGuide(guide, repository, version, state, null);
@@ -200,12 +218,12 @@ public final class ReleaseCatalog {
                 "RELEASE-PUBLIC-DOWNLOAD-IDENTITY");
         return value;
     }
-    private static void verifyPayload(Path folder,JsonNode manifest) throws IOException {
+    private static void verifyPayload(Path folder, Path binaries, String apkName, JsonNode manifest) throws IOException {
         var expected=new HashSet<String>();
         for(JsonNode row:manifest.path("integrity").path("files")) {
             String path=ReleasePaths.relative(row.path("path").asText());
             require(expected.add(path) && !path.equals("release-validation.json"),"RELEASE-PAYLOAD-ENTRY");
-            Path file=folder.resolve(path);
+            Path file=isBinary(path, apkName) ? binaries.resolve(path) : folder.resolve(path);
             require(Files.isRegularFile(file) && !Files.isSymbolicLink(file) && Files.size(file)==number(row,"bytes")
                     && ApkPayload.hash(file).equals(row.path("sha256").asText()),"RELEASE-PAYLOAD-HASH: "+path);
         }
@@ -216,7 +234,15 @@ public final class ReleaseCatalog {
                 if(!name.equals("release-validation.json"))actual.add(name);
             }
         }
+        if (!binaries.equals(folder)) {
+            actual.add(apkName);
+            actual.add(apkName + ".sha256");
+        }
         require(!expected.isEmpty() && expected.equals(actual),"RELEASE-PAYLOAD-POPULATION");
+    }
+
+    private static boolean isBinary(String relative, String apkName) {
+        return relative.equals(apkName) || relative.equals(apkName + ".sha256");
     }
     public static JsonNode read(Path path) throws IOException { return JSON.readTree(path.toFile()); }
     public static long number(JsonNode value,String field) throws IOException {

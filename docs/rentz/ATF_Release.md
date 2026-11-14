@@ -70,7 +70,7 @@ Tagul identifică sursa comună a artefactelor declarate. Fiecare artefact își
 ## Ordinea calificării Android curente
 
 - Aduceți în `release/<versiune>` APK-ul ediției active și checksum-ul, din depozitul extern sau din GitHub cu un cont autorizat.
-- Comparați dimensiunea și SHA-256 cu manifestul înainte de regresie. Git păstrează manifestul, iar fișierele binare sunt ignorate.
+- Comparați dimensiunea și SHA-256 cu manifestul înainte de regresie. Catalogul citește APK-ul și checksum-ul din `distribution/incoming/<versiune>` sub rădăcina externă de date. Git păstrează documentația și manifestul.
 
 Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și cache-urile pregătite:
 
@@ -175,7 +175,7 @@ README-ul principal începe cu jocul, descărcarea și prima partidă. Secțiune
 |---|---|
 | `DRAFT` | Dosarul ediției |
 | `PREPARED` | Dosarul ediției, APK-ul local |
-| `PUBLISHED`, acces restricționat | APK-ul direct din canalul calificat |
+| `PUBLISHED`, acces restricționat | Dosarul ediției, APK-ul direct din canalul calificat |
 | `PUBLISHED`, acces public | Pagina release-ului, APK-ul direct din canalul calificat |
 
 Catalogul verifică unicitatea secțiunii, ordinea și adresele. Verificatorul post-publicare cere aceeași formă în README-ul remote. Condițiile de acces, compatibilitatea Android și dovezile ediției se citesc în documentele de distribuție și în dosarul ediției.

@@ -761,9 +761,10 @@ public final class ReleaseReadinessRag {
     }
 
     public static String git(Path root, String... arguments) throws Exception {
-        var command = new ArrayList<String>(); command.add("git"); command.add("-C"); command.add(root.toString());
+        var command = new ArrayList<>(List.of("git", "--no-optional-locks", "-C", root.toString()));
         command.addAll(List.of(arguments));
         var process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45);
         var output = new java.util.concurrent.FutureTask<>(() -> {
             try (var stream = process.getInputStream()) {
                 return stream.readNBytes(4 * 1024 * 1024 + 1);
@@ -772,13 +773,20 @@ public final class ReleaseReadinessRag {
         Thread.startVirtualThread(output);
         byte[] bytes;
         try {
-            bytes = output.get(10, TimeUnit.SECONDS);
+            bytes = output.get(Math.max(0, deadline - System.nanoTime()), TimeUnit.NANOSECONDS);
             if (bytes.length > 4 * 1024 * 1024) throw new IOException("RAG-GIT-OUTPUT-LIMIT");
-            if (!process.waitFor(10, TimeUnit.SECONDS)) throw new IOException("RAG-GIT-TIMEOUT");
+            if (!process.waitFor(Math.max(0, deadline - System.nanoTime()), TimeUnit.NANOSECONDS))
+                throw new IOException("RAG-GIT-TIMEOUT: " + arguments[0]);
+        } catch (java.util.concurrent.TimeoutException timeout) {
+            throw new IOException("RAG-GIT-TIMEOUT: " + arguments[0], timeout);
         } finally {
-            if (process.isAlive()) process.destroyForcibly();
+            if (process.isAlive()) {
+                process.destroyForcibly();
+                process.waitFor(5, TimeUnit.SECONDS);
+            }
+            output.cancel(true);
         }
-        if (process.exitValue() != 0) throw new IOException("RAG-GIT-IDENTITY");
+        if (process.exitValue() != 0) throw new IOException("RAG-GIT-IDENTITY: " + arguments[0]);
         return new String(bytes, StandardCharsets.UTF_8);
     }
 

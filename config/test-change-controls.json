@@ -94,7 +94,7 @@
       "criterion": "Require the qualified routes and authenticated APK bytes. Retirement requires both Extent artifacts to match the RAG source, length and SHA-256.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-09",
-      "sha256": "d3b21e010a38502852dc8975fa12cad85c9aa0ecd4634fb8ed6157cc179d4902",
+      "sha256": "7ec60b9919241d389cd6037812208153baec1eeffc5be69d19ee9e77bf64907e",
       "allowDelete": false
     },
     {
@@ -444,7 +444,7 @@
       "criterion": "A missing or partial Rentz-plus-two-distinct-contracts receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged. The release requires exactly three native games, geometry, history, restart and original Extent evidence. Catalog breadth and terminal victory eligibility run in the mandatory Android JVM population.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "03b1b279f3cff5f89f259fece50aac6b3667d659b8bddf98fee648a7021d38aa",
+      "sha256": "d73b762fc0d07f8ed5f99bbbcc461cc4036c4d5e1d53799b13c3301edf80d022",
       "allowDelete": false
     },
     {
@@ -614,7 +614,7 @@
       "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access. The native fixture qualifies the representative search and progress journey while preserving the existing rejection controls for incomplete games, geometry, source identity and corrupt evidence.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-11-20",
-      "sha256": "4392c274e3f95600cb64e057c08963c870bd2eba5ac69868c87cc7223795382d",
+      "sha256": "1f4a8e11153c1253d58a4a691bebd42a7a4301c93f7009ffe3f0a3ee1bdf1887",
       "allowDelete": false
     },
     {
@@ -804,7 +804,7 @@
       "criterion": "Exercise a successful and a failed evaluator with nested generated files, verify cleanup receipts and retain component inputs.",
       "proof": "docs/rentz/ATF_Infrastructure.md#curățare-și-probe",
       "expires": "2026-12-10",
-      "sha256": "c5d9636a796557ab405a94164dee97177a11f4da1d037c56d6612e628cafca59",
+      "sha256": "3d653c5ecd796fd46997d76f285b5c80694eced98b4a2bc49fbd1670705c46dd",
       "allowDelete": false
     },
     {
@@ -1204,7 +1204,7 @@
       "criterion": "The main guide accepts the exact production edition or one verified private preview. A newer staged candidate leaves the latest verified download in place.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "06289ae771c7a087fbbf0a3bd38166908b9500761901989f4c92ee601b92ecaf",
+      "sha256": "193c0649e6cce5200436e4d3a90a3a139ece3ade32d59dc80e2081f770506e88",
       "allowDelete": false
     },
     {
@@ -1314,7 +1314,7 @@
       "criterion": "Advance versionCode from 27 to 28, preserve the existing signing identity, and bind the candidate to source-matched regression, Android JVM, three-game native and RAG receipts.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-11-20",
-      "sha256": "fbedaac09be90b065a8d871ce3c2c8093d0fc57f09a6561d52650a6e1c7803e7",
+      "sha256": "9e879d1ab87006df44d2a9f91d592fb0a6bcfdbd3005cd3961426b7a3e9f51aa",
       "allowDelete": false
     },
     {
@@ -1324,7 +1324,7 @@
       "criterion": "Keep exactly one current edition and bind v0.24.0, private asset IDs and authenticated bytes to the published manifest. Record offline test scope and native NOT_RUN without changing the standard release gate.",
       "proof": "docs/rentz/ATF_Release.md#publicare-și-descărcare",
       "expires": "2027-02-12",
-      "sha256": "1bdc5884130c4c32bfa068974f95769ac580a9c215ce0d6efcd82b55260882ac",
+      "sha256": "76093c74a30c1d46de8bbacc65d76118d6099fa7c7fe53c850b76b0d2efd4fc4",
       "allowDelete": false
     },
     {

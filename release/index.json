@@ -4,5 +4,9 @@
   "currentVersion": "0.24.0",
   "versions": [
     "0.24.0"
-  ]
+  ],
+  "candidate": {
+    "version": "0.25.0",
+    "versionCode": 29
+  }
 }
