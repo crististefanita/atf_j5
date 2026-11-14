@@ -63,19 +63,28 @@ $runtimeInventory=Join-Path $RunRoot 'classpath-inventory.json'
 $runtimeAttestation=Join-Path $RunRoot 'runtime-attestation.json'
 $qualificationToken=[guid]::NewGuid().ToString('N')
 $savedJava=$env:JAVA_HOME
+$savedJavaOptions=$env:JAVA_TOOL_OPTIONS
+$savedDataRoot=$env:RENTZ_DATA_ROOT
 $exit=1
 $cacheLease=Enter-AtfJ5CacheLease -Repository $repository
 try {
     $env:JAVA_HOME=$JavaHome
+    $env:RENTZ_DATA_ROOT=Get-AtfDataRoot -ProjectRoot $root
     Push-Location $stage
     try {
         New-Item -ItemType Directory -Path "$stage/runtime"|Out-Null
+        $env:JAVA_TOOL_OPTIONS=("$savedJavaOptions " + '-Djava.io.tmpdir="' + "$stage/runtime" + '"').Trim()
         $arguments=@('-B','-o',"-Drentz.runtime.inventory=$runtimeInventory","-Drentz.runtime.attestation=$runtimeAttestation","-Drentz.runtime.token=$qualificationToken","-Drentz.governance.sourceRoot=$source","-Dmaven.repo.local=$repository","-Djava.io.tmpdir=$stage/runtime",'-Datf.test.heap.max=256m',"-Drentz.report.output=$RunRoot\rentz-rules-extent.html","-Drentz.release.report.directory=$RunRoot\release-contracts")
         if($plan.selectors.Count){$arguments+=@('-Dsurefire.failIfNoSpecifiedTests=false',('-Dtest='+($plan.selectors-join',')),'test')}else{$arguments+=@('-N','validate')}
         & $Maven @arguments *> "$RunRoot\maven.log"
         $exit=$LASTEXITCODE
     } finally { Pop-Location }
-} finally { $env:JAVA_HOME=$savedJava; $cacheLease.Dispose() }
+} finally {
+    $env:JAVA_HOME=$savedJava
+    $env:JAVA_TOOL_OPTIONS=$savedJavaOptions
+    $env:RENTZ_DATA_ROOT=$savedDataRoot
+    $cacheLease.Dispose()
+}
 $results=@()
 $reportFailures=[Collections.Generic.List[string]]::new()
 foreach ($module in @('rentz-lab-app/game-core','atf-tests')) {

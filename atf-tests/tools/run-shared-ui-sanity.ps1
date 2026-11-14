@@ -12,8 +12,10 @@ Assert-AtfInfrastructure -ProjectRoot $project
 $reportingLibrary=Get-AtfReportingLibrary -ProjectRoot $project
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
 if(Test-Path -LiteralPath $RunRoot){throw 'A fresh sanity output directory is required.'}
+Assert-AtfArtifactPath -Path $BuildQualification -ProjectRoot $project
 $build=Get-Content -LiteralPath $BuildQualification -Raw|ConvertFrom-Json
 if($build.status-ne'PASS'-or$build.applicationId-ne'ro.rentzlab.app.uisanity'-or$build.newAuditedCases-lt1){throw 'Qualified isolated UI build required.'}
+Assert-AtfArtifactPath -Path $build.apk -ProjectRoot $project
 if((Get-FileHash -LiteralPath $build.apk -Algorithm SHA256).Hash-ne$build.apkSha256){throw 'APK changed after qualification.'}
 $fixture=$null
 $historyProfile=$null
@@ -45,6 +47,7 @@ $developmentExposures=[Collections.Generic.List[object]]::new()
 if(-not $HelpAwardsOnly){
     if(-not $ComponentRun){$ComponentRun=$build.componentRun}
     if(-not $ComponentRun){throw 'A qualified ComponentRun is required for native development exposure.'}
+    Assert-AtfArtifactPath -Path $ComponentRun -ProjectRoot $project
     $component=Get-Content -LiteralPath (Join-Path $ComponentRun 'result.json') -Raw|ConvertFrom-Json
     if($component.status -ne 'PASS' -or -not $component.nativeRuntime){throw 'A qualified native adapter is required.'}
     Import-Module (Join-Path $project 'scripts/RuntimeQualification.psm1') -Force
