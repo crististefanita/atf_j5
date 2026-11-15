@@ -28,6 +28,18 @@ Verificăm fiecare cerință la cel mai mic nivel care poate observa efectul ei.
 | Help prezintă premiile Rentz pentru locurile reale | [RentzScoreContentTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java) verifică matricea de premiere pentru 3–6 jucători și descrierile RO și EN. | Sanity-ul focalizat verifică deschiderea, afișarea și accesibilitatea unor premii reprezentative, apoi revenirea în meniu. |
 | Titlul se acordă numai după o partidă confirmată | [GameplayAchievementComponentTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/GameplayAchievementComponentTest.java) confruntă cheia salvată pentru o partidă în curs și pentru locul întâi confirmat. [SessionControllerTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/SessionControllerTest.java) verifică refuzul și după reluarea unei mâini jucate. | Traseul dovedește creditul manual, progresul asistat și păstrarea progresului după repornire. |
 
+## Alegerea probelor Android
+
+| Scenariu | Regresie fără dispozitiv | Când adaug proba Android |
+|---|---|---|
+| Trei contracte consecutive | Tranzițiile de actor și punctajul se verifică prin observații simulate. Replay-ul independent verifică comenzile și rezultatele. | Calificarea obligatorie înaintea release-ului verifică gesturile, geometria și reluarea în același APK. |
+| O mână, locuri extreme și scor compact | Proiecția tablei, locurile și spațiul pentru scor se verifică în JVM la dimensiuni controlate. | O schimbare a poziționării, a textului sau a densității cere proba nativă focalizată. |
+| Istoric, detalii și schimbarea înălțimii | Componentele acoperă modelul, punctajele, totalurile și jurnalul de 48 de mâini. | Modificări la scroll, atingere, schimbarea ferestrei sau integrarea antetului fix. |
+| Ajutor, catalog și profil | Conținutul, filtrele, eligibilitatea și persistența au probe offline. | Modificări la navigare, tastatură, accesibilitate sau afișarea dialogului. |
+| Marcaje Rentz și colectarea levatei | Motorul și proiecția verifică legalitatea, marcajele și starea salvată. | Modificări la raster, ritm, reatașarea după relansare sau așezarea cărților. |
+
+Probele focalizate se aleg după interacțiunea afectată. Nativul păstrează gesturile, capturile și dovada reluării procesului. [Opțiunile runnerului](ATF_Android.md#livrabile-și-limite)
+
 ## Anatomia unui test auditabil
 
 ```mermaid

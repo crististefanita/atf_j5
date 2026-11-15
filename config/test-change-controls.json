@@ -802,11 +802,11 @@
     {
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz Android qualification",
-      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
-      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
+      "criterion": "Offline cases reject stale revisions, repeated next-hand taps, a wrong hand, an unresolved chooser and premature settlement. Native play, replay, capture and source digest gates remain required.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-12",
-      "sha256": "dabe0e5035a11abfbaa0e7eea4e0398b848bd90066d750ac64961ced75a5e19e",
+      "expires": "2026-12-13",
+      "sha256": "f46ba7803966d8ad6a79a933f88e21225f73307325946e47d9998b89d8599ec6",
       "allowDelete": false
     },
     {
@@ -1272,11 +1272,11 @@
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz Android qualification",
-      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
-      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
+      "criterion": "Offline cases reject stale revisions, repeated next-hand taps, a wrong hand, an unresolved chooser and premature settlement. Native play, replay, capture and source digest gates remain required.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-12",
-      "sha256": "6657e8bd2efd12342d9b9c9b6e8c1353385f5a8a0d032b96ad852bf9de7e47ed",
+      "expires": "2026-12-13",
+      "sha256": "48bf8f48252ec480f21c4d3042c12b67debf7dbd0fa678a709b8e5d8eab2bac3",
       "allowDelete": false
     },
     {
@@ -1590,21 +1590,21 @@
     {
       "path": "rentz-reference/tools/RentzUiOracle.psm1",
       "owner": "Rentz Android qualification",
-      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
-      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
+      "criterion": "Offline cases reject stale revisions, repeated next-hand taps, a wrong hand, an unresolved chooser and premature settlement. Native play, replay, capture and source digest gates remain required.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-12",
-      "sha256": "f04e6fbf23eaee1b6b867c5c72fd349d409878bf231c5f77dd67a288ff9099f5",
+      "expires": "2026-12-13",
+      "sha256": "503e9fe03174aef42e82ef32ec9271b49620cdaaf11b9bb3a5cacb2102a069b0",
       "allowDelete": false
     },
     {
       "path": "atf-tests/tools/test-ui-selectors.ps1",
       "owner": "Rentz Android qualification",
-      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
-      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
+      "criterion": "Offline cases reject stale revisions, repeated next-hand taps, a wrong hand, an unresolved chooser and premature settlement. Native play, replay, capture and source digest gates remain required.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-12",
-      "sha256": "13d051d2470a95387e5d5122f33594a2bbbdcfe53fb517cf14c8a399f1c942c4",
+      "expires": "2026-12-13",
+      "sha256": "9fb6cad8a49611e286f0bd994c4b48abcf38a902ea2e452e5d9b1635565d6cae",
       "allowDelete": false
     }
   ]

@@ -25,6 +25,50 @@ try{
     [xml]$ambiguous='<hierarchy><node text="Choice" content-desc="" class="android.widget.Button" enabled="true" clickable="true"/><node text="Choice" content-desc="" class="android.widget.Button" enabled="true" clickable="true"/></hierarchy>'
     $rejected=$false;try{$null=Get-RentzTapTarget -Nodes @($ambiguous.SelectNodes('//node')) -Label 'Choice'}catch{$rejected=$_.Exception.Message-like'Ambiguous native control:*'}
     Check 'Two matching targets fail rather than choosing one' $true $rejected
+
+    function Actor([long]$Revision,[int]$Hand,[string]$Phase,[int]$Turn,[string]$Contract='RENTZ',$Points=@(10,5,0),$Finish=@(0,2,1)){
+        @{revision=$Revision;screen='GAME';busy=$false;view=@{handNumber=$Hand;phase=$Phase;turn=$Turn;contract=$Contract;players=3;dealPoints=$Points;finishOrder=$Finish}}
+    }
+    $settled=Actor 10 1 'DEAL_END' 0
+    $calls=[Collections.Generic.List[string]]::new()
+    $next=Start-RentzNextDeal -Completed $settled -Advance {$calls.Add('next')} -ReadActor {
+        param($after)
+        $calls.Add("read:$after")
+        if($after-eq10){Actor 11 2 'CHOOSE' 1}else{Actor 12 2 'CHOOSE' 0}
+    } -ChooseHuman {
+        param($chooser)
+        $calls.Add("choose:$($chooser.revision)")
+        Actor 13 2 'PLAY' 0 'WHIST'
+    }
+    Check 'Advance the UI once and process each chooser at a fresh revision' 'next,read:10,read:11,choose:12' ($calls -join ',')
+    Check 'Next deal enters play with the expected hand and contract' '2:WHIST' "$($next.view.handNumber):$($next.view.contract)"
+    $calls.Clear()
+    foreach($case in @(
+        @{name='Premature next hand cannot tap the UI'; completed=(Actor 10 1 'PLAY' 0); frame=$null; error='ANDROID-NEXT-DEAL: previous hand is not settled.'; actions=0},
+        @{name='Stale next-hand state fails without tapping again'; completed=$settled; frame=(Actor 10 2 'PLAY' 0); error='ANDROID-NEXT-DEAL: stale or busy actor observation.'; actions=1},
+        @{name='New revision from the previous hand is rejected'; completed=$settled; frame=(Actor 11 1 'CHOOSE' 1); error='ANDROID-NEXT-DEAL: wrong hand number.'; actions=1},
+        @{name='Premature score screen cannot substitute for play'; completed=$settled; frame=(Actor 11 2 'DEAL_END' 0); error='ANDROID-NEXT-DEAL: expected CHOOSE or PLAY.'; actions=1}
+    )){
+        $failureText=''
+        try{
+            $null=Start-RentzNextDeal -Completed $case.completed -Advance {$calls.Add('next')} -ReadActor {$case.frame} -ChooseHuman {throw 'Unexpected choice'}
+        }catch{$failureText=$_.Exception.Message}
+        Check $case.name "$($case.error) [$($case.actions)]" "$failureText [$($calls.Count)]"
+        $calls.Clear()
+    }
+    $stuck=''
+    try{
+        $null=Start-RentzNextDeal -Completed $settled -Advance {$calls.Add('next')} -ReadActor {
+            param($after)
+            Actor ($after+1) 2 'CHOOSE' 1
+        } -ChooseHuman {throw 'Unexpected choice'}
+    }catch{$stuck=$_.Exception.Message}
+    Check 'An unresolved chooser has a bounded observation budget and one UI tap' 'ANDROID-NEXT-DEAL: chooser did not resolve. [1]' "$stuck [$($calls.Count)]"
+    $checksForScore=@(Get-RentzCompletedDealChecks -Actor $settled -Hand 1 -Contract 'RENTZ')
+    Check 'Settlement verifies phase, hand, contract, score and Rentz order' 5 @($checksForScore|Where-Object passed).Count
+    $invalid=Actor 11 2 'PLAY' 1 'WHIST' @(0) @()
+    $checksForScore=@(Get-RentzCompletedDealChecks -Actor $invalid -Hand 1 -Contract 'RENTZ')
+    Check 'Premature or misattributed scores fail every settlement comparison' 5 @($checksForScore|Where-Object { !$_.passed }).Count
 }catch{$failure=$_.Exception.ToString()}
-[ordered]@{class='atf.rentz.android.NativeUiSelectors';method='adapterViewItemsAndNegativeNeighbours';status=$(if($failure){'FAIL'}else{'PASS'});failure=$failure;checks=$checks.ToArray()}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $RunRoot 'assertions.json') -Encoding utf8NoBOM
+[ordered]@{class='atf.rentz.android.NativeUiOracle';method='selectorsAndConsecutiveDealTransitions';status=$(if($failure){'FAIL'}else{'PASS'});failure=$failure;checks=$checks.ToArray()}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $RunRoot 'assertions.json') -Encoding utf8NoBOM
 if($failure){throw $failure}

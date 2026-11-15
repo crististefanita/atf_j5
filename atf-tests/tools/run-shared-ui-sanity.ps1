@@ -779,13 +779,12 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
             }
             $state=ChooseHumanSubgame $state -ForceRentz
         }else{
-            if($state.view.phase-ne'DEAL_END'){throw "Subgame $($deal-1) did not reach a completed deal."}
-            $revision=$state.revision;Tap 'Next hand';$state=State -After $revision
-            $choiceSteps=0
-            while($state.view.phase-eq'CHOOSE'){
-                if($state.view.turn-eq0){$state=ChooseHumanSubgame $state -Played $selectedContracts.ToArray()}
-                else{$state=State -After $state.revision}
-                if(++$choiceSteps-gt8){throw 'The next chooser did not resolve through the UI flow.'}
+            $state=Start-RentzNextDeal -Completed $state -Advance {Tap 'Next hand'} -ReadActor {
+                param($after)
+                State -After $after
+            } -ChooseHuman {
+                param($chooser)
+                ChooseHumanSubgame $chooser -Played $selectedContracts.ToArray()
             }
         }
         if($state.view.phase-ne'PLAY'){throw "Subgame $deal did not enter PLAY."}
@@ -863,11 +862,8 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
         Observe "Subgame $deal completed: $contract" {param($captured)
             GameHeadingChecks $captured $terminal
             if($deal-eq2){Check 'Dismissing the achievement panel returns to the score' 0 @($captured|Where-Object text -CEQ 'Achievement progress').Count}
-            Check 'Exact completed hand number' $deal $terminal.view.handNumber
-            Check 'Completed subgame contract' $contract $terminal.view.contract
-            Check 'One score value per player' $terminal.view.players $terminal.view.dealPoints.Count
+            Get-RentzCompletedDealChecks -Actor $terminal -Hand $deal -Contract $contract
             if($contract-eq'RENTZ'){
-                Check 'Rentz finishing order contains each player' $terminal.view.players $terminal.view.finishOrder.Count
                 if($deal-eq1){Check 'Auto play added seat-zero plays without manual card taps' $true ($delegatedPlays-gt0)}
                 RentzSequenceChecks $captured $terminal
             }
