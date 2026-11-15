@@ -460,21 +460,21 @@
     {
       "path": "scripts/run-release-rag.ps1",
       "owner": "Rentz release",
-      "reason": "Contain and retire scratch created by the RAG evaluator.",
-      "criterion": "Create JVM scratch within the owned run, remove it after exit, and keep original evidence and the evaluator verdict.",
-      "proof": "docs/rentz/ATF_Infrastructure.md#curățare-și-probe",
+      "reason": "Admit explicit restricted publication after recomputing qualified release evidence.",
+      "criterion": "Keep default RAG and post-publication verification read-only. Require named resume inputs and record the interrupted attempt.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
       "expires": "2026-12-10",
-      "sha256": "a0b6a9a6f1db65caa4e54b38701b3c2e128e8ebbfb01e46bf8350c5b7572ed7c",
+      "sha256": "c0109619328fed13b9291c0339ca87b0d5cfc91c579f1825c8921c715ae76369",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/changes/TestChangeGovernanceTest.java",
       "owner": "Rentz release",
-      "reason": "Protect release pipeline, workspace boundaries, and reporting tools with exact change controls.",
-      "criterion": "New protected paths are asserted; the actual Git diff must have one current review control per protected change.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "1c77b81e5c364bee85efa2698df37e8988304cc4373230bb8276cc8b4e46c9ca",
+      "reason": "Protect the restricted publication implementation and its authorization gates.",
+      "criterion": "Require exact reviewed bytes for the new publication package plus all existing protected paths.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "expires": "2026-12-10",
+      "sha256": "b0d14de4f9c52d63a7281c70c8a0ec7907288680311297309ee3ac3848846919",
       "allowDelete": false
     },
     {
@@ -1040,11 +1040,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java",
       "owner": "Rentz UI",
-      "reason": "S05 and U10–U13 · Qualify the common table presentation and effective score help.",
-      "criterion": "Preserve legal card identity, validate physical hand order and verify two complete localized score rows on restored seats.",
-      "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
-      "expires": "2026-11-20",
-      "sha256": "b000c25dde926ce828b96f9c57a3426e6f7ea393a52809311f1ebc01ab13457f",
+      "reason": "Qualify signed score projections independent of native display.",
+      "criterion": "Check all positions for three through six seats, both locales, negative and positive scores, and restoration.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#auditul-cititorului-extent",
+      "expires": "2026-12-10",
+      "sha256": "e94ad263f8084991a79c20655abf4d3eb2517999cee3a09fb08a6608e4c8c446",
       "allowDelete": false
     },
     {
@@ -1270,11 +1270,11 @@
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz release",
-      "reason": "Move the exhaustive Help award matrix into Android JVM and keep representative native display.",
-      "criterion": "Keep Help navigation, accessibility samples in both languages and proof that Help creates no session. Keep the three distinct complete release hands, Rentz first.",
-      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
+      "reason": "Keep native compact score geometry representative and exercise full score content in JVM.",
+      "criterion": "Keep the required three-hand trace, Help navigation, score row containment, font and resumed session proofs.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#auditul-cititorului-extent",
       "expires": "2026-12-10",
-      "sha256": "996152077250a2da55d2ebe60434c90743dd3cdbd2eb43dd39703482d0799ed2",
+      "sha256": "b0b54a344c36aa700a0e61a593e332bfe9376f77c2ad4ce6da8f48ecc31b755e",
       "allowDelete": false
     },
     {
@@ -1414,6 +1414,46 @@
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
       "allowDelete": true
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/ReleasePublication.java",
+      "owner": "Rentz release",
+      "reason": "Recover an interrupted restricted GitHub publication from verified remote state.",
+      "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "expires": "2026-12-10",
+      "sha256": "98e9a08ed6d10c9986940d8f4468df9b48fc3d21636ff9a73ce2d46171a04afc",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/GitHubPublication.java",
+      "owner": "Rentz release",
+      "reason": "Recover an interrupted restricted GitHub publication from verified remote state.",
+      "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "expires": "2026-12-10",
+      "sha256": "eb822d5be92137bb6d5e2dbd4028b37ae9e476d6a61b03a038099ec801239c55",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/PublicationCommand.java",
+      "owner": "Rentz release",
+      "reason": "Recover an interrupted restricted GitHub publication from verified remote state.",
+      "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "expires": "2026-12-10",
+      "sha256": "889e67cc11d5956645b8d786378e7b9ebf8723a46d584f8eaad913b4b7c4c2b7",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePublicationResumeTest.java",
+      "owner": "Rentz release",
+      "reason": "Recover an interrupted restricted GitHub publication from verified remote state.",
+      "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "expires": "2026-12-10",
+      "sha256": "9b13de8761ee1f491f903d2063ae44963f31ca849c4df7d8fe2b862b33d829ad",
+      "allowDelete": false
     }
   ]
 }

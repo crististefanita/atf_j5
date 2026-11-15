@@ -82,26 +82,41 @@ public final class RentzTableContentTest {
                     RentzTableContent.seats(session.view(), copy, session.displayNames("Ana"), false).stream().noneMatch(seat -> seat.active()));
         }
     }
-    @Test public void signedScoresAndNamesUseTwoLocalizedFactsOnTheSameSeatsAfterRestore() throws Exception {
-        var session = ready(4, Contract.TRICKS);
-        while (session.view().phase() == RentzMatch.Phase.PLAY) {
-            session.apply(new GameSession.Command(GameSession.Action.PLAY, 0, session.view().legal().get(0), null, false));
-            session.advanceBots();
-        }
-        var restored = GameSession.restore(session.save());
-        var view = restored.view();
-        var names = restored.displayNames("Ana");
-        var seats = RentzTableContent.seats(view, new RentzUiText(RentzUiText.Language.RO), names, false);
-        audit.truth("The fixture has a negative seat score", view.dealPoints().stream().anyMatch(points -> points < 0));
-        for (var seat : seats) {
-            var points = "Puncte: " + view.dealPoints().get(seat.seat());
-            var total = "Total: " + view.totals().get(seat.seat());
-            audit.equal("Same two score markers as in history for seat " + seat.seat(),
-                    List.of("Δ " + view.dealPoints().get(seat.seat()), "Σ " + view.totals().get(seat.seat())),
-                    seat.facts().stream().map(fact -> fact.inlineText()).toList());
-            audit.equal("Seat reading order " + seat.seat(), names.get(seat.seat()) + ". " + points + ". " + total, seat.description());
+    @Test public void signedScoresKeepTheirSeatsAndLocalizeAfterRestore() throws Exception {
+        for (int count : List.of(3, 4, 5, 6)) {
+            for (Contract contract : List.of(Contract.TRICKS, Contract.WHIST)) {
+                var session = ready(count, contract);
+                for (int moves = 0; session.view().phase() == RentzMatch.Phase.PLAY; moves++) {
+                    if (moves == 8) throw new AssertionError("Expected at most eight player moves");
+                    session.apply(new GameSession.Command(GameSession.Action.PLAY, 0, session.view().legal().get(0), null, false));
+                    session.advanceBots();
+                }
+                var restored = GameSession.restore(session.save());
+                var view = restored.view();
+                var names = restored.displayNames("Ana");
+                int expectedSign = contract == Contract.TRICKS ? -1 : 1;
+                audit.truth("Fixture has a point value of the expected sign " + count + "/" + contract,
+                        view.dealPoints().stream().anyMatch(points -> Integer.signum(points) == expectedSign));
+                for (var language : RentzUiText.Language.values()) {
+                    var seats = RentzTableContent.seats(view, new RentzUiText(language), names, false);
+                    String label = count + "/" + contract + "/" + language;
+                    audit.equal("Every seat retained " + label, count, seats.size());
+                    for (int index = 0; index < count; index++) {
+                        var seat = seats.get(index);
+                        int points = view.dealPoints().get(index);
+                        int total = view.totals().get(index);
+                        String details = language == RentzUiText.Language.RO ? "Puncte: " : "Points: ";
+                        audit.equal("Seat position " + label + "/" + index, index, seat.seat());
+                        audit.equal("Score marker order " + label + "/" + index,
+                                List.of("Δ " + points, "Σ " + total), seat.facts().stream().map(fact -> fact.inlineText()).toList());
+                        audit.equal("Accessible description " + label + "/" + index,
+                                names.get(index) + ". " + details + points + ". Total: " + total, seat.description());
+                    }
+                }
+            }
         }
     }
+
     private GameSession ready(int count, Contract contract) {
         var session = new GameSession(count, 31, RentzPlayer.Difficulty.NORMAL);
         session.apply(new GameSession.Command(GameSession.Action.REVEAL, 0, null, null, false));

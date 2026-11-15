@@ -8,9 +8,17 @@ param(
     [string]$UiBuildRun='',
     [string]$PublicationEvidence='',
     [switch]$RestrictedPublication,
+    [switch]$ResumeRestrictedPublication,
+    [string]$PublicationJournal='',
+    [string]$PublicationChecksum='',
     [string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe'
 )
 $ErrorActionPreference='Stop'
+if($ResumeRestrictedPublication){
+    if(!$BuildRun-or!$NativeUiRun-or!$UiBuildRun-or!$PublicationJournal-or!$PublicationChecksum-or$DocumentationRun-or$PublicationEvidence-or$RestrictedPublication){
+        throw 'Restricted resumption requires build, native UI, UI build, journal and checksum. Run post-publication verification separately.'
+    }
+}elseif($PublicationJournal-or$PublicationChecksum){throw 'PublicationJournal and PublicationChecksum require ResumeRestrictedPublication.'}
 if($RestrictedPublication-and-not$PublicationEvidence){throw 'RestrictedPublication requires PublicationEvidence.'}
 if($DocumentationRun-and($BuildRun-or$NativeUiRun-or$UiBuildRun-or$PublicationEvidence)){throw 'Documentation reconciliation only verifies offline evidence.'}
 $project=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
@@ -18,7 +26,7 @@ Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'RuntimeQualification.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
 $ragDataRoot=Get-AtfDataRoot -ProjectRoot $project
-foreach($path in @($ComponentRun,$DocumentationRun,$BuildRun,$NativeUiRun,$UiBuildRun,$PublicationEvidence)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
+foreach($path in @($ComponentRun,$DocumentationRun,$BuildRun,$NativeUiRun,$UiBuildRun,$PublicationEvidence,$PublicationJournal,$PublicationChecksum)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
 $ComponentRun=[IO.Path]::GetFullPath($ComponentRun);$RunRoot=[IO.Path]::GetFullPath($RunRoot)
 if($DocumentationRun){$DocumentationRun=[IO.Path]::GetFullPath($DocumentationRun)}
@@ -106,10 +114,17 @@ try{
     try{
         [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$ragDataRoot,'Process')
         & $Java @jvm @arguments
+        if($LASTEXITCODE-ne0){throw "Local release RAG failed: $RunRoot"}
+        if($ResumeRestrictedPublication){
+            $publicationJvm=@($jvm[0..($jvm.Count-2)])
+            & $Java @publicationJvm 'atf.rentz.distribution.publication.PublicationCommand' `
+                $project (Join-Path $reportRoot 'release-rag-report.json') $ComponentRun $BuildRun $NativeUiRun $UiBuildRun `
+                ([IO.Path]::GetFullPath($PublicationChecksum)) ([IO.Path]::GetFullPath($PublicationJournal)) (Join-Path $RunRoot 'publication-resume')
+            if($LASTEXITCODE-ne0){throw "Restricted publication stopped. Read the publication-resume receipt in $RunRoot."}
+        }
     }finally{
         [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$previousDataRoot,'Process')
     }
-    if($LASTEXITCODE-ne0){throw "Local release RAG failed: $RunRoot"}
 }finally{
     $cleanup=[ordered]@{status='PASS';path=$scratch;detail='Owned Java scratch removed.'}
     try{

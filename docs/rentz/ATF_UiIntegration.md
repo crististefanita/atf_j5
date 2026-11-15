@@ -134,7 +134,7 @@ Varianta izolată are receipt propriu. Runnerul curent folosește replay-ul inde
 - [Driverul focalizat](../../atf-tests/tools/run-trick-collection-sanity.ps1) execută ultima mutare legală și reia mâna după oprirea procesului. Înregistrați fixture-ul de dezvoltare înainte de a-l expune emulatorului.
 - [Analiza cadrelor](../../atf-tests/tools/analyze-trick-collection.mjs) măsoară timestamp-urile, centrele cărților și apropierea de chenarul câștigător. Extent include cadrele și hash-urile înregistrărilor.
 
-- `-CompactScores` verifică în română chenarul la font 1,5 și confruntă ordinea cărților vizibile cu observația motorului.
+- `-CompactScores` verifică încadrarea valorilor pe două rânduri la font 1,5 și reluarea aceleiași sesiuni după schimbarea limbii. [Componentele mesei](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java) verifică valorile și descrierile fiecărui loc la 3–6 jucători, în ambele limbi.
 - `-HelpAwardsOnly` verifică navigarea, afișarea și accesibilitatea unor premii reprezentative în ambele limbi. Matricea completă a premiilor și descrierilor pentru 3–6 jucători se verifică la [componentă JVM](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java).
 - `-HistoryDetails` confruntă profilul jurnalului și premiile locurilor confirmate.
 

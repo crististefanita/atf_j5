@@ -1017,14 +1017,18 @@ function RunCompactScores($terminal){
     SetHistorySize '720x1280'
     $font=(Adb @('shell','settings','get','system','font_scale') 'score-effective-font').Output.Trim()
     Tap 'Continuă partida';Tap 'Vezi masa';$state=State
-    Observe 'Romanian signed scores stay on two lines per seat at enlarged font' {param($nodes)
+    Observe 'Representative Romanian scores fit two lines at enlarged font' {param($nodes)
         Check 'Effective enlarged system font' '1.5' $font
         Check 'Logical Android viewport' '720x1280' $logicalProfile
         Check 'Same confirmed revision after resize and resume' $terminal.revision $state.revision
         Check 'Same opponents after switching language' ($terminal.opponents-join',') ($state.opponents-join',')
         Check 'There is a negative score to render' $true (@($state.view.dealPoints|Where-Object{$_-lt0}).Count-gt0)
         $names=@('Ana')+@($state.opponents)
-        for($seat=0;$seat-lt$names.Count;$seat++){
+        $negativeSeat=0
+        while($negativeSeat-lt$names.Count-and$state.view.dealPoints[$negativeSeat]-ge0){$negativeSeat++}
+        $samples=@(0)
+        if($negativeSeat-gt0-and$negativeSeat-lt$names.Count){$samples+=$negativeSeat}
+        foreach($seat in $samples){
             $points=$state.view.dealPoints[$seat];$total=$state.view.totals[$seat]
             $pointsLine="Δ $points"
             $totalLine="Σ $total"
