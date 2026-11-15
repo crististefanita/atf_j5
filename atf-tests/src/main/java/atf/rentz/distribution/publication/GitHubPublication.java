@@ -97,12 +97,12 @@ final class GitHubPublication implements Remote {
         }
     }
 
-    @Override public List<Release> releases(String repository, String tag) throws IOException {
-        var matches = new ArrayList<Release>();
+    @Override public List<Release> releases(String repository) throws IOException {
+        var inventory = new ArrayList<Release>();
         for (JsonNode row : pages(repository, "/releases")) {
-            if (tag.equals(row.path("tag_name").asText())) matches.add(release(row));
+            inventory.add(release(row));
         }
-        return List.copyOf(matches);
+        return List.copyOf(inventory);
     }
 
     @Override public Release release(String repository, long id) throws IOException {

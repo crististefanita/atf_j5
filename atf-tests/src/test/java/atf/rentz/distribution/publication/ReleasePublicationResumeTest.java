@@ -1,15 +1,24 @@
 package atf.rentz.distribution.publication;
 
 import atf.rentz.RentzRulePublication;
+import atf.rentz.distribution.evidence.ReleaseEvidenceFiles;
 import atf.testkit.AtfComponentTest;
 import atf.testkit.assertions.AuditedAssertions;
 import atf.testkit.assertions.ComponentAuditExtension;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -152,61 +161,147 @@ class ReleasePublicationResumeTest {
     }
 
     @Test void actualRestAdapterDiscoversDraftFromAuthenticatedListAndUploadsOnlyMissingFile() throws Exception {
-        var mapper = new ObjectMapper();
-        Path file = Files.writeString(scratch.resolve(CHECKSUM.name()), "qualified checksum fixture");
-        var checksum = new Payload(CHECKSUM.name(), file, Files.size(file),
-                atf.rentz.distribution.evidence.ReleaseEvidenceFiles.sha256(Files.readAllBytes(file)));
-        var plan = new Plan(PLAN.sourceRepository(), PLAN.releaseRepository(), PLAN.version(), COMMIT, APK, checksum);
-        var writes = new java.util.concurrent.CopyOnWriteArrayList<String>();
-        var published = new java.util.concurrent.atomic.AtomicBoolean();
-        var checksumPresent = new java.util.concurrent.atomic.AtomicBoolean();
-        var server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/", request -> {
+        try (var github = new DraftApi(false, false, List.of(
+                edition(82, "v0.26.9", false, false),
+                edition(83, "v0.99.0", true, false),
+                edition(84, "v0.100.0", false, true)), List.of())) {
+            AuditedAssertions.assertEquals(81L, github.resume(0), "Publish a newer stable candidate");
+            String route = "/repos/" + PLAN.releaseRepository() + "/releases/81";
+            AuditedAssertions.assertEquals(List.of("POST " + route + "/assets?name=" + CHECKSUM.name(), "PATCH " + route),
+                    github.writes, "Only the missing checksum and final publication go over HTTP");
+        }
+    }
+
+    @Test void olderDraftBehindStableOnSecondPageSendsZeroPatches() throws Exception {
+        var editions = new ArrayList<Release>();
+        for (int id = 82; id <= 180; id++) editions.add(edition(id, "v0.1." + id, false, false));
+        editions.add(edition(181, "v0.100.0", false, false));
+        try (var github = new DraftApi(false, true, editions, List.of())) {
+            AuditedAssertions.assertEquals(List.of(), github.refusalWrites(81, "PUBLICATION-NEWER-STABLE"),
+                    "No HTTP writes, including zero PATCH, when numeric ordering finds a newer stable release on page two");
+        }
+    }
+
+    @Test void stableReleaseAppearingDuringChecksumUploadStopsBeforePatch() throws Exception {
+        try (var github = new DraftApi(false, false, List.of(), List.of(edition(82, "v0.28.0", false, false)))) {
+            String route = "/repos/" + PLAN.releaseRepository() + "/releases/81";
+            AuditedAssertions.assertEquals(List.of("POST " + route + "/assets?name=" + CHECKSUM.name()),
+                    github.refusalWrites(81, "PUBLICATION-NEWER-STABLE"),
+                    "Refresh the stable inventory just before promotion and send zero PATCH");
+        }
+    }
+
+    @Test void alreadyPublishedEditionIsRecoveredWithoutPatchWhenANewerOneExists() throws Exception {
+        try (var github = new DraftApi(true, true, List.of(edition(82, "v0.28.0", false, false)), List.of())) {
+            AuditedAssertions.assertEquals(81L, github.resume(81), "Recover the original published ID");
+            AuditedAssertions.assertEquals(List.of(), github.writes, "Recover read-only even after another release shipped");
+        }
+    }
+
+    @Test void unstableVersionTagInPublishedInventoryRefusesWrites() throws Exception {
+        try (var github = new DraftApi(false, true, List.of(edition(82, "unversioned", false, false)), List.of())) {
+            AuditedAssertions.assertEquals(List.of(), github.refusalWrites(81, "PUBLICATION-STABLE-VERSION"),
+                    "An ambiguous stable tag never permits PATCH");
+        }
+    }
+
+    private static Release edition(long id, String tag, boolean draft, boolean prerelease) {
+        return new Release(id, tag, COMMIT, draft, prerelease);
+    }
+
+    private final class DraftApi implements AutoCloseable {
+        private final ObjectMapper mapper = new ObjectMapper();
+        private final List<String> writes = new CopyOnWriteArrayList<>();
+        private final AtomicBoolean published;
+        private final AtomicBoolean checksumPresent;
+        private final List<Release> initial;
+        private final List<Release> afterUpload;
+        private final Plan plan;
+        private final HttpServer server;
+
+        DraftApi(boolean published, boolean checksumPresent, List<Release> initial, List<Release> afterUpload)
+                throws IOException {
+            this.published = new AtomicBoolean(published);
+            this.checksumPresent = new AtomicBoolean(checksumPresent);
+            this.initial = List.copyOf(initial);
+            this.afterUpload = List.copyOf(afterUpload);
+            Path file = Files.writeString(scratch.resolve(CHECKSUM.name()), "qualified checksum fixture");
+            var checksum = new Payload(CHECKSUM.name(), file, Files.size(file),
+                    ReleaseEvidenceFiles.sha256(Files.readAllBytes(file)));
+            plan = new Plan(PLAN.sourceRepository(), PLAN.releaseRepository(), PLAN.version(), COMMIT, APK, checksum);
+            server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+            server.createContext("/", this::respond);
+            server.start();
+        }
+
+        long resume(long id) throws IOException {
+            var endpoint = URI.create("http://127.0.0.1:" + server.getAddress().getPort() + "/");
+            return ReleasePublication.resume(plan, new GitHubPublication(scratch, "test_credential", endpoint, endpoint),
+                    id, remembered::add, trace::add);
+        }
+
+        List<String> refusalWrites(long id, String diagnostic) {
+            String actual;
+            try {
+                actual = "Published release " + resume(id);
+            } catch (IOException refused) {
+                actual = refused.getMessage();
+            }
+            AuditedAssertions.assertEquals(diagnostic, actual, "Publication is refused with the expected diagnostic");
+            return List.copyOf(writes);
+        }
+
+        private void respond(HttpExchange request) throws IOException {
             String url = request.getRequestURI().getPath();
             String method = request.getRequestMethod();
+            if (!method.equals("GET")) writes.add(method + " " + request.getRequestURI());
+            Release candidate = edition(81, plan.tag(), !published.get(), false);
             int status = 200;
             Object response;
             if (!"Bearer test_credential".equals(request.getRequestHeaders().getFirst("Authorization"))) {
                 status = 401;
-                response = java.util.Map.of();
+                response = Map.of();
             } else if (url.contains("/compare/")) {
-                response = java.util.Map.of("status", "ahead", "merge_base_commit", java.util.Map.of("sha", COMMIT));
+                response = Map.of("status", "ahead", "merge_base_commit", Map.of("sha", COMMIT));
             } else if (url.endsWith("/git/ref/tags/" + plan.tag())) {
-                response = java.util.Map.of("ref", "refs/tags/" + plan.tag(), "object", java.util.Map.of("type", "commit", "sha", COMMIT));
+                response = Map.of("ref", "refs/tags/" + plan.tag(), "object", Map.of("type", "commit", "sha", COMMIT));
             } else if (url.endsWith("/atf_j5_releases")) {
-                response = java.util.Map.of("full_name", PLAN.releaseRepository(), "private", true, "visibility", "private");
+                response = Map.of("full_name", PLAN.releaseRepository(), "private", true, "visibility", "private");
             } else if (method.equals("POST") && url.endsWith("/releases/81/assets")) {
-                writes.add(method + " " + request.getRequestURI());
-                checksumPresent.set(java.util.Arrays.equals(Files.readAllBytes(file), request.getRequestBody().readAllBytes()));
+                checksumPresent.set(Arrays.equals(Files.readAllBytes(plan.checksum().file()), request.getRequestBody().readAllBytes()));
                 status = 201;
-                response = java.util.Map.of("id", 12);
+                response = Map.of("id", 12);
             } else if (method.equals("PATCH") && url.endsWith("/releases/81")) {
-                writes.add(method + " " + request.getRequestURI());
-                published.set(!mapper.readTree(request.getRequestBody()).path("draft").asBoolean(true));
-                response = java.util.Map.of("id", 81);
-            } else if (url.endsWith("/assets")) {
-                response = checksumPresent.get() ? List.of(assetJson(11, APK), assetJson(12, checksum)) : List.of(assetJson(11, APK));
+                var update = mapper.readTree(request.getRequestBody());
+                published.set(!update.path("draft").asBoolean(true) && "true".equals(update.path("make_latest").asText()));
+                response = Map.of("id", 81);
+            } else if (url.endsWith("/releases/81/assets")) {
+                response = checksumPresent.get() ? List.of(assetJson(11, APK), assetJson(12, plan.checksum()))
+                        : List.of(assetJson(11, APK));
+            } else if (url.endsWith("/releases/81")) {
+                response = releaseJson(candidate);
+            } else if (url.endsWith("/releases") && method.equals("GET")) {
+                var inventory = new ArrayList<Release>();
+                inventory.add(candidate);
+                inventory.addAll(initial);
+                if (checksumPresent.get()) inventory.addAll(afterUpload);
+                int offset = request.getRequestURI().getQuery().endsWith("&page=2") ? 100 : 0;
+                response = inventory.stream().skip(offset).limit(100).map(DraftApi::releaseJson).toList();
             } else {
-                var draft = java.util.Map.of("id", 81, "tag_name", PLAN.tag(), "target_commitish", COMMIT,
-                        "draft", !published.get(), "prerelease", false);
-                response = url.endsWith("/releases") ? List.of(draft) : draft;
+                status = 404;
+                response = Map.of();
             }
             byte[] bytes = mapper.writeValueAsBytes(response);
             request.sendResponseHeaders(status, bytes.length);
             try (var output = request.getResponseBody()) { output.write(bytes); }
-        });
-        server.start();
-        try {
-            var endpoint = java.net.URI.create("http://127.0.0.1:" + server.getAddress().getPort() + "/");
-            var remote = new GitHubPublication(scratch, "test_credential", endpoint, endpoint);
-            AuditedAssertions.assertEquals(81L, ReleasePublication.resume(plan, remote, 0, remembered::add, trace::add),
-                    "Resume through real HTTP serialization against loopback");
-            String route = "/repos/" + PLAN.releaseRepository() + "/releases/81";
-            AuditedAssertions.assertEquals(List.of("POST " + route + "/assets?name=" + CHECKSUM.name(), "PATCH " + route),
-                    writes, "A draft is listed and opened by ID; only checksum and final publication go over HTTP");
-        } finally {
-            server.stop(0);
         }
+
+        private static Map<String, Object> releaseJson(Release release) {
+            return Map.of("id", release.id(), "tag_name", release.tag(), "target_commitish", release.target(),
+                    "draft", release.draft(), "prerelease", release.prerelease());
+        }
+
+        @Override public void close() { server.stop(0); }
     }
 
     private static java.util.Map<String, Object> assetJson(long id, Payload payload) {
@@ -264,7 +359,7 @@ class ReleasePublicationResumeTest {
             if (repository.equals(PLAN.sourceRepository())) sourceTag = commit;
             else releaseTag = commit;
         }
-        @Override public List<Release> releases(String repository, String tag) {
+        @Override public List<Release> releases(String repository) {
             return item == null ? List.of() : List.of(item);
         }
         @Override public Release release(String repository, long id) { return item; }

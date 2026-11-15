@@ -6,7 +6,7 @@
 
 - [Interfața Rentz](ATF_Rentz_UI_ToDo.md) urmărește diferențele rămase de interacțiune, geometrie și scor, cu probe de componentă și acceptanță nativă selectivă. [Biblioteca grafică](../../rentz-lab-app/ui-library/README.md) și adaptoarele Rentz au verificări separate.
 - [Integritate și calitate](ATF_RentzQuality.md) deține criteriile strategice și documentare încă deschise. Validarea, lifecycle-ul, guvernanța sursei și [calificarea consumatorului](../rentz/ATF_Qualification.md) au contracte și probe proprii; calificarea nativă rămâne separată.
-- [Feedback-ul RAG](ATF_Release_RAG.md) urmărește protejarea edițiilor publicate când se reia un draft. [Ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) deține porțile Android.
+- [Feedback-ul RAG](ATF_Release_RAG.md) urmărește coordonarea scrierilor între workspaces. [Ghidul de release](../rentz/ATF_Release.md#ordinea-calificării-android-curente) deține porțile Android.
 - [Extinderea realizărilor](ATF_Rentz_Achievements_ToDo.md) urmărește obiectivele candidate, sincronizarea și probele de accesibilitate rămase. [Integrarea actuală](../rentz/ATF_UiIntegration.md#realizări-și-profil-local)
 
 ## ToDo-uri active: prioritate /100
@@ -29,8 +29,8 @@ Scorul este prioritatea de remediere, nu nota calității sau procentul de acope
 | 7 | **P2 · Promovarea AI și calibrarea lumilor** · [calitatea Rentz](ATF_RentzQuality.md) | 82 (33+26+15+8) | Continuarea completă offline există; promovarea cere comparație independentă pe loturi noi, sampler documentat și transportul registrului public în integrare. |
 | 8 | **P2 · Variante de reguli și program configurabil** · [registrul regulilor](ATF_Rentz.md) | 77 (26+25+18+8) | „Totale plus” și sub-jocuri dezactivate nu sunt implementate; definiți contracte și teste pe fiecare variantă. |
 | 9 | **P2 · Responsabilitățile orchestrării** · [criteriul de refactorizare](ATF_RentzQuality.md#limitele-orchestrării) | 75 (30+23+15+7) | Izolați căutarea RAG de verdict, precum și transportul Android de oracolul scenariului. Păstrați diagnosticele și contractele de ieșire. |
-| 10 | **P2 · Ordinea edițiilor publicate** · [criteriul latest](ATF_Release_RAG.md#ordinea-edițiilor-publicate) | 74 (32+22+13+7) | Refuzați promovarea unui draft mai vechi când există deja o ediție stabilă mai nouă. |
-| 11 | **P2 · Politica numelui în dialogul comun** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 72 (25+22+16+9) | Proprietarul J4 trebuie să alinieze filtrul UTF-16 la politica de caractere a consumatorului, fără a schimba validarea Rentz locală. |
+| 10 | **P2 · Politica numelui în dialogul comun** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 72 (25+22+16+9) | Proprietarul J4 trebuie să alinieze filtrul UTF-16 la politica de caractere a consumatorului, fără a schimba validarea Rentz locală. |
+| 11 | **P2 · Promovări concurente între workspaces** · [criteriul de distribuție](ATF_Release_RAG.md#promovări-concurente-între-workspaces) | 70 (32+22+10+6) | Coordonați promovarea pe canal și testați doi operatori cu jurnale distincte. |
 | 12 | **P2 · Compatibilitatea sesiunilor și migrarea scorului** · [registrul regulilor](ATF_Rentz.md) | 67 (23+20+16+8) | Sesiunile vechi și opțiunile/profilurile noi au nevoie de migrare fără pierderea sau reinterpretarea datelor. |
 | 13 | **P2 · Gesturile pe antetul fix al istoricului** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 65 (24+18+15+8) | Verificați tragerea și fling-ul pornite de pe antet fix; tragerea derulează, iar atingerea deschide exact un singur detaliu. |
 | 14 | **P2 · Împachetarea guvernanței reutilizabile** · [contractul generic](README.md#contract-generic-pentru-guvernanță) | 61 (20+18+15+8) | Adaptorul local și probele există; lipsește API-ul comun împachetat și acceptanța într-un consumator mixt Maven/Gradle. |

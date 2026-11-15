@@ -1,15 +1,20 @@
 package atf.rentz.distribution.publication;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 /** Resumes one version by reconciling GitHub state before any write. */
 public final class ReleasePublication {
+    private static final Pattern STABLE_TAG = Pattern.compile("v(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)");
+
     public record Payload(String name, Path file, long bytes, String sha256) { }
     public record Plan(String sourceRepository, String releaseRepository, String version, String commit,
                        Payload apk, Payload checksum) {
@@ -24,7 +29,7 @@ public final class ReleasePublication {
         boolean privateRepository(String repository) throws IOException;
         String tagCommit(String repository, String tag) throws IOException;
         void pushTag(String repository, String tag, String commit) throws IOException;
-        List<Release> releases(String repository, String tag) throws IOException;
+        List<Release> releases(String repository) throws IOException;
         Release release(String repository, long id) throws IOException;
         long createDraft(Plan plan) throws IOException;
         List<Asset> assets(String repository, long releaseId) throws IOException;
@@ -48,7 +53,9 @@ public final class ReleasePublication {
 
         String sourceTag = inspectTag(remote, plan, plan.sourceRepository());
         String releaseTag = inspectTag(remote, plan, repository);
-        Release release = discover(remote, plan, knownId);
+        List<Release> inventory = remote.releases(repository);
+        Release release = discover(remote, plan, knownId, inventory);
+        if (release == null || release.draft()) requirePromotionOrder(plan, inventory, trace);
         if (release != null) {
             require(release.draft() || sourceTag != null && releaseTag != null, "MISSING-PUBLISHED-TAG");
             require(releaseTag != null || plan.commit().equals(release.target()), "DRAFT-TARGET");
@@ -89,6 +96,7 @@ public final class ReleasePublication {
         require(inspectAssets(remote, plan, release).size() == 2, "ASSET-INVENTORY");
         if (release.draft()) {
             require(remote.sourceOnMain(plan), "SOURCE-NOT-MAIN");
+            requirePromotionOrder(plan, remote.releases(repository), trace);
             trace.accept(new Step("Attempt", "Publish verified draft " + id));
             remote.publish(repository, id);
             release = discover(remote, plan, id);
@@ -98,8 +106,28 @@ public final class ReleasePublication {
         return id;
     }
 
+    private static void requirePromotionOrder(Plan plan, List<Release> inventory, Consumer<Step> trace) throws IOException {
+        var candidate = stableVersion(plan.tag());
+        for (Release release : inventory) {
+            if (release.draft() || release.prerelease()) continue;
+            if (Arrays.compare(stableVersion(release.tag()), candidate) > 0) {
+                trace.accept(new Step("Newer published stable release", release.tag()));
+                throw new IOException("PUBLICATION-NEWER-STABLE");
+            }
+        }
+    }
+
+    private static BigInteger[] stableVersion(String tag) throws IOException {
+        require(STABLE_TAG.matcher(tag).matches(), "STABLE-VERSION");
+        return Arrays.stream(tag.substring(1).split("\\.")).map(BigInteger::new).toArray(BigInteger[]::new);
+    }
+
     private static Release discover(Remote remote, Plan plan, long knownId) throws IOException {
-        List<Release> matches = remote.releases(plan.releaseRepository(), plan.tag());
+        return discover(remote, plan, knownId, remote.releases(plan.releaseRepository()));
+    }
+
+    private static Release discover(Remote remote, Plan plan, long knownId, List<Release> inventory) throws IOException {
+        List<Release> matches = inventory.stream().filter(release -> plan.tag().equals(release.tag())).toList();
         require(matches.size() <= 1, "DUPLICATE-RELEASE");
         if (matches.isEmpty()) {
             require(knownId == 0, "RELEASE-ID");

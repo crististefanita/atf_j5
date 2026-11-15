@@ -451,11 +451,11 @@
     {
       "path": "config/release-rag-corpus.json",
       "owner": "Rentz release",
-      "reason": "Define the bounded source allowlist and metadata taxonomy for release review retrieval.",
-      "criterion": "Every source declares exactly one class, owner and known gate; the retriever rejects path traversal, secret-like names, generated output and unsupported file types.",
-      "proof": "docs/feedback/ATF_Release_RAG.md",
+      "reason": "Block promotion of superseded stable drafts and keep the release policy distinct from open feedback.",
+      "criterion": "Recheck the complete numeric stable inventory before remote writes and immediately before PATCH; preserve read-only recovery of already published releases.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
       "expires": "2026-11-30",
-      "sha256": "9b05b6e0126cfebb3c4ad70e0813c4902b199547c08f884a68f5dd7e1a84bb49",
+      "sha256": "fc3053052d1a37beb1ac46f0e84320557aa765ecbdff4ee70dbc80e5ac179468",
       "allowDelete": false
     },
     {
@@ -1419,21 +1419,21 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/ReleasePublication.java",
       "owner": "Rentz release",
-      "reason": "Recover an interrupted restricted GitHub publication from verified remote state.",
-      "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes.",
+      "reason": "Block promotion of superseded stable drafts and keep the release policy distinct from open feedback.",
+      "criterion": "Recheck the complete numeric stable inventory before remote writes and immediately before PATCH; preserve read-only recovery of already published releases.",
       "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
       "expires": "2026-12-10",
-      "sha256": "98e9a08ed6d10c9986940d8f4468df9b48fc3d21636ff9a73ce2d46171a04afc",
+      "sha256": "29ed6ed0dcffe92388a5d919cb05ea9c14d35236065af7d1897f3711a0a60f24",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/GitHubPublication.java",
       "owner": "Rentz release",
-      "reason": "Recover an interrupted restricted GitHub publication from verified remote state.",
-      "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes.",
+      "reason": "Block promotion of superseded stable drafts and keep the release policy distinct from open feedback.",
+      "criterion": "Recheck the complete numeric stable inventory before remote writes and immediately before PATCH; preserve read-only recovery of already published releases.",
       "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
       "expires": "2026-12-10",
-      "sha256": "eb822d5be92137bb6d5e2dbd4028b37ae9e476d6a61b03a038099ec801239c55",
+      "sha256": "d952a46242088e0705f73640c426a5e078794a172948f1e1cbd45b97ae58e2e4",
       "allowDelete": false
     },
     {
@@ -1449,11 +1449,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePublicationResumeTest.java",
       "owner": "Rentz release",
-      "reason": "Recover an interrupted restricted GitHub publication from verified remote state.",
-      "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes.",
+      "reason": "Block promotion of superseded stable drafts and keep the release policy distinct from open feedback.",
+      "criterion": "Recheck the complete numeric stable inventory before remote writes and immediately before PATCH; preserve read-only recovery of already published releases.",
       "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
       "expires": "2026-12-10",
-      "sha256": "9b13de8761ee1f491f903d2063ae44963f31ca849c4df7d8fe2b862b33d829ad",
+      "sha256": "44b63e8212ddee069aa47639358f3bb370d5d8ef3af3c6065ea9238db9ccdb3b",
       "allowDelete": false
     },
     {

@@ -3,7 +3,7 @@
   "topK": 5,
   "maxSourceBytes": 262144,
   "sources": [
-    {"path": "docs/feedback/ATF_Release_RAG.md", "class": "contract", "owner": "release-review", "gate": "policy"},
+    {"path": "docs/feedback/ATF_Release_RAG.md", "class": "feedback", "owner": "release-review", "gate": "policy"},
     {"path": "docs/feedback/ATF_Rentz.md", "class": "feedback", "owner": "rentz-product", "gate": "policy"},
     {"path": "docs/rentz/ATF_Release.md", "class": "normative", "owner": "release", "gate": "policy"},
     {"path": "docs/rentz/ATF_Lifecycle.md", "class": "normative", "owner": "rentz-android", "gate": "android-jvm"},

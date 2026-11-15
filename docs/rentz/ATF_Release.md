@@ -157,10 +157,15 @@ Din checkout-ul calificat, utilizați acreditările Git pentru tag și `GH_TOKEN
 | Sursa calificată se află pe `main`, iar canalul de artefacte este privat | RAG recitește porțile și reconciliază tagurile ambelor repository-uri. |
 | Există un draft unic pentru tag | Confirmă release ID și salvează identitatea înainte de upload. Verifică inventarul complet al draftului. |
 | APK-ul sau checksum-ul are nume, stare, mărime și SHA-256 identice | Reutilizează fișierul și încarcă doar ce lipsește. |
-| Draftul are ambele artefacte exacte | Publică draftul verificat și recitește starea. O ediție deja publicată și verificată este reutilizată. |
+| Repo-ul de distribuție are o ediție stabilă mai nouă | Refuză promovarea cu `PUBLICATION-NEWER-STABLE`. Trimite zero cereri `PATCH`. |
+| Inventarul publicării este incomplet ori un tag stabil are format necunoscut | Oprește promovarea. Verifică accesul API și tagurile din canal înainte de reluare. |
+| Draftul are ambele artefacte exacte și versiunea este admisă | Publică draftul verificat și recitește starea. |
+| Ediția căutată este deja publicată și verificată | Refolosește ID-ul și artefactele prin citire, inclusiv după publicarea altei ediții. |
 | Tagul, draftul sau artefactul diferă ori răspunsul la scriere se pierde | Oprește operația. Următoarea rulare recitește starea și jurnalul înainte să decidă următoarea scriere. |
 
-Jurnalul fixează repository-urile, tagul, commitul, hash-urile și ID-ul release-ului observat. Rezultatul și raportul Extent păstrează pașii confirmați și diagnosticul ultimei încercări. [Implementare și mock-uri](../../atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePublicationResumeTest.java)
+- **Inventar.** Citește toate paginile canalului și compară numeric tagurile stabile `vMAJOR.MINOR.PATCH`. Exclude drafturile și prerelease-urile.
+- **Momentul verificării.** Verifică ordinea înaintea scrierilor în GitHub și din nou imediat înainte de promovare.
+- **Jurnal și raport.** Jurnalul fixează repository-urile, tagul, commitul, hash-urile și ID-ul observat. Raportul Extent păstrează pașii confirmați și diagnosticul ultimei încercări. [Implementare și mock-uri](../../atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePublicationResumeTest.java)
 
 Verificarea README-ului remote, descărcarea autentificată și refuzul accesului anonim se fac după publicare. Pentru retragere se aplică aceleași [porți de distribuție](#distribuție-cu-autentificare).
 
