@@ -27,5 +27,5 @@
 ## Contracte înrudite
 
 - [Guvernanță reutilizabilă și adopția Kit](README.md#contract-generic-pentru-guvernanță)
-- [Retenția probelor](ATF_Release_RAG.md#retenția-spațiilor-de-lucru)
+- [Retenția probelor](../rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor)
 - [Prezentare și scor](ATF_Rentz_UI_ToDo.md)

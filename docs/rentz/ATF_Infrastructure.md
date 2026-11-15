@@ -71,7 +71,7 @@ Analiza AST protejează formele declarate și recunoscute, nu reprezintă un san
 
 Copiile istorice indicate de receipt-uri nu se rebotează și nu se șterg în masă pentru a obține verde. Datele și procesele altui proprietar se păstrează; restricția unei familii vechi nu este o permisiune de a curăța întregul director temporar.
 
-- Regresia și buildul Android compilează în `infrastructure/workspaces`. Un `target` dintr-un astfel de spațiu poate conține clase pe care se bazează classpath-ul atestat al raportului sau al probei Android. Înainte de retragere, verificați receiptele, runtime-ul, worktree-urile Git și semnarea. [Retenția spațiilor de lucru în feedback](../feedback/ATF_Release_RAG.md#retenția-spațiilor-de-lucru)
+- Regresia și buildul Android compilează în `infrastructure/workspaces`. Un `target` dintr-un astfel de spațiu poate conține clase pe care se bazează classpath-ul atestat al raportului sau al probei Android. Înainte de retragere, verificați receiptele, runtime-ul, worktree-urile Git și semnarea. [Retenția cache-urilor și a fixture-urilor](#retenția-cache-urilor-și-a-fixture-urilor)
 
 - Lansatorul RAG alocă JVM-ului `java-scratch` în directorul rulării. La ieșire încearcă să elimine acest director și scrie `scratch-cleanup.json`, inclusiv dacă evaluatorul eșuează. Rezultatul curățării are propriul statut. [Lansatorul RAG](../../scripts/run-release-rag.ps1) · [Controalele runtime](../../atf-tests/tools/test-qualified-runtime.ps1)
 
@@ -84,6 +84,28 @@ Reluați RAG din worktree-ul commitului calificat, cu receiptele originale de co
 - Furnizați căile exacte `target`, rădăcinile receiptelelor, comenzile proceselor active și căile worktree-urilor Git. Pentru țintele dintr-un workspace înregistrat, furnizați și rădăcina workspace-ului prin `WorkspaceByTarget`.
 - `KEEP` indică o dependență, dovezi aflate în țintă sau un perimetru incomplet. `REVIEW` înseamnă că inventarul a terminat scanarea fără o dependență observată.
 - Operatorul verifică din nou căile, referințele și procesele imediat înainte de ștergere. Salvează inventarul și rezultatul curățării cu rularea. [Inventarul read-only](../../scripts/BuildRetention.psm1) · [Controalele](../../atf-tests/tools/test-workspace-governance.ps1)
+
+### Retenția cache-urilor și a fixture-urilor
+
+Controlul runtime păstrează identitatea fixture-ului, ieșirea sintetică și cache-urile create pentru aceeași rulare. Inventarul tratează aceste căi ca un grup. O referință externă către orice cale păstrează grupul întreg.
+
+Fișierele cu extensia APK sunt păstrate. Singurele excepții sunt fișierele de text din probele de descărcare, identificate prin poziția în fixture și prin SHA-256 cunoscut.
+
+| Verdict | Criteriu |
+|---|---|
+| `REGENERABLE` | Receipt de control trecut, descriptor valid, fișiere inventariate și absența referințelor în perimetrul declarat. |
+| `KEEP` | Referință din dovezi, proces, worktree, cache reutilizabil, binar semnat, cale legată sau scanare incompletă. |
+
+Furnizați rădăcinile care conțin receiptele, capturile, rapoartele și descriptorii stagiilor active. Păstrați fișierul planului într-un director de audit din afara rădăcinilor scanate.
+
+```powershell
+.\scripts\run-runtime-retention.ps1 -ControlReceipt $controls -EvidenceRoot $evidenceRoots -PlanFile $plan
+.\scripts\run-runtime-retention.ps1 -Apply -PlanFile $plan -RunRoot $audit -VerifyEvidence $readQualifiedRag
+```
+
+- Lansatorul recitește procesele, worktree-urile și dependențele. Compară hash-ul receipt-ului și inventarul pe fiecare cale înainte de mutare.
+- Mutarea în carantină păstrează o hartă explicită a căilor. O recitire eșuată readuce directoarele la locațiile inițiale. Jurnalul indică și căile a căror restaurare a fost blocată.
+- `$readQualifiedRag` recitește aceleași dovezi și întoarce `$true` după confirmarea celor două porți Extent. Un verdict `VERIFIED` permite retragerea carantinei. [Recitirea release-ului](#verificare-după-curățare) · [Probe offline](../../atf-tests/tools/test-runtime-retention.ps1)
 
 ## Dosarul selectat al livrării
 

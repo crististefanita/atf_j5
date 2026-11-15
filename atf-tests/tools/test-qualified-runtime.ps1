@@ -8,6 +8,7 @@ $fixture=New-AtfWorkspace -Kind fixture -ProjectRoot $project
 $product=Join-Path (Get-AtfDataRoot -ProjectRoot $project) ('components/runtime-fixtures-'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory $product|Out-Null
 $results=[Collections.Generic.List[object]]::new()
+$cacheFixtures=[Collections.Generic.List[string]]::new()
 function Require([bool]$Value,[string]$Reason){if(-not$Value){throw $Reason}}
 function Case([string]$Name,[scriptblock]$Body){try{& $Body;$results.Add([pscustomobject]@{name=$Name;status='PASS'})}catch{$results.Add([pscustomobject]@{name=$Name;status='FAIL';error=$_.Exception.Message})}}
 function Hash([string]$File){return (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash.ToLowerInvariant()}
@@ -30,6 +31,7 @@ function Context([string]$Name){
     $entryClass=Join-Path $stage 'atf-tests/target/classes/atf/rentz/OfflineArena.class'
     $repo=Join-Path (Get-AtfInfrastructurePath -Area cache -ProjectRoot $project) ('runtime-fixture-'+[guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory $repo|Out-Null
+    $cacheFixtures.Add($repo)
     Json $descriptor ([ordered]@{mainClass='atf.rentz.OfflineArena';classpath=($classes+[IO.Path]::PathSeparator+"$root/dependency.jar");classFile=$entryClass;classSha256=(Hash "$classes/atf/rentz/OfflineArena.class");inventory=$inventory;inventorySha256=(Hash $inventory);attestation=$attestation;attestationSha256=(Hash $attestation);qualificationToken=$token})
     Json "$component/result.json" ([ordered]@{status='PASS';stage=$stage;arenaRuntime=$descriptor;arenaRuntimeSha256=(Hash $descriptor);repository=$repo})
     '[]'|Set-Content "$component/source-identity.json"
@@ -618,6 +620,6 @@ Case 'Retirement reopens both qualified Extent files and rejects missing or fore
     Require ($foreign[1].status -ceq 'BLOCKED' -and $foreign[1].reason -cmatch 'identity') 'Report from another candidate allowed retirement'
 }
 $failed=@($results|Where-Object status -EQ FAIL)
-[ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;productFixtures=$product;scope='Byte fixtures, injected Java recorder and extracted publication block; no real JVM body, game, full native launcher or device';results=$results}|ConvertTo-Json -Depth 7|Set-Content "$RunRoot/controls.json" -Encoding utf8NoBOM
+[ordered]@{status=$(if($failed.Count){'FAIL'}else{'PASS'});tests=$results.Count;failed=$failed.Count;fixture=$fixture;productFixtures=$product;disposableCaches=$cacheFixtures.ToArray();scope='Byte fixtures, injected Java recorder and extracted publication block; no real JVM body, game, full native launcher or device';results=$results}|ConvertTo-Json -Depth 7|Set-Content "$RunRoot/controls.json" -Encoding utf8NoBOM
 $results|Format-Table name,status -AutoSize
 if($failed.Count){throw 'Qualified runtime controls failed'}

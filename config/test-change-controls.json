@@ -41,11 +41,12 @@
     {
       "path": "scripts/BuildRetention.psm1",
       "owner": "Rentz release and infrastructure",
-      "reason": "Separate native evidence qualification and inventory older build dependencies.",
-      "criterion": "Existing native decisions, evidence integrity and diagnostics remain enforced; referenced or incomplete retention inventory never permits cleanup.",
-      "proof": "ReleaseGovernanceTest, ReleaseReadinessRagPngTest and test-workspace-governance.ps1",
+      "reason": "Inventory and quarantine disposable runtime fixtures and caches while retaining qualified release evidence.",
+      "criterion": "Bind physical snapshots to the producer receipt; block drift, active use and unknown dependencies; reread original RAG evidence or restore every moved path.",
+      "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
       "expires": "2026-12-10",
-      "sha256": "6339fd79ef3e75cac7378feca46b8d09aa70e7b60ba65f908728a318be69e7a7"
+      "sha256": "b859ea87df0bf76358217cd6e98d7e1cae59f12942d5c24c39cebc6618e07a58",
+      "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/factual/DocumentationNativeFlowTest.java",
@@ -469,12 +470,12 @@
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/changes/TestChangeGovernanceTest.java",
-      "owner": "Rentz release",
-      "reason": "Protect the restricted publication implementation and its authorization gates.",
-      "criterion": "Require exact reviewed bytes for the new publication package plus all existing protected paths.",
-      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Inventory and quarantine disposable runtime fixtures and caches while retaining qualified release evidence.",
+      "criterion": "Bind physical snapshots to the producer receipt; block drift, active use and unknown dependencies; reread original RAG evidence or restore every moved path.",
+      "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
       "expires": "2026-12-10",
-      "sha256": "b0d14de4f9c52d63a7281c70c8a0ec7907288680311297309ee3ac3848846919",
+      "sha256": "b0b580e2dad20e8bf9d08c7cbc38835fa9b8a54eccdf3453b874b953d0adde63",
       "allowDelete": false
     },
     {
@@ -799,12 +800,12 @@
     },
     {
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
-      "owner": "Rentz consumer",
-      "reason": "Add the native contract sequence control to the qualified runtime fixtures.",
-      "criterion": "Accept the valid three-contract sequence and reject repeats, a wrong opener, an incomplete sequence, or an extra contract.",
-      "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
-      "expires": "2027-02-12",
-      "sha256": "644aa2450555359b3a8011ce6fc66db3d4e407e8112a96af60317dfcabd2fbb5",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Inventory and quarantine disposable runtime fixtures and caches while retaining qualified release evidence.",
+      "criterion": "Bind physical snapshots to the producer receipt; block drift, active use and unknown dependencies; reread original RAG evidence or restore every moved path.",
+      "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
+      "expires": "2026-12-10",
+      "sha256": "7c3bd14749e1435a0b273028dc8e196e53a5eaf12c97fa5836fd9dff43215972",
       "allowDelete": false
     },
     {
@@ -839,12 +840,12 @@
     },
     {
       "path": "config/infrastructure-workspaces.json",
-      "owner": "Rentz release",
-      "reason": "Register the atf_j7 sibling and the external validation collection used for retained governance evidence.",
-      "criterion": "The declared sibling and validation collection are admitted while arbitrary sibling directories, unregistered workspaces and forbidden system-TEMP outputs still fail.",
-      "proof": "docs/rentz/ATF_Infrastructure.md",
-      "expires": "2026-12-12",
-      "sha256": "67c19ad309dd1c1565b7f09e4b3eba3e333c4c47e4b7305238bb1c47aa01dfab",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Inventory and quarantine disposable runtime fixtures and caches while retaining qualified release evidence.",
+      "criterion": "Bind physical snapshots to the producer receipt; block drift, active use and unknown dependencies; reread original RAG evidence or restore every moved path.",
+      "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
+      "expires": "2026-12-10",
+      "sha256": "c320eaa6fb71ad15e3159ad78d3d311c48ebbbca959007f844dffee04d616117",
       "allowDelete": false
     },
     {
@@ -1453,6 +1454,36 @@
       "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
       "expires": "2026-12-10",
       "sha256": "9b13de8761ee1f491f903d2063ae44963f31ca849c4df7d8fe2b862b33d829ad",
+      "allowDelete": false
+    },
+    {
+      "path": "scripts/run-runtime-retention.ps1",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Inventory and quarantine disposable runtime fixtures and caches while retaining qualified release evidence.",
+      "criterion": "Bind physical snapshots to the producer receipt; block drift, active use and unknown dependencies; reread original RAG evidence or restore every moved path.",
+      "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
+      "expires": "2026-12-10",
+      "sha256": "0ae5042cee369640226baa29a8043b438ad98919c7d4e70c55bd696daa61ab1c",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/tools/test-runtime-retention.ps1",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Inventory and quarantine disposable runtime fixtures and caches while retaining qualified release evidence.",
+      "criterion": "Bind physical snapshots to the producer receipt; block drift, active use and unknown dependencies; reread original RAG evidence or restore every moved path.",
+      "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
+      "expires": "2026-12-10",
+      "sha256": "aa4d1bae654cc3b8fe486a64dd2661f3b63d6fb973dbf35b49c221b952adbc74",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/ReleaseRuntimeRetentionTest.java",
+      "owner": "Rentz release and infrastructure",
+      "reason": "Inventory and quarantine disposable runtime fixtures and caches while retaining qualified release evidence.",
+      "criterion": "Bind physical snapshots to the producer receipt; block drift, active use and unknown dependencies; reread original RAG evidence or restore every moved path.",
+      "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
+      "expires": "2026-12-10",
+      "sha256": "9746066df75689dbdf369bfeb6033f9855ab906fce4c319e039e9ee8c4f96b9a",
       "allowDelete": false
     }
   ]

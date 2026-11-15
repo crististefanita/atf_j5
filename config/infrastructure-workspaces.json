@@ -77,6 +77,8 @@
     "scripts/TestSourceInventory.psm1",
     "scripts/RuntimeQualification.psm1",
     "scripts/BuildRetention.psm1",
+    "scripts/run-runtime-retention.ps1",
+    "atf-tests/tools/test-runtime-retention.ps1",
     "atf-tests/tools/run-shared-ui-sanity.ps1",
     "atf-tests/tools/run-trick-collection-sanity.ps1",
     "atf-tests/tools/test-ui-selectors.ps1"
