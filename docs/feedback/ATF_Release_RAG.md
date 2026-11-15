@@ -1,8 +1,8 @@
 # Feedback · RAG pentru release
 
-## Promovări concurente între workspaces
+## Calificarea permisiunilor pe canalul GitHub
 
-**P2 · Echipa de distribuție Rentz.** Jurnalul blochează o a doua scriere locală pentru același fișier. Două workspaces pot avea jurnale distincte, iar GitHub poate accepta o altă publicare între ultimele cereri `GET` și `PATCH`. [Regula de promovare](../rentz/ATF_Release.md#reluarea-publicării-restricționate)
+**P3 · Echipa de distribuție Rentz.** Probele locale verifică actualizarea condiționată a referinței Git folosind două checkout-uri. Politica tagurilor și permisiunile din canalul GitHub se aplică în mediul de distribuție. [Contractul rezervării](../rentz/ATF_Release.md#rezervarea-canalului-de-promovare)
 
-- Verificați o coordonare comună per canal de distribuție, cu proprietarul operației și o regulă explicită de recuperare după întrerupere.
-- Proba de componentă pornește doi operatori cu jurnale distincte și blochează primul flux după citirea finală. Criteriul cere o singură promovare la un moment dat și reluarea verificării versiunii la preluarea operației. [Jurnal și blocare locală](../../atf-tests/src/main/java/atf/rentz/distribution/publication/PublicationCommand.java)
+- Verificați pe un canal privat de test că două identități autorizate pot obține și elibera pe rând referința de coordonare. Înregistrați separat refuzul pentru o identitate fără drept de scriere.
+- Criteriul cere controlul asupra referinței de coordonare și respingerea ștergerii cu un SHA străin. Păstrați proba de permisiuni separată de calificarea APK-ului.

@@ -169,6 +169,31 @@ Din checkout-ul calificat, utilizați acreditările Git pentru tag și `GH_TOKEN
 
 Verificarea README-ului remote, descărcarea autentificată și refuzul accesului anonim se fac după publicare. Pentru retragere se aplică aceleași [porți de distribuție](#distribuție-cu-autentificare).
 
+### Rezervarea canalului de promovare
+
+Fiecare canal privat de distribuție are o referință Git comună, `refs/tags/atf-rentz-promotion-lock`. Procesul o creează numai dacă este liberă și înregistrează în Extent SHA-ul proprietarului. Operarea cere acces Git pentru crearea și ștergerea acelei referințe.
+
+| Stare | Efect |
+|---|---|
+| Canal liber | Rezervă canalul cu un SHA unic. Recitește draftul, artefactele și edițiile stabile după obținerea rezervării. |
+| Canal ocupat | Întoarce `PUBLICATION-CHANNEL-IN-USE`, cu zero cereri `PATCH` din încercarea blocată. |
+| Promovare confirmată sau oprire înainte de PATCH | Eliberează referința numai dacă SHA-ul proprietarului corespunde. |
+| PATCH trimis cu rezultat incert | Păstrează rezervarea. Administratorul confruntă identitatea raportată cu starea de pe GitHub. |
+
+Rezervarea acoperă operatorii care publică prin RAG. Pentru recuperare, confirmați oprirea proprietarului și rezultatul cererii PATCH înainte de preluare.
+
+1. Citiți SHA-ul curent și confruntați-l cu dovada operației.
+2. Ștergeți referința condiționat folosind SHA-ul confirmat.
+3. Reluați verificarea versiunii din jurnalul propriu.
+
+```powershell
+$ref = 'refs/tags/atf-rentz-promotion-lock'
+git ls-remote --refs $channel $ref
+git push "--force-with-lease=${ref}:$ownerSha" $channel ":${ref}"
+```
+
+`$channel` este URL-ul Git al canalului de distribuție, iar `$ownerSha` este SHA-ul confirmat pentru operația închisă. [Condiția Git pentru actualizarea referinței](https://git-scm.com/docs/git-push) · [Probe de coordonare](../../atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePromotionCoordinationTest.java)
+
 ### Linkurile din README
 
 README-ul principal începe cu jocul, descărcarea și prima partidă. Secțiunea **Jocul** conține câte o legătură pe rând.

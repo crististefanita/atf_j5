@@ -34,11 +34,33 @@ public final class ReleasePublication {
         long createDraft(Plan plan) throws IOException;
         List<Asset> assets(String repository, long releaseId) throws IOException;
         void upload(String repository, long releaseId, Payload payload) throws IOException;
+        PromotionLease reservePromotion(Plan plan) throws IOException;
         void publish(String repository, long releaseId) throws IOException;
     }
 
     @FunctionalInterface public interface Checkpoint {
         void save(long releaseId) throws IOException;
+    }
+
+    public static final class PromotionLease implements AutoCloseable {
+        @FunctionalInterface interface ReleaseRef { void release() throws IOException; }
+        private final String owner;
+        private final ReleaseRef ref;
+        private boolean pending;
+
+        PromotionLease(String owner, ReleaseRef ref) {
+            this.owner = owner;
+            this.ref = ref;
+        }
+
+        String owner() { return owner; }
+        boolean pending() { return pending; }
+        void startPatch() { pending = true; }
+        void confirmPatch() { pending = false; }
+
+        @Override public void close() throws IOException {
+            if (!pending) ref.release();
+        }
     }
 
     private ReleasePublication() { }
@@ -94,16 +116,31 @@ public final class ReleasePublication {
                 && inspectTag(remote, plan, repository) != null, "TAG-NOT-OBSERVED");
         release = discover(remote, plan, id);
         require(inspectAssets(remote, plan, release).size() == 2, "ASSET-INVENTORY");
-        if (release.draft()) {
-            require(remote.sourceOnMain(plan), "SOURCE-NOT-MAIN");
-            requirePromotionOrder(plan, remote.releases(repository), trace);
-            trace.accept(new Step("Attempt", "Publish verified draft " + id));
-            remote.publish(repository, id);
-            release = discover(remote, plan, id);
-            require(!release.draft() && inspectAssets(remote, plan, release).size() == 2, "PUBLISH-NOT-OBSERVED");
-        }
+        if (release.draft()) promote(plan, remote, id, trace);
         trace.accept(new Step("Verified published release ID", Long.toString(id)));
         return id;
+    }
+
+    private static void promote(Plan plan, Remote remote, long id, Consumer<Step> trace) throws IOException {
+        try (var lease = remote.reservePromotion(plan)) {
+            trace.accept(new Step("Promotion channel owner", lease.owner()));
+            require(remote.sourceOnMain(plan), "SOURCE-NOT-MAIN");
+            Release current = discover(remote, plan, id);
+            require(inspectAssets(remote, plan, current).size() == 2, "ASSET-INVENTORY");
+            if (!current.draft()) return;
+            String repository = plan.releaseRepository();
+            requirePromotionOrder(plan, remote.releases(repository), trace);
+            trace.accept(new Step("Attempt", "Publish verified draft " + id));
+            lease.startPatch();
+            try {
+                remote.publish(repository, id);
+                Release published = discover(remote, plan, id);
+                require(!published.draft() && inspectAssets(remote, plan, published).size() == 2, "PUBLISH-NOT-OBSERVED");
+                lease.confirmPatch();
+            } finally {
+                if (lease.pending()) trace.accept(new Step("Promotion channel held for recovery", lease.owner()));
+            }
+        }
     }
 
     private static void requirePromotionOrder(Plan plan, List<Release> inventory, Consumer<Step> trace) throws IOException {

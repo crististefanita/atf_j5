@@ -480,12 +480,12 @@
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/documentation/DocumentationControlsTest.java",
-      "owner": "Rentz consumer",
-      "reason": "Keep versioned release receipts outside active guide lint while retaining exact catalog integrity checks.",
-      "criterion": "The active documentation inventory excludes immutable versioned release payloads, includes unversioned release guides, and keeps each published payload bound to its declared hash.",
-      "proof": "docs/rentz/ATF_Documentation.md",
-      "expires": "2026-12-12",
-      "sha256": "02c3caa5f22b3d43dbb9bca0502338f01b3d5048f4b4ac46176a9a0b0e24c4ea",
+      "owner": "Rentz documentation",
+      "reason": "Keep the ATF architecture and evidence flow ahead of the gameplay tutorial.",
+      "criterion": "The root README introduces architecture and qualification before the first-game section.",
+      "proof": "README.md#arhitectura-atf",
+      "expires": "2026-12-10",
+      "sha256": "6868b95ba4e6e674fa103abeda0dfa743c976e8aebec3cad54b4024c5b2ca9bc",
       "allowDelete": false
     },
     {
@@ -1419,21 +1419,21 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/ReleasePublication.java",
       "owner": "Rentz release",
-      "reason": "Block promotion of superseded stable drafts and keep the release policy distinct from open feedback.",
-      "criterion": "Recheck the complete numeric stable inventory before remote writes and immediately before PATCH; preserve read-only recovery of already published releases.",
-      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
+      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
+      "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
       "expires": "2026-12-10",
-      "sha256": "29ed6ed0dcffe92388a5d919cb05ea9c14d35236065af7d1897f3711a0a60f24",
+      "sha256": "0a90f1d7bbd3b49cbc43fe0d0ec03a0a1163503e665f052d732580ef4360a2f3",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/GitHubPublication.java",
       "owner": "Rentz release",
-      "reason": "Block promotion of superseded stable drafts and keep the release policy distinct from open feedback.",
-      "criterion": "Recheck the complete numeric stable inventory before remote writes and immediately before PATCH; preserve read-only recovery of already published releases.",
-      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
+      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
+      "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
       "expires": "2026-12-10",
-      "sha256": "d952a46242088e0705f73640c426a5e078794a172948f1e1cbd45b97ae58e2e4",
+      "sha256": "a3c58dac5d99891edc3ac45f8f6a17428eb36470c22e4fa992a247a7ef810ad3",
       "allowDelete": false
     },
     {
@@ -1449,11 +1449,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePublicationResumeTest.java",
       "owner": "Rentz release",
-      "reason": "Block promotion of superseded stable drafts and keep the release policy distinct from open feedback.",
-      "criterion": "Recheck the complete numeric stable inventory before remote writes and immediately before PATCH; preserve read-only recovery of already published releases.",
-      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
+      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
+      "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
       "expires": "2026-12-10",
-      "sha256": "44b63e8212ddee069aa47639358f3bb370d5d8ef3af3c6065ea9238db9ccdb3b",
+      "sha256": "d04ac576945c8bf56ae4efaebe8059662c7699ae48bc2e8461d0c15f51aa3bac",
       "allowDelete": false
     },
     {
@@ -1484,6 +1484,26 @@
       "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
       "expires": "2026-12-10",
       "sha256": "9746066df75689dbdf369bfeb6033f9855ab906fce4c319e039e9ee8c4f96b9a",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/GitPromotionChannel.java",
+      "owner": "Rentz release",
+      "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
+      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
+      "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
+      "expires": "2026-12-10",
+      "sha256": "ca265cd5c69466c8d54cb515c976ef5bfb29a222e2f837acb661bcf290f98f14",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePromotionCoordinationTest.java",
+      "owner": "Rentz release",
+      "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
+      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
+      "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
+      "expires": "2026-12-10",
+      "sha256": "b75c6bcfa002c27b174597c40616fed5af89c0f48cbb81725a5faa0437841e25",
       "allowDelete": false
     }
   ]

@@ -3,6 +3,7 @@ package atf.rentz.distribution.publication;
 import atf.rentz.distribution.publication.ReleasePublication.Asset;
 import atf.rentz.distribution.publication.ReleasePublication.Payload;
 import atf.rentz.distribution.publication.ReleasePublication.Plan;
+import atf.rentz.distribution.publication.ReleasePublication.PromotionLease;
 import atf.rentz.distribution.publication.ReleasePublication.Release;
 import atf.rentz.distribution.publication.ReleasePublication.Remote;
 import com.fasterxml.jackson.core.JsonParser;
@@ -33,20 +34,28 @@ final class GitHubPublication implements Remote {
     private final URI uploads;
     private final String credential;
     private final Path checkout;
+    private final PromotionCoordinator promotion;
+
+    @FunctionalInterface interface PromotionCoordinator {
+        PromotionLease reserve(Plan plan) throws IOException;
+    }
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15))
             .followRedirects(HttpClient.Redirect.NEVER).build();
 
     GitHubPublication(Path checkout, String credential) {
-        this(checkout, credential, URI.create("https://api.github.com/"), URI.create("https://uploads.github.com/"));
+        this(checkout, credential, URI.create("https://api.github.com/"), URI.create("https://uploads.github.com/"),
+                plan -> new GitPromotionChannel(checkout, "https://github.com/" + plan.releaseRepository() + ".git")
+                        .reserve(plan.tag()));
     }
 
-    GitHubPublication(Path checkout, String credential, URI api, URI uploads) {
+    GitHubPublication(Path checkout, String credential, URI api, URI uploads, PromotionCoordinator promotion) {
         if (credential == null || credential.isBlank() || !credential.matches("[A-Za-z0-9_]+"))
             throw new IllegalArgumentException("PUBLICATION-CREDENTIAL");
         this.checkout = checkout;
         this.credential = credential;
         this.api = api;
         this.uploads = uploads;
+        this.promotion = promotion;
     }
 
     @Override public boolean sourceOnMain(Plan plan) throws IOException {
@@ -132,6 +141,10 @@ final class GitHubPublication implements Remote {
         URI uri = uploads.resolve("repos/" + repository + "/releases/" + releaseId + "/assets?name=" + payload.name());
         String type = payload.name().endsWith(".apk") ? "application/vnd.android.package-archive" : "text/plain";
         request("POST", uri, HttpRequest.BodyPublishers.ofByteArray(bytes), type, 201, false);
+    }
+
+    @Override public PromotionLease reservePromotion(Plan plan) throws IOException {
+        return promotion.reserve(plan);
     }
 
     @Override public void publish(String repository, long releaseId) throws IOException {

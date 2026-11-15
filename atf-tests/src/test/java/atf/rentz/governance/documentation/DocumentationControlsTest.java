@@ -103,6 +103,15 @@ class DocumentationControlsTest {
                 "links/DocumentationLinkGovernanceTest.java", "links/DocumentationLocalLinks.java",
                 "links/MarkdownAnchorIndex.java"), paths);
     }
+    @Test void rootReadmeIntroducesArchitectureAndEvidenceBeforeTheFirstGame() throws Exception {
+        String readme = Files.readString(GovernanceProject.root().resolve("README.md"));
+        int architecture = readme.indexOf("## Arhitectura ATF");
+        int evidence = readme.indexOf("## Verificare și livrare");
+        int firstGame = readme.indexOf("## Prima partidă");
+        assertTrue(architecture >= 0 && evidence > architecture && firstGame > evidence,
+                "Architecture and verification orient the reader before the gameplay tutorial");
+    }
+
     @Test void configuredInventoryIncludesEveryActiveGuideAndKeepsRetentionSeparate() throws Exception {
         Path project = GovernanceProject.root();
         var policy = new ObjectMapper().readTree(project.resolve("config/documentation-policy.json").toFile());

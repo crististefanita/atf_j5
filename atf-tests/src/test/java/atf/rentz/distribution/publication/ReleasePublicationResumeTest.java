@@ -236,7 +236,8 @@ class ReleasePublicationResumeTest {
 
         long resume(long id) throws IOException {
             var endpoint = URI.create("http://127.0.0.1:" + server.getAddress().getPort() + "/");
-            return ReleasePublication.resume(plan, new GitHubPublication(scratch, "test_credential", endpoint, endpoint),
+            return ReleasePublication.resume(plan, new GitHubPublication(scratch, "test_credential", endpoint, endpoint,
+                            ignored -> new PromotionLease("fixture-owner", () -> { })),
                     id, remembered::add, trace::add);
         }
 
@@ -381,6 +382,10 @@ class ReleasePublicationResumeTest {
                 throw new IOException("Write outcome unknown");
             }
         }
+        @Override public PromotionLease reservePromotion(Plan plan) {
+            return new PromotionLease("fixture-owner", () -> { });
+        }
+
         @Override public void publish(String repository, long releaseId) {
             writes.add("publish");
             item = new Release(item.id(), item.tag(), item.target(), false, false);
