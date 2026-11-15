@@ -1441,20 +1441,20 @@
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/PublicationCommand.java",
       "owner": "Rentz release",
       "reason": "Recover an interrupted restricted GitHub publication from verified remote state.",
-      "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes.",
+      "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes. Compare persisted integral receipt values exactly.",
       "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
       "expires": "2026-12-10",
-      "sha256": "889e67cc11d5956645b8d786378e7b9ebf8723a46d584f8eaad913b4b7c4c2b7",
+      "sha256": "1cd2c33de8332179c916f9cf9220d446e163c6e3d3cc06856851be24a00fb00d",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePublicationResumeTest.java",
       "owner": "Rentz release",
       "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
-      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
+      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner. Reject changed or textual byte counts after report serialization.",
       "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
       "expires": "2026-12-10",
-      "sha256": "d04ac576945c8bf56ae4efaebe8059662c7699ae48bc2e8461d0c15f51aa3bac",
+      "sha256": "679b726baf97ae79a2bb016dfc18e3261a83434a0eca9297ebaa507456027c1d",
       "allowDelete": false
     },
     {

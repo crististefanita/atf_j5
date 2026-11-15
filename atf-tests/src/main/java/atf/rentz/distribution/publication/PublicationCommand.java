@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -42,6 +43,12 @@ public final class PublicationCommand {
     private static final List<String> REQUIRED = List.of("offline-regression", "component-extent-report", "android-jvm",
             "local-catalog", "native-ui", "native-ui-report", "release-build");
     private static final int APK_LIMIT = 256 * 1024 * 1024;
+    private static final Comparator<JsonNode> RECEIPT_VALUES = (recorded, live) -> {
+        if (recorded.isIntegralNumber() && live.isIntegralNumber()) {
+            return recorded.bigIntegerValue().compareTo(live.bigIntegerValue());
+        }
+        return recorded.equals(live) ? 0 : 1;
+    };
 
     private PublicationCommand() { }
 
@@ -107,7 +114,8 @@ public final class PublicationCommand {
                 && "CLEAN".equals(candidate.path("worktreeState").asText()), "QUALIFICATION");
         for (String id : REQUIRED) {
             JsonNode gate = gate(current, id);
-            require(gate.equals(gate(original, id)) && "PASS".equals(gate.path("status").asText()), "QUALIFICATION-GATE");
+            require(gate.equals(RECEIPT_VALUES, gate(original, id))
+                    && "PASS".equals(gate.path("status").asText()), "QUALIFICATION-GATE");
         }
         String repository = candidate.path("repository").asText();
         String version = candidate.path("candidateVersion").asText();

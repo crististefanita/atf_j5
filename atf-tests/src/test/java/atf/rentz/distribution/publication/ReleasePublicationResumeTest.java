@@ -149,6 +149,21 @@ class ReleasePublicationResumeTest {
                 .put("receiptSha256", receiptHash).put("artifactBytes", Files.size(apk)).put("artifactSha256", hash);
         AuditedAssertions.assertEquals(hash, PublicationCommand.qualifiedPlan(rag, rag.deepCopy(), build, checksum).apk().sha256(),
                 "All seven source-bound gates admit exact APK");
+        Path recordedReport = scratch.resolve("release-rag-report.json");
+        mapper.writeValue(recordedReport.toFile(), rag);
+        var recorded = mapper.readTree(recordedReport.toFile());
+        AuditedAssertions.assertEquals(hash, PublicationCommand.qualifiedPlan(recorded, rag, build, checksum).apk().sha256(),
+                "The report read from disk must admit the same qualified APK");
+        var changedSize = recorded.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode) changedSize.path("gates").get(6))
+                .put("artifactBytes", Files.size(apk) + 1);
+        AuditedAssertions.assertThrows(IOException.class,
+                () -> PublicationCommand.qualifiedPlan(changedSize, rag, build, checksum), "A different byte count blocks publication");
+        var textSize = recorded.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode) textSize.path("gates").get(6))
+                .put("artifactBytes", Long.toString(Files.size(apk)));
+        AuditedAssertions.assertThrows(IOException.class,
+                () -> PublicationCommand.qualifiedPlan(textSize, rag, build, checksum), "Text cannot stand in for a byte count");
         var missingNative = rag.deepCopy();
         ((com.fasterxml.jackson.databind.node.ObjectNode) missingNative.path("gates").get(4)).put("status", "NOT_RUN");
         AuditedAssertions.assertThrows(IOException.class,
