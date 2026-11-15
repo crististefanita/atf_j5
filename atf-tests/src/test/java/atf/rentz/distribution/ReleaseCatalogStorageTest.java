@@ -1,5 +1,6 @@
 package atf.rentz.distribution;
 
+import atf.testkit.AtfComponentTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@AtfComponentTest
 class ReleaseCatalogStorageTest {
     @TempDir Path temporary;
 

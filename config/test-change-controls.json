@@ -1614,7 +1614,7 @@
       "criterion": "A clean draft is readable. Old APKs in the catalog root, a local APK for the current edition and its local checksum each cause a refusal.",
       "proof": "docs/rentz/ATF_Release.md",
       "expires": "2026-12-14",
-      "sha256": "15ce4f5a6f54e73498ce42a248bde8cfbf461d9e2df834aa2da5c5f42f27a784",
+      "sha256": "5dcf2e8ee7ff74f9ed3b78070ff4d0414afb6bce0d94981469e30f7a675ca7f5",
       "allowDelete": false
     }
   ]
