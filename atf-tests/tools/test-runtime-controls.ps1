@@ -3,6 +3,7 @@ $ErrorActionPreference='Stop'
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $project 'rentz-reference/tools/RentzAndroid.psm1') -Force
+Import-Module (Join-Path $project 'rentz-reference/tools/RentzUiOracle.psm1') -Force
 Import-Module (Join-Path $project 'scripts/TestCollections.psm1') -Force
 $allowed=Get-AtfInfrastructurePath -Area governance -ProjectRoot $project
 $RunRoot=[IO.Path]::GetFullPath($RunRoot)

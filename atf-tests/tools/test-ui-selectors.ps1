@@ -4,7 +4,7 @@ $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
-Import-Module (Join-Path $PSScriptRoot '../../rentz-reference/tools/RentzAndroid.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot '../../rentz-reference/tools/RentzUiOracle.psm1') -Force
 if(Test-Path -LiteralPath $RunRoot){throw 'Fresh selector component output required.'}
 New-Item -ItemType Directory -Path $RunRoot|Out-Null
 $checks=[Collections.Generic.List[object]]::new()

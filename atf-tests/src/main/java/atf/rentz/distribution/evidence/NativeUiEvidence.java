@@ -80,6 +80,7 @@ public final class NativeUiEvidence {
                 throw new IOException("RAG-UI-LEARNING-ISOLATION");
             if (!sha256(Files.readAllBytes(runner)).equalsIgnoreCase(ui.path("runnerSha256").asText()))
                 throw new IOException("RAG-UI-TOOL-IDENTITY");
+            verifyModuleIdentity(root, ui.path("uiToolHashes"));
             AtfReportingLibrary reporting = AtfReportingLibrary.resolve(root);
             if (!ui.path("reportingLibrary").asText().equals(reporting.artifactName())
                     || !ui.path("reportingLibrarySha256").asText().equalsIgnoreCase(reporting.sha256()))
@@ -216,6 +217,23 @@ public final class NativeUiEvidence {
             throw new IOException("RAG-UI-CHECKPOINT-EVIDENCE: " + title);
         }
         throw new IOException("RAG-UI-CHECKPOINT-MISSING: " + title);
+    }
+
+    private static void verifyModuleIdentity(Path root, JsonNode hashes) throws IOException {
+        Path oracle = root.resolve("rentz-reference/tools/RentzUiOracle.psm1");
+        // Historical runner sources used no separate oracle or module identity receipt.
+        if (Files.notExists(oracle, LinkOption.NOFOLLOW_LINKS) && hashes.isMissingNode()) return;
+        Path transport = root.resolve("rentz-reference/tools/RentzAndroid.psm1");
+        if (!hashes.isObject() || hashes.size() != 2
+                || !matchesModule(transport, hashes.path("transport"))
+                || !matchesModule(oracle, hashes.path("oracle")))
+            throw new IOException("RAG-UI-TOOL-IDENTITY");
+    }
+
+    private static boolean matchesModule(Path module, JsonNode expectedHash) throws IOException {
+        assertNoSymlinkPath(module);
+        return Files.isRegularFile(module, LinkOption.NOFOLLOW_LINKS) && expectedHash.isTextual()
+                && sha256(readExternalFile(module, 1_048_576)).equalsIgnoreCase(expectedHash.textValue());
     }
 
     private static String safeUiFailure(JsonNode ui) {

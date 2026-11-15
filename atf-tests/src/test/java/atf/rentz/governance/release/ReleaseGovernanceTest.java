@@ -517,6 +517,10 @@ class ReleaseGovernanceTest {
                 .put("sharedDevelopmentLedgerSha256After",sha(learningLedger))
                 .put("runnerSha256",sha(root.resolve("atf-tests/tools/run-shared-ui-sanity.ps1")))
                 .put("reportingLibrary","atf-reporting-1.0.0-j24").put("reportingLibrarySha256",sha(root.resolve("lib/atf-reporting-1.0.0-j24.jar")));
+        Path tools = root.resolve("rentz-reference/tools");
+        uiReceipt.putObject("uiToolHashes")
+                .put("transport", sha(tools.resolve("RentzAndroid.psm1")))
+                .put("oracle", sha(tools.resolve("RentzUiOracle.psm1")));
         uiReceipt.putArray("cleanupFailures");
         var contracts=List.of("RENTZ","TRICKS","DIAMONDS");
         contracts.forEach(uiReceipt.putArray("subgames")::add);
@@ -601,6 +605,21 @@ class ReleaseGovernanceTest {
         assertFalse(abstained.path("releaseWorkflow").path("readyForProductBuild").asBoolean());
         assertFalse(abstained.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
         assertEquals("BLOCKED", abstained.path("aggregate").asText());
+
+        Path nativeReceipt = ui.resolve("result.json");
+        var missingTools = uiReceipt.deepCopy();
+        missingTools.remove("uiToolHashes");
+        Files.write(nativeReceipt, JSON().writeValueAsBytes(missingTools));
+        var missing = gate(ReleaseReadinessRag.evaluate(root, "gate:native-ui Rentz", component, build, ui), "native-ui");
+        assertEquals("BLOCKED", missing.path("status").asText());
+        assertEquals("RAG-UI-TOOL-IDENTITY", missing.path("actual").asText());
+        var changedOracle = uiReceipt.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode) changedOracle.get("uiToolHashes")).put("oracle", "0".repeat(64));
+        Files.write(nativeReceipt, JSON().writeValueAsBytes(changedOracle));
+        var rejectedOracle = gate(ReleaseReadinessRag.evaluate(root, "gate:native-ui Rentz", component, build, ui), "native-ui");
+        assertEquals("BLOCKED", rejectedOracle.path("status").asText());
+        assertEquals("RAG-UI-TOOL-IDENTITY", rejectedOracle.path("actual").asText());
+        Files.write(nativeReceipt, JSON().writeValueAsBytes(uiReceipt));
 
         Path productReceipt = build.resolve("build-qualification.json");
         byte[] productReceiptBytes = Files.readAllBytes(productReceipt);
@@ -1027,6 +1046,9 @@ class ReleaseGovernanceTest {
         Files.createDirectories(root.resolve("config"));Files.createDirectories(root.resolve("docs"));
         Files.createDirectories(root.resolve("scripts"));Files.createDirectories(root.resolve("release/1.2.0"));
         Files.createDirectories(root.resolve("atf-tests/tools"));Files.createDirectories(root.resolve("lib"));
+        Path nativeTools = Files.createDirectories(root.resolve("rentz-reference/tools"));
+        Files.writeString(nativeTools.resolve("RentzAndroid.psm1"), "# native transport fixture");
+        Files.writeString(nativeTools.resolve("RentzUiOracle.psm1"), "# native oracle fixture");
         Files.createDirectories(root.resolve("rentz-lab-app/app"));
         Files.writeString(root.resolve("config/infrastructure-workspaces.json"),"{\"schemaVersion\":1,\"owner\":\"atf_j5\"}");
         Files.writeString(root.resolve("pom.xml"),"<project xmlns=\"http://maven.apache.org/POM/4.0.0\"><properties><atf.reporting.version>1.0.0-j24</atf.reporting.version></properties></project>");

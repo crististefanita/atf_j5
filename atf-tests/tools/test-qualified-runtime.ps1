@@ -2,6 +2,8 @@ param([Parameter(Mandatory)][string]$RunRoot,[string]$NativePublicationScript=''
 $ErrorActionPreference='Stop'
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
+Import-Module (Join-Path $project 'rentz-reference/tools/RentzAndroid.psm1') -Force
+Import-Module (Join-Path $project 'rentz-reference/tools/RentzUiOracle.psm1') -Force
 if(Test-Path -LiteralPath $RunRoot){throw 'Fresh runtime-control output required'}
 New-Item -ItemType Directory $RunRoot|Out-Null
 $fixture=New-AtfWorkspace -Kind fixture -ProjectRoot $project
@@ -432,6 +434,47 @@ Case 'Achievement query retries corrupted native input and requires an exact foc
         $expected=if($state.focused){3}else{1}
         Require ($failed-and$state.writes-eq$expected) 'Unconfirmed input must fail within the retry budget'
     }
+}
+Case 'The visual oracle waits for the requested route and never verifies a late hierarchy' {
+    $tokens=$null;$errors=$null
+    $path=Join-Path $project 'atf-tests/tools/run-shared-ui-sanity.ps1'
+    $ast=[Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$errors)
+    Require (-not$errors) 'Shared UI runner does not parse'
+    $definition=$ast.Find({param($node) $node-is[Management.Automation.Language.FunctionDefinitionAst]-and$node.Name-ceq'Observe'},$true)
+    . ([scriptblock]::Create($definition.Extent.Text))
+    $raw=$fixture;$points=[Collections.Generic.List[object]]::new();$actions=[Collections.Generic.List[object]]::new()
+    $displayProfile='';$logicalProfile=''
+    $test=@{captures=0;verified=0;mode='DELAYED';clock=[datetime]::UtcNow}
+    function Wait-RentzVisualCheckpoint($Capture,$Recover,$Deadline,$UntilText){
+        $test.clock=$Deadline.AddMilliseconds(-500)
+        RentzUiOracle\Wait-RentzVisualCheckpoint @PSBoundParameters -Clock {$test.clock} -Pause {
+            param($Milliseconds)
+            $test.clock=$test.clock.AddMilliseconds($Milliseconds)
+        }
+    }
+    function Save-RentzObservation($RunRoot,$Name){
+        $test.captures++
+        if($test.mode-eq'LATE'){$test.clock=$test.clock.AddMilliseconds(600)}
+        $text=if(($test.mode-eq'DELAYED'-and$test.captures-eq2)-or$test.mode-eq'LATE'){'Ready to play'}else{'Old menu'}
+        [pscustomobject]@{text=$text}
+    }
+    $verify={
+        param($Nodes)
+        $test.verified++
+        [pscustomobject]@{name='Accepted route';expected='Ready to play';actual=($Nodes.text-join'');passed=($Nodes.text-ccontains'Ready to play')}
+    }
+    Observe 'Delayed route' $verify 'Ready to play'
+    Require ($test.captures-eq2-and$test.verified-eq1-and$points.Count-eq1-and$points[0].image-ceq'checkpoint-01-attempt-02.png') 'Only the second fresh frame may be verified'
+    $proof=@([ordered]@{mode='DELAYED';captures=$test.captures;verified=$test.verified;checkpoint=$points[0].image})
+    foreach($mode in @('STALE','LATE')){
+        $test.captures=0;$test.verified=0;$test.mode=$mode
+        $diagnostic=''
+        try{Observe $mode $verify 'Ready to play'}catch{$diagnostic=$_.Exception.Message}
+        Require ($diagnostic-ceq'Native observation did not reach required text: Ready to play') 'A stale or late frame reached a scenario verdict'
+        Require ($test.verified-eq0-and$points.Count-eq1) 'A timed-out route acquired a checkpoint'
+        $proof+=@([ordered]@{mode=$mode;captures=$test.captures;verified=$test.verified;diagnostic=$diagnostic})
+    }
+    Json (Join-Path $RunRoot 'delayed-hierarchy.json') $proof
 }
 Case 'Consecutive native acceptance rejects repeated or reordered contracts' {
     $tokens=$null;$errors=$null

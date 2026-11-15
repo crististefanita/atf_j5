@@ -7,8 +7,17 @@ $gameplayCatalog=Get-Content -LiteralPath (Join-Path $project 'rentz-lab-app/app
 $gameplayTotal=$gameplayCatalog.tiers.EASY.Count+$gameplayCatalog.tiers.MEDIUM.Count+$gameplayCatalog.tiers.HARD.Count
 $gameplayProgressPattern='^Unlocked [1-9][0-9]*/'+$gameplayTotal+'$'
 Import-Module (Join-Path $project 'scripts/InfrastructureWorkspaces.psm1') -Force
-Import-Module (Join-Path $project 'rentz-reference/tools/RentzAndroid.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
+$uiTools=[ordered]@{
+    transport=(Join-Path $project 'rentz-reference/tools/RentzAndroid.psm1')
+    oracle=(Join-Path $project 'rentz-reference/tools/RentzUiOracle.psm1')
+}
+$uiToolHashes=[ordered]@{}
+foreach($tool in $uiTools.GetEnumerator()){
+    Assert-AtfPhysicalPath -Path $tool.Value
+    $uiToolHashes[$tool.Key]=(Get-FileHash -LiteralPath $tool.Value -Algorithm SHA256).Hash.ToLowerInvariant()
+    Import-Module $tool.Value -Force
+}
 $reportingLibrary=Get-AtfReportingLibrary -ProjectRoot $project
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
 if(Test-Path -LiteralPath $RunRoot){throw 'A fresh sanity output directory is required.'}
@@ -121,27 +130,15 @@ function Recover-SystemUi([xml]$Document,[string]$Hierarchy,[string]$Screenshot=
     return $true
 }
 function Ui([datetime]$Deadline=[datetime]::UtcNow.AddSeconds(25)) {
-    $remote='/sdcard/rentz-ui-'+$leaseId+'.xml'
-    $interrupted=$false
-    for($attempt=0;$attempt-lt8-and[datetime]::UtcNow-lt$Deadline;$attempt++){
-        $dump=Adb @('shell','uiautomator','dump',$remote) 'dump' @(0,137)
-        if($dump.ExitCode-eq137){Start-Sleep -Milliseconds 300;continue}
-        $receipt=$dump.Output+$dump.Error
-        if($receipt-match[regex]::Escape($remote)-and$receipt-notmatch'(?i)ERROR|Exception'){
-            $read=Adb @('exec-out','cat',$remote) 'hierarchy'
-            [xml]$doc=$read.Output
-            $nodes=@($doc.SelectNodes('/hierarchy/node/descendant-or-self::node'))
-            if($nodes.Count){
-                if(Recover-SystemUi $doc $read.File){$interrupted=$true;continue}
-                return $nodes
-            }
-            throw 'Fresh native hierarchy contains no nodes.'
+    Wait-RentzUiHierarchy -Deadline $Deadline -ReadHierarchy {
+        Read-RentzHierarchy -RemotePath ('/sdcard/rentz-ui-'+$leaseId+'.xml') -Command {
+            param($Arguments,$Label,$Allowed)
+            Adb $Arguments $Label $Allowed
         }
-        if($receipt-notmatch'(?i)null root node returned|could not get idle state'){throw "Android hierarchy dump was rejected: $receipt"}
-        Start-Sleep -Milliseconds 300
-    }
-    if($interrupted){throw 'ANDROID_SYSTEM_UI_ANR: no fresh application hierarchy within the observation budget.'}
-    throw 'Fresh native hierarchy unavailable within the observation retry budget.'
+    } -Recover {
+        param($Frame)
+        Recover-SystemUi $Frame.document $Frame.hierarchy
+    } -Pause {param($Milliseconds) Start-Sleep -Milliseconds $Milliseconds}
 }
 function Bounds($node){
     $m=[regex]::Match([string]$node.bounds,'^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$')
@@ -195,38 +192,31 @@ function EnterAchievementSearch([string]$Query){
     throw 'ANDROID_TEXT_INPUT: achievement query did not match the focused field after three attempts.'
 }
 function State([long]$After=-1,[string]$Screen='GAME',[int]$TimeoutSeconds=25){
-    $deadline=[datetime]::UtcNow.AddSeconds($TimeoutSeconds)
-    do{
+    Wait-RentzActorCheckpoint -After $After -Screen $Screen -Deadline ([datetime]::UtcNow.AddSeconds($TimeoutSeconds)) -ReadActor {
         $read=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/actor-view.json') 'actor' -Allowed @(0,1)
-        if($read.ExitCode-eq0){
-            try{$state=$read.Output|ConvertFrom-Json;if($state.revision-gt$After-and$state.screen-eq$Screen-and-not$state.busy){return $state}}catch{}
-        }
-        Start-Sleep -Milliseconds 200
-    }while([datetime]::UtcNow-lt$deadline)
-    throw 'Current actor checkpoint did not reach the expected revision and route.'
+        if($read.ExitCode-eq0){return $read.Output}
+        return $null
+    }
 }
 function Check([string]$Name,$Expected,$Actual){[pscustomobject]@{name=$Name;expected=[string]$Expected;actual=[string]$Actual;passed=([string]$Expected-ceq[string]$Actual)}}
 function Observe([string]$Title,[scriptblock]$Verify,[string]$UntilText=''){
-    $deadline=[datetime]::UtcNow.AddSeconds(25);$attempt=0;$lastFailure=$null
-    do{
-        $attempt++;$name='checkpoint-{0:d2}-attempt-{1:d2}'-f($points.Count+1),$attempt
+    $frame=Wait-RentzVisualCheckpoint -UntilText $UntilText -Deadline ([datetime]::UtcNow.AddSeconds(25)) -Capture {
+        param($Attempt)
+        $name='checkpoint-{0:d2}-attempt-{1:d2}'-f($points.Count+1),$Attempt
         $watch=[Diagnostics.Stopwatch]::StartNew()
         try{
-            $nodes=@(Save-RentzObservation -RunRoot $raw -Name $name);$lastFailure=$null
-            if($nodes.text-ccontains"System UI isn't responding"){
-                $hierarchy=Join-Path $raw "$name-hierarchy.txt"
-                [xml]$doc=Get-Content -LiteralPath $hierarchy -Raw
-                if(Recover-SystemUi $doc $hierarchy (Join-Path $raw "$name.png")){
-                    $lastFailure=[InvalidOperationException]::new("ANDROID_SYSTEM_UI_ANR: no fresh application frame after $name.")
-                    continue
-                }
-            }
-            if(!$UntilText-or$nodes.text -ccontains $UntilText){break}
-        }
-        catch{if($_.Exception.Message-notlike'Fresh hierarchy was not confirmed*'){throw};$lastFailure=$_.Exception;Start-Sleep -Milliseconds 250}
-        finally{$watch.Stop()}
-    }while([datetime]::UtcNow-lt$deadline)
-    if($lastFailure){throw $lastFailure}
+            $nodes=@(Save-RentzObservation -RunRoot $raw -Name $name)
+        }finally{$watch.Stop()}
+        [pscustomobject]@{name=$name;nodes=$nodes;captureMillis=$watch.ElapsedMilliseconds}
+    } -Recover {
+        param($Candidate)
+        if($Candidate.nodes.text-cnotcontains"System UI isn't responding"){return $false}
+        $hierarchy=Join-Path $raw "$($Candidate.name)-hierarchy.txt"
+        [xml]$doc=Get-Content -LiteralPath $hierarchy -Raw
+        return (Recover-SystemUi $doc $hierarchy (Join-Path $raw "$($Candidate.name).png"))
+    }
+    $name=$frame.name
+    $nodes=$frame.nodes
     $checks=@(& $Verify $nodes)
     $capturePixels=''
     if($displayProfile){
@@ -240,7 +230,7 @@ function Observe([string]$Title,[scriptblock]$Verify,[string]$UntilText=''){
         $checks+=Check 'Visible hierarchy stays inside the logical viewport' 0 $outside.Count
     }
     if(-not$checks.Count){throw 'A visual checkpoint needs evaluated comparisons.'}
-    $points.Add([pscustomobject]@{title=$Title;image="$name.png";hierarchy="$name-hierarchy.txt";captureMillis=$watch.ElapsedMilliseconds;logicalViewport=$logicalProfile;capturePixels=$capturePixels;actions=$actions.ToArray();checks=$checks})
+    $points.Add([pscustomobject]@{title=$Title;image="$name.png";hierarchy="$name-hierarchy.txt";captureMillis=$frame.captureMillis;logicalViewport=$logicalProfile;capturePixels=$capturePixels;actions=$actions.ToArray();checks=$checks})
     $actions.Clear()
     $script:lastObservation=$nodes
     foreach($check in $checks){if(-not$check.passed){throw "Native assertion failed: $($check.name)"}}
@@ -1227,6 +1217,14 @@ ScriptStackTrace: "+$_.ScriptStackTrace
     }
 }
 $preserved=$initialSize-and$initialSize-eq$finalSize-and$initialDensity-eq$finalDensity-and$initialFont-eq$finalFont-and$packagesBefore-ceq$packagesAfter
+foreach($tool in $uiTools.GetEnumerator()){
+    try{
+        Assert-AtfPhysicalPath -Path $tool.Value
+        if((Get-FileHash -LiteralPath $tool.Value -Algorithm SHA256).Hash-ine$uiToolHashes[$tool.Key]){
+            throw 'Native adapter or oracle changed during acceptance.'
+        }
+    }catch{if(-not$failure){$failure=$_.Exception.Message}}
+}
 $sharedDevelopmentLedgerSha256After='';$sharedDevelopmentLedgerUnchanged=$false;$isolatedDevelopmentLedgerSha256After=''
 if(-not $HelpAwardsOnly){
     $sharedDevelopmentLedgerSha256After=(Get-FileHash -LiteralPath $sharedDevelopmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -1261,6 +1259,7 @@ if($component){
 }
 $extentHash='';if($extentPath-and(Test-Path -LiteralPath $extentPath -PathType Leaf)){$extentHash=(Get-FileHash -LiteralPath $extentPath -Algorithm SHA256).Hash.ToLowerInvariant()}
 $result=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;helpAwardsOnly=[bool]$HelpAwardsOnly;historyOnly=[bool]$HistoryOnly;historyMatrix=[bool]$HistoryMatrix;historyDetails=[bool]$HistoryDetails;seatExtremes=[bool]$SeatExtremes;consecutiveSubgames=[bool]$ConsecutiveSubgames;compactConsecutive=[bool]$CompactConsecutive;subgames=$consecutiveContracts;completedGames=$completedGames.ToArray();gameAudit=$consecutiveOracle;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;build=$build;rawRoot=$raw;extentReport=$extentPath;extentReportSha256=$extentHash;reportingLibrary=$reportingLibrary.name;reportingLibrarySha256=$reportingLibrary.sha256;runnerSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant();developmentLedger=$developmentLedger;developmentLedgerScope=$(if($HelpAwardsOnly){'NOT_USED'}else{'RUN_ISOLATED_COPY'});isolatedDevelopmentLedgerSha256Before=$isolatedDevelopmentLedgerSha256Before;isolatedDevelopmentLedgerSha256After=$isolatedDevelopmentLedgerSha256After;sharedDevelopmentLedger=$sharedDevelopmentLedger;sharedDevelopmentLedgerSha256Before=$sharedDevelopmentLedgerSha256Before;sharedDevelopmentLedgerSha256After=$sharedDevelopmentLedgerSha256After;sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerUnchanged;developmentExposures=$developmentExposures.ToArray();failure=$failure;cleanupFailures=$cleanup.ToArray();display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;checkpoints=$points.ToArray()}
+$result.uiToolHashes=$uiToolHashes
 $result|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $RunRoot 'result.json') -Encoding utf8NoBOM
 if($failure){throw "Shared UI sanity failed: $RunRoot"}
 Write-Output $RunRoot

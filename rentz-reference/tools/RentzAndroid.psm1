@@ -138,28 +138,20 @@ function Save-RentzObservation {
     })
 }
 
-function Get-RentzTapTarget {
-    param([Parameter(Mandatory)][System.Xml.XmlElement[]]$Nodes,[Parameter(Mandatory)][string]$Label,[string]$Class='')
-    $matches=@(foreach($node in $Nodes){
-        $listItem=$node.class-in@('android.widget.CheckedTextView','android.widget.TextView')-and
-            $null-ne$node.SelectSingleNode("ancestor::node[@class='android.widget.ListView']")
-        if(($node.text-ieq$Label-or$node.'content-desc'-ceq$Label)-and$node.enabled-eq'true'-and
-           ($node.clickable-eq'true'-or$listItem)-and(-not$Class-or$node.class-eq$Class)){$node}
-    })
-    if($matches.Count-gt1){throw "Ambiguous native control: $Label"}
-    if($matches.Count-eq1){return $matches[0]}
-    return $null
+function Read-RentzHierarchy {
+    param([Parameter(Mandatory)][string]$RemotePath,[Parameter(Mandatory)][scriptblock]$Command)
+    $dump = & $Command @('shell','uiautomator','dump',$RemotePath) 'dump' @(0,137)
+    if($dump.ExitCode-eq137){return $null}
+    $receipt = $dump.Output + $dump.Error
+    if($receipt-notmatch[regex]::Escape($RemotePath)-or$receipt-match'(?i)ERROR|Exception'){
+        if($receipt-match'(?i)null root node returned|could not get idle state'){return $null}
+        throw "Android hierarchy dump was rejected: $receipt"
+    }
+    $read = & $Command @('exec-out','cat',$RemotePath) 'hierarchy' @(0)
+    [xml]$doc = $read.Output
+    $nodes = @($doc.SelectNodes('/hierarchy/node/descendant-or-self::node'))
+    if(!$nodes.Count){throw 'Fresh native hierarchy contains no nodes.'}
+    [pscustomobject]@{document=$doc;nodes=$nodes;hierarchy=$read.File}
 }
 
-function Get-RentzSystemUiWaitTarget {
-    param([Parameter(Mandatory)][System.Xml.XmlElement[]]$Nodes)
-    $title=@($Nodes|Where-Object {$_.package-ceq'android'-and$_.'resource-id'-ceq'android:id/alertTitle'-and
-        $_.text-ceq"System UI isn't responding"})
-    if(!$title.Count){return $null}
-    $wait=@($title[0].SelectNodes('ancestor::node[.//node[@resource-id="android:id/aerr_wait"]][1]//node[@resource-id="android:id/aerr_wait"]')|
-        Where-Object {$_.package-ceq'android'-and$_.class-ceq'android.widget.Button'-and$_.enabled-eq'true'-and$_.clickable-eq'true'})
-    if($title.Count-ne1-or$wait.Count-ne1){throw 'ANDROID_SYSTEM_UI_ANR: no unambiguous system Wait action.'}
-    return $wait[0]
-}
-
-Export-ModuleMember -Function Invoke-RentzAdb,Save-RentzObservation,Get-RentzTapTarget,Open-RentzAndroidLeaseFile,Close-RentzAndroidLease,Get-RentzSystemUiWaitTarget
+Export-ModuleMember -Function Invoke-RentzAdb,Save-RentzObservation,Read-RentzHierarchy,Open-RentzAndroidLeaseFile,Close-RentzAndroidLease

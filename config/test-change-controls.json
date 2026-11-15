@@ -22,12 +22,13 @@
     },
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/evidence/NativeUiEvidence.java",
-      "owner": "Rentz release and infrastructure",
-      "reason": "Separate native evidence qualification and inventory older build dependencies.",
-      "criterion": "Existing native decisions, evidence integrity and diagnostics remain enforced; referenced or incomplete retention inventory never permits cleanup.",
-      "proof": "ReleaseGovernanceTest, ReleaseReadinessRagPngTest and test-workspace-governance.ps1",
-      "expires": "2026-12-10",
-      "sha256": "f3faef0e918dbd7fa225a044c7a35604a4c2225735d615523d0cc4694d503bf4"
+      "owner": "Rentz Android qualification",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "expires": "2026-12-12",
+      "sha256": "640bb95fc1aa814c640dadf28d9fac697d79d63718dc1ee5dcc9bbf7eff71646",
+      "allowDelete": false
     },
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/evidence/ReleaseEvidenceFiles.java",
@@ -470,12 +471,12 @@
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/changes/TestChangeGovernanceTest.java",
-      "owner": "Rentz release",
-      "reason": "Extend exact file protection to the extracted search, qualification and metadata paths.",
-      "criterion": "Replacing the original implementation cannot leave any of the extracted owners outside change governance.",
-      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "owner": "Rentz Android qualification",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-12",
-      "sha256": "860ee789b6ee0ea9a8f7716dbdf5260e7dac4e5be1053e17975e596c63461487",
+      "sha256": "b1c5d1c3d7247943568c82c4302502793355d1248912d7fac9b9a15e075eead3",
       "allowDelete": false
     },
     {
@@ -610,12 +611,12 @@
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
-      "owner": "Rentz release",
-      "reason": "Verify the ownership boundary and preserved diagnostics against existing evidence fixtures.",
-      "criterion": "Changing the query cannot alter the receipts verified by the gates; native verification remains delegated.",
-      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "owner": "Rentz Android qualification",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-12",
-      "sha256": "2674cb5843820d30ce8fb4777e44ef09d43fdfc03e1ca3381fa2fc9b7706186b",
+      "sha256": "9d819feccc00e46ec6658afe29a950f5e8045dc9ab7d563189f9671fb6a06702",
       "allowDelete": false
     },
     {
@@ -800,22 +801,22 @@
     },
     {
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
-      "owner": "Rentz release and infrastructure",
-      "reason": "Inventory and quarantine disposable runtime fixtures and caches while retaining qualified release evidence.",
-      "criterion": "Bind physical snapshots to the producer receipt; block drift, active use and unknown dependencies; reread original RAG evidence or restore every moved path.",
-      "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
-      "expires": "2026-12-10",
-      "sha256": "7c3bd14749e1435a0b273028dc8e196e53a5eaf12c97fa5836fd9dff43215972",
+      "owner": "Rentz Android qualification",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "expires": "2026-12-12",
+      "sha256": "4b1a3ee4f6f54fd3d4555ca2c377e1d34c50183c99c6ef0b5a12cd708f3ffc2d",
       "allowDelete": false
     },
     {
       "path": "atf-tests/tools/test-runtime-controls.ps1",
-      "owner": "Rentz consumer",
-      "reason": "Q13–Q14: complete pre/post runtime byte inventory and a shared JDK executable-source inventory; preserve parallel work and UI behavior.",
-      "criterion": "Healthy neighbors remain executable; nonconventional Jupiter tests cannot disappear; helper/resource/JAR/population/order mutations fail before Java and in-flight mutation invalidates qualification. No existing behavioral assertion is weakened.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q13-q14-b87e3805/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "1e4df6104fd3608d260dc54d3f1a94f233fc0de5cc55a0f675df187775500fe5",
+      "owner": "Rentz Android qualification",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "expires": "2026-12-12",
+      "sha256": "7fb5a2ca807b52b206059d8d1e23ea3a88b8e4f9ca73ab8c7c1052334512ffdb",
       "allowDelete": false
     },
     {
@@ -840,12 +841,12 @@
     },
     {
       "path": "config/infrastructure-workspaces.json",
-      "owner": "Rentz release and infrastructure",
-      "reason": "Inventory and quarantine disposable runtime fixtures and caches while retaining qualified release evidence.",
-      "criterion": "Bind physical snapshots to the producer receipt; block drift, active use and unknown dependencies; reread original RAG evidence or restore every moved path.",
-      "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
-      "expires": "2026-12-10",
-      "sha256": "c320eaa6fb71ad15e3159ad78d3d311c48ebbbca959007f844dffee04d616117",
+      "owner": "Rentz Android qualification",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "expires": "2026-12-12",
+      "sha256": "21397a0a4634337139431535d673e798b755ccfe77a5301e51a2a0abe6dbc5b8",
       "allowDelete": false
     },
     {
@@ -1270,12 +1271,12 @@
     },
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
-      "owner": "Rentz release",
-      "reason": "Keep native compact score geometry representative and exercise full score content in JVM.",
-      "criterion": "Keep the required three-hand trace, Help navigation, score row containment, font and resumed session proofs.",
-      "proof": "docs/rentz/ATF_UiIntegration.md#auditul-cititorului-extent",
-      "expires": "2026-12-10",
-      "sha256": "b0b54a344c36aa700a0e61a593e332bfe9376f77c2ad4ce6da8f48ecc31b755e",
+      "owner": "Rentz Android qualification",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "expires": "2026-12-12",
+      "sha256": "6657e8bd2efd12342d9b9c9b6e8c1353385f5a8a0d032b96ad852bf9de7e47ed",
       "allowDelete": false
     },
     {
@@ -1574,6 +1575,36 @@
       "proof": "ReleaseReadinessSnapshotTest",
       "expires": "2026-12-12",
       "sha256": "45002973caa6ad866e60725e84b55f99a59c46b94f2fc11b1d10a4cb0e07c2c3",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-reference/tools/RentzAndroid.psm1",
+      "owner": "Rentz Android qualification",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "expires": "2026-12-12",
+      "sha256": "d4f27c8fc6c0c934d950d7c7448ac42c566754e87219d32b6bc3d86d007a044e",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-reference/tools/RentzUiOracle.psm1",
+      "owner": "Rentz Android qualification",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "expires": "2026-12-12",
+      "sha256": "f04e6fbf23eaee1b6b867c5c72fd349d409878bf231c5f77dd67a288ff9099f5",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/tools/test-ui-selectors.ps1",
+      "owner": "Rentz Android qualification",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "expires": "2026-12-12",
+      "sha256": "13d051d2470a95387e5d5122f33594a2bbbdcfe53fb517cf14c8a399f1c942c4",
       "allowDelete": false
     }
   ]

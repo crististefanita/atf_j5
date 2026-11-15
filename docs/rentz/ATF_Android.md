@@ -20,6 +20,16 @@ Adaptorul nativ folosește motorul și jucătorii offline, cu profilul de labora
 
 ## Acțiune și verificare
 
+| Componentă | Responsabilitate |
+|---|---|
+| [Transport ADB](../../rentz-reference/tools/RentzAndroid.psm1) | Verifică rezervarea, execută comenzi și extrage ierarhia și captura asociate aceleiași încercări. |
+| [Oracolul UI](../../rentz-reference/tools/RentzUiOracle.psm1) | Așteaptă eticheta sau revizia cerută, alege controalele și respinge observația întârziată. Primește observații prin porturi care pot fi simulate offline. |
+| [Runnerul nativ](../../atf-tests/tools/run-shared-ui-sanity.ps1) | Leagă acțiunile de porturile concrete și publică în Extent doar cadrul admis de oracol, cu comparațiile scenariului. |
+
+- O captură validă cu altă etichetă declanșează o nouă încercare. La expirarea bugetului, verificatorul scenariului rămâne neapelat, iar checkpoint-ul lipsește.
+- Receipt-ul nativ identifică prin SHA-256 runnerul, transportul și oracolul. Un modul schimbat blochează calificarea. [Porțile RAG](ATF_Release.md)
+- Probele simulate acoperă pierderea temporară a rădăcinii și ierarhia corectă sosită după buget. Acceptanța Android califică separat execuția și captura nativă. [Controalele offline](../../atf-tests/tools/test-qualified-runtime.ps1)
+
 ```mermaid
 flowchart LR
     VIEW[Observație proprie debug] -->|alimentează exclusiv| PLAYER[Jucător independent]

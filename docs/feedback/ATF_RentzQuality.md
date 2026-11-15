@@ -14,13 +14,6 @@ Aici se urmăresc rezultatele necesare pentru promovarea AI și limitele de ment
 - Profilul contextual rămâne separat de candidatul cu dovadă publică. Reguli locale plauzibile sau componente verzi nu justifică păstrarea lor într-un candidat care pierde comparația pereche.
 - Integrarea Android trebuie să transporte registrul public complet și să alinieze codec-ul, identitatea politicii și APK-ul înaintea calificării native. Componentele JVM nu închid această frontieră.
 
-## Limitele orchestrării
-
-**P2 · Responsabil: calificarea J5.** [Runnerul Android](../../atf-tests/tools/run-shared-ui-sanity.ps1) combină comenzile ADB, extragerea UI, scenariile și compunerea dovezilor. O schimbare de selector traversează aceste responsabilități.
-
-- Separați transportul ADB de oracolul scenariului. Păstrați intrările publice, ordinea porților, codurile de diagnostic și schema Extent.
-- Verificați la componentă o ierarhie Android întârziată și un vecin valid, cu fixture-uri locale și un adaptor ADB simulat. Păstrați traseul nativ consecutiv pentru verificarea integrării.
-
 ## Distribuția APK
 
 | Prioritate | Lacună delimitată | Criteriu de închidere |

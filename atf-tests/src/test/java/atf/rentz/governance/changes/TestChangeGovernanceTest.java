@@ -86,6 +86,9 @@ class TestChangeGovernanceTest {
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/AtfReportingLibrary.java")
                 || path.equals("scripts/build-rentz-android.ps1")
                 || path.equals("atf-tests/tools/run-shared-ui-sanity.ps1")
+                || path.equals("rentz-reference/tools/RentzAndroid.psm1")
+                || path.equals("rentz-reference/tools/RentzUiOracle.psm1")
+                || path.equals("atf-tests/tools/test-ui-selectors.ps1")
                 || path.equals("atf-tests/tools/test-workspace-governance.ps1")
                 || path.equals("rentz-lab-app/app/build.gradle") || path.equals("release/index.json")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java")
@@ -125,6 +128,9 @@ class TestChangeGovernanceTest {
         assertTrue(protectedPath("scripts/InfrastructureWorkspaces.psm1"));
         assertTrue(protectedPath("scripts/build-rentz-android.ps1"));
         assertTrue(protectedPath("atf-tests/tools/run-shared-ui-sanity.ps1"));
+        assertTrue(protectedPath("rentz-reference/tools/RentzAndroid.psm1"));
+        assertTrue(protectedPath("rentz-reference/tools/RentzUiOracle.psm1"));
+        assertTrue(protectedPath("atf-tests/tools/test-ui-selectors.ps1"));
         assertTrue(protectedPath("atf-tests/tools/test-workspace-governance.ps1"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/AtfReportingLibrary.java"));
