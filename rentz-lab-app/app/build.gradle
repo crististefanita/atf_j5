@@ -4,7 +4,7 @@ android {
     namespace 'ro.rentzlab.app'
     compileSdk 36
     defaultConfig {
-        applicationId 'ro.rentzlab.app'; minSdk 26; targetSdk 36; versionCode 30; versionName '0.26.0'
+        applicationId 'ro.rentzlab.app'; minSdk 26; targetSdk 36; versionCode 31; versionName '0.27.0'
         buildConfigField 'long', 'NATIVE_ACCEPTANCE_SEED', '0L'
     }
     buildFeatures { buildConfig true }

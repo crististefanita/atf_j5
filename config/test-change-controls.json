@@ -806,7 +806,7 @@
       "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-12",
-      "sha256": "4b1a3ee4f6f54fd3d4555ca2c377e1d34c50183c99c6ef0b5a12cd708f3ffc2d",
+      "sha256": "dabe0e5035a11abfbaa0e7eea4e0398b848bd90066d750ac64961ced75a5e19e",
       "allowDelete": false
     },
     {
@@ -1312,21 +1312,21 @@
     {
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
-      "reason": "Declare the fixture seed for UI acceptance and prepare Rentz Lab 0.26.0.",
-      "criterion": "Only uiSanity can use the declared fixed seed. The release remains 0.x, versionCode 30, and normal game starts keep the clock seed.",
+      "reason": "Advance the qualified Rentz candidate to 0.27.0.",
+      "criterion": "VersionCode increases to 31 and the test-only seed stays isolated from normal game starts.",
       "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
       "expires": "2027-02-12",
-      "sha256": "d3bfdeebfd840a3e8fd0fa56d589305bf89a86a58705df1cdd6401b8df88f278",
+      "sha256": "a73dd9c7cd3835029c5c19646e1422576ee5016572fd8ec193bd5096a2df940b",
       "allowDelete": false
     },
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Stage Rentz Lab 0.26.0 for same-commit qualification.",
+      "reason": "Stage Rentz Lab 0.27.0 for same-commit qualification.",
       "criterion": "Preserve the current published edition until the candidate passes offline, native, signed build and authenticated distribution checks.",
       "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
       "expires": "2027-02-12",
-      "sha256": "dacbcd0759332081e80cbd5799df4a30ba6aa95062aab8f6ee2f725b131818d9",
+      "sha256": "1ae0ab200231eea0dc584df50fbde41eca44572f0d630f4057ad36fc7f62ebe8",
       "allowDelete": false
     },
     {

@@ -28,7 +28,7 @@ Adaptorul nativ folosește motorul și jucătorii offline, cu profilul de labora
 
 - O captură validă cu altă etichetă declanșează o nouă încercare. La expirarea bugetului, verificatorul scenariului rămâne neapelat, iar checkpoint-ul lipsește.
 - Receipt-ul nativ identifică prin SHA-256 runnerul, transportul și oracolul. Un modul schimbat blochează calificarea. [Porțile RAG](ATF_Release.md)
-- Probele simulate acoperă pierderea temporară a rădăcinii și ierarhia corectă sosită după buget. Acceptanța Android califică separat execuția și captura nativă. [Controalele offline](../../atf-tests/tools/test-qualified-runtime.ps1)
+- Regresia offline verifică pierderea temporară a rădăcinii, ierarhia întârziată și selecția controalelor. Receipt-ul indică dosarul `productFixtures` cu comparațiile din `ui-selectors/assertions.json`. [Controalele offline](../../atf-tests/tools/test-qualified-runtime.ps1) · [Probele selectorilor](../../atf-tests/tools/test-ui-selectors.ps1)
 
 ```mermaid
 flowchart LR
@@ -64,7 +64,7 @@ Fișierul debug este numai citit pentru sincronizare și decizie. Adaptorul nu i
 |---|---|
 | Încadrarea levatei și a cărților în centru, pentru 3–6 locuri, fonturi și densități | Componente JVM cu dimensiuni măsurate controlat. Oracolul compară limita în pixeli cu dimensiunea din formula folosită de randare. |
 | Cărțile rămase după finalul secvenței | Componenta confruntă sloturile afișate cu evenimentele publice de joc ale motorului. |
-| Tranzițiile între contracte și reluarea sesiunii | Traseul Android de release. Dreptunghiurile locurilor și starea tablei se verifică în cadrele atașate aceluiași raport. |
+| Tranzițiile între contracte și reluarea sesiunii | Componentele acoperă tranzițiile și replay-ul. Traseul de release verifică efectele la atingere, geometria și reluarea efectivă a procesului. |
 | Raster, fonturi și gesturi | Probe native focalizate pe tabla Rentz sau istoricul compact, după zona modificată. |
 
 [Lansatorul prototipului](../../atf-tests/tools/run-android-sanity.ps1) păstrează contractul UI anterior și refuză receipt-ul `card-table-ui-v1` înainte de ADB. Traseul actual folosește [oracolul Java](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) pentru replay și confruntarea proiecției publice. U09 păstrează separat eventuala migrare a deciziei externe din suita veche.

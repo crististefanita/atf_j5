@@ -20,3 +20,10 @@ Aici se urmăresc rezultatele necesare pentru promovarea AI și limitele de ment
 |---|---|---|
 
 | P2 | Contractele de transport și arhivă sunt adaptoare locale pentru distribuția produsului; reutilizarea printr-o bibliotecă comună nu este încă împachetată. | Prin ownerul comun, promovați un API generic cu nume de produs configurabil și oracole negative independente. Păstrați în consumator selecția versiunii, regulile Rentz și acceptanța consumatorului. |
+
+## Scenarii Android și teste fără dispozitiv
+
+**P2 · Responsabil: acceptanța Android.** După separarea transportului și a oracolului, lansatorul comun încă îmbină progresul partidei, comparațiile geometrice și restaurarea dispozitivului. Evoluția scenariului ar trebui să fie testabilă cu observații simulate, prin porturile deja existente.
+
+- Extrageți așteptările pentru trecerea dintr-un contract în următorul și delimitarea punctajului. Proba de componentă trebuie să respingă o revizie veche, apăsarea repetată a controlului și un ecran de scor prematur.
+- Păstrați în acceptanța nativă cele trei contracte complete, gesturile, reluarea și capturile originale. Calificarea continuă să confrunte sursa, verdictul și fiecare cadru Extent. [Protocolul Android](../rentz/ATF_Android.md)
