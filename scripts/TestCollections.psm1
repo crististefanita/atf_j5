@@ -1,6 +1,6 @@
 Import-Module (Join-Path $PSScriptRoot 'TestSourceInventory.psm1')
 function Get-RentzTestPlan {
-    param([Parameter(Mandatory)][string]$ProjectRoot,[string]$Collection='regression',
+    param([Parameter(Mandatory)][string]$ProjectRoot,[string[]]$Collection=@('regression'),
           [string]$InventorySourceRoot=(Split-Path -Parent $PSScriptRoot),[string]$JavaHome='C:\tools\Java21\jdk-21.0.12.1+1')
     $path=Join-Path $ProjectRoot 'config/test-collections.json'
     $document=[Text.Json.JsonDocument]::Parse([IO.File]::ReadAllText($path))
@@ -14,7 +14,9 @@ function Get-RentzTestPlan {
     $policy=Get-Content -Raw -LiteralPath $path|ConvertFrom-Json
     if(@(Compare-Object @('schemaVersion','default','collections'|Sort-Object) @($policy.psobject.Properties.Name|Sort-Object)).Count-or($policy.schemaVersion-isnot[long]-and$policy.schemaVersion-isnot[int])-or$policy.schemaVersion-ne1-or$policy.default-ne'regression'){throw 'Invalid collection policy'}
     $names=@('quick','regression','learning','infrastructure','android-jvm')
-    if(@(Compare-Object @($names|Sort-Object) @($policy.collections.psobject.Properties.Name|Sort-Object)).Count-or$Collection-notin$names){throw 'Unknown or incomplete collection registry'}
+    if(@(Compare-Object @($names|Sort-Object) @($policy.collections.psobject.Properties.Name|Sort-Object)).Count-or
+        !$Collection.Count-or@($Collection|Where-Object {$_-notin$names}).Count-or
+        @($Collection|Group-Object|Where-Object Count -GT 1).Count){throw 'Unknown or incomplete collection registry'}
     foreach($entry in $policy.collections.psobject.Properties){
         $p=$entry.Value
         if(@(Compare-Object @('maven','androidJvm','runtimeControls'|Sort-Object) @($p.psobject.Properties.Name|Sort-Object)).Count-or$p.androidJvm-isnot[bool]-or$p.runtimeControls-isnot[bool]-or-not$p.runtimeControls){throw 'Invalid collection stages'}
@@ -22,14 +24,19 @@ function Get-RentzTestPlan {
         if(-not$p.maven.Count-and-not$p.androidJvm){throw 'Empty collection'}
     }
     if(($policy.collections.regression.maven-join',')-ne'*Test'-or-not$policy.collections.regression.androidJvm){throw 'Regression must include all offline gates'}
-    $selected=$policy.collections.$Collection
     $layout=Get-Content -Raw -LiteralPath (Join-Path $ProjectRoot 'config/java-source-layout.json')|ConvertFrom-Json
+    if(-not$layout.mavenModules){throw 'TEST-INVENTORY: declared Maven membership required'}
+    $inventory=Get-RentzSourceInventory -ProjectRoot $ProjectRoot -Layout $layout -InventorySourceRoot $InventorySourceRoot -JavaHome $JavaHome
+    $policyHash=(Get-FileHash -LiteralPath $path).Hash
+    foreach($name in $Collection) {
+        New-RentzCollectionPlan $name $policy.collections.$name $layout $inventory $policyHash
+    }
+}
+function New-RentzCollectionPlan([string]$Name,$Selected,$Layout,$Inventory,[string]$PolicyHash) {
     $expected=[Collections.Generic.List[string]]::new()
     $reports=[Collections.Generic.List[string]]::new()
     $nestedReports=[Collections.Generic.List[string]]::new()
     $nestedCaseClasses=[Collections.Generic.List[string]]::new()
-    if(-not$layout.mavenModules){throw 'TEST-INVENTORY: declared Maven membership required'}
-    $inventory=Get-RentzSourceInventory -ProjectRoot $ProjectRoot -Layout $layout -InventorySourceRoot $InventorySourceRoot -JavaHome $JavaHome
     foreach($entry in $inventory.entries){
         $sourceRoot=@($layout.roots|Where-Object{$_.role-eq'test'-and$entry.file.StartsWith($_.path+'/',[StringComparison]::Ordinal)})
         if(-not$sourceRoot.Count){continue}
@@ -59,7 +66,7 @@ function Get-RentzTestPlan {
     if(@($reports|Group-Object -CaseSensitive|Where-Object Count -GT 1).Count){
         throw 'TEST-INVENTORY: selected roots share a binary report class; Surefire XML cannot attribute those cases independently'
     }
-    [pscustomobject]@{name=$Collection;selectors=@($selected.maven);expected=@($expected|Sort-Object);reports=@($reports|Sort-Object);nestedReports=@($nestedReports|Sort-Object);nestedCaseClasses=@($nestedCaseClasses|Sort-Object);androidJvm=$selected.androidJvm;runtimeControls=$selected.runtimeControls;policySha256=(Get-FileHash -LiteralPath $path).Hash;inventoryImplementation=$inventory.implementationSources}
+    [pscustomobject]@{name=$Name;selectors=@($selected.maven);expected=@($expected|Sort-Object);reports=@($reports|Sort-Object);nestedReports=@($nestedReports|Sort-Object);nestedCaseClasses=@($nestedCaseClasses|Sort-Object);androidJvm=$selected.androidJvm;runtimeControls=$selected.runtimeControls;policySha256=$PolicyHash;inventoryImplementation=$inventory.implementationSources}
 }
 function Read-RentzSurefireResult {
     param([Parameter(Mandatory)][string]$Path,[Parameter(Mandatory)][string]$Module,[Parameter(Mandatory)]$Plan)

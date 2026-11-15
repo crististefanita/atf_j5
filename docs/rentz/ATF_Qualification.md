@@ -53,6 +53,7 @@ Livrarea se compară cu perechea publicată și dovada producătorului, apoi pri
 Comanda pornește din rădăcina proiectului în PowerShell 7, cu JDK 21, Maven, SDK Android și cache-urile pregătite. [Infrastructura](ATF_Infrastructure.md) alocă staging-ul și ieșirile externe; [lansatorul Android JVM](../../scripts/test-rentz-android-jvm.ps1) primește sursa înghețată, nu o altă versiune live.
 
 - Un [inventar executabil comun](../../atf-tests/src/main/java/atf/rentz/discovery/TestSourceInventory.java) alimentează clasificarea și selecția. Formele Jupiter declarate, inclusiv compoziția, sunt analizate înaintea convenției de nume; o sursă executabilă neconformă este refuzată explicit.
+- Când controlul verifică toate colecțiile simultan, selectorul construiește planurile în ordinea cerută din același inventar Java. Fiecare plan validează selecția și apartenența la module.
 - Clasele executate trebuie să coincidă cu selecția derivată din sursă; dublurile, suitele goale, eșecurile și skip-urile refuză calificarea.
 - Android JVM păstrează propria populație XML și receipt; nu este raportat drept test Maven sau execuție Android nativă.
 - Asamblarea APK cere calificarea `regression`, inclusiv Android JVM; o colecție focalizată nu devine acceptanță integrală prin redenumirea rezultatului.

@@ -816,7 +816,7 @@
       "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-12",
-      "sha256": "7fb5a2ca807b52b206059d8d1e23ea3a88b8e4f9ca73ab8c7c1052334512ffdb",
+      "sha256": "2273519ff02c220ea53a65b6ea09451cd9fa7cb8050076be107fc478fb891f96",
       "allowDelete": false
     },
     {
@@ -1186,7 +1186,7 @@
       "criterion": "Refuse namespaced, misplaced and unknown outcomes. Preserve real Surefire reports and Nested consolidation.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "2be051da3587104c0f003691d724a5a1b4046ab3dbb673a250a864780ecd38ca",
+      "sha256": "3e44e74651953eb1a93f7190850599da2010c8cf4bca28547529bc6dc564f44a",
       "allowDelete": false
     },
     {

@@ -112,8 +112,12 @@ function PlanFixture([string]$Name){
     return $folder
 }
 Case 'All five collections are resolvable and regression includes all offline gates' {
-    foreach($name in @('quick','regression','learning','infrastructure','android-jvm')){$p=Get-RentzTestPlan -ProjectRoot $project -Collection $name;Require ($p.name-eq$name-and$p.runtimeControls) 'Named collection is not executable'}
-    $p=Get-RentzTestPlan -ProjectRoot $project;Require ($p.androidJvm-and$p.selectors-contains'*Test') 'Standard regression omits Android JVM or Maven tests'
+    $names=@('quick','regression','learning','infrastructure','android-jvm')
+    $plans=@(Get-RentzTestPlan -ProjectRoot $project -Collection $names)
+    Require (($plans.name-join',')-ceq($names-join',')-and
+        @($plans|Where-Object {!$_.runtimeControls}).Count-eq0) 'Named collection is not executable'
+    $p=$plans|Where-Object name -CEQ 'regression'
+    Require ($p.androidJvm-and$p.selectors-contains'*Test') 'Standard regression omits Android JVM or Maven tests'
 }
 Case 'Unknown collection and duplicate JSON properties fail closed' {
     $failed=$false;try{Get-RentzTestPlan -ProjectRoot $project -Collection 'typo'|Out-Null}catch{$failed=$true};Require $failed 'Unknown collection accepted'
