@@ -106,19 +106,37 @@ Case 'POM-selected reporting artifact and provenance resolve by exact version' {
 Case 'A future reporting patch selects its own artifact instead of a pinned JAR' {$fixture=Join-Path $RunRoot 'reporting-version-fixture';New-Item -ItemType Directory -Force -Path (Join-Path $fixture 'lib')|Out-Null;'<project><properties><atf.reporting.version>1.0.0-j99</atf.reporting.version></properties></project>'|Set-Content -LiteralPath (Join-Path $fixture 'pom.xml') -Encoding utf8NoBOM;'fixture-jar'|Set-Content -LiteralPath (Join-Path $fixture 'lib/atf-reporting-1.0.0-j99.jar') -Encoding utf8NoBOM;'fixture-pom'|Set-Content -LiteralPath (Join-Path $fixture 'lib/atf-reporting-1.0.0-j99.pom') -Encoding utf8NoBOM;$actual=Get-AtfReportingLibrary -ProjectRoot $fixture;Require ($actual.name-ceq'atf-reporting-1.0.0-j99') 'A future POM version resolved a pinned artifact'}
 Case 'Data root cannot point inside operating-system Temp' {$saved=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT');try{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',(Join-Path ([IO.Path]::GetTempPath()) 'atf-bypass'));try{Get-AtfDataRoot -ProjectRoot $project|Out-Null;throw 'Temporary data root accepted'}catch{Require ($_.Exception.Message-match'must be outside') 'Wrong data-root failure'}}finally{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$saved)}}
 Case 'Default data root stays anchored to the shared checkout in a nested worktree' {
-    $base=Join-Path $fixture 'default-data-root-layout';$canonical=Join-Path $base 'checkout-group/atf_j5';$expected=Join-Path $base 'rentz_back/j5-active'
-    $nested=Join-Path $expected ('infrastructure/workspaces/fixture-'+[guid]::NewGuid().ToString('N')+'/atf_j5')
-    New-Item -ItemType Directory -Force -Path (Join-Path $canonical 'config'),(Split-Path -Parent $nested)|Out-Null
+    $base=Join-Path $fixture 'git'
+    $canonical=Join-Path $base 'src/atf_j5'
+    $expected=Join-Path $base 'rentz_back/j5-active'
+    $nested=Join-Path $expected 'worktrees/atf_j5'
+    $padding='x'*[Math]::Max(16,(280-(Join-Path $nested 'payload/probe.txt').Length))
+    $relative="payload/$padding/probe.txt"
+    $tracked=Join-Path $canonical $relative
+    $checkedOut=Join-Path $nested $relative
+    New-Item -ItemType Directory -Force -Path (Join-Path $canonical 'config'),(Split-Path -Parent $tracked),(Split-Path -Parent $nested)|Out-Null
     '{}'|Set-Content -LiteralPath (Join-Path $canonical 'config/infrastructure-workspaces.json') -Encoding utf8NoBOM
     '/.atf-signing/'|Set-Content -LiteralPath (Join-Path $canonical '.gitignore') -Encoding utf8NoBOM
+    $content='Git checkout must preserve this file'
+    [IO.File]::WriteAllText($tracked,$content)
     & git -C $canonical init --quiet
     Require ($LASTEXITCODE-eq0) 'Canonical fixture repository could not be initialized'
-    & git -C $canonical add config/infrastructure-workspaces.json .gitignore
+    & git -C $canonical config --local core.longpaths false
+    Require ($LASTEXITCODE-eq0) 'Canonical fixture could not enforce default Git path behavior'
+    & git -c core.longpaths=true -C $canonical add -- config/infrastructure-workspaces.json .gitignore $relative
     Require ($LASTEXITCODE-eq0) 'Canonical fixture source could not be staged'
-    & git -C $canonical -c user.name='ATF Fixture' -c user.email='atf-fixture@example.invalid' commit --quiet -m 'fixture root'
+    & git -C $canonical -c user.name='ATF Fixture' -c user.email='atf-fixture@example.invalid' -c commit.gpgsign=false commit --quiet -m 'fixture root'
     Require ($LASTEXITCODE-eq0) 'Canonical fixture commit could not be created'
-    & git -C $canonical worktree add --detach --quiet $nested HEAD
+    # Older Git for Windows passes the absolute gitfile path in GIT_DIR to the automatic checkout.
+    & git -c core.longpaths=true -C $canonical worktree add --detach --no-checkout --quiet $nested HEAD
     Require ($LASTEXITCODE-eq0) 'Nested fixture worktree could not be created'
+    & git -c core.longpaths=true -C $nested read-tree --reset -u HEAD
+    Require ($LASTEXITCODE-eq0) 'Nested fixture worktree could not materialize HEAD'
+    Require ($checkedOut.Length-gt260) 'The checkout did not exercise a long tracked path'
+    Require ([IO.File]::ReadAllText($checkedOut)-ceq$content) 'Git changed the tracked bytes in the nested worktree'
+    $localLongPaths=git -C $canonical config --local --get core.longpaths
+    Require ($LASTEXITCODE-eq0-and$localLongPaths-ceq'false') 'The fixture changed the repository configuration to enable long paths'
+    Write-Host "Git fixture path lengths: worktree=$($nested.Length), tracked file=$($checkedOut.Length)"
     $saved=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT')
     try{
         [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$null)

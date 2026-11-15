@@ -60,6 +60,9 @@ Lansatoarele și controalele infrastructurii folosesc PowerShell 7.
 
 [Controalele cu fixture-uri](../../atf-tests/tools/test-workspace-governance.ps1) confruntă omisiunile inventarului, API-ul de mediu, citirile legitime, funcțiile neaprobate și linkurile imbricate. Lansatorul standard al componentelor le rulează înaintea Maven; eșecul oprește rularea și păstrează diagnosticul extern.
 
+- **Fixture Git.** Worktree-ul imbricat are o rădăcină compactă în spațiul înregistrat. Crearea metadatelor și materializarea commitului sunt separate pentru limita internă `GIT_DIR` din versiunile mai vechi de Git for Windows. [Git for Windows](https://gitforwindows.org/git-cannot-create-a-file-or-directory-with-a-long-path.html)
+- **Cale lungă.** Comenzile necesare primesc `core.longpaths=true` local procesului. Proba verifică octeții unui fișier a cărui cale depășește 260 de caractere, rădăcina comună a datelor și locația semnării cu o rădăcină de artefacte configurată.
+
 Analiza AST protejează formele declarate și recunoscute, nu reprezintă un sandbox pentru orice cod dinamic. Destinația fizică, proprietarul și verificarea la momentul scrierii rămân contracte obligatorii; motivul unei citiri TEMP nu autorizează alocarea în acel director.
 
 ## Curățare și probe

@@ -1282,10 +1282,10 @@
       "path": "atf-tests/tools/test-workspace-governance.ps1",
       "owner": "Rentz release",
       "reason": "Cover default data-root resolution and worktree source identity without weakening workspace owner checks.",
-      "criterion": "Nested worktrees resolve the shared root. Component stages name the tested checkout when the runner is invoked elsewhere. Unverified source paths and foreign descriptors fail closed.",
+      "criterion": "Nested worktrees resolve the shared root. Component stages name the tested checkout when the runner is invoked elsewhere. A tracked path longer than 260 characters checks out byte-for-byte with process-local Git settings. Unverified source paths and foreign descriptors fail closed.",
       "proof": "docs/rentz/ATF_Infrastructure.md",
       "expires": "2026-12-12",
-      "sha256": "5379bf45d0ea1e997467ec5e5ae206a6acd927050811287e062f7d0542f65184",
+      "sha256": "d6fffc9ea175cdd2a3deed0f6cc2edaffd5e994d3f26f627a1ce72adac50d480",
       "allowDelete": false
     },
     {

@@ -64,3 +64,5 @@ API-ul comun trebuie să primească rădăcina explicită, inventarul activ și 
 La împachetarea guvernanței, API-ul comun trebuie să păstreze inventarul AST pentru clasificare și selecție, cu rădăcină, source-set și apartenență la build declarate. Refuzul formelor neconforme și al octeților modificați ai bootstrap-ului are probe independente la consumator.
 
 Calificarea runtime-ului cere lista ordonată a classpath-ului, inventarul recursiv de clase și resurse, atestarea la granițele testelor și verificarea aceleiași așteptări înainte/după lansare. Aria rămâne infrastructură de test; domeniul Rentz, observația jucătorului și semantica scorului nu se extrag în biblioteca comună.
+
+- **Fixture-uri Git pe Windows.** Consumatorii pot verifica materializarea unui fișier cu cale lungă, octeții și opțiunile limitate la invocare. [Proba J5](../rentz/ATF_Infrastructure.md#rolurile-scripturilor-și-citirea-temp) arată cum se păstrează validările fizice ale workspace-ului.
