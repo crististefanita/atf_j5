@@ -6,7 +6,7 @@ Catalogul identifică ediția curentă și trimite la APK-ul semnat și la prove
 
 ## Ediția curentă
 
-[Rentz Lab 0.26.0](0.26.0/README.md) — [descarcă APK-ul](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.26.0/RentzLab-0.26.0.apk).
+[Rentz Lab 0.27.0](0.27.0/README.md) — [descarcă APK-ul](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.27.0/RentzLab-0.27.0.apk).
 
 ## Organizare
 

@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "versionName": "0.27.0",
+    "versionCode": 31,
+    "applicationId": "ro.rentzlab.app",
+    "sourceCommit": "bd30aa50686f543bf267339484fd7553f67e332b",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "apkName": "RentzLab-0.27.0.apk",
+    "apkBytes": 926714,
+    "sha256": "003475508b7cd4d10da15037975ea1a80d6dc4b3288f88ce938806aef9257bd8",
+    "certificateSha256": "14305dbae65971684fbf0c21b2a2f40557409afa86495befc7fb0f633e2381ab",
+    "debuggable": false
+  },
+  "publication": {
+    "state": "PUBLISHED",
+    "channel": "authenticated-only",
+    "sourceCommit": "bd30aa50686f543bf267339484fd7553f67e332b",
+    "sourceTag": "v0.27.0",
+    "releaseId": 446396689,
+    "provider": "GitHub",
+    "releaseRepository": "crististefanita/atf_j5_releases",
+    "assetId": 752482960,
+    "checksumAssetId": 752483128,
+    "link": "https://github.com/crististefanita/atf_j5_releases/releases/download/v0.27.0/RentzLab-0.27.0.apk",
+    "authenticatedDownload": "PASS",
+    "anonymousDownload": "DENIED",
+    "latestTag": "v0.27.0"
+  },
+  "qualification": {
+    "status": "PASS",
+    "scope": "maven-components-android-jvm-native-ui-and-signed-build",
+    "e2e": "PASS",
+    "ragPublication": "STANDARD",
+    "tests": 619,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": {
+      "androidJvmTests": 126,
+      "maven": 52,
+      "mavenTests": 493,
+      "androidJvm": 25
+    },
+    "evidence": {
+      "components": {
+        "bytes": 7351978,
+        "path": "components/j5-027-bd30aa5/component-suite-extent.html",
+        "sha256": "a42934609b25e9c28b3c230a641a51a51a802395295d16c644cc608ffaf1582a"
+      },
+      "componentResult": {
+        "bytes": 30924,
+        "path": "components/j5-027-bd30aa5/result.json",
+        "sha256": "23ea69fb776c4ea0d7cdbe23799291b6a5c869866a4af9e3afcd984dcee3880d"
+      },
+      "androidJvm": {
+        "bytes": 4475,
+        "path": "components/j5-027-bd30aa5/android-jvm/result.json",
+        "sha256": "d3bbaa3f7b92da3d5cd2ef9a223aaf38b523adddf5d2ab378797d59d1619f57f"
+      },
+      "build": {
+        "bytes": 8421,
+        "path": "distribution/j5-027/product-bd30aa5/build-qualification.json",
+        "sha256": "6da77351334156e9eaaa645a9a5ec21e532897de9a97a29f62e226334d85bdcb"
+      },
+      "native": {
+        "bytes": 12984037,
+        "path": "android-acceptance/j5-027-bd30aa5-lease-2/android-extent.html",
+        "sha256": "a91f495909c174cd6b7128189789abdded8ebc25c89280602a6aa0d3217b7267"
+      },
+      "nativeResult": {
+        "bytes": 120638,
+        "path": "android-acceptance/j5-027-bd30aa5-lease-2/result.json",
+        "sha256": "eaf9c5adbf5c37a2c1bf0bc2d60a4e7af75aa541d936210e0cbe9dbc687843d0"
+      },
+      "rag": {
+        "bytes": 17410,
+        "path": "validation/j5-027-release-20261115/qualified-rag-bd30aa5/report/release-rag-report.json",
+        "sha256": "c167dcac02429ae2c7f1b81276d640b4a61cb63482ccf4ab6b016cf36aea7634"
+      },
+      "distribution": {
+        "bytes": 1016,
+        "path": "validation/j5-027-release-20261115/download-before-catalog-3/restricted-download.json",
+        "sha256": "f467e87c76b606c8db8f82ea1e49e2c50282786200e84b26fc2af3bd058e901c"
+      }
+    }
+  },
+  "integrity": {
+    "files": [
+      {
+        "bytes": 190,
+        "path": "README.md",
+        "sha256": "9c66c95ef5a3925f72eb6e007e3e0929b575807038f8e8962e7fae0405fcb880"
+      },
+      {
+        "bytes": 293,
+        "path": "release-notes.md",
+        "sha256": "eec2a7fee4539c12a00b4f65ad6669543c02a90ac948d5216ff63b06f8e528dd"
+      },
+      {
+        "bytes": 544,
+        "path": "reports/README.md",
+        "sha256": "0d7de87d0db048838622a0cf6e348d087890a34816a8eed1e5edce22d6d9f071"
+      },
+      {
+        "bytes": 926714,
+        "path": "RentzLab-0.27.0.apk",
+        "sha256": "003475508b7cd4d10da15037975ea1a80d6dc4b3288f88ce938806aef9257bd8"
+      },
+      {
+        "bytes": 86,
+        "path": "RentzLab-0.27.0.apk.sha256",
+        "sha256": "40c26ebf49391f5e91c945c62e63d32ac770e1d8e6c1789ce82f556992199344"
+      }
+    ]
+  },
+  "verifiedUtc": "2026-11-15T22:00:24.4044091Z"
+}

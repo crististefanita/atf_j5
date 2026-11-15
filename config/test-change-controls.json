@@ -1322,11 +1322,11 @@
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Stage Rentz Lab 0.27.0 for same-commit qualification.",
+      "reason": "Record the verified publication of Rentz Lab 0.27.0.",
       "criterion": "Preserve the current published edition until the candidate passes offline, native, signed build and authenticated distribution checks.",
       "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
       "expires": "2027-02-12",
-      "sha256": "1ae0ab200231eea0dc584df50fbde41eca44572f0d630f4057ad36fc7f62ebe8",
+      "sha256": "b64d61b4024de7299ec0218b108283365f0bcd584b69b1f79e55a804eaef3cb2",
       "allowDelete": false
     },
     {
