@@ -798,6 +798,15 @@ class ReleaseGovernanceTest {
 
         assertEquals("PASS", gate(ReleaseReadinessRag.evaluate(root, question, run), "component-extent-report").path("status").asText());
 
+        Path attestedSource = root.resolve("docs/ATF_Release.md");
+        byte[] originalSource = Files.readAllBytes(attestedSource);
+        Files.writeString(attestedSource, "\nAdditional content.\n", java.nio.file.StandardOpenOption.APPEND);
+        var sourceDrift = ReleaseReadinessRag.evaluate(root, question, run);
+        assertEquals("RAG-RECEIPT-SOURCE-DRIFT",
+                gate(sourceDrift, "offline-regression").path("actual").asText());
+        assertFalse(sourceDrift.path("mayPublish").asBoolean());
+        Files.write(attestedSource, originalSource);
+
         for (var change : java.util.Map.of("sample.ComponentTest", "sample.ReplacedTest",
                 receipt.required("sourceManifestSha256").asText(), "a".repeat(64)).entrySet()) {
             String replacement = new String(valid, StandardCharsets.UTF_8).replace(change.getKey(), change.getValue());

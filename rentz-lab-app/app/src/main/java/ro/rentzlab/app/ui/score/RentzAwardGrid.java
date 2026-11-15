@@ -38,16 +38,15 @@ public final class RentzAwardGrid {
         for (var points : awards) {
             var row = new TableRow(views.activity());
             row.setBackgroundColor(points.size() % 2 == 0 ? ScreenViews.SURFACE : ScreenViews.BACKGROUND);
-            String table = points.size() + copy.text(" players", " jucători");
             var count = cell(views, Integer.toString(points.size()), true);
-            count.setContentDescription(table);
+            count.setContentDescription(copy.finishingAwardTable(points.size()));
             row.addView(count);
             for (int place = 1; place <= places; place++) {
                 var value = cell(views, place <= points.size() ? points.get(place - 1).toString() : "—", false);
                 if (place <= points.size()) {
                     value.setId(R.id.rentz_finishing_award);
-                    value.setContentDescription(table + copy.text(", place ", ", locul ") + place
-                            + ", " + value.getText() + copy.text(" points", " puncte"));
+                    value.setContentDescription(copy.finishingAwardDescription(
+                            points.size(), place, points.get(place - 1)));
                 } else {
                     value.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
                 }

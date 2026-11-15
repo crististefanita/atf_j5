@@ -29,6 +29,15 @@ public final class RentzUiText {
     }
     public String play(String label) { return text("Play ", "Joacă ") + label; }
     public String seatTurn(boolean choosing) { return choosing ? text("Choosing", "Alege") : text("Playing", "Joacă"); }
+    public String finishingAwardTable(int players) {
+        return players + text(" players", " jucători");
+    }
+
+    public String finishingAwardDescription(int players, int place, int points) {
+        return finishingAwardTable(players) + text(", place ", ", locul ") + place
+                + ", " + points + text(" points", " puncte");
+    }
+
     public String trickScoring(ScoreProfile scoring) {
         return String.format(java.util.Locale.ROOT,
                 text("Trick %s · queen %s · diamond %s · K♥ %s. Whist %s · 10♣ %s.",

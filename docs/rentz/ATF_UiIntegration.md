@@ -135,7 +135,7 @@ Varianta izolată are receipt propriu. Runnerul curent folosește replay-ul inde
 - [Analiza cadrelor](../../atf-tests/tools/analyze-trick-collection.mjs) măsoară timestamp-urile, centrele cărților și apropierea de chenarul câștigător. Extent include cadrele și hash-urile înregistrărilor.
 
 - `-CompactScores` verifică în română chenarul la font 1,5 și confruntă ordinea cărților vizibile cu observația motorului.
-- `-HelpAwardsOnly` verifică în ambele limbi premiile distincte pentru mesele de 3–6 jucători.
+- `-HelpAwardsOnly` verifică navigarea, afișarea și accesibilitatea unor premii reprezentative în ambele limbi. Matricea completă a premiilor și descrierilor pentru 3–6 jucători se verifică la [componentă JVM](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java).
 - `-HistoryDetails` confruntă profilul jurnalului și premiile locurilor confirmate.
 
 - Spark grupează metodele sub clasă: confruntați atât populația metodelor, cât și suma comparațiilor; numărul intrărilor din stânga nu este numărul testelor.

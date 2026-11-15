@@ -126,7 +126,7 @@ Verificatorul nativ stabilește verdictul execuției din receipt. Validarea Exte
 - Sanity-ul Android produce Extent prin aceeași bibliotecă. RAG confruntă fiecare checkpoint în ordinea execuției, cu toate perechile așteptat și observat, și verifică octeții PNG inline față de captura originală. Capturile identice pot referi aceeași imagine încorporată. Ierarhia nativă rămâne în dosarul de dovezi.
 - Receipt-ul păstrează versiunea și hash-ul JAR-ului, sursa, intrările, rezultatul și digestul HTML. APK-ul și raportul rămân artefacte externe.
 
-[Atributele Git](https://git-scm.com/docs/gitattributes) dezactivează conversia text pentru intrările APK și dosarul release. Înainte de push se confruntă octeții din Git cu inventarul, separat de copia din workspace.
+[Politica de reproducere a sursei](ATF_Qualification.md#reproducerea-sursei-atestate) păstrează octeții Git pentru toate intrările atestate. Înainte de push se confruntă inventarul din Git cu octeții din workspace.
 
 ## Publicare și descărcare
 

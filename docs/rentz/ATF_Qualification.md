@@ -58,6 +58,12 @@ Comanda pornește din rădăcina proiectului în PowerShell 7, cu JDK 21, Maven,
 - Asamblarea APK cere calificarea `regression`, inclusiv Android JVM; o colecție focalizată nu devine acceptanță integrală prin redenumirea rezultatului.
 - Arena și adaptorul nativ cer descriptorul clasei compilate și componenta lor calificată; nu depind de existența unui scenariu narativ fără legătură.
 
+## Reproducerea sursei atestate
+
+[Atributele Git](../../.gitattributes) dezactivează conversia text pentru intrările din repository. Același tag livrează aceiași octeți indiferent de `core.autocrlf`. Manifestul `source-identity.json` și porțile RAG confruntă fișierele efective prin SHA-256. [Proba cu două worktree-uri](../../atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGitPolicyTest.java)
+
+Pentru un tag anterior acestei politici, porniți de la manifestul original, cu SHA-256 confirmat din receipt. Folosiți worktree-uri izolate ale tagului, cu `git -c core.autocrlf=false worktree add --detach` și `git -c core.autocrlf=true worktree add --detach`. Folosiți pentru fiecare cale numai copia al cărei hash coincide cu manifestul, apoi reconfruntați inventarul complet în worktree-ul de recitire. Dacă o cale rămâne fără o copie exactă, folosiți snapshotul original sau păstrați calificarea blocată. Tagul și dovezile originale rămân sursele de adevăr.
+
 ## Reconcilierea unei revizii editoriale
 
 Păstrați checkout-ul curat și rularea `regression` care au produs dovada originală. Dintr-un al doilea worktree înregistrat, pe commitul editorial, rulați colecția `infrastructure`. Compositorul cere controalele de documentație și verifică fiecare receipt împotriva sursei sale.

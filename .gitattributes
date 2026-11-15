@@ -1,11 +1,2 @@
-# Preserve hashed APK build inputs and immutable release evidence byte for byte.
-rentz-lab-app/** -text
-release/** -text
-lib/** -text
-docs/history/contract-whist/** -text
-
-# Governance hashes bind the reviewed bytes in these source trees.
-pom.xml -text
-atf-tests/** -text
-config/** -text
-scripts/** -text
+# Preserve committed bytes for source attestations, irrespective of checkout EOL settings.
+* -text

@@ -25,6 +25,7 @@ Verificăm fiecare cerință la cel mai mic nivel care poate observa efectul ei.
 | Invariant | Verificare la componentă | Dovadă păstrată în Android |
 |---|---|---|
 | Catalogul Greu conține obiectivele corecte în ordine | [AchievementFullCatalogComponentTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/AchievementFullCatalogComponentTest.java) confruntă populația, ordinea, etichetele RO/EN și identitățile rândurilor cu catalogul. | Traseul deschide Antrenament, aplică filtre prin dialog, verifică starea goală, deschide un rezultat și revine după resetare. |
+| Help prezintă premiile Rentz pentru locurile reale | [RentzScoreContentTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java) verifică matricea de premiere pentru 3–6 jucători și descrierile RO și EN. | Sanity-ul focalizat verifică deschiderea, afișarea și accesibilitatea unor premii reprezentative, apoi revenirea în meniu. |
 | Titlul se acordă numai după o partidă confirmată | [GameplayAchievementComponentTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/achievements/GameplayAchievementComponentTest.java) confruntă cheia salvată pentru o partidă în curs și pentru locul întâi confirmat. [SessionControllerTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/SessionControllerTest.java) verifică refuzul și după reluarea unei mâini jucate. | Traseul dovedește creditul manual, progresul asistat și păstrarea progresului după repornire. |
 
 ## Anatomia unui test auditabil

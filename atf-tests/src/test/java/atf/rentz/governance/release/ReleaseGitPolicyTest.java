@@ -5,6 +5,7 @@ import atf.testkit.AtfComponentTest;
 import atf.testkit.assertions.AuditedAssertions;
 import atf.testkit.assertions.ComponentAuditExtension;
 import java.nio.file.*;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,48 @@ class ReleaseGitPolicyTest {
         Files.writeString(fixture.resolve(".gitattributes"), "release/** -text\n");
         AuditedAssertions.assertEquals(List.of(), textConversions(fixture, List.of(evidence)),
                 "The healthy neighboring policy preserves evidence bytes");
+    }
+
+    @Test void theSameTagPreservesAttestedBytesWithBothAutocrlfSettings() throws Exception {
+        Path fixture = Files.createDirectory(temporary.resolve("source repository"));
+        Path root = atf.rentz.distribution.ReleaseCatalog.root();
+        Map<String, byte[]> inputs = new LinkedHashMap<>();
+        inputs.put(".gitattributes", Files.readAllBytes(root.resolve(".gitattributes")));
+        inputs.put("README.md", "# Rentz\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        inputs.put("docs/feedback/release.md", "# Relecture\n\nVérification.\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        inputs.put("docs/rentz/contract.md", "# Contract\r\n\r\nReceipt.\r\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        inputs.put("rentz-reference/tools/runner.ps1", "Write-Output 'fixture'\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        inputs.put("release/0.1.0/report.json", new byte[]{'{', '}', 13, 10});
+        var expected = new LinkedHashMap<String, String>();
+        for (var input : inputs.entrySet()) {
+            Path path = fixture.resolve(input.getKey());
+            Files.createDirectories(path.getParent());
+            Files.write(path, input.getValue());
+            expected.put(input.getKey(), sha256(input.getValue()));
+        }
+
+        git(fixture, List.of("init", "--quiet"));
+        git(fixture, List.of("-c", "core.autocrlf=false", "add", "--", "."));
+        git(fixture, List.of("-c", "user.name=Rentz Test", "-c", "user.email=test@example.invalid",
+                "commit", "--quiet", "--no-gpg-sign", "-m", "Attested source fixture"));
+        git(fixture, List.of("-c", "tag.gpgSign=false", "tag", "attested-source"));
+        String commit = git(fixture, List.of("rev-parse", "attested-source")).strip();
+
+        for (String autocrlf : List.of("false", "true")) {
+            Path checkout = temporary.resolve("checkout-" + autocrlf);
+            git(fixture, List.of("-c", "core.autocrlf=" + autocrlf,
+                    "worktree", "add", "--quiet", "--detach", checkout.toString(), "attested-source"));
+            AuditedAssertions.assertEquals(commit, git(checkout, List.of("rev-parse", "HEAD")).strip(),
+                    "Worktree resolves the attested tag with core.autocrlf=" + autocrlf);
+            var actual = new LinkedHashMap<String, String>();
+            for (String file : expected.keySet()) actual.put(file, sha256(Files.readAllBytes(checkout.resolve(file))));
+            AuditedAssertions.assertEquals(expected, actual,
+                    "Worktree must reproduce original bytes with core.autocrlf=" + autocrlf);
+        }
+    }
+
+    private static String sha256(byte[] bytes) throws Exception {
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
     }
 
     private List<String> textConversions(Path root, List<String> paths) throws Exception {

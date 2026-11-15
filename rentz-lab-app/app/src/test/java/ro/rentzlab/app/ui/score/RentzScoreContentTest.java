@@ -24,6 +24,26 @@ public final class RentzScoreContentTest {
         audit.rejects("An actual place cannot be removed", UnsupportedOperationException.class, rows.get(3)::clear);
     }
 
+    @Test public void helpDescribesEveryFinishingAwardInBothLanguages() {
+        var english = new RentzUiText(RentzUiText.Language.EN);
+        var romanian = new RentzUiText(RentzUiText.Language.RO);
+        for (var row : RentzScoreContent.finishingAwards(GameSession.scoringProfile())) {
+            int players = row.size();
+            audit.equal("English table label", players + " players", english.finishingAwardTable(players));
+            audit.equal("Romanian table label", players + " jucători", romanian.finishingAwardTable(players));
+            for (int index = 0; index < players; index++) {
+                int place = index + 1;
+                int points = row.get(index);
+                audit.equal("English award " + players + "/" + place,
+                        players + " players, place " + place + ", " + points + " points",
+                        english.finishingAwardDescription(players, place, points));
+                audit.equal("Romanian award " + players + "/" + place,
+                        players + " jucători, locul " + place + ", " + points + " puncte",
+                        romanian.finishingAwardDescription(players, place, points));
+            }
+        }
+    }
+
     @Test public void helpUsesTheEffectiveProfileWithoutSortingOrInventingPlaces() {
         var alternate = new ScoreProfile(0, 4, 8, 16, 2, 32, List.of(25, 900, 25, 7, 0, 12, 999));
         audit.equal("Non-default awards keep place order, ties and zero; seventh place stays outside the grid", List.of(

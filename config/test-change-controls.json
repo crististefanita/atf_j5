@@ -600,21 +600,21 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGitPolicyTest.java",
       "owner": "Rentz consumer",
-      "reason": "0.3.0 P1: preserve the release catalog, byte identity and complete retained evidence while promoting the active edition.",
-      "criterion": "Retain exact DRAFT/PREPARED/PUBLISHED navigation and release identities; preserve raw JAR/POM bytes; reject truncated or empty evidence bodies while accepting the complete neighboring body.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-rentz-0.3.0/README.md",
-      "expires": "2026-11-20",
-      "sha256": "721b1c69c54b9bc202191f670db4783c0c80d91d99c15280f7ba47942cdbcf01",
+      "reason": "Reproduce the exact attested tree under different Git checkout configurations.",
+      "criterion": "Check two real worktrees of one tag with core.autocrlf false and true. Preserve LF, CRLF and immutable release evidence bytes. Keep rejection of missing or overriding attributes.",
+      "proof": "docs/rentz/ATF_Qualification.md#reproducerea-sursei-atestate",
+      "expires": "2026-12-10",
+      "sha256": "4b5bfb5f46e05e78de4a9d891d685ae36c3004100b8871e6be50812d2ada1a8f",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz release",
-      "reason": "Govern release-state, three complete game deals, display layout, learning isolation, source identity and Extent evidence.",
-      "criterion": "Two deals or missing required geometry cannot qualify an APK. Valid receipts are source-bound and report corruption blocks promotion. README controls also reject duplicate or indirect downloads, a different preview identity and public preview access. The native fixture qualifies the representative search and progress journey while preserving the existing rejection controls for incomplete games, geometry, source identity and corrupt evidence.",
-      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
-      "expires": "2026-11-20",
-      "sha256": "1f4a8e11153c1253d58a4a691bebd42a7a4301c93f7009ffe3f0a3ee1bdf1887",
+      "reason": "Keep the source receipt bound to actual bytes after checkout policy changes.",
+      "criterion": "Keep native and release qualification checks. A changed attested source must block regression with RAG-RECEIPT-SOURCE-DRIFT while the exact source neighbor passes.",
+      "proof": "docs/rentz/ATF_Qualification.md#reproducerea-sursei-atestate",
+      "expires": "2026-12-10",
+      "sha256": "7e196c87befa353ada007456e9e4258f5048cff857bdc0eab6168ccda08cdbd2",
       "allowDelete": false
     },
     {
@@ -1020,11 +1020,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java",
       "owner": "Rentz UI",
-      "reason": "S05 and U10–U13 · Qualify the common table presentation and effective score help.",
-      "criterion": "Verify every 3–6 player award row and an alternate profile, preserving explicit zero rewards and absent places.",
-      "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
-      "expires": "2026-11-20",
-      "sha256": "fe0ced69bcf503d2c074a9a21ea2032aa2a92432a5af1863f9d58f85e025f165",
+      "reason": "Qualify every Help award in the JVM, including the production accessibility strings.",
+      "criterion": "Verify exact payouts and RO/EN descriptions for every actual place at 3 to 6 seats. Keep the alternate profile, history and standings neighbors.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
+      "expires": "2026-12-10",
+      "sha256": "b190a3aa1899fd1d46e7171277aeb7f66288608812df87af15fdfac5ca5e6cf7",
       "allowDelete": false
     },
     {
@@ -1270,11 +1270,11 @@
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz release",
-      "reason": "Keep the consecutive native scenario reproducible without changing gameplay policy.",
-      "criterion": "The isolated package uses the configured seed, each deal completes through the UI, and duplicates block PASS. Keep capture, replay, history, restart, and cleanup.",
-      "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
-      "expires": "2027-02-12",
-      "sha256": "99e4112400582ae4b793e7ad76cf5d1d7968f5b6d9126095c6bda926483fffaa",
+      "reason": "Move the exhaustive Help award matrix into Android JVM and keep representative native display.",
+      "criterion": "Keep Help navigation, accessibility samples in both languages and proof that Help creates no session. Keep the three distinct complete release hands, Rentz first.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
+      "expires": "2026-12-10",
+      "sha256": "996152077250a2da55d2ebe60434c90743dd3cdbd2eb43dd39703482d0799ed2",
       "allowDelete": false
     },
     {

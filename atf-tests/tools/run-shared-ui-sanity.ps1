@@ -254,33 +254,20 @@ function BackFromHelp {
 }
 function HelpAwardChecks($Nodes,[string]$Heading,[string]$Players,[string]$Place,[string]$Points){
     Check 'Localized finishing awards heading' 1 @($Nodes|Where-Object text -ceq $Heading).Count
-    $cells=@($Nodes|Where-Object id -like '*:id/rentz_finishing_award')
-    Check 'Eighteen awards for the four supported tables' 18 $cells.Count
-    $expected=@{
-        3=@(300,200,0)
-        4=@(300,200,100,0)
-        5=@(300,175,100,25,0)
-        6=@(300,150,75,50,25,0)
-    }
-    foreach($playersCount in 3..6){
-        Check "Table row for $playersCount players" 1 @($Nodes|Where-Object description -ceq "$playersCount $Players").Count
-        for($position=1;$position-le$playersCount;$position++){
-            $pointsValue=$expected[$playersCount][$position-1]
-            $description="$playersCount $Players, $Place $position, $pointsValue $Points"
-            $matches=@($cells|Where-Object description -ceq $description)
-            $actual=if($matches.Count-eq1){$matches[0].text}else{"$($matches.Count) visible cells"}
-            Check "Table $playersCount, place $position" $pointsValue $actual
-        }
-    }
+    $awards=@($Nodes|Where-Object id -like '*:id/rentz_finishing_award')
+    $first="6 $Players, ${Place} 1, 300 $Points"
+    $last="3 $Players, ${Place} 3, 0 $Points"
+    Check 'Highest award is rendered and accessible' 1 @($awards|Where-Object{$_.text-ceq'300'-and$_.description-ceq$first}).Count
+    Check 'Zero award is rendered and accessible' 1 @($awards|Where-Object{$_.text-ceq'0'-and$_.description-ceq$last}).Count
 }
 function RunHelpAwardsSanity {
     Tap 'How to play'
-    Observe 'English help exposes the 3–6 player finishing awards' {param($nodes)
+    Observe 'English help displays representative finishing awards' {param($nodes)
         HelpAwardChecks $nodes 'Rentz finishing awards' 'players' 'place' 'points'
     }
     BackFromHelp
     Tap 'Interface language';Tap 'Română';Tap 'Cum se joacă'
-    Observe 'Romanian help keeps the same finishing awards' {param($nodes)
+    Observe 'Romanian help displays representative finishing awards' {param($nodes)
         HelpAwardChecks $nodes 'Premii de sosire Rentz' 'jucători' 'locul' 'puncte'
     }
     BackFromHelp
@@ -1247,7 +1234,7 @@ $minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}
 if($HistoryDetails){$minimum+=4}
 if($CompactScores){$minimum++}
 if(-not$failure-and($cleanup.Count-or-not$released-or-not$preserved-or$points.Count-lt$minimum)){$failure='Native closeout failed or the declared checkpoint population is incomplete.'}
-$scope=if($HelpAwardsOnly){'Rentz help finishing awards for 3–6 players in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: Rentz first, then two distinct standard games, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
+$scope=if($HelpAwardsOnly){'Rentz help navigation and representative finishing awards in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: Rentz first, then two distinct standard games, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
 if($HistoryDetails){$scope+='; confirmed blind trick contributions and the actual Rentz finishing places after journal restore'}
 if($ConsecutiveSubgames){$scope+='; learning order, search, filters, eligibility, local profile and durable achievement progress'}
 if($CompactConsecutive){$scope+='; compact 720x1280, density 360, font scale 1.5'}
