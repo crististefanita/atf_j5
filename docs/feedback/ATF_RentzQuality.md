@@ -2,19 +2,24 @@
 
 ## Pe scurt
 
-Registrul separă mecanismele implementate de promovarea strategică și de integrarea nativă încă necalificate. [Regulile și fidelitatea](ATF_Rentz.md) și [prezentarea tablei și scorului](ATF_Rentz_UI_ToDo.md) au criterii proprii.
+Aici se urmăresc rezultatele necesare pentru promovarea AI și limitele de mentenanță ale adaptoarelor. [Regulile și fidelitatea](ATF_Rentz.md) și [prezentarea tablei și scorului](ATF_Rentz_UI_ToDo.md) au criterii proprii.
 
 ## Q08: forța AI se măsoară la obiectivul declarat
 
 **P2 · Responsabil: motorul AI și integrarea Android.** Promovarea candidatului la strategia implicită cere progres independent pe obiectivul declarat și admiterea codec-ului folosit de produs. [Contractul de evaluare](../rentz/ATF_Learning.md) · [Regresia de admitere](../../atf-tests/src/test/java/atf/rentz/OfflineArenaComponentTest.java)
 
-### Condiții rămase înaintea promovării
-
 - Un orizont mai lung trebuie să depășească reperul pe obiectivul declarat, pe lot nou, fără ajustare după expunere. O regresie măsurată păstrează candidatul experimental și implicitul produsului neschimbat.
-- Diagnosticul separă variația lumilor de eroarea politicii de continuare; o pierdere devine regresie mică numai cu justificarea independentă a deciziei.
+- Identificați distribuția samplerului și familia de politici adverse, apoi separați variația lumilor de eroarea continuării. O pierdere devine regresie mică după justificarea independentă a deciziei.
 - Pentru tactica live de joc în lipsa culorii, fixați varianta și comutatorul înaintea lotului. Comparați reperul și candidata pe aceleași distribuiri și rotații, separat pe contracte și număr de locuri. Raportați puncte, credit de victorie, cost și intervalul pereche pe seed. Un câștig pe subsetul tactic nu validează singur profilul global. [Ramura tactică](../../rentz-lab-app/game-core/src/main/java/ro/rentzlab/ai/TacticalPolicy.java)
 - Profilul contextual rămâne separat de candidatul cu dovadă publică. Reguli locale plauzibile sau componente verzi nu justifică păstrarea lor într-un candidat care pierde comparația pereche.
 - Integrarea Android trebuie să transporte registrul public complet și să alinieze codec-ul, identitatea politicii și APK-ul înaintea calificării native. Componentele JVM nu închid această frontieră.
+
+## Limitele orchestrării
+
+**P2 · Responsabil: calificarea J5.** [RAG](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java) gestionează în aceeași clasă indexarea, validarea dovezilor și verdictul. [Runnerul Android](../../atf-tests/tools/run-shared-ui-sanity.ps1) combină comenzile ADB, extragerea UI, scenariile și compunerea dovezilor. O schimbare de selector sau de intrare în RAG traversează aceste responsabilități.
+
+- Separați pe rând căutarea în corpus de evaluarea porților și transportul ADB de oracolul scenariului. Păstrați intrările publice, ordinea porților, codurile de diagnostic și schema Extent.
+- Verificați la componentă un corpus respins și o ierarhie Android întârziată, cu un vecin valid pentru fiecare. Folosiți fixture-uri locale și un adaptor ADB simulat. Păstrați traseul nativ consecutiv pentru verificarea integrării.
 
 ## Distribuția APK
 

@@ -2,43 +2,19 @@
 
 ## Pe scurt
 
-O livrare identifică artefactele semnate ale platformelor declarate (în prezent Android/APK), sursele construirii, porțile trecute și copia primită de utilizator. Publicarea GitHub și dosarul documentar sunt suprafețe distincte.
+Livrarea Rentz Lab identifică APK-ul Android semnat, sursa construirii, porțile trecute și copia descărcată. Dosarul din Git documentează ediția, iar canalul GitHub Releases distribuie binarul.
 
 ## Stări și responsabilități
 
 | Stare | Criteriu |
 |---|---|
 | DRAFT | Metadate și documente inspectabile; fără binar sau descărcare calificată. |
-| PREPARED | Porțile comune și cele specifice fiecărei platforme declarate au trecut; artefactele semnate și integritatea lor sunt verificate în dosarul candidatului. |
-| PUBLISHED | Tag fixat pe sursele calificate, artefactele tuturor platformelor declarate confruntate și descărcarea fiecăruia verificată în canalul anunțat. |
+| PREPARED | Porțile locale Android au trecut. Dosarul candidatului verifică APK-ul semnat și integritatea lui. |
+| PUBLISHED | Tagul identifică sursele calificate. APK-ul publicat și copia descărcată sunt confruntate în canalul declarat. |
 
 ## Calificarea iOS
 
-Livrarea curentă este Android. Orice extindere iOS are contract și probe proprii.
-
-| Decizie iOS | Cerință |
-|---|---|
-| Platforme declarate | Candidatele noi numesc explicit platformele. Un manifest istoric numai cu APK înseamnă livrare Android; lipsa câmpului nu implică iOS. |
-| Motor | Înainte de implementare, documentați motorul portabil comun sau motorul iOS separat. Ambele folosesc aceiași vectori pentru reguli, scor, Normal/Hard, salvare și reluare. |
-| Aplicație | Interfața, ciclul de viață și persistența native au calificare distinctă. |
-| Diferențe | Orice abatere de la Android este deliberată, vizibilă în contract și verificată cu aceleași așteptări de domeniu. |
-
-| Cerință | Dovadă minimă pentru o afirmație de suport iOS |
-|---|---|
-| Versiuni OS | Politica de suport declară versiunea minimă și califică cea mai nouă versiune stabilă publică iOS disponibilă la momentul release-ului. Versiunile intermediare incluse în politica produsului rămân în matrice; versiunile beta nu înlocuiesc calificarea stabilă. |
-| Build și simulator | Țintă Xcode reală, scheme identificabile, versiune Xcode/SDK fixată în receipt și teste pe simulatorul versiunii minime și pe simulatorul stabil curent. Numele plutitor `macos-latest` fără versiunea Xcode/runtime observată nu este identitate de build suficientă. |
-| Reguli și componente | Suitele iOS verifică aceiași vectori de reguli și scor ai motorului de referință; testele componente rămân principala acoperire. Un rezultat JVM Android nu substituie testul adapterului sau al persistenței iOS. |
-| Dispozitiv fizic | Înaintea unei afirmații de distribuție către utilizatori, cel puțin o instalare pe un iPhone fizic verifică pornirea, o partidă, salvarea și reluarea. Simulatorul nu certifică performanța sau capabilitățile hardware ale dispozitivului. |
-| Distribuție | IPA/Archive-ul, Bundle ID, versiunea/build number, echipa și identitatea semnării sunt distincte de APK. TestFlight/App Store au receipt-uri și fluxuri de distribuție proprii; niciun link Android nu este reutilizat pentru iOS. |
-
-Planificați infrastructura macOS separat de semnarea și distribuția iOS.
-
-- Un simulator iOS poate fi construit și exercitat într-un job macOS; dezvoltatorul nu are nevoie de un Mac local.
-- Conform politicii curente, runner-ele GitHub standard sunt gratuite pentru repository-urile publice, iar runner-ele mai mari sunt taxate. Verificați politica, eticheta runnerului și versiunea Xcode înaintea fiecărui release.
-- Semnarea și distribuția iOS cer configurarea protejată a certificatelor, profilurilor și accesului Apple.
-- Surse oficiale: [facturarea Actions](https://docs.github.com/en/actions/concepts/billing-and-usage), [runner-ele găzduite](https://docs.github.com/en/actions/reference/runners/github-hosted-runners), [versiunile stabile Apple](https://developer.apple.com/news/releases/), [testarea pe simulator sau dispozitiv](https://developer.apple.com/documentation/Xcode/running-your-app-on-simulated-or-physical-devices), [certificate Apple](https://developer.apple.com/help/account/certificates/certificates-overview), [distribuirea prin Xcode](https://developer.apple.com/documentation/Xcode/distributing-your-app-for-beta-testing-and-releases).
-
-RAG-ul aplică domeniul declarat: pentru o ediție numai pentru Android, iOS este în afara livrării și nu se deduce PASS; pentru o ediție care declară iOS, lipsa țintei, a buildului Xcode, a receipt-urilor sau a probei cerute blochează afirmația iOS independent de rezultatul Android. Ghidul de produs și criteriile deschise sunt în [feedback-ul iOS](../feedback/ATF_Rentz.md#platforma-ios).
+Catalogul și porțile RAG curente califică exclusiv APK-ul Android. O eventuală livrare iOS cere o țintă nativă, propriul artefact semnat și porți explicite de calificare și distribuție. [Criteriile de extindere](../feedback/ATF_Rentz.md#platforma-ios)
 
 ## Versiunea candidatului și staging
 
@@ -63,7 +39,7 @@ flowchart LR
 <details>
 <summary>Legendă: surse, dovezi și publicare</summary>
 
-Tagul identifică sursa comună a artefactelor declarate. Fiecare artefact își păstrează identitatea și receipt-ul platformei. Commit-ul dovezilor poate fi ulterior; corecția unei prezentări nu mută tagul și nu înlocuiește binarul publicat. O descărcare API sau nativă nu califică automat navigarea vizuală din browser.
+Tagul identifică sursa calificată a APK-ului. Commitul editorial poate fi ulterior. O corecție de prezentare păstrează tagul, binarul și dovada originale. Validarea navigării în browser cere o probă separată.
 
 </details>
 
@@ -193,13 +169,7 @@ Distribuiți candidatul numai după calificarea RAG locală și verificarea semn
 
 ### APK de test
 
-Intrarea existentă către APK-ul de test poate rămâne în **Jocul** până la calificarea următoarei ediții. Pentru următoarea descărcare, secțiunea indică APK-ul de produs cu versiunea numerică și numele `RentzLab-<versiune>.apk`.
-
-- Verificați regresia offline, semnătura și identitatea Android izolată înainte de distribuție.
-- Descărcați binarul cu un cont autorizat și confirmați că accesul anonim este refuzat.
-- Păstrați ultimul APK descărcabil în README până când succesorul trece verificarea. Ediția de producție se găsește în catalogul tehnic.
-- Citiți `versionName` din APK-ul semnat și confruntați-l cu versiunea declarată. Poarta RAG `release-build` cere aceeași versiune numerică și numele exact al fișierului.
-- Păstrați sufixul `-ui-sanity` pentru pachetul izolat folosit la verificări. La promovarea ediției de producție, eliminați înregistrarea de test din intrarea principală.
+Varianta `ui-sanity` are pachet și artefact separat pentru acceptanța Android. Secțiunea **Jocul** păstrează linkul ediției de produs calificate până la publicarea succesorului. Poarta `release-build` confruntă `versionName` din APK-ul semnat cu versiunea numerică din catalog și cere numele exact `RentzLab-<versiune>.apk`.
 
 ### Proba Android a APK-ului livrat
 

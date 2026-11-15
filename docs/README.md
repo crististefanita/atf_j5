@@ -2,7 +2,7 @@
 
 ## Pe scurt
 
-Documentația activă explică Rentz, modelul offline și verificarea independentă. [Aria Rentz](rentz/README.md) deține contractele curente, iar [feedback-ul Rentz](feedback/ATF_Rentz.md) păstrează criteriile deschise.
+Documentația activă explică Rentz, modelul offline și verificarea independentă. [Aria Rentz](rentz/README.md) grupează contractele după responsabilitate. [Registrul de feedback](feedback/README.md) ordonează criteriile deschise.
 
 ## Trasee de lectură
 
@@ -15,9 +15,10 @@ Documentația activă explică Rentz, modelul offline și verificarea independen
 | Cum calificăm bibliotecile și selecțiile offline? | [Calificarea consumatorului](rentz/ATF_Qualification.md) |
 | Cum evaluăm și îmbunătățim jucătorii? | [Învățare offline](rentz/ATF_Learning.md) |
 | Cine poate salva după pauză sau înlocuire? | [Lifecycle](rentz/ATF_Lifecycle.md) |
-| Cum calificăm aplicația Android? | [Android](rentz/ATF_Android.md) |
+| Cum alegem între o probă de componentă și una nativă? | [Strategia de testare](rentz/ATF_TestingStrategy.md) |
+| Ce verificăm când se schimbă interfața? | [Integrarea UI](rentz/ATF_UiIntegration.md) · [Traseele Android](rentz/ATF_Android.md) |
 | Cum calificăm și publicăm o ediție Android? | [Release și livrare](rentz/ATF_Release.md) |
-| Ce verifică porțile RAG și ce probe rămân deschise? | [Ordinea calificării](rentz/ATF_Release.md#ordinea-calificării-android-curente) · [Feedback](feedback/ATF_Release_RAG.md) |
+| Cum menținem ghidurile aliniate cu sursa? | [Standardul documentației](rentz/ATF_Documentation.md) |
 | Unde sunt sursele, fixture-urile și rezultatele? | [Infrastructură](rentz/ATF_Infrastructure.md) |
 | Ce reutilizăm fără reguli Whist? | [Transfer](rentz/ATF_Transfer.md) |
 

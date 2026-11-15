@@ -7,35 +7,22 @@
 | P1 | Domeniul: catalogul păstrează magnitudini vizibile, dar asocierea cu „Classic”/„Traditional” și câmpurile rămase nu sunt confirmate. | Captură care identifică preset-ul și fiecare valoare, inclusiv recompensa Whist și sosirile etichetate pentru fiecare masă; comparații independente și dublare pe sub-joc. [Proveniența](../rentz/ATF_RuleSources.md) delimitează observația numerică. |
 | P1 | Domeniul: instrucțiunile APK declară pachetul, levatele fără atu, captura 10♣ și excluderea ultimei alegeri de la pe-nevăzute; frontierele rămase și execuția originală au calificare distinctă. | Confirmați primul alegător, închiderea pentru dame/carouri, actorii terminați și ultimul loc în secvențe. Nu redeschideți ca necunoscute regulile deja ancorate în resurse; păstrați diferența dintre declarație și verificare în execuție. |
 | P2 | Domeniul: Totale plus și dezactivarea sub-jocurilor rămân neimplementate. | Programul derivă numărul mâinilor din selecția validată; fiecare loc consumă exact jocurile active. [Regulile de deschidere și reluare](../rentz/ATF_Rules.md#pregătirea-mesei) aparțin contractului de produs. |
-| P2 | AI: alegerea Normal folosește încă reperul simplu, iar continuarea Hard presupune adversari tactici. | Calificați separat alegerea sub-jocului și cartea, pe familii și mese; un candidat nou păstrează sursa și datele rezervate, fără degradarea frontierelor informației. |
-| P2 | AI: lumile sunt fezabile, fără uniformitate sau calibrare probabilistică demonstrată. | Identificați distribuția samplerului și familia adversă; orice ponderare după comportament are reguli și componente proprii, apoi evaluare pe date noi. |
-| P2 | AI: continuarea completă există offline, dar selecția viitoare a sub-jocurilor rămâne tactică; produsul implicit și codec-ul Android nu sunt promovate la candidatul pe partidă. | [Protocolul strategic](ATF_RentzQuality.md#q08-forța-ai-se-măsoară-la-obiectivul-declarat) cere progres independent, integrarea registrului public și o eventuală decizie pe nevăzute înaintea accesului la mână. Nu echivalați continuarea simulată cu planificarea optimă. |
+| P2 | AI. Alegerea Normal folosește reperul simplu, iar continuarea Hard presupune adversari tactici și distribuiri fezabile. | [Criteriile strategice](ATF_RentzQuality.md#q08-forța-ai-se-măsoară-la-obiectivul-declarat) urmăresc calibrarea distribuirilor, alegerea sub-jocului, jocul cărții și admiterea codec-ului Android. |
 
 ## Integrare și infrastructură
-
-<a id="închiderea-contractelor-cu-țintă-fixă"></a>
-
-[Regulile și punctajul](../rentz/ATF_Rules.md) dețin contractul local de închidere timpurie. Tabelul urmărește verificările încă deschise pentru referință și integrarea nativă.
-
-[Registrul de calitate](ATF_RentzQuality.md) deține adopția binară și probele încă lipsă ale adaptoarelor. [Lifecycle-ul](../rentz/ATF_Lifecycle.md), [guvernanța sursei](../rentz/ATF_Components.md) și validarea strictă au contracte și componente proprii; acceptanța nativă a pauzei, relansării și filesystem-ului rămâne distinctă de JVM.
 
 | Prioritate | Responsabil și diferență | Criteriu de închidere |
 |---|---|---|
 | P1 | Referința: pornirea poate produce WebView negru pe configurația Android inspectată. | Identificați runtime-ul și cauza prin probe delimitate; un ecran utilizabil și instrucțiuni lizibile preced calificarea regulilor. Instalarea sau PID-ul procesului nu constituie succes funcțional. |
-| P1 | Android local: integrarea mesei și a istoricului este livrată; motorul alege deschiderea din pachetul activ. Rămân probele native pentru geometrie compactă, ritmul actorilor și clasamentul final. | Închideți probele de componentă și de acceptanță nativă selectivă din [backlog-ul UI](ATF_Rentz_UI_ToDo.md). Contractele livrate sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md). |
 | P2 | Persistență: versiunea regulilor este explicită; compatibilitatea veche este limitată la reluarea validată a comenzilor, fără migrarea scorului sau a opțiunilor noi. | Calificați migrări reprezentative și refuzul sesiunilor incompatibile, cu păstrarea fișierului original. Orice schimbare de profil sau candidat cere identitate și strategie explicită. |
-| P1 | iOS: cererea de suport iPhone nu are încă țintă, build sau calificare proprie în J5. | Contractul actual [descrie livrarea Android](../rentz/ATF_Release.md). Dacă iOS rămâne în scop, adăugați criterii și receipte de release proprii; APK-ul și testele Android nu îl califică. |
 
 ## Platforma iOS
 
-Acesta este un obiectiv deschis al produsului, nu o afirmație că J5 conține deja o aplicație iOS. Documentația și artefactele Android rămân valabile pentru Android; ele nu închid criteriul iOS. Până când există țintă nativă și receipte separate, RAG-ul raportează cerința ca neimplementată/necalificată, fără să transforme APK-ul sau testele Android în dovadă iOS.
+**P1 · Responsabil: produsul Rentz.** Prima decizie este includerea iOS în produs. După aprobare, criteriile de mai jos se aplică unei livrări distincte. [Calificarea curentă](../rentz/ATF_Release.md#calificarea-ios)
 
-Păstrați contractele de domeniu și calificați separat implementarea nativă.
-
-- **Reguli:** păstrați aceleași contracte de reguli, scor, Normal/Hard, configurare și reluare.
-- **Motor:** decideți înaintea portării între un motor comun portabil și o reimplementare verificată prin aceiași vectori de conformitate.
-- **Aplicație:** UI-ul, ciclul de viață și stocarea nativă au teste și identitate de release proprii.
-- **Suport declarat:** fixați matricea versiunilor stabile, treceți testele offline/componente și verificați instalarea pe un dispozitiv fizic.
+- **Componente.** Rulați aceiași vectori pentru reguli, scor, Normal/Hard, configurare și reluare pe motorul iOS ales. Testați separat persistența și lifecycle-ul adaptorului.
+- **Acceptanță nativă.** Fixați versiunile Xcode și iOS folosite, verificați matricea declarată și probați pe un iPhone fizic instalarea, o partidă, salvarea și reluarea.
+- **Distribuție.** Identificați artefactul, semnarea și receiptele canalului iOS. Într-o probă negativă, prezentați APK și dovezi Android pentru o livrare care declară și iOS. Poarta viitoare trebuie să identifice dovada iOS absentă și să blocheze acea calificare.
 
 ## Contracte înrudite
 
