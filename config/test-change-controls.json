@@ -1202,11 +1202,11 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java",
       "owner": "Rentz release",
-      "reason": "Release candidate version boundary and catalog identity.",
-      "criterion": "The main guide accepts the exact production edition or one verified private preview. A newer staged candidate leaves the latest verified download in place.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "193c0649e6cce5200436e4d3a90a3a139ece3ade32d59dc80e2081f770506e88",
+      "reason": "Keep edition documentation in source and qualified APKs in the managed distribution store.",
+      "criterion": "RAG rejects local APKs and checksums under release. A verified production or preview guide and a newer staged candidate keep the existing version and identity rules.",
+      "proof": "ReleaseCatalogStorageTest and docs/rentz/ATF_Release.md",
+      "expires": "2026-12-14",
+      "sha256": "d1c08d8b7ef7ea82df8a69d9b2d7f3f0c04665aec2a5a3074850ad3a459f9efb",
       "allowDelete": false
     },
     {
@@ -1605,6 +1605,16 @@
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-13",
       "sha256": "9fb6cad8a49611e286f0bd994c4b48abcf38a902ea2e452e5d9b1635565d6cae",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/ReleaseCatalogStorageTest.java",
+      "owner": "Rentz release",
+      "reason": "Protect the managed release documentation directory against shadow APKs.",
+      "criterion": "A clean draft is readable. Old APKs in the catalog root, a local APK for the current edition and its local checksum each cause a refusal.",
+      "proof": "docs/rentz/ATF_Release.md",
+      "expires": "2026-12-14",
+      "sha256": "15ce4f5a6f54e73498ce42a248bde8cfbf461d9e2df834aa2da5c5f42f27a784",
       "allowDelete": false
     }
   ]

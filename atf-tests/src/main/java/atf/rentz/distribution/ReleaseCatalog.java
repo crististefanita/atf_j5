@@ -36,6 +36,10 @@ public final class ReleaseCatalog {
         throw new IllegalStateException("RELEASE-ROOT: explicit Rentz project or complete source snapshot required");
     }
     public static Edition verify(Path root, boolean requireDelivery) throws IOException {
+        return verify(root, requireDelivery, System.getenv("RENTZ_DATA_ROOT"));
+    }
+
+    static Edition verify(Path root, boolean requireDelivery, String dataRoot) throws IOException {
         JsonNode index=read(root.resolve("release/index.json"));
         String version=index.path("currentVersion").asText(),repository=index.path("repository").asText();
         require(repository.matches("[A-Za-z0-9_-][A-Za-z0-9_.-]*/[A-Za-z0-9_-][A-Za-z0-9_.-]*"),"RELEASE-REPOSITORY");
@@ -64,6 +68,12 @@ public final class ReleaseCatalog {
         try(var children=Files.list(root.resolve("release"))) {
             require(children.filter(Files::isDirectory).map(p->p.getFileName().toString()).toList().equals(List.of(version)),"RELEASE-POPULATION");
         }
+        if (dataRoot != null && !dataRoot.isBlank()) {
+            try (var paths = Files.walk(root.resolve("release"))) {
+                require(paths.noneMatch(path -> path.getFileName().toString().matches("(?i).*\\.apk(?:\\.sha256)?")),
+                        "RELEASE-BINARY-IN-DOCUMENTATION");
+            }
+        }
         require(Files.readString(root.resolve("release/README.md")).contains("("+version+"/README.md)"),"RELEASE-CATALOG-LINK");
         String guide=Files.readString(root.resolve("README.md"));
         String downloadRepository=repository;
@@ -85,7 +95,7 @@ public final class ReleaseCatalog {
             return new Edition(folder,manifest,null,state);
         }
         ApkDownloadTarget target=new ApkDownloadTarget(downloadRepository,version,number(identity,"apkBytes"),identity.path("sha256").asText());
-        Path binaries=editionBinaries(root, folder, version, target.fileName());
+        Path binaries=editionBinaries(root, folder, version, target.fileName(), dataRoot);
         Path apk=binaries.resolve(target.fileName());
         ApkPayload.verify(apk,target.bytes(),target.sha256());
         require(Files.readString(binaries.resolve(target.fileName()+".sha256")).trim().equals(target.sha256()+"  "+target.fileName()),"RELEASE-CHECKSUM");
@@ -135,12 +145,10 @@ public final class ReleaseCatalog {
                 + "/RentzLab-" + version + ".apk"));
     }
 
-    private static Path editionBinaries(Path root, Path edition, String version, String apkName) throws IOException {
-        String configured = System.getenv("RENTZ_DATA_ROOT");
+    private static Path editionBinaries(Path root, Path edition, String version, String apkName, String configured) throws IOException {
         if (configured == null || configured.isBlank()) return edition;
         Path data = Path.of(configured).toAbsolutePath().normalize();
         Path incoming = data.resolve("distribution/incoming").resolve(version);
-        if (Files.exists(edition.resolve(apkName)) || Files.exists(edition.resolve(apkName + ".sha256"))) return edition;
         for (Path path : List.of(data, data.resolve("distribution"), incoming.getParent(), incoming,
                 incoming.resolve(apkName), incoming.resolve(apkName + ".sha256"))) {
             require(!Files.isSymbolicLink(path), "RELEASE-PHYSICAL-PATH");
