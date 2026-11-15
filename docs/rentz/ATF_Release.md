@@ -194,6 +194,27 @@ git push "--force-with-lease=${ref}:$ownerSha" $channel ":${ref}"
 
 `$channel` este URL-ul Git al canalului de distribuție, iar `$ownerSha` este SHA-ul confirmat pentru operația închisă. [Condiția Git pentru actualizarea referinței](https://git-scm.com/docs/git-push) · [Probe de coordonare](../../atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePromotionCoordinationTest.java)
 
+### Calificarea permisiunilor pe GitHub
+
+Folosiți un repository privat de test fără ediții și trei conturi GitHub distincte. Două conturi au drept de citire și scriere, iar al treilea poate citi. Alegeți explicit canalul de test și furnizați credențialele în mediul procesului, prin mecanismul local de secrete.
+
+| Variabilă | Identitatea verificată |
+|---|---|
+| `RENTZ_PROMOTION_WRITER_A` | Primul cont cu citire și scriere |
+| `RENTZ_PROMOTION_WRITER_B` | Al doilea cont cu citire și scriere |
+| `RENTZ_PROMOTION_READER` | Contul cu citire |
+
+```powershell
+.\scripts\run-release-rag.ps1 -Question 'calificare permisiuni canal' `
+  -ComponentRun $components -RunRoot $attempt -PromotionTestRepository $testRepository
+```
+
+- **Identitate.** API-ul confirmă ID-uri de utilizator distincte și același ID de repository privat. Comenzile Git folosesc credențiala rolului curent, limitată la URL-ul de test.
+- **Drepturi.** Cititorul primește refuz de la serviciul Git de scriere și rezervarea rămâne liberă. Operatorii o obțin pe rând, iar un SHA străin păstrează rezervarea curentă.
+- **Dovadă.** `promotion-channel.json` identifică sursa și amprenta raportului Extent. O rulare incompletă rămâne `BLOCKED`. Certificarea APK-ului are porțile din [ordinea calificării Android](#ordinea-calificării-android-curente).
+
+[Controalele offline ale probei](../../atf-tests/src/test/java/atf/rentz/distribution/publication/GitHubPromotionQualificationTest.java) · [Identități în API-ul GitHub](https://docs.github.com/en/rest/users/users) · [Permisiuni de repository](https://docs.github.com/en/rest/repos/repos#get-a-repository)
+
 ### Linkurile din README
 
 README-ul principal începe cu jocul, descărcarea și prima partidă. Secțiunea **Jocul** conține câte o legătură pe rând.

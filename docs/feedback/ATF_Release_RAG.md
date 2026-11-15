@@ -2,7 +2,7 @@
 
 ## Calificarea permisiunilor pe canalul GitHub
 
-**P3 · Echipa de distribuție Rentz.** Probele locale verifică actualizarea condiționată a referinței Git folosind două checkout-uri. Politica tagurilor și permisiunile din canalul GitHub se aplică în mediul de distribuție. [Contractul rezervării](../rentz/ATF_Release.md#rezervarea-canalului-de-promovare)
+**P3 · Echipa de distribuție Rentz.** Lansatorul RAG verifică distinct identitatea, drepturile și operațiile Git pe canalul privat de test. Închiderea cere receipt-ul live `PASS` și raportul Extent asociat, cu cele trei identități și referința eliberată la final. [Fluxul de calificare](../rentz/ATF_Release.md#calificarea-permisiunilor-pe-github)
 
-- Verificați pe un canal privat de test că două identități autorizate pot obține și elibera pe rând referința de coordonare. Înregistrați separat refuzul pentru o identitate fără drept de scriere.
-- Criteriul cere controlul asupra referinței de coordonare și respingerea ștergerii cu un SHA străin. Păstrați proba de permisiuni separată de calificarea APK-ului.
+- Pregătiți canalul privat de test și accesul pentru două conturi cu scriere și un cont cu citire. Verificați autenticarea prin ID-uri GitHub distincte.
+- Arhivați dovada cu refuzul scrierii pentru cititor, refuzul SHA-ului străin și promovarea coordonată. [Probe de componentă](../../atf-tests/src/test/java/atf/rentz/distribution/publication/GitHubPromotionQualificationTest.java)

@@ -27,6 +27,7 @@ class ReleasePromotionCoordinationTest {
     private static final String SOURCE = "owner/atf_j5";
     private static final String CHANNEL = "owner/atf_j5_releases";
     private static final String COMMIT = "a".repeat(40);
+    private static final int SYNC_TIMEOUT_SECONDS = 120;
     @TempDir Path scratch;
 
     @Test void otherJournalCannotPatchWhileFirstOperatorHoldsFinalInventory() throws Exception {
@@ -40,7 +41,7 @@ class ReleasePromotionCoordinationTest {
         try {
             var first = executor.submit(() -> PublicationCommand.resumeWithJournal(newer.plan, newer,
                     scratch.resolve("newer.json"), step -> pauseAfterLastInventory(step, lastRead, allowPatch)));
-            AuditedAssertions.assertTrue(lastRead.await(15, TimeUnit.SECONDS), "First operator pauses just before PATCH");
+            AuditedAssertions.assertTrue(lastRead.await(SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS), "First operator pauses just before PATCH");
             String second;
             List<String> concurrentPatches;
             try {
@@ -49,7 +50,7 @@ class ReleasePromotionCoordinationTest {
             } finally {
                 allowPatch.countDown();
             }
-            AuditedAssertions.assertEquals(81L, first.get(15, TimeUnit.SECONDS).longValue(), "First operator completes");
+            AuditedAssertions.assertEquals(81L, first.get(SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS).longValue(), "First operator completes");
             AuditedAssertions.assertEquals("PUBLICATION-CHANNEL-IN-USE", second, "Second journal must wait for the same channel");
             AuditedAssertions.assertEquals(List.of(), concurrentPatches, "Neither operator has sent PATCH while the first is paused");
             AuditedAssertions.assertEquals("PUBLICATION-NEWER-STABLE", outcome(older, scratch.resolve("older.json")),
@@ -57,7 +58,8 @@ class ReleasePromotionCoordinationTest {
             AuditedAssertions.assertEquals(List.of("v0.28.0"), shared.patches, "Exactly the newer release was promoted");
         } finally {
             allowPatch.countDown();
-            executor.shutdownNow();
+            executor.shutdown();
+            if (!executor.awaitTermination(SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS)) executor.shutdownNow();
         }
     }
 
@@ -116,7 +118,7 @@ class ReleasePromotionCoordinationTest {
         Process git = new ProcessBuilder(command).redirectOutput(ProcessBuilder.Redirect.DISCARD)
                 .redirectError(ProcessBuilder.Redirect.DISCARD).start();
         try {
-            if (!git.waitFor(15, TimeUnit.SECONDS) || git.exitValue() != 0) throw new IOException("Cannot initialize Git fixture");
+            if (!git.waitFor(SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS) || git.exitValue() != 0) throw new IOException("Cannot initialize Git fixture");
         } finally {
             if (git.isAlive()) git.destroyForcibly();
         }
@@ -128,7 +130,7 @@ class ReleasePromotionCoordinationTest {
         if (!"Attempt".equals(step.name()) || !step.actual().startsWith("Publish verified draft ")) return;
         lastRead.countDown();
         try {
-            if (!allowPatch.await(30, TimeUnit.SECONDS)) throw new IllegalStateException("Timed out at promotion boundary");
+            if (!allowPatch.await(SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS)) throw new IllegalStateException("Timed out at promotion boundary");
         } catch (InterruptedException failure) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(failure);

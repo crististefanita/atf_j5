@@ -11,6 +11,7 @@ param(
     [switch]$ResumeRestrictedPublication,
     [string]$PublicationJournal='',
     [string]$PublicationChecksum='',
+    [string]$PromotionTestRepository='',
     [string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe'
 )
 $ErrorActionPreference='Stop'
@@ -19,6 +20,9 @@ if($ResumeRestrictedPublication){
         throw 'Restricted resumption requires build, native UI, UI build, journal and checksum. Run post-publication verification separately.'
     }
 }elseif($PublicationJournal-or$PublicationChecksum){throw 'PublicationJournal and PublicationChecksum require ResumeRestrictedPublication.'}
+if($PromotionTestRepository-and($DocumentationRun-or$BuildRun-or$NativeUiRun-or$UiBuildRun-or$PublicationEvidence-or$ResumeRestrictedPublication)){
+    throw 'Channel qualification has its own scope and uses component evidence only.'
+}
 if($RestrictedPublication-and-not$PublicationEvidence){throw 'RestrictedPublication requires PublicationEvidence.'}
 if($DocumentationRun-and($BuildRun-or$NativeUiRun-or$UiBuildRun-or$PublicationEvidence)){throw 'Documentation reconciliation only verifies offline evidence.'}
 $project=[IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
@@ -45,6 +49,9 @@ if(-not(Test-Path -LiteralPath $componentFile -PathType Leaf)){throw 'Component 
 $component=Get-Content -Raw -LiteralPath $componentFile|ConvertFrom-Json
 if($component.status-notin@('PASS','FAIL')-or$component.collection.name-cne'regression'){
     throw 'RAG accepts only the full regression receipt, whether it passed or failed; it never launches a gate.'
+}
+if($PromotionTestRepository-and($component.status-cne'PASS'-or!$component.componentExtentQualified)){
+    throw 'Channel qualification requires a qualified passing regression receipt.'
 }
 $null=New-Item -ItemType Directory -Path $RunRoot
 $source=[IO.Path]::GetFullPath($component.source)
@@ -115,6 +122,19 @@ try{
         [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$ragDataRoot,'Process')
         & $Java @jvm @arguments
         if($LASTEXITCODE-ne0){throw "Local release RAG failed: $RunRoot"}
+        if($PromotionTestRepository){
+            $evidence=Get-Content -Raw -LiteralPath (Join-Path $reportRoot 'release-rag-report.json')|ConvertFrom-Json
+            $expected=@('offline-regression','component-extent-report','android-jvm')
+            $passing=@($evidence.gates|Where-Object {$_.id -cin $expected-and$_.status-ceq'PASS'})
+            if($evidence.candidate.sourceCommit-cne$component.sourceCommit-or
+                $evidence.candidate.worktreeState-cne'CLEAN'-or@($passing.id|Sort-Object -Unique).Count-ne3){
+                throw 'Channel qualification requires reproducible component evidence on the source commit.'
+            }
+            $promotionJvm=@($jvm[0..($jvm.Count-2)])
+            & $Java @promotionJvm 'atf.rentz.distribution.publication.GitHubPromotionQualification' `
+                $project $PromotionTestRepository (Join-Path $RunRoot 'promotion-channel') $component.sourceCommit
+            if($LASTEXITCODE-ne0){throw "Channel qualification stopped. Read the promotion-channel receipt in $RunRoot."}
+        }
         if($ResumeRestrictedPublication){
             $publicationJvm=@($jvm[0..($jvm.Count-2)])
             & $Java @publicationJvm 'atf.rentz.distribution.publication.PublicationCommand' `

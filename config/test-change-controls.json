@@ -461,11 +461,11 @@
     {
       "path": "scripts/run-release-rag.ps1",
       "owner": "Rentz release",
-      "reason": "Admit explicit restricted publication after recomputing qualified release evidence.",
-      "criterion": "Keep default RAG and post-publication verification read-only. Require named resume inputs and record the interrupted attempt.",
-      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "reason": "Qualify the live Git permission boundary independently from APK release.",
+      "criterion": "Require separate GitHub account IDs and a private test repository, verify replace-and-release semantics, and keep unqualified evidence BLOCKED.",
+      "proof": "docs/rentz/ATF_Release.md#calificarea-permisiunilor-pe-github",
       "expires": "2026-12-10",
-      "sha256": "c0109619328fed13b9291c0339ca87b0d5cfc91c579f1825c8921c715ae76369",
+      "sha256": "a3d0209bb0df870500ff0aa448f1e3aa3e4cb0e5842d46fe6a0414cbb8e41ee5",
       "allowDelete": false
     },
     {
@@ -1489,11 +1489,11 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/GitPromotionChannel.java",
       "owner": "Rentz release",
-      "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
-      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
-      "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
+      "reason": "Qualify the live Git permission boundary independently from APK release.",
+      "criterion": "Require separate GitHub account IDs and a private test repository, verify replace-and-release semantics, and keep unqualified evidence BLOCKED.",
+      "proof": "docs/rentz/ATF_Release.md#calificarea-permisiunilor-pe-github",
       "expires": "2026-12-10",
-      "sha256": "ca265cd5c69466c8d54cb515c976ef5bfb29a222e2f837acb661bcf290f98f14",
+      "sha256": "5e2d56b1c105f5b329a588eec6d2438112d5071258695e27b0d424be6c96ddf0",
       "allowDelete": false
     },
     {
@@ -1503,7 +1503,27 @@
       "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
       "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
       "expires": "2026-12-10",
-      "sha256": "b75c6bcfa002c27b174597c40616fed5af89c0f48cbb81725a5faa0437841e25",
+      "sha256": "eb21230ca0a34025c548deaa39ef54a284d2f51fc6613aadcef91eb4ccc97d90",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/GitHubPromotionQualification.java",
+      "owner": "Rentz release",
+      "reason": "Qualify the live Git permission boundary independently from APK release.",
+      "criterion": "Require separate GitHub account IDs and a private test repository, verify replace-and-release semantics, and keep unqualified evidence BLOCKED.",
+      "proof": "docs/rentz/ATF_Release.md#calificarea-permisiunilor-pe-github",
+      "expires": "2026-12-10",
+      "sha256": "57355f76f5ea9878dad489dee6632a9422b09037529b27dc404d89e6cb51d85d",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/GitHubPromotionQualificationTest.java",
+      "owner": "Rentz release",
+      "reason": "Qualify the live Git permission boundary independently from APK release.",
+      "criterion": "Require separate GitHub account IDs and a private test repository, verify replace-and-release semantics, and keep unqualified evidence BLOCKED.",
+      "proof": "docs/rentz/ATF_Release.md#calificarea-permisiunilor-pe-github",
+      "expires": "2026-12-10",
+      "sha256": "71c9ccdac6b115e5fb3bdfd364a7b2dac2a9e0a1e72bb2f74e185379e5c1528f",
       "allowDelete": false
     }
   ]

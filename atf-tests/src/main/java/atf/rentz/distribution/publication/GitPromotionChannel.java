@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -14,10 +16,20 @@ final class GitPromotionChannel {
     static final String REF = "refs/tags/atf-rentz-promotion-lock";
     private final Path checkout;
     private final String remote;
+    private final Consumer<Map<String, String>> environment;
 
     GitPromotionChannel(Path checkout, String remote) {
+        this(checkout, remote, ignored -> { });
+    }
+
+    GitPromotionChannel(Path checkout, String remote, Consumer<Map<String, String>> environment) {
         this.checkout = checkout;
         this.remote = remote;
+        this.environment = environment;
+    }
+
+    void initialize() throws IOException {
+        if (git("init", "--quiet", "--template=").exit() != 0) throw new IOException("PUBLICATION-CHANNEL-GIT");
     }
 
     PromotionLease reserve(String tag) throws IOException {
@@ -65,6 +77,7 @@ final class GitPromotionChannel {
         var builder = new ProcessBuilder(command).redirectError(ProcessBuilder.Redirect.DISCARD);
         builder.environment().put("GIT_TERMINAL_PROMPT", "0");
         builder.environment().put("GCM_INTERACTIVE", "Never");
+        environment.accept(builder.environment());
         Process process = builder.start();
         try {
             process.getOutputStream().close();
