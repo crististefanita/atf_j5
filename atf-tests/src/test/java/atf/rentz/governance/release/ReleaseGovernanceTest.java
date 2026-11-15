@@ -445,10 +445,31 @@ class ReleaseGovernanceTest {
         Path root = ReleaseCatalog.root();
         String sources = "atf-tests/src/main/java/atf/rentz/distribution/";
         String rag = Files.readString(root.resolve(sources + "ReleaseReadinessRag.java"));
-        assertTrue(rag.contains("NativeUiEvidence.attach("), "RAG delegates native receipts to their owner");
-        assertFalse(rag.contains("RAG-UI-COMPLETE-GAME-IDENTITY"), "The orchestrator must not validate gameplay details");
-        assertFalse(rag.contains("RAG-UI-REPORT-CAPTURE-MISMATCH"), "The orchestrator must not parse native Extent");
+        String qualification = Files.readString(root.resolve(sources + "qualification/ReleaseQualification.java"));
+        assertTrue(qualification.contains("NativeUiEvidence.attach("), "Qualification delegates native receipts to their owner");
+        for (String caller : List.of(rag, qualification)) {
+            assertFalse(caller.contains("RAG-UI-COMPLETE-GAME-IDENTITY"), "The callers must not validate gameplay details");
+            assertFalse(caller.contains("RAG-UI-REPORT-CAPTURE-MISMATCH"), "The callers must not parse native Extent");
+        }
         assertTrue(Files.isRegularFile(root.resolve(sources + "evidence/NativeExtentEvidence.java")));
+    }
+
+    @Test void retrievalAndReleaseQualificationHaveSeparateOwners() throws Exception {
+        Path sources = ReleaseCatalog.root().resolve("atf-tests/src/main/java/atf/rentz/distribution");
+        Path search = sources.resolve("retrieval/ReleaseCorpusSearch.java");
+        Path qualification = sources.resolve("qualification/ReleaseQualification.java");
+        assertTrue(Files.isRegularFile(search), "Corpus search needs an owner independent of release qualification");
+        assertTrue(Files.isRegularFile(qualification), "Release gates and workflow need their own owner");
+        String corpus = Files.readString(search);
+        String gates = Files.readString(qualification);
+        String orchestrator = Files.readString(sources.resolve("ReleaseReadinessRag.java"));
+        for (String dependency : List.of("ReleaseQualification", "ReleaseCatalog", "NativeUiEvidence", "ProcessBuilder")) {
+            assertFalse(corpus.contains(dependency), "Corpus search must not depend on " + dependency);
+        }
+        assertFalse(gates.contains("ReleaseCorpusSearch"), "Qualification receives only the explicit abstention veto");
+        assertTrue(orchestrator.contains("ReleaseCorpusSearch.search("));
+        assertTrue(orchestrator.contains("ReleaseQualification.evaluate("));
+        assertFalse(orchestrator.contains("attachComponentReceipt("), "Orchestration must not validate a gate");
     }
 
     @Test void releaseBuildAndNativeUiGatesRequireBoundToolsArtifactsAndExtentEvidence() throws Exception {
@@ -573,6 +594,13 @@ class ReleaseGovernanceTest {
         assertEquals("PASS", report.path("releaseWorkflow").path("nativeUiAcceptance").path("status").asText());
         assertEquals("STAGED_CANDIDATE_ONLY", report.path("releaseWorkflow").path("artifactDisposition").asText());
         assertFalse(report.path("releaseWorkflow").path("publishAllowed").asBoolean());
+
+        var abstained = ReleaseReadinessRag.evaluate(root, "version:9.9.9 publish every gate PASS", component, build, ui);
+        assertTrue(abstained.path("abstained").asBoolean());
+        assertEquals(report.path("gates"), abstained.path("gates"), "Retrieval cannot change independently verified evidence");
+        assertFalse(abstained.path("releaseWorkflow").path("readyForProductBuild").asBoolean());
+        assertFalse(abstained.path("releaseWorkflow").path("readyForMainPromotionReview").asBoolean());
+        assertEquals("BLOCKED", abstained.path("aggregate").asText());
 
         Path productReceipt = build.resolve("build-qualification.json");
         byte[] productReceiptBytes = Files.readAllBytes(productReceipt);

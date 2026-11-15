@@ -18,6 +18,7 @@
     {"path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseDownloadAcceptance.java", "class": "gate", "owner": "download-acceptance", "gate": "authenticated-download"},
     {"path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseDownloadComponentTest.java", "class": "test", "owner": "download-governance", "gate": "download-components"},
     {"path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java", "class": "retrieval", "owner": "release-review", "gate": "retrieval"},
+    {"path": "atf-tests/src/main/java/atf/rentz/distribution/retrieval/ReleaseCorpusSearch.java", "class": "retrieval", "owner": "release-review", "gate": "retrieval"},
     {"path": "README.md", "class": "product-entry", "owner": "product-documentation", "gate": "product-navigation"},
     {"path": "release/index.json", "class": "release-index", "owner": "release-catalog", "gate": "local-catalog"},
     {"path": "release/{currentVersion}/release-validation.json", "class": "candidate-manifest", "owner": "release-catalog", "gate": "local-catalog"}

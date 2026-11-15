@@ -90,6 +90,9 @@ class TestChangeGovernanceTest {
                 || path.equals("rentz-lab-app/app/build.gradle") || path.equals("release/index.json")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java")
+                || path.equals("atf-tests/src/main/java/atf/rentz/distribution/retrieval/ReleaseCorpusSearch.java")
+                || path.equals("atf-tests/src/main/java/atf/rentz/distribution/qualification/ReleaseQualification.java")
+                || path.equals("atf-tests/src/main/java/atf/rentz/distribution/ReleasePaths.java")
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/editorial/DocumentationReconciliation.java")
                 || path.startsWith("atf-tests/src/main/java/atf/rentz/distribution/evidence/")
                 || path.startsWith("atf-tests/src/main/java/atf/rentz/distribution/publication/")
@@ -110,6 +113,9 @@ class TestChangeGovernanceTest {
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/publication/PublicationCommand.java"));
         assertTrue(protectedPath("scripts/verify-release-readme.ps1"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java"));
+        assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/retrieval/ReleaseCorpusSearch.java"));
+        assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/qualification/ReleaseQualification.java"));
+        assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/ReleasePaths.java"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/editorial/DocumentationReconciliation.java"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/evidence/ComponentSuiteEvidence.java"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/evidence/MavenFailureExtent.java"));

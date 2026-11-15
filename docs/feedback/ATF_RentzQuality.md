@@ -16,10 +16,10 @@ Aici se urmăresc rezultatele necesare pentru promovarea AI și limitele de ment
 
 ## Limitele orchestrării
 
-**P2 · Responsabil: calificarea J5.** [RAG](../../atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java) gestionează în aceeași clasă indexarea, validarea dovezilor și verdictul. [Runnerul Android](../../atf-tests/tools/run-shared-ui-sanity.ps1) combină comenzile ADB, extragerea UI, scenariile și compunerea dovezilor. O schimbare de selector sau de intrare în RAG traversează aceste responsabilități.
+**P2 · Responsabil: calificarea J5.** [Runnerul Android](../../atf-tests/tools/run-shared-ui-sanity.ps1) combină comenzile ADB, extragerea UI, scenariile și compunerea dovezilor. O schimbare de selector traversează aceste responsabilități.
 
-- Separați pe rând căutarea în corpus de evaluarea porților și transportul ADB de oracolul scenariului. Păstrați intrările publice, ordinea porților, codurile de diagnostic și schema Extent.
-- Verificați la componentă un corpus respins și o ierarhie Android întârziată, cu un vecin valid pentru fiecare. Folosiți fixture-uri locale și un adaptor ADB simulat. Păstrați traseul nativ consecutiv pentru verificarea integrării.
+- Separați transportul ADB de oracolul scenariului. Păstrați intrările publice, ordinea porților, codurile de diagnostic și schema Extent.
+- Verificați la componentă o ierarhie Android întârziată și un vecin valid, cu fixture-uri locale și un adaptor ADB simulat. Păstrați traseul nativ consecutiv pentru verificarea integrării.
 
 ## Distribuția APK
 

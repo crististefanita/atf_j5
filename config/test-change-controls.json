@@ -441,21 +441,21 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java",
       "owner": "Rentz release",
-      "reason": "Make a three-game native flow a mandatory candidate-promotion gate; bind complete deals, display evidence, learning isolation and Extent to the pinned APK source.",
-      "criterion": "A missing or partial Rentz-plus-two-distinct-contracts receipt, mismatched independent history, failed geometry/display check, shared-learning mutation, invalid screenshot or Extent hash keeps the APK staged. The release requires exactly three native games, geometry, history, restart and original Extent evidence. Catalog breadth and terminal victory eligibility run in the mandatory Android JVM population.",
-      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
-      "expires": "2026-11-20",
-      "sha256": "d73b762fc0d07f8ed5f99bbbcc461cc4036c4d5e1d53799b13c3301edf80d022",
+      "reason": "Compose search and release qualification at the existing reporting boundary.",
+      "criterion": "Reuse the same CLI and receipt model; recheck the snapshot before emitting readiness, retaining all gate evidence.",
+      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "expires": "2026-12-12",
+      "sha256": "0c493ab82ac3a269978def2036b69107c2deac0f730104947f08a1c60bfdd435",
       "allowDelete": false
     },
     {
       "path": "config/release-rag-corpus.json",
       "owner": "Rentz release",
-      "reason": "Block promotion of superseded stable drafts and keep the release policy distinct from open feedback.",
-      "criterion": "Recheck the complete numeric stable inventory before remote writes and immediately before PATCH; preserve read-only recovery of already published releases.",
-      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
-      "expires": "2026-11-30",
-      "sha256": "fc3053052d1a37beb1ac46f0e84320557aa765ecbdff4ee70dbc80e5ac179468",
+      "reason": "Allowlist the extracted search implementation for retrieval.",
+      "criterion": "Search citations can resolve the new implementation; only configured sources are indexed and no excerpt supplies a gate result.",
+      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "expires": "2026-12-12",
+      "sha256": "dcd699009f61d5bc1d44755aa6b42492809417af98825e038c687f33a3d0a10e",
       "allowDelete": false
     },
     {
@@ -470,12 +470,12 @@
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/changes/TestChangeGovernanceTest.java",
-      "owner": "Rentz release and infrastructure",
-      "reason": "Inventory and quarantine disposable runtime fixtures and caches while retaining qualified release evidence.",
-      "criterion": "Bind physical snapshots to the producer receipt; block drift, active use and unknown dependencies; reread original RAG evidence or restore every moved path.",
-      "proof": "docs/rentz/ATF_Infrastructure.md#retenția-cache-urilor-și-a-fixture-urilor",
-      "expires": "2026-12-10",
-      "sha256": "b0b580e2dad20e8bf9d08c7cbc38835fa9b8a54eccdf3453b874b953d0adde63",
+      "owner": "Rentz release",
+      "reason": "Extend exact file protection to the extracted search, qualification and metadata paths.",
+      "criterion": "Replacing the original implementation cannot leave any of the extracted owners outside change governance.",
+      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "expires": "2026-12-12",
+      "sha256": "860ee789b6ee0ea9a8f7716dbdf5260e7dac4e5be1053e17975e596c63461487",
       "allowDelete": false
     },
     {
@@ -611,11 +611,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz release",
-      "reason": "Keep the source receipt bound to actual bytes after checkout policy changes.",
-      "criterion": "Keep native and release qualification checks. A changed attested source must block regression with RAG-RECEIPT-SOURCE-DRIFT while the exact source neighbor passes.",
-      "proof": "docs/rentz/ATF_Qualification.md#reproducerea-sursei-atestate",
-      "expires": "2026-12-10",
-      "sha256": "7e196c87befa353ada007456e9e4258f5048cff857bdc0eab6168ccda08cdbd2",
+      "reason": "Verify the ownership boundary and preserved diagnostics against existing evidence fixtures.",
+      "criterion": "Changing the query cannot alter the receipts verified by the gates; native verification remains delegated.",
+      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "expires": "2026-12-12",
+      "sha256": "2674cb5843820d30ce8fb4777e44ef09d43fdfc03e1ca3381fa2fc9b7706186b",
       "allowDelete": false
     },
     {
@@ -1524,6 +1524,56 @@
       "proof": "docs/rentz/ATF_Release.md#calificarea-permisiunilor-pe-github",
       "expires": "2026-12-10",
       "sha256": "71c9ccdac6b115e5fb3bdfd364a7b2dac2a9e0a1e72bb2f74e185379e5c1528f",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/retrieval/ReleaseCorpusSearch.java",
+      "owner": "Rentz release",
+      "reason": "Give the allowlisted corpus and deterministic citations an independent owner.",
+      "criterion": "Keep path, secret, size, filter and abstention checks; the search result cannot supply a gate state.",
+      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "expires": "2026-12-12",
+      "sha256": "a26e7b8ea858e1ab1bae9bfae66f151bc4ab7dbebc065e3494b6a94a99f8cf14",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/qualification/ReleaseQualification.java",
+      "owner": "Rentz release",
+      "reason": "Give read-only receipt validation and release decisions an independent owner.",
+      "criterion": "Preserve receipt identities, gate order and strict PASS requirements; abstention and snapshot drift can only veto eligibility.",
+      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "expires": "2026-12-12",
+      "sha256": "fc3f038788c5bb22176b91be1cdc1dc98c250e9ba1c8bfdce91f1682c3529eea",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleasePaths.java",
+      "owner": "Rentz release",
+      "reason": "Reuse the bounded JSON reader for release and search metadata.",
+      "criterion": "Continue denying traversal, links, unsafe corpus paths, over-limit files and malformed JSON.",
+      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "expires": "2026-12-12",
+      "sha256": "6dbca667f693f61135e02bf99cae9ea120fe337e9b4a676de2da55386bf23ee8",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/qualification/ReleaseQualificationTest.java",
+      "owner": "Rentz release",
+      "reason": "Cover receipt-backed readiness and the snapshot recheck with small offline fixtures.",
+      "criterion": "A retrieval hit cannot replace a failed gate; a changed indexed source revokes release eligibility without erasing receipts.",
+      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "expires": "2026-12-12",
+      "sha256": "878fc51f8ee5f3fa950fc4dd28316a424f72e21238f18cc4c256d24f1ba31401",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/ReleaseReadinessSnapshotTest.java",
+      "owner": "Rentz release",
+      "reason": "Exercise source drift at the reporting boundary.",
+      "criterion": "The initially valid snapshot is accepted; a changed document revokes eligibility with original receipt data preserved.",
+      "proof": "ReleaseReadinessSnapshotTest",
+      "expires": "2026-12-12",
+      "sha256": "45002973caa6ad866e60725e84b55f99a59c46b94f2fc11b1d10a4cb0e07c2c3",
       "allowDelete": false
     }
   ]

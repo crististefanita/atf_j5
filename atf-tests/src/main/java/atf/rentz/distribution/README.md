@@ -12,6 +12,9 @@ Acest pachet verifică identitatea declarată și achiziția APK-ului; nu implem
 | ApkDownloadTarget | Repository, versiune, bytes integrali și SHA-256 declarate înaintea accesului. |
 | ReleaseDownloadAcceptance | Intrare CLI live explicită, cu șase comparații și Extent; nu se execută implicit în regresie. |
 | GitHubApkDownload | Metadata, redirecturi limitate și transfer complet; credentiala rămâne numai la originea API. |
+| `retrieval.ReleaseCorpusSearch` | Validează corpusul și filtrele, apoi produce indexul, citările și semnalul de abținere. |
+| `qualification.ReleaseQualification` | Confruntă identitatea candidatului și receiptele cu porțile. Folosește abținerea ca motiv de blocare a verdictului. |
+| ReleaseReadinessRag | Compune raportul și verifică din nou sursa și indexul înainte de scriere. |
 | NativeUiEvidence și AndroidSourceEvidence | Califică receipt-ul de joc și leagă APK-ul și manifestul Android de sursa calificată. |
 | NativeExtentEvidence | Confruntă capturile PNG originale, ordinea pașilor și fiecare comparație expected/actual cu raportul nativ. |
 | ApkPayload și ReleasePaths | Hash, CRC pentru toate intrările ZIP și căi canonice, fără promovarea textului de eroare la APK. |
