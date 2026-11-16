@@ -204,10 +204,12 @@ if(-not$componentExtentReportFailure){
         [ordered]@{schemaVersion=1;sourceCommit=$sourceCommitForReport.ToLowerInvariant();sourceManifestSha256=$sourceManifestSha256;collection=$plan.name;processExitCode=$reportExitCode;executionFailure=$executionDiagnostic;suites=@($extentSuites)}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath $reportInput -Encoding utf8NoBOM
         $componentSuiteInputSha256=(Get-FileHash -LiteralPath $reportInput -Algorithm SHA256).Hash.ToLowerInvariant()
         $javaReport=Join-Path $JavaHome 'bin/java.exe'
-        & $javaReport -Xmx256m -cp $reportClasspath atf.rentz.reporting.ComponentSuiteExtentReport $reportInput $componentExtentReport *> (Join-Path $RunRoot 'component-suite-extent.log')
+        $extentSummaryPath=Join-Path $RunRoot 'component-suite-summary.json'
+        $extentDiagnostics=Join-Path $RunRoot 'component-suite-extent.log'
+        & $javaReport -Xmx256m -cp $reportClasspath atf.rentz.reporting.ComponentSuiteExtentReport $reportInput $componentExtentReport 1> $extentSummaryPath 2> $extentDiagnostics
         if($LASTEXITCODE-ne0){throw 'atf-reporting suite report publisher failed'}
         if((Get-FileHash -LiteralPath $reportInput -Algorithm SHA256).Hash.ToLowerInvariant()-cne$componentSuiteInputSha256){throw 'Suite execution receipt changed during Extent publication'}
-        $extentSummary=Get-Content -Raw -LiteralPath (Join-Path $RunRoot 'component-suite-extent.log')|Select-Object -Last 1|ConvertFrom-Json
+        $extentSummary=Get-Content -Raw -LiteralPath $extentSummaryPath|ConvertFrom-Json
         if(-not(Test-Path -LiteralPath $componentExtentReport -PathType Leaf)-or-not$extentSummary.reportSha256){throw 'Extent output or digest is missing'}
         $componentExtentReportSha256=(Get-FileHash -LiteralPath $componentExtentReport -Algorithm SHA256).Hash.ToLowerInvariant()
         if($componentExtentReportSha256-cne$extentSummary.reportSha256){throw 'Extent report digest differs from publisher receipt'}

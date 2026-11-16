@@ -1163,10 +1163,10 @@
       "path": "scripts/run-rentz-components.ps1",
       "owner": "Rentz release",
       "reason": "Generate an auditable atf-reporting Extent for the full selected component suite.",
-      "criterion": "Hash and reconcile all selected Surefire XML. Use the ATF runtime classpath for Extent and register the workspace against the tested source for Android JVM evidence. Failed or empty runs remain FAIL.",
+      "criterion": "Hash and reconcile all selected Surefire XML. Use the ATF runtime classpath for Extent and register the workspace against the tested source for Android JVM evidence. Read the JSON summary from stdout and preserve JVM diagnostics separately. Failed or empty runs remain FAIL.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "bce662f481eaffa16eec325e9d491aff5d38e63814304ecaace7fde27097679d",
+      "sha256": "7e8e6d98cdd850f3e8c404248d5dcb15ce3cdf0dd6c88e23a9c861fac7dc3b96",
       "allowDelete": false
     },
     {

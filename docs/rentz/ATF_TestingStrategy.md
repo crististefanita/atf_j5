@@ -67,6 +67,7 @@ Fixture-ul fixează intrarea și interfața exercitată. Oracolul stabilește re
 
 - Pentru o revizie editorială, verifică identitatea intrărilor și păstrează dovada de regresie la commitul executat. Rulează guvernanța pe noua revizie și leagă cele două dovezi prin [reconcilierea editorială](ATF_Qualification.md#reconcilierea-unei-revizii-editoriale).
 - Rulează regresia offline înaintea probei native. Compară inventarul așteptat cu XML-urile Maven și Android JVM. Păstrează refuzurile și aserțiunile cu valori independente în [rapoartele componentei](ATF_Components.md#execuție).
+- Runnerul componentei citește sumarul JSON al publicatorului Extent din fluxul de ieșire standard. Mesajele de diagnostic ale JVM au jurnal separat. Verdictul verifică digestul raportului și integritatea intrărilor.
 - **Traseul Android de release.** 3 mâini complete, cu Rentz prima.
 - RAG leagă replay-ul, capturile, versiunea și hash-ul APK-ului de test. Registrul cere amprenta jurnalului capturat înainte să elibereze rezervarea. [Poarta nativă](ATF_Release.md#ordinea-calificării-android-curente) · [Identitatea distribuirii și expunerea](ATF_Learning.md#identitatea-distribuirii-și-expunerea)
 - Păstrează contractele stabile în ghidul modulului, constatările deschise în [feedback](../feedback/README.md) și artefactele datate în depozitul extern.
