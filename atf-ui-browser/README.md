@@ -6,7 +6,7 @@ Adaptorul folosește contractul Card Table Browser și proiectează starea publi
 
 ## Pornire
 
-Pregătiți PowerShell 7 și JDK 21. Lansatorul verifică SHA-256 și folosește Card Table Browser 0.2.0 din `lib/`. `$WorkRoot` indică un director extern pentru clase. Deschideți adresa completă afișată de lansator.
+Pregătiți PowerShell 7 și JDK 21. Lansatorul verifică SHA-256 și folosește Card Table Browser 0.2.1 din `lib/`. `$WorkRoot` indică un director extern pentru clase. Deschideți adresa completă afișată de lansator.
 
 ```powershell
 .\atf-ui-browser\Start-RentzBrowser.ps1 -WorkRoot $WorkRoot
@@ -14,7 +14,7 @@ Pregătiți PowerShell 7 și JDK 21. Lansatorul verifică SHA-256 și folosește
 
 ## Verificare
 
-Arhiva `lib/atf-ui-browser-0.2.0-tests.jar` furnizează aceleași probe reutilizabile pentru contractul HTTP, reviziile comenzilor, ridicarea cărții, colectare și afișajul mobil. Extrageți arhiva cu `jar xf` într-un director extern, apoi rulați următoarea comandă cu Node.js 24. `$Classes` este classpath-ul returnat de lansator cu `-BuildOnly`, iar `$Chrome` poate indica executabilul Chrome sau Edge.
+Arhiva `lib/atf-ui-browser-0.2.1-tests.jar` furnizează aceleași probe reutilizabile pentru contractul HTTP, reviziile comenzilor, ridicarea cărții, colectare și afișajul mobil. Extrageți arhiva cu `jar xf` într-un director extern, apoi rulați următoarea comandă cu Node.js 24. `$Classes` este classpath-ul returnat de lansator cu `-BuildOnly`, iar `$Chrome` poate indica executabilul Chrome sau Edge.
 
 ```powershell
 node .\packaged-sanity.mjs $EvidenceRoot $Classes "ro.rentzlab.browser.RentzBrowser" "Rentz Lab" $Chrome
