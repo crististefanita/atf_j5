@@ -343,20 +343,20 @@
       "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java",
       "owner": "Rentz release",
       "reason": "Rentz release · Require the consecutive-game Android acceptance to be explicit in the native report. Q32 adds capture binding.",
-      "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim. Capture binding and completion use the registry contract. An arbitrary journal with the correct token cannot complete a bound reservation.",
+      "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim. Capture binding and completion use the registry contract. An arbitrary journal with the correct token cannot complete a bound reservation. A decision accepts the public view for the actor on turn and fails before returning any choice for a foreign turn.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "7ae4199909bc5156133018cabba1c6429b739fb6a2d051c563cce2ad58726046",
+      "expires": "2026-12-15",
+      "sha256": "28de87c246f41c149ae658a79067fd8c536a009fdbf556f12633643e8cba56f8",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlowTest.java",
       "owner": "Rentz release",
       "reason": "Keep the native Extent title and scope truthful for each UI sanity mode.",
-      "criterion": "The acceptance reports the measured scope of consecutive complete games. Narrower sanity reports describe their own scope.",
+      "criterion": "The acceptance reports the measured scope of consecutive complete games. Narrower sanity reports describe their own scope. The in-JVM decision oracle keeps one positive CLI encoding proof and rejects a foreign turn at the CLI boundary.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "3448bb6bb778bdc7c9eace435c06512d77cbf9753ef9e57ccbd389b8a2586208",
+      "expires": "2026-12-15",
+      "sha256": "cc7394189caf156f2a844601a148f183d5ae359948043b2602c7aa379905b64b",
       "allowDelete": false
     },
     {
@@ -723,10 +723,10 @@
       "path": "atf-tests/src/test/java/atf/rentz/libraries/LibraryUsageTest.java",
       "owner": "Rentz consumer",
       "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
-      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass. Compile and execute the documented Kit example using the physical Kit JAR and JUnit dependencies in an isolated class loader.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "9ddfae3737390ce0223e6a9ea5fb30f1b43af5cd147ebf2b582a7f956872c190",
+      "expires": "2026-12-15",
+      "sha256": "f7e492098dfe1a18dce09a539b3a63099584a9cfc07a52e01bcf07060038c658",
       "allowDelete": false
     },
     {
@@ -803,10 +803,10 @@
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The legacy launcher refuses the current UI contract before reading a binary or sending device operations.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-14",
-      "sha256": "a04e26c26a3a5ed702058c99f85f6154431a5a1b850b2c2485fe0729ac9ccf60",
+      "expires": "2026-12-15",
+      "sha256": "8fe7d8f1bb853da47a9e89fdc9b6dd00a5d0b4973922bddb3d230e8118317f09",
       "allowDelete": false
     },
     {

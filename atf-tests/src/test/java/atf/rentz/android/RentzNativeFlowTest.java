@@ -43,11 +43,25 @@ class RentzNativeFlowTest {
         var game=new RentzMatch(4,31,ScoreProfile.laboratory());Path file=actor(game);
         var hidden=invoke("decide",file.toString());assertEquals(0,hidden.exit(),hidden.error());assertEquals("REVEAL",JSON.readTree(hidden.output()).required("action").textValue());
         assertTrue(hidden.output().chars().allMatch(c->c<128));assertEquals("Vezi cărțile",JSON.readTree(hidden.output()).required("label").textValue());
-        game.reveal(0);var choice=invoke("decide",actor(game).toString());assertEquals(0,choice.exit(),choice.error());
-        var selected=Contract.valueOf(JSON.readTree(choice.output()).required("contract").textValue());assertTrue(game.observe(0).available().contains(selected));
-        game.choose(0,Contract.WHIST,false);var move=invoke("decide",actor(game).toString());assertEquals(0,move.exit(),move.error());
-        var node=JSON.readTree(move.output());var card=new Card(Card.Suit.valueOf(node.required("suit").textValue()),node.required("rank").intValue());
+        game.reveal(0);
+        var choice = RentzNativeFlow.decision(game.observe(0));
+        var selected = Contract.valueOf(choice.required("contract").textValue());
+        assertTrue(game.observe(0).available().contains(selected));
+        game.choose(0, Contract.WHIST, false);
+        var node = RentzNativeFlow.decision(game.observe(0));
+        var card = new Card(Card.Suit.valueOf(node.required("suit").textValue()), node.required("rank").intValue());
         assertTrue(game.observe(0).legal().contains(card));assertFalse(Files.exists(directory.resolve("session.json")),"No private journal was supplied to decide");
+    }
+    @Test void theCliRejectsAViewFromTheWrongSeatBeforeEmittingAChoice() throws Exception {
+        var game = new RentzMatch(4, 31, ScoreProfile.laboratory());
+        game.choose(0, Contract.WHIST, false);
+        Path file = directory.resolve("foreign-turn.json");
+        JSON.writeValue(file.toFile(), Map.of("view", game.observe(1)));
+        assertNotEquals(game.observe(1).turn(), game.observe(1).seat());
+        var refused = invoke("decide", file.toString());
+        assertNotEquals(0, refused.exit());
+        assertTrue(refused.output().isBlank());
+        assertTrue(refused.error().contains("own turn"), refused.error());
     }
     @Test void replayAuditAcceptsAValidNeighborAndRejectsAPublicScoreMismatch()throws Exception{
         var game=new RentzMatch(4,31,ScoreProfile.laboratory());var commands=new ArrayList<Map<String,Object>>();

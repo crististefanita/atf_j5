@@ -127,7 +127,7 @@ Receipt-ul probei UI este distinct de cel al release-ului și se produce numai d
 | `assertionDirectory`, `capturedComparisons` | JSON-urile comparațiilor capturate în execuția finală, fără populație goală. |
 | `uiLibrary`, `lintErrors`, `lintWarnings` | Proveniența AAR-ului și rezultatul Lint al acelorași intrări. |
 
-Varianta izolată are receipt propriu. Runnerul curent folosește replay-ul independent al sesiunii, iar integrarea deciziei externe din lansatorul prototipului rămâne U09.
+Varianta izolată are receipt propriu. Runnerul curent folosește alegeri scriptate pentru un traseu repetabil și verifică rezultatele prin replay independent. Decizia externă se probează prin observația actorului și CLI. [Domeniul celor două rute](ATF_Android.md#livrabile-și-limite)
 
 ## Auditul cititorului Extent
 

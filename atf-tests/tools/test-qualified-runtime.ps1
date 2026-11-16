@@ -499,6 +499,19 @@ Case 'Consecutive native acceptance rejects repeated or reordered contracts' {
     }
 }
 
+Case 'The historical launcher rejects the current Android contract before any device operation' {
+    $build = Join-Path $product 'prototype-preflight'
+    New-Item -ItemType Directory -Path $build | Out-Null
+    Json (Join-Path $build 'build-qualification.json') @{status='PASS';uiContract='card-table-ui-v1'}
+    $diagnostic = ''
+    try {
+        & (Join-Path $PSScriptRoot 'run-android-sanity.ps1') -BuildRun $build -ComponentRun $build -RunName 'refused'
+    } catch {
+        $diagnostic = $_.Exception.Message
+    }
+    Require ($diagnostic -like 'The prototype native driver cannot accept card-table-ui-v1.*') 'Current Android must use its qualified launcher'
+    Require (@(Get-ChildItem -LiteralPath (Join-Path $build 'refused') -Force).Count -eq 0) 'Incompatible Android route must produce no device transcript'
+}
 Case 'Direct Release build rejects missing native evidence before staging' {
     $output=Join-Path $fixture 'release-without-native-evidence'
     $component=Join-Path $fixture 'component-not-read-before-preflight'

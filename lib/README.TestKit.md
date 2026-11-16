@@ -25,6 +25,8 @@ public static void verifyState(RecordedAssertions audit, String actual) {
 }
 ```
 
+[Proba portabilității](../atf-tests/src/test/java/atf/rentz/libraries/LibraryUsageTest.java) compilează fragmentul din ghid într-un consumator separat. Verifică valorile expected și actual, verdictul și excepția JUnit folosind JAR-ul publicat și dependențele JUnit.
+
 ## Scope și integrare
 
 - Dependență atf.api:atf-test-kit cu versiunea atf.testkit.version din POM-ul proiectului. Folosiți test scope în produs; compile este justificat numai pentru suportul main al unui modul de test. Nu includeți Kit în APK/aplicație.

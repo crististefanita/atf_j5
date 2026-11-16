@@ -26,7 +26,6 @@ Măsurați pe dispozitiv marcajul actorului, pauza și câte o depunere în trei
 | ID | Criteriu rămas |
 |---|---|
 | U02, U03 | Calificați rutele negative la font mărit: anularea, resetarea numelui, refuzul de salvare și confirmarea înlocuirii sesiunii. Aliniați filtrul UTF-16 al dialogului comun cu politica Rentz în puncte de cod. |
-| U09 | Evaluați migrarea selecției externe la observația actorului. Păstrați replay-ul independent și refuzul rutei de prototip înaintea comenzilor ADB incompatibile. |
 | Istoric | Porniți tragerea de pe coloana fixă, inclusiv după fling. Confirmați deplasarea rândurilor la tragere și deschiderea exact a unui detaliu la atingere. |
 
 [Strategia de testare](../rentz/ATF_TestingStrategy.md) · [Admiterea bibliotecilor](../rentz/ATF_UiIntegration.md#admiterea-bibliotecilor-de-produs)

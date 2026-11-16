@@ -57,8 +57,16 @@ public final class RentzNativeFlow {
         System.out.println("{\"exposure\":\"DEVELOPMENT_RECORDED\"}");
     }
     private static RentzMatch.Observation view(Path file)throws Exception{return JSON.treeToValue(JSON.readTree(file.toFile()).required("view"),RentzMatch.Observation.class);}
-    private static void decide(Path file)throws Exception{
-        var v=view(file);var decision=JSON.createObjectNode();
+    private static void decide(Path file) throws Exception {
+        System.out.println(JSON.writeValueAsString(decision(view(file))));
+    }
+
+    static ObjectNode decision(RentzMatch.Observation v) {
+        boolean active = v.phase() == RentzMatch.Phase.CHOOSE || v.phase() == RentzMatch.Phase.PLAY;
+        if (active && v.seat() != v.turn()) {
+            throw new IllegalArgumentException("Native decision requires the actor's own turn");
+        }
+        var decision = JSON.createObjectNode();
         if(v.phase()==RentzMatch.Phase.CHOOSE){
             if(!v.revealed())decision.put("action","REVEAL").put("label","Vezi cărțile");
             else{var selected=new RentzPlayer(RentzPlayer.Difficulty.HARD,ScoreProfile.laboratory(),PolicySettings.defaults()).choose(v);decision.put("action","CHOOSE").put("label","Alege: "+selected.selected().label()).put("contract",selected.selected().name());}
@@ -66,7 +74,7 @@ public final class RentzNativeFlow {
             if(v.legal().isEmpty())decision.put("action","PASS").put("label","Pas");
             else{var selected=new RentzPlayer(RentzPlayer.Difficulty.HARD,ScoreProfile.laboratory(),PolicySettings.defaults()).card(v);decision.put("action","PLAY").put("label","Joacă "+selected.selected().label()).put("suit",selected.selected().suit().name()).put("rank",selected.selected().rank()).put("method",selected.method());}
         }else decision.put("action","COMPLETE");
-        System.out.println(JSON.writeValueAsString(decision));
+        return decision;
     }
     private static void audit(Path privateJournal,Path actorView)throws Exception{
         var journal=JSON.readTree(privateJournal.toFile());

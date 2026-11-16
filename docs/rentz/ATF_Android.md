@@ -69,7 +69,7 @@ Fișierul debug este numai citit pentru sincronizare și decizie. Adaptorul nu i
 | Tranzițiile între contracte și reluarea sesiunii | Componentele acoperă tranzițiile și replay-ul. Traseul de release verifică efectele la atingere, geometria și reluarea efectivă a procesului. |
 | Raster, fonturi și gesturi | Probe native focalizate pe tabla Rentz sau istoricul compact, după zona modificată. |
 
-[Lansatorul prototipului](../../atf-tests/tools/run-android-sanity.ps1) păstrează contractul UI anterior și refuză receipt-ul `card-table-ui-v1` înainte de ADB. Traseul actual folosește [oracolul Java](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) pentru replay și confruntarea proiecției publice. U09 păstrează separat eventuala migrare a deciziei externe din suita veche.
+[Lansatorul prototipului](../../atf-tests/tools/run-android-sanity.ps1) păstrează contractul UI anterior și refuză receipt-ul `card-table-ui-v1` înainte de ADB. Traseul actual folosește [oracolul Java](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java) pentru replay și confruntarea proiecției publice. Decizia externă cere observația locului aflat la tură. Componenta testează alegerea și cartea legală în JVM, iar CLI păstrează contractul JSON și Unicode. Ruta curentă folosește alegeri scriptate pentru reproductibilitatea acceptanței și recitește independent jurnalul. [Proba deciziei](../../atf-tests/src/test/java/atf/rentz/android/RentzNativeFlowTest.java) · [Refuzul rutei vechi](../../atf-tests/tools/test-qualified-runtime.ps1)
 
 | Livrabil sau limită | Contract |
 |---|---|
