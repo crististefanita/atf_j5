@@ -170,7 +170,7 @@ function Get-RentzSeatFrames {
             $label=if($_ -is [Xml.XmlElement]){$_.GetAttribute('content-desc')}else{[string]$_.description}
             $label.StartsWith($name+'. Points:',[StringComparison]::Ordinal)
         })
-        if($matches.Count-ne1){throw "One visible frame required for $name."}
+        if($matches.Count-ne1){throw "One visible frame required for seat $($frames.Count) ($name)."}
         $bounds=[string]$matches[0].bounds
         $box=@(Read-RentzVisibleBounds $bounds)
         foreach($previous in $frames){

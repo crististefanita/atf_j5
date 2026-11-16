@@ -703,10 +703,16 @@ function RunSeatExtremesSanity {
         $reference=''
         foreach($contract in @('RENTZ','TRICKS')){
             if($started){Tap 'Options';Tap 'Main menu'}
-            Tap 'New game';Tap 'Players';Tap ([string]$count);Tap 'Start game'
+            Tap 'New game';Tap 'Players';Tap ([string]$count)
+            $token=Start-DevelopmentExposure
+            Tap 'Start game'
             if($started){Tap 'Start'}
             $started=$true
             $state=State
+            $journal=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/session.json') 'development-table-size'
+            $journalFile=Join-Path $raw "development-$count-$contract.json"
+            [IO.File]::WriteAllText($journalFile,$journal.Output,[Text.UTF8Encoding]::new($false))
+            Complete-DevelopmentExposure $journalFile $token
             Tap 'Show cards';$state=State -After $state.revision
             $names=@('You')+@($state.opponents)
             Observe "$count seats · choosing $(HumanContractLabel $contract)" {param($nodes)
@@ -1234,7 +1240,7 @@ if(-not $HelpAwardsOnly){
     $sharedDevelopmentLedgerSha256After=(Get-FileHash -LiteralPath $sharedDevelopmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()
     $sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerSha256Before-eq$sharedDevelopmentLedgerSha256After
     if(Test-Path -LiteralPath $developmentLedger -PathType Leaf){$isolatedDevelopmentLedgerSha256After=(Get-FileHash -LiteralPath $developmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()}
-    if($ConsecutiveSubgames-and-not$sharedDevelopmentLedgerUnchanged-and-not$failure){$failure='Shared training ledger changed during isolated native acceptance.'}
+    if(($ConsecutiveSubgames-or$SeatExtremes)-and-not$sharedDevelopmentLedgerUnchanged-and-not$failure){$failure='Shared training ledger changed during isolated native acceptance.'}
 }
 $minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}elseif($ConsecutiveSubgames){3*$consecutiveGameCount+4}elseif($RentzCardMarksOnly){8}else{10}
 if($HistoryDetails){$minimum+=4}

@@ -1276,7 +1276,7 @@
       "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The focused Android route compares chooser and first play at 3, 5 and 6 places, with the same compact viewport and exact seat positions.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-14",
-      "sha256": "c92f26007a57f9525232b57038e20ec3d8bc8283f01917487d87b99057322295",
+      "sha256": "231bfcc566ca68b64b3069d3c5420d911e404bfe7843c6db85579ea10c67d700",
       "allowDelete": false
     },
     {
@@ -1594,7 +1594,7 @@
       "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. Validate measurable non-intersecting frames, actor badge placement and the full Rentz finish permutation.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-14",
-      "sha256": "91332d197e7c28f263cd00266a3403629daf5e0c468719f8ccebd53eb3971ca6",
+      "sha256": "4a914e94a3128060e77e96149f590e6ac572af75cbba2de0d2937598a519dac2",
       "allowDelete": false
     },
     {
