@@ -128,7 +128,7 @@ final class RentzTable implements BrowserGame.Match {
         boolean startsTrick = before.contract() != Contract.RENTZ && before.trick().isEmpty();
         CollectionCue cue = collection(before, after);
         steps.add(new PlayStep(played, startsTrick, BOT_TURN_DELAY_MILLIS, cue,
-                after.contract() == null ? "" : after.contract().label(), seatFacts(after)));
+                after.contract() == null ? "" : contractName(after.contract()), seatFacts(after)));
         if (cue != null) cues.add(cue);
     }
 
@@ -180,7 +180,7 @@ final class RentzTable implements BrowserGame.Match {
                 playing && state.turn() == 0 && state.legal().contains(card) ? key(card) : "")).toList();
         var played = state.trick().stream().map(play -> new Played(play.seat(), face(play.card()),
                 play.card().label(), names.get(play.seat()) + " · " + play.card().label())).toList();
-        String contract = state.contract() == null ? text("Alege sub-jocul", "Choose a contract") : state.contract().label();
+        String contract = state.contract() == null ? text("Alege sub-jocul", "Choose a contract") : contractName(state.contract());
         String progress = text("Mâna", "Hand") + " " + state.handNumber() + "/" + (state.players() * Contract.values().length)
                 + " · " + (state.phase() == Phase.MATCH_END ? text("Partidă încheiată", "Match complete") : contract);
         String prompt = switch (state.phase()) {
@@ -191,7 +191,7 @@ final class RentzTable implements BrowserGame.Match {
         };
         var header = new BrowserGame.Header("RENTZ", text("Rentz", "Rentz"), progress,
                 text("Sub-joc", "Contract") + " · " + contract,
-                state.contract() == null ? "—" : state.contract().label(),
+                state.contract() == null ? "—" : contractName(state.contract()),
                 text("Sub-jocul selectat", "Selected contract"), 22f, 14f, 13f);
         var history = history(state);
         boolean scoreScreen = state.phase() == Phase.DEAL_END || state.phase() == Phase.MATCH_END;
@@ -211,7 +211,7 @@ final class RentzTable implements BrowserGame.Match {
                 boolean blind = !state.revealed();
                 state.available().stream().sorted().forEach(contract -> moves.add(new Action(
                         (blind ? "blind:" : "choose:") + contract.name(),
-                        contract.label() + (blind ? text(" · pe nevăzute", " · blind") : ""))));
+                        contractName(contract) + (blind ? text(" · pe nevăzute", " · blind") : ""))));
             }
         }
         if (game.hasPendingHumanDecision()) moves.add(new Action("auto-step", text("Joc automat", "Auto play")));
@@ -290,7 +290,20 @@ final class RentzTable implements BrowserGame.Match {
     }
 
     private String contractLabel(Contract contract, boolean blind) {
-        return contract.label() + (blind ? text(" · pe nevăzute ×2", " · blind ×2") : "");
+        return contractName(contract) + (blind ? text(" · pe nevăzute ×2", " · blind ×2") : "");
+    }
+
+    private String contractName(Contract contract) {
+        return switch (contract) {
+            case TRICKS -> text("Levate", "Tricks");
+            case QUEENS -> text("Dame", "Queens");
+            case DIAMONDS -> text("Carouri", "Diamonds");
+            case KING_HEARTS -> text("Regele de cupă", "King of hearts");
+            case TOTALS -> text("Totale", "Totals");
+            case WHIST -> "Whist";
+            case TEN_CLUBS -> text("Zece de treflă", "Ten of clubs");
+            case RENTZ -> "Rentz";
+        };
     }
 
     private String text(String romanian, String english) { return "en".equals(language) ? english : romanian; }

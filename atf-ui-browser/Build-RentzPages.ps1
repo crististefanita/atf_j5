@@ -75,22 +75,49 @@ $tableScript = Join-Path $site 'table.mjs'
 $markup = [IO.File]::ReadAllText($tableScript).Replace("`r`n", "`n")
 $importAnchor = 'import { historyGrid } from "./records.mjs";'
 $renderAnchor = '  const visible = element("div", "", "cards-on-table");' + "`n" + '  if (!match.header) for (const face of match.center) visible.append(card(face));'
-foreach ($anchor in @($importAnchor, $renderAnchor)) {
+$choiceAnchor = @(
+  '  for (const move of match.actions.filter(move => !move.key.startsWith("bid:") && !(match.header && ["auto", "auto-step"].includes(move.key)))) {'
+  '    actions.append(control(move));'
+  '  }'
+) -join "`n"
+foreach ($anchor in @($importAnchor, $renderAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
     if ($count -ne 1) { throw "Card Table Browser 0.2.4 adapter anchor changed; expected one match, found $count." }
 }
-$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { rentzSequence } from "./rentz-ui.mjs";')
+$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
 $rentzRender = $renderAnchor + "`n" + '  if (match.rentzSequence?.length) visible.append(rentzSequence(match.rentzSequence, element, action, language));'
 $markup = $markup.Replace($renderAnchor, $rentzRender)
+$rentzChoiceRender = @(
+  '  const rentzChoices = match.actions.filter(move => move.key.startsWith("choose:") || move.key.startsWith("blind:"));'
+  '  const rentzPicker = match.header ? rentzChoiceDropdown(rentzChoices, element, action, language) : null;'
+  '  if (rentzPicker) actions.append(rentzPicker);'
+  '  for (const move of match.actions.filter(move => !move.key.startsWith("bid:") && !(match.header && ["auto", "auto-step"].includes(move.key))'
+  '      && !move.key.startsWith("choose:") && !move.key.startsWith("blind:"))) {'
+  '    actions.append(control(move));'
+  '  }'
+) -join "`n"
+$markup = $markup.Replace($choiceAnchor, $rentzChoiceRender)
 [IO.File]::WriteAllText($tableScript, $markup, [Text.UTF8Encoding]::new($false))
 
 $index = Join-Path $site 'index.html'
 $html = [IO.File]::ReadAllText($index)
+$tableStylePattern = '<link rel="stylesheet" href="\./table\.css(?:\?[^\"]*)?">'
+$tableStyleMatches = [regex]::Matches($html, $tableStylePattern)
+if ($tableStyleMatches.Count -ne 1) {
+    throw "Card Table Browser page stylesheet anchor changed; expected one table.css link, found $($tableStyleMatches.Count)."
+}
+$rentzStyleLink = '<link rel="stylesheet" href="./rentz.css">'
+if ($html.Contains($rentzStyleLink)) { throw 'Rentz stylesheet is already linked in the common page template.' }
+$html = [regex]::Replace($html, $tableStylePattern, [Text.RegularExpressions.MatchEvaluator]{
+    param($match)
+    return $match.Value + "`n  " + $rentzStyleLink
+})
 $html = $html.Replace('<html lang="ro">', '<html lang="ro" data-engine="whist" data-game="rentz">')
 $html = $html.Replace('<title>Card Table</title>', '<title>Rentz Lab</title>')
-$html = $html.Replace('<link rel="stylesheet" href="./table.css?v=0.2.4">', '<link rel="stylesheet" href="./table.css?v=0.2.4">' + "`n" + '  <link rel="stylesheet" href="./rentz.css">')
 $policy = "default-src 'self'; connect-src 'none'; style-src 'self' 'unsafe-inline'; worker-src 'self'; base-uri 'none'"
 $html = $html.Replace('<meta charset="utf-8">', '<meta charset="utf-8">' + "`n" + "  <meta http-equiv=`"Content-Security-Policy`" content=`"$policy`">")
+$rentzStyleLinks = ([regex]::Matches($html, '<link rel="stylesheet" href="\./rentz\.css">')).Count
+if ($rentzStyleLinks -ne 1) { throw "Rentz page must load its adapter stylesheet exactly once, found $rentzStyleLinks." }
 [IO.File]::WriteAllText($index, $html, [Text.UTF8Encoding]::new($false))
 [IO.File]::WriteAllText((Join-Path $site '.nojekyll'), '', [Text.UTF8Encoding]::new($false))
 

@@ -9,6 +9,7 @@ import ro.cardtable.browser.BrowserExperience;
 import ro.cardtable.browser.BrowserGame;
 import ro.rentzlab.app.achievements.AchievementCatalog;
 import ro.rentzlab.core.Contract;
+import ro.rentzlab.core.ScoreProfile;
 
 /** Offline component checks for the Rentz adapter boundary; no browser or emulator is required. */
 public final class RentzBrowserComponentTest {
@@ -21,11 +22,13 @@ public final class RentzBrowserComponentTest {
         checks += ro.cardtable.browser.BrowserSessionRentzContractTest.run();
         browserPaletteDefinesTheSharedShellTheme();
         browserRulesStayAlignedWithRentzScoring();
+        contractChoicesFollowTheSelectedLanguage();
         browserNameMatchesNativeProfileContract();
         checkpointsRestoreTheSamePublicDecision();
         legalCardsAndSequenceAgree();
         automaticTurnsKeepTheirOrderAndTiming();
         completedHandHistorySeparatesDeltaAndTotal();
+        browserRentzAwardsOnlyOneZeroForEveryTableSize();
         profileAndAchievementProgressSurviveAdapterRecreation();
         System.out.println("Rentz browser component checks passed: " + checks);
     }
@@ -77,6 +80,41 @@ public final class RentzBrowserComponentTest {
         throw new AssertionError("Missing rule: " + title);
     }
 
+    private static void contractChoicesFollowTheSelectedLanguage() {
+        var english = start(new RentzBrowser(() -> 20261117L), 4);
+        english.setLanguage("en");
+        english.act("reveal");
+        var englishChoices = english.view().actions().stream()
+                .filter(action -> action.key().startsWith("choose:"))
+                .map(BrowserGame.Action::label).toList();
+        equal("English browser choices match the Android picker labels",
+                List.of("Tricks", "Queens", "Diamonds", "King of hearts", "Totals", "Whist", "Ten of clubs", "Rentz"),
+                englishChoices);
+
+        var romanian = start(new RentzBrowser(() -> 20261118L), 4);
+        romanian.setLanguage("ro");
+        romanian.act("reveal");
+        var romanianChoices = romanian.view().actions().stream()
+                .filter(action -> action.key().startsWith("choose:"))
+                .map(BrowserGame.Action::label).toList();
+        equal("Romanian browser choices preserve the APK labels",
+                List.of("Levate", "Dame", "Carouri", "Regele de cupă", "Totale", "Whist", "Zece de treflă", "Rentz"),
+                romanianChoices);
+
+        var selected = start(new RentzBrowser(() -> 20261119L), 4);
+        selected.setLanguage("en");
+        selected.act("reveal");
+        selected.act("choose:KING_HEARTS");
+        equal("Selected contract status uses the same translated label", "King of hearts", selected.view().subtitle());
+        equal("Browser game header localizes the selected contract", "King of hearts", selected.view().header().trump());
+
+        var selectedRomanian = start(new RentzBrowser(() -> 20261120L), 4);
+        selectedRomanian.setLanguage("ro");
+        selectedRomanian.act("reveal");
+        selectedRomanian.act("choose:KING_HEARTS");
+        equal("Romanian browser game header matches the APK contract label", "Regele de cupă",
+                selectedRomanian.view().header().trump());
+    }
     private static void browserNameMatchesNativeProfileContract() {
         var table = start(new RentzBrowser(() -> 1L), 3);
         table.validateName("Abc1234567");
@@ -185,6 +223,32 @@ public final class RentzBrowserComponentTest {
         }
     }
 
+    private static void browserRentzAwardsOnlyOneZeroForEveryTableSize() {
+        for (int players = 3; players <= 6; players++) {
+            int count = players;
+            var table = start(new RentzBrowser(() -> 20261117L + count), players);
+            table.act("reveal");
+            table.act("choose:RENTZ");
+            finishOneHand(table);
+
+            var hand = table.completedHands().get(0);
+            var expectedByPlace = ScoreProfile.laboratory().finishRewardsFor(players);
+            var actualByPlace = hand.scoring().finishOrder().stream().map(hand.points()::get).toList();
+            equal("Browser Rentz awards match the Android laboratory profile for " + players,
+                    expectedByPlace, actualByPlace);
+            equal("Browser Rentz leaves exactly one zero-point player for " + players, 1L,
+                    hand.points().stream().filter(points -> points == 0).count());
+
+            var row = table.view().history().grid().rows().get(0);
+            equal("Score history exposes one score cell per seat for " + players, players, row.cells().size());
+            equal("Projected history keeps the engine's unique zero for " + players, 1L,
+                    row.cells().stream().filter(cell -> "0".equals(cell.bid())).count());
+            for (int seat = 0; seat < players; seat++) {
+                equal("Projected score cell remains tied to the settled seat " + players + "/" + seat,
+                        Integer.toString(hand.points().get(seat)), row.cells().get(seat).bid());
+            }
+        }
+    }
     private static void profileAndAchievementProgressSurviveAdapterRecreation() {
         var name = new MemoryStore();
         var progress = new MemoryStore();

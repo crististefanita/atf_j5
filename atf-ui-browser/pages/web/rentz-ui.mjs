@@ -32,3 +32,31 @@ export function rentzSequence(rows, element, play, language) {
   }
   return panel;
 }
+export function rentzChoiceDropdown(actions, element, play, language) {
+  const choices = actions.filter(move => move.key.startsWith("choose:") || move.key.startsWith("blind:"));
+  if (!choices.length) return null;
+
+  const prompt = language === "en" ? "Choose a sub-game" : "Alege sub-jocul";
+  const label = element("label", "", "rentz-contract-picker");
+  label.append(element("span", language === "en" ? "Game" : "Sub-joc"));
+
+  const select = element("select", "", "rentz-contract-select");
+  select.setAttribute("aria-label", prompt);
+  const placeholder = element("option", prompt);
+  placeholder.value = "";
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  select.append(placeholder);
+
+  for (const move of choices) {
+    const option = element("option", move.label);
+    option.value = move.key;
+    select.append(option);
+  }
+  select.addEventListener("change", () => {
+    if (choices.some(move => move.key === select.value)) play(select.value);
+  });
+
+  label.append(select);
+  return label;
+}

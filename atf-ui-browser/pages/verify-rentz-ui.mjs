@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { rentzSequence } from "./web/rentz-ui.mjs";
+import { rentzChoiceDropdown, rentzSequence } from "./web/rentz-ui.mjs";
 
 class FakeElement {
   constructor(tag, text = "", className = "") {
@@ -23,6 +23,7 @@ const check = (message, expected, actual) => {
   assert.deepEqual(actual, expected, message);
   checks++;
 };
+const element = (tag, text, className) => new FakeElement(tag, text, className);
 const rows = ["♣", "♦", "♥", "♠"].map((suit, suitIndex) => ({
   suit,
   cells: [
@@ -32,8 +33,7 @@ const rows = ["♣", "♦", "♥", "♠"].map((suit, suitIndex) => ({
   ],
 }));
 const actions = [];
-const panel = rentzSequence(rows, (tag, text, className) => new FakeElement(tag, text, className),
-  action => actions.push(action), "ro");
+const panel = rentzSequence(rows, element, action => actions.push(action), "ro");
 
 check("sequence is an accessible group", "group", panel.attributes.role);
 check("sequence uses the Romanian accessible name", "Șirurile Rentz", panel.attributes["aria-label"]);
@@ -50,5 +50,20 @@ panel.children[3].children[3].click();
 check("click dispatches only the selected legal cards", ["card:J♣", "card:K♠"], actions);
 check("red suits get red card styling", true, panel.children[1].children[1].className.includes("red"));
 check("black suits get black card styling", true, panel.children[0].children[1].className.includes("black"));
+
+const selected = [];
+const picker = rentzChoiceDropdown([
+  { key: "choose:RENTZ", label: "Rentz" },
+  { key: "blind:QUEENS", label: "Dame · pe nevăzute" },
+], element, key => selected.push(key), "ro");
+const select = picker.children.find(child => child.tagName === "select");
+check("contract choices use a semantic labelled picker", "Alege sub-jocul", select.attributes["aria-label"]);
+check("picker presents a placeholder before a choice", "Alege sub-jocul", select.children[0].textContent);
+check("picker contains all available contracts", ["choose:RENTZ", "blind:QUEENS"],
+  select.children.slice(1).map(option => option.value));
+select.value = "blind:QUEENS";
+select.listeners.change();
+check("selecting a contract dispatches the matching native action once", ["blind:QUEENS"], selected);
+check("no contract choices means no picker", null, rentzChoiceDropdown([], element, () => {}, "ro"));
 
 console.log(`Rentz browser rendering checks passed: ${checks}`);

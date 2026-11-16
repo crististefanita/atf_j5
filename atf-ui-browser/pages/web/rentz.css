@@ -57,3 +57,21 @@
   background: #fff7de;
 }
 .rentz-sequence-cell.legal:not(.played):active { transform: translateY(1px); }
+
+.rentz-contract-picker {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 20rem);
+  color: var(--whist-seat-text, #d3efe2);
+  font-weight: 650;
+  text-align: start;
+}
+.rentz-contract-picker select {
+  width: 100%;
+  min-height: 48px;
+  padding-inline: 10px;
+  border: 1px solid var(--whist-turn-line, #dcb569);
+  border-radius: 10px;
+  background: var(--whist-surface, #fffef8);
+  color: var(--whist-pine, #1d362b);
+}
