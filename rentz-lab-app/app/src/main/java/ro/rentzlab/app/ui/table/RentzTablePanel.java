@@ -188,7 +188,8 @@ public final class RentzTablePanel extends LinearLayout {
         if (arrival != null) {
             var summary = new TextView(context);
             summary.setText(arrival);
-            summary.setTextColor(TablePalette.ACTIVE_SEAT_TEXT);
+            summary.setTextColor(TablePalette.IDLE_SEAT_TEXT);
+            summary.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
             summary.setTextSize(12);
             summary.setIncludeFontPadding(false);
             summary.setGravity(Gravity.CENTER);
