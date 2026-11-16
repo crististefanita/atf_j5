@@ -165,6 +165,22 @@ function TapNode($Node,[string]$Label){
     Adb @('shell','input','tap',[string][int](($box[0]+$box[2])/2),[string][int](($box[1]+$box[3])/2)) 'tap'|Out-Null;$watch.Stop()
     $actions.Add([pscustomobject]@{operation='Tap Android control';control=$Label;bounds=$Node.bounds;elapsedMillis=$watch.ElapsedMilliseconds})
 }
+function TapContract([string]$Label){
+    if(!$ShortTables){Tap $Label;return}
+    for($page=0;$page-lt4;$page++){
+        $nodes=@(Ui)
+        $target=Get-RentzTapTarget -Nodes $nodes -Label $Label
+        if($null-ne$target){TapNode $target $Label;return}
+        $list=@($nodes|Where-Object {$_.class-ceq'android.widget.ListView'-and$_.scrollable-ceq'true'})
+        if($list.Count-ne1){throw "No scrollable contract picker for $Label."}
+        $box=Bounds $list[0]
+        $x=[int](($box[0]+$box[2])/2)
+        $padding=[int](($box[3]-$box[1])/5)
+        Adb @('shell','input','swipe',[string]$x,[string]($box[3]-$padding),[string]$x,[string]($box[1]+$padding),'280') 'contract-picker-scroll' | Out-Null
+        $actions.Add([pscustomobject]@{operation='Scroll the native contract list';control=$Label;bounds=$list[0].bounds})
+    }
+    throw "Contract not reached in the short viewport: $Label"
+}
 function AchievementKeyboardShown {
     $dump=(Adb @('shell','dumpsys','input_method') 'achievement-search-keyboard').Output
     $shown=[regex]::Match($dump,'\bmInputShown=(true|false)\b')
@@ -810,7 +826,7 @@ function RunSeatExtremesSanity {
                 if($reference){Check 'Both contracts begin with the same indexed seat positions' $reference (SeatGeometry $nodes $state 'You')}
             }
             if(!$reference){$reference=SeatGeometry $lastObservation $state 'You'}
-            Tap 'Choose game';Tap (HumanContractLabel $contract);$state=State -After $state.revision
+            Tap 'Choose game';TapContract (HumanContractLabel $contract);$state=State -After $state.revision
             if($state.view.phase-cne'PLAY'-or$state.view.turn-ne0-or!$state.view.legal.Count){
                 throw "No manual opening available for $count seats in $contract."
             }
@@ -838,7 +854,7 @@ function ChooseHumanSubgame($state,[string[]]$Played=@(),[switch]$ForceRentz){
         if($new.Count){$new[0]}else{$available[0]}
     }
     if(-not$contract-or$available -notcontains$contract){throw "Required human subgame is unavailable: $contract"}
-    Tap 'Choose game';Tap (HumanContractLabel $contract)
+    Tap 'Choose game';TapContract (HumanContractLabel $contract)
     return (State -After $state.revision)
 }
 function ConfirmNativeCheck($checkpoints,[string]$Title,[string]$Name){

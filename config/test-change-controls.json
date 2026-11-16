@@ -1276,7 +1276,7 @@
       "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The focused Android route compares chooser and first play at 3, 5 and 6 places, with the same compact viewport and exact seat positions. The focused Rentz ending keeps action pacing, score and terminal table evidence distinct from the release route. The short viewport records a visible Rentz arrival before score and one completed trick at each target table size.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-14",
-      "sha256": "4bb8d81d6958058f4e065c9e81a5b85525385353ce9ed8fb7d57720f61e5237f",
+      "sha256": "937a061d448dc869761be60f47d2165647f4af0df1782557b463a6995b775c2b",
       "allowDelete": false
     },
     {
