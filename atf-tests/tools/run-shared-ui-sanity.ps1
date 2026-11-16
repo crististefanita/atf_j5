@@ -712,13 +712,14 @@ function RentzIndexPixelChecks($nodes,$state,[string]$Png){
         $sx=$image.Width/[int]$dimensions[0];$sy=$image.Height/[int]$dimensions[1]
         foreach($index in $indices){
             $red=$index.card-match'[♦♥]$'
-            $ink=if($red){@(173,57,58)}else{@(42,53,47)}
             $columns=[Collections.Generic.HashSet[int]]::new()
             $rows=[Collections.Generic.HashSet[int]]::new()
             for($y=[int][Math]::Ceiling(($index.top+3)*$sy);$y-lt($index.bottom-3)*$sy;$y++){
                 for($x=[int][Math]::Ceiling(($index.left+3)*$sx);$x-lt($index.right-2)*$sx;$x++){
                     $pixel=$image.GetPixel($x,$y)
-                    if([Math]::Abs($pixel.R-$ink[0])-le12-and[Math]::Abs($pixel.G-$ink[1])-le12-and[Math]::Abs($pixel.B-$ink[2])-le12){
+                    $ink=if($red){$pixel.R-$pixel.G-ge50-and$pixel.R-$pixel.B-ge45-and$pixel.G-lt130}
+                         else{$pixel.R-lt120-and$pixel.G-lt120-and$pixel.B-lt120}
+                    if($ink){
                         [void]$rows.Add($y);[void]$columns.Add($x)
                     }
                 }
