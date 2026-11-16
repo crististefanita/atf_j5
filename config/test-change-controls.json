@@ -803,7 +803,7 @@
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The legacy launcher refuses the current UI contract before reading a binary or sending device operations. The selector receipt has 42 distinct passing checks including the table-size matrix. The updated selector receipt must contain 72 distinct passing checks.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The legacy launcher refuses the current UI contract before reading a binary or sending device operations. The selector receipt must contain 72 distinct passing checks, including the table-size and closing-state probes.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-15",
       "sha256": "053285c20704a441ed2f9b25197fa53ea926f59f39bf7019cfdb85a134401a35",
