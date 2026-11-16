@@ -53,7 +53,8 @@ Fișierul debug este numai citit pentru sincronizare și decizie. Adaptorul nu i
 
 ## Livrabile și limite
 
-- Sanity-ul UI comun instalează varianta izolată `ro.rentzlab.app.uisanity` și verifică meniul, profilul, limbile, o mână, istoricul și restart-ul. Opțiunea `-SeatExtremes` adaugă probele de afișaj la 3 și 6 locuri. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1) · [Protocolul integrării](ATF_UiIntegration.md)
+- Sanity-ul UI comun instalează varianta izolată `ro.rentzlab.app.uisanity` și verifică meniul, profilul, limbile, o mână, istoricul și restart-ul. [Lansatorul](../../atf-tests/tools/run-shared-ui-sanity.ps1) · [Protocolul integrării](ATF_UiIntegration.md)
+- `-SeatExtremes` rulează separat la 3, 5 și 6 locuri. Compară chenarele din selector cu chenarele după prima atingere legală în Rentz și Levate, la 720 × 1280, 360 dpi și font 1,5. Verifică marcajul actorului și încadrarea secvențelor, cu capturi native în Extent.
 - **Traseul Android de release.** 3 mâini complete, cu Rentz prima.
 - `-ConsecutiveSubgames` rulează traseul în aceeași partidă. Capturile compară chenarele la fiecare limită de mână, iar auditul verifică grila, istoricul după restart și jurnalul prin replay independent. Extent păstrează capturile native inline. Componentele acoperă 3–6 locuri, iar proba de release folosește patru locuri la profilul compact.
 - Opțiunea `-HistoryOnly` verifică istoricul gol și încărcarea unui jurnal de 48 de mâini produs de componente. Gesturile urmăresc lățimea completă a ultimei coloane, apoi ultima mână, cu verificări de aliniere și de conservare a reviziei. Android califică gesturile și afișarea pe profilul executat, iar jocul din jurnal provine din execuția de componentă. [Contractul istoricului](ATF_UiIntegration.md#istoricul-adaptiv-rentz)

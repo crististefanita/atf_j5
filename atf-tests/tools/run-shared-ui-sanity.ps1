@@ -2,6 +2,7 @@ param([Parameter(Mandatory)][string]$BuildQualification,[Parameter(Mandatory)][s
     [switch]$SeatExtremes,[switch]$HistoryOnly,[switch]$HistoryMatrix,[switch]$HistoryDetails,[switch]$HelpAwardsOnly,[switch]$CompactScores,[switch]$ConsecutiveSubgames,[switch]$CompactConsecutive,[switch]$RentzCardMarksOnly,[string]$ComponentRun,[string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe')
 $ErrorActionPreference='Stop'
 $consecutiveGameCount=3
+$seatSizes=@(3,5,6)
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $gameplayCatalog=Get-Content -LiteralPath (Join-Path $project 'rentz-lab-app/app/src/main/achievement-rules/rentz-gameplay-achievements.yaml') -Raw|ConvertFrom-Json
 $gameplayTotal=$gameplayCatalog.tiers.EASY.Count+$gameplayCatalog.tiers.MEDIUM.Count+$gameplayCatalog.tiers.HARD.Count
@@ -573,18 +574,9 @@ function TableChecks($nodes,$state){
     Check 'Actual left-to-right hand order' ($expectedOrder-join' ') ($visibleOrder-join' ')
     if($hand.Count-eq1){$handBox=Bounds $hand[0];foreach($seat in $seats){$box=Bounds $seat;Check ('Seat clears hand: '+$seat.description) $true ($box[3]-le$handBox[1])}}
 }
-function SeatGeometry($nodes,$state){
-    $names=@('Ana')+@($state.opponents);$rectangles=[Collections.Generic.List[string]]::new()
-    for($seat=0;$seat-lt$state.view.players;$seat++){
-        $name=[string]$names[$seat]
-        $frames=@($nodes|Where-Object{
-            $label=if($_ -is [Xml.XmlElement]){$_.GetAttribute('content-desc')}else{[string]$_.description}
-            $label.StartsWith($name+'. Points:',[StringComparison]::Ordinal)
-        })
-        if($frames.Count-ne1){throw "One visible frame required for seat $seat ($name)."}
-        $rectangles.Add("$seat=$($frames[0].bounds)")
-    }
-    return ($rectangles -join ';')
+function SeatGeometry($nodes,$state,[string]$HumanName='Ana'){
+    $frames=@(Get-RentzSeatFrames -Nodes $nodes -Names (@($HumanName)+@($state.opponents)))
+    return ((0..($frames.Count-1)|ForEach-Object {"$_=$($frames[$_].bounds)"}) -join ';')
 }
 function RentzSequenceChecks($nodes,$state){
     $cellPattern='^(?:Empty slot )?(?:[2-9]|10|J|Q|K|A)[♣♦♥♠]$'
@@ -704,6 +696,45 @@ function RunRentzCardMarks($state){
 }
 function HumanContractLabel([string]$contract){
     return @{TRICKS='Tricks';QUEENS='Queens';DIAMONDS='Diamonds';KING_HEARTS='King of Hearts';TOTALS='Totals';WHIST='Whist';TEN_CLUBS='Ten of Clubs';RENTZ='Rentz'}[$contract]
+}
+function RunSeatExtremesSanity {
+    $started=$false
+    foreach($count in $seatSizes){
+        $reference=''
+        foreach($contract in @('RENTZ','TRICKS')){
+            if($started){Tap 'Options';Tap 'Main menu'}
+            Tap 'New game';Tap 'Players';Tap ([string]$count);Tap 'Start game'
+            if($started){Tap 'Start'}
+            $started=$true
+            $state=State
+            Tap 'Show cards';$state=State -After $state.revision
+            $names=@('You')+@($state.opponents)
+            Observe "$count seats · choosing $(HumanContractLabel $contract)" {param($nodes)
+                Check 'Requested table size' $count $state.view.players
+                Check 'Opening chooser' 'CHOOSE/0' "$($state.view.phase)/$($state.view.turn)"
+                Check 'Eight revealed cards' 8 $state.view.hand.Count
+                TableChecks $nodes $state
+                Get-RentzTurnBadgeChecks -Nodes $nodes -Frames @(Get-RentzSeatFrames -Nodes $nodes -Names $names) -Turn 0 -Label 'CHOOSING'
+                if($reference){Check 'Both contracts begin with the same indexed seat positions' $reference (SeatGeometry $nodes $state 'You')}
+            }
+            if(!$reference){$reference=SeatGeometry $lastObservation $state 'You'}
+            Tap 'Choose game';Tap (HumanContractLabel $contract);$state=State -After $state.revision
+            if($state.view.phase-cne'PLAY'-or$state.view.turn-ne0-or!$state.view.legal.Count){
+                throw "No manual opening available for $count seats in $contract."
+            }
+            $card=CardLabel $state.view.legal[0]
+            Tap ('Play '+$card);$state=State -After $state.revision
+            Observe "$count seats · $(HumanContractLabel $contract) after touch" {param($nodes)
+                Check 'Contract and phase after playing' "$contract/PLAY" "$($state.view.contract)/$($state.view.phase)"
+                Check 'Exactly one human card removed' 7 $state.view.hand.Count
+                Check 'The chosen card left the hand' $false ($card-in@($state.view.hand|ForEach-Object{CardLabel $_}))
+                Check 'Touch and contract preserve every physical seat position' $reference (SeatGeometry $nodes $state 'You')
+                TableChecks $nodes $state
+                Get-RentzTurnBadgeChecks -Nodes $nodes -Frames @(Get-RentzSeatFrames -Nodes $nodes -Names $names) -Turn $state.view.turn -Label 'PLAYING'
+                if($contract-ceq'RENTZ'){RentzSequenceChecks $nodes $state}
+            }
+        }
+    }
 }
 function ChooseHumanSubgame($state,[string[]]$Played=@(),[switch]$ForceRentz){
     if(-not$state.view.revealed){$revision=$state.revision;Tap 'Show cards';$state=State -After $revision}
@@ -1038,7 +1069,7 @@ try{
     Adb @('shell','input','keyevent','KEYCODE_WAKEUP') 'wake-device'|Out-Null
     Adb @('shell','wm','dismiss-keyguard') 'dismiss-emulator-keyguard'|Out-Null
     $initialSize=(Adb @('shell','wm','size') 'size').Output;$initialDensity=(Adb @('shell','wm','density') 'density').Output;$initialFont=(Adb @('shell','settings','get','system','font_scale') 'font').Output
-    if($CompactConsecutive-or$RentzCardMarksOnly){
+    if($CompactConsecutive-or$RentzCardMarksOnly-or$SeatExtremes){
         $restoreSize=DisplayOverride $initialSize 'size' '\d+x\d+'
         $restoreDensity=DisplayOverride $initialDensity 'density' '\d+'
         $restoreFont=$initialFont.Trim()
@@ -1068,7 +1099,7 @@ try{
         $launch+=@('--ez','rentz.nativeAcceptance','true')
     }
     Adb $launch 'launch'|Out-Null
-    if($HelpAwardsOnly){RunHelpAwardsSanity}elseif($HistoryOnly){RunHistorySanity}else{
+    if($HelpAwardsOnly){RunHelpAwardsSanity}elseif($HistoryOnly){RunHistorySanity}elseif($SeatExtremes){RunSeatExtremesSanity}else{
     Observe 'English shared home and disabled resume' {param($nodes) $t=Text $nodes;Check 'Rentz home' $true ($t.Contains('Rentz'));Check 'English first launch' $true ($t.Contains('New game'));Check 'Resume disabled' 1 @($nodes|Where-Object{$_.text-eq'Resume game'-and$_.enabled-eq'false'}).Count}
     if($ConsecutiveSubgames){
         Tap 'Achievements'
@@ -1152,20 +1183,6 @@ try{
     Tap 'Options';Tap 'Score history';$null=State -Screen 'HISTORY'
     Observe 'Restored score history still contains the confirmed row' {param($nodes) $t=Text $nodes;Check 'History restored' $true ($t.Contains('1 · Tricks'));Check 'Restored player identity' $true ($t.Contains('Ana'))}
     if($CompactScores){RunCompactScores $terminal}
-    if($SeatExtremes){
-        Tap 'Close';$null=State
-        foreach($seatCount in @(6,3)){
-            Tap 'Options';Tap 'Main menu';Tap 'New game';Tap 'Players';Tap ([string]$seatCount)
-            $token=Start-DevelopmentExposure
-            Tap 'Start game';Tap 'Start';$state=State
-            $journal=Adb @('exec-out','run-as','ro.rentzlab.app.uisanity','cat','files/session.json') ('development-'+$seatCount)
-            $journalFile=Join-Path $raw ('development-journal-'+$seatCount+'.json')
-            [IO.File]::WriteAllText($journalFile,$journal.Output,[Text.UTF8Encoding]::new($false))
-            Complete-DevelopmentExposure $journalFile $token
-            $revision=$state.revision;Tap 'Show cards';$state=State -After $revision
-            Observe ('Display-only initialization with '+$seatCount+' seats') {param($nodes) Check 'Requested Rentz table size' $seatCount $state.view.players;Check 'Eight cards on the single hand row' 8 @($state.view.hand).Count;TableChecks $nodes $state}
-        }
-    }
     }
     }
 }catch{
@@ -1221,9 +1238,10 @@ if(-not $HelpAwardsOnly){
 }
 $minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}elseif($ConsecutiveSubgames){3*$consecutiveGameCount+4}elseif($RentzCardMarksOnly){8}else{10}
 if($HistoryDetails){$minimum+=4}
+if($SeatExtremes){$minimum=4*$seatSizes.Count}
 if($CompactScores){$minimum++}
 if(-not$failure-and($cleanup.Count-or-not$released-or-not$preserved-or$points.Count-lt$minimum)){$failure='Native closeout failed or the declared checkpoint population is incomplete.'}
-$scope=if($HelpAwardsOnly){'Rentz help navigation and representative finishing awards in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: Rentz first, then two distinct standard games, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; optional display-only 3/6 seats; one native display profile'}
+$scope=if($HelpAwardsOnly){'Rentz help navigation and representative finishing awards in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($SeatExtremes){'Compact native choosing, actor placement and first card touch in Rentz and Tricks at 3, 5 and 6 seats; 720x1280, density 360, font scale 1.5'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: Rentz first, then two distinct standard games, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; one native display profile'}
 if($HistoryDetails){$scope+='; confirmed blind trick contributions and the actual Rentz finishing places after journal restore'}
 if($ConsecutiveSubgames){$scope+='; learning order, search, filters, eligibility, local profile and durable achievement progress'}
 if($CompactConsecutive){$scope+='; compact 720x1280, density 360, font scale 1.5'}

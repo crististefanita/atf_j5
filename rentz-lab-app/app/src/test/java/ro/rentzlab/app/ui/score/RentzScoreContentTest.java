@@ -6,6 +6,7 @@ import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.ai.RentzPlayer;
 import ro.rentzlab.core.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -103,6 +104,50 @@ public final class RentzScoreContentTest {
                 audit.equal("Tied seat order " + players + "/" + seat,
                         new RentzScoreContent.Standing(seat, 1, -50), rows.get(seat));
             }
+        }
+    }
+
+    @Test public void rentzAwardsAndFinalPlaceFollowTheSeatThatEmptiedItsHand() {
+        checkRentzSettlement(List.of(300, 200, 0));
+        checkRentzSettlement(List.of(300, 175, 100, 25, 0));
+        checkRentzSettlement(List.of(300, 150, 75, 50, 25, 0));
+    }
+
+    private void checkRentzSettlement(List<Integer> awards) {
+        int players = awards.size();
+        var copy = new RentzUiText(RentzUiText.Language.EN);
+        var match = new RentzMatch(players, 31, ScoreProfile.laboratory());
+        match.choose(0, Contract.RENTZ, false);
+        var finishers = new ArrayList<Integer>();
+        var cardsPlayed = new int[players];
+        int actions = 0;
+        audit.truth("No score before settlement at " + players + " seats",
+                RentzScoreContent.currentHand(match.observe(0), match.history(), copy).isEmpty());
+        while (match.observe(0).phase() == RentzMatch.Phase.PLAY) {
+            var actor = match.observe(match.observe(0).turn());
+            if (actor.legal().isEmpty()) {
+                match.pass(actor.seat());
+            } else {
+                match.play(actor.seat(), actor.legal().get(0));
+                if (++cardsPlayed[actor.seat()] == 8) finishers.add(actor.seat());
+            }
+            if (++actions > 128) throw new AssertionError("Rentz fixture did not complete its hand");
+        }
+
+        audit.equal("Exactly one player has cards left at " + players + " seats", players - 1, finishers.size());
+        for (int seat = 0; seat < players; seat++) {
+            if (cardsPlayed[seat] < 8) finishers.add(seat);
+        }
+        var current = RentzScoreContent.currentHand(match.observe(0), match.history(), copy).orElseThrow();
+        var details = RentzScoreContent.details(current);
+        audit.equal("Public play order determines detail seats at " + players + " seats",
+                finishers, details.stream().map(RentzScoreContent.Detail::seat).toList());
+        for (int place = 0; place < players; place++) {
+            var detail = details.get(place);
+            var expected = new RentzScoreContent.Value(awards.get(place), awards.get(place));
+            audit.equal("Place ties the award to the visible seat " + players + "/" + place, place + 1, detail.place());
+            audit.equal("Exact points at " + players + "/" + place, expected, detail.score());
+            audit.equal("Detail and history agree at " + players + "/" + place, expected, current.values().get(detail.seat()));
         }
     }
 

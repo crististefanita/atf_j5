@@ -70,6 +70,38 @@ try{
     $checksForScore=@(Get-RentzCompletedDealChecks -Actor $invalid -Hand 1 -Contract 'RENTZ')
     Check 'Premature or misattributed scores fail every settlement comparison' 5 @($checksForScore|Where-Object { !$_.passed }).Count
 
+    foreach($players in @(3,5,6)){
+        $order=@(($players-1)..0)
+        $score=Actor 20 1 'DEAL_END' 0 'RENTZ' @(1..$players) $order
+        $score.view.players=$players
+        Check "A distinct finish for each of $players places is accepted" 5 @(Get-RentzCompletedDealChecks $score 1 'RENTZ' | Where-Object passed).Count
+        $score.view.finishOrder=@($order)
+        $score.view.finishOrder[$players-1]=$players-1
+        Check "A duplicate finisher cannot stand in for seat zero at $players places" 1 @(Get-RentzCompletedDealChecks $score 1 'RENTZ' | Where-Object {!$_.passed}).Count
+        $score.view.finishOrder[$players-1]=$players
+        Check "A foreign seat is refused at $players places" 1 @(Get-RentzCompletedDealChecks $score 1 'RENTZ' | Where-Object {!$_.passed}).Count
+
+        $names=@(0..($players-1)|ForEach-Object {"Player$_"})
+        $nodes=@(0..($players-1)|ForEach-Object {
+            $left=10+$_*100
+            [pscustomobject]@{description=$names[$_]+'. Points: 0. Total: 0';text='';bounds="[$left,80][$($left+80),140]"}
+        })
+        $turn=$players-1
+        $left=10+$turn*100
+        $badge=[pscustomobject]@{description='';text='CHOOSING';bounds="[$left,50][$($left+80),75]"}
+        $frames=@(Get-RentzSeatFrames -Nodes ($nodes+$badge) -Names $names)
+        Check "Each player has a measurable frame at $players places" $players $frames.Count
+        Check "The action is above the actor at $players places" 3 @(Get-RentzTurnBadgeChecks -Nodes ($nodes+$badge) -Frames $frames -Turn $turn -Label 'CHOOSING' | Where-Object passed).Count
+        $badge.text='PASSING'
+        Check "A forced pass keeps the same actor at $players places" 3 @(Get-RentzTurnBadgeChecks -Nodes ($nodes+$badge) -Frames $frames -Turn $turn -Label 'PASSING' | Where-Object passed).Count
+        $badge.bounds='[10,50][90,75]'
+        Check "A badge above another player fails at $players places" 1 @(Get-RentzTurnBadgeChecks -Nodes ($nodes+$badge) -Frames $frames -Turn $turn -Label 'PASSING' | Where-Object {!$_.passed}).Count
+        $badBounds=[pscustomobject]@{description=$nodes[$turn].description;text='';bounds=$nodes[0].bounds}
+        $refusal=''
+        try{$null=Get-RentzSeatFrames -Nodes ($nodes[0..($turn-1)]+$badBounds) -Names $names}catch{$refusal=$_.Exception.Message}
+        Check "Overlapping seat frames fail at $players places" "Player frames intersect: Player0 and Player$turn" $refusal
+    }
+
     $history=[Collections.Generic.HashSet[int]]::new()
     $contracts=@('Rentz','Tricks','Whist')
     $page=@(Get-RentzHistoryPageChecks -Labels @('Score history',"1 · Rentz"+[Environment]::NewLine+'scores','2 · Tricks ×2') -Contracts $contracts -Seen $history)

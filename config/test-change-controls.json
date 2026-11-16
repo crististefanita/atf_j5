@@ -1023,10 +1023,10 @@
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java",
       "owner": "Rentz UI",
       "reason": "Qualify every Help award in the JVM, including the production accessibility strings.",
-      "criterion": "Verify exact payouts and RO/EN descriptions for every actual place at 3 to 6 seats. Keep the alternate profile, history and standings neighbors.",
+      "criterion": "Verify exact payouts and RO/EN descriptions for every actual place at 3 to 6 seats. Keep the alternate profile, history and standings neighbors. Replay the finishing order from legal plays and check each exact place and award against the confirmed row.",
       "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
       "expires": "2026-12-10",
-      "sha256": "b190a3aa1899fd1d46e7171277aeb7f66288608812df87af15fdfac5ca5e6cf7",
+      "sha256": "525dafbed3d917f0fe037a0e8076a75affb1863fba063d37e26a7ac1938c30af",
       "allowDelete": false
     },
     {
@@ -1273,10 +1273,10 @@
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The focused Android route compares chooser and first play at 3, 5 and 6 places, with the same compact viewport and exact seat positions.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-14",
-      "sha256": "57bcbd4c1fb90473600c9363ea98f1315865cf392435180daca9f91e1e6d36c1",
+      "sha256": "c92f26007a57f9525232b57038e20ec3d8bc8283f01917487d87b99057322295",
       "allowDelete": false
     },
     {
@@ -1591,20 +1591,20 @@
       "path": "rentz-reference/tools/RentzUiOracle.psm1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. Validate measurable non-intersecting frames, actor badge placement and the full Rentz finish permutation.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-14",
-      "sha256": "9473a0f152af63aa240552932390b3e8aef8510d320eb054ffb924a507a32f78",
+      "sha256": "91332d197e7c28f263cd00266a3403629daf5e0c468719f8ccebd53eb3971ca6",
       "allowDelete": false
     },
     {
       "path": "atf-tests/tools/test-ui-selectors.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. At 3, 5 and 6 places, refuse duplicated or foreign finishers, overlapping frames and an action badge over the wrong seat.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-14",
-      "sha256": "b9b12571ad155453158a17485519f42b30a8349def05a5147c1f42e804f358cb",
+      "sha256": "6c1ddd955aeee7bf476242fec6ccbd1e70a2f01ce353065254c960017d313cfb",
       "allowDelete": false
     },
     {

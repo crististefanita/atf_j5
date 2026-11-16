@@ -143,7 +143,7 @@ function Get-RentzCompletedDealChecks {
         @{name='One score value per player';expected=$view.players;actual=$view.dealPoints.Count}
     )
     if($Contract-ceq'RENTZ'){
-        $checks += @{name='Rentz finishing order contains each player';expected=$view.players;actual=$view.finishOrder.Count}
+        $checks += @{name='Rentz finishing order contains each player';expected=(0..($view.players-1) -join ',');actual=(@($view.finishOrder|Sort-Object)-join ',')}
     }
     foreach($check in $checks){
         $check.expected = [string]$check.expected
@@ -151,6 +151,53 @@ function Get-RentzCompletedDealChecks {
         $check.passed = $check.expected-ceq$check.actual
         [pscustomobject]$check
     }
+}
+
+function Read-RentzVisibleBounds([string]$Value){
+    $bounds=[regex]::Match($Value,'^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$')
+    if($bounds.Success){
+        $box=@(1..4|ForEach-Object {[int]$bounds.Groups[$_].Value})
+        if($box[0]-lt$box[2]-and$box[1]-lt$box[3]){return $box}
+    }
+    throw "Invalid visible bounds: $Value"
+}
+
+function Get-RentzSeatFrames {
+    param([object[]]$Nodes,[string[]]$Names)
+    $frames=[Collections.Generic.List[object]]::new()
+    foreach($name in $Names){
+        $matches=@($Nodes|Where-Object {
+            $label=if($_ -is [Xml.XmlElement]){$_.GetAttribute('content-desc')}else{[string]$_.description}
+            $label.StartsWith($name+'. Points:',[StringComparison]::Ordinal)
+        })
+        if($matches.Count-ne1){throw "One visible frame required for $name."}
+        $bounds=[string]$matches[0].bounds
+        $box=@(Read-RentzVisibleBounds $bounds)
+        foreach($previous in $frames){
+            $other=$previous.box
+            if($box[0]-lt$other[2]-and$box[2]-gt$other[0]-and$box[1]-lt$other[3]-and$box[3]-gt$other[1]){
+                throw "Player frames intersect: $($previous.name) and $name"
+            }
+        }
+        $frames.Add([pscustomobject]@{name=$name;bounds=$bounds;box=$box})
+    }
+    return $frames.ToArray()
+}
+
+function Get-RentzTurnBadgeChecks {
+    param([object[]]$Nodes,[object[]]$Frames,[int]$Turn,[string]$Label)
+    if($Turn-lt0-or$Turn-ge$Frames.Count){throw "Invalid badge actor seat: $Turn"}
+    $badges=@($Nodes|Where-Object {$_.text -cin @('CHOOSING','PLAYING','PASSING')})
+    $text=$badges.text -join ','
+    $belongs=$false
+    if($badges.Count-eq1){
+        $badge=@(Read-RentzVisibleBounds $badges[0].bounds)
+        $actor=$Frames[$Turn].box
+        $belongs=$badge[0]+$badge[2]-eq$actor[0]+$actor[2]-and$badge[3]-le$actor[1]
+    }
+    [pscustomobject]@{name='One native action badge';expected='1';actual=[string]$badges.Count;passed=$badges.Count-eq1}
+    [pscustomobject]@{name='Action badge label';expected=$Label;actual=$text;passed=$text-ceq$Label}
+    [pscustomobject]@{name='Action badge centered above the active player';expected=$Frames[$Turn].name;actual=$(if($belongs){$Frames[$Turn].name}else{'outside the actor frame'});passed=$belongs}
 }
 
 
@@ -178,4 +225,4 @@ function Get-RentzHistoryPageChecks {
     }
 }
 
-Export-ModuleMember -Function Wait-RentzUiHierarchy,Wait-RentzActorCheckpoint,Wait-RentzVisualCheckpoint,Get-RentzTapTarget,Get-RentzSystemUiWaitTarget,Start-RentzNextDeal,Get-RentzCompletedDealChecks,Get-RentzHistoryPageChecks
+Export-ModuleMember -Function Wait-RentzUiHierarchy,Wait-RentzActorCheckpoint,Wait-RentzVisualCheckpoint,Get-RentzTapTarget,Get-RentzSystemUiWaitTarget,Start-RentzNextDeal,Get-RentzCompletedDealChecks,Get-RentzHistoryPageChecks,Get-RentzSeatFrames,Get-RentzTurnBadgeChecks

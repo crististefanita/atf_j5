@@ -99,13 +99,15 @@ Componenta comună aplică stilul cărților marcate. În tura manuală, o ating
 
 Proba `-RentzCardMarksOnly` verifică pe emulator acțiunile accesibile și culorile capturate pentru o carte, mai multe cărți, după mutare și după pas. [Componentele de geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) · [Runner Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 
-### Schimbarea contractului la masa de patru jucători
+### Schimbarea contractului la masă
 
 - Alegerea sub-jocului și jocul păstrează aceleași dreptunghiuri ale locurilor pentru același ecran. Masa măsoară locurile o singură dată pe cadru, apoi adaptează comenzile de alegere, secvența sau levata la banda rămasă. Indicatorul Alege, Joacă sau Pasează arată actorul curent deasupra chenarului.
 - Pe un ecran scund, levata reduce mai întâi distanța dintre rânduri și păstrează ordinea cărților. Bugetul se verifică în pixeli, cu aceeași rotunjire separată a poziției și a înălțimii ultimului rând ca la randarea Android.
 - Masa și ecranul de punctaj afișează progresul `Mâna x/y` pe primul rând și contractul pe rândul următor. Marcajul `×2` rămâne lângă contract.
 
-[Componentele de geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) verifică încadrarea pe dimensiuni controlate. [Acceptanța de release](ATF_Release.md#ordinea-calificării-android-curente) compară dreptunghiurile native înainte și după schimbarea contractului, după mutări și după reluare.
+Componentele verifică geometria pe dimensiuni controlate și premiile pe locuri. Mock-urile refuză suprapunerea chenarelor, un marcaj atribuit altui actor și un clasament cu locuri duplicate sau străine. [Geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) · [Punctaj](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java) · [Mock-uri](../../atf-tests/tools/test-ui-selectors.ps1)
+
+Acceptanța de release compară dreptunghiurile mesei de patru locuri înainte și după schimbarea contractului, după mutări și după reluare. Proba focalizată compară selectorul și prima atingere în Rentz și Levate la 3, 5 și 6 locuri. [Poarta de release](ATF_Release.md#ordinea-calificării-android-curente) · [Proba focalizată](ATF_Android.md#livrabile-și-limite)
 
 ## Traseul minim de calificare
 
