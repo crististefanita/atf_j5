@@ -1,0 +1,108 @@
+#requires -Version 7.0
+param(
+    [Parameter(Mandatory)][string]$WorkRoot,
+    [string]$JsonLibrary
+)
+$ErrorActionPreference = 'Stop'
+$root = [IO.Path]::GetFullPath($WorkRoot)
+$checkout = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+$sourcePrefix = $checkout.TrimEnd([char[]]@('/', '\')) + [IO.Path]::DirectorySeparatorChar
+if (($root.Equals($checkout, [StringComparison]::OrdinalIgnoreCase)) -or
+        ($root.StartsWith($sourcePrefix, [StringComparison]::OrdinalIgnoreCase))) {
+    throw 'Use an external build directory; generated Pages files do not belong in the source tree.'
+}
+$null = New-Item -ItemType Directory -Force -Path $root
+$jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -JsonLibrary $JsonLibrary -BuildOnly
+if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
+$classpath = $jvm -join ''
+$run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.1.jar'
+$pages = Join-Path $PSScriptRoot 'pages'
+$dependencySpec = Join-Path $pages 'teavm-dependencies.xml'
+$toolClasspath = Join-Path $root 'teavm.classpath'
+$toolClasspathHash = Join-Path $root 'teavm-dependencies.sha256'
+$compilerLog = Join-Path $root 'teavm-dependencies.log'
+$dependencyHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $dependencySpec).Hash
+$resolvedHash = if (Test-Path -LiteralPath $toolClasspathHash) {
+    (Get-Content -LiteralPath $toolClasspathHash -Raw).Trim()
+} else { '' }
+if (!(Test-Path -LiteralPath $toolClasspath) -or $resolvedHash -ine $dependencyHash) {
+    & mvn -B -ntp -f $dependencySpec `
+        'org.apache.maven.plugins:maven-dependency-plugin:3.8.1:build-classpath' "-Dmdep.outputFile=$toolClasspath" *> $compilerLog
+    if ($LASTEXITCODE -ne 0) { throw "Could not resolve TeaVM. See $compilerLog" }
+    [IO.File]::WriteAllText($toolClasspathHash, $dependencyHash, [Text.UTF8Encoding]::new($false))
+}
+$classpath = @($classpath, (Get-Content -LiteralPath $toolClasspath -Raw).Trim()) -join [IO.Path]::PathSeparator
+$classes = Join-Path $run 'rentz-pages-classes'
+$site = Join-Path $run 'rentz-pages-site'
+$javaTemp = Join-Path $root 'java-temp'
+$null = New-Item -ItemType Directory -Force -Path $classes, $site, $javaTemp
+$sources = Get-ChildItem -LiteralPath (Join-Path $pages 'src/main/java') -Filter '*.java' -File -Recurse |
+    ForEach-Object FullName
+& javac --release 17 -encoding UTF-8 -cp $classpath -d $classes @sources
+if ($LASTEXITCODE -ne 0) { throw 'Rentz Pages adapter compilation failed.' }
+$componentTests = @(
+    (Join-Path $pages 'src/test/java/ro/cardtable/browser/RentzPageComponentTest.java'),
+    (Join-Path $pages 'src/test/java/ro/cardtable/names/PlayerNamesParityTest.java'))
+$testClasspath = @($classes, $classpath) -join [IO.Path]::PathSeparator
+& javac --release 17 -encoding UTF-8 -cp $testClasspath -d $classes @componentTests
+if ($LASTEXITCODE -ne 0) { throw 'Rentz Pages component test compilation failed.' }
+& java '-Xmx256m' '-XX:ActiveProcessorCount=2' -cp $testClasspath 'ro.cardtable.browser.RentzPageComponentTest'
+if ($LASTEXITCODE -ne 0) { throw 'Rentz Pages component checks failed.' }
+$nativeNames = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar'
+$nativeClasses = $classpath.Split([IO.Path]::PathSeparator)[0]
+& java '-Xmx256m' '-XX:ActiveProcessorCount=2' "-Drentz.names.nativeJar=$nativeNames" "-Drentz.native.appClasses=$nativeClasses" -cp $testClasspath 'ro.cardtable.names.PlayerNamesParityTest'
+if ($LASTEXITCODE -ne 0) { throw 'WEB PlayerNames shim differs from the APK names contract.' }
+$previousJavaOptions = $env:JAVA_TOOL_OPTIONS
+try {
+    $env:JAVA_TOOL_OPTIONS = (($previousJavaOptions, "-Djava.io.tmpdir=$javaTemp" | Where-Object { $_ }) -join ' ')
+    $compilerLog = Join-Path $run 'teavm.log'
+    & java '-XX:ActiveProcessorCount=3' '-Xmx1g' -cp (@($classes, $classpath) -join [IO.Path]::PathSeparator) `
+        (Join-Path $pages 'CompileRentzPage.java') $site *> $compilerLog
+} finally { $env:JAVA_TOOL_OPTIONS = $previousJavaOptions }
+if ($LASTEXITCODE -ne 0) { throw "Rentz browser engine compilation failed. See $compilerLog" }
+
+$commonRoot = Join-Path $run 'common-web'
+$null = New-Item -ItemType Directory -Force -Path $commonRoot
+Push-Location $commonRoot
+try { & jar xf $library 'ro/cardtable/browser/web' }
+finally { Pop-Location }
+$commonWeb = Join-Path $commonRoot 'ro/cardtable/browser/web'
+Get-ChildItem -LiteralPath $commonWeb -File | Copy-Item -Destination $site
+Get-ChildItem -LiteralPath (Join-Path $pages 'web') -File | Copy-Item -Destination $site
+
+$tableScript = Join-Path $site 'table.mjs'
+$markup = [IO.File]::ReadAllText($tableScript).Replace("`r`n", "`n")
+$importAnchor = 'import { historyGrid } from "./records.mjs";'
+$renderAnchor = '  const visible = element("div", "", "cards-on-table");' + "`n" + '  if (!match.header) for (const face of match.center) visible.append(card(face));'
+foreach ($anchor in @($importAnchor, $renderAnchor)) {
+    $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
+    if ($count -ne 1) { throw "Card Table Browser 0.2.1 adapter anchor changed; expected one match, found $count." }
+}
+$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { rentzSequence } from "./rentz-ui.mjs";')
+$rentzRender = $renderAnchor + "`n" + '  if (match.rentzSequence?.length) visible.append(rentzSequence(match.rentzSequence, element, action, language));'
+$markup = $markup.Replace($renderAnchor, $rentzRender)
+[IO.File]::WriteAllText($tableScript, $markup, [Text.UTF8Encoding]::new($false))
+
+$index = Join-Path $site 'index.html'
+$html = [IO.File]::ReadAllText($index)
+$html = $html.Replace('<html lang="ro">', '<html lang="ro" data-engine="whist" data-game="rentz">')
+$html = $html.Replace('<title>Card Table</title>', '<title>Rentz Lab</title>')
+$html = $html.Replace('<link rel="stylesheet" href="./table.css">', '<link rel="stylesheet" href="./table.css">' + "`n" + '  <link rel="stylesheet" href="./rentz.css">')
+$policy = "default-src 'self'; connect-src 'none'; style-src 'self' 'unsafe-inline'; worker-src 'self'; base-uri 'none'"
+$html = $html.Replace('<meta charset="utf-8">', '<meta charset="utf-8">' + "`n" + "  <meta http-equiv=`"Content-Security-Policy`" content=`"$policy`">")
+[IO.File]::WriteAllText($index, $html, [Text.UTF8Encoding]::new($false))
+[IO.File]::WriteAllText((Join-Path $site '.nojekyll'), '', [Text.UTF8Encoding]::new($false))
+
+foreach ($required in @('index.html', 'rentz-engine.mjs', 'engine-worker.mjs', 'local-transport.mjs', 'rentz-ui.mjs', 'rentz.css', 'table.mjs')) {
+    if (!(Test-Path -LiteralPath (Join-Path $site $required))) { throw "Rentz Pages output is missing $required" }
+}
+foreach ($script in @('rentz-ui.mjs', 'table.mjs', 'engine-worker.mjs', 'local-transport.mjs')) {
+    & node --check (Join-Path $site $script)
+    if ($LASTEXITCODE -ne 0) { throw "Generated browser script is invalid: $script" }
+}
+& node (Join-Path $pages 'verify-rentz-engine.mjs') (Join-Path $site 'rentz-engine.mjs')
+if ($LASTEXITCODE -ne 0) { throw 'Generated Rentz engine component checks failed.' }
+& node (Join-Path $pages 'verify-rentz-ui.mjs')
+if ($LASTEXITCODE -ne 0) { throw 'Rentz sequence renderer component verification failed.' }
+$site

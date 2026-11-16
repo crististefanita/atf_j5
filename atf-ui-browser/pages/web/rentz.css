@@ -1,0 +1,59 @@
+.rentz-sequence {
+  width: min(100%, 430px);
+  margin-inline: auto;
+  display: grid;
+  gap: clamp(2px, .7vw, 5px);
+  align-content: center;
+  padding: 3px;
+}
+.rentz-sequence-row {
+  display: grid;
+  grid-template-columns: clamp(18px, 5vw, 24px) repeat(var(--rentz-ranks), minmax(0, 1fr));
+  gap: 2px;
+  min-height: clamp(24px, 6.1vw, 36px);
+}
+.rentz-suit-symbol {
+  display: grid;
+  place-items: center;
+  font: 700 clamp(11px, 2.7vw, 15px)/1 "Segoe UI Symbol", "Segoe UI", sans-serif;
+}
+.rentz-suit-symbol.red { color: #f39a94; }
+.rentz-suit-symbol.black { color: #d7e4da; }
+.rentz-sequence-row > * {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  overflow: hidden;
+  padding: 1px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #d3efe2;
+  font: 700 clamp(9px, 2.4vw, 14px)/1 "Segoe UI", sans-serif;
+  white-space: nowrap;
+  text-overflow: clip;
+}
+.rentz-sequence-cell.played {
+  border-color: #b7c0b9;
+  background: #fffef8;
+}
+.rentz-sequence-cell.red { color: #ad393a; }
+.rentz-sequence-cell.black { color: #26332c; }
+.rentz-sequence-cell.opening:not(.played) {
+  border-color: #dcb569;
+  background: #f1e6c8;
+  color: #29362e;
+}
+.rentz-sequence-cell.legal:not(.played) {
+  border: 2px solid #dcb569;
+  background: #f5eccf;
+  color: #26332c;
+  cursor: pointer;
+}
+.rentz-sequence-cell.legal:not(.played):hover,
+.rentz-sequence-cell.legal:not(.played):focus-visible {
+  outline: 2px solid #fff4ca;
+  outline-offset: 1px;
+  background: #fff7de;
+}
+.rentz-sequence-cell.legal:not(.played):active { transform: translateY(1px); }

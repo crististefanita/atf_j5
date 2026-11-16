@@ -1,0 +1,104 @@
+name: Rentz browser Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/rentz-pages.yml
+      - atf-ui-browser/**
+      - rentz-lab-app/game-core/**
+      - rentz-lab-app/app/achievement-catalog.gradle
+      - rentz-lab-app/app/src/main/achievement-rules/**
+      - rentz-lab-app/app/src/main/java/ro/rentzlab/app/GameSession.java
+      - rentz-lab-app/app/src/main/java/ro/rentzlab/app/achievements/**
+      - rentz-lab-app/app/src/main/java/ro/rentzlab/app/profile/**
+      - rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/profile/DisplayName.java
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rentz-pages
+  cancel-in-progress: false
+
+jobs:
+  qualify-and-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platforms;android-36'
+
+      - name: Qualify native JVM and browser components
+        id: qualify-and-build
+        shell: pwsh
+        run: |
+          $work = Join-Path $env:RUNNER_TEMP 'rentz-pages-qualification'
+          $gradleOutput = Join-Path $work 'gradle-output'
+          $gradleHome = Join-Path $env:RUNNER_TEMP 'rentz-gradle-home'
+          $projectCache = Join-Path $work 'gradle-project-cache'
+          $javaTemp = Join-Path $work 'java-temp'
+          New-Item -ItemType Directory -Force -Path $work, $gradleOutput, $gradleHome, $projectCache, $javaTemp | Out-Null
+
+          $env:GRADLE_USER_HOME = $gradleHome
+          $env:RENTZ_BROWSER_BUILD_ROOT = $gradleOutput
+          $env:JAVA_TOOL_OPTIONS = "-Djava.io.tmpdir=$javaTemp"
+          $init = Join-Path $work 'rentz-gradle-init.gradle'
+          @'
+          allprojects { project ->
+              def base = new File(System.getenv('RENTZ_BROWSER_BUILD_ROOT'))
+              def child = project.path == ':' ? '_root' : project.path.substring(1).replace(':', File.separator)
+              project.buildDir = new File(base, child)
+          }
+          '@ | Set-Content -LiteralPath $init -Encoding utf8
+
+          & .\rentz-lab-app\gradlew.bat -p .\rentz-lab-app --no-daemon `
+            --project-cache-dir $projectCache -I $init :game-core:test :app:testDebugUnitTest
+          if ($LASTEXITCODE -ne 0) { throw 'Native JVM component qualification failed.' }
+
+          & pwsh -NoLogo -NoProfile -File .\atf-ui-browser\Test-RentzBrowserComponents.ps1 -WorkRoot $work
+          if ($LASTEXITCODE -ne 0) { throw 'Browser adapter component qualification failed.' }
+
+          $log = Join-Path $work 'pages-build.log'
+          & pwsh -NoLogo -NoProfile -File .\atf-ui-browser\Build-RentzPages.ps1 -WorkRoot $work *> $log
+          if ($LASTEXITCODE -ne 0) {
+            Get-Content -LiteralPath $log
+            throw 'Rentz Pages compilation or compiled-engine checks failed.'
+          }
+          Get-Content -LiteralPath $log
+          $site = Get-ChildItem -LiteralPath $work -Recurse -Directory -Filter 'rentz-pages-site' |
+            Select-Object -Last 1
+          if (!$site) { throw 'Rentz Pages output was not found.' }
+          "site=$($site.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ steps.qualify-and-build.outputs.site }}
+
+  deploy:
+    needs: qualify-and-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/deploy-pages@v5
+        id: deployment

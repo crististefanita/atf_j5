@@ -1,23 +1,64 @@
-# Adaptor browser Rentz
+# Adaptorul WEB Rentz
 
-## Pe scurt
+## Rolul adaptorului
 
-Adaptorul folosește contractul Card Table Browser și proiectează starea publică din `GameSession`. Jucătorul poate dezvălui cărțile, alege sub-jocul, folosi un contract la orb când este permis și juca până la decontare. Sesiunea definește acțiunile legale, trecerile forțate și totalurile.
+Adaptorul livrează aceeași partidă Rentz în browser, folosind motorul J5 și shell-ul comun Card Table Browser. `GameSession` rămâne sursa regulilor, a comenzilor legale, a AI-ului și a scorului. Adaptorul transformă comenzile locale ale paginii în comenzi pentru sesiunea comună și proiectează numai informația publică; mâinile adversarilor nu sunt trimise către interfață.
 
-## Pornire
-
-Pregătiți PowerShell 7 și JDK 21. Lansatorul verifică SHA-256 și folosește Card Table Browser 0.2.1 din `lib/`. `$WorkRoot` indică un director extern pentru clase. Deschideți adresa completă afișată de lansator.
-
-```powershell
-.\atf-ui-browser\Start-RentzBrowser.ps1 -WorkRoot $WorkRoot
+```mermaid
+flowchart LR
+    U[Interfața WEB] -->|acțiune + revizie| P[Adaptor RentzPage]
+    P --> S[BrowserSession comun]
+    S --> G[GameSession J5]
+    G --> C[game-core Rentz]
+    G -->|observație publică| P
+    P -->|JSON local| U
+    U --> L[(localStorage: profil, progres, reluare)]
 ```
 
-## Verificare
+Shell-ul comun gestionează masa, dialogurile, comenzile cu revizie, animațiile și aspectul adaptiv. J5 păstrează conținutul specific Rentz: cele opt sub-jocuri, succesiunea cărților, punctajul, profilul, realizările și istoria.
 
-Arhiva `lib/atf-ui-browser-0.2.1-tests.jar` furnizează aceleași probe reutilizabile pentru contractul HTTP, reviziile comenzilor, ridicarea cărții, colectare și afișajul mobil. Extrageți arhiva cu `jar xf` într-un director extern, apoi rulați următoarea comandă cu Node.js 24. `$Classes` este classpath-ul returnat de lansator cu `-BuildOnly`, iar `$Chrome` poate indica executabilul Chrome sau Edge.
+## Contractul de compatibilitate cu APK-ul
+
+Adaptorul WEB nu implementează o a doua versiune a jocului. Testele compilează aceleași surse `game-core` și `GameSession` pe care le folosește APK-ul, apoi verifică stratul de browser la granița publică. Sursa WEB proprie `PlayerNames` există numai în compilarea TeaVM: înlocuiește apelurile Unicode indisponibile în acel runtime, iar testul ei compară rezultatele direct cu biblioteca de nume folosită de APK. Codul nativ și APK-ul nu sunt schimbate de această adaptare.
+
+| Strat | Verifică fără emulator | Ce protejează |
+|---|---|---|
+| Componente JVM | Validarea configurării comune; 3–6 jucători și Normal/Greu; reguli, acțiuni legale, treceri automate, rezultate și istoric; profil, realizări și checkpoint; contractele de nume și punctaj | Motorul și regulile rămân cele ale APK-ului, iar proiecția WEB nu schimbă rezultatul sesiunii |
+| Paritate cu biblioteca APK | NFC, limita de zece puncte Unicode, intrări valide/invalide și lista deterministă de adversari, comparate cu JAR-ul `card-table-names`; normalizarea profilului se compară și cu sursa Android `DisplayName` | Shim-urile necesare TeaVM nu schimbă contractul de profil Android |
+| Componente pentru API-ul TeaVM | Pornire pentru 3–6 locuri și Normal/Greu; cărți ascunse până la dezvăluire; alegerea Rentz; ancora de deschidere pentru fiecare dimensiune de masă; mutări legale; o mână Rentz completă; punctaj, progres, reluare și următoarea mână | Codul compilat efectiv pentru browser se comportă ca implementarea JVM, fără DOM sau emulator |
+| Componente DOM | Proiecția mesei, marcarea cărților legale, textul, acțiunile, rezoluția compactă și stările de randare | Shell-ul și pagina păstrează contractul vizual și de interacțiune pe care îl poate verifica un test automat |
+| Verificare în browser MCP | Încărcarea pachetului static, creare profil, pornirea unei mese, Rentz și o mutare legală | Integrarea dintre browser, worker și artefactele publicate local |
+
+Aceste verificări înlocuiesc verificările de logică, stare, alegeri AI, scor, istoric, profil și realizări care altfel ar fi repetate prin emulator. Se folosesc aceleași surse de motor, aceleași comenzi `GameSession` și același JAR nativ de nume ca bază de comparație; testele nu simulează sau injectează rezultatele partidei.
+
+Rămân dependente de un dispozitiv Android numai proprietățile platformei native: instalarea APK-ului, lifecycle-ul și restaurarea prin sistemul Android, inset-urile și fonturile furnizorului, gesturile tactile reale și performanța pe hardware. Ele nu sunt criterii pentru validarea logicii jocului în browser. Pagina WEB se califică separat prin testele de browser și prin publicarea reală.
+
+## Compilare și verificări locale
+
+Necesită PowerShell 7, JDK 21, Maven și Node.js 24. Toate clasele generate, cache-urile și paginile construite se scriu într-un director extern checkout-ului.
 
 ```powershell
-node .\packaged-sanity.mjs $EvidenceRoot $Classes "ro.rentzlab.browser.RentzBrowser" "Rentz Lab" $Chrome
+.\atf-ui-browser\Test-RentzBrowserComponents.ps1 -WorkRoot C:\work\rentz_back\web-01\components
+.\atf-ui-browser\Build-RentzPages.ps1 -WorkRoot C:\work\rentz_back\web-01\pages
 ```
 
-`-BuildOnly` întoarce directorul de clase pentru verificarea de componentă comună. Parcursul verifică dezvăluirea, alegerea contractului, acțiunea manuală și înregistrarea totalurilor. Comparația vizuală pe telefon și ecranele de profil și realizări rămân criterii de calificare. [Contractul jocului](../rentz-lab-app/game-core/README.md)
+`Test-RentzBrowserComponents.ps1` rulează testele JVM ale adaptorului și ale sesiunii comune. Build-ul WEB rulează, în ordine, testele JVM ale endpoint-ului, comparația cu biblioteca APK, compilarea TeaVM, verificările Node asupra motorului generat și verificările DOM. O eroare la oricare strat oprește build-ul.
+
+## Pornire locală
+
+Folosiți lansatorul și un build extern:
+
+```powershell
+.\atf-ui-browser\Start-RentzBrowser.ps1 -WorkRoot C:\work\rentz_back\web-01\local
+```
+
+## Publicare
+
+Workflow-ul `.github/workflows/rentz-pages.yml` publică pachetul static din `main` numai după ce trec testele JVM native și verificările adaptorului și ale motorului compilat. Profilul și reluarea rămân în `localStorage`, pe dispozitivul browserului; pagina nu trimite datele într-un serviciu extern.
+
+README-ul principal va lega jocul online după ce workflow-ul publică pagina și URL-ul trece verificarea anonimă. Un build local sau un URL de preview nu este adresă publică de joc.
+
+## Surse
+
+- [Regulile și arhitectura motorului Rentz](../rentz-lab-app/game-core/README.md)
+- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.1.jar) · [checksum](lib/atf-ui-browser-0.2.1.jar.sha256)
