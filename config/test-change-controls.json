@@ -803,10 +803,10 @@
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The legacy launcher refuses the current UI contract before reading a binary or sending device operations. The selector receipt has 42 distinct passing checks including the table-size matrix.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The legacy launcher refuses the current UI contract before reading a binary or sending device operations. The selector receipt has 42 distinct passing checks including the table-size matrix. The updated selector receipt must contain 72 distinct passing checks.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-15",
-      "sha256": "3e167387d3d25d065bc44c6d205fe5412137f91f2345e409a1692106771a4118",
+      "sha256": "053285c20704a441ed2f9b25197fa53ea926f59f39bf7019cfdb85a134401a35",
       "allowDelete": false
     },
     {
@@ -1273,10 +1273,10 @@
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The focused Android route compares chooser and first play at 3, 5 and 6 places, with the same compact viewport and exact seat positions.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The focused Android route compares chooser and first play at 3, 5 and 6 places, with the same compact viewport and exact seat positions. The focused Rentz ending keeps action pacing, score and terminal table evidence distinct from the release route.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-14",
-      "sha256": "231bfcc566ca68b64b3069d3c5420d911e404bfe7843c6db85579ea10c67d700",
+      "sha256": "93d259177d705eeec734972d34a83e1ca53648303102f080e3e06dcda36293f7",
       "allowDelete": false
     },
     {
@@ -1591,20 +1591,20 @@
       "path": "rentz-reference/tools/RentzUiOracle.psm1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. Validate measurable non-intersecting frames, actor badge placement and the full Rentz finish permutation.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. Validate measurable non-intersecting frames, actor badge placement and the full Rentz finish permutation. Require a current frame, the measured delay and a single accepted revision. Reconcile the score route and clip a visible index at the next played face.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-14",
-      "sha256": "4a914e94a3128060e77e96149f590e6ac572af75cbba2de0d2937598a519dac2",
+      "sha256": "e5d34267385ebdd81956f06d4f97bdda7043a49bb2749a0c9e901dcb5c144943",
       "allowDelete": false
     },
     {
       "path": "atf-tests/tools/test-ui-selectors.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. At 3, 5 and 6 places, refuse duplicated or foreign finishers, overlapping frames and an action badge over the wrong seat.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. At 3, 5 and 6 places, refuse duplicated or foreign finishers, overlapping frames and an action badge over the wrong seat. Negative neighbors cover early and duplicate actions, batched revisions and premature scores at 3, 5 and 6 seats.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-14",
-      "sha256": "6c1ddd955aeee7bf476242fec6ccbd1e70a2f01ce353065254c960017d313cfb",
+      "sha256": "49f685e09c68178c4a448adaa2a569bed5c257d2137e4825bbd493c26b2c4713",
       "allowDelete": false
     },
     {

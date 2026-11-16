@@ -20,7 +20,7 @@ Scorul este prioritatea de remediere, nu nota calității sau procentul de acope
 
 | Ordine | Prioritate și criteriu | Prioritate /100 | Restanță concretă |
 |---:|---|---:|---|
-| 1 | **P1 · Acceptanță nativă a mesei, turei și scorului** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 84 (39+23+14+8) | Rămân cadrele până la decontare, ritmul actorului, lizibilitatea la suprapunere și la finalul mâinii, contoarele accesibile și egalitățile. |
+| 1 | **P1 · Acceptanță nativă a mesei, turei și scorului** · [backlog UI](ATF_Rentz_UI_ToDo.md) | 84 (39+23+14+8) | Rămân cadrul sosirii înainte de scor, profilurile mai scunde, colectarea levatei, contoarele accesibile și egalitățile. |
 | 2 | **P1 · Regulile și valorile versiunii originale** · [registrul regulilor](ATF_Rentz.md) | 84 (36+26+14+8) | Confirmați independent preset-ul, valorile neetichetate și frontierele execuției originale; declarațiile din instrucțiuni nu țin loc de rulare verificată. |
 | 3 | **P1 · Bifa Automat și ritmul delegării** · [criteriile turei](ATF_Rentz_UI_ToDo.md#p1--bifa-automat-și-ritmul-turei) | 81 (33+25+15+8) | Adoptați contractul comun al antetului, confirmați reluarea după anulare și o singură mutare per cadru, apoi calificați cadrul nativ al actorului și anularea la navigare. |
 | 4 | **P1 · Pornirea aplicației de referință** · [registrul regulilor](ATF_Rentz.md) | 74 (31+28+9+6) | Investigația ecranului WebView negru încă cere cauză și probă reproductibilă de pornire funcțională. |

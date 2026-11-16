@@ -2,16 +2,16 @@
 
 ## Pe scurt
 
-Probele focalizate pentru 3, 5 și 6 locuri urmăresc selectorul, prima atingere și poziția actorului. Agenda nativă rămasă urmărește cazurile din continuarea mâinii, decontarea și lizibilitatea la suprapunere. [Contractul de integrare](../rentz/ATF_UiIntegration.md) · [Poarta Android](../rentz/ATF_Release.md#ordinea-calificării-android-curente)
+Probele focalizate pentru 3, 5 și 6 locuri urmăresc selectorul, prima atingere și finalul unei mâini Rentz. Pentru fiecare gol rămas, precizați cadrul sau interacțiunea care trebuie observată pe dispozitiv. [Probe Android](../rentz/ATF_Android.md#livrabile-și-limite)
 
 ## P1 · Geometrie, secvențe și scor
 
 | ID | Criteriu rămas |
 |---|---|
-| U01, U04, U05, R02 | În continuarea probei focalizate, verificați nativ pe profil scund și font mărit rangul și simbolul culorii la suprapunere, o carte rămasă, mâna goală, pasul și accesul la continuare. Componentele verifică geometria și legalitatea pentru aceste stări. |
+| U01, U04, U05, R02 | Extindeți proba peste profilul compact curent la ferestre mai scunde. Verificați o carte rămasă, mâna goală, pasul și accesul la continuare în timpul mâinii. |
 | R03 | Marcați ultima mutare și explicați extensiile legale sau pasul fără a divulga cărți adverse. Testați explicația pentru ambele capete ale secvenței. |
-| R04, R05 | Verificați nativ sosirea înainte de decontare și contorul accesibil al cărților neplasate. Comparați tabla terminală și spațiile rămase înainte și după deschiderea scorului. |
-| U07, S01, S04 | Jocul offline verifică premiile, ordinea locurilor și egalitățile. Pe dispozitiv verificați cum se afișează egalitățile și valorile semnate, plus sosirea Rentz înainte de primul cadru cu punctajul confirmat. |
+| R04, R05 | Proba surprinde scorul confirmat și tabla terminală redeschisă. Pentru sosirea anterioară scorului, cereți un cadru distinct în fluxul automat și verificați contorul accesibil al cărților neplasate. |
+| U07, S01, S04 | Jocul offline verifică premiile, ordinea locurilor și egalitățile. Pe dispozitiv rămân de calificat randarea egalităților și a valorilor semnate la decontare. |
 
 Folosiți comparații pe aceeași configurație efectivă și captați doar tranziția relevantă. [Matricea de afișaj](../rentz/ATF_UiIntegration.md#matricea-de-afișaj) · [Istoricul adaptiv](../rentz/ATF_UiIntegration.md#istoricul-adaptiv-rentz)
 
@@ -19,7 +19,7 @@ Folosiți comparații pe aceeași configurație efectivă și captați doar tran
 
 **Responsabil:** adaptorul Rentz. Antetul construiește bifa în activitate. Adoptați controlul comun după admiterea AAR-ului compatibil și verificați dispunerea la font mărit, o singură intenție per atingere și revenirea la debifat la mâna nouă. [Antetul curent](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/MainActivity.java) · [Biblioteca UI](../../rentz-lab-app/ui-library/README.md)
 
-Măsurați pe dispozitiv marcajul actorului, pauza și câte o depunere în trei mutări adverse urmate de o levată nouă. Verificați anularea la pauză sau navigare și reluarea între două mutări. Testele lifecycle fixează ordinea și invalidarea. [Contractul lifecycle](../rentz/ATF_Lifecycle.md) · [Componente](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java)
+Proba Rentz corelează cadrul actorului, pauza și o comandă pentru fiecare tură adversă. Rămân de verificat tranziția prin colectarea levatei, anularea la pauză sau navigare și reluarea între două mutări. [Contractul lifecycle](../rentz/ATF_Lifecycle.md) · [Componente](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java)
 
 ## P2 · Meniu și istoric
 

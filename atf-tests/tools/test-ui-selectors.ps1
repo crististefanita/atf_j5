@@ -116,6 +116,40 @@ try{
     $refusal=''
     try{$null=Get-RentzHistoryPageChecks -Labels @('4 · Whist') -Contracts $contracts -Seen $history}catch{$refusal=$_.Exception.Message}
     Check 'A row outside the completed history is refused' 'Unexpected confirmed hand 4' $refusal
+    foreach($count in @(3,5,6)){
+        $trace=@(
+            '10.000 first-frame frame=21 current=true controllerBusy=false phase=PLAY turn=1',
+            '10.001 delay-scheduled-550 frame=21 current=true controllerBusy=false phase=PLAY turn=1',
+            '10.551 delay-fired frame=21 current=true controllerBusy=false phase=PLAY turn=1',
+            '10.552 automatic-action-start frame=21 current=true controllerBusy=false phase=PLAY turn=1',
+            '10.552 controller-submit ticket=8 revision=4',
+            '10.650 controller-accept ticket=8 revision=5'
+        )
+        Check "A paced bot commits one action at $count places" 0 @(Get-RentzBotPacingChecks -Lines $trace -Players $count | Where-Object {!$_.passed}).Count
+        $early=@($trace -replace '10\.551','10.101' -replace '10\.552','10.102')
+        Check "An early bot action fails at $count places" $true (@(Get-RentzBotPacingChecks -Lines $early -Players $count | Where-Object {!$_.passed}).Count-gt0)
+        $duplicated=@($trace[0..4])+@($trace[3])+@($trace[5])
+        Check "One frame cannot launch twice at $count places" $true (@(Get-RentzBotPacingChecks -Lines $duplicated -Players $count | Where-Object {!$_.passed}).Count-gt0)
+        $batched=@($trace -replace 'revision=5','revision=6')
+        Check "One worker cannot advance two commands at $count places" $true (@(Get-RentzBotPacingChecks -Lines $batched -Players $count | Where-Object {!$_.passed}).Count-gt0)
+        $sequence=@(
+            [pscustomobject]@{description='9♣';bounds='[10,20][50,80]'},
+            [pscustomobject]@{description='10♣';bounds='[35,20][75,80]'},
+            [pscustomobject]@{description='Empty slot J♣';bounds='[60,20][85,80]'}
+        )
+        $indices=@(Get-RentzVisibleSequenceIndices -Nodes $sequence)
+        Check "An overlapped index stops at the next played face at $count places" '9♣:35' "$($indices[0].card):$($indices[0].right)"
+        Check "An empty slot does not obscure a played index at $count places" '10♣:75' "$($indices[1].card):$($indices[1].right)"
+        $playing=Actor 20 1 'PLAY' 0
+        $settled=Actor 21 1 'DEAL_END' 0 'RENTZ' @(1..$count) @(($count-1)..0)
+        $playing.view.players=$count;$settled.view.players=$count
+        $board=@([pscustomobject]@{text='';description='Rentz table'},[pscustomobject]@{text='Next hand';description='Next hand';enabled='true'})
+        $scores=@([pscustomobject]@{text='Hand score';description=''},[pscustomobject]@{text='Next hand';description='Next hand';enabled='true'})
+        Check "The score waits for settlement at $count places" $true (@(Get-RentzScoreRouteChecks -Nodes $scores -Actor $playing -Route 'Score' | Where-Object {!$_.passed}).Count-gt0)
+        Check "The settled score exposes one continuation at $count places" 0 @(Get-RentzScoreRouteChecks -Nodes $scores -Actor $settled -Route 'Score' | Where-Object {!$_.passed}).Count
+        Check "The terminal board remains available at $count places" 0 @(Get-RentzScoreRouteChecks -Nodes $board -Actor $settled -Route 'Table' | Where-Object {!$_.passed}).Count
+        Check "A duplicate continuation fails at $count places" 1 @(Get-RentzScoreRouteChecks -Nodes ($scores+$scores[1]) -Actor $settled -Route 'Score' | Where-Object {!$_.passed}).Count
+    }
 }catch{$failure=$_.Exception.ToString()}
 [ordered]@{class='atf.rentz.android.NativeUiOracle';method='selectorsDealsAndHistory';status=$(if($failure){'FAIL'}else{'PASS'});failure=$failure;checks=$checks.ToArray()}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $RunRoot 'assertions.json') -Encoding utf8NoBOM
 if($failure){throw $failure}

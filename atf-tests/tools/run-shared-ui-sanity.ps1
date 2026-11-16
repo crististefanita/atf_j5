@@ -1,5 +1,5 @@
 param([Parameter(Mandatory)][string]$BuildQualification,[Parameter(Mandatory)][string]$RunRoot,
-    [switch]$SeatExtremes,[switch]$HistoryOnly,[switch]$HistoryMatrix,[switch]$HistoryDetails,[switch]$HelpAwardsOnly,[switch]$CompactScores,[switch]$ConsecutiveSubgames,[switch]$CompactConsecutive,[switch]$RentzCardMarksOnly,[string]$ComponentRun,[string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe')
+    [switch]$SeatExtremes,[switch]$TableEndings,[switch]$HistoryOnly,[switch]$HistoryMatrix,[switch]$HistoryDetails,[switch]$HelpAwardsOnly,[switch]$CompactScores,[switch]$ConsecutiveSubgames,[switch]$CompactConsecutive,[switch]$RentzCardMarksOnly,[string]$ComponentRun,[string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe')
 $ErrorActionPreference='Stop'
 $consecutiveGameCount=3
 $seatSizes=@(3,5,6)
@@ -29,13 +29,14 @@ Assert-AtfArtifactPath -Path $build.apk -ProjectRoot $project
 if((Get-FileHash -LiteralPath $build.apk -Algorithm SHA256).Hash-ne$build.apkSha256){throw 'APK changed after qualification.'}
 $fixture=$null
 $historyProfile=$null
+if($TableEndings-and($SeatExtremes-or$HistoryOnly-or$HelpAwardsOnly-or$CompactScores-or$ConsecutiveSubgames-or$RentzCardMarksOnly)){throw 'Choose a single native sanity scope.'}
 if(($HistoryMatrix-or$HistoryDetails)-and-not$HistoryOnly){throw 'History matrix and details require HistoryOnly.'}
 if($HelpAwardsOnly-and($HistoryOnly-or$SeatExtremes)){throw 'Choose a single native sanity scope.'}
 if($CompactScores-and($HelpAwardsOnly-or$HistoryOnly-or$SeatExtremes)){throw 'Compact scores continue the one-hand sanity.'}
 if($ConsecutiveSubgames-and($HelpAwardsOnly-or$HistoryOnly-or$SeatExtremes-or$CompactScores)){throw 'Consecutive subgames are a standalone native sanity scope.'}
 if($CompactConsecutive-and-not$ConsecutiveSubgames){throw 'Compact consecutive testing requires ConsecutiveSubgames.'}
 if($RentzCardMarksOnly-and($ConsecutiveSubgames-or$HelpAwardsOnly-or$HistoryOnly-or$SeatExtremes-or$CompactScores)){throw 'Rentz card marks are a standalone compact scope.'}
-if($RentzCardMarksOnly){Add-Type -AssemblyName System.Drawing.Common}
+if($RentzCardMarksOnly-or$TableEndings){Add-Type -AssemblyName System.Drawing.Common}
 if($HistoryOnly){
     if($SeatExtremes){throw 'Choose a single native sanity scope.'}
     if(!$build.historyFixture -or $build.historyFixtureSha256 -notmatch '^[a-f0-9]{64}$'){
@@ -697,11 +698,75 @@ function RunRentzCardMarks($state){
 function HumanContractLabel([string]$contract){
     return @{TRICKS='Tricks';QUEENS='Queens';DIAMONDS='Diamonds';KING_HEARTS='King of Hearts';TOTALS='Totals';WHIST='Whist';TEN_CLUBS='Ten of Clubs';RENTZ='Rentz'}[$contract]
 }
+function ReadTurnTimeline {
+    $processId=(Adb @('shell','pidof','ro.rentzlab.app.uisanity') 'pacing-process').Output.Trim()
+    if($processId-notmatch'^\d+$'){throw 'Expected one running isolated APK process'}
+    return (Adb @('shell','logcat','-d','-v','monotonic',("--pid="+$processId),'-s','RentzTurn:D','*:S') 'pacing-trace').Output
+}
+function RentzIndexPixelChecks($nodes,$state,[string]$Png){
+    $indices=@(Get-RentzVisibleSequenceIndices -Nodes $nodes)
+    Check 'Terminal board contains exactly the public cards' (($state.view.board|ForEach-Object{CardLabel $_}|Sort-Object)-join' ') (($indices.card|Sort-Object)-join' ')
+    $image=[Drawing.Bitmap]::new($Png)
+    try{
+        $dimensions=$logicalProfile.Split('x')
+        $sx=$image.Width/[int]$dimensions[0];$sy=$image.Height/[int]$dimensions[1]
+        foreach($index in $indices){
+            $red=$index.card-match'[♦♥]$'
+            $ink=if($red){@(173,57,58)}else{@(42,53,47)}
+            $columns=[Collections.Generic.HashSet[int]]::new()
+            $rows=[Collections.Generic.HashSet[int]]::new()
+            for($y=[int][Math]::Ceiling(($index.top+3)*$sy);$y-lt($index.bottom-3)*$sy;$y++){
+                for($x=[int][Math]::Ceiling(($index.left+3)*$sx);$x-lt($index.right-2)*$sx;$x++){
+                    $pixel=$image.GetPixel($x,$y)
+                    if([Math]::Abs($pixel.R-$ink[0])-le12-and[Math]::Abs($pixel.G-$ink[1])-le12-and[Math]::Abs($pixel.B-$ink[2])-le12){
+                        [void]$rows.Add($y);[void]$columns.Add($x)
+                    }
+                }
+            }
+            $stacked=$index.bottom-$index.top-ge[math]::Round(24*[double]$effectiveDisplay.density/160)
+            $axis=if($stacked){@($rows|Sort-Object)}else{@($columns|Sort-Object)}
+            $bands=0;$previous=-2
+            foreach($sample in $axis){if($sample-gt$previous+1){$bands++};$previous=$sample}
+            $required=if(!$stacked-and$index.card.StartsWith('10')){3}else{2}
+            $passed=$bands-ge$required-and$axis.Count-ge8
+            [pscustomobject]@{name="Visible native index $($index.card)";expected="At least $required ink bands in the exposed rank/suit strip";
+                actual="$bands bands, $($axis.Count) occupied lines, overlap=$($index.overlapped)";passed=$passed}
+        }
+    }finally{$image.Dispose()}
+}
+function CompleteTableEnding($state,[int]$Count){
+    $game=ChooseHumanSubgame $state -ForceRentz
+    Observe "$Count seats · Rentz in play" {param($nodes)
+        Check 'Rentz hand starts before settlement' 'RENTZ/PLAY' "$($game.view.contract)/$($game.view.phase)"
+        Check 'Score absent during play' 0 @($nodes|Where-Object text -CEQ 'Hand score').Count
+    }
+    $preTrace=ReadTurnTimeline
+    $frames=@([regex]::Matches($preTrace,'frame=(\d+)')|ForEach-Object {[long]$_.Groups[1].Value})
+    $afterFrame=if($frames.Count){($frames|Measure-Object -Maximum).Maximum}else{-1}
+    Tap 'Auto play' 'android.widget.CheckBox'
+    $settled=State -After $game.revision -TimeoutSeconds 145
+    $trace=ReadTurnTimeline
+    [IO.File]::WriteAllText((Join-Path $raw "pacing-$Count.log"),$trace,[Text.UTF8Encoding]::new($false))
+    $pacing=@(Get-RentzBotPacingChecks -Lines ($trace -split '\r?\n') -Players $Count -AfterFrame $afterFrame)
+    Observe "$Count seats · confirmed Rentz score" {param($nodes)
+        Get-RentzScoreRouteChecks -Nodes $nodes -Actor $settled -Route Score
+        $pacing
+    } -UntilText 'Hand score'
+    Tap 'View table'
+    $table=State
+    Observe "$Count seats · terminal Rentz table" {param($nodes)
+        Get-RentzScoreRouteChecks -Nodes $nodes -Actor $table -Route Table
+        Check 'Opening the confirmed board preserves the command revision' $settled.revision $table.revision
+        RentzSequenceChecks $nodes $table
+        RentzIndexPixelChecks $nodes $table (Join-Path $raw "$name.png")
+    }
+}
 function RunSeatExtremesSanity {
     $started=$false
     foreach($count in $seatSizes){
         $reference=''
-        foreach($contract in @('RENTZ','TRICKS')){
+        $contracts=if($TableEndings){@('RENTZ')}else{@('RENTZ','TRICKS')}
+        foreach($contract in $contracts){
             if($started){Tap 'Options';Tap 'Main menu'}
             Tap 'New game';Tap 'Players';Tap ([string]$count)
             $token=Start-DevelopmentExposure
@@ -713,6 +778,7 @@ function RunSeatExtremesSanity {
             $journalFile=Join-Path $raw "development-$count-$contract.json"
             [IO.File]::WriteAllText($journalFile,$journal.Output,[Text.UTF8Encoding]::new($false))
             Complete-DevelopmentExposure $journalFile $token
+            if($TableEndings){CompleteTableEnding $state $count;continue}
             Tap 'Show cards';$state=State -After $state.revision
             $names=@('You')+@($state.opponents)
             Observe "$count seats · choosing $(HumanContractLabel $contract)" {param($nodes)
@@ -1075,7 +1141,7 @@ try{
     Adb @('shell','input','keyevent','KEYCODE_WAKEUP') 'wake-device'|Out-Null
     Adb @('shell','wm','dismiss-keyguard') 'dismiss-emulator-keyguard'|Out-Null
     $initialSize=(Adb @('shell','wm','size') 'size').Output;$initialDensity=(Adb @('shell','wm','density') 'density').Output;$initialFont=(Adb @('shell','settings','get','system','font_scale') 'font').Output
-    if($CompactConsecutive-or$RentzCardMarksOnly-or$SeatExtremes){
+    if($CompactConsecutive-or$RentzCardMarksOnly-or$SeatExtremes-or$TableEndings){
         $restoreSize=DisplayOverride $initialSize 'size' '\d+x\d+'
         $restoreDensity=DisplayOverride $initialDensity 'density' '\d+'
         $restoreFont=$initialFont.Trim()
@@ -1097,7 +1163,7 @@ try{
     if($existing.Output-match'package:'){throw 'The isolated test package already exists; identity and data need reconciliation before reuse.'}
     Adb @('install',$build.apk) 'install'|Out-Null;$installed=$true
     $launch=@('shell','am','start','-W','-n','ro.rentzlab.app.uisanity/ro.rentzlab.app.MainActivity')
-    if($ConsecutiveSubgames){
+    if($ConsecutiveSubgames-or$TableEndings){
         $gradle=Get-Content -LiteralPath (Join-Path $project 'rentz-lab-app/app/build.gradle') -Raw
         $seedDeclaration=[regex]::Match($gradle,"(?m)^def nativeAcceptanceSeed = '([1-9][0-9]*)L'\r?$")
         if(!$seedDeclaration.Success){throw 'The native acceptance seed is missing from the qualified Android build configuration.'}
@@ -1105,7 +1171,7 @@ try{
         $launch+=@('--ez','rentz.nativeAcceptance','true')
     }
     Adb $launch 'launch'|Out-Null
-    if($HelpAwardsOnly){RunHelpAwardsSanity}elseif($HistoryOnly){RunHistorySanity}elseif($SeatExtremes){RunSeatExtremesSanity}else{
+    if($HelpAwardsOnly){RunHelpAwardsSanity}elseif($HistoryOnly){RunHistorySanity}elseif($SeatExtremes-or$TableEndings){RunSeatExtremesSanity}else{
     Observe 'English shared home and disabled resume' {param($nodes) $t=Text $nodes;Check 'Rentz home' $true ($t.Contains('Rentz'));Check 'English first launch' $true ($t.Contains('New game'));Check 'Resume disabled' 1 @($nodes|Where-Object{$_.text-eq'Resume game'-and$_.enabled-eq'false'}).Count}
     if($ConsecutiveSubgames){
         Tap 'Achievements'
@@ -1240,11 +1306,12 @@ if(-not $HelpAwardsOnly){
     $sharedDevelopmentLedgerSha256After=(Get-FileHash -LiteralPath $sharedDevelopmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()
     $sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerSha256Before-eq$sharedDevelopmentLedgerSha256After
     if(Test-Path -LiteralPath $developmentLedger -PathType Leaf){$isolatedDevelopmentLedgerSha256After=(Get-FileHash -LiteralPath $developmentLedger -Algorithm SHA256).Hash.ToLowerInvariant()}
-    if(($ConsecutiveSubgames-or$SeatExtremes)-and-not$sharedDevelopmentLedgerUnchanged-and-not$failure){$failure='Shared training ledger changed during isolated native acceptance.'}
+    if(($ConsecutiveSubgames-or$SeatExtremes-or$TableEndings)-and-not$sharedDevelopmentLedgerUnchanged-and-not$failure){$failure='Shared training ledger changed during isolated native acceptance.'}
 }
 $minimum=if($HelpAwardsOnly){3}elseif($HistoryMatrix){10}elseif($HistoryOnly){5}elseif($ConsecutiveSubgames){3*$consecutiveGameCount+4}elseif($RentzCardMarksOnly){8}else{10}
 if($HistoryDetails){$minimum+=4}
 if($SeatExtremes){$minimum=4*$seatSizes.Count}
+if($TableEndings){$minimum=3*$seatSizes.Count}
 if($CompactScores){$minimum++}
 if(-not$failure-and($cleanup.Count-or-not$released-or-not$preserved-or$points.Count-lt$minimum)){$failure='Native closeout failed or the declared checkpoint population is incomplete.'}
 $scope=if($HelpAwardsOnly){'Rentz help navigation and representative finishing awards in English and Romanian, with no match started'}elseif($HistoryMatrix){'Adaptive Rentz history with 1.5 text at 720x1280 and 720x740, six players and 48 confirmed hands, including recovery after resize'}elseif($HistoryOnly){'Adaptive Rentz history on a replayed 48-hand journal: empty, first row, last player, final row, return to menu; one native display profile'}elseif($SeatExtremes){'Compact native choosing, actor placement and first card touch in Rentz and Tricks at 3, 5 and 6 seats; 720x1280, density 360, font scale 1.5'}elseif($ConsecutiveSubgames){'Three consecutive complete UI games in one match: Rentz first, then two distinct standard games, each to DEAL_END; four-seat geometry, score history, restart and independent journal replay'}else{'Shared UI integration: one trick hand, menu, profile, languages, history and restart; one native display profile'}
@@ -1252,6 +1319,7 @@ if($HistoryDetails){$scope+='; confirmed blind trick contributions and the actua
 if($ConsecutiveSubgames){$scope+='; learning order, search, filters, eligibility, local profile and durable achievement progress'}
 if($CompactConsecutive){$scope+='; compact 720x1280, density 360, font scale 1.5'}
 if($RentzCardMarksOnly){$scope='R06 native Rentz card marks: one or several legal cards, after manual move and automatic pass; 720x1280, density 360, font scale 1.5'}
+if($TableEndings){$scope='Native Rentz hand endings at 3, 5 and 6 seats: paced bot commits, confirmed score and visible overlapping rank/suit indices; 720x1280, density 360, font scale 1.5'}
 if($CompactScores){$scope+='; Romanian compact signed scores at font scale 1.5 and a 720x1280 logical viewport'}
 $display=[ordered]@{before=@{size=$initialSize.Trim();density=$initialDensity.Trim();font=$initialFont.Trim()};effective=$effectiveDisplay;after=@{size=$finalSize.Trim();density=$finalDensity.Trim();font=$finalFont.Trim()}}
 if($component){
@@ -1271,6 +1339,7 @@ if($component){
 $extentHash='';if($extentPath-and(Test-Path -LiteralPath $extentPath -PathType Leaf)){$extentHash=(Get-FileHash -LiteralPath $extentPath -Algorithm SHA256).Hash.ToLowerInvariant()}
 $result=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;helpAwardsOnly=[bool]$HelpAwardsOnly;historyOnly=[bool]$HistoryOnly;historyMatrix=[bool]$HistoryMatrix;historyDetails=[bool]$HistoryDetails;seatExtremes=[bool]$SeatExtremes;consecutiveSubgames=[bool]$ConsecutiveSubgames;compactConsecutive=[bool]$CompactConsecutive;subgames=$consecutiveContracts;completedGames=$completedGames.ToArray();gameAudit=$consecutiveOracle;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;build=$build;rawRoot=$raw;extentReport=$extentPath;extentReportSha256=$extentHash;reportingLibrary=$reportingLibrary.name;reportingLibrarySha256=$reportingLibrary.sha256;runnerSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant();developmentLedger=$developmentLedger;developmentLedgerScope=$(if($HelpAwardsOnly){'NOT_USED'}else{'RUN_ISOLATED_COPY'});isolatedDevelopmentLedgerSha256Before=$isolatedDevelopmentLedgerSha256Before;isolatedDevelopmentLedgerSha256After=$isolatedDevelopmentLedgerSha256After;sharedDevelopmentLedger=$sharedDevelopmentLedger;sharedDevelopmentLedgerSha256Before=$sharedDevelopmentLedgerSha256Before;sharedDevelopmentLedgerSha256After=$sharedDevelopmentLedgerSha256After;sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerUnchanged;developmentExposures=$developmentExposures.ToArray();failure=$failure;cleanupFailures=$cleanup.ToArray();display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;checkpoints=$points.ToArray()}
 $result.uiToolHashes=$uiToolHashes
+$result.tableEndings=[bool]$TableEndings
 $result|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $RunRoot 'result.json') -Encoding utf8NoBOM
 if($failure){throw "Shared UI sanity failed: $RunRoot"}
 Write-Output $RunRoot
