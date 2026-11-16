@@ -20,7 +20,7 @@ if ($BrowserRoot) {
         -JavaInputs $sources -MainClass $main -Port $Port -ListenAddress $ListenAddress -BuildOnly:$BuildOnly
     return
 }
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.1.0.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.0.jar'
 $expected = (Get-Content -LiteralPath "$library.sha256" -Raw).Trim()
 if ((Get-FileHash -Algorithm SHA256 -LiteralPath $library).Hash -ine $expected) {
     throw 'Browser library checksum mismatch.'
