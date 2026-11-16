@@ -16,7 +16,7 @@ $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -Jso
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.1.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.4.jar'
 $pages = Join-Path $PSScriptRoot 'pages'
 $dependencySpec = Join-Path $pages 'teavm-dependencies.xml'
 $toolClasspath = Join-Path $root 'teavm.classpath'
@@ -77,7 +77,7 @@ $importAnchor = 'import { historyGrid } from "./records.mjs";'
 $renderAnchor = '  const visible = element("div", "", "cards-on-table");' + "`n" + '  if (!match.header) for (const face of match.center) visible.append(card(face));'
 foreach ($anchor in @($importAnchor, $renderAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
-    if ($count -ne 1) { throw "Card Table Browser 0.2.1 adapter anchor changed; expected one match, found $count." }
+    if ($count -ne 1) { throw "Card Table Browser 0.2.4 adapter anchor changed; expected one match, found $count." }
 }
 $markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { rentzSequence } from "./rentz-ui.mjs";')
 $rentzRender = $renderAnchor + "`n" + '  if (match.rentzSequence?.length) visible.append(rentzSequence(match.rentzSequence, element, action, language));'
@@ -88,7 +88,7 @@ $index = Join-Path $site 'index.html'
 $html = [IO.File]::ReadAllText($index)
 $html = $html.Replace('<html lang="ro">', '<html lang="ro" data-engine="whist" data-game="rentz">')
 $html = $html.Replace('<title>Card Table</title>', '<title>Rentz Lab</title>')
-$html = $html.Replace('<link rel="stylesheet" href="./table.css">', '<link rel="stylesheet" href="./table.css">' + "`n" + '  <link rel="stylesheet" href="./rentz.css">')
+$html = $html.Replace('<link rel="stylesheet" href="./table.css?v=0.2.4">', '<link rel="stylesheet" href="./table.css?v=0.2.4">' + "`n" + '  <link rel="stylesheet" href="./rentz.css">')
 $policy = "default-src 'self'; connect-src 'none'; style-src 'self' 'unsafe-inline'; worker-src 'self'; base-uri 'none'"
 $html = $html.Replace('<meta charset="utf-8">', '<meta charset="utf-8">' + "`n" + "  <meta http-equiv=`"Content-Security-Policy`" content=`"$policy`">")
 [IO.File]::WriteAllText($index, $html, [Text.UTF8Encoding]::new($false))

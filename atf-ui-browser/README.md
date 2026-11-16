@@ -61,4 +61,4 @@ README-ul principal va lega jocul online după ce workflow-ul publică pagina ș
 ## Surse
 
 - [Regulile și arhitectura motorului Rentz](../rentz-lab-app/game-core/README.md)
-- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.1.jar) · [checksum](lib/atf-ui-browser-0.2.1.jar.sha256)
+- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.4.jar) · [checksum](lib/atf-ui-browser-0.2.4.jar.sha256)
