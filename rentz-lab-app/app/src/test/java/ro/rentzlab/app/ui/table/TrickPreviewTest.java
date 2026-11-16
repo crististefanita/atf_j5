@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import org.junit.*;
 import ro.rentzlab.app.testing.*;
 import ro.rentzlab.app.GameSession;
@@ -102,6 +103,93 @@ public final class TrickPreviewTest {
         audit.truth("Cold resume of a sequence has no collection", preview.collection(1100).isEmpty());
         preview.restoreLast(session.view());
         audit.truth("Cold resume preserves a partially played trick", preview.collection(1100).isEmpty());
+    }
+    @Test public void rentzArrivalWaitsForOneVisibleFrameBeforeTheScore() {
+        for (int players : new int[]{3, 5, 6}) {
+            var play = rentzBoundary(players, RentzMatch.Phase.PLAY);
+            var finish = rentzBoundary(players, RentzMatch.Phase.DEAL_END);
+            var preview = new TrickPreview();
+            preview.reset(play);
+            preview.display(play, 100);
+            audit.equal("No presentation pending during play at " + players, 0L, preview.remaining(100));
+            preview.display(finish, 200);
+            audit.truth("Rentz must present its arrival before the score at " + players, preview.awaitingFirstFrame());
+            audit.truth("The pending frame is a Rentz arrival at " + players, preview.arrival(200));
+            audit.equal("Queueing does not spend the arrival window at " + players, 1800L, preview.remaining(4000));
+            audit.truth("No collection motion is created for Rentz at " + players, preview.collection(4000).isEmpty());
+            preview.markVisible(4000);
+            preview.display(finish, 5000);
+            preview.markVisible(5000);
+            audit.equal("One clock controls the deadline at " + players, 1L, preview.remaining(5799));
+            audit.equal("Release the score at the deadline at " + players, 0L, preview.remaining(5800));
+            audit.truth("The arrival is no longer eligible at " + players, !preview.arrival(5800));
+            preview.display(finish, 6000);
+            audit.equal("Redrawing the settled board never starts it again at " + players, 0L, preview.remaining(6000));
+            preview.restoreLast(finish);
+            preview.display(finish, 6200);
+            audit.equal("Resuming the saved score does not replay Rentz arrival at " + players, 0L, preview.remaining(6200));
+        }
+    }
+
+    @Test public void arrivalExposesTheWinnerAndRemainingCardsWithoutPresentingPendingPoints() {
+        var english = new ro.rentzlab.app.ui.copy.RentzUiText(ro.rentzlab.app.ui.copy.RentzUiText.Language.EN);
+        for (int players : new int[]{3, 5, 6}) {
+            var match = new RentzMatch(players, 31, ScoreProfile.laboratory());
+            match.choose(0, Contract.RENTZ, false);
+            for (int action = 0; action < 128 && match.observe(0).phase() == RentzMatch.Phase.PLAY; action++) {
+                var actor = match.observe(match.observe(0).turn());
+                if (actor.legal().isEmpty()) match.pass(actor.seat());
+                else match.play(actor.seat(), actor.legal().get(0));
+            }
+            var finish = match.observe(0);
+            audit.equal("The public sequence settled at " + players, RentzMatch.Phase.DEAL_END, finish.phase());
+            var names = java.util.stream.IntStream.range(0, players).mapToObj(seat -> "Player " + seat).toList();
+            int winner = finish.finishOrder().get(0);
+            int left = players * 8 - finish.board().size();
+            audit.truth("The last player still holds cards at " + players, left > 0);
+            audit.equal("Arrival announces public facts at " + players,
+                    "Rentz finish · " + names.get(winner) + "\nUnplayed cards · " + left,
+                    RentzTableContent.arrival(finish, english, names));
+            var waiting = RentzTableContent.seats(finish, english, names, true, false, true);
+            audit.equal("Arrival withholds the winning award at " + players, "…", waiting.get(winner).facts().get(0).value());
+            audit.equal("Arrival shows only the previous total at " + players, "0", waiting.get(winner).facts().get(1).value());
+            var confirmed = RentzTableContent.seats(finish, english, names, false);
+            audit.equal("Confirmed board exposes the same winning seat at " + players, "300", confirmed.get(winner).facts().get(0).value());
+        }
+    }
+
+    @Test public void trickCollectionKeepsOneCardPerSeatAndItsDeadlineAtEveryTargetSize() {
+        for (int players : new int[]{3, 5, 6}) {
+            var match = new RentzMatch(players, 31, ScoreProfile.laboratory());
+            var preview = new TrickPreview();
+            match.choose(0, Contract.TRICKS, false);
+            preview.reset(match.observe(0));
+            var played = new java.util.ArrayList<TrickRules.Play>();
+            for (int index = 0; index < players; index++) {
+                var actor = match.observe(match.observe(0).turn());
+                var card = actor.legal().get(0);
+                played.add(new TrickRules.Play(actor.seat(), card));
+                match.play(actor.seat(), card);
+            }
+            var led = played.get(0).card().suit();
+            int expectedWinner = played.stream().filter(play -> play.card().suit() == led)
+                    .max(java.util.Comparator.comparingInt(play -> play.card().rank())).orElseThrow().seat();
+            var after = match.observe(0);
+            audit.equal("All played faces remain on the board at " + players, played, preview.display(after, 100));
+            audit.equal("The independent suit/rank winner gets the collection at " + players,
+                    expectedWinner, preview.collection(100).orElseThrow().winner());
+            preview.markVisible(200);
+            audit.equal("Faces hold until the last millisecond at " + players, played, preview.display(after, 1699));
+            audit.equal("The collection clears before the next trick appears at " + players, after.trick(), preview.display(after, 1700));
+            audit.truth("Collection does not replay on another redraw at " + players, preview.collection(1701).isEmpty());
+        }
+    }
+
+    private static RentzMatch.Observation rentzBoundary(int players, RentzMatch.Phase phase) {
+        var scores=java.util.Collections.nCopies(players, 0);
+        return new RentzMatch.Observation(0, players, 0, 0, 1, phase, Contract.RENTZ, false, true,
+                List.of(), List.of(), List.of(), scores, scores,
+                List.of(), List.of(), List.of(), List.of(), List.of(), Set.of());
     }
     private static void writeNativeFixture(GameSession.Saved before, String journal, TrickPreview preview, GameSession restored) throws Exception {
         String output = System.getProperty("rentz.uiEvidence");

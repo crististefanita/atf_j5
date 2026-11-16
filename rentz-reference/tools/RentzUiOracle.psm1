@@ -293,4 +293,29 @@ function Get-RentzScoreRouteChecks {
     New-RentzUiComparison 'Exactly one enabled continuation' 1 @($Nodes|Where-Object {($_.text-ceq'Next hand'-or$_.description-ceq'Next hand')-and$_.enabled-eq'true'}).Count
 }
 
-Export-ModuleMember -Function Wait-RentzUiHierarchy,Wait-RentzActorCheckpoint,Wait-RentzVisualCheckpoint,Get-RentzTapTarget,Get-RentzSystemUiWaitTarget,Start-RentzNextDeal,Get-RentzCompletedDealChecks,Get-RentzHistoryPageChecks,Get-RentzSeatFrames,Get-RentzTurnBadgeChecks,Get-RentzBotPacingChecks,Get-RentzVisibleSequenceIndices,Get-RentzScoreRouteChecks
+function Get-RentzPresentationChecks {
+    param([string[]]$Lines,[long]$AfterFrame=-1,[int]$CollectionWinner=-1)
+    $startLabel=if($CollectionWinner-lt0){'rentz-arrival-visible'}else{"collection-visible-seat-$CollectionWinner"}
+    $endLabel=if($CollectionWinner-lt0){'rentz-score-visible'}else{'collection-cleared'}
+    $minimum=if($CollectionWinner-lt0){1799}else{1499}
+    $events=@(foreach($line in $Lines){
+        $event=[regex]::Match($line,'^\s*\[?\s*(?<time>\d+\.\d+).*?(?<kind>rentz-arrival-visible|rentz-score-visible|collection-visible-seat-\d+|collection-cleared) frame=(?<frame>\d+) current=true')
+        if(!$event.Success-or[long]$event.Groups['frame'].Value-le$AfterFrame){continue}
+        [pscustomobject]@{kind=$event.Groups['kind'].Value;frame=[long]$event.Groups['frame'].Value;
+            time=1000*[double]::Parse($event.Groups['time'].Value,[Globalization.CultureInfo]::InvariantCulture)}
+    })
+    $starts=@($events|Where-Object kind -CEQ $startLabel)
+    $ends=@($events|Where-Object kind -CEQ $endLabel)
+    New-RentzUiComparison 'One native presentation starts on the expected route or winner' 1 $starts.Count
+    New-RentzUiComparison 'One native presentation ends' 1 $ends.Count
+    $measured=-1
+    $correctFrame=$false
+    if($starts.Count-eq1-and$ends.Count-eq1){
+        $measured=[Math]::Round($ends[0].time-$starts[0].time)
+        $correctFrame=if($CollectionWinner-lt0){$ends[0].frame-gt$starts[0].frame}else{$ends[0].frame-eq$starts[0].frame}
+    }
+    [pscustomobject]@{name='Native frame sequence respects the presentation window';expected="At least $minimum ms and matching frame order";
+        actual="$measured ms, frame order=$correctFrame";passed=$correctFrame-and$measured-ge$minimum}
+}
+
+Export-ModuleMember -Function Wait-RentzUiHierarchy,Wait-RentzActorCheckpoint,Wait-RentzVisualCheckpoint,Get-RentzTapTarget,Get-RentzSystemUiWaitTarget,Start-RentzNextDeal,Get-RentzCompletedDealChecks,Get-RentzHistoryPageChecks,Get-RentzSeatFrames,Get-RentzTurnBadgeChecks,Get-RentzBotPacingChecks,Get-RentzVisibleSequenceIndices,Get-RentzScoreRouteChecks,Get-RentzPresentationChecks

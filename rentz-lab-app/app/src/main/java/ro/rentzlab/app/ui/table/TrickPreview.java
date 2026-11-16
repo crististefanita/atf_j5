@@ -8,15 +8,18 @@ import ro.rentzlab.core.*;
 import java.util.List;
 import java.util.Optional;
 
-/** Observes new public completions and hands their winning seat to the shared animation. */
+/** Holds newly completed public tricks and a Rentz arrival until their presentation finishes. */
 public final class TrickPreview {
+    private static final long RENTZ_ARRIVAL_MILLIS = 1800;
     private int hand = -1, seenSequence;
     private long until;
     private boolean awaitingFirstFrame;
+    private boolean seenArrival;
     private List<TrickRules.Play> held = List.of();
     private CollectionTarget target;
     public void reset(RentzMatch.Observation view) {
         hand = view.handNumber(); seenSequence = latestCompleted(view); until = 0; awaitingFirstFrame = false;
+        seenArrival = rentzSettled(view);
         held = List.of(); target = null;
     }
     /** One cold presentation of the confirmed boundary, without applying a game command. */
@@ -27,8 +30,17 @@ public final class TrickPreview {
         hold(view, plays, plays.size());
     }
     public List<TrickRules.Play> display(RentzMatch.Observation view, long now) {
-        if (view.contract() == Contract.RENTZ || view.contract() == null) { reset(view); return view.trick(); }
+        if (view.contract() == null) { reset(view); return view.trick(); }
         if (hand != view.handNumber()) reset(view);
+        if (view.contract() == Contract.RENTZ) {
+            if (rentzSettled(view) && !seenArrival) {
+                seenArrival = true;
+                held = List.of();
+                target = null;
+                awaitingFirstFrame = true;
+            }
+            return view.trick();
+        }
         var plays = playedTrickCards(view);
         int complete = plays.size() / view.players() * view.players();
         int sequence = complete == 0 ? 0 : plays.get(complete - 1).sequence();
@@ -48,13 +60,23 @@ public final class TrickPreview {
     public void markVisible(long now) {
         if (!awaitingFirstFrame) return;
         awaitingFirstFrame = false;
-        until = now + TrickCollectionMotion.DISPLAY_MILLIS;
+        until = now + windowMillis();
     }
     public long remaining(long now) {
-        return awaitingFirstFrame ? TrickCollectionMotion.DISPLAY_MILLIS : Math.max(0, until - now);
+        return awaitingFirstFrame ? windowMillis() : Math.max(0, until - now);
     }
     public Optional<CollectionTarget> collection(long now) {
-        return remaining(now) > 0 ? Optional.of(target) : Optional.empty();
+        return remaining(now) > 0 ? Optional.ofNullable(target) : Optional.empty();
+    }
+    public boolean arrival(long now) {
+        return seenArrival && target == null && remaining(now) > 0;
+    }
+    private long windowMillis() {
+        return target == null ? RENTZ_ARRIVAL_MILLIS : TrickCollectionMotion.DISPLAY_MILLIS;
+    }
+    private static boolean rentzSettled(RentzMatch.Observation view) {
+        return view.contract() == Contract.RENTZ
+                && (view.phase() == RentzMatch.Phase.DEAL_END || view.phase() == RentzMatch.Phase.MATCH_END);
     }
     private static int latestCompleted(RentzMatch.Observation view) {
         var plays = playedTrickCards(view);

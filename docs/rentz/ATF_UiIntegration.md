@@ -112,6 +112,7 @@ Acceptanța de release compară dreptunghiurile mesei de patru locuri înainte �
 ### Decontarea unei secvențe Rentz
 
 - Actorul automat primește un cadru propriu înaintea întârzierii de 550 ms. Logul APK-ului izolat leagă cadrul, pornirea și revizia comenzii confirmate. [Ciclul de viață](ATF_Lifecycle.md)
+- La terminare, cadrul sosirii prezintă câștigătorul și totalul public al cărților neplasate. Fereastra de 1,8 secunde începe la prima randare. Chenarele păstrează totalurile anterioare până la scor.
 - Tabla terminală păstrează cărțile jucate și sloturile libere. În zona suprapusă, indicele lizibil se termină la marginea următoarei cărți jucate.
 - Ecranul de punctaj afișează mâna confirmată. Revenirea la tablă păstrează revizia și continuarea. [Proba Android](ATF_Android.md#livrabile-și-limite)
 

@@ -149,6 +149,13 @@ try{
         Check "The settled score exposes one continuation at $count places" 0 @(Get-RentzScoreRouteChecks -Nodes $scores -Actor $settled -Route 'Score' | Where-Object {!$_.passed}).Count
         Check "The terminal board remains available at $count places" 0 @(Get-RentzScoreRouteChecks -Nodes $board -Actor $settled -Route 'Table' | Where-Object {!$_.passed}).Count
         Check "A duplicate continuation fails at $count places" 1 @(Get-RentzScoreRouteChecks -Nodes ($scores+$scores[1]) -Actor $settled -Route 'Score' | Where-Object {!$_.passed}).Count
+        $arrival=@('10.000 rentz-arrival-visible frame=21 current=true','11.800 rentz-score-visible frame=22 current=true')
+        Check "Arrival and score occupy separate ordered frames at $count places" 3 @(Get-RentzPresentationChecks $arrival | Where-Object passed).Count
+        $earlyScore=@($arrival -replace '11.800','10.010')
+        Check "Rentz score cannot cut off the visible arrival at $count places" 1 @(Get-RentzPresentationChecks $earlyScore | Where-Object {!$_.passed}).Count
+        $collection=@("10.000 collection-visible-seat-$($count-1) frame=21 current=true",'11.500 collection-cleared frame=21 current=true')
+        Check "Collection goes to the winner and clears at $count places" 3 @(Get-RentzPresentationChecks $collection -CollectionWinner ($count-1) | Where-Object passed).Count
+        Check "Collection to the wrong seat is rejected at $count places" $true (@(Get-RentzPresentationChecks $collection -CollectionWinner 0|Where-Object {!$_.passed}).Count-gt0)
     }
 }catch{$failure=$_.Exception.ToString()}
 [ordered]@{class='atf.rentz.android.NativeUiOracle';method='selectorsDealsAndHistory';status=$(if($failure){'FAIL'}else{'PASS'});failure=$failure;checks=$checks.ToArray()}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $RunRoot 'assertions.json') -Encoding utf8NoBOM

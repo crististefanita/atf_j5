@@ -36,9 +36,9 @@ public final class RentzTablePanel extends LinearLayout {
     private ViewTreeObserver.OnPreDrawListener collectionExpiry;
     private RentzCollectionAnimation nativeCollection;
     public RentzTablePanel(Context context, RentzMatch.Observation view, RentzUiText copy, List<String> names,
-            boolean paused, boolean holding, boolean forcedPass, List<TrickRules.Play> visible, Actions actions) {
+            boolean paused, boolean holding, boolean arrival, boolean forcedPass, List<TrickRules.Play> visible, Actions actions) {
         super(context); this.context = context; this.copy = copy; this.paused = paused;
-        defaultCollectionScale = holding
+        defaultCollectionScale = holding && !arrival
                 && Settings.Global.getFloat(context.getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 1f;
         float fontScale = getResources().getConfiguration().fontScale;
         float density = getResources().getDisplayMetrics().density;
@@ -49,12 +49,12 @@ public final class RentzTablePanel extends LinearLayout {
         boolean sequence = view.contract() == Contract.RENTZ && view.phase() != RentzMatch.Phase.CHOOSE;
         var trick = PlayedCardMetrics.forTable(view.players(), width, fontScale, viewport);
         int choiceRowPx = dp(CHOICE_HEIGHT_DP) + dp(CHOICE_MARGIN_DP);
-        int footer = sequence && view.phase() == RentzMatch.Phase.DEAL_END ? choiceRowPx : 0;
+        int footer = sequence && (arrival || view.phase() == RentzMatch.Phase.DEAL_END) ? choiceRowPx : 0;
         // Keep the measured seat plan across contract selection, play and the turn indicators.
         var cardBoard = new RentzCardBoard(context, view.players(), footer, 2 * choiceRowPx, viewport, trick,
                 (widthPx, budgetPx) -> {
                     if (sequence) return sequence(view, actions, RentzCardSpace.sequence(view.players(), widthPx,
-                            budgetPx - footer, density, fontScale));
+                            budgetPx - footer, density, fontScale), arrival ? RentzTableContent.arrival(view, copy, names) : null);
                     if (cards) return playedCards(visible, names, holding, viewport,
                             RentzCardSpace.fitTrick(trick, budgetPx, density));
                     View controls = center(view, actions);
@@ -66,7 +66,7 @@ public final class RentzTablePanel extends LinearLayout {
         center = cardBoard.center();
         board.setTag("game-board"); board.setContentDescription(copy.text("Rentz table", "Masa Rentz"));
         String turnBadge = RentzTableContent.turnLabel(view, copy, forcedPass).toUpperCase(java.util.Locale.ROOT);
-        for (var seat : RentzTableContent.seats(view, copy, names, holding, forcedPass)) {
+        for (var seat : RentzTableContent.seats(view, copy, names, holding, forcedPass, arrival)) {
             var frame = new PlayerSeatFrame(context, viewport.isCompact()).buildInlineFacts(seat, viewport.seatVerticalPaddingDp());
             board.addView(new PlayerSeatView(context, frame, turnBadge, seat.active(), seat.seat(), viewport.isCompact()));
         }
@@ -148,7 +148,7 @@ public final class RentzTablePanel extends LinearLayout {
         }
         return box;
     }
-    private View sequence(RentzMatch.Observation view, Actions actions, RentzCardSpace.Sequence metrics) {
+    private View sequence(RentzMatch.Observation view, Actions actions, RentzCardSpace.Sequence metrics, String arrival) {
         var box = new LinearLayout(context);
         box.setOrientation(VERTICAL);
         box.setGravity(Gravity.CENTER);
@@ -185,7 +185,17 @@ public final class RentzTablePanel extends LinearLayout {
             }
             box.addView(line, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metrics.rowHeight()));
         }
-        if (view.phase() == RentzMatch.Phase.DEAL_END) box.addView(button(copy.text("Next hand", "Mâna următoare"), actions.next()), choiceSize());
+        if (arrival != null) {
+            var summary = new TextView(context);
+            summary.setText(arrival);
+            summary.setTextColor(TablePalette.ACTIVE_SEAT_TEXT);
+            summary.setTextSize(12);
+            summary.setIncludeFontPadding(false);
+            summary.setGravity(Gravity.CENTER);
+            box.addView(summary, choiceSize());
+        } else if (view.phase() == RentzMatch.Phase.DEAL_END) {
+            box.addView(button(copy.text("Next hand", "Mâna următoare"), actions.next()), choiceSize());
+        }
         return box;
     }
     private GradientDrawable sequenceCardFace() {

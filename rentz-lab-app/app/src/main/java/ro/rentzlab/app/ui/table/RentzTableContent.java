@@ -34,10 +34,15 @@ public final class RentzTableContent {
         return seats(view, copy, names, paused, false);
     }
     static List<SeatContent> seats(RentzMatch.Observation view, RentzUiText copy, List<String> names, boolean paused, boolean passing) {
+        return seats(view, copy, names, paused, passing, false);
+    }
+    static List<SeatContent> seats(RentzMatch.Observation view, RentzUiText copy, List<String> names,
+            boolean paused, boolean passing, boolean arrival) {
         return IntStream.range(0, view.players()).mapToObj(seat -> {
             boolean active = !paused && (view.phase() == RentzMatch.Phase.PLAY || view.phase() == RentzMatch.Phase.CHOOSE) && view.turn() == seat;
-            String points = view.dealPoints().get(seat).toString();
-            String total = view.totals().get(seat).toString();
+            int delta = view.dealPoints().get(seat);
+            String points = arrival ? "…" : Integer.toString(delta);
+            String total = Integer.toString(view.totals().get(seat) - (arrival ? delta : 0));
             var facts = List.of(new SeatContent.Fact(RentzScoreContent.HAND_POINTS_MARK, points),
                     new SeatContent.Fact(RentzScoreContent.TOTAL_MARK, total));
             String who = names.get(seat);
@@ -45,6 +50,11 @@ public final class RentzTableContent {
                     + ". " + copy.total() + " " + total
                     + (active ? ". " + turnLabel(view, copy, passing) : ""));
         }).collect(immutable());
+    }
+    static String arrival(RentzMatch.Observation view, RentzUiText copy, List<String> names) {
+        int unplayed = view.players() * 8 - view.board().size();
+        return copy.text("Rentz finish", "Sosire Rentz") + " · " + names.get(view.finishOrder().get(0))
+                + "\n" + copy.text("Unplayed cards", "Cărți neplasate") + " · " + unplayed;
     }
     public static List<HandCard> hand(RentzMatch.Observation view, RentzUiText copy, boolean paused) {
         if (!view.revealed()) return List.of();

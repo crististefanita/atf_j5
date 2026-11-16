@@ -173,6 +173,7 @@ public final class MainActivity extends Activity {
         boolean automaticTurn = session.hasPendingBotTurn() || forcedPass || automatedHumanTurn;
         long now = SystemClock.uptimeMillis();
         var visible = preview.display(view, now); boolean holding = preview.remaining(now) > 0;
+        boolean arrival = preview.arrival(now);
         var permit = new InputPermit(session.save().commands().size(), frame);
         Runnable next = () -> command(permit, () -> new GameSession.Command(GameSession.Action.NEXT_HAND, 0, null, null, false));
         var names = session.displayNames(copy.humanName(profile.preferredName()));
@@ -189,13 +190,16 @@ public final class MainActivity extends Activity {
                 achievementPopup = AchievementPopup.show(views, progressSlot, copy, notice, this::dismissAchievementPopup);
                 display.postDelayed(this::dismissAchievementPopup, 8000);
             }
+            if (BuildConfig.DEBUG && view.contract() == Contract.RENTZ) {
+                afterFirstFrame(progressSlot, frame, () -> traceTurn("rentz-score-visible", frame));
+            }
             return;
         }
         var page = views.gamePage(); views.applyTableWindowChrome();
         var header = new LinearLayout(this); header.setGravity(Gravity.CENTER_VERTICAL);
         var options = new Button(this); options.setText("☰"); options.setTextSize(20); options.setAllCaps(false);
         options.setBackgroundColor(android.graphics.Color.TRANSPARENT); options.setTextColor(android.graphics.Color.WHITE);
-        options.setContentDescription(copy.text("Options", "Opțiuni")); options.setEnabled(!automaticTurn && !controller.isBusy());
+        options.setContentDescription(copy.text("Options", "Opțiuni")); options.setEnabled(!arrival && !automaticTurn && !controller.isBusy());
         options.setOnClickListener(ignored -> {
             if (!gameFrame(frame) || controller.isBusy()) return;
             var menu = new PopupMenu(this, options);
@@ -247,11 +251,20 @@ public final class MainActivity extends Activity {
                 next,
                 id -> command(permit, () -> new GameSession.Command(GameSession.Action.PLAY, 0, RentzTableContent.selected(controller.session().view(), id), null, false)));
         var panel = new RentzTablePanel(this, view, copy, names, automaticTurn || controller.isBusy() || holding,
-                holding, forcedPass, visible, actions);
+                holding, arrival, forcedPass, visible, actions);
         page.addView(panel, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        if (holding) {
+        if (arrival) {
             if (preview.awaitingFirstFrame()) afterFirstFrame(panel, frame, () -> {
                 preview.markVisible(SystemClock.uptimeMillis());
+                traceTurn("rentz-arrival-visible", frame);
+                finishArrivalAfterDeadline(frame);
+            });
+            else finishArrivalAfterDeadline(frame);
+        } else if (holding) {
+            if (preview.awaitingFirstFrame()) afterFirstFrame(panel, frame, () -> {
+                preview.markVisible(SystemClock.uptimeMillis());
+                preview.collection(SystemClock.uptimeMillis()).ifPresent(target ->
+                        traceTurn("collection-visible-seat-" + target.winner(), frame));
                 animateCollection(panel, frame);
             });
             else animateCollection(panel, frame);
@@ -287,7 +300,7 @@ public final class MainActivity extends Activity {
         autoPlay = false;
         controller.cancelHumanAutomation();
     }
-    private void afterFirstFrame(RentzTablePanel panel, long frame, Runnable action) {
+    private void afterFirstFrame(View panel, long frame, Runnable action) {
         var observer = panel.getViewTreeObserver();
         observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override public boolean onPreDraw() {
@@ -297,6 +310,11 @@ public final class MainActivity extends Activity {
                 return true;
             }
         });
+    }
+    private void finishArrivalAfterDeadline(long frame) {
+        display.postDelayed(() -> {
+            if (gameFrame(frame)) redraw();
+        }, preview.remaining(SystemClock.uptimeMillis()));
     }
     private boolean gameFrame(long frame) { return active && generation == frame && screen.equals("GAME"); }
     private void traceTurn(String stage, long frame) {
@@ -309,7 +327,11 @@ public final class MainActivity extends Activity {
                 + " turn=" + (view == null ? -1 : view.turn()));
     }
     private void animateCollection(RentzTablePanel panel, long frame) {
-        Runnable refresh = () -> { if (gameFrame(frame)) redraw(); };
+        Runnable refresh = () -> {
+            if (!gameFrame(frame)) return;
+            traceTurn("collection-cleared", frame);
+            redraw();
+        };
         long attachedAt = SystemClock.uptimeMillis();
         long remaining = preview.remaining(attachedAt);
         long deadline = attachedAt + remaining;
