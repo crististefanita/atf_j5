@@ -737,21 +737,12 @@ function GameHeadingChecks($nodes,$state){
     }
 }
 function ReadConsecutiveHistory([string]$Title,[string[]]$Contracts){
+    $contractLabels=@($Contracts|ForEach-Object {HumanContractLabel $_})
     $seen=[Collections.Generic.HashSet[int]]::new()
     for($page=1;$page-le$Contracts.Count;$page++){
         $before=$seen.Count
         Observe "$Title · viewport $page" {param($nodes)
-            $rows=@($nodes|Where-Object{$_.text-match'(?m)^\d+ · '})
-            Check 'Native history shows confirmed hand rows' $true ($rows.Count-gt0)
-            foreach($row in $rows){
-                $match=[regex]::Match($row.text,'^(\d+) · ([^\r\n]+)')
-                $number=[int]$match.Groups[1].Value
-                if($number-lt1-or$number-gt$Contracts.Count){throw "Unexpected confirmed hand $number"}
-                $expected=HumanContractLabel $Contracts[$number-1]
-                $label=$match.Groups[2].Value -replace ' ×2$',''
-                Check "Confirmed hand $number contract" $expected.ToLowerInvariant() $label.ToLowerInvariant()
-                [void]$seen.Add($number)
-            }
+            Get-RentzHistoryPageChecks -Labels @($nodes|ForEach-Object {[string]$_.text}) -Contracts $contractLabels -Seen $seen
         }
         if($seen.Count-eq$Contracts.Count-or$seen.Count-eq$before){break}
         $body=Bounds (HistoryElement @(Ui) 'history_body')

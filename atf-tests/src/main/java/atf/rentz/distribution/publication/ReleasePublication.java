@@ -93,8 +93,7 @@ public final class ReleasePublication {
             long id = remote.createDraft(plan);
             require(id > 0, "RELEASE-ID");
             checkpoint.save(id);
-            release = discover(remote, plan, id);
-            require(release.draft(), "UNEXPECTED-RELEASE-STATE");
+            release = awaitCreatedDraft(plan, remote, id, trace);
             trace.accept(new Step("Verified draft ID", Long.toString(id)));
         }
         long id = release.id();
@@ -119,6 +118,30 @@ public final class ReleasePublication {
         if (release.draft()) promote(plan, remote, id, trace);
         trace.accept(new Step("Verified published release ID", Long.toString(id)));
         return id;
+    }
+
+
+    private static Release awaitCreatedDraft(Plan plan, Remote remote, long id, Consumer<Step> trace) throws IOException {
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            List<Release> inventory = remote.releases(plan.releaseRepository());
+            requirePromotionOrder(plan, inventory, trace);
+            if (inventory.stream().anyMatch(release -> plan.tag().equals(release.tag()))) {
+                Release draft = discover(remote, plan, id, inventory);
+                require(draft.draft(), "UNEXPECTED-RELEASE-STATE");
+                require(plan.commit().equals(draft.target()), "DRAFT-TARGET");
+                return draft;
+            }
+            trace.accept(new Step("Draft inventory pending", "Read " + attempt + " of 3, ID " + id));
+            if (attempt < 3) {
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("PUBLICATION-DRAFT-WAIT-INTERRUPTED", interrupted);
+                }
+            }
+        }
+        throw new IOException("PUBLICATION-DRAFT-NOT-VISIBLE");
     }
 
     private static void promote(Plan plan, Remote remote, long id, Consumer<Step> trace) throws IOException {

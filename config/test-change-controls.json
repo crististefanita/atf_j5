@@ -803,10 +803,10 @@
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Offline cases reject stale revisions, repeated next-hand taps, a wrong hand, an unresolved chooser and premature settlement. Native play, replay, capture and source digest gates remain required.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-13",
-      "sha256": "f46ba7803966d8ad6a79a933f88e21225f73307325946e47d9998b89d8599ec6",
+      "expires": "2026-12-14",
+      "sha256": "a04e26c26a3a5ed702058c99f85f6154431a5a1b850b2c2485fe0729ac9ccf60",
       "allowDelete": false
     },
     {
@@ -1273,10 +1273,10 @@
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Offline cases reject stale revisions, repeated next-hand taps, a wrong hand, an unresolved chooser and premature settlement. Native play, replay, capture and source digest gates remain required.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-13",
-      "sha256": "48bf8f48252ec480f21c4d3042c12b67debf7dbd0fa678a709b8e5d8eab2bac3",
+      "expires": "2026-12-14",
+      "sha256": "57bcbd4c1fb90473600c9363ea98f1315865cf392435180daca9f91e1e6d36c1",
       "allowDelete": false
     },
     {
@@ -1421,10 +1421,10 @@
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/ReleasePublication.java",
       "owner": "Rentz release",
       "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
-      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
+      "criterion": "An acknowledged draft gets three read-only inventory attempts. No repeat POST, asset upload or promotion before verification. Conflicts and newer stable editions remain blocked.",
       "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
-      "expires": "2026-12-10",
-      "sha256": "0a90f1d7bbd3b49cbc43fe0d0ec03a0a1163503e665f052d732580ef4360a2f3",
+      "expires": "2026-12-14",
+      "sha256": "f8704d535bc775ccb1ebac91dd26c7af07f43f3ccc94d03f6b3307a39927ac6b",
       "allowDelete": false
     },
     {
@@ -1451,10 +1451,10 @@
       "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePublicationResumeTest.java",
       "owner": "Rentz release",
       "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
-      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner. Reject changed or textual byte counts after report serialization.",
+      "criterion": "An acknowledged draft gets three read-only inventory attempts. No repeat POST, asset upload or promotion before verification. Conflicts and newer stable editions remain blocked.",
       "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
-      "expires": "2026-12-10",
-      "sha256": "679b726baf97ae79a2bb016dfc18e3261a83434a0eca9297ebaa507456027c1d",
+      "expires": "2026-12-14",
+      "sha256": "932f26eb913369d51c35c0fc394f5b92d8f98d42b65c0a2f71f6547bc9d72e1d",
       "allowDelete": false
     },
     {
@@ -1591,20 +1591,20 @@
       "path": "rentz-reference/tools/RentzUiOracle.psm1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Offline cases reject stale revisions, repeated next-hand taps, a wrong hand, an unresolved chooser and premature settlement. Native play, replay, capture and source digest gates remain required.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-13",
-      "sha256": "503e9fe03174aef42e82ef32ec9271b49620cdaaf11b9bb3a5cacb2102a069b0",
+      "expires": "2026-12-14",
+      "sha256": "9473a0f152af63aa240552932390b3e8aef8510d320eb054ffb924a507a32f78",
       "allowDelete": false
     },
     {
       "path": "atf-tests/tools/test-ui-selectors.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Offline cases reject stale revisions, repeated next-hand taps, a wrong hand, an unresolved chooser and premature settlement. Native play, replay, capture and source digest gates remain required.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-13",
-      "sha256": "9fb6cad8a49611e286f0bd994c4b48abcf38a902ea2e452e5d9b1635565d6cae",
+      "expires": "2026-12-14",
+      "sha256": "b9b12571ad155453158a17485519f42b30a8349def05a5147c1f42e804f358cb",
       "allowDelete": false
     },
     {

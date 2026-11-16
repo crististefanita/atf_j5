@@ -34,7 +34,7 @@ Verificăm fiecare cerință la cel mai mic nivel care poate observa efectul ei.
 |---|---|---|
 | Trei contracte consecutive | Tranzițiile de actor și punctajul se verifică prin observații simulate. Replay-ul independent verifică comenzile și rezultatele. | Calificarea obligatorie înaintea release-ului verifică gesturile, geometria și reluarea în același APK. |
 | O mână, locuri extreme și scor compact | Proiecția tablei, locurile și spațiul pentru scor se verifică în JVM la dimensiuni controlate. | O schimbare a poziționării, a textului sau a densității cere proba nativă focalizată. |
-| Istoric, detalii și schimbarea înălțimii | Componentele acoperă modelul, punctajele, totalurile și jurnalul de 48 de mâini. | Modificări la scroll, atingere, schimbarea ferestrei sau integrarea antetului fix. |
+| Istoric, detalii și schimbarea înălțimii | Componentele acoperă modelul, punctajele, totalurile, jurnalul de 48 de mâini și rândurile din pagini suprapuse. | Modificări la scroll, atingere, schimbarea ferestrei sau integrarea antetului fix. |
 | Ajutor, catalog și profil | Conținutul, filtrele, eligibilitatea și persistența au probe offline. | Modificări la navigare, tastatură, accesibilitate sau afișarea dialogului. |
 | Marcaje Rentz și colectarea levatei | Motorul și proiecția verifică legalitatea, marcajele și starea salvată. | Modificări la raster, ritm, reatașarea după relansare sau așezarea cărților. |
 

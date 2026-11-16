@@ -29,6 +29,7 @@ Adaptorul nativ folosește motorul și jucătorii offline, cu profilul de labora
 - O captură validă cu altă etichetă declanșează o nouă încercare. La expirarea bugetului, verificatorul scenariului rămâne neapelat, iar checkpoint-ul lipsește.
 - Receipt-ul nativ identifică prin SHA-256 runnerul, transportul și oracolul. Un modul schimbat blochează calificarea. [Porțile RAG](ATF_Release.md)
 - Regresia offline verifică ierarhia întârziată, selecția controalelor, trecerea la mâna următoare și punctajul terminal. Aceeași funcție cere o singură apăsare, observații cu revizie crescătoare și mâna imediat următoare. Un actor blocat, o revizie veche sau un scor prematur opresc scenariul.
+- Comparația rândurilor indexate din istoric folosește aceeași funcție în probele offline și în traseul Android. Ea recunoaște contractele dublate, deduplică paginile suprapuse și numără doar contractele confirmate.
 - Receipt-ul runtime indică `productFixtures/ui-selectors/assertions.json` pentru comparațiile cu observații simulate. [Probele offline](../../atf-tests/tools/test-ui-selectors.ps1) · [Alegerea probelor Android](ATF_TestingStrategy.md#alegerea-probelor-android)
 
 ```mermaid

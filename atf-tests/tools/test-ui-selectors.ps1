@@ -69,6 +69,21 @@ try{
     $invalid=Actor 11 2 'PLAY' 1 'WHIST' @(0) @()
     $checksForScore=@(Get-RentzCompletedDealChecks -Actor $invalid -Hand 1 -Contract 'RENTZ')
     Check 'Premature or misattributed scores fail every settlement comparison' 5 @($checksForScore|Where-Object { !$_.passed }).Count
+
+    $history=[Collections.Generic.HashSet[int]]::new()
+    $contracts=@('Rentz','Tricks','Whist')
+    $page=@(Get-RentzHistoryPageChecks -Labels @('Score history',"1 · Rentz"+[Environment]::NewLine+'scores','2 · Tricks ×2') -Contracts $contracts -Seen $history)
+    Check 'History parses a score row and a doubled contract without making another gesture' '3:2' "$(@($page|Where-Object passed).Count):$($history.Count)"
+    $page=@(Get-RentzHistoryPageChecks -Labels @('2 · Tricks','3 · Whist') -Contracts $contracts -Seen $history)
+    Check 'Overlapping history pages count each completed hand once' '3:3' "$(@($page|Where-Object passed).Count):$($history.Count)"
+    $history.Clear()
+    $page=@(Get-RentzHistoryPageChecks -Labels @('2 · Rentz') -Contracts $contracts -Seen $history)
+    Check 'A mismatched history contract cannot advance the coverage count' '1:0' "$(@($page|Where-Object {!$_.passed}).Count):$($history.Count)"
+    $page=@(Get-RentzHistoryPageChecks -Labels @('Score history','') -Contracts $contracts -Seen $history)
+    Check 'An empty history viewport fails even when its heading is present' '1:0' "$(@($page|Where-Object {!$_.passed}).Count):$($history.Count)"
+    $refusal=''
+    try{$null=Get-RentzHistoryPageChecks -Labels @('4 · Whist') -Contracts $contracts -Seen $history}catch{$refusal=$_.Exception.Message}
+    Check 'A row outside the completed history is refused' 'Unexpected confirmed hand 4' $refusal
 }catch{$failure=$_.Exception.ToString()}
-[ordered]@{class='atf.rentz.android.NativeUiOracle';method='selectorsAndConsecutiveDealTransitions';status=$(if($failure){'FAIL'}else{'PASS'});failure=$failure;checks=$checks.ToArray()}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $RunRoot 'assertions.json') -Encoding utf8NoBOM
+[ordered]@{class='atf.rentz.android.NativeUiOracle';method='selectorsDealsAndHistory';status=$(if($failure){'FAIL'}else{'PASS'});failure=$failure;checks=$checks.ToArray()}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $RunRoot 'assertions.json') -Encoding utf8NoBOM
 if($failure){throw $failure}

@@ -153,4 +153,29 @@ function Get-RentzCompletedDealChecks {
     }
 }
 
-Export-ModuleMember -Function Wait-RentzUiHierarchy,Wait-RentzActorCheckpoint,Wait-RentzVisualCheckpoint,Get-RentzTapTarget,Get-RentzSystemUiWaitTarget,Start-RentzNextDeal,Get-RentzCompletedDealChecks
+
+function Get-RentzHistoryPageChecks {
+    param(
+        [AllowEmptyCollection()][AllowEmptyString()][string[]]$Labels,
+        [string[]]$Contracts,
+        [AllowEmptyCollection()][Collections.Generic.HashSet[int]]$Seen
+    )
+    $rows=@(foreach($label in $Labels){
+        $row=[regex]::Match($label,'^([0-9]+) · ([^\r\n]+)')
+        if($row.Success){$row}
+    })
+    [pscustomobject]@{name='Native history shows confirmed hand rows';expected='True';actual=[string]($rows.Count-gt0);passed=($rows.Count-gt0)}
+    foreach($row in $rows){
+        $number=0
+        if(![int]::TryParse($row.Groups[1].Value,[ref]$number)-or$number-lt1-or$number-gt$Contracts.Count){
+            throw "Unexpected confirmed hand $($row.Groups[1].Value)"
+        }
+        $expected=$Contracts[$number-1].ToLowerInvariant()
+        $actual=($row.Groups[2].Value -replace ' ×2$','').ToLowerInvariant()
+        $passed=$expected-ceq$actual
+        if($passed){[void]$Seen.Add($number)}
+        [pscustomobject]@{name="Confirmed hand $number contract";expected=$expected;actual=$actual;passed=$passed}
+    }
+}
+
+Export-ModuleMember -Function Wait-RentzUiHierarchy,Wait-RentzActorCheckpoint,Wait-RentzVisualCheckpoint,Get-RentzTapTarget,Get-RentzSystemUiWaitTarget,Start-RentzNextDeal,Get-RentzCompletedDealChecks,Get-RentzHistoryPageChecks

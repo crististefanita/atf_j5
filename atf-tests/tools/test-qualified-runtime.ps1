@@ -13,12 +13,12 @@ $results=[Collections.Generic.List[object]]::new()
 $cacheFixtures=[Collections.Generic.List[string]]::new()
 function Require([bool]$Value,[string]$Reason){if(-not$Value){throw $Reason}}
 function Case([string]$Name,[scriptblock]$Body){try{& $Body;$results.Add([pscustomobject]@{name=$Name;status='PASS'})}catch{$results.Add([pscustomobject]@{name=$Name;status='FAIL';error=$_.Exception.Message})}}
-Case 'Android selectors and deal transitions qualify offline' {
+Case 'Android selectors, deal transitions and history qualify offline' {
     $selection = Join-Path $product 'ui-selectors'
     & (Join-Path $PSScriptRoot 'test-ui-selectors.ps1') -RunRoot $selection
     $audit = Get-Content -Raw -LiteralPath (Join-Path $selection 'assertions.json') | ConvertFrom-Json
-    Require ($audit.status-ceq'PASS'-and$audit.checks.Count-eq13-and
-        @($audit.checks | Where-Object { !$_.passed }).Count-eq0) 'Expected thirteen passing selector and transition comparisons'
+    Require ($audit.status-ceq'PASS'-and$audit.checks.Count-eq18-and
+        @($audit.checks | Where-Object { !$_.passed }).Count-eq0) 'Expected eighteen passing selector, transition and history comparisons'
 }
 function Hash([string]$File){return (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash.ToLowerInvariant()}
 function Json([string]$File,$Value){ConvertTo-Json -InputObject $Value -Depth 12|Set-Content -LiteralPath $File -Encoding utf8NoBOM}

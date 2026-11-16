@@ -39,6 +39,38 @@ class ReleasePublicationResumeTest {
     private final List<Long> remembered = new ArrayList<>();
     private final List<Step> trace = new ArrayList<>();
 
+
+    @Test void acknowledgedDraftBecomesVisibleBeforeAnyAssetWrite() throws Exception {
+        var github = new Mock();
+        github.hiddenDraftReads = 2;
+        AuditedAssertions.assertEquals(81L, run(github, 0), "Resume the acknowledged draft within the read budget");
+        AuditedAssertions.assertEquals(List.of(81L), remembered, "Persist the returned draft ID once");
+        AuditedAssertions.assertEquals(2, github.missingDraftReads, "Observe both stale inventory responses");
+        AuditedAssertions.assertEquals(1L, github.writes.stream().filter("draft"::equals).count(),
+                "Never repeat the draft POST");
+        AuditedAssertions.assertEquals(false, github.wroteAssetWhileHidden, "Wait for the matching draft before uploads");
+    }
+
+    @Test void invisibleAcknowledgedDraftStopsAtTheReadBudgetAndKeepsItsId() throws IOException {
+        var github = new Mock();
+        github.hiddenDraftReads = 20;
+        AuditedAssertions.assertEquals("PUBLICATION-DRAFT-NOT-VISIBLE", failure(github, 0), "Report inventory timeout");
+        AuditedAssertions.assertEquals(List.of(81L), remembered, "Keep the recovery checkpoint");
+        AuditedAssertions.assertEquals(3, github.missingDraftReads, "Use exactly the configured read budget");
+        AuditedAssertions.assertEquals(List.of("tag:" + PLAN.sourceRepository(), "tag:" + PLAN.releaseRepository(), "draft"),
+                github.writes, "Do not upload assets or PATCH an invisible draft");
+    }
+
+    @Test void visibleWrongDraftIdFailsWithoutFurtherInventoryReads() throws IOException {
+        var github = new Mock();
+        github.conflictingDraftId = true;
+        AuditedAssertions.assertEquals("PUBLICATION-RELEASE-ID", failure(github, 0), "Refuse a visible foreign ID");
+        AuditedAssertions.assertEquals(1, github.conflictingDraftReads, "Stop on the first identity conflict");
+        AuditedAssertions.assertEquals(List.of(81L), remembered, "Retain only the acknowledged ID");
+        AuditedAssertions.assertEquals(List.of("tag:" + PLAN.sourceRepository(), "tag:" + PLAN.releaseRepository(), "draft"),
+                github.writes, "Fail before uploads or PATCH");
+    }
+
     @Test void existingTagAndDraftWithApkOnlyUploadTheMissingChecksum() throws Exception {
         var github = draft();
         github.assets.add(asset(11, APK));
@@ -362,6 +394,11 @@ class ReleasePublicationResumeTest {
         boolean interruptUpload;
         boolean interruptDraft;
         boolean rejectPush;
+        int hiddenDraftReads;
+        int missingDraftReads;
+        boolean conflictingDraftId;
+        int conflictingDraftReads;
+        boolean wroteAssetWhileHidden;
         Release item;
 
         @Override public boolean sourceOnMain(Plan plan) { return onMain; }
@@ -376,6 +413,15 @@ class ReleasePublicationResumeTest {
             else releaseTag = commit;
         }
         @Override public List<Release> releases(String repository) {
+            if (item != null && item.draft() && hiddenDraftReads > 0) {
+                hiddenDraftReads--;
+                missingDraftReads++;
+                return List.of();
+            }
+            if (item != null && conflictingDraftId) {
+                conflictingDraftReads++;
+                return List.of(new Release(82, item.tag(), item.target(), true, false));
+            }
             return item == null ? List.of() : List.of(item);
         }
         @Override public Release release(String repository, long id) { return item; }
@@ -390,6 +436,7 @@ class ReleasePublicationResumeTest {
         }
         @Override public List<Asset> assets(String repository, long releaseId) { return List.copyOf(assets); }
         @Override public void upload(String repository, long releaseId, Payload payload) throws IOException {
+            wroteAssetWhileHidden |= hiddenDraftReads > 0;
             writes.add("upload:" + payload.name());
             assets.add(asset(11 + assets.size(), payload));
             if (interruptUpload) {

@@ -158,6 +158,7 @@ Din checkout-ul calificat, utilizați acreditările Git pentru tag și `GH_TOKEN
 |---|---|
 | Sursa calificată se află pe `main`, iar canalul de artefacte este privat | RAG recitește porțile și reconciliază tagurile ambelor repository-uri. |
 | Există un draft unic pentru tag | Confirmă release ID și salvează identitatea înainte de upload. Verifică inventarul complet al draftului. |
+| GitHub confirmă crearea, iar draftul încă lipsește din inventar | Salvează ID-ul și citește inventarul de cel mult trei ori. Un ID diferit, un duplicat, o sursă diferită sau o ediție stabilă mai nouă opresc publicarea. |
 | APK-ul sau checksum-ul are nume, stare, mărime și SHA-256 identice | Reutilizează fișierul și încarcă doar ce lipsește. |
 | Repo-ul de distribuție are o ediție stabilă mai nouă | Refuză promovarea cu `PUBLICATION-NEWER-STABLE`. Trimite zero cereri `PATCH`. |
 | Inventarul publicării este incomplet ori un tag stabil are format necunoscut | Oprește promovarea. Verifică accesul API și tagurile din canal înainte de reluare. |
@@ -165,6 +166,7 @@ Din checkout-ul calificat, utilizați acreditările Git pentru tag și `GH_TOKEN
 | Ediția căutată este deja publicată și verificată | Refolosește ID-ul și artefactele prin citire, inclusiv după publicarea altei ediții. |
 | Tagul, draftul sau artefactul diferă ori răspunsul la scriere se pierde | Oprește operația. Următoarea rulare recitește starea și jurnalul înainte să decidă următoarea scriere. |
 
+- Dacă draftul rămâne invizibil, RAG înregistrează `PUBLICATION-DRAFT-NOT-VISIBLE` și păstrează ID-ul pentru reluare. Încărcarea pornește după confirmarea identității.
 - **Inventar.** Citește toate paginile canalului și compară numeric tagurile stabile `vMAJOR.MINOR.PATCH`. Exclude drafturile și prerelease-urile.
 - **Momentul verificării.** Verifică ordinea înaintea scrierilor în GitHub și din nou imediat înainte de promovare.
 - **Recitirea porților.** Valorile întregi din raport și din evaluarea curentă trebuie să fie egale exact. Un număr schimbat sau înlocuit cu text blochează publicarea.
