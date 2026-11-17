@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import ro.cardtable.browser.BrowserExperience;
 import ro.cardtable.browser.BrowserGame;
+import ro.cardtable.ui.turn.TurnPacing;
 import ro.rentzlab.app.achievements.AchievementCatalog;
 import ro.rentzlab.core.Contract;
 import ro.rentzlab.core.ScoreProfile;
@@ -145,7 +146,7 @@ public final class RentzBrowserComponentTest {
         var browser = new RentzBrowser(() -> 20261116L);
         equal("Rentz title", "Rentz Lab", browser.title());
         equal("Shared native table surface", "whist", browser.surface());
-        equal("Android pacing adapter", 1_000, browser.autoDelayMillis());
+        equal("Android first-frame pacing adapter", (int) TurnPacing.ACTION_DELAY_MILLIS, browser.autoDelayMillis());
         var playerField = browser.fields("ro").stream().filter(field -> field.key().equals("players")).findFirst().orElseThrow();
         equal("Player choices", List.of("3", "4", "5", "6"), playerField.options().stream()
                 .map(BrowserGame.Option::value).toList());
@@ -218,14 +219,17 @@ public final class RentzBrowserComponentTest {
     }
 
     private static void automaticTurnsKeepTheirOrderAndTiming() {
+        var delay = new RentzBrowser(() -> 779L).autoDelayMillis();
+        equal("Web decision delay matches the pinned Android first-frame cadence",
+                TurnPacing.ACTION_DELAY_MILLIS, (long) delay);
         var table = start(new RentzBrowser(() -> 779L), 5);
         table.act("reveal");
         table.act("choose:RENTZ");
         table.act(firstLegalAction(table));
         var playback = table.playback();
         truth("Opponent response is projected as playback", !playback.isEmpty());
-        truth("Bot delay is consistently one second", playback.stream()
-                .allMatch(step -> step.delayMillis() == RentzTable.BOT_TURN_DELAY_MILLIS));
+        truth("Each visible bot action uses the qualified Android pacing interval", playback.stream()
+                .allMatch(step -> step.delayMillis() == TurnPacing.ACTION_DELAY_MILLIS));
         truth("Playback actors are opponents only", playback.stream().allMatch(step -> step.play().seat() != 0));
         truth("Seat facts follow the shared browser shell two-line contract", playback.stream().allMatch(step ->
                 step.seatFacts().size() == table.names().size()

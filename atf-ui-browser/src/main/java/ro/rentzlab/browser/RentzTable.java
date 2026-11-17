@@ -30,7 +30,8 @@ import ro.rentzlab.core.sequence.SequenceOpening;
 
 /** Browser projection of the same session used by Android. Opponent hands never cross this boundary. */
 final class RentzTable implements BrowserGame.Match {
-    static final int BOT_TURN_DELAY_MILLIS = 1_000;
+    /** Keep bot playback on the pinned card-table-ui first-frame cadence. */
+    static final int AUTOMATED_ACTION_DELAY_MILLIS = 550;
     private static final List<ro.rentzlab.core.Card.Suit> HAND_SUITS = List.of(
             ro.rentzlab.core.Card.Suit.SPADES, ro.rentzlab.core.Card.Suit.HEARTS,
             ro.rentzlab.core.Card.Suit.CLUBS, ro.rentzlab.core.Card.Suit.DIAMONDS);
@@ -147,7 +148,7 @@ final class RentzTable implements BrowserGame.Match {
                 names.get(event.seat()) + " · " + event.card().label());
         boolean startsTrick = before.contract() != Contract.RENTZ && before.trick().isEmpty();
         CollectionCue cue = collection(before, after);
-        steps.add(new PlayStep(played, startsTrick, BOT_TURN_DELAY_MILLIS, cue,
+        steps.add(new PlayStep(played, startsTrick, AUTOMATED_ACTION_DELAY_MILLIS, cue,
                 after.contract() == null ? "" : contractName(after.contract()), seatFacts(after)));
         if (cue != null) cues.add(cue);
     }

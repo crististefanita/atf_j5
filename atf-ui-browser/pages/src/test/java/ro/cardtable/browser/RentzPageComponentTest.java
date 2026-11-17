@@ -20,6 +20,8 @@ public final class RentzPageComponentTest {
         RentzPage.initialize(0, 20261116);
         var setupReply = new JSONObject(RentzPage.commandLocal("/api/setup", "{}", null, null, null, null));
         check("Page setup returns a successful renderer contract", !setupReply.has("status"));
+        check("Page setup forwards the Android-aligned action cadence",
+                setupReply.getJSONObject("result").optInt("autoDelayMillis") == 550);
 
         var values = Map.of("name", "Ana", "players", "3", "mode", "RENTZ", "difficulty", "HARD",
                 "series", "5", "streaks", "no", "zero", "no");

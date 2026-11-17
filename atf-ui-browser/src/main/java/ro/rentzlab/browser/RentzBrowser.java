@@ -63,7 +63,7 @@ public final class RentzBrowser implements BrowserGame {
     private static Token token(String name, String color) { return new Token("--whist-" + name, color); }
     private static Token dimension(String name, String value) { return token(name, value); }
 
-    @Override public int autoDelayMillis() { return RentzTable.BOT_TURN_DELAY_MILLIS; }
+    @Override public int autoDelayMillis() { return RentzTable.AUTOMATED_ACTION_DELAY_MILLIS; }
 
     @Override public boolean hasProfile() { return true; }
 
