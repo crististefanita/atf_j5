@@ -53,6 +53,7 @@ export function localTransport() {
     if (reply.result?.view !== undefined) {
       if (reply.rejectedCheckpoint) reply.result.storageIssue = "savedGameError";
       else if (!storageAvailable) reply.result.storageIssue = "storageError";
+      if (reply.rentzArrival) reply.result.rentzArrival = reply.rentzArrival;
     }
     return reply.result;
   }

@@ -75,18 +75,31 @@ $tableScript = Join-Path $site 'table.mjs'
 $markup = [IO.File]::ReadAllText($tableScript).Replace("`r`n", "`n")
 $importAnchor = 'import { historyGrid } from "./records.mjs";'
 $renderAnchor = '  const visible = element("div", "", "cards-on-table");' + "`n" + '  if (!match.header) for (const face of match.center) visible.append(card(face));'
+$contentAnchor = '  const content = element("section", "", match.header ? "match whist-match" : "match");'
+$issueAnchor = '    state = result;' + "`n" + '    transport.remember?.(state.profile);'
 $choiceAnchor = @(
   '  for (const move of match.actions.filter(move => !move.key.startsWith("bid:") && !(match.header && ["auto", "auto-step"].includes(move.key)))) {'
   '    actions.append(control(move));'
   '  }'
 ) -join "`n"
-foreach ($anchor in @($importAnchor, $renderAnchor, $choiceAnchor)) {
+foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
     if ($count -ne 1) { throw "Card Table Browser 0.2.4 adapter anchor changed; expected one match, found $count." }
 }
-$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
-$rentzRender = $renderAnchor + "`n" + '  if (match.rentzSequence?.length) visible.append(rentzSequence(match.rentzSequence, element, action, language));'
+$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
+$rentzRender = $renderAnchor + "`n" + '  if (match.rentzSequence?.length) visible.append(rentzSequence(match.rentzSequence, element, action, language, match.rentzArrival));'
 $markup = $markup.Replace($renderAnchor, $rentzRender)
+$markup = $markup.Replace($contentAnchor, $contentAnchor + "`n" + '  if (match.rentzArrival) content.dataset.rentzArrival = "true";')
+$rentzIssue = @(
+  '    const arrivalPresented = await presentRentzArrival(result, language, {'
+  '      render: next => { state = next; return render(); },'
+  '      wait: duration => new Promise(resolve => setTimeout(resolve, duration)),'
+  '      stopAutomation: () => automation.set(false),'
+  '    });'
+  '    state = result;'
+  '    transport.remember?.(state.profile);'
+) -join "`n"
+$markup = $markup.Replace($issueAnchor, $rentzIssue)
 $rentzChoiceRender = @(
   '  const rentzChoices = match.actions.filter(move => move.key.startsWith("choose:") || move.key.startsWith("blind:"));'
   '  const rentzPicker = match.header ? rentzChoiceDropdown(rentzChoices, element, action, language) : null;'
@@ -97,6 +110,11 @@ $rentzChoiceRender = @(
   '  }'
 ) -join "`n"
 $markup = $markup.Replace($choiceAnchor, $rentzChoiceRender)
+$renderBranch = '    else await render();'
+if (([regex]::Matches($markup, [regex]::Escape($renderBranch))).Count -ne 1) {
+    throw 'Card Table Browser render completion anchor changed; expected one match.'
+}
+$markup = $markup.Replace($renderBranch, '    else if (!arrivalPresented) await render();')
 [IO.File]::WriteAllText($tableScript, $markup, [Text.UTF8Encoding]::new($false))
 
 $index = Join-Path $site 'index.html'
@@ -132,4 +150,6 @@ foreach ($script in @('rentz-ui.mjs', 'table.mjs', 'engine-worker.mjs', 'local-t
 if ($LASTEXITCODE -ne 0) { throw 'Generated Rentz engine component checks failed.' }
 & node (Join-Path $pages 'verify-rentz-ui.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Rentz sequence renderer component verification failed.' }
+& node (Join-Path $pages 'verify-rentz-transport.mjs')
+if ($LASTEXITCODE -ne 0) { throw 'Rentz transient event transport verification failed.' }
 $site

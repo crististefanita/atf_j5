@@ -4,6 +4,7 @@ import org.json.JSONObject;
 import org.teavm.jso.JSExport;
 import ro.cardtable.ui.animation.TrickCollectionMotion;
 import ro.rentzlab.browser.RentzBrowser;
+import ro.rentzlab.core.RentzMatch.Observation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -45,6 +46,8 @@ public final class RentzPage {
         try {
             var input = new JSONObject(body);
             long revision = input.optLong("revision", -1);
+            Observation before = path.equals("/api/action")
+                    ? RentzBrowser.observation(session.match()) : null;
             Object result = switch (path) {
                 case "/api/setup" -> game.setup(TrickCollectionMotion.keyframes());
                 case "/api/state" -> session.state();
@@ -62,10 +65,13 @@ public final class RentzPage {
                 var match = session.match();
                 if (match != null) checkpoint = game.checkpoint(match);
             }
-            return PageJson.encode(PageJson.fields("result", result, "name", name.value,
+            var response = PageJson.fields("result", result, "name", name.value,
                     "progress", progress.value, "rankings", rankings.value,
                     "checkpoint", gameCommand ? checkpoint : savedCheckpoint,
-                    "rejectedCheckpoint", rejected));
+                    "rejectedCheckpoint", rejected);
+            var arrival = path.equals("/api/action") ? RentzBrowser.arrival(session.match(), before) : null;
+            if (arrival != null) response.put("rentzArrival", arrival);
+            return PageJson.encode(response);
         } catch (BrowserSession.StaleRevision stale) {
             return PageJson.encode(PageJson.fields("status", 409, "error", "Masa a avansat. Am reîncărcat starea."));
         } catch (IllegalArgumentException invalid) {

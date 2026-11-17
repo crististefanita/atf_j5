@@ -14,6 +14,7 @@ import ro.cardtable.browser.BrowserServer;
 import ro.cardtable.names.PlayerNames;
 import ro.rentzlab.ai.RentzPlayer;
 import ro.rentzlab.app.GameSession;
+import ro.rentzlab.core.RentzMatch.Observation;
 import ro.rentzlab.core.ScoreProfile;
 
 public final class RentzBrowser implements BrowserGame {
@@ -98,6 +99,15 @@ public final class RentzBrowser implements BrowserGame {
             rows.add(Map.of("suit", suit, "cells", entries, "suitIndex", suitIndex));
         }
         return List.copyOf(rows);
+    }
+
+    /** Public one-response cue for the native Rentz arrival pause; never part of a checkpoint. */
+    public static Map<String, Object> arrival(BrowserGame.Match match, Observation before) {
+        return match instanceof RentzTable table ? table.arrival(before) : null;
+    }
+
+    public static Observation observation(BrowserGame.Match match) {
+        return match instanceof RentzTable table ? table.observation() : null;
     }
 
     @Override public List<Field> fields() {

@@ -11,6 +11,8 @@ public final class RentzPageComponentTest {
 
     public static void main(String[] args) {
         pageCommandStartsTheRealGameSession();
+        rentzArrivalIsAOneShotPublicProjectionBeforeTheScore();
+        otherContractsDoNotEmitARentzArrival();
         System.out.println("Rentz Pages component checks passed: " + checks);
     }
 
@@ -43,6 +45,102 @@ public final class RentzPageComponentTest {
         String publicView = view.toString();
         check("Public view does not expose opponent hand collections", !publicView.contains("opponentHands") && !publicView.contains("hands"));
         check("Public view does not expose the private command journal", !publicView.contains("commands"));
+    }
+
+    private static void rentzArrivalIsAOneShotPublicProjectionBeforeTheScore() {
+        for (int players : new int[]{3, 4, 5, 6}) {
+            var checkpoint = startPage(20261117 + players, Integer.toString(players), "HARD");
+            var reply = new JSONObject();
+            for (int step = 0; step < 96; step++) {
+                var current = pageState(checkpoint);
+                var view = current.getJSONObject("view");
+                if (view.optJSONObject("score") != null) break;
+                String action = nextAction(view, "RENTZ");
+                reply = pageAction(checkpoint, current.getLong("revision"), action);
+                checkpoint = reply.optString("checkpoint", checkpoint);
+                if (reply.has("rentzArrival")
+                        || reply.getJSONObject("result").getJSONObject("view").optJSONObject("score") != null) break;
+            }
+
+            check("A completed Rentz hand emits an arrival projection at " + players + " seats", reply.has("rentzArrival"));
+            var arrival = reply.getJSONObject("rentzArrival");
+            check("Arrival identifies the first finisher at " + players + " seats", !arrival.optString("winner").isBlank());
+            check("Arrival reports public unplayed cards at " + players + " seats", arrival.optInt("unplayedCards", -1) > 0);
+            check("Arrival keeps the native 1.8 s duration at " + players + " seats", arrival.optLong("durationMillis") == 1800L);
+            check("Arrival carries prior public totals for every seat at " + players + " seats",
+                    arrival.getJSONArray("previousTotals").length() == players);
+            check("The underlying response keeps its calculated score at " + players + " seats",
+                    reply.getJSONObject("result").getJSONObject("view").optJSONObject("score") != null);
+
+            var settled = pageState(checkpoint);
+            check("A fresh state response has no transient arrival at " + players + " seats", !settled.has("rentzArrival"));
+            check("A fresh state response exposes the settled score at " + players + " seats",
+                    settled.getJSONObject("view").optJSONObject("score") != null);
+        }
+    }
+
+    private static void otherContractsDoNotEmitARentzArrival() {
+        var checkpoint = startPage(20261118, "3", "NORMAL");
+        var reply = new JSONObject();
+        for (int step = 0; step < 128; step++) {
+            var current = pageState(checkpoint);
+            var view = current.getJSONObject("view");
+            String action = nextAction(view, "TRICKS");
+            reply = pageAction(checkpoint, current.getLong("revision"), action);
+            checkpoint = reply.optString("checkpoint", checkpoint);
+            if (reply.getJSONObject("result").getJSONObject("view").optJSONObject("score") != null) break;
+        }
+        check("Non-Rentz scoring never emits the Rentz arrival adapter", !reply.has("rentzArrival"));
+        check("The non-Rentz comparison reaches its score boundary", reply.getJSONObject("result")
+                .getJSONObject("view").optJSONObject("score") != null);
+    }
+
+    private static String startPage(int seed, String players, String difficulty) {
+        RentzPage.initialize(0, seed);
+        var values = new JSONObject(Map.of("name", "Test", "players", players, "mode", "RENTZ",
+                "difficulty", difficulty, "series", "0", "streaks", "no", "zero", "no", "revision", "0"));
+        var started = new JSONObject(RentzPage.commandLocal("/api/start", values.toString(), "Test", null, null, null));
+        if (started.has("status")) throw new AssertionError("Page start error response: " + started);
+        return started.optString("checkpoint");
+    }
+
+    private static JSONObject pageState(String checkpoint) {
+        return new JSONObject(RentzPage.commandLocal("/api/state", "{}", "Test", null, checkpoint, null))
+                .getJSONObject("result");
+    }
+
+    private static JSONObject pageAction(String checkpoint, long revision, String action) {
+        var values = new JSONObject(Map.of("revision", Long.toString(revision), "action", action));
+        var reply = new JSONObject(RentzPage.commandLocal("/api/action", values.toString(), "Test", null, checkpoint, null));
+        if (reply.has("status")) throw new AssertionError("Page action error response: " + reply);
+        return reply;
+    }
+
+    private static String nextAction(JSONObject view, String contract) {
+        var actions = view.getJSONArray("actions");
+        for (int index = 0; index < actions.length(); index++) {
+            String key = actions.getJSONObject(index).getString("key");
+            if (key.equals("reveal")) return key;
+            if (key.equals("choose:" + contract) || key.equals("blind:" + contract)) return key;
+        }
+        var hand = view.getJSONArray("hand");
+        for (int index = 0; index < hand.length(); index++) {
+            String action = hand.getJSONObject(index).optString("action");
+            if (!action.isBlank()) return action;
+        }
+        var sequence = view.optJSONArray("rentzSequence");
+        if (sequence != null) for (int row = 0; row < sequence.length(); row++) {
+            var cells = sequence.getJSONObject(row).getJSONArray("cells");
+            for (int cell = 0; cell < cells.length(); cell++) {
+                String action = cells.getJSONObject(cell).optString("action");
+                if (!action.isBlank()) return action;
+            }
+        }
+        for (int index = 0; index < actions.length(); index++) {
+            String key = actions.getJSONObject(index).getString("key");
+            if (key.equals("auto-step") || key.equals("next")) return key;
+        }
+        throw new AssertionError("No legal page action in view: " + view);
     }
 
     private static void check(String description, boolean condition) {

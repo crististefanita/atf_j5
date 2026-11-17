@@ -19,6 +19,19 @@
 }
 .rentz-suit-symbol.red { color: #f39a94; }
 .rentz-suit-symbol.black { color: #d7e4da; }
+.rentz-arrival {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  margin-top: 3px;
+  padding: 5px 4px 2px;
+  border-top: 1px solid rgb(220 181 105 / 55%);
+  color: #d3efe2;
+  font: 600 clamp(10px, 2.5vw, 13px)/1.25 "Segoe UI", sans-serif;
+  text-align: center;
+}
+.rentz-arrival strong { color: #f1e6c8; }
+.match[data-rentz-arrival="true"] .prompt { display: none; }
 .rentz-sequence-row > * {
   display: grid;
   min-width: 0;

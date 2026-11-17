@@ -56,6 +56,19 @@ final class RentzTable implements BrowserGame.Match {
     int acceptedCommandCount() { return game.save().commands().size(); }
     List<AchievementHand> achievementHands() { return game.achievementHands(); }
     List<String> names() { return List.copyOf(names); }
+    java.util.Map<String, Object> arrival(Observation before) {
+        Observation after = game.view();
+        if (before == null || before.contract() != Contract.RENTZ || before.phase() != Phase.PLAY
+                || after.contract() != Contract.RENTZ
+                || (after.phase() != Phase.DEAL_END && after.phase() != Phase.MATCH_END)
+                || after.completedHands().size() <= before.completedHands().size()) return null;
+        int winner = after.finishOrder().get(0);
+        var previousTotals = java.util.stream.IntStream.range(0, names.size())
+                .map(seat -> after.totals().get(seat) - after.dealPoints().get(seat)).boxed().toList();
+        return java.util.Map.of("winner", names.get(winner),
+                "unplayedCards", after.players() * 8 - after.board().size(),
+                "previousTotals", previousTotals, "durationMillis", 1800);
+    }
     boolean isFinished() { return game.view().phase() == Phase.MATCH_END; }
     List<Integer> finalResults() { return game.view().totals(); }
     void rename(String value) { names.set(0, value); }

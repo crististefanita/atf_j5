@@ -1,4 +1,55 @@
-export function rentzSequence(rows, element, play, language) {
+export function rentzArrivalView(state, arrival, language) {
+  const match = state?.view;
+  if (!match?.score || !Array.isArray(match.seats) || !Array.isArray(arrival?.previousTotals)
+      || arrival.previousTotals.length !== match.seats.length || !Number.isInteger(arrival.unplayedCards)
+      || !Number.isInteger(arrival.durationMillis) || arrival.durationMillis <= 0) {
+    throw new Error("Rentz arrival payload does not match the settled public view.");
+  }
+  const hand = language === "en" ? "Hand" : "Mână";
+  const total = language === "en" ? "Total" : "Total";
+  return {
+    ...state,
+    view: {
+      ...match,
+      prompt: "",
+      actions: [],
+      seats: match.seats.map((seat, index) => ({
+        ...seat,
+        firstFact: `${hand} …`,
+        secondFact: `${total} ${arrival.previousTotals[index]}`,
+        active: false,
+      })),
+      score: null,
+      scoreDetails: null,
+      rentzArrival: { ...arrival, language },
+    },
+  };
+}
+
+export async function presentRentzArrival(result, language, { render, wait, stopAutomation }) {
+  if (!result?.rentzArrival) return false;
+  stopAutomation();
+  try {
+    await render(rentzArrivalView(result, result.rentzArrival, language));
+    await wait(result.rentzArrival.durationMillis);
+  } finally {
+    await render(result);
+  }
+  return true;
+}
+
+export function rentzArrivalPanel(arrival, element, language) {
+  if (!arrival || !Number.isInteger(arrival.unplayedCards) || !arrival.winner) return null;
+  const panel = element("div", "", "rentz-arrival");
+  panel.setAttribute("role", "status");
+  panel.setAttribute("aria-live", "polite");
+  panel.setAttribute("aria-atomic", "true");
+  panel.append(element("strong", `${language === "en" ? "Rentz finish" : "Sosire Rentz"} · ${arrival.winner}`));
+  panel.append(element("span", `${language === "en" ? "Unplayed cards" : "Cărți neplasate"} · ${arrival.unplayedCards}`));
+  return panel;
+}
+
+export function rentzSequence(rows, element, play, language, arrival = null) {
   const panel = element("div", "", "rentz-sequence");
   panel.setAttribute("role", "group");
   panel.setAttribute("aria-label", language === "en" ? "Rentz sequence board" : "Șirurile Rentz");
@@ -30,6 +81,8 @@ export function rentzSequence(rows, element, play, language) {
     }
     panel.append(row);
   }
+  const summary = rentzArrivalPanel(arrival, element, language);
+  if (summary) panel.append(summary);
   return panel;
 }
 export function rentzChoiceDropdown(actions, element, play, language) {
