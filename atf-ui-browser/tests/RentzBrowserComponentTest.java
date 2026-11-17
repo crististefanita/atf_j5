@@ -404,7 +404,7 @@ public final class RentzBrowserComponentTest {
                 equal("Browser score projection matches engine delta/total ordering " + players + "/" + contract,
                         expected, displayLines);
                 equal("Browser score projection keeps all contributions " + players + "/" + contract,
-                        hand.scoring().bySeat().stream().mapToInt(List::size).sum(),
+                        hand.scoring().bySeat().stream().mapToLong(List::size).sum(),
                         table.view().scoreDetails().awards().lines().filter(line -> line.startsWith("  ")).count());
                 if (contract == Contract.RENTZ) {
                     equal("Rentz has one zero in the displayed result " + players, 1L,
