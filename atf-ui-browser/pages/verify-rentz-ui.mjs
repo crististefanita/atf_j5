@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { presentRentzArrival, rentzArrivalView, rentzChoiceDropdown, rentzSequence } from "./web/rentz-ui.mjs";
+import { presentRentzArrival, rentzArrivalView, rentzChoiceDropdown, rentzSequence,
+  rentzSequenceLayout, applyRentzSequenceLayout } from "./web/rentz-ui.mjs";
+import { readFileSync } from "node:fs";
 
 class FakeElement {
   constructor(tag, text = "", className = "") {
@@ -16,7 +18,16 @@ class FakeElement {
   setAttribute(key, value) { this.attributes[key] = value; }
   addEventListener(name, listener) { this.listeners[name] = listener; }
   click() { this.listeners.click?.(); }
+  setBounds(width, height) { this.bounds = { width, height }; }
+  getBoundingClientRect() { return this.bounds ?? { width: 0, height: 0 }; }
 }
+class FakeResizeObserver {
+  static instances = [];
+  constructor(callback) { this.callback = callback; FakeResizeObserver.instances.push(this); }
+  observe(target) { this.target = target; }
+  trigger() { this.callback([{ target: this.target }]); }
+}
+globalThis.ResizeObserver = FakeResizeObserver;
 
 let checks = 0;
 const check = (message, expected, actual) => {
@@ -26,31 +37,93 @@ const check = (message, expected, actual) => {
 const element = (tag, text, className) => new FakeElement(tag, text, className);
 const rows = ["♣", "♦", "♥", "♠"].map((suit, suitIndex) => ({
   suit,
-  cells: [
-    { label: `J${suit}`, legal: suitIndex === 0, action: suitIndex === 0 ? `card:J${suit}` : "", opening: true, played: false },
-    { label: `Q${suit}`, legal: false, action: "", opening: false, played: suitIndex === 1 },
-    { label: `K${suit}`, legal: suitIndex === 3, action: suitIndex === 3 ? `card:K${suit}` : "", opening: false, played: false },
-  ],
+  cells: ["9", "10", "J", "Q", "K", "A"].map((rank, column) => ({
+    label: `${rank}${suit}`, legal: (suitIndex === 0 && column === 3) || (suitIndex === 3 && column === 4),
+    action: suitIndex === 0 && column === 3 ? `card:Q${suit}`
+      : suitIndex === 3 && column === 4 ? `card:K${suit}` : "",
+    opening: column === 3, played: (suitIndex === 1 && column === 2) || (suitIndex === 3 && column === 5),
+  })),
 }));
-const actions = [];
-const panel = rentzSequence(rows, element, action => actions.push(action), "ro");
+const panel = rentzSequence(rows, element, "ro");
+const sequenceObserver = FakeResizeObserver.instances.at(-1);
+check("sequence observes its display container for responsive layout", true, sequenceObserver.target === panel);
+check("played Rentz card starts with its full card label before viewport sizing", "J♦", panel.children[1].children[2].textContent);
+panel.setBounds(372, 640);
+sequenceObserver.trigger();
+check("resize observer applies native geometry after the panel is measured", "true", panel.dataset.layoutReady);
+check("resize observer adopts the measured desktop-width card band", `${rentzSequenceLayout(3, 372, 640).rowHeight}px`,
+  panel.children[0].style.height);
+check("measured layout stacks the played rank and suit like Android", "J\n♦", panel.children[1].children[2].textContent);
+panel.setBounds(280, 168);
+sequenceObserver.trigger();
+check("resize observer recalculates geometry when the viewport becomes compact", `${rentzSequenceLayout(3, 280, 168).rowHeight}px`,
+  panel.children[0].style.height);
 
 check("sequence is an accessible group", "group", panel.attributes.role);
 check("sequence uses the Romanian accessible name", "Șirurile Rentz", panel.attributes["aria-label"]);
 check("all four suit rows are rendered", 4, panel.children.filter(row => row.className === "rentz-sequence-row").length);
 check("each row keeps its stable suit identity", ["0", "1", "2", "3"],
   panel.children.filter(row => row.className === "rentz-sequence-row").map(row => row.dataset.suitRow));
-check("only two legal cards become buttons", 2,
+check("sequence cards remain display-only like the native Android board", 0,
   panel.children.flatMap(row => row.children).filter(child => child.tagName === "button").length);
 check("played card stays visible as a tile", 1,
   panel.children[1].children.filter(child => child.className.includes("played")).length);
 check("opening card is marked", true, panel.children[0].children.some(child => child.className.includes("opening")));
-check("legal card gets exact action id", "card:J♣", panel.children[0].children[1].dataset.action);
-panel.children[0].children[1].click();
-panel.children[3].children[3].click();
-check("click dispatches only the selected legal cards", ["card:J♣", "card:K♠"], actions);
-check("red suits get red card styling", true, panel.children[1].children[1].className.includes("red"));
-check("black suits get black card styling", true, panel.children[0].children[1].className.includes("black"));
+check("sequence adds no suit badge absent from the native board", false,
+  panel.children.some(child => child.className === "rentz-suit-symbol"));
+check("opening slot shows only its rank before it is played", "Q", panel.children[0].children[3].textContent);
+check("opening card is not given a separate clickable action", false,
+  panel.children[0].children[3].attributes.role === "button");
+check("red suits get red card styling", true, panel.children[1].children[2].className.includes("red"));
+check("black suits get black card styling", true, panel.children[3].children[5].className.includes("black"));
+
+const nativeMetrics = readFileSync(process.argv[2], "utf8").trim().split(/\r?\n/).map(line => {
+  const [players, width, height, fontScale, rowHeight, faceHeight, faceWidth, advance, start,
+    indexWidth, indexPadding, labelSizePx, stackedIndex] = line.split("\t");
+  return { players: Number(players), width: Number(width), height: Number(height), fontScale: Number(fontScale),
+    rowHeight: Number(rowHeight), faceHeight: Number(faceHeight), faceWidth: Number(faceWidth),
+    advance: Number(advance), start: Number(start), indexWidth: Number(indexWidth),
+    indexPadding: Number(indexPadding), labelSizePx: Number(labelSizePx), stackedIndex: stackedIndex === "true" };
+});
+for (const expected of nativeMetrics) {
+  const { players, width, height, fontScale, ...nativeLayout } = expected;
+  const actualLayout = rentzSequenceLayout(players, width, height, fontScale);
+  const { labelSizePx: nativeLabelSize, ...nativeIntegerLayout } = nativeLayout;
+  const { labelSizePx: actualLabelSize, ...actualIntegerLayout } = actualLayout;
+  nativeIntegerLayout.columns = players * 2;
+  check(`sequence integer metrics match native RentzCardSpace at ${players}/${width}x${height}/${fontScale}`,
+    nativeIntegerLayout, actualIntegerLayout);
+  check(`sequence label metric matches native float precision at ${players}/${width}x${height}/${fontScale}`,
+    true, Math.abs(nativeLabelSize - actualLabelSize) < 0.00001);
+}
+const denseRanks = ["3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+const denseRows = ["♣", "♦", "♥", "♠"].map((suit, suitIndex) => ({
+  suit,
+  cells: denseRanks.map((rank, column) => ({ label: `${rank}${suit}`, legal: false, action: "",
+    opening: column === 6, played: suitIndex === 1 && column === 2 })),
+}));
+const densePanel = rentzSequence(denseRows, element, "ro");
+const denseLayout = applyRentzSequenceLayout(densePanel, 280, 235, 1);
+check("compact table uses the native overlapping card advance", true, denseLayout.advance < denseLayout.faceWidth);
+check("played faces use the native card width", `${denseLayout.faceWidth}px`,
+  densePanel.children[1].children[2].style.width);
+const nativeRightPadding = denseLayout.indexPadding + denseLayout.faceWidth - denseLayout.indexWidth;
+check("overlapped card labels reserve the same visible index area as Android",
+  `${denseLayout.indexPadding}px ${nativeRightPadding}px ${denseLayout.indexPadding}px ${denseLayout.indexPadding}px`,
+  densePanel.children[1].children[2].style.padding);
+check("opening rank remains plain text rather than a fabricated card face", "9",
+  densePanel.children[0].children[6].textContent);
+check("covered empty slots disappear only when native cards overlap", "",
+  densePanel.children[1].children[3].textContent);
+const rentzCss = readFileSync(new URL("./web/rentz.css", import.meta.url), "utf8");
+check("empty sequence slots use the Android sequence text color", true, rentzCss.includes("color: #c2d3c5;"));
+check("black card faces use the Android card text color", true, rentzCss.includes("#2a352f"));
+check("red card faces use the Android card text color", true, rentzCss.includes("#ad393a"));
+check("Rentz arrival uses the Android idle-seat text color", true, rentzCss.includes("color: #d3efe2;"));
+check("Rentz sequence indices keep Android's left edge alignment", true,
+  rentzCss.includes("justify-content: flex-start;"));
+check("Rentz sequence uses a condensed card-face font", true,
+  rentzCss.includes("Roboto Condensed") && rentzCss.includes("Arial Narrow"));
 
 const settled = {
   revision: 9,
@@ -76,13 +149,13 @@ check("arrival seats show pending hand points and pre-hand totals", [
   ["Mână …", "Total 100", false], ["Mână …", "Total -200", false], ["Mână …", "Total 50", false],
 ], waiting.view.seats.map(seat => [seat.firstFact, seat.secondFact, seat.active]));
 check("original result remains available unchanged for the score screen", "Rezultatul mâinii", settled.view.score.title);
-const arrivalBoard = rentzSequence(rows, element, () => {}, "ro", { ...arrival, language: "ro" });
+const arrivalBoard = rentzSequence(rows, element, "ro", { ...arrival, language: "ro" });
 const arrivalPanel = arrivalBoard.children.at(-1);
 check("arrival is an accessible live status", "status", arrivalPanel.attributes.role);
 check("arrival announces politely without stealing focus", "polite", arrivalPanel.attributes["aria-live"]);
 check("arrival identifies the finisher", "Sosire Rentz · Ana", arrivalPanel.children[0].textContent);
 check("arrival reports unplayed cards", "Cărți neplasate · 7", arrivalPanel.children[1].textContent);
-const englishBoard = rentzSequence(rows, element, () => {}, "en", { ...arrival, language: "en" });
+const englishBoard = rentzSequence(rows, element, "en", { ...arrival, language: "en" });
 check("arrival copy follows the selected language", "Rentz finish · Ana", englishBoard.children.at(-1).children[0].textContent);
 check("arrival helper rejects a payload without prior totals", true, (() => {
   try { rentzArrivalView(settled, { ...arrival, previousTotals: [] }, "ro"); return false; }

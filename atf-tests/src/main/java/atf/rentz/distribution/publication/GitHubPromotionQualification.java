@@ -137,7 +137,8 @@ public final class GitHubPromotionQualification {
     static String testRepository(String repository) throws IOException {
         require(repository.matches("[A-Za-z0-9-]+/[A-Za-z0-9_.-]+"), "REPOSITORY");
         String name = repository.substring(repository.indexOf('/') + 1).toLowerCase(Locale.ROOT);
-        require(!List.of(".", "..", "atf_j5", "atf_j5_releases").contains(name) && !name.endsWith(".git"), "PRODUCTION-REPOSITORY");
+        require(!List.of(".", "..", "rentz", "atf_j5", "atf_j5_releases", "rentz_releases").contains(name)
+                && !name.endsWith(".git"), "PRODUCTION-REPOSITORY");
         return repository;
     }
 

@@ -24,7 +24,7 @@ class ReleasePromotionCoordinationTest {
     @RegisterExtension static final ComponentAuditExtension AUDIT = RentzRulePublication.scoped(
             ReleasePromotionCoordinationTest.class, "release-promotion-coordination.html",
             "Competing operators with separate publication journals");
-    private static final String SOURCE = "owner/atf_j5";
+    private static final String SOURCE = "owner/rentz";
     private static final String CHANNEL = "owner/atf_j5_releases";
     private static final String COMMIT = "a".repeat(40);
     private static final int SYNC_TIMEOUT_SECONDS = 120;

@@ -285,27 +285,48 @@ final class RentzTable implements BrowserGame.Match {
         String summary = contractLabel(last.contract(), last.blind()) + " · " + text("Mâna", "Hand") + " " + last.number();
         String winner = state.phase() == Phase.MATCH_END ? finalStandings(state) : "";
         String awards = pointsLine(last);
-        List<String> rules = List.of(text("Fiecare sub-joc se joacă o singură dată de fiecare jucător.",
-                "Each contract is played once by each player."),
-                text("Punctele mâinii se adună la totalul fiecărui jucător.",
-                        "Hand points are added to each player's cumulative total."));
+        List<String> rules = last.contract() == Contract.RENTZ
+                ? List.of(text("Premiile urmează ordinea în care jucătorii își termină cărțile.",
+                                "Awards follow the order in which players empty their hands."),
+                        text("Ultimul jucător rămas cu cărți primește 0 puncte.",
+                                "The last player still holding cards receives 0 points."),
+                        text("Punctele mâinii se adună la totalul fiecărui jucător.",
+                                "Hand points are added to each player's cumulative total."))
+                : List.of(text("Fiecare sub-joc se joacă o singură dată de fiecare jucător.",
+                                "Each contract is played once by each player."),
+                        text("Punctele mâinii se adună la totalul fiecărui jucător.",
+                                "Hand points are added to each player's cumulative total."));
         return new ScoreDetails(text("Rezultatul mâinii", "Hand result"), summary, "", winner, awards, rules,
                 currentHandHistory(state));
     }
 
     private String finalStandings(Observation state) {
-        var order = java.util.stream.IntStream.range(0, names.size()).boxed()
-                .sorted(java.util.Comparator.<Integer>comparingInt(state.totals()::get).reversed().thenComparingInt(i -> i)).toList();
+        return String.join("\n", finalStandings(state.totals(), names));
+    }
+
+    static List<String> finalStandings(List<Integer> totals, List<String> names) {
+        if (totals.size() != names.size()) throw new IllegalArgumentException("Every total needs one seat name");
+        var order = java.util.stream.IntStream.range(0, totals.size()).boxed()
+                .sorted(java.util.Comparator.<Integer>comparingInt(totals::get).reversed().thenComparingInt(i -> i)).toList();
         var lines = new ArrayList<String>();
+        int place = 0;
         for (int index = 0; index < order.size(); index++) {
             int seat = order.get(index);
-            lines.add((index + 1) + ". " + names.get(seat) + " · " + state.totals().get(seat));
+            if (index == 0 || !totals.get(seat).equals(totals.get(order.get(index - 1)))) place = index + 1;
+            lines.add(place + ". " + names.get(seat) + " · " + totals.get(seat));
         }
-        return String.join("\n", lines);
+        return List.copyOf(lines);
     }
 
     private String pointsLine(ro.rentzlab.core.RentzMatch.HandResult hand) {
         var lines = new ArrayList<String>();
+        if (hand.contract() == Contract.RENTZ && hand.scoring().finishOrder().size() == names.size()) {
+            for (int place = 0; place < names.size(); place++) {
+                int seat = hand.scoring().finishOrder().get(place);
+                lines.add((place + 1) + ". " + names.get(seat) + " · " + hand.points().get(seat));
+            }
+            return String.join("\n", lines);
+        }
         for (int seat = 0; seat < names.size(); seat++) lines.add(names.get(seat) + " · " + hand.points().get(seat));
         return String.join("\n", lines);
     }

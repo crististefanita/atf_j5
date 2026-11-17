@@ -48,7 +48,8 @@ class GitHubPromotionQualificationTest {
 
     @Test void realDistributionIsOutsideThePermissionProbe() throws Exception {
         AuditedAssertions.assertEquals(REPOSITORY, testRepository(REPOSITORY), "Accept an explicit isolated repository");
-        for (String target : new String[]{"owner/ATF_j5", "owner/atf_j5_releases", "owner/..", "owner/test.git", "https://github.com/" + REPOSITORY}) {
+        for (String target : new String[]{"owner/ATF_j5", "owner/rentz", "owner/atf_j5_releases",
+                "owner/rentz_releases", "owner/..", "owner/test.git", "https://github.com/" + REPOSITORY}) {
             AuditedAssertions.assertThrows(IOException.class, () -> testRepository(target), "Reject production or ambiguous target " + target);
         }
     }

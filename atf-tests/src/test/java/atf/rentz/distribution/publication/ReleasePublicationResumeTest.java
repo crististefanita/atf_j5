@@ -34,7 +34,7 @@ class ReleasePublicationResumeTest {
     private static final String COMMIT = "a".repeat(40);
     private static final Payload APK = new Payload("RentzLab-0.27.0.apk", Path.of("fixture.apk"), 901, "b".repeat(64));
     private static final Payload CHECKSUM = new Payload("RentzLab-0.27.0.apk.sha256", Path.of("fixture.sha256"), 86, "c".repeat(64));
-    private static final Plan PLAN = new Plan("owner/atf_j5", "owner/atf_j5_releases", "0.27.0", COMMIT, APK, CHECKSUM);
+    private static final Plan PLAN = new Plan("owner/rentz", "owner/atf_j5_releases", "0.27.0", COMMIT, APK, CHECKSUM);
     @TempDir Path scratch;
     private final List<Long> remembered = new ArrayList<>();
     private final List<Step> trace = new ArrayList<>();
@@ -120,11 +120,11 @@ class ReleasePublicationResumeTest {
         var github = new Mock();
         github.rejectPush = true;
         AuditedAssertions.assertEquals("Tag push refused", failure(github, 0), "Report failed tag step");
-        AuditedAssertions.assertEquals(List.of("tag:owner/atf_j5"), github.writes, "Stop before private tag or draft");
+        AuditedAssertions.assertEquals(List.of("tag:owner/rentz"), github.writes, "Stop before private tag or draft");
         github.rejectPush = false;
         github.writes.clear();
         AuditedAssertions.assertEquals(81L, run(github, 0), "Retry from remote state");
-        AuditedAssertions.assertEquals(List.of("tag:owner/atf_j5", "tag:owner/atf_j5_releases", "draft",
+        AuditedAssertions.assertEquals(List.of("tag:owner/rentz", "tag:owner/atf_j5_releases", "draft",
                 "upload:" + APK.name(), "upload:" + CHECKSUM.name(), "publish"), github.writes,
                 "Only missing operations are performed in dependency order");
     }
@@ -179,13 +179,23 @@ class ReleasePublicationResumeTest {
                                    "native-ui", "native-ui-report")) gates.addObject().put("id", gate).put("status", "PASS");
         gates.addObject().put("id", "release-build").put("status", "PASS").put("artifact", APK.name())
                 .put("receiptSha256", receiptHash).put("artifactBytes", Files.size(apk)).put("artifactSha256", hash);
-        AuditedAssertions.assertEquals(hash, PublicationCommand.qualifiedPlan(rag, rag.deepCopy(), build, checksum).apk().sha256(),
+        var qualified = PublicationCommand.qualifiedPlan(rag, rag.deepCopy(), build, checksum);
+        AuditedAssertions.assertEquals("owner/rentz", qualified.sourceRepository(),
+                "The renamed source repository is carried into the publication plan");
+        AuditedAssertions.assertEquals("owner/atf_j5_releases", qualified.releaseRepository(),
+                "The existing APK release repository remains distinct from the source repository");
+        AuditedAssertions.assertEquals(hash, qualified.apk().sha256(),
                 "All seven source-bound gates admit exact APK");
         Path recordedReport = scratch.resolve("release-rag-report.json");
         mapper.writeValue(recordedReport.toFile(), rag);
         var recorded = mapper.readTree(recordedReport.toFile());
         AuditedAssertions.assertEquals(hash, PublicationCommand.qualifiedPlan(recorded, rag, build, checksum).apk().sha256(),
                 "The report read from disk must admit the same qualified APK");
+        var legacySource = rag.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode) legacySource.path("candidate")).put("repository", "owner/atf_j5");
+        AuditedAssertions.assertThrows(IOException.class,
+                () -> PublicationCommand.qualifiedPlan(legacySource, legacySource, build, checksum),
+                "The pre-rename repository slug cannot qualify a new publication");
         var changedSize = recorded.deepCopy();
         ((com.fasterxml.jackson.databind.node.ObjectNode) changedSize.path("gates").get(6))
                 .put("artifactBytes", Files.size(apk) + 1);

@@ -120,7 +120,7 @@ public final class PublicationCommand {
         String repository = candidate.path("repository").asText();
         String version = candidate.path("candidateVersion").asText();
         String commit = candidate.path("sourceCommit").asText();
-        require(repository.matches("[A-Za-z0-9-]+/atf_j5") && commit.matches("[a-f0-9]{40}")
+        require(repository.matches("[A-Za-z0-9-]+/rentz") && commit.matches("[a-f0-9]{40}")
                 && version.matches("(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)")
                 && !version.equals(candidate.path("currentReleaseVersion").asText()), "CANDIDATE");
         JsonNode qualified = gate(current, "release-build");
@@ -135,7 +135,8 @@ public final class PublicationCommand {
         payloadBytes(product);
         byte[] checksumBytes = readExternalFile(checksum, 512);
         require(new String(checksumBytes, StandardCharsets.US_ASCII).strip().equals(product.sha256() + "  " + name), "CHECKSUM");
-        return new Plan(repository, repository + "_releases", version, commit, product,
+        String owner = repository.substring(0, repository.indexOf('/'));
+        return new Plan(repository, owner + "/atf_j5_releases", version, commit, product,
                 new Payload(name + ".sha256", checksum, checksumBytes.length, sha256(checksumBytes)));
     }
 

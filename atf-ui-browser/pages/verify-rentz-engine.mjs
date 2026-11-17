@@ -105,6 +105,19 @@ for (let players = 3; players <= 6; players++) {
     }
     check(`${players}/${difficulty}: complete Rentz hand reaches score history`, completed);
     check(`${players}/${difficulty}: score history has every table seat`, view.history.grid.rows[0].cells.length === players);
+    const rentzDeltas = view.history.grid.rows[0].cells.map(cell => Number(cell.bid));
+    const awardsByPlayers = {
+      3: [300, 200, 0], 4: [300, 200, 100, 0],
+      5: [300, 175, 100, 25, 0], 6: [300, 150, 75, 50, 25, 0],
+    };
+    const sortedDeltas = [...rentzDeltas].sort((left, right) => right - left);
+    check(`${players}/${difficulty}: compiled Rentz settlement matches the Android award schedule`,
+      JSON.stringify(sortedDeltas) === JSON.stringify(awardsByPlayers[players]));
+    check(`${players}/${difficulty}: compiled score row has exactly one zero award`,
+      rentzDeltas.filter(points => points === 0).length === 1);
+    const orderedAwards = view.scoreDetails.awards.split("\n").map(line => Number(line.slice(line.lastIndexOf(" · ") + 3)));
+    check(`${players}/${difficulty}: compiled score details retain Rentz finish order and the single zero`,
+      JSON.stringify(orderedAwards) === JSON.stringify(awardsByPlayers[players]));
     check(`${players}/${difficulty}: confirmed Rentz hand persists achievement progress`,
       typeof profile.progress === "string" && profile.progress.length > 0);
 

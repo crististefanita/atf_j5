@@ -32,6 +32,7 @@ public final class RentzBrowserComponentTest {
         automaticTurnsKeepTheirOrderAndTiming();
         completedHandHistorySeparatesDeltaAndTotal();
         browserRentzAwardsOnlyOneZeroForEveryTableSize();
+        browserFinalStandingsUseAndroidCompetitionTies();
         profileAndAchievementProgressSurviveAdapterRecreation();
         System.out.println("Rentz browser component checks passed: " + checks);
     }
@@ -282,6 +283,17 @@ public final class RentzBrowserComponentTest {
             equal("Browser Rentz leaves exactly one zero-point player for " + players, 1L,
                     hand.points().stream().filter(points -> points == 0).count());
 
+            var expectedAwards = java.util.stream.IntStream.range(0, hand.scoring().finishOrder().size())
+                    .mapToObj(place -> {
+                        int seat = hand.scoring().finishOrder().get(place);
+                        return (place + 1) + ". " + table.names().get(seat) + " · " + hand.points().get(seat);
+                    }).collect(Collectors.joining("\n"));
+            equal("Browser score details show native Rentz finish order for " + players,
+                    expectedAwards, table.view().scoreDetails().awards());
+            equal("Browser score details show exactly one zero award for " + players, 1L,
+                    java.util.Arrays.stream(table.view().scoreDetails().awards().split("\\n"))
+                            .filter(line -> line.endsWith(" · 0")).count());
+
             var row = table.view().history().grid().rows().get(0);
             equal("Score history exposes one score cell per seat for " + players, players, row.cells().size());
             equal("Projected history keeps the engine's unique zero for " + players, 1L,
@@ -291,6 +303,16 @@ public final class RentzBrowserComponentTest {
                         Integer.toString(hand.points().get(seat)), row.cells().get(seat).bid());
             }
         }
+    }
+
+    private static void browserFinalStandingsUseAndroidCompetitionTies() {
+        var totals = List.of(-30, 20, 20, 0, -30, 5);
+        var names = List.of("Ana", "Mihai", "Ioana", "Dan", "Eva", "Radu");
+        equal("Web final standings keep Android competition ranks for tied totals", List.of(
+                "1. Mihai · 20", "1. Ioana · 20", "3. Radu · 5", "4. Dan · 0",
+                "5. Ana · -30", "5. Eva · -30"),
+                RentzTable.finalStandings(totals, names));
+        equal("Ranking projection does not reorder source totals", List.of(-30, 20, 20, 0, -30, 5), totals);
     }
     private static void profileAndAchievementProgressSurviveAdapterRecreation() {
         var name = new MemoryStore();

@@ -87,7 +87,12 @@ foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $issueAnchor
     if ($count -ne 1) { throw "Card Table Browser 0.2.4 adapter anchor changed; expected one match, found $count." }
 }
 $markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
-$rentzRender = $renderAnchor + "`n" + '  if (match.rentzSequence?.length) visible.append(rentzSequence(match.rentzSequence, element, action, language, match.rentzArrival));'
+$rentzRender = $renderAnchor + "`n" + (@(
+  '  if (match.rentzSequence?.length) {'
+  '    visible.dataset.rentzSequence = "true";'
+  '    visible.append(rentzSequence(match.rentzSequence, element, language, match.rentzArrival));'
+  '  }'
+) -join "`n")
 $markup = $markup.Replace($renderAnchor, $rentzRender)
 $markup = $markup.Replace($contentAnchor, $contentAnchor + "`n" + '  if (match.rentzArrival) content.dataset.rentzArrival = "true";')
 $rentzIssue = @(
@@ -148,7 +153,36 @@ foreach ($script in @('rentz-ui.mjs', 'table.mjs', 'engine-worker.mjs', 'local-t
 }
 & node (Join-Path $pages 'verify-rentz-engine.mjs') (Join-Path $site 'rentz-engine.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Generated Rentz engine component checks failed.' }
-& node (Join-Path $pages 'verify-rentz-ui.mjs')
+$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.11/card-table-ui-0.1.11.aar'
+$nativeUiProvenance = Get-Content -LiteralPath (Join-Path $checkout 'rentz-lab-app/ui-library/provenance.json') -Raw | ConvertFrom-Json
+$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.11/card-table-ui-0.1.11.aar' })
+if ($nativeUiPin.Count -ne 1 -or
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $nativeUiAar).Hash -ine $nativeUiPin[0].sha256) {
+    throw 'The native Rentz layout reference does not match the pinned Android UI AAR.'
+}
+$nativeUiClasses = Join-Path $run 'card-table-ui-0.1.11-classes.jar'
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$archive = [IO.Compression.ZipFile]::OpenRead($nativeUiAar)
+try {
+    $entry = $archive.GetEntry('classes.jar')
+    if (!$entry) { throw 'The pinned Android UI AAR has no classes.jar.' }
+    $input = $entry.Open()
+    $output = [IO.File]::Create($nativeUiClasses)
+    try { $input.CopyTo($output) }
+    finally { $output.Dispose(); $input.Dispose() }
+} finally { $archive.Dispose() }
+$nativeReferenceClasses = Join-Path $run 'rentz-native-layout-reference'
+$null = New-Item -ItemType Directory -Force -Path $nativeReferenceClasses
+$nativeCardSpace = Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/table/RentzCardSpace.java'
+$nativeReferenceSource = Join-Path $PSScriptRoot 'tests/ro/rentzlab/app/ui/table/RentzNativeSequenceMetricsReference.java'
+$nativeReferenceClasspath = @($classpath, $nativeUiClasses) -join [IO.Path]::PathSeparator
+& javac --release 17 -encoding UTF-8 -cp $nativeReferenceClasspath -d $nativeReferenceClasses $nativeCardSpace $nativeReferenceSource
+if ($LASTEXITCODE -ne 0) { throw 'Could not compile the native Rentz sequence layout reference.' }
+$nativeMetrics = Join-Path $run 'rentz-native-sequence-metrics.tsv'
+$nativeReferenceRuntime = @($nativeReferenceClasses, $nativeUiClasses) -join [IO.Path]::PathSeparator
+& java -cp $nativeReferenceRuntime 'ro.rentzlab.app.ui.table.RentzNativeSequenceMetricsReference' | Set-Content -LiteralPath $nativeMetrics -Encoding utf8
+if ($LASTEXITCODE -ne 0) { throw 'Could not emit native Rentz sequence layout metrics.' }
+& node (Join-Path $pages 'verify-rentz-ui.mjs') $nativeMetrics
 if ($LASTEXITCODE -ne 0) { throw 'Rentz sequence renderer component verification failed.' }
 & node (Join-Path $pages 'verify-rentz-transport.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Rentz transient event transport verification failed.' }
