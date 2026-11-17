@@ -6,7 +6,7 @@ Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din st
 
 | Responsabilitate | Sursă |
 |---|---|
-| Proiecția datelor | [RentzScoreContent](RentzScoreContent.java) păstrează ordinea locurilor și copiază delta, totalul și marcajul ×2 din rezultatele motorului. |
+| Proiecția datelor | [RentzScoreContent](RentzScoreContent.java) adaptează [ScoreSettlement](../../../../../../../../../game-core/src/main/java/ro/rentzlab/core/score/ScoreSettlement.java) și [ScoreStandings](../../../../../../../../../game-core/src/main/java/ro/rentzlab/core/score/ScoreStandings.java), comune cu browserul, pentru ordinea locurilor, delta, total și contribuțiile confirmate. |
 | Calculul dimensiunilor | [HistoryGridMetrics](HistoryGridMetrics.java) primește lățimi măsurate în pixeli. Rezervă loc pentru scoruri și stabilește când derulează toate elementele din zona de conținut. |
 | Randarea și gesturile | [RentzHistoryGrid](RentzHistoryGrid.java) măsoară cu fontul Android activ, aliniază celulele și sincronizează pozițiile de derulare. |
 | Dialogul | [RentzHistoryView](../screens/RentzHistoryView.java) rezolvă numele afișate, mesajul pentru istoricul gol și dimensiunea ferestrei. |

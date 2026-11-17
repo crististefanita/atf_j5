@@ -32,6 +32,7 @@ public final class RentzBrowserComponentTest {
         automaticTurnsKeepTheirOrderAndTiming();
         rentzPlaybackKeepsThePlayedCardAndSequenceInLockstep();
         completedHandHistorySeparatesDeltaAndTotal();
+        browserScoreProjectionMatchesTheSettledEngineForEveryContract();
         browserRentzAwardsOnlyOneZeroForEveryTableSize();
         browserFinalStandingsUseAndroidCompetitionTies();
         profileAndAchievementProgressSurviveAdapterRecreation();
@@ -364,13 +365,14 @@ public final class RentzBrowserComponentTest {
             var expectedAwards = java.util.stream.IntStream.range(0, hand.scoring().finishOrder().size())
                     .mapToObj(place -> {
                         int seat = hand.scoring().finishOrder().get(place);
-                        return (place + 1) + ". " + table.names().get(seat) + " · " + hand.points().get(seat);
+                        return (place + 1) + ". " + table.names().get(seat) + " · Δ " + hand.points().get(seat)
+                                + " · Σ " + hand.totals().get(seat) + "\n  Premiu de sosire · " + hand.points().get(seat);
                     }).collect(Collectors.joining("\n"));
             equal("Browser score details show native Rentz finish order for " + players,
                     expectedAwards, table.view().scoreDetails().awards());
             equal("Browser score details show exactly one zero award for " + players, 1L,
                     java.util.Arrays.stream(table.view().scoreDetails().awards().split("\\n"))
-                            .filter(line -> line.endsWith(" · 0")).count());
+                            .filter(line -> !line.startsWith("  ") && line.contains(" · Δ 0 · Σ ")).count());
 
             var row = table.view().history().grid().rows().get(0);
             equal("Score history exposes one score cell per seat for " + players, players, row.cells().size());
@@ -383,12 +385,41 @@ public final class RentzBrowserComponentTest {
         }
     }
 
+    private static void browserScoreProjectionMatchesTheSettledEngineForEveryContract() {
+        for (int players = 3; players <= 6; players++) {
+            for (Contract contract : Contract.values()) {
+                int seats = players;
+                var table = start(new RentzBrowser(() -> 20261117L + seats * 100L + contract.ordinal()), players);
+                table.act("reveal");
+                table.act("choose:" + contract.name());
+                finishOneHand(table);
+                var hand = table.completedHands().get(0);
+                var displayLines = table.view().scoreDetails().awards().lines()
+                        .filter(line -> !line.startsWith("  ")).toList();
+                var expected = (contract == Contract.RENTZ ? hand.scoring().finishOrder()
+                        : java.util.stream.IntStream.range(0, players).boxed().toList()).stream()
+                        .map(seat -> (contract == Contract.RENTZ ? (hand.scoring().finishOrder().indexOf(seat) + 1) + ". " : "")
+                                + table.names().get(seat) + " · Δ " + hand.points().get(seat)
+                                + " · Σ " + hand.totals().get(seat)).toList();
+                equal("Browser score projection matches engine delta/total ordering " + players + "/" + contract,
+                        expected, displayLines);
+                equal("Browser score projection keeps all contributions " + players + "/" + contract,
+                        hand.scoring().bySeat().stream().mapToInt(List::size).sum(),
+                        table.view().scoreDetails().awards().lines().filter(line -> line.startsWith("  ")).count());
+                if (contract == Contract.RENTZ) {
+                    equal("Rentz has one zero in the displayed result " + players, 1L,
+                            displayLines.stream().filter(line -> line.contains(" · Δ 0 · Σ ")).count());
+                }
+            }
+        }
+    }
+
     private static void browserFinalStandingsUseAndroidCompetitionTies() {
         var totals = List.of(-30, 20, 20, 0, -30, 5);
         var names = List.of("Ana", "Mihai", "Ioana", "Dan", "Eva", "Radu");
-        equal("Web final standings keep Android competition ranks for tied totals", List.of(
-                "1. Mihai · 20", "1. Ioana · 20", "3. Radu · 5", "4. Dan · 0",
-                "5. Ana · -30", "5. Eva · -30"),
+        equal("Web final standings keep Android competition ranks and total labels for tied totals", List.of(
+                "1. Mihai · Σ 20", "1. Ioana · Σ 20", "3. Radu · Σ 5", "4. Dan · Σ 0",
+                "5. Ana · Σ -30", "5. Eva · Σ -30"),
                 RentzTable.finalStandings(totals, names));
         equal("Ranking projection does not reorder source totals", List.of(-30, 20, 20, 0, -30, 5), totals);
     }

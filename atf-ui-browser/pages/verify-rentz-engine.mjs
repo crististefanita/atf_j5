@@ -160,9 +160,21 @@ for (let players = 3; players <= 6; players++) {
       JSON.stringify(sortedDeltas) === JSON.stringify(awardsByPlayers[players]));
     check(`${players}/${difficulty}: compiled score row has exactly one zero award`,
       rentzDeltas.filter(points => points === 0).length === 1);
-    const orderedAwards = view.scoreDetails.awards.split("\n").map(line => Number(line.slice(line.lastIndexOf(" · ") + 3)));
+    const awardLines = view.scoreDetails.awards.split("\n");
+    const playerLines = awardLines.filter(line => !line.startsWith("  "));
+    const contributionLines = awardLines.filter(line => line.startsWith("  "));
+    const historyCells = view.history.grid.rows[0].cells;
+    const orderedAwards = playerLines.map((line, row) => {
+      const match = line.match(/^(?:\d+\. )?(.+?) · Δ (-?\d+) · Σ (-?\d+)$/);
+      const seat = match ? view.seats.findIndex(value => value.name === match[1]) : -1;
+      check(`${players}/${difficulty}: score line exposes confirmed delta and total for seat ${seat}`,
+        !!match && seat >= 0 && Number(match[2]) === Number(historyCells[seat]?.bid)
+          && Number(match[3]) === Number(historyCells[seat]?.total));
+      return match ? Number(match[2]) : Number.NaN;
+    });
     check(`${players}/${difficulty}: compiled score details retain Rentz finish order and the single zero`,
-      JSON.stringify(orderedAwards) === JSON.stringify(awardsByPlayers[players]));
+      JSON.stringify(orderedAwards) === JSON.stringify(awardsByPlayers[players])
+        && playerLines.length === players && contributionLines.length === players);
     check(`${players}/${difficulty}: confirmed Rentz hand persists achievement progress`,
       typeof profile.progress === "string" && profile.progress.length > 0);
 

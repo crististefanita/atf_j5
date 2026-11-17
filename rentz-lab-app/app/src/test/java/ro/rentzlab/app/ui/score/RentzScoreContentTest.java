@@ -93,6 +93,12 @@ public final class RentzScoreContentTest {
                 new RentzScoreContent.Standing(5, 3, 5), new RentzScoreContent.Standing(3, 4, 0),
                 new RentzScoreContent.Standing(0, 5, -30), new RentzScoreContent.Standing(4, 5, -30)),
                 RentzScoreContent.finalStandings(end));
+        var names = List.of("Ana", "Mihai", "Ioana", "Dan", "Eva", "Radu");
+        audit.equal("Android final labels use the shared platform-neutral format", List.of(
+                "1. Mihai · Σ 20", "1. Ioana · Σ 20", "3. Radu · Σ 5", "4. Dan · Σ 0",
+                "5. Ana · Σ -30", "5. Eva · Σ -30"),
+                RentzScoreContent.finalStandings(end).stream()
+                        .map(row -> RentzScoreContent.standingLabel(row, names.get(row.seat()))).toList());
         audit.equal("Final ranking does not mutate seat totals", totals, end.totals());
         audit.truth("An ordinary settled hand has no final standings",
                 RentzScoreContent.finalStandings(standingsInput(RentzMatch.Phase.DEAL_END, totals)).isEmpty());
@@ -103,6 +109,46 @@ public final class RentzScoreContentTest {
             for (int seat = 0; seat < players; seat++) {
                 audit.equal("Tied seat order " + players + "/" + seat,
                         new RentzScoreContent.Standing(seat, 1, -50), rows.get(seat));
+            }
+        }
+    }
+
+    @Test public void resultDetailsUseSharedSettlementForEveryContractAndTableSize() {
+        var copy = new RentzUiText(RentzUiText.Language.RO);
+        for (int players = 3; players <= 6; players++) {
+            for (Contract contract : Contract.values()) {
+                var session = new GameSession(players, 9100L + players * 10L + contract.ordinal(), RentzPlayer.Difficulty.NORMAL);
+                session.apply(new GameSession.Command(GameSession.Action.CHOOSE, 0, null, contract, false));
+                int moves = 0;
+                while (session.view().phase() == RentzMatch.Phase.PLAY) {
+                    if (session.hasForcedHumanPass()) {
+                        session.apply(new GameSession.Command(GameSession.Action.PASS, 0, null, null, false));
+                    } else if (session.hasPendingHumanDecision()) {
+                        session.advanceHumanTurn();
+                    } else {
+                        session.advanceBotTurn();
+                    }
+                    if (++moves > 128) throw new AssertionError("Score fixture did not finish " + players + "/" + contract);
+                }
+                var hand = session.history().get(0);
+                var row = RentzScoreContent.currentHand(session.view(), session.history(), copy).orElseThrow();
+                var details = RentzScoreContent.details(row);
+                audit.equal("One result detail per seat " + players + "/" + contract, players, details.size());
+                for (int place = 0; place < players; place++) {
+                    int seat = contract == Contract.RENTZ ? hand.scoring().finishOrder().get(place) : place;
+                    var detail = details.get(place);
+                    audit.equal("Shared row order " + players + "/" + contract + "/" + place, seat, detail.seat());
+                    audit.equal("Shared delta " + players + "/" + contract + "/" + place,
+                            hand.points().get(seat), detail.score().delta());
+                    audit.equal("Shared cumulative total " + players + "/" + contract + "/" + place,
+                            hand.totals().get(seat), detail.score().total());
+                }
+                if (contract == Contract.RENTZ) {
+                    audit.equal("Exactly one Rentz zero in history " + players, 1L,
+                            hand.points().stream().filter(points -> points == 0).count());
+                    audit.equal("Exactly one Rentz zero in result projection " + players, 1L,
+                            details.stream().filter(detail -> detail.score().delta() == 0).count());
+                }
             }
         }
     }

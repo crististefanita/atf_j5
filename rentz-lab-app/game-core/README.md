@@ -26,6 +26,7 @@ Aliasurile regulilor din YAML se rezolvă prin registrul tipizat al claselor pub
 | `TrickRules` | Urmarea culorii și câștigătorul fără atu. |
 | `RentzBoard` | Extinderea contiguă pe culori. |
 | `ScoreProfile` | Punctajul levatelor, grila premiilor pe mărimea mesei, dublarea și intervalul numeric sigur. |
+| `ScoreSettlement`, `ScoreStandings` | Proiecții imutabile comune adaptoarelor Android și WEB pentru rezultatul unei mâini și clasamentul final; nu schimbă registrul de scor al motorului. |
 | `RentzMatch` | Faze, alegeri, acțiuni, evenimente publice și istoric. |
 | `LabPolicy` | Reper simplu care primește numai observația actorului. |
 | `RentzPlayer` | Port stabil cu niveluri Normal și Hard, pe observația actorului. |

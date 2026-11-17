@@ -25,7 +25,7 @@ public final class RentzHandDetails extends ScrollView {
         if (!standings.isEmpty()) {
             line(content, copy.text("Final standings", "Clasament final"), true);
             for (var standing : standings) {
-                line(content, standing.place() + ". " + players.get(standing.seat()) + "   ·   Σ " + standing.total(), false);
+                line(content, RentzScoreContent.standingLabel(standing, players.get(standing.seat())), false);
             }
             line(content, copy.text("Last hand details", "Detaliile ultimei mâini"), true);
         }

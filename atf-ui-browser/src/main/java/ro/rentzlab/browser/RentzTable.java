@@ -27,6 +27,8 @@ import ro.rentzlab.core.RentzBoard;
 import ro.rentzlab.core.RentzMatch.Observation;
 import ro.rentzlab.core.RentzMatch.Phase;
 import ro.rentzlab.core.TrickRules;
+import ro.rentzlab.core.score.ScoreStandings;
+import ro.rentzlab.core.score.ScoreSettlement;
 import ro.rentzlab.core.sequence.SequenceOpening;
 
 /** Browser projection of the same session used by Android. Opponent hands never cross this boundary. */
@@ -349,28 +351,23 @@ final class RentzTable implements BrowserGame.Match {
 
     static List<String> finalStandings(List<Integer> totals, List<String> names) {
         if (totals.size() != names.size()) throw new IllegalArgumentException("Every total needs one seat name");
-        var order = java.util.stream.IntStream.range(0, totals.size()).boxed()
-                .sorted(java.util.Comparator.<Integer>comparingInt(totals::get).reversed().thenComparingInt(i -> i)).toList();
-        var lines = new ArrayList<String>();
-        int place = 0;
-        for (int index = 0; index < order.size(); index++) {
-            int seat = order.get(index);
-            if (index == 0 || !totals.get(seat).equals(totals.get(order.get(index - 1)))) place = index + 1;
-            lines.add(place + ". " + names.get(seat) + " · " + totals.get(seat));
-        }
-        return List.copyOf(lines);
+        return ScoreStandings.rank(totals).stream()
+                .map(place -> ScoreStandings.label(place, names.get(place.seat()))).toList();
     }
 
     private String pointsLine(ro.rentzlab.core.RentzMatch.HandResult hand) {
         var lines = new ArrayList<String>();
-        if (hand.contract() == Contract.RENTZ && hand.scoring().finishOrder().size() == names.size()) {
-            for (int place = 0; place < names.size(); place++) {
-                int seat = hand.scoring().finishOrder().get(place);
-                lines.add((place + 1) + ". " + names.get(seat) + " · " + hand.points().get(seat));
+        for (var player : ScoreSettlement.project(hand.contract(), hand.points(), hand.totals(), hand.scoring())) {
+            String heading = player.finishPlace() == 0 ? names.get(player.seat())
+                    : player.finishPlace() + ". " + names.get(player.seat());
+            lines.add(heading + " · Δ " + player.delta() + " · Σ " + player.total());
+            for (var contribution : player.contributions()) {
+                String label = contribution.category() == Contract.RENTZ
+                        ? text("Premiu de sosire", "Finishing award")
+                        : contractName(contribution.category()) + " × " + contribution.count();
+                lines.add("  " + label + " · " + contribution.points());
             }
-            return String.join("\n", lines);
         }
-        for (int seat = 0; seat < names.size(); seat++) lines.add(names.get(seat) + " · " + hand.points().get(seat));
         return String.join("\n", lines);
     }
 

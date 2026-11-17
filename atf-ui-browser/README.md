@@ -78,6 +78,13 @@ Săgețile punctate întorc observațiile publice. Așteptarea fixează ritmul r
 - Sursa WEB proprie `PlayerNames` există numai în compilarea TeaVM: înlocuiește apelurile Unicode indisponibile în acel runtime, iar testul ei compară rezultatele direct cu biblioteca de nume folosită de APK.
 - Codul nativ și APK-ul nu sunt schimbate de această adaptare.
 
+### Scor și clasament comune
+
+- `ScoreSettlement` păstrează ordinea de sosire la Rentz; la celelalte sub-jocuri păstrează ordinea locurilor.
+- Fiecare rând de rezultat adaptează delta, totalul confirmat și contribuțiile din istoricul motorului.
+- `ScoreStandings` aplică departajarea competitivă și eticheta totalului final folosite de APK.
+- Testele compară adaptoarele Android și WEB cu rezultatul motorului pentru mese de 3–6 jucători și verifică un singur zero la Rentz.
+
 | Strat | Verifică fără emulator | Ce protejează |
 |---|---|---|
 | Componente JVM | Validarea configurării comune; 3–6 jucători și Normal/Greu; reguli, acțiuni legale, treceri automate, rezultate și istoric; profil, realizări și checkpoint; contractele de nume și punctaj; ordinea snapshot-urilor Rentz și cele 550 ms după primul cadru al locului activ, comparate cu biblioteca UI Android fixată | Motorul, regulile și ritmul de decizie rămân aliniate cu APK-ul, iar proiecția WEB nu schimbă rezultatul sesiunii |
@@ -107,8 +114,11 @@ Săgețile punctate întorc observațiile publice. Așteptarea fixează ritmul r
 Necesită PowerShell 7, JDK 21, Maven și Node.js 24. Toate clasele generate, cache-urile și paginile construite se scriu într-un director extern checkout-ului.
 
 ```powershell
-.\atf-ui-browser\Test-RentzBrowserComponents.ps1 -WorkRoot C:\work\rentz_back\web-01\components
-.\atf-ui-browser\Build-RentzPages.ps1 -WorkRoot C:\work\rentz_back\web-01\pages
+$env:RENTZ_WORK_ROOT = '<director extern pentru artefactele Rentz>'
+$components = Join-Path $env:RENTZ_WORK_ROOT 'browser-components'
+$pages = Join-Path $env:RENTZ_WORK_ROOT 'browser-pages'
+.\atf-ui-browser\Test-RentzBrowserComponents.ps1 -WorkRoot $components
+.\atf-ui-browser\Build-RentzPages.ps1 -WorkRoot $pages
 ```
 
 `Test-RentzBrowserComponents.ps1` rulează testele JVM ale adaptorului și ale sesiunii comune. Build-ul WEB rulează, în ordine, testele JVM ale endpoint-ului, comparația cu biblioteca APK, compilarea TeaVM, verificările Node asupra motorului generat și verificările DOM. O eroare la oricare strat oprește build-ul.
@@ -118,7 +128,9 @@ Necesită PowerShell 7, JDK 21, Maven și Node.js 24. Toate clasele generate, ca
 Folosiți lansatorul și un build extern:
 
 ```powershell
-.\atf-ui-browser\Start-RentzBrowser.ps1 -WorkRoot C:\work\rentz_back\web-01\local
+$env:RENTZ_WORK_ROOT = '<director extern pentru artefactele Rentz>'
+$local = Join-Path $env:RENTZ_WORK_ROOT 'browser-local'
+.\atf-ui-browser\Start-RentzBrowser.ps1 -WorkRoot $local
 ```
 
 ## Publicare
