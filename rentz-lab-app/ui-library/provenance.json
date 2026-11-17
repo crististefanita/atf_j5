@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "coordinate": "ro.cardtable:card-table-ui:0.1.11",
+  "coordinate": "ro.cardtable:card-table-ui:0.1.15",
   "namesCoordinate": "ro.cardtable:card-table-names:0.1.0",
   "producer": "atf_j4",
-  "qualification": "https://github.com/crististefanita/atf_j4/blob/fed61011afbca578cf6c7ad038ad891f4e75b49c/whist-lab-app/atf-card-table-ui/README.md",
+  "qualification": "https://github.com/crististefanita/whist/blob/1d31c9c7cc204dd4854643256dd326370f169b2f/whist-lab-app/atf-card-table-ui/README.md",
   "files": [
     {
-      "sha256": "230d530ee23f5141b6b9adc6931d9bc38b78c2cc3cb8fd6ed69a797b16a1d1b9",
-      "path": "ro/cardtable/card-table-ui/0.1.11/card-table-ui-0.1.11.aar"
+      "path": "ro/cardtable/card-table-ui/0.1.15/card-table-ui-0.1.15.aar",
+      "sha256": "30a2588ccf31ffdca4a8d0c50a424cb4446d2c08677426d2fafe2ec322cfd9d7"
     },
     {
-      "sha256": "321093d7a7f7754838be47e97c99a96a211a06f73640e424e2d31fa5a55cbf87",
-      "path": "ro/cardtable/card-table-ui/0.1.11/card-table-ui-0.1.11.pom"
+      "path": "ro/cardtable/card-table-ui/0.1.15/card-table-ui-0.1.15.pom",
+      "sha256": "e800d092b91d7e2b9e737dc231f52633ddce2554b86d210706a9011e0f8f4a7f"
     },
     {
-      "sha256": "e493916137e7e9ff57da07404341216f4b6950bc5ed6227994b9433ffd131fa2",
-      "path": "ro/cardtable/card-table-ui/0.1.11/card-table-ui-0.1.11.module"
+      "path": "ro/cardtable/card-table-ui/0.1.15/card-table-ui-0.1.15.module",
+      "sha256": "4acb0683a69f736248cbe0ccd008742629f474313249388a34e3d777d4cc4bc8"
     },
     {
-      "sha256": "4855af63a5dac2954ce04b2c9bfa96e7c99bbcc6993a2bc75774ee8d5cfec9de",
-      "path": "ro/cardtable/card-table-ui/0.1.11/card-table-ui-0.1.11-sources.jar"
+      "path": "ro/cardtable/card-table-ui/0.1.15/card-table-ui-0.1.15-sources.jar",
+      "sha256": "d7a17f31a850bf16a06fd252d3b665a885b608de2885f39b56676fa89161baf2"
     },
     {
       "path": "ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar",
@@ -38,6 +38,6 @@
       "sha256": "92a5fb18ad5e183f89a09392b177803b0b42227f83cf5a278012760291d3c030"
     }
   ],
-  "producerCommit": "fed61011afbca578cf6c7ad038ad891f4e75b49c",
-  "producerSourceFingerprint": "d0dee3dbe3a7c7efe7080e052ccfe037ba6a55beae0c06e2997d37bd3fd14166"
+  "producerCommit": "1d31c9c7cc204dd4854643256dd326370f169b2f",
+  "producerSourceFingerprint": "6344f44b0042acfcbda4259b1a401822025e5367bd63ccc3e3c94f4c921e8f90"
 }

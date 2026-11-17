@@ -15,6 +15,7 @@ import ro.cardtable.ui.animation.TrickCollectionAnimator;
 import ro.cardtable.ui.hand.*;
 import ro.cardtable.ui.seat.*;
 import ro.cardtable.ui.table.*;
+import ro.cardtable.ui.table.android.PlayedCardsView;
 import ro.cardtable.ui.theme.TablePalette;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.app.ui.window.WindowContent;

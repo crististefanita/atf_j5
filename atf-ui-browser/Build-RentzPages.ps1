@@ -16,7 +16,7 @@ $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -Jso
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.4.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.5.jar'
 $pages = Join-Path $PSScriptRoot 'pages'
 $dependencySpec = Join-Path $pages 'teavm-dependencies.xml'
 $toolClasspath = Join-Path $root 'teavm.classpath'
@@ -84,7 +84,7 @@ $choiceAnchor = @(
 ) -join "`n"
 foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
-    if ($count -ne 1) { throw "Card Table Browser 0.2.4 adapter anchor changed; expected one match, found $count." }
+    if ($count -ne 1) { throw "Card Table Browser 0.2.5 adapter anchor changed; expected one match, found $count." }
 }
 $markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
 $rentzRender = $renderAnchor + "`n" + (@(
@@ -153,14 +153,14 @@ foreach ($script in @('rentz-ui.mjs', 'table.mjs', 'engine-worker.mjs', 'local-t
 }
 & node (Join-Path $pages 'verify-rentz-engine.mjs') (Join-Path $site 'rentz-engine.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Generated Rentz engine component checks failed.' }
-$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.11/card-table-ui-0.1.11.aar'
+$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.15/card-table-ui-0.1.15.aar'
 $nativeUiProvenance = Get-Content -LiteralPath (Join-Path $checkout 'rentz-lab-app/ui-library/provenance.json') -Raw | ConvertFrom-Json
-$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.11/card-table-ui-0.1.11.aar' })
+$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.15/card-table-ui-0.1.15.aar' })
 if ($nativeUiPin.Count -ne 1 -or
         (Get-FileHash -Algorithm SHA256 -LiteralPath $nativeUiAar).Hash -ine $nativeUiPin[0].sha256) {
     throw 'The native Rentz layout reference does not match the pinned Android UI AAR.'
 }
-$nativeUiClasses = Join-Path $run 'card-table-ui-0.1.11-classes.jar'
+$nativeUiClasses = Join-Path $run 'card-table-ui-0.1.15-classes.jar'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archive = [IO.Compression.ZipFile]::OpenRead($nativeUiAar)
 try {
