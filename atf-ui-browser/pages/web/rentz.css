@@ -31,6 +31,9 @@
   width: 100%;
   overflow: visible;
 }
+.whist-match .center {
+  inset-block: var(--rentz-center-top, 72px) var(--rentz-center-bottom, 67px);
+}
 .rentz-sequence[data-layout-ready="true"] .rentz-sequence-row { display: block; }
 .rentz-arrival {
   display: grid;
@@ -56,7 +59,7 @@
   border-radius: 0;
   background: transparent;
   color: #c2d3c5;
-  font: 700 14px/1.1 "Roboto Condensed", "Arial Narrow", sans-serif;
+  font: 700 14px/1.1 "CardTableSuits", "Roboto Condensed", "Arial Narrow", sans-serif;
   white-space: pre-line;
   text-overflow: clip;
 }

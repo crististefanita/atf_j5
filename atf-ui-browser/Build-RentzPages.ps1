@@ -17,6 +17,11 @@ if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' 
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
 $library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.6.jar'
+$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.6-tests.jar'
+$commonTestsExpected = (Get-Content -LiteralPath "$commonTests.sha256" -Raw).Trim()
+if ((Get-FileHash -Algorithm SHA256 -LiteralPath $commonTests).Hash -ine $commonTestsExpected) {
+    throw 'Shared browser component test checksum mismatch.'
+}
 $pages = Join-Path $PSScriptRoot 'pages'
 $dependencySpec = Join-Path $pages 'teavm-dependencies.xml'
 $toolClasspath = Join-Path $root 'teavm.classpath'
@@ -67,15 +72,25 @@ $null = New-Item -ItemType Directory -Force -Path $commonRoot
 Push-Location $commonRoot
 try { & jar xf $library 'ro/cardtable/browser/web' }
 finally { Pop-Location }
+$commonTestRoot = Join-Path $run 'common-component-tests'
+$null = New-Item -ItemType Directory -Force -Path $commonTestRoot
+Push-Location $commonTestRoot
+try { & jar xf $commonTests 'hand-presentation.mjs' }
+finally { Pop-Location }
 $commonWeb = Join-Path $commonRoot 'ro/cardtable/browser/web'
 Get-ChildItem -LiteralPath $commonWeb -File | Copy-Item -Destination $site
 Get-ChildItem -LiteralPath (Join-Path $pages 'web') -File | Copy-Item -Destination $site
+if (!(Test-Path -LiteralPath (Join-Path $commonTestRoot 'hand-presentation.mjs'))) {
+    throw 'The shared Card Table Browser hand component test is missing.'
+}
 
 $tableScript = Join-Path $site 'table.mjs'
 $markup = [IO.File]::ReadAllText($tableScript).Replace("`r`n", "`n")
 $importAnchor = 'import { historyGrid } from "./records.mjs";'
 $renderAnchor = '  const visible = element("div", "", "cards-on-table");' + "`n" + '  if (!match.header) for (const face of match.center) visible.append(card(face));'
 $contentAnchor = '  const content = element("section", "", match.header ? "match whist-match" : "match");'
+$centerAnchor = '  const center = element("div", "", "center");'
+$automationAnchor = '    input.checked = automation.selected();'
 $rentzHeaderAnchor = '  const title = element("h1", match.header.title);' + "`n" + '  top.append(navigation, title);'
 $rentzDetailsAnchor = '  details.append(status, trump);'
 $issueAnchor = '    state = result;' + "`n" + '    transport.remember?.(state.profile);'
@@ -84,11 +99,11 @@ $choiceAnchor = @(
   '    actions.append(control(move));'
   '  }'
 ) -join "`n"
-foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
+foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAnchor, $automationAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
     if ($count -ne 1) { throw "Card Table Browser 0.2.6 adapter anchor changed; expected one match, found $count." }
 }
-$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
+$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
 $markup = $markup.Replace($rentzHeaderAnchor,
   '  const title = element("h1", match.header.title);' + "`n" +
   '  title.hidden = match.header.mode === "RENTZ";' + "`n" +
@@ -104,8 +119,18 @@ $rentzRender = $renderAnchor + "`n" + (@(
 ) -join "`n")
 $markup = $markup.Replace($renderAnchor, $rentzRender)
 $markup = $markup.Replace($contentAnchor, $contentAnchor + "`n" + '  if (match.rentzArrival) content.dataset.rentzArrival = "true";')
+$rentzCenterRender = $centerAnchor + "`n" + (@(
+  '  if (match.header?.mode === "RENTZ") {'
+  '    const insets = rentzCenterInsets(match.seats.length);'
+  '    center.style.setProperty("--rentz-center-top", `${insets.top}px`);'
+  '    center.style.setProperty("--rentz-center-bottom", `${insets.bottom}px`);'
+  '  }'
+) -join "`n")
+$markup = $markup.Replace($centerAnchor, $rentzCenterRender)
+$markup = $markup.Replace($automationAnchor, $automationAnchor + "`n" + '    input.disabled = !!match.rentzArrival;')
 $rentzIssue = @(
   '    await presentRentzPlayback(result, {'
+  '      autoStepAction: state.view?.actions?.find(move => move.key === "auto-step"),'
   '      render: next => { state = next; return render(); },'
   '      nextFrame: () => new Promise(resolve => requestAnimationFrame(resolve)),'
   '      wait: duration => new Promise(resolve => setTimeout(resolve, duration)),'
@@ -113,6 +138,7 @@ $rentzIssue = @(
   '    const arrivalPresented = await presentRentzArrival(result, language, {'
   '      render: next => { state = next; return render(); },'
   '      wait: duration => new Promise(resolve => setTimeout(resolve, duration)),'
+  '      autoStepAction: state.view?.actions?.find(move => move.key === "auto-step"),'
   '      stopAutomation: () => automation.set(false),'
   '    });'
   '    state = result;'
@@ -158,14 +184,16 @@ if ($rentzStyleLinks -ne 1) { throw "Rentz page must load its adapter stylesheet
 [IO.File]::WriteAllText($index, $html, [Text.UTF8Encoding]::new($false))
 [IO.File]::WriteAllText((Join-Path $site '.nojekyll'), '', [Text.UTF8Encoding]::new($false))
 
-foreach ($required in @('index.html', 'rentz-engine.mjs', 'engine-worker.mjs', 'local-transport.mjs', 'rentz-ui.mjs', 'rentz.css', 'table.mjs')) {
+foreach ($required in @('index.html', 'rentz-engine.mjs', 'engine-worker.mjs', 'local-transport.mjs', 'rentz-ui.mjs', 'rentz.css', 'table.mjs', 'hand-feedback.mjs', 'card-suits.woff2', 'card-suits-OFL.txt')) {
     if (!(Test-Path -LiteralPath (Join-Path $site $required))) { throw "Rentz Pages output is missing $required" }
 }
 foreach ($script in @('rentz-ui.mjs', 'table.mjs', 'engine-worker.mjs', 'local-transport.mjs')) {
     & node --check (Join-Path $site $script)
     if ($LASTEXITCODE -ne 0) { throw "Generated browser script is invalid: $script" }
 }
-& node (Join-Path $pages 'verify-rentz-engine.mjs') (Join-Path $site 'rentz-engine.mjs')
+& node (Join-Path $pages 'verify-rentz-engine.mjs') (Join-Path $site 'rentz-engine.mjs') `
+    (Join-Path $commonTestRoot 'hand-presentation.mjs') (Join-Path $site 'hand-feedback.mjs') `
+    (Join-Path $site 'rentz-ui.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Generated Rentz engine component checks failed.' }
 $nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.15/card-table-ui-0.1.15.aar'
 $nativeUiProvenance = Get-Content -LiteralPath (Join-Path $checkout 'rentz-lab-app/ui-library/provenance.json') -Raw | ConvertFrom-Json

@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { pathToFileURL } from "node:url";
 
 const engine = await import(pathToFileURL(process.argv[2]).href);
+const { verifyHandPresentation } = await import(pathToFileURL(process.argv[3]).href);
+const { bindHandFeedback } = await import(pathToFileURL(process.argv[4]).href);
+const { presentRentzPlayback } = await import(pathToFileURL(process.argv[5]).href);
 let checks = 0;
+let sharedHandComponentChecked = false;
 const nativeSuitOrder = { "♠": 0, "♥": 1, "♣": 2, "♦": 3 };
 const nativeRank = label => ({ J: 11, Q: 12, K: 13, A: 14 }[label.slice(0, -1)] ?? Number(label.slice(0, -1)));
 
@@ -32,6 +36,18 @@ for (let players = 3; players <= 6; players++) {
 
     const setup = call("/api/setup");
     check(`${players}/${difficulty}: setup contract`, !setup.status && setup.result.fields.length > 0);
+    if (!sharedHandComponentChecked) {
+      const cards = { first: { face: "8♦", command: "first" }, second: { face: "10♦", command: "second" },
+        wrong: { face: "8♣", command: "" } };
+      const motion = await verifyHandPresentation(bindHandFeedback, setup.result.handMotion, cards, ({ card }) => {
+        const wrong = card === cards.wrong.face;
+        return { action: wrong ? "HINT" : "PLAY", rejected: wrong ? card : "", selected: !wrong,
+          revision: wrong ? 1 : 2, suggestions: wrong ? [cards.first.face, cards.second.face] : [] };
+      }, command => assert.equal(command, cards.second.command));
+      check("Rentz uses the shared J4 hand hint, lift and cancel behavior from the pinned component test",
+        motion.submitted === 1 && motion.duration === setup.result.handMotion.liftMillis);
+      sharedHandComponentChecked = true;
+    }
     const initial = call("/api/state");
     check(`${players}/${difficulty}: initial state`, !initial.status && initial.result.revision === 0);
     const started = call("/api/start", {
@@ -48,11 +64,20 @@ for (let players = 3; players <= 6; players++) {
     check(`${players}/${difficulty}: profile uses APK NFC normalization`, !renamed.status && renamed.name === "José");
     const rejectedName = call("/api/profile", { revision: renamed.result.revision, name: "Ana🙂" });
     check(`${players}/${difficulty}: profile rejects names invalid in the APK`, rejectedName.status === 400);
-    view = renamed.result.view;
+    const supplementaryLetter = "\uD801\uDC00";
+    const unicodeName = call("/api/profile", { revision: renamed.result.revision,
+      name: supplementaryLetter.repeat(10) });
+    check(`${players}/${difficulty}: compiled browser accepts ten supplementary Unicode letters`,
+      !unicodeName.status && unicodeName.name === supplementaryLetter.repeat(10));
+    const overlongUnicodeName = call("/api/profile", { revision: unicodeName.result.revision,
+      name: supplementaryLetter.repeat(11) });
+    check(`${players}/${difficulty}: compiled browser counts Unicode code points like the APK`,
+      overlongUnicodeName.status === 400);
+    view = unicodeName.result.view;
 
     let reveal = view.actions.find(action => action.key === "reveal");
     check(`${players}/${difficulty}: reveal is an offered action`, !!reveal);
-    let response = call("/api/action", { revision: renamed.result.revision, action: reveal.key });
+    let response = call("/api/action", { revision: unicodeName.result.revision, action: reveal.key });
     check(`${players}/${difficulty}: reveal action is accepted (${JSON.stringify(response)})`, !response.status);
     view = response.result.view;
     check(`${players}/${difficulty}: reveal exposes only eight human cards`, view.hand.length === 8);
@@ -102,6 +127,26 @@ for (let players = 3; players <= 6; players++) {
         advanced.result.playback.every(step => step.seatFacts.length === players
           && step.seatFacts.every(fact => fact.split("\n").length === 2
             && fact.split("\n").every(line => line.length > 0))));
+      const renderedFrames = [];
+      const playbackFrames = advanced.rentzPlayback ?? [];
+      const replayed = await presentRentzPlayback(advanced, {
+        render: async snapshot => renderedFrames.push(snapshot.view),
+        nextFrame: async () => {},
+        wait: async () => {},
+      });
+      check(`${players}/${difficulty}: real engine playback is routed through the browser adapter`,
+        playbackFrames.length > 0, replayed);
+      const expectedRenderCount = playbackFrames.reduce((count, frame) => count + (frame.delayMillis > 0 ? 2 : 1), 0);
+      check(`${players}/${difficulty}: browser adapter renders each actor/card step exactly once`,
+        expectedRenderCount, renderedFrames.length);
+      if (playbackFrames.length > 0) {
+        const labels = sequence => sequence.flatMap(row => row.cells)
+          .filter(cell => cell.played).map(cell => cell.label).sort();
+        check(`${players}/${difficulty}: displayed Rentz board equals the last public frame`,
+          labels(playbackFrames.at(-1).after.rentzSequence), labels(renderedFrames.at(-1).rentzSequence));
+        check(`${players}/${difficulty}: last public frame equals the committed engine state`,
+          labels(advanced.result.view.rentzSequence), labels(renderedFrames.at(-1).rentzSequence));
+      }
     }
     check(`${players}/${difficulty}: complete Rentz hand reaches score history`, completed);
     check(`${players}/${difficulty}: score history has every table seat`, view.history.grid.rows[0].cells.length === players);

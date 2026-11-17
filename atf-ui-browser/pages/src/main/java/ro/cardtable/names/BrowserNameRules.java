@@ -44,7 +44,8 @@ public final class BrowserNameRules {
 
     @JSBody(params = "codePoint", script = """
             if (codePoint === 0x20 || codePoint === 0x2d || codePoint === 0x27) return true;
-            return /^[\\p{L}\\p{N}]$/u.test(String.fromCodePoint(codePoint));
+            const letterOrNumber = new RegExp("^[\\\\p{L}\\\\p{N}]$", "u");
+            return letterOrNumber.test(String.fromCodePoint(codePoint));
             """)
     private static native boolean browserAllowed(int codePoint);
 }

@@ -1,4 +1,4 @@
-export function rentzArrivalView(state, arrival, language) {
+export function rentzArrivalView(state, arrival, language, autoStepAction = null) {
   const match = state?.view;
   if (!match?.score || !Array.isArray(match.seats) || !Array.isArray(arrival?.previousTotals)
       || arrival.previousTotals.length !== match.seats.length || !Number.isInteger(arrival.unplayedCards)
@@ -12,7 +12,7 @@ export function rentzArrivalView(state, arrival, language) {
     view: {
       ...match,
       prompt: "",
-      actions: [],
+      actions: autoStepAction?.key === "auto-step" ? [autoStepAction] : [],
       seats: match.seats.map((seat, index) => ({
         ...seat,
         firstFact: `${hand} …`,
@@ -26,11 +26,11 @@ export function rentzArrivalView(state, arrival, language) {
   };
 }
 
-export async function presentRentzArrival(result, language, { render, wait, stopAutomation }) {
+export async function presentRentzArrival(result, language, { render, wait, stopAutomation, autoStepAction }) {
   if (!result?.rentzArrival) return false;
   stopAutomation();
   try {
-    await render(rentzArrivalView(result, result.rentzArrival, language));
+    await render(rentzArrivalView(result, result.rentzArrival, language, autoStepAction));
     await wait(result.rentzArrival.durationMillis);
   } finally {
     await render(result);
@@ -38,17 +38,21 @@ export async function presentRentzArrival(result, language, { render, wait, stop
   return true;
 }
 
-function rentzPlaybackView(result, snapshot, activeSeat = null) {
+function rentzPlaybackView(result, snapshot, activeSeat = null, autoStepAction = null) {
   const view = snapshot;
   if (!view || !Array.isArray(view.seats) || !Array.isArray(view.rentzSequence)
       || !Array.isArray(view.hand)) {
     throw new Error("Rentz playback snapshot is incomplete or exposes no public table state.");
   }
+  const autoStep = [...(view.actions ?? []), ...(result?.view?.actions ?? []), autoStepAction]
+    .find(action => action?.key === "auto-step");
   return {
     ...result,
     view: {
       ...view,
-      actions: [],
+      // The shared shell renders the persistent auto-play checkbox from this action marker.
+      // Keep only that marker during playback; card actions stay hidden until the replay ends.
+      actions: autoStep ? [autoStep] : [],
       prompt: "",
       score: null,
       scoreDetails: null,
@@ -60,20 +64,120 @@ function rentzPlaybackView(result, snapshot, activeSeat = null) {
   };
 }
 
+function rentzPlaybackSnapshot(snapshot, frameIndex, side) {
+  const fail = reason => { throw new Error(`Rentz playback frame ${frameIndex} ${side}: ${reason}.`); };
+  if (!snapshot || typeof snapshot !== "object" || !Array.isArray(snapshot.seats)
+      || !Array.isArray(snapshot.hand) || !Array.isArray(snapshot.rentzSequence)) {
+    fail("public table snapshot is incomplete");
+  }
+  if (snapshot.seats.length < 3 || snapshot.seats.length > 6
+      || snapshot.seats.some(seat => !seat || typeof seat.active !== "boolean")) {
+    fail("seat projection is outside the Rentz table contract");
+  }
+  if (snapshot.rentzSequence.length !== 4) fail("sequence must contain four suit rows");
+  if (containsPrivateHands(snapshot)) fail("snapshot contains a private opponent-hand field");
+
+  const hand = snapshot.hand.map(card => {
+    if (!card || typeof card.label !== "string" || card.label.length === 0) {
+      fail("private hand contains a card without a public label");
+    }
+    return card.label;
+  });
+  if (new Set(hand).size !== hand.length) fail("private hand contains duplicate cards");
+
+  const slots = [];
+  const played = new Set();
+  const identities = new Set();
+  let width = -1;
+  for (const row of snapshot.rentzSequence) {
+    if (!row || !Array.isArray(row.cells) || row.cells.length === 0) fail("sequence row has no card slots");
+    if (width < 0) width = row.cells.length;
+    else if (row.cells.length !== width) fail("sequence rows have different widths");
+    for (const cell of row.cells) {
+      if (!cell || typeof cell.label !== "string" || typeof cell.played !== "boolean") {
+        fail("sequence slot has an invalid card projection");
+      }
+      if (identities.has(cell.label)) {
+        fail("sequence contains a duplicate card identity");
+      }
+      identities.add(cell.label);
+      const slot = { label: cell.label, played: cell.played };
+      slots.push(slot);
+      if (cell.played) played.add(cell.label);
+    }
+  }
+  if (hand.some(label => played.has(label))) fail("a card is both private and on the public sequence");
+  return { seats: snapshot.seats, hand, slots, played };
+}
+
+const privateCardCollectionFields = new Set([
+  "hands", "opponenthand", "opponenthands", "privatehand", "privatehands", "hiddenhand", "hiddenhands",
+  "concealedhand", "concealedhands", "otherhand", "otherhands", "playerhand", "playerhands",
+  "handbyseat", "handsbyseat", "cardsbyseat", "cardsbyplayer", "opponentcards", "playercards",
+]);
+
+function containsPrivateHands(value, visited = new WeakSet()) {
+  if (!value || typeof value !== "object") return false;
+  if (visited.has(value)) return false;
+  visited.add(value);
+  if (Array.isArray(value)) return value.some(item => containsPrivateHands(item, visited));
+  return Object.entries(value).some(([key, item]) => privateCardCollectionFields.has(key.toLowerCase().replace(/[^a-z0-9]/g, ""))
+    || containsPrivateHands(item, visited));
+}
+
+function validateRentzPlaybackFrame(frame, index) {
+  const fail = reason => { throw new Error(`Rentz playback frame ${index}: ${reason}.`); };
+  if (!frame || !Number.isInteger(frame.actorSeat) || !Number.isInteger(frame.delayMillis) || frame.delayMillis < 0) {
+    fail("actor or cadence is invalid");
+  }
+  const before = rentzPlaybackSnapshot(frame.before, index, "before");
+  const after = rentzPlaybackSnapshot(frame.after, index, "after");
+  if (frame.actorSeat >= before.seats.length || after.seats.length !== before.seats.length) {
+    fail("actor does not belong to the projected table");
+  }
+  const activeBefore = before.seats.flatMap((seat, seatIndex) => seat.active ? [seatIndex] : []);
+  if (activeBefore.length !== 1 || activeBefore[0] !== frame.actorSeat) {
+    fail("pre-play active seat does not match the actor");
+  }
+  if (after.seats.filter(seat => seat.active).length > 1) fail("post-play snapshot marks multiple active seats");
+  if (frame.actorSeat > 0 && frame.delayMillis === 0) fail("automated opponent has no visible-turn delay");
+  if (before.slots.length !== after.slots.length
+      || before.slots.some((slot, slotIndex) => slot.label !== after.slots[slotIndex].label)) {
+    fail("Rentz card slots changed identity during playback");
+  }
+
+  const newlyPlayed = [...after.played].filter(label => !before.played.has(label));
+  if (newlyPlayed.length !== 1 || after.played.size !== before.played.size + 1) {
+    fail("one action must place exactly one new card on the sequence");
+  }
+  if ([...before.played].some(label => !after.played.has(label))) fail("a played card disappeared from the sequence");
+  if (after.hand.some(label => after.played.has(label))) fail("a played card remains in the private hand");
+
+  const removedFromHand = before.hand.filter(label => !after.hand.includes(label));
+  if (frame.actorSeat === 0) {
+    if (removedFromHand.length !== 1 || removedFromHand[0] !== newlyPlayed[0]
+        || after.hand.length !== before.hand.length - 1
+        || after.hand.some(label => !before.hand.includes(label))) {
+      fail("the human card leaving the hand does not match the card placed on the table");
+    }
+  } else if (removedFromHand.length !== 0 || before.hand.length !== after.hand.length
+      || before.hand.some(label => !after.hand.includes(label))) {
+    fail("an opponent action changed the human hand");
+  }
+}
+
 /** Replays public Rentz card placements from the same turn snapshots used by the Android session. */
-export async function presentRentzPlayback(result, { render, wait, nextFrame }) {
+export async function presentRentzPlayback(result, { render, wait, nextFrame, autoStepAction }) {
   const frames = result?.rentzPlayback;
   if (!Array.isArray(frames) || frames.length === 0) return false;
+  frames.forEach(validateRentzPlaybackFrame);
   for (const frame of frames) {
-    if (!Number.isInteger(frame.actorSeat) || !Number.isInteger(frame.delayMillis) || frame.delayMillis < 0) {
-      throw new Error("Rentz playback actor or cadence is invalid.");
-    }
     if (frame.delayMillis > 0) {
-      await render(rentzPlaybackView(result, frame.before, frame.actorSeat));
+      await render(rentzPlaybackView(result, frame.before, frame.actorSeat, autoStepAction));
       await nextFrame();
       await wait(frame.delayMillis);
     }
-    await render(rentzPlaybackView(result, frame.after));
+    await render(rentzPlaybackView(result, frame.after, null, autoStepAction));
   }
   return true;
 }
@@ -117,6 +221,14 @@ export function rentzSequenceLayout(players, width, height, fontScale = 1) {
     Math.min((indexWidth - 2 * indexPadding) / (stackedIndex ? 1.5 : 2.2),
       (faceHeight - 2 * indexPadding) / (stackedIndex ? 2.6 : 1.4)));
   return { columns, rowHeight, faceHeight, faceWidth, advance, start, indexWidth, indexPadding, labelSizePx, stackedIndex };
+}
+
+/** Preserves the common four-seat arrangement while reserving a larger card lane between seats. */
+export function rentzCenterInsets(players) {
+  if (!Number.isInteger(players) || players < 3 || players > 6) {
+    throw new RangeError("Rentz table needs 3–6 players.");
+  }
+  return players === 4 ? { top: 58, bottom: 58 } : { top: 72, bottom: 67 };
 }
 
 /** Applies one measured native-compatible layout to the four sequence rows. */
