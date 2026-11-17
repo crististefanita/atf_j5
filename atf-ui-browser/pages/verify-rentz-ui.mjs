@@ -161,6 +161,30 @@ check("Rentz suit symbols use the font shipped by the shared browser library", t
 check("Rentz center consumes dynamic vertical insets without changing the common seat anchors", true,
   rentzCss.includes("inset-block: var(--rentz-center-top, 72px) var(--rentz-center-bottom, 67px);"));
 const generatedShell = readFileSync(process.argv[3], "utf8");
+const generatedTableCss = readFileSync(process.argv[4], "utf8");
+const generatedRentzCss = readFileSync(process.argv[5], "utf8");
+const generatedPage = readFileSync(process.argv[6], "utf8");
+const sharedLegalCardRule = generatedTableCss.match(
+  /#table:not\(\[data-automatic\]\) \.whist-match \.fan \.legal-card:not\(\.suggested-card\)\s*\{([^}]*)\}/);
+check("shared shell keeps the manual legal-card cue available as a comparison", true,
+  !!sharedLegalCardRule && sharedLegalCardRule[1].includes("border: 2px solid #dcb569"));
+const rentzLegalCardRule = generatedRentzCss.match(
+  /#table \.whist-match:has\(\.rentz-sequence\) \.fan \.card\.legal-card\s*\{([^}]*)\}/);
+check("Rentz legal-card styling is scoped to the Rentz sequence and survives automatic mode", true,
+  !!rentzLegalCardRule
+    && rentzLegalCardRule[1].includes("background: var(--whist-hint-legal-fill)")
+    && rentzLegalCardRule[1].includes("border: var(--whist-hint-stroke) solid var(--whist-hint-legal-line)"));
+check("Rentz legal-card cue uses the Android fill and outline tokens in manual and automatic mode", true,
+  !!rentzLegalCardRule
+    && generatedTableCss.includes("--whist-hint-legal-fill")
+    && generatedTableCss.includes("--whist-hint-legal-line")
+    && generatedTableCss.includes("--whist-hint-stroke"));
+check("published page loads the Rentz cue after the shared card-table stylesheet", true,
+  (() => {
+    const sharedStyle = generatedPage.match(/<link rel="stylesheet" href="\.\/table\.css(?:\?[^\"]*)?">/);
+    const rentzStyle = generatedPage.match(/<link rel="stylesheet" href="\.\/rentz\.css">/);
+    return !!sharedStyle && !!rentzStyle && rentzStyle.index > sharedStyle.index;
+  })());
 check("Rentz header removes the extra product title used by the generic Whist shell", true,
   generatedShell.includes('title.hidden = match.header.mode === "RENTZ";'));
 check("Rentz header omits the trump panel and preserves the selected-game line", true,

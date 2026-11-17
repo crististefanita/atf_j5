@@ -227,7 +227,8 @@ $nativeMetrics = Join-Path $run 'rentz-native-sequence-metrics.tsv'
 $nativeReferenceRuntime = @($nativeReferenceClasses, $nativeUiClasses) -join [IO.Path]::PathSeparator
 & java -cp $nativeReferenceRuntime 'ro.rentzlab.app.ui.table.RentzNativeSequenceMetricsReference' | Set-Content -LiteralPath $nativeMetrics -Encoding utf8
 if ($LASTEXITCODE -ne 0) { throw 'Could not emit native Rentz sequence layout metrics.' }
-& node (Join-Path $pages 'verify-rentz-ui.mjs') $nativeMetrics $tableScript
+& node (Join-Path $pages 'verify-rentz-ui.mjs') $nativeMetrics $tableScript `
+    (Join-Path $site 'table.css') (Join-Path $site 'rentz.css') (Join-Path $site 'index.html')
 if ($LASTEXITCODE -ne 0) { throw 'Rentz sequence renderer component verification failed.' }
 & node (Join-Path $pages 'verify-rentz-transport.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Rentz transient event transport verification failed.' }

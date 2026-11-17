@@ -12,6 +12,7 @@ public final class RentzPageComponentTest {
     public static void main(String[] args) {
         pageCommandStartsTheRealGameSession();
         rentzCardPlaybackIsAnIncrementalPublicProjection();
+        rentzLegalCardActionsRemainAvailableAfterAnAutomaticStep();
         rentzArrivalIsAOneShotPublicProjectionBeforeTheScore();
         otherContractsDoNotEmitARentzArrival();
         System.out.println("Rentz Pages component checks passed: " + checks);
@@ -102,6 +103,12 @@ public final class RentzPageComponentTest {
         checkpoint = reply.optString("checkpoint", checkpoint);
         current = pageState(checkpoint);
         var hand = current.getJSONObject("view").getJSONArray("hand");
+        var firstView = current.getJSONObject("view");
+        var legalHandActions = legalHandActions(hand);
+        var legalSequenceActions = legalSequenceActions(firstView.getJSONArray("rentzSequence"));
+        check("Rentz marks every and only legal card as an actionable hand face",
+                !legalHandActions.isEmpty() && legalHandActions.equals(legalSequenceActions));
+        check("Rentz keeps the Joc automat action marker alongside the legal hand", hasAction(firstView, "auto-step"));
         String cardAction = "";
         String selectedLabel = "";
         for (int index = 0; index < hand.length(); index++) {
@@ -140,6 +147,60 @@ public final class RentzPageComponentTest {
             check("Playback does not reveal opponent hands or private hand collections",
                     !projection.contains("opponentHands") && !projection.contains("\"hands\""));
         }
+    }
+
+    private static void rentzLegalCardActionsRemainAvailableAfterAnAutomaticStep() {
+        var checkpoint = startPage(20261124, "4", "HARD");
+        var current = pageState(checkpoint);
+        var reply = pageAction(checkpoint, current.getLong("revision"), "reveal");
+        checkpoint = reply.optString("checkpoint", checkpoint);
+        current = pageState(checkpoint);
+        reply = pageAction(checkpoint, current.getLong("revision"), "choose:RENTZ");
+        checkpoint = reply.optString("checkpoint", checkpoint);
+        current = pageState(checkpoint);
+        var before = current.getJSONObject("view");
+        check("Rentz exposes an automatic step before delegation", hasAction(before, "auto-step"));
+        check("Rentz has a legal human card before autoplay", !legalHandActions(before.getJSONArray("hand")).isEmpty());
+
+        reply = pageAction(checkpoint, current.getLong("revision"), "auto-step");
+        checkpoint = reply.optString("checkpoint", checkpoint);
+        var after = reply.getJSONObject("result").getJSONObject("view");
+        check("Rentz returns to a playable human decision after autoplay advances the table",
+                after.optJSONArray("rentzSequence") != null && !legalHandActions(after.getJSONArray("hand")).isEmpty());
+        check("Rentz keeps the automatic action available at the next human decision", hasAction(after, "auto-step"));
+        check("Rentz legal actions still match the sequence after autoplay advances the table",
+                legalHandActions(after.getJSONArray("hand")).equals(legalSequenceActions(after.getJSONArray("rentzSequence"))));
+        check("The automatic step preserves a resumable checkpoint", !checkpoint.isBlank());
+    }
+
+    private static java.util.List<String> legalHandActions(org.json.JSONArray hand) {
+        var actions = new java.util.ArrayList<String>();
+        for (int index = 0; index < hand.length(); index++) {
+            String action = hand.getJSONObject(index).optString("action");
+            if (!action.isBlank()) actions.add(action);
+        }
+        return actions.stream().sorted().toList();
+    }
+
+    private static java.util.List<String> legalSequenceActions(org.json.JSONArray sequence) {
+        var actions = new java.util.ArrayList<String>();
+        for (int row = 0; row < sequence.length(); row++) {
+            var cells = sequence.getJSONObject(row).getJSONArray("cells");
+            for (int cell = 0; cell < cells.length(); cell++) {
+                String action = cells.getJSONObject(cell).optString("action");
+                if (!action.isBlank()) actions.add(action);
+            }
+        }
+        return actions.stream().sorted().toList();
+    }
+
+    private static boolean hasAction(JSONObject view, String key) {
+        var actions = view.optJSONArray("actions");
+        if (actions == null) return false;
+        for (int index = 0; index < actions.length(); index++) {
+            if (key.equals(actions.getJSONObject(index).optString("key"))) return true;
+        }
+        return false;
     }
 
     private static int playedInSequence(org.json.JSONArray sequence) {

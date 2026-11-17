@@ -57,6 +57,9 @@ public final class RentzBrowserComponentTest {
         equal("Browser paper matches the Android background", "#f6f5ed", tokens.get("--whist-paper"));
         equal("Browser card surface matches native Rentz cards", "#fffef8", tokens.get("--whist-surface"));
         equal("Active seat matches native Rentz highlight", "#f1e6c8", tokens.get("--whist-turn-fill"));
+        equal("Legal-card fill matches Android CardHighlight.IN_PLACE", "#fff6d7", tokens.get("--whist-hint-legal-fill"));
+        equal("Legal-card outline matches Android CardHighlight.IN_PLACE", "#c99537", tokens.get("--whist-hint-legal-line"));
+        equal("Legal-card stroke matches Android CardHighlight.IN_PLACE", "1.5px", tokens.get("--whist-hint-stroke"));
         equal("Shared hand geometry matches the Android card face", "88px", tokens.get("--whist-hand-face-height"));
     }
 

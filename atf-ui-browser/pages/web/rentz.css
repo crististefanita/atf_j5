@@ -1,3 +1,8 @@
+#table .whist-match:has(.rentz-sequence) .fan .card.legal-card {
+  background: var(--whist-hint-legal-fill);
+  border: var(--whist-hint-stroke) solid var(--whist-hint-legal-line);
+}
+
 .cards-on-table[data-rentz-sequence="true"] {
   display: flex;
   flex: 1 1 0;
