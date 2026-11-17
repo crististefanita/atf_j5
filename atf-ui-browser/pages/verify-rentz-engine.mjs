@@ -3,6 +3,13 @@ import { pathToFileURL } from "node:url";
 
 const engine = await import(pathToFileURL(process.argv[2]).href);
 let checks = 0;
+const nativeSuitOrder = { "♠": 0, "♥": 1, "♣": 2, "♦": 3 };
+const nativeRank = label => ({ J: 11, Q: 12, K: 13, A: 14 }[label.slice(0, -1)] ?? Number(label.slice(0, -1)));
+
+function nativeHandOrder(labels) {
+  return [...labels].sort((left, right) => nativeSuitOrder[left.slice(-1)] - nativeSuitOrder[right.slice(-1)]
+    || nativeRank(left) - nativeRank(right));
+}
 
 function check(description, condition) {
   assert.ok(condition, description);
@@ -74,6 +81,14 @@ for (let players = 3; players <= 6; players++) {
     for (let turn = 0; turn < players * 8 + 16; turn++) {
       const state = call("/api/state");
       view = state.result.view;
+      const displayedHand = view.hand.map(card => card.label);
+      check(`${players}/${difficulty}: compiled Web hand follows the Android suit/rank order`,
+        JSON.stringify(displayedHand) === JSON.stringify(nativeHandOrder(displayedHand)));
+      const handMoves = new Set(view.hand.map(card => card.action).filter(Boolean));
+      const sequenceMoves = new Set(view.rentzSequence.flatMap(row => row.cells)
+        .filter(cell => cell.legal).map(cell => cell.action));
+      check(`${players}/${difficulty}: compiled Web hand and Rentz board expose the same legal moves`,
+        JSON.stringify([...handMoves].sort()) === JSON.stringify([...sequenceMoves].sort()));
       if (view.history.grid.rows.length === 1) {
         completed = true;
         break;

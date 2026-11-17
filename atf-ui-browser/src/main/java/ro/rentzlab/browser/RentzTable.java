@@ -1,6 +1,7 @@
 package ro.rentzlab.browser;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import ro.cardtable.browser.BrowserGame;
 import ro.cardtable.browser.BrowserGame.Action;
@@ -30,6 +31,12 @@ import ro.rentzlab.core.sequence.SequenceOpening;
 /** Browser projection of the same session used by Android. Opponent hands never cross this boundary. */
 final class RentzTable implements BrowserGame.Match {
     static final int BOT_TURN_DELAY_MILLIS = 1_000;
+    private static final List<ro.rentzlab.core.Card.Suit> HAND_SUITS = List.of(
+            ro.rentzlab.core.Card.Suit.SPADES, ro.rentzlab.core.Card.Suit.HEARTS,
+            ro.rentzlab.core.Card.Suit.CLUBS, ro.rentzlab.core.Card.Suit.DIAMONDS);
+    private static final Comparator<ro.rentzlab.core.Card> HAND_ORDER = Comparator
+            .comparingInt((ro.rentzlab.core.Card card) -> HAND_SUITS.indexOf(card.suit()))
+            .thenComparingInt(ro.rentzlab.core.Card::rank);
     private final GameSession game;
     private final ArrayList<String> names;
     private List<PlayStep> playback = List.of();
@@ -176,7 +183,7 @@ final class RentzTable implements BrowserGame.Match {
             seats.add(Seat.at(seat, names.size(), names.get(seat), hand, points,
                     live && state.turn() == seat));
         }
-        var hand = state.hand().stream().map(card -> face(card,
+        var hand = state.hand().stream().sorted(HAND_ORDER).map(card -> face(card,
                 playing && state.turn() == 0 && state.legal().contains(card) ? key(card) : "")).toList();
         var played = state.trick().stream().map(play -> new Played(play.seat(), face(play.card()),
                 play.card().label(), names.get(play.seat()) + " · " + play.card().label())).toList();

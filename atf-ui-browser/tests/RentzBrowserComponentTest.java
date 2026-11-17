@@ -1,5 +1,6 @@
 package ro.rentzlab.browser;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public final class RentzBrowserComponentTest {
         browserNameMatchesNativeProfileContract();
         checkpointsRestoreTheSamePublicDecision();
         legalCardsAndSequenceAgree();
+        browserHandOrderMatchesAndroid();
         automaticTurnsKeepTheirOrderAndTiming();
         completedHandHistorySeparatesDeltaAndTotal();
         browserRentzAwardsOnlyOneZeroForEveryTableSize();
@@ -176,6 +178,43 @@ public final class RentzBrowserComponentTest {
                 .flatMap(List::stream).anyMatch(RentzTable.MapCell::opening));
         truth("Rentz map distinguishes played slots", RentzTable.sequence(table.observation()).stream()
                 .flatMap(List::stream).anyMatch(RentzTable.MapCell::played));
+    }
+
+    private static void browserHandOrderMatchesAndroid() {
+        var suitOrder = List.of(ro.rentzlab.core.Card.Suit.SPADES, ro.rentzlab.core.Card.Suit.HEARTS,
+                ro.rentzlab.core.Card.Suit.CLUBS, ro.rentzlab.core.Card.Suit.DIAMONDS);
+        Comparator<ro.rentzlab.core.Card> nativeOrder = Comparator
+                .comparingInt((ro.rentzlab.core.Card card) -> suitOrder.indexOf(card.suit()))
+                .thenComparingInt(ro.rentzlab.core.Card::rank);
+        for (int players = 3; players <= 6; players++) {
+            int count = players;
+            var table = start(new RentzBrowser(() -> 20261130L + count), players);
+            table.act("reveal");
+            table.act("choose:RENTZ");
+            for (int step = 0; step < 24 && table.observation().phase() == ro.rentzlab.core.RentzMatch.Phase.PLAY; step++) {
+                var state = table.observation();
+                var view = table.view();
+                var expectedOrder = state.hand().stream().sorted(nativeOrder)
+                        .map(ro.rentzlab.core.Card::label).toList();
+                var actualOrder = view.hand().stream().map(BrowserGame.Card::label).toList();
+                equal("Web hand follows Android suit/rank order " + players + "/" + step, expectedOrder, actualOrder);
+
+                var expectedLegal = state.legal().stream()
+                        .map(card -> "card:" + card.suit().name() + ":" + card.rank()).collect(Collectors.toSet());
+                var actualLegal = view.hand().stream().map(BrowserGame.Card::action).filter(action -> !action.isBlank())
+                        .collect(Collectors.toSet());
+                equal("Web playable hand actions remain exact after sort " + players + "/" + step,
+                        expectedLegal, actualLegal);
+
+                if (expectedLegal.isEmpty()) {
+                    var automatic = view.actions().stream().map(BrowserGame.Action::key)
+                            .filter("auto-step"::equals).findFirst().orElseThrow();
+                    table.act(automatic);
+                } else {
+                    table.act(expectedLegal.stream().sorted().findFirst().orElseThrow());
+                }
+            }
+        }
     }
 
     private static void automaticTurnsKeepTheirOrderAndTiming() {
