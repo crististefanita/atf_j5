@@ -16,7 +16,7 @@ $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -Jso
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.5.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.6.jar'
 $pages = Join-Path $PSScriptRoot 'pages'
 $dependencySpec = Join-Path $pages 'teavm-dependencies.xml'
 $toolClasspath = Join-Path $root 'teavm.classpath'
@@ -86,7 +86,7 @@ $choiceAnchor = @(
 ) -join "`n"
 foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
-    if ($count -ne 1) { throw "Card Table Browser 0.2.5 adapter anchor changed; expected one match, found $count." }
+    if ($count -ne 1) { throw "Card Table Browser 0.2.6 adapter anchor changed; expected one match, found $count." }
 }
 $markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
 $markup = $markup.Replace($rentzHeaderAnchor,
