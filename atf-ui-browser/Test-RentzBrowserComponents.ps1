@@ -34,6 +34,20 @@ try {
 } finally { $archive.Dispose() }
 $classes = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -BuildOnly
 if ($LASTEXITCODE -ne 0 -or !$classes) { throw 'Rentz browser adapter build failed.' }
+$sourceCommit = '1440273c74ea693598776857db5a5c5a8b8d361f'
+$sharedRuntime = & (Join-Path $PSScriptRoot 'Verify-CardTableBrowser.ps1') -Version '0.2.10' -SourceCommit $sourceCommit
+$sharedTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.10-tests.jar'
+$sharedRoot = Join-Path $root 'shared-viewport-contract'
+$null = New-Item -ItemType Directory -Force -Path $sharedRoot
+Push-Location $sharedRoot
+try {
+    & jar xf $sharedRuntime 'ro/cardtable/browser/web/viewport.mjs'
+    if ($LASTEXITCODE -ne 0) { throw 'Could not extract the shared viewport runtime.' }
+    & jar xf $sharedTests 'viewport-contract.mjs'
+    if ($LASTEXITCODE -ne 0) { throw 'Could not extract the shared viewport component test.' }
+} finally { Pop-Location }
+& node (Join-Path $sharedRoot 'viewport-contract.mjs') (Join-Path $sharedRoot 'ro/cardtable/browser/web/viewport.mjs')
+if ($LASTEXITCODE -ne 0) { throw 'Shared browser viewport component checks failed.' }
 $tests = @(
     Join-Path $PSScriptRoot 'tests/RentzBrowserComponentTest.java'
     Join-Path $PSScriptRoot 'tests/ro/cardtable/browser/BrowserSessionRentzContractTest.java'

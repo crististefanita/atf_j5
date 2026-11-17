@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "version": "0.2.8",
-  "sourceCommit": "67582f7a31b15f0312a2b58da1bbbeaf3de42578",
-  "inputSha256": "2808a70eacc839648c92dd7ba546c4d5b70437378e179b02e5ae4a1636acf9e7",
+  "version": "0.2.10",
+  "sourceCommit": "1440273c74ea693598776857db5a5c5a8b8d361f",
+  "inputSha256": "9cf801e71e916c8a4a4cd0917ac1e80e6a27741f4a61a10186be99de5aaa27c7",
   "inputs": [
     {
       "path": "atf-ui-browser/Package-CardTableBrowser.ps1",
-      "sha256": "e7c02053801c403ddbaf37070eedb469838b2092b32f4d04920011ae535c0e9b"
+      "sha256": "779e45e8dbe277494eb0e7f0eefd6252a23c68a335f2d2b2d59953902a674bad"
     },
     {
       "path": "atf-ui-browser/Start-CardTableBrowser.ps1",
@@ -66,7 +66,7 @@
     },
     {
       "path": "atf-ui-browser/src/main/web/index.html",
-      "sha256": "4e861da5dd1eb1394d2c2f0a1722b2f6e36b227ab4baa00dc0423cea3f2d3f57"
+      "sha256": "6df864bef10b79d72c18b4322a495e883b49eb63a0f4cafddc78078635c9adac"
     },
     {
       "path": "atf-ui-browser/src/main/web/profile.mjs",
@@ -82,11 +82,11 @@
     },
     {
       "path": "atf-ui-browser/src/main/web/table.mjs",
-      "sha256": "b46f7aecd03c2c59473c02aaef18daf9f1513ea411a55fd923bd9ad97714324a"
+      "sha256": "233ad5b1ad37f6f08dde595d89ee32ddae4ad962e40d40f7737a61164abcc175"
     },
     {
       "path": "atf-ui-browser/src/main/web/viewport.mjs",
-      "sha256": "8528e75bf1c6d28cc872c9aac1c9df9adfef32c22da69852550ba24b2de1d7b5"
+      "sha256": "c28aee5da26609f75b73211164fa67a6bdccc68b4d6c62a752bf098c67741b7b"
     },
     {
       "path": "atf-ui-browser/tests/fixtures.mjs",
@@ -102,11 +102,15 @@
     },
     {
       "path": "atf-ui-browser/tests/packaged-sanity.mjs",
-      "sha256": "fafa4a80e6b6a63f68b7f2e0bfdf6f92e22adbf24630599e2e941900975eb980"
+      "sha256": "1e0d51c075f24d307c54260fd5b628566e819291e13d3c15c5943775e7e6070d"
     },
     {
       "path": "atf-ui-browser/tests/trump-text-fit.mjs",
       "sha256": "d65966294a815a4fdbbd675bb0ea405df745a9577ed0d69ee93d4fc5dc051d4e"
+    },
+    {
+      "path": "atf-ui-browser/tests/viewport-contract.mjs",
+      "sha256": "31568d54ae8bc8012fc0a8bab1ae28b161195ca15868d786ef2b1c5b312b8e79"
     },
     {
       "path": "whist-lab-app/app/src/test/resources/whist-trump-text-fit.tsv",
@@ -207,24 +211,24 @@
   ],
   "files": [
     {
-      "path": "atf-ui-browser-0.2.8.jar",
-      "bytes": 136175,
-      "sha256": "956fad7f2e0060c1392365b5427b603d076245212a675d5e9969232e648e013c"
+      "path": "atf-ui-browser-0.2.10.jar",
+      "bytes": 136241,
+      "sha256": "d9745a26b35ef5d026efe0bfc999782d223493e8828d60e3e06aaffe8ce9b9d9"
     },
     {
-      "path": "atf-ui-browser-0.2.8.jar.sha256",
+      "path": "atf-ui-browser-0.2.10.jar.sha256",
       "bytes": 65,
-      "sha256": "57e91b0d8b473b1d8b60fa819d689ecfe07ab692063b0f86f8e00aadacf9a0f2"
+      "sha256": "8b76d1c6e488616a8cd8e6a69c48f0549216cb0a8fede1840eb18d8a8a4c6e2f"
     },
     {
-      "path": "atf-ui-browser-0.2.8-tests.jar",
-      "bytes": 8703,
-      "sha256": "1b4ce1bee6f88b2bf27d1e6beb0d94f15a11edd351c6650db893db666fed29c3"
+      "path": "atf-ui-browser-0.2.10-tests.jar",
+      "bytes": 10498,
+      "sha256": "d8e7f3eddc9531c2deaf78a7d822a1b88cafc43bf319f9a045e7ed333f0926b0"
     },
     {
-      "path": "atf-ui-browser-0.2.8-tests.jar.sha256",
+      "path": "atf-ui-browser-0.2.10-tests.jar.sha256",
       "bytes": 65,
-      "sha256": "0bf8713fd4e0e0387c4262022eac9fe7a2ceacc11e522f3f5dcea07d6695aaa0"
+      "sha256": "5b0cdf7f4626424e49bfae6d8967c20fb83cbda5c68858d87b1894c7e352399a"
     }
   ]
 }

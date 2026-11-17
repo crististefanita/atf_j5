@@ -16,8 +16,8 @@ $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -Jso
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.8.jar'
-$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.8-tests.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.10.jar'
+$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.10-tests.jar'
 $commonTestsExpected = (Get-Content -LiteralPath "$commonTests.sha256" -Raw).Trim()
 if ((Get-FileHash -Algorithm SHA256 -LiteralPath $commonTests).Hash -ine $commonTestsExpected) {
     throw 'Shared browser component test checksum mismatch.'
@@ -75,14 +75,17 @@ finally { Pop-Location }
 $commonTestRoot = Join-Path $run 'common-component-tests'
 $null = New-Item -ItemType Directory -Force -Path $commonTestRoot
 Push-Location $commonTestRoot
-try { & jar xf $commonTests 'hand-presentation.mjs' }
+try { & jar xf $commonTests 'hand-presentation.mjs' 'viewport-contract.mjs' }
 finally { Pop-Location }
 $commonWeb = Join-Path $commonRoot 'ro/cardtable/browser/web'
 Get-ChildItem -LiteralPath $commonWeb -File | Copy-Item -Destination $site
 Get-ChildItem -LiteralPath (Join-Path $pages 'web') -File | Copy-Item -Destination $site
-if (!(Test-Path -LiteralPath (Join-Path $commonTestRoot 'hand-presentation.mjs'))) {
-    throw 'The shared Card Table Browser hand component test is missing.'
+if (!(Test-Path -LiteralPath (Join-Path $commonTestRoot 'hand-presentation.mjs')) -or
+        !(Test-Path -LiteralPath (Join-Path $commonTestRoot 'viewport-contract.mjs'))) {
+    throw 'The shared Card Table Browser component contracts are missing.'
 }
+& node (Join-Path $commonTestRoot 'viewport-contract.mjs') (Join-Path $commonRoot 'ro/cardtable/browser/web/viewport.mjs')
+if ($LASTEXITCODE -ne 0) { throw 'Shared browser viewport component checks failed.' }
 
 $tableScript = Join-Path $site 'table.mjs'
 $markup = [IO.File]::ReadAllText($tableScript).Replace("`r`n", "`n")
@@ -101,7 +104,7 @@ $choiceAnchor = @(
 ) -join "`n"
 foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAnchor, $automationAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
-    if ($count -ne 1) { throw "Card Table Browser 0.2.8 adapter anchor changed; expected one match, found $count." }
+    if ($count -ne 1) { throw "Card Table Browser 0.2.10 adapter anchor changed; expected one match, found $count." }
 }
 $markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
 $markup = $markup.Replace($rentzHeaderAnchor,

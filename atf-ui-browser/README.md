@@ -24,7 +24,7 @@ Cartea și actorul ajung la browser prin observația publică. Sesiunea este pro
 
 Shell-ul comun gestionează masa, dialogurile, comenzile cu revizie, animațiile și aspectul adaptiv. J5 păstrează conținutul specific Rentz: cele opt sub-jocuri, succesiunea cărților, punctajul, profilul, realizările și istoria.
 
-Consumatorul fixează Card Table Browser 0.2.8. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
+Consumatorul fixează Card Table Browser 0.2.10. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
 
 ### Secvența vizibilă a unei mâini Rentz
 
@@ -121,7 +121,7 @@ $pages = Join-Path $env:RENTZ_WORK_ROOT 'browser-pages'
 .\atf-ui-browser\Build-RentzPages.ps1 -WorkRoot $pages
 ```
 
-`Test-RentzBrowserComponents.ps1` rulează testele JVM ale adaptorului și ale sesiunii comune. Build-ul WEB rulează, în ordine, testele JVM ale endpoint-ului, comparația cu biblioteca APK, compilarea TeaVM, verificările Node asupra motorului generat și verificările DOM. O eroare la oricare strat oprește build-ul.
+`Test-RentzBrowserComponents.ps1` rulează testele JVM ale adaptorului și ale sesiunii comune, apoi extrage runtime-ul și testul versionate și verifică toate cele 51 de cazuri din contractul de viewport. Build-ul WEB rulează, în ordine, testele JVM ale endpoint-ului, comparația cu biblioteca APK, compilarea TeaVM, verificările Node asupra motorului generat și verificările DOM. O eroare la oricare strat oprește build-ul.
 
 ## Pornire locală
 
@@ -142,5 +142,5 @@ README-ul principal va lega jocul online după ce workflow-ul publică pagina ș
 ## Surse
 
 - [Regulile și arhitectura motorului Rentz](../rentz-lab-app/game-core/README.md)
-- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.8.jar) · [checksum](lib/atf-ui-browser-0.2.8.jar.sha256)
-- [Testul comun de componentă](lib/atf-ui-browser-0.2.8-tests.jar) · [checksum](lib/atf-ui-browser-0.2.8-tests.jar.sha256)
+- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.10.jar) · [checksum](lib/atf-ui-browser-0.2.10.jar.sha256)
+- [Testul comun de componentă](lib/atf-ui-browser-0.2.10-tests.jar) · [checksum](lib/atf-ui-browser-0.2.10-tests.jar.sha256)
