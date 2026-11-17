@@ -76,11 +76,8 @@ if ($BrowserRoot) {
         -JavaInputs $sources -Libraries @($JsonLibrary) -MainClass $main -Port $Port -ListenAddress $ListenAddress -BuildOnly:$BuildOnly
     return
 }
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.6.jar'
-$expected = (Get-Content -LiteralPath "$library.sha256" -Raw).Trim()
-if ((Get-FileHash -Algorithm SHA256 -LiteralPath $library).Hash -ine $expected) {
-    throw 'Browser library checksum mismatch.'
-}
+$library = & (Join-Path $PSScriptRoot 'Verify-CardTableBrowser.ps1') -Version '0.2.8' `
+    -SourceCommit '67582f7a31b15f0312a2b58da1bbbeaf3de42578'
 $build = Join-Path $root ('browser-' + [guid]::NewGuid().ToString('N'))
 $classes = Join-Path $build 'classes'
 $javaTemp = Join-Path $root 'java-temp'

@@ -15,7 +15,7 @@ $null = New-Item -ItemType Directory -Force -Path $javaTemp, $testClasses
 $checkout = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $uiRepository = Join-Path $checkout 'rentz-lab-app/ui-library'
 $provenance = Get-Content -LiteralPath (Join-Path $uiRepository 'provenance.json') -Raw | ConvertFrom-Json
-if ($provenance.producer -ne 'atf_j4') { throw 'The Android UI timing reference must come from the qualified J4 package.' }
+if ($provenance.producer -ne 'whist') { throw 'The Android UI timing reference must come from the qualified Whist package.' }
 $pinnedUi = @($provenance.files | Where-Object { $_.path -match '^ro/cardtable/card-table-ui/[^/]+/card-table-ui-[^/]+\.aar$' })
 if ($pinnedUi.Count -ne 1) { throw 'Expected exactly one versioned Card Table UI AAR in provenance.json.' }
 $uiAar = Join-Path $uiRepository $pinnedUi[0].path.Replace('/', [IO.Path]::DirectorySeparatorChar)
@@ -41,10 +41,10 @@ $tests = @(
 $previousJavaOptions = $env:JAVA_TOOL_OPTIONS
 try {
     $env:JAVA_TOOL_OPTIONS = (($previousJavaOptions, "-Djava.io.tmpdir=$javaTemp" | Where-Object { $_ }) -join ' ')
-    $testDependencies = @($classes, $androidUiClasses) -join [IO.Path]::PathSeparator
+    $testDependencies = @($androidUiClasses, $classes) -join [IO.Path]::PathSeparator
     & javac --release 17 -encoding UTF-8 -cp $testDependencies -d $testClasses $tests
     if ($LASTEXITCODE -ne 0) { throw 'Rentz browser component test compilation failed.' }
-    $testClasspath = @($testClasses, $classes, $androidUiClasses) -join [IO.Path]::PathSeparator
+    $testClasspath = @($testClasses, $androidUiClasses, $classes) -join [IO.Path]::PathSeparator
     & java -cp $testClasspath ro.rentzlab.browser.RentzBrowserComponentTest
     if ($LASTEXITCODE -ne 0) { throw 'Rentz browser component checks failed.' }
 } finally {
