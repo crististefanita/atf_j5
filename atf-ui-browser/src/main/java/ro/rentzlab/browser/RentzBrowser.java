@@ -83,7 +83,10 @@ public final class RentzBrowser implements BrowserGame {
 
     public static List<Map<String, Object>> sequence(BrowserGame.Match match) {
         if (!(match instanceof RentzTable table)) return List.of();
-        var observation = table.observation();
+        return sequence(table.observation());
+    }
+
+    static List<Map<String, Object>> sequence(ro.rentzlab.core.RentzMatch.Observation observation) {
         if (observation.contract() != ro.rentzlab.core.Contract.RENTZ) return List.of();
         var suits = ro.rentzlab.core.Card.Suit.values();
         var rows = new ArrayList<Map<String, Object>>();
@@ -99,6 +102,10 @@ public final class RentzBrowser implements BrowserGame {
             rows.add(Map.of("suit", suit, "cells", entries, "suitIndex", suitIndex));
         }
         return List.copyOf(rows);
+    }
+
+    public static List<Map<String, Object>> sequencePlayback(BrowserGame.Match match) {
+        return match instanceof RentzTable table ? table.sequencePlayback() : List.of();
     }
 
     /** Public one-response cue for the native Rentz arrival pause; never part of a checkpoint. */

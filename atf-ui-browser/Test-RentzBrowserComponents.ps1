@@ -14,10 +14,12 @@ $androidUiClasses = Join-Path $root 'card-table-ui-classes.jar'
 $null = New-Item -ItemType Directory -Force -Path $javaTemp, $testClasses
 $checkout = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $uiRepository = Join-Path $checkout 'rentz-lab-app/ui-library'
-$uiAar = Join-Path $uiRepository 'ro/cardtable/card-table-ui/0.1.11/card-table-ui-0.1.11.aar'
 $provenance = Get-Content -LiteralPath (Join-Path $uiRepository 'provenance.json') -Raw | ConvertFrom-Json
-$pinnedUi = @($provenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.11/card-table-ui-0.1.11.aar' })
-if ($pinnedUi.Count -ne 1 -or (Get-FileHash -Algorithm SHA256 -LiteralPath $uiAar).Hash -ine $pinnedUi[0].sha256) {
+if ($provenance.producer -ne 'atf_j4') { throw 'The Android UI timing reference must come from the qualified J4 package.' }
+$pinnedUi = @($provenance.files | Where-Object { $_.path -match '^ro/cardtable/card-table-ui/[^/]+/card-table-ui-[^/]+\.aar$' })
+if ($pinnedUi.Count -ne 1) { throw 'Expected exactly one versioned Card Table UI AAR in provenance.json.' }
+$uiAar = Join-Path $uiRepository $pinnedUi[0].path.Replace('/', [IO.Path]::DirectorySeparatorChar)
+if (!(Test-Path -LiteralPath $uiAar) -or (Get-FileHash -Algorithm SHA256 -LiteralPath $uiAar).Hash -ine $pinnedUi[0].sha256) {
     throw 'The Android UI pacing reference does not match the pinned product AAR.'
 }
 Add-Type -AssemblyName System.IO.Compression.FileSystem

@@ -2,9 +2,9 @@
 
 ## Pe scurt
 
-Rentz Lab este un joc de cărți pentru Android, cu opt sub-jocuri și adversari AI. Poți juca offline, relua o partidă salvată și urmări scorul și realizările.
+Rentz Lab este un joc de cărți pentru Android și browser, cu opt sub-jocuri și adversari AI. Cele două interfețe folosesc același motor pentru reguli, mutări legale și scor; profilul și reluarea rămân locale pe dispozitiv.
 
-Proiectul ATF J5 modelează regulile Rentz în Java și verifică același motor pe care îl folosește aplicația. Verificările offline acoperă regulile și scorul, iar acceptanța Android confruntă interacțiunea cu observațiile publice ale motorului.
+Proiectul ATF J5 modelează regulile Rentz în Java și verifică motorul folosit de aplicația Android și de adaptorul browser. Verificările offline acoperă regulile, scorul și prezentarea; acceptanțele native verifică numai comportamentele care depind de platformă.
 
 ## Jocul
 
@@ -17,8 +17,11 @@ Proiectul ATF J5 modelează regulile Rentz în Java și verifică același motor
 flowchart LR
     APP["Aplicație Android"] -->|apelează| CORE["Motor Rentz"]
     APP -->|integrează| UI["Bibliotecă UI"]
+    WEB["Adaptor browser"] -->|apelează aceeași sesiune| CORE
+    WEB -->|randează prin| SHELL["Card Table Browser comun"]
     ATF["atf-tests"] -->|verifică| CORE
     ATF -->|observă| APP
+    ATF -->|verifică| WEB
     ATF -->|consumă| LIB["Biblioteci ATF"]
 ```
 
@@ -26,6 +29,8 @@ flowchart LR
 <summary><strong>Legendă — dependențele aplicației și ale testelor</strong></summary>
 
 - **Aplicație Android.** Traduce comenzile utilizatorului și gestionează sesiunea și profilul. Biblioteca UI comună furnizează componentele vizuale.
+- **Adaptor browser.** Conectează pagina locală la aceeași sesiune Java, proiectează numai informația publică și păstrează profilul în stocarea locală a browserului.
+- **Card Table Browser comun.** Oferă shell-ul adaptiv, dialogurile și controalele reutilizate de adaptor.
 - **Motor Rentz.** Deține starea, mutările legale și scorul. Politicile AI primesc observația permisă jucătorului.
 - **atf-tests.** Adaugă scenarii, oracole independente și guvernanță. Verifică motorul direct și observă aplicația prin traseul Android nativ. Test Kit și Reporting susțin aserțiunile și dovezile.
 
@@ -35,6 +40,7 @@ flowchart LR
 |---|---|
 | [Motor · `rentz-lab-app/game-core`](rentz-lab-app/game-core/README.md) | Modul Java în Maven și Gradle. Reguli, politici AI și teste de domeniu. |
 | [Aplicație · `rentz-lab-app/app`](rentz-lab-app/app/README.md) | Modul Gradle. Sesiune, persistență, masă, scor și realizări. |
+| [Adaptor browser · `atf-ui-browser`](atf-ui-browser/README.md) | Proiectează sesiunea Rentz în shell-ul comun, cu stare locală și playback vizibil al mutărilor. |
 | [Verificare · `atf-tests`](atf-tests/README.md) | Modul Maven. Scenarii Rentz, evaluare offline, guvernanță și adaptoare de acceptanță. |
 | [Biblioteci ATF · `lib`](lib/README.md) | Perechi JAR/POM pentru Core, Reporting, Console, Mock și Test Kit, cu verificări de proveniență. |
 | [Bibliotecă UI · `rentz-lab-app/ui-library`](rentz-lab-app/ui-library/README.md) | Repository Maven local folosit de Gradle pentru dependențele de produs. |

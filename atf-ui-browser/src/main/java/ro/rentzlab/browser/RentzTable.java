@@ -3,6 +3,7 @@ package ro.rentzlab.browser;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import ro.cardtable.browser.BrowserGame;
 import ro.cardtable.browser.BrowserGame.Action;
 import ro.cardtable.browser.BrowserGame.Card;
@@ -42,6 +43,7 @@ final class RentzTable implements BrowserGame.Match {
     private final ArrayList<String> names;
     private List<PlayStep> playback = List.of();
     private List<CollectionCue> collections = List.of();
+    private List<Map<String, Object>> sequencePlayback = List.of();
     private String language = "ro";
 
     RentzTable(GameSession game, String name) {
@@ -57,6 +59,7 @@ final class RentzTable implements BrowserGame.Match {
     int acceptedCommandCount() { return game.save().commands().size(); }
     List<AchievementHand> achievementHands() { return game.achievementHands(); }
     List<String> names() { return List.copyOf(names); }
+    List<Map<String, Object>> sequencePlayback() { return sequencePlayback; }
     java.util.Map<String, Object> arrival(Observation before) {
         Observation after = game.view();
         if (before == null || before.contract() != Contract.RENTZ || before.phase() != Phase.PLAY
@@ -85,17 +88,21 @@ final class RentzTable implements BrowserGame.Match {
     @Override public void act(String action) {
         playback = List.of();
         collections = List.of();
+        sequencePlayback = List.of();
         Observation before = game.view();
         var steps = new ArrayList<PlayStep>();
         var cues = new ArrayList<CollectionCue>();
+        var sequenceSteps = new ArrayList<Map<String, Object>>();
         if ("auto-step".equals(action)) {
             if (game.hasForcedHumanPass()) submit(GameSession.Action.PASS, null, null, false, Origin.AUTOMATIC);
             else if (game.hasPendingHumanDecision()) game.advanceHumanTurn();
             else throw new IllegalStateException("There is no human decision to automate");
+            captureRentzPlay(before, game.view(), sequenceSteps, true);
             captureManualCollection(before, game.view(), cues);
-            advanceBots(steps, cues);
+            advanceBots(steps, cues, sequenceSteps);
             playback = List.copyOf(steps);
             collections = List.copyOf(cues);
+            sequencePlayback = List.copyOf(sequenceSteps);
             return;
         }
         var parts = action.split(":", 2);
@@ -111,19 +118,22 @@ final class RentzTable implements BrowserGame.Match {
             case "next" -> submit(GameSession.Action.NEXT_HAND, null, null, false, Origin.MANUAL);
             default -> throw new IllegalArgumentException("Unknown Rentz action");
         }
+        captureRentzPlay(before, game.view(), sequenceSteps, false);
         captureManualCollection(before, game.view(), cues);
-        advanceBots(steps, cues);
+        advanceBots(steps, cues, sequenceSteps);
         playback = List.copyOf(steps);
         collections = List.copyOf(cues);
+        sequencePlayback = List.copyOf(sequenceSteps);
     }
 
     private void submit(GameSession.Action action, ro.rentzlab.core.Card card, Contract contract, boolean blind, Origin origin) {
         game.apply(new Command(action, 0, card, contract, blind, origin));
     }
 
-    private void advanceBots() { advanceBots(new ArrayList<>(), new ArrayList<>()); }
+    private void advanceBots() { advanceBots(new ArrayList<>(), new ArrayList<>(), new ArrayList<>()); }
 
-    private void advanceBots(List<PlayStep> steps, List<CollectionCue> cues) {
+    private void advanceBots(List<PlayStep> steps, List<CollectionCue> cues,
+            List<Map<String, Object>> sequenceSteps) {
         for (int turns = 0; turns < 512; turns++) {
             if (game.hasForcedHumanPass()) {
                 submit(GameSession.Action.PASS, null, null, false, Origin.AUTOMATIC);
@@ -131,7 +141,7 @@ final class RentzTable implements BrowserGame.Match {
                 Observation before = game.view();
                 game.advanceBotTurn();
                 Observation after = game.view();
-                captureBotPlay(before, after, steps, cues);
+                if (!captureRentzPlay(before, after, sequenceSteps, true)) captureBotPlay(before, after, steps, cues);
             } else {
                 return;
             }
@@ -151,6 +161,37 @@ final class RentzTable implements BrowserGame.Match {
         steps.add(new PlayStep(played, startsTrick, AUTOMATED_ACTION_DELAY_MILLIS, cue,
                 after.contract() == null ? "" : contractName(after.contract()), seatFacts(after)));
         if (cue != null) cues.add(cue);
+    }
+
+    private boolean captureRentzPlay(Observation before, Observation after,
+            List<Map<String, Object>> sequenceSteps, boolean automated) {
+        if (before.contract() != Contract.RENTZ || after.contract() != Contract.RENTZ
+                || after.events().size() <= before.events().size()) return false;
+        var event = after.events().get(after.events().size() - 1);
+        if (event.action() != ro.rentzlab.core.RentzMatch.Action.PLAY || event.card() == null) return false;
+        sequenceSteps.add(Map.of("actorSeat", event.seat(),
+                "delayMillis", automated ? AUTOMATED_ACTION_DELAY_MILLIS : 0,
+                "before", publicFrame(before), "after", publicFrame(after)));
+        return true;
+    }
+
+    private Map<String, Object> publicFrame(Observation state) {
+        var view = view(state);
+        var result = new java.util.LinkedHashMap<String, Object>();
+        result.put("heading", view.heading());
+        result.put("subtitle", view.subtitle());
+        result.put("prompt", view.prompt());
+        result.put("seats", view.seats());
+        result.put("hand", view.hand());
+        result.put("played", view.played());
+        result.put("center", view.center());
+        result.put("actions", view.actions());
+        result.put("history", view.history());
+        result.put("header", view.header());
+        result.put("score", view.score());
+        result.put("scoreDetails", view.scoreDetails());
+        result.put("rentzSequence", RentzBrowser.sequence(state));
+        return result;
     }
 
     private void captureManualCollection(Observation before, Observation after, List<CollectionCue> cues) {
@@ -186,7 +227,10 @@ final class RentzTable implements BrowserGame.Match {
     @Override public List<CollectionCue> collections() { return collections; }
 
     @Override public View view() {
-        Observation state = game.view();
+        return view(game.view());
+    }
+
+    private View view(Observation state) {
         boolean choosing = state.phase() == Phase.CHOOSE;
         boolean playing = state.phase() == Phase.PLAY;
         boolean live = choosing || playing;
@@ -202,8 +246,7 @@ final class RentzTable implements BrowserGame.Match {
         var played = state.trick().stream().map(play -> new Played(play.seat(), face(play.card()),
                 play.card().label(), names.get(play.seat()) + " · " + play.card().label())).toList();
         String contract = state.contract() == null ? text("Alege sub-jocul", "Choose a contract") : contractName(state.contract());
-        String progress = text("Mâna", "Hand") + " " + state.handNumber() + "/" + (state.players() * Contract.values().length)
-                + " · " + (state.phase() == Phase.MATCH_END ? text("Partidă încheiată", "Match complete") : contract);
+        String progress = text("Mâna", "Hand") + " " + state.handNumber() + "/" + (state.players() * Contract.values().length);
         String prompt = switch (state.phase()) {
             case CHOOSE -> text("Alege sub-jocul", "Choose a contract");
             case PLAY -> state.turn() == 0 ? text("Rândul tău", "Your turn") : text("Se joacă", "Playing");
@@ -211,7 +254,7 @@ final class RentzTable implements BrowserGame.Match {
             case MATCH_END -> text("Partidă încheiată", "Match complete");
         };
         var header = new BrowserGame.Header("RENTZ", text("Rentz", "Rentz"), progress,
-                text("Sub-joc", "Contract") + " · " + contract,
+                state.contract() == null ? "" : contractName(state.contract()),
                 state.contract() == null ? "—" : contractName(state.contract()),
                 text("Sub-jocul selectat", "Selected contract"), 22f, 14f, 13f);
         var history = history(state);

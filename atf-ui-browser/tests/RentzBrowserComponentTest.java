@@ -30,6 +30,7 @@ public final class RentzBrowserComponentTest {
         legalCardsAndSequenceAgree();
         browserHandOrderMatchesAndroid();
         automaticTurnsKeepTheirOrderAndTiming();
+        rentzPlaybackKeepsThePlayedCardAndSequenceInLockstep();
         completedHandHistorySeparatesDeltaAndTotal();
         browserRentzAwardsOnlyOneZeroForEveryTableSize();
         browserFinalStandingsUseAndroidCompetitionTies();
@@ -111,6 +112,8 @@ public final class RentzBrowserComponentTest {
         selected.act("choose:KING_HEARTS");
         equal("Selected contract status uses the same translated label", "King of hearts", selected.view().subtitle());
         equal("Browser game header localizes the selected contract", "King of hearts", selected.view().header().trump());
+        equal("Browser progress line matches the Android title", "Hand 1/32", selected.view().header().progress());
+        equal("Browser selected-game line matches Android without an Atu label", "King of hearts", selected.view().header().bids());
 
         var selectedRomanian = start(new RentzBrowser(() -> 20261120L), 4);
         selectedRomanian.setLanguage("ro");
@@ -118,6 +121,10 @@ public final class RentzBrowserComponentTest {
         selectedRomanian.act("choose:KING_HEARTS");
         equal("Romanian browser game header matches the APK contract label", "Regele de cupă",
                 selectedRomanian.view().header().trump());
+        equal("Romanian progress line matches the Android hand counter", "Mâna 1/32",
+                selectedRomanian.view().header().progress());
+        equal("Romanian selected-game line shows only the chosen contract", "Regele de cupă",
+                selectedRomanian.view().header().bids());
     }
     private static void browserNameMatchesNativeProfileContract() {
         var table = start(new RentzBrowser(() -> 1L), 3);
@@ -227,16 +234,16 @@ public final class RentzBrowserComponentTest {
         table.act("reveal");
         table.act("choose:RENTZ");
         table.act(firstLegalAction(table));
-        var playback = table.playback();
-        truth("Opponent response is projected as playback", !playback.isEmpty());
-        truth("Each visible bot action uses the qualified Android pacing interval", playback.stream()
-                .allMatch(step -> step.delayMillis() == TurnPacing.ACTION_DELAY_MILLIS));
-        truth("Playback actors are opponents only", playback.stream().allMatch(step -> step.play().seat() != 0));
-        truth("Seat facts follow the shared browser shell two-line contract", playback.stream().allMatch(step ->
-                step.seatFacts().size() == table.names().size()
-                        && step.seatFacts().stream().allMatch(fact -> fact.split("\\n", -1).length == 2
-                                && fact.split("\\n", -1)[0].startsWith("Mână ")
-                                && fact.split("\\n", -1)[1].startsWith("Total "))));
+        var playback = RentzBrowser.sequencePlayback(table);
+        truth("Rentz browser replay starts with the selected human card", !playback.isEmpty()
+                && Integer.valueOf(0).equals(playback.get(0).get("actorSeat")));
+        truth("Automated cards use the qualified Android first-frame interval", playback.stream().skip(1)
+                .allMatch(step -> step.get("delayMillis") instanceof Number delayValue
+                        && delayValue.longValue() == TurnPacing.ACTION_DELAY_MILLIS));
+        truth("Automated playback follows the human card in seat order", playback.stream().skip(1)
+                .allMatch(step -> !Integer.valueOf(0).equals(step.get("actorSeat"))));
+        truth("Every playback step carries a public Rentz sequence snapshot", playback.stream()
+                .allMatch(step -> step.get("before") instanceof Map<?, ?> && step.get("after") instanceof Map<?, ?>));
         equal("Rentz does not use trick collection animation", List.of(), table.collections());
 
         var before = table.acceptedCommandCount();
@@ -244,6 +251,77 @@ public final class RentzBrowserComponentTest {
         truth("One auto step advances at least one accepted command", table.acceptedCommandCount() > before);
         truth("Auto step leaves a legal player action or a completed hand",
                 !table.view().actions().isEmpty() || !table.isFinished());
+    }
+
+    private static void rentzPlaybackKeepsThePlayedCardAndSequenceInLockstep() {
+        for (int players = 3; players <= 6; players++) {
+            int count = players;
+            var table = start(new RentzBrowser(() -> 20261200L + count), count);
+            table.act("reveal");
+            table.act("choose:RENTZ");
+            var before = table.observation();
+            int initialPlayed = countPlayedCells(RentzBrowser.sequence(table));
+            String action = firstLegalAction(table);
+            String selected = before.hand().stream().filter(card -> action.equals("card:" + card.suit().name() + ":" + card.rank()))
+                    .map(ro.rentzlab.core.Card::label).findFirst().orElseThrow();
+
+            table.act(action);
+
+            var frames = RentzBrowser.sequencePlayback(table);
+            truth("The accepted human card is the first incremental Rentz frame at " + players + " seats", !frames.isEmpty());
+            var first = frames.get(0);
+            equal("The first Rentz frame belongs to the human at " + players + " seats", 0, first.get("actorSeat"));
+            equal("The selected human card reuses the native lift instead of an AI delay", 0, first.get("delayMillis"));
+            var beforeFrame = frameState(first, "before");
+            var afterFrame = frameState(first, "after");
+            equal("Pre-play sequence is unchanged at " + players + " seats",
+                    initialPlayed, playedCards(beforeFrame));
+            equal("The human card becomes public on the board in the same frame at " + players + " seats",
+                    playedCards(beforeFrame) + 1, playedCards(afterFrame));
+            truth("The played human card leaves the private hand before playback continues at " + players + " seats",
+                    afterFrame.hand().stream().noneMatch(card -> card.label().equals(selected)));
+            truth("The played human card is present in the public sequence at " + players + " seats",
+                    afterFrame.sequence().stream().flatMap(row -> rowCells(row).stream())
+                            .anyMatch(cell -> selected.equals(cell.get("label")) && Boolean.TRUE.equals(cell.get("played"))));
+
+            int previous = playedCards(afterFrame);
+            for (int index = 1; index < frames.size(); index++) {
+                var frame = frames.get(index);
+                equal("Opponent playback waits on the shared J4 first-frame cadence at " + players + "/" + index,
+                        (int) TurnPacing.ACTION_DELAY_MILLIS, frame.get("delayMillis"));
+                var snapshot = frameState(frame, "after");
+                equal("Each opponent card advances exactly one Rentz sequence slot at " + players + "/" + index,
+                        ++previous, playedCards(snapshot));
+                truth("Playback snapshots expose only the human private hand at " + players + "/" + index,
+                        snapshot.hand().size() <= 8);
+            }
+        }
+    }
+
+    private record PlaybackSnapshot(List<BrowserGame.Card> hand, List<Map<String, Object>> sequence) { }
+
+    @SuppressWarnings("unchecked")
+    private static PlaybackSnapshot frameState(Map<String, Object> frame, String key) {
+        Object snapshot = frame.get(key);
+        if (!(snapshot instanceof Map<?, ?> values) || !(values.get("hand") instanceof List<?> hand)
+                || !(values.get("rentzSequence") instanceof List<?> sequence)) {
+            throw new AssertionError("Rentz playback is missing its public " + key + " view snapshot");
+        }
+        return new PlaybackSnapshot((List<BrowserGame.Card>) hand, (List<Map<String, Object>>) sequence);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> rowCells(Map<String, Object> row) {
+        return (List<Map<String, Object>>) row.get("cells");
+    }
+
+    private static int playedCards(PlaybackSnapshot snapshot) {
+        return countPlayedCells(snapshot.sequence());
+    }
+
+    private static int countPlayedCells(List<Map<String, Object>> sequence) {
+        return (int) sequence.stream().flatMap(row -> rowCells(row).stream())
+                .filter(cell -> Boolean.TRUE.equals(cell.get("played"))).count();
     }
 
     private static void completedHandHistorySeparatesDeltaAndTotal() {

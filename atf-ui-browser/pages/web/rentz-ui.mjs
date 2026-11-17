@@ -38,6 +38,46 @@ export async function presentRentzArrival(result, language, { render, wait, stop
   return true;
 }
 
+function rentzPlaybackView(result, snapshot, activeSeat = null) {
+  const view = snapshot;
+  if (!view || !Array.isArray(view.seats) || !Array.isArray(view.rentzSequence)
+      || !Array.isArray(view.hand)) {
+    throw new Error("Rentz playback snapshot is incomplete or exposes no public table state.");
+  }
+  return {
+    ...result,
+    view: {
+      ...view,
+      actions: [],
+      prompt: "",
+      score: null,
+      scoreDetails: null,
+      seats: view.seats.map((seat, index) => ({
+        ...seat,
+        active: activeSeat === null ? seat.active : index === activeSeat,
+      })),
+    },
+  };
+}
+
+/** Replays public Rentz card placements from the same turn snapshots used by the Android session. */
+export async function presentRentzPlayback(result, { render, wait, nextFrame }) {
+  const frames = result?.rentzPlayback;
+  if (!Array.isArray(frames) || frames.length === 0) return false;
+  for (const frame of frames) {
+    if (!Number.isInteger(frame.actorSeat) || !Number.isInteger(frame.delayMillis) || frame.delayMillis < 0) {
+      throw new Error("Rentz playback actor or cadence is invalid.");
+    }
+    if (frame.delayMillis > 0) {
+      await render(rentzPlaybackView(result, frame.before, frame.actorSeat));
+      await nextFrame();
+      await wait(frame.delayMillis);
+    }
+    await render(rentzPlaybackView(result, frame.after));
+  }
+  return true;
+}
+
 export function rentzArrivalPanel(arrival, element, language) {
   if (!arrival || !Number.isInteger(arrival.unplayedCards) || !arrival.winner) return null;
   const panel = element("div", "", "rentz-arrival");

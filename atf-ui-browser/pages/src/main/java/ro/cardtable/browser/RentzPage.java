@@ -69,6 +69,10 @@ public final class RentzPage {
                     "progress", progress.value, "rankings", rankings.value,
                     "checkpoint", gameCommand ? checkpoint : savedCheckpoint,
                     "rejectedCheckpoint", rejected);
+            if (path.equals("/api/action")) {
+                var sequencePlayback = RentzBrowser.sequencePlayback(session.match());
+                if (!sequencePlayback.isEmpty()) response.put("rentzPlayback", sequencePlayback);
+            }
             var arrival = path.equals("/api/action") ? RentzBrowser.arrival(session.match(), before) : null;
             if (arrival != null) response.put("rentzArrival", arrival);
             return PageJson.encode(response);

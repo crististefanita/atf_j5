@@ -104,6 +104,7 @@ Proba `-RentzCardMarksOnly` verifică pe emulator acțiunile accesibile și culo
 - Alegerea sub-jocului și jocul păstrează aceleași dreptunghiuri ale locurilor pentru același ecran. Masa măsoară locurile o singură dată pe cadru, apoi adaptează comenzile de alegere, secvența sau levata la banda rămasă. Indicatorul Alege, Joacă sau Pasează arată actorul curent deasupra chenarului.
 - Pe un ecran scund, levata reduce mai întâi distanța dintre rânduri și păstrează ordinea cărților. Bugetul se verifică în pixeli, cu aceeași rotunjire separată a poziției și a înălțimii ultimului rând ca la randarea Android.
 - Masa și ecranul de punctaj afișează progresul `Mâna x/y` pe primul rând și contractul pe rândul următor. Marcajul `×2` rămâne lângă contract.
+- Adaptorul browser folosește aceleași două rânduri după selectarea sub-jocului; ascunde titlul duplicat și panoul de atu din shell-ul comun Whist. Selectorul WEB păstrează numele de contract RO/EN din motor.
 
 Componentele verifică geometria pe dimensiuni controlate și premiile pe locuri. Mock-urile refuză suprapunerea chenarelor, un marcaj atribuit altui actor și un clasament cu locuri duplicate sau străine. [Geometrie](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) · [Punctaj](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java) · [Mock-uri](../../atf-tests/tools/test-ui-selectors.ps1)
 
@@ -112,6 +113,7 @@ Acceptanța de release compară dreptunghiurile mesei de patru locuri înainte �
 ### Decontarea unei secvențe Rentz
 
 - Actorul automat primește un cadru propriu înaintea întârzierii de 550 ms. Logul APK-ului izolat leagă cadrul, pornirea și revizia comenzii confirmate. [Ciclul de viață](ATF_Lifecycle.md)
+- În WEB, aceeași acțiune produce snapshot-uri publice înainte și după fiecare carte. Cartea proprie este scoasă din mână în același pas în care apare în secvență; pentru AI, indicatorul locului precedă intervalul de 550 ms. La ultima carte, snapshot-ul final rămâne vizibil pe durata sosirii de 1,8 secunde, apoi apare scorul. Componentele verifică ordinea, sloturile, durata și lipsa mâinilor adverse înainte de orice verificare în browser.
 - La terminare, cadrul sosirii prezintă câștigătorul și totalul public al cărților neplasate. Fereastra de 1,8 secunde începe la prima randare. Chenarele păstrează totalurile anterioare până la scor.
 - Tabla terminală păstrează cărțile jucate și sloturile libere. În zona suprapusă, indicele lizibil se termină la marginea următoarei cărți jucate.
 - Ecranul de punctaj afișează mâna confirmată. Revenirea la tablă păstrează revizia și continuarea. [Proba Android](ATF_Android.md#livrabile-și-limite)

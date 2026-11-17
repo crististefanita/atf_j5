@@ -11,6 +11,7 @@ public final class RentzPageComponentTest {
 
     public static void main(String[] args) {
         pageCommandStartsTheRealGameSession();
+        rentzCardPlaybackIsAnIncrementalPublicProjection();
         rentzArrivalIsAOneShotPublicProjectionBeforeTheScore();
         otherContractsDoNotEmitARentzArrival();
         System.out.println("Rentz Pages component checks passed: " + checks);
@@ -71,14 +72,103 @@ public final class RentzPageComponentTest {
             check("Arrival keeps the native 1.8 s duration at " + players + " seats", arrival.optLong("durationMillis") == 1800L);
             check("Arrival carries prior public totals for every seat at " + players + " seats",
                     arrival.getJSONArray("previousTotals").length() == players);
+            var terminalView = reply.getJSONObject("result").getJSONObject("view");
             check("The underlying response keeps its calculated score at " + players + " seats",
-                    reply.getJSONObject("result").getJSONObject("view").optJSONObject("score") != null);
+                    terminalView.optJSONObject("score") != null);
+            var terminalPlayback = reply.optJSONArray("rentzPlayback");
+            check("The completing action carries incremental card playback at " + players + " seats",
+                    terminalPlayback != null && terminalPlayback.length() > 0);
+            if (terminalPlayback != null && terminalPlayback.length() > 0) {
+                var finalFrame = terminalPlayback.getJSONObject(terminalPlayback.length() - 1).getJSONObject("after");
+                check("The last played card remains in the final playback snapshot at " + players + " seats",
+                        playedInSequence(finalFrame.getJSONArray("rentzSequence"))
+                                == playedInSequence(terminalView.getJSONArray("rentzSequence")));
+            }
 
             var settled = pageState(checkpoint);
             check("A fresh state response has no transient arrival at " + players + " seats", !settled.has("rentzArrival"));
             check("A fresh state response exposes the settled score at " + players + " seats",
                     settled.getJSONObject("view").optJSONObject("score") != null);
         }
+    }
+
+    private static void rentzCardPlaybackIsAnIncrementalPublicProjection() {
+        var checkpoint = startPage(20261123, "4", "HARD");
+        var current = pageState(checkpoint);
+        var reply = pageAction(checkpoint, current.getLong("revision"), "reveal");
+        checkpoint = reply.optString("checkpoint", checkpoint);
+        current = pageState(checkpoint);
+        reply = pageAction(checkpoint, current.getLong("revision"), "choose:RENTZ");
+        checkpoint = reply.optString("checkpoint", checkpoint);
+        current = pageState(checkpoint);
+        var hand = current.getJSONObject("view").getJSONArray("hand");
+        String cardAction = "";
+        String selectedLabel = "";
+        for (int index = 0; index < hand.length(); index++) {
+            var card = hand.getJSONObject(index);
+            if (!card.optString("action").isBlank()) {
+                cardAction = card.getString("action");
+                selectedLabel = card.getString("label");
+                break;
+            }
+        }
+        check("A public legal card exists for the human Rentz turn", !cardAction.isBlank());
+
+        reply = pageAction(checkpoint, current.getLong("revision"), cardAction);
+        var frames = reply.optJSONArray("rentzPlayback");
+        check("The action DTO carries the step-by-step Rentz playback", frames != null && frames.length() > 0);
+        var first = frames.getJSONObject(0);
+        check("The first playback event is the already-lifted human card",
+                first.getInt("actorSeat") == 0 && first.getInt("delayMillis") == 0);
+        var before = first.getJSONObject("before");
+        var after = first.getJSONObject("after");
+        check("The first Rentz card is added exactly once to the public sequence",
+                playedInSequence(before.getJSONArray("rentzSequence")) == 0
+                        && playedInSequence(after.getJSONArray("rentzSequence")) == 1);
+        check("The same card is removed from the private hand in that rendered snapshot",
+                handHasLabel(after.getJSONArray("hand"), selectedLabel) == false
+                        && sequenceHasPlayedLabel(after.getJSONArray("rentzSequence"), selectedLabel));
+
+        int expectedPlayed = 1;
+        for (int index = 1; index < frames.length(); index++) {
+            var frame = frames.getJSONObject(index);
+            check("Automated card has the J4 first-frame delay", frame.getInt("delayMillis") == 550);
+            var step = frame.getJSONObject("after");
+            check("Every bot card advances one public sequence slot",
+                    playedInSequence(step.getJSONArray("rentzSequence")) == ++expectedPlayed);
+            String projection = frame.toString();
+            check("Playback does not reveal opponent hands or private hand collections",
+                    !projection.contains("opponentHands") && !projection.contains("\"hands\""));
+        }
+    }
+
+    private static int playedInSequence(org.json.JSONArray sequence) {
+        int count = 0;
+        for (int row = 0; row < sequence.length(); row++) {
+            var cells = sequence.getJSONObject(row).getJSONArray("cells");
+            for (int cell = 0; cell < cells.length(); cell++) {
+                if (cells.getJSONObject(cell).optBoolean("played")) count++;
+            }
+        }
+        return count;
+    }
+
+    private static boolean sequenceHasPlayedLabel(org.json.JSONArray sequence, String label) {
+        for (int row = 0; row < sequence.length(); row++) {
+            var cells = sequence.getJSONObject(row).getJSONArray("cells");
+            for (int cell = 0; cell < cells.length(); cell++) {
+                var card = cells.getJSONObject(cell);
+                if (card.optBoolean("played") && label.equals(card.optString("label"))) return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean handHasLabel(org.json.JSONArray hand, String label) {
+        for (int index = 0; index < hand.length(); index++) {
+            if (label.equals(hand.getJSONObject(index).optString("label"))) return true;
+        }
+        return false;
     }
 
     private static void otherContractsDoNotEmitARentzArrival() {

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { presentRentzArrival, rentzArrivalView, rentzChoiceDropdown, rentzSequence,
+import { presentRentzArrival, presentRentzPlayback, rentzArrivalView, rentzChoiceDropdown, rentzSequence,
   rentzSequenceLayout, applyRentzSequenceLayout } from "./web/rentz-ui.mjs";
 import { readFileSync } from "node:fs";
 
@@ -124,6 +124,12 @@ check("Rentz sequence indices keep Android's left edge alignment", true,
   rentzCss.includes("justify-content: flex-start;"));
 check("Rentz sequence uses a condensed card-face font", true,
   rentzCss.includes("Roboto Condensed") && rentzCss.includes("Arial Narrow"));
+const generatedShell = readFileSync(process.argv[3], "utf8");
+check("Rentz header removes the extra product title used by the generic Whist shell", true,
+  generatedShell.includes('title.hidden = match.header.mode === "RENTZ";'));
+check("Rentz header omits the trump panel and preserves the selected-game line", true,
+  generatedShell.includes('if (match.header.mode === "RENTZ") details.append(status);')
+    && generatedShell.includes('else details.append(status, trump);'));
 
 const settled = {
   revision: 9,
@@ -177,6 +183,83 @@ check("ordinary result skips Rentz arrival lifecycle", false, await presentRentz
     wait: async () => ignoredLifecycle.push("wait"),
   }));
 check("ordinary result has no transient rendering effects", [], ignoredLifecycle);
+
+const playbackLife = [];
+const publicSnapshot = (heading, played, activeSeat) => ({
+  ...settled.view,
+  heading,
+  hand: [],
+  actions: [{ key: "card:must-be-hidden", label: "hidden during playback" }],
+  seats: settled.view.seats.map((seat, index) => ({ ...seat, active: index === activeSeat })),
+  rentzSequence: [{ suit: "♣", cells: [{ label: "J♣", played }] }],
+});
+const sequencePlayback = {
+  ...settled,
+  rentzPlayback: [
+    { actorSeat: 0, delayMillis: 0, before: publicSnapshot("before-human", false, 0),
+      after: publicSnapshot("after-human", true, 1) },
+    { actorSeat: 2, delayMillis: 550, before: publicSnapshot("before-bot", true, 2),
+      after: publicSnapshot("after-bot", true, 0) },
+  ],
+};
+const playedBack = await presentRentzPlayback(sequencePlayback, {
+  stopAutomation: () => playbackLife.push("stop"),
+  render: async state => {
+    const view = state.view;
+    playbackLife.push(`render:${view.heading}:${view.seats.findIndex(seat => seat.active)}:${view.rentzSequence[0].cells[0].played}:${view.actions.length}:${view.score}`);
+  },
+  nextFrame: async () => playbackLife.push("visible-frame"),
+  wait: async duration => playbackLife.push(`wait:${duration}`),
+});
+check("incremental Rentz replay activates only when public snapshots exist", true, playedBack);
+check("manual play is shown immediately, then bot actor is visible for one J4 interval before its card without cancelling auto-play",
+  ["render:after-human:1:true:0:null", "render:before-bot:2:true:0:null", "visible-frame",
+    "wait:550", "render:after-bot:0:true:0:null"], playbackLife);
+check("empty Rentz replay has no delay, render, or automation side effects", false,
+  await presentRentzPlayback({ ...settled, rentzPlayback: [] }, {
+    stopAutomation: () => playbackLife.push("unexpected-stop"), render: async () => playbackLife.push("unexpected-render"),
+    nextFrame: async () => playbackLife.push("unexpected-frame"), wait: async () => playbackLife.push("unexpected-wait"),
+  }));
+check("empty replay leaves the lifecycle trace untouched", 5, playbackLife.length);
+
+const terminalSequence = [{ suit: "♣", cells: [
+  { label: "J♣", played: true }, { label: "Q♣", played: true },
+] }];
+const terminalSnapshot = (heading, cells) => ({
+  ...settled.view,
+  heading,
+  hand: [],
+  actions: [{ key: "next", label: "must be hidden" }],
+  seats: settled.view.seats,
+  rentzSequence: [{ suit: "♣", cells }],
+});
+const terminalResult = {
+  ...settled,
+  view: { ...settled.view, rentzSequence: terminalSequence },
+  rentzPlayback: [{
+    actorSeat: 1, delayMillis: 550,
+    before: terminalSnapshot("before-final-card", [{ label: "J♣", played: true }]),
+    after: terminalSnapshot("after-final-card", terminalSequence[0].cells),
+  }],
+  rentzArrival: arrival,
+};
+const terminalLife = [];
+const terminalRender = async state => {
+  const view = state.view;
+  const cards = view.rentzSequence?.flatMap(row => row.cells).filter(cell => cell.played).length ?? 0;
+  terminalLife.push(view.score ? "score" : view.rentzArrival ? `arrival:${cards}:${view.actions.length}` : `board:${cards}`);
+};
+await presentRentzPlayback(terminalResult, {
+  stopAutomation: () => terminalLife.push("unexpected-stop-playback"), render: terminalRender,
+  nextFrame: async () => terminalLife.push("visible-frame"), wait: async duration => terminalLife.push(`wait:${duration}`),
+});
+await presentRentzArrival(terminalResult, "ro", {
+  stopAutomation: () => terminalLife.push("stop-arrival"), render: terminalRender,
+  wait: async duration => terminalLife.push(`wait:${duration}`),
+});
+check("the last Rentz card remains on the board through the native arrival pause before score appears",
+  ["board:1", "visible-frame", "wait:550", "board:2",
+    "stop-arrival", "arrival:2:0", "wait:1800", "score"], terminalLife);
 
 const selected = [];
 const picker = rentzChoiceDropdown([

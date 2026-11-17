@@ -76,17 +76,26 @@ $markup = [IO.File]::ReadAllText($tableScript).Replace("`r`n", "`n")
 $importAnchor = 'import { historyGrid } from "./records.mjs";'
 $renderAnchor = '  const visible = element("div", "", "cards-on-table");' + "`n" + '  if (!match.header) for (const face of match.center) visible.append(card(face));'
 $contentAnchor = '  const content = element("section", "", match.header ? "match whist-match" : "match");'
+$rentzHeaderAnchor = '  const title = element("h1", match.header.title);' + "`n" + '  top.append(navigation, title);'
+$rentzDetailsAnchor = '  details.append(status, trump);'
 $issueAnchor = '    state = result;' + "`n" + '    transport.remember?.(state.profile);'
 $choiceAnchor = @(
   '  for (const move of match.actions.filter(move => !move.key.startsWith("bid:") && !(match.header && ["auto", "auto-step"].includes(move.key)))) {'
   '    actions.append(control(move));'
   '  }'
 ) -join "`n"
-foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $issueAnchor, $choiceAnchor)) {
+foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
     if ($count -ne 1) { throw "Card Table Browser 0.2.5 adapter anchor changed; expected one match, found $count." }
 }
-$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
+$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
+$markup = $markup.Replace($rentzHeaderAnchor,
+  '  const title = element("h1", match.header.title);' + "`n" +
+  '  title.hidden = match.header.mode === "RENTZ";' + "`n" +
+  '  top.append(navigation, title);')
+$markup = $markup.Replace($rentzDetailsAnchor,
+  '  if (match.header.mode === "RENTZ") details.append(status);' + "`n" +
+  '  else details.append(status, trump);')
 $rentzRender = $renderAnchor + "`n" + (@(
   '  if (match.rentzSequence?.length) {'
   '    visible.dataset.rentzSequence = "true";'
@@ -96,6 +105,11 @@ $rentzRender = $renderAnchor + "`n" + (@(
 $markup = $markup.Replace($renderAnchor, $rentzRender)
 $markup = $markup.Replace($contentAnchor, $contentAnchor + "`n" + '  if (match.rentzArrival) content.dataset.rentzArrival = "true";')
 $rentzIssue = @(
+  '    await presentRentzPlayback(result, {'
+  '      render: next => { state = next; return render(); },'
+  '      nextFrame: () => new Promise(resolve => requestAnimationFrame(resolve)),'
+  '      wait: duration => new Promise(resolve => setTimeout(resolve, duration)),'
+  '    });'
   '    const arrivalPresented = await presentRentzArrival(result, language, {'
   '      render: next => { state = next; return render(); },'
   '      wait: duration => new Promise(resolve => setTimeout(resolve, duration)),'
@@ -182,7 +196,7 @@ $nativeMetrics = Join-Path $run 'rentz-native-sequence-metrics.tsv'
 $nativeReferenceRuntime = @($nativeReferenceClasses, $nativeUiClasses) -join [IO.Path]::PathSeparator
 & java -cp $nativeReferenceRuntime 'ro.rentzlab.app.ui.table.RentzNativeSequenceMetricsReference' | Set-Content -LiteralPath $nativeMetrics -Encoding utf8
 if ($LASTEXITCODE -ne 0) { throw 'Could not emit native Rentz sequence layout metrics.' }
-& node (Join-Path $pages 'verify-rentz-ui.mjs') $nativeMetrics
+& node (Join-Path $pages 'verify-rentz-ui.mjs') $nativeMetrics $tableScript
 if ($LASTEXITCODE -ne 0) { throw 'Rentz sequence renderer component verification failed.' }
 & node (Join-Path $pages 'verify-rentz-transport.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Rentz transient event transport verification failed.' }
