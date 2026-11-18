@@ -33,7 +33,7 @@ public final class RentzGameHeader {
         Objects.requireNonNull(copy);
         boolean visible = playable;
         return new Content(copy.handProgress(hand, totalHands), copy.playedContract(contract, blind),
-                contract != null, visible, visible && autoPlay, visible && enabled);
+                contract != null, visible, visible && autoPlay, visible && (autoPlay || enabled));
     }
 
     public static GameTitleBar build(ScreenViews views, RentzUiText copy, Content content,

@@ -24,7 +24,7 @@ public final class RentzGameHeaderComponentTest {
             audit.truth("Contract row remains visible after selection " + language, content.contractVisible());
             audit.truth("AutoPlay is shown only on a playable hand " + language, content.autoPlayVisible());
             audit.truth("Header mirrors checked AutoPlay state " + language, content.autoPlayChecked());
-            audit.equal("Automatic or delayed turns disable the control " + language, false, content.autoPlayEnabled());
+            audit.equal("Active AutoPlay always keeps the stop control available " + language, true, content.autoPlayEnabled());
             audit.equal("Localized AutoPlay label " + language,
                     language == RentzUiText.Language.RO ? "Joc automat" : "Auto play", copy.autoPlay());
             audit.equal("Accessible start action " + language,
@@ -56,5 +56,21 @@ public final class RentzGameHeaderComponentTest {
                 () -> new RentzGameHeader.Content("Hand 1/32", "", false, false, true, false));
         audit.rejects("A hidden AutoPlay cannot be enabled", IllegalArgumentException.class,
                 () -> new RentzGameHeader.Content("Hand 1/32", "", false, false, false, true));
+    }
+
+    @Test public void queuedAutomationCanBeStoppedButCannotBeStartedWhileInputIsBlocked() {
+        for (var language : RentzUiText.Language.values()) {
+            var copy = new RentzUiText(language);
+            for (var contract : new Contract[]{null, Contract.RENTZ, Contract.WHIST}) {
+                var active = RentzGameHeader.content(copy, 2, 32, contract, false, true, true, false);
+                var manual = RentzGameHeader.content(copy, 2, 32, contract, false, false, true, false);
+                audit.equal("A queued AI decision keeps its stop action " + language + " " + contract,
+                        true, active.autoPlayEnabled());
+                audit.equal("Blocked input cannot start an automatic decision " + language + " " + contract,
+                        false, manual.autoPlayEnabled());
+                audit.equal("The control value changes only through its owner " + language + " " + contract,
+                        false, manual.autoPlayChecked());
+            }
+        }
     }
 }

@@ -16,11 +16,25 @@ Folosiți comparații pe aceeași configurație efectivă și captați doar tran
 
 ## P1 · Bifa Automat și ritmul turei
 
-**Adoptarea controlului comun este implementată:** `RentzGameHeader` proiectează textul RO/EN și starea curentă în `GameTitleBar` din AAR-ul fixat; logica de pornire, oprire și anulare rămâne în Rentz. Componentele verifică starea vizibilă, bifată și dezactivată, iar testul de adopție confirmă clasa încărcată din AAR. [Adaptorul](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/screens/RentzGameHeader.java) · [Componentele adaptorului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/screens/RentzGameHeaderComponentTest.java) · [Biblioteca UI](../../rentz-lab-app/ui-library/README.md)
+Antetul folosește `GameTitleBar` din AAR-ul fixat. Contractul stabil este în [ghidul de integrare](../rentz/ATF_UiIntegration.md#antetul-mesei-și-autoplay); aici rămân limitele de acceptanță.
 
-**Rămâne acceptanța pe Android:** la font mărit, confirmarea unei singure intenții per atingere și resetarea vizuală la începutul mâinii noi. Geometria comună se verifică offline în Rentz pe profilele Whist de 320×599, 360×740, 393×800 (font 2×) și 600×1140, plus profilurile Rentz scund și lat. [Matricea de afișaj și antet](../rentz/ATF_UiIntegration.md#antetul-mesei-și-autoplay) · [Componente AutoPlay](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java)
+| Strat | Contract și verificare |
+|---|---|
+| Adaptor | [RentzGameHeader](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/screens/RentzGameHeader.java) păstrează oprirea disponibilă cu AI în așteptare. [Componentele](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/screens/RentzGameHeaderComponentTest.java) verifică RO/EN, control activ și pornire blocată. |
+| Geometrie offline | Profilele Whist 320×599, 360×740, 393×800 (font 2×) și 600×1140 completează profilele Rentz scund și lat. [Matricea de afișaj](../rentz/ATF_UiIntegration.md#antetul-mesei-și-autoplay) |
+| Lifecycle offline | [Componentele AutoPlay](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java) refuză răspunsul livrat după oprire și păstrează tura adversarului. |
+| Acceptanță Android rămasă | Confirmați la font mărit o singură intenție per atingere, resetarea vizuală la mâna nouă, pauză/navigare și reluarea între două mutări. [Contractul lifecycle](../rentz/ATF_Lifecycle.md) |
 
-Proba Rentz corelează cadrul actorului, pauza și o comandă pentru fiecare tură adversă. Rămân de verificat anularea la pauză sau navigare și reluarea între două mutări. [Contractul lifecycle](../rentz/ATF_Lifecycle.md) · [Componente](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java)
+## P1 · Admiterea bibliotecilor și paritatea Whist
+
+Păstrați AAR-ul Android `0.1.17` și pachetul Browser `0.2.10` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
+
+| Prioritate | Cerință rămasă | Criteriu de închidere |
+|---|---|---|
+| P1 | Paritatea pe profile dinamice | Refolosiți testele de viewport din JAR; după redimensionare și font mărit, toate chenarele rămân fixe între alegere, joc și colectare. Proba nativă identifică profilul, APK-ul și regiunea observată. |
+| P1 | Secvența Rentz la 3–6 jucători | Măsurați banda centrală și toate cele patru șiruri, inclusiv ultima carte și pasul forțat. Nu schimbați geometria comună a locurilor pentru a compensa conținutul specific. |
+| P1 | Oprirea AutoPlay în ambele adaptoare | Oprirea rămâne accesibilă când AI-ul calculează; livrarea întârziată nu aplică o comandă. În Web, includeți și oprirea între două cadre de playback. |
+| P2 | Meniuri și fonturi comune | Verificați RO/EN, tastatura, închiderea la click în exterior și fontul mărit. Ajustările CSS rămân în adaptorul Web; dimensiunile APK nu se schimbă implicit. |
 
 ## P2 · Meniu și istoric
 
