@@ -102,9 +102,10 @@ public final class RentzCardSpaceTest {
                     Math.round((trick.rows() - 1) * trick.rowStrideDp() * density)
                             + Math.round(trick.cellHeightDp() * density));
             var whist = TableGeometry.arrangeDisplay(width, height, players, seatWidth, seatHeight, width,
-                    measuredTrick, gap, true, TableGeometry.CenterAlignment.BALANCED);
+                    measuredTrick, gap, true, TableGeometry.CenterAlignment.BALANCED,
+                    Math.round(HandLayoutMetrics.LIFT_CLEARANCE_DP * density));
             var rentz = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap,
-                    RentzCardSpace.trickHeightPx(density, trick));
+                    RentzCardSpace.trickHeightPx(density, trick), Math.round(HandLayoutMetrics.LIFT_CLEARANCE_DP * density));
             assertEquals(whist.seats(), rentz.seats());
         }
     }
@@ -118,7 +119,7 @@ public final class RentzCardSpaceTest {
             var old = TableGeometry.arrangeDisplay(width, height, players, seatWidth, seatHeight,
                     220, 128, gap, false, TableGeometry.CenterAlignment.BALANCED);
             var trick = PlayedCardMetrics.forTable(players, width, 1f, viewport);
-            var play = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap, trick.centerHeightDp());
+            var play = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap, trick.centerHeightDp(), HandLayoutMetrics.LIFT_CLEARANCE_DP);
             assertTrue(play.seats().get(upper).bottom() < old.seats().get(upper).bottom());
             if (players >= 5) assertTrue(play.seats().get(1).top() > old.seats().get(1).top());
         }
@@ -138,7 +139,7 @@ public final class RentzCardSpaceTest {
                     int height = RentzCardSpace.boardMinimumHeight(players, seatHeight, gap, controls,
                             RentzCardSpace.minimumTrickHeightPx(density, trick.rows()), 0);
                     var table = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap,
-                            RentzCardSpace.trickHeightPx(density, trick));
+                            RentzCardSpace.trickHeightPx(density, trick), Math.round(HandLayoutMetrics.LIFT_CLEARANCE_DP * density));
                     assertTrue("Both chooser controls fit at the minimum measured height", table.band().height() >= controls);
                     var displayed = RentzCardSpace.fitTrick(trick, table.band().height(), density);
                     assertTrue("Every public card row fits its band",
@@ -198,7 +199,8 @@ public final class RentzCardSpaceTest {
         int gap = Math.round(viewport.regionGapDp() * density);
         var trick = PlayedCardMetrics.forTable(4, 280, 1.5f, viewport);
         int reference = RentzCardSpace.trickHeightPx(density, trick);
-        var board = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, reference);
+        var board = RentzCardSpace.plan(width, height, 4, seatWidth, seatHeight, gap, reference,
+                Math.round(HandLayoutMetrics.LIFT_CLEARANCE_DP * density));
         int budgetDp = (int) Math.floor(board.band().height() / density);
         assertTrue(budgetDp < trick.centerHeightDp());
         var fitted = RentzCardSpace.fitTrick(trick, board.band().height(), density);
@@ -378,7 +380,7 @@ public final class RentzCardSpaceTest {
             int seatWidth = TableSizing.seatWidthDp(window.width(), viewport.isCompact());
             var trick = PlayedCardMetrics.forTable(players, window.width(), window.fontScale(), viewport);
             var plan = RentzCardSpace.plan(window.width(), window.boardHeight(), players, seatWidth,
-                    window.seatHeight(), gap, trick.centerHeightDp());
+                    window.seatHeight(), gap, trick.centerHeightDp(), HandLayoutMetrics.LIFT_CLEARANCE_DP);
             int budget = plan.band().height();
             var sequence = RentzCardSpace.sequence(players, window.width(), budget, 1f, window.fontScale());
             int contentHeight = 4 * sequence.rowHeight();
@@ -386,7 +388,7 @@ public final class RentzCardSpaceTest {
             int maxFootprint = window.boardHeight() - TableGeometry.minimumHeight(players, window.seatHeight(), 0, gap);
             var whist = TableGeometry.arrangeDisplay(window.width(), window.boardHeight(), players,
                     seatWidth, window.seatHeight(), window.width(), Math.min(trick.centerHeightDp(), maxFootprint), gap,
-                    true, TableGeometry.CenterAlignment.BALANCED);
+                    true, TableGeometry.CenterAlignment.BALANCED, HandLayoutMetrics.LIFT_CLEARANCE_DP);
             assertEquals(whist.seats(), plan.seats());
             if (window == TALL) assertTrue(sequence.faceHeight() > 40);
             int top = plan.band().centeredTop(contentHeight);

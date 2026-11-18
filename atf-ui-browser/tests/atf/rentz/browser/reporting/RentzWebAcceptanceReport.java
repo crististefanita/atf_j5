@@ -18,21 +18,28 @@ import javax.imageio.ImageIO;
 public final class RentzWebAcceptanceReport {
     private static final ObjectMapper JSON = new ObjectMapper();
     public static void main(String[] args) throws Exception {
+        if (args.length < 1 || args.length > 2 || (args.length == 2 && !"--components-only".equals(args[1])))
+            throw new IllegalArgumentException("Usage: RentzWebAcceptanceReport <evidence-root> [--components-only]");
+        boolean componentsOnly = args.length == 2;
         Path root=Path.of(args[0]).toAbsolutePath().normalize();
-        var run=JSON.readTree(root.resolve("checkpoints.json").toFile());
-        if(!run.isArray() || run.isEmpty()) throw new IllegalArgumentException("Executed MCP checkpoints required");
-        try(var report=new ExtentReportSession(root.resolve("web-extent.html"),ReportingSettings.defaults())) {
+        var run=componentsOnly ? JSON.createArrayNode() : JSON.readTree(root.resolve("checkpoints.json").toFile());
+        if(!componentsOnly && (!run.isArray() || run.isEmpty())) throw new IllegalArgumentException("Executed MCP checkpoints required");
+        try(var report=new ExtentReportSession(root.resolve(componentsOnly ? "web-components-extent.html" : "web-extent.html"),ReportingSettings.defaults())) {
             try(var files=Files.list(root.resolve("components"))) {
-                for(var file:files.filter(p->p.toString().endsWith(".json")).sorted().toList()) {
+                var inputs=files.filter(p->p.toString().endsWith(".json")).sorted().toList();
+                if (componentsOnly && inputs.isEmpty()) throw new IllegalArgumentException("Executed component comparisons required");
+                for(var file:inputs) {
                     var result=JSON.readTree(file.toFile());
                     var assertions=checks(result.required("checks"));
                     try(var scenario=report.startScenario(result.required("name").asText(),"Fast components: real compiled engine and shared DOM renderer; no browser",List.of("component","web"));
                         var phase=scenario.startPhase("TEST BODY")) {
                         AssertionAuditReport.publishStep(phase,"Evaluated expected/actual comparisons",assertions,AtfReportStatus.INFO);
+                        if(Files.exists(root.resolve("source-manifest.json"))) phase.observation(new ReportObservation("Source provenance",List.of(),List.of(new ReportObservation.Body("Manifest",Files.readString(root.resolve("source-manifest.json")),ReportObservation.Format.JSON)),List.of()));
                         var status=status(assertions);phase.complete(status);scenario.complete(status);
                     }
                 }
             }
+            if (componentsOnly) return;
             var raw=report.startScenario("RentzFourSeatMixedContractWebFlow","Real UI controls: complete Rentz, another contract, P/T history and reload. Each checkpoint identifies MCP or offline mobile Chrome. APK qualification is separate.",List.of("e2e","web","4-seats"));
             try(var ui=UiExtentReportSession.adaptScenario(raw,ReportEvidenceProfile.forScreenshotPolicy(ReportScreenshotPolicy.EACH_CHECKPOINT),"Original browser JPEG/PNG; decoded losslessly to PNG for the reporting contract")) {
                 boolean good=true;

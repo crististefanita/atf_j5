@@ -20,6 +20,7 @@ public final class RentzBrowserComponentTest {
     private RentzBrowserComponentTest() { }
 
     public static void main(String[] args) {
+        sharedPresentationComesFromTheLibrary();
         everyTrickCardIsVisible();
         setupSupportsEveryTableSize();
         checks += ro.cardtable.browser.BrowserSessionRentzContractTest.run();
@@ -41,6 +42,31 @@ public final class RentzBrowserComponentTest {
         System.out.println("Rentz browser component checks passed: " + checks);
     }
 
+    private static void sharedPresentationComesFromTheLibrary() {
+        var browser = new RentzBrowser(() -> 31L);
+        for (int players : List.of(3, 4, 5, 6)) for (int width : List.of(280, 360, 414, 600)) {
+            for (int height : List.of(569, 896)) {
+                var policy = new ro.cardtable.ui.table.TableViewportPolicy(height);
+                var profile = browser.boardProfile("RENTZ", players, width, 0, policy);
+                truth("Every table supplies the shared card layout " + players + "/" + width + "/" + height,
+                        profile.playedCards() != null);
+                equal("Exact shared card metrics independent of the contract",
+                        ro.cardtable.ui.table.PlayedCardMetrics.forTable(players, width, 1f, policy), profile.playedCards());
+                equal("Shared hand clearance", ro.cardtable.ui.hand.HandLayoutMetrics.LIFT_CLEARANCE_DP, profile.handClearance());
+            }
+        }
+        var palette = browser.palette().stream().collect(Collectors.toMap(BrowserGame.Token::name, BrowserGame.Token::color));
+        equal("Shared rank proportions", Float.toString(ro.cardtable.ui.cards.CardFaceMetrics.RANK_SCALE),palette.get("--whist-rank-scale"));
+        equal("Shared played face outline", "#"+Integer.toHexString(ro.cardtable.ui.table.PlayedCardStyle.OUTLINE).substring(2),palette.get("--whist-played-line"));
+        equal("Shared score human row", "#"+Integer.toHexString(ro.cardtable.ui.table.ScoreGridStyle.HUMAN_ROW).substring(2),palette.get("--whist-score-human"));
+        var weights = ro.cardtable.ui.table.ScoreGridStyle.COLUMN_WEIGHTS;
+        double total = (double) weights.get(0) + weights.get(3) + weights.get(4);
+        for (int index = 0; index < 3; index++) {
+            float weight = weights.get(index == 0 ? 0 : index + 2);
+            equal("Native Jucator/P/T column proportion " + index, weight * 100 / total + "%", palette.get("--rentz-score-col-" + index));
+        }
+    }
+
     private static void browserPaletteDefinesTheSharedShellTheme() {
         var tokens = new RentzBrowser(() -> 1L).palette().stream()
                 .collect(java.util.stream.Collectors.toMap(BrowserGame.Token::name, BrowserGame.Token::color));
@@ -51,7 +77,8 @@ public final class RentzBrowserComponentTest {
                 "--whist-hint-rejected-fill", "--whist-hint-rejected-line", "--whist-hint-legal-fill",
                 "--whist-hint-legal-line", "--whist-played-fill", "--whist-played-line", "--whist-played-red",
                 "--whist-played-dark", "--whist-played-player", "--whist-rank-scale", "--whist-hand-rank-cap",
-                "--whist-played-rank-cap", "--whist-played-suit-cap", "--whist-badge-rank-cap", "--whist-played-radius",
+                "--whist-hand-label", "--whist-face-index-top", "--whist-face-index-side",
+                "--whist-face-suit-baseline", "--whist-face-suit-size", "--whist-face-inverted-size", "--whist-played-radius",
                 "--whist-played-stroke", "--whist-hint-stroke", "--whist-hand-face-width", "--whist-hand-face-height",
                 "--whist-trump-face-width", "--whist-trump-face-height", "--whist-hand-slot", "--whist-score-head",
                 "--whist-score-row");

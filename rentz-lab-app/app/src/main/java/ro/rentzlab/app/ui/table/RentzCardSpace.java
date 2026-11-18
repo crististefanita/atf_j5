@@ -1,19 +1,38 @@
 package ro.rentzlab.app.ui.table;
 
 import ro.cardtable.ui.cards.CardFaceMetrics;
+import ro.cardtable.ui.hand.HandLayoutMetrics;
 import ro.cardtable.ui.table.PlayedCardMetrics;
 import ro.cardtable.ui.table.TableGeometry;
+import ro.cardtable.ui.table.TableViewportPolicy;
 
 import java.util.List;
 
 /** Uses the shared play geometry and fits the public Rentz sequence into its free band. */
-final class RentzCardSpace {
+public final class RentzCardSpace {
+    static final int CHOICE_HEIGHT_DP = 48;
+    static final int CHOICE_MARGIN_DP = 3;
+    /** Portable adapter policy; both renderers consume the library's unchanged card slots. */
+    public record Profile(TableGeometry.CenterSpec center, int handClearance,
+                          PlayedCardMetrics.Layout playedCards) { }
+
+    public static Profile profile(int players, int width, float fontScale, TableViewportPolicy viewport) {
+        var cards = PlayedCardMetrics.forTable(players, width, fontScale, viewport);
+        int choiceHeight = 2 * (CHOICE_HEIGHT_DP + CHOICE_MARGIN_DP);
+        return new Profile(new TableGeometry.CenterSpec(width, Math.max(choiceHeight, cards.centerHeightDp()),
+                true, TableGeometry.CenterAlignment.BALANCED), HandLayoutMetrics.LIFT_CLEARANCE_DP, cards);
+    }
     record Sequence(int rowHeight, int faceHeight, int faceWidth, int advance, int start,
                     int indexWidth, int indexPadding, float labelSizePx, boolean stackedIndex) {
         int left(int column) { return start + column * advance; }
         boolean overlaps() { return advance < faceWidth; }
     }
-    record Plan(List<TableGeometry.Rect> seats, TableGeometry.VerticalBand band) { }
+    record Plan(List<TableGeometry.Rect> seats, TableGeometry.Rect center, TableGeometry.VerticalBand band) {
+        int contentTop(int height, boolean sequence) {
+            return sequence ? band.centeredTop(height)
+                    : center.top() + (center.bottom() - center.top() - height) / 2;
+        }
+    }
 
     private RentzCardSpace() { }
 
@@ -55,11 +74,15 @@ final class RentzCardSpace {
         return TableGeometry.minimumHeight(players, seatHeight, centerHeight, gap);
     }
 
-    static Plan plan(int width, int height, int players, int seatWidth, int seatHeight, int gap, int trickHeight) {
+    static Plan plan(int width, int height, int players, int seatWidth, int seatHeight, int gap,
+                     int trickHeight, int handClearance) {
         int maximumCenter = height - TableGeometry.minimumHeight(players, seatHeight, 0, gap);
-        var layout = TableGeometry.arrangeDisplay(width, height, players, seatWidth, seatHeight,
-                width, Math.min(trickHeight, maximumCenter), gap, true, TableGeometry.CenterAlignment.BALANCED);
-        return new Plan(layout.seats(), TableGeometry.fullWidthCardBand(layout, gap));
+        var center = new TableGeometry.CenterSpec(width, Math.min(trickHeight, maximumCenter),
+                true, TableGeometry.CenterAlignment.BALANCED);
+        var spec = new TableGeometry.BoardSpec(players, seatWidth, seatHeight, center, gap, 0, handClearance, true);
+        var layout = spec.plan(width, height, 0);
+        return new Plan(layout.seats(), spec.content(layout, width, center.reservedHeight()),
+                TableGeometry.fullWidthCardBand(layout, gap));
     }
 
     static Sequence sequence(int players, int width, int height, float density, float fontScale) {

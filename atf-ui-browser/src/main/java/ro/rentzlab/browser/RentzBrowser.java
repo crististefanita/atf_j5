@@ -12,6 +12,14 @@ import ro.cardtable.browser.BrowserGame;
 import ro.cardtable.browser.BrowserGame.Token;
 import ro.cardtable.browser.BrowserServer;
 import ro.cardtable.names.PlayerNames;
+import ro.cardtable.ui.cards.CardFaceMetrics;
+import ro.cardtable.ui.cards.CardHighlight;
+import ro.cardtable.ui.hand.HandLayoutMetrics;
+import ro.cardtable.ui.table.PlayedCardStyle;
+import ro.cardtable.ui.table.ScoreGridStyle;
+import ro.cardtable.ui.table.TableViewportPolicy;
+import ro.cardtable.ui.theme.TableColors;
+import ro.rentzlab.app.ui.table.RentzCardSpace;
 import ro.rentzlab.ai.RentzPlayer;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.core.RentzMatch.Observation;
@@ -36,32 +44,55 @@ public final class RentzBrowser implements BrowserGame {
     /** Reuse the common card-table shell; the engine and the Rentz contract remain J5-owned. */
     @Override public String surface() { return "whist"; }
 
+    @Override public BoardProfile boardProfile(String mode, int players, int width, int bidOptions,
+            TableViewportPolicy viewport) {
+        var profile = RentzCardSpace.profile(players, width, 1f, viewport);
+        return new BoardProfile(profile.center(), profile.handClearance(), profile.playedCards());
+    }
+
     /** Pure-Java mirror of the Rentz Android theme and shared card-table metrics. */
     @Override public List<Token> palette() {
-        return List.of(
-                token("paper", "#f6f5ed"), token("surface", "#fffef8"), token("pine", "#1d362b"),
-                token("accent", "#306f4e"), token("felt", "#174f3c"),
-                token("seat-fill", "#1f5743"), token("seat-line", "#4c7660"), token("seat-text", "#d3efe2"),
-                token("turn-fill", "#f1e6c8"), token("turn-line", "#dcb569"), token("turn-text", "#29362e"),
-                token("score-paper", "#fffef8"), token("score-stripe", "#f1f5ee"),
-                token("score-human", "#f1e6c8"), token("score-header", "#dfeada"),
-                token("score-rule", "#b4c3af"), token("score-ink", "#29362e"), token("score-muted", "#69756a"),
-                token("hint-rejected-fill", "#ffeee8"), token("hint-rejected-line", "#b7544d"),
-                token("hint-legal-fill", "#fff6d7"), token("hint-legal-line", "#c99537"),
-                token("played-fill", "#fffef8"), token("played-line", "#bfc9bf"),
-                token("played-red", "#ad393a"), token("played-dark", "#2a352f"),
-                token("played-player", "#c2d3c5"),
-                dimension("rank-scale", "1"), dimension("hand-rank-cap", "16px"),
-                dimension("played-rank-cap", "18px"), dimension("played-suit-cap", "26px"),
-                dimension("badge-rank-cap", "9px"), dimension("played-radius", "5px"),
-                dimension("played-stroke", "1px"), dimension("hint-stroke", "1.5px"),
-                dimension("hand-face-width", "63px"), dimension("hand-face-height", "88px"),
+        var tokens = new ArrayList<>(List.of(
+                color("paper", TableColors.BACKGROUND), color("surface", TableColors.SURFACE), color("pine", TableColors.PINE),
+                color("accent", TableColors.ACCENT), color("felt", TableColors.TABLE_FELT),
+                color("seat-fill", TableColors.IDLE_SEAT_FILL), color("seat-line", TableColors.IDLE_SEAT_STROKE), color("seat-text", TableColors.IDLE_SEAT_TEXT),
+                color("turn-fill", TableColors.ACTIVE_SEAT_FILL), color("turn-line", TableColors.ACTIVE_SEAT_STROKE), color("turn-text", TableColors.ACTIVE_SEAT_TEXT),
+                color("score-paper", ScoreGridStyle.PAPER), color("score-stripe", ScoreGridStyle.STRIPE),
+                color("score-human", ScoreGridStyle.HUMAN_ROW), color("score-header", ScoreGridStyle.HEADER),
+                color("score-rule", ScoreGridStyle.RULE), color("score-ink", ScoreGridStyle.INK), color("score-muted", ScoreGridStyle.MUTED),
+                color("hint-rejected-fill", CardHighlight.REJECTED.fill()), color("hint-rejected-line", CardHighlight.REJECTED.outline()),
+                color("hint-legal-fill", CardHighlight.IN_PLACE.fill()), color("hint-legal-line", CardHighlight.IN_PLACE.outline()),
+                color("played-fill", PlayedCardStyle.FILL), color("played-line", PlayedCardStyle.OUTLINE),
+                color("played-red", PlayedCardStyle.RED), color("played-dark", PlayedCardStyle.DARK),
+                color("played-player", PlayedCardStyle.PLAYER),
+                dimension("rank-scale", Float.toString(CardFaceMetrics.RANK_SCALE)),
+                dimension("hand-label", HandLayoutMetrics.cardLabelSizeSp() / 16.0 + "rem"),
+                dimension("hand-rank-cap", 2 * CardFaceMetrics.INDEX_SIZE_SP + "px"),
+                dimension("face-index-top", CardFaceMetrics.INDEX_TOP_DP + "px"),
+                dimension("face-index-side", CardFaceMetrics.INDEX_SIDE_DP + "px"),
+                dimension("face-suit-baseline", Math.round(CardFaceMetrics.CENTER_SUIT_BASELINE * 100) + "%"),
+                dimension("face-suit-size", CardFaceMetrics.CENTER_SUIT_SIZE_DP + "px"),
+                dimension("face-inverted-size", CardFaceMetrics.INVERTED_SIZE_DP + "px"),
+                dimension("played-radius", PlayedCardStyle.RADIUS_DP + "px"),
+                dimension("played-stroke", PlayedCardStyle.STROKE_DP + "px"), dimension("hint-stroke", CardHighlight.IN_PLACE.strokeDp() + "px"),
+                dimension("hand-face-width", HandLayoutMetrics.CARD_WIDTH_DP + "px"),
+                dimension("hand-face-height", HandLayoutMetrics.CARD_HEIGHT_DP + "px"),
                 dimension("trump-face-width", "32px"), dimension("trump-face-height", "48px"),
-                dimension("hand-slot", "116px"), dimension("score-head", "38px"), dimension("score-row", "43px"));
+                dimension("hand-slot", (HandLayoutMetrics.CARD_HEIGHT_DP + HandLayoutMetrics.LIFT_CLEARANCE_DP) + "px"),
+                dimension("score-head", ScoreGridStyle.HEADER_DP + "px"), dimension("score-row", ScoreGridStyle.ROW_DP + "px")));
+        var columns = List.of(ScoreGridStyle.COLUMN_WEIGHTS.get(0), ScoreGridStyle.COLUMN_WEIGHTS.get(3), ScoreGridStyle.COLUMN_WEIGHTS.get(4));
+        double total = columns.stream().mapToDouble(Float::doubleValue).sum();
+        for (int index = 0; index < columns.size(); index++) {
+            tokens.add(new Token("--rentz-score-col-" + index, columns.get(index) * 100 / total + "%"));
+        }
+        return List.copyOf(tokens);
     }
 
     private static Token token(String name, String color) { return new Token("--whist-" + name, color); }
     private static Token dimension(String name, String value) { return token(name, value); }
+    private static Token color(String name, int argb) {
+        return token(name, "#" + Integer.toHexString(argb).substring(2));
+    }
 
     @Override public int autoDelayMillis() { return RentzTable.AUTOMATED_ACTION_DELAY_MILLIS; }
 

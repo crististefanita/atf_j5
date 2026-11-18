@@ -37,6 +37,20 @@ O revizie de conținut identifică întregul pachet încărcat de browser.
 
 Consumatorul fixează Card Table Browser 0.2.13. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
 
+### Reutilizarea prezentării native
+
+`RentzCardSpace.profile` leagă ambele adaptoare de aceleași componente neutre. O modificare de contract nu schimbă forma sau scara cărții depuse.
+
+| Responsabilitate comună | Consum în Rentz | Verificare rapidă |
+|---|---|---|
+| Locuri și levată | `TableGeometry.BoardSpec`, `TableSizing`, `PlayedCardMetrics`; `boardProfile` transmite explicit sloturile către renderer. | Aceleași dreptunghiuri și sloturi pentru 3–6 locuri, măsurate în AAR și în motorul Web compilat. |
+| Fețe și marcaj | `CardFaceMetrics`, `HandLayoutMetrics`, `PlayedCardStyle`, `CardHighlight`. | Fixture-ul tipografic livrat în JAR-ul de teste se confruntă cu AAR-ul; funcția reală `placePlayed` primește DOM mock. |
+| Scor | `ScoreGridStyle` furnizează culori, înălțimi și ponderi; adaptorul selectează Jucător/P/T. | Scorul confirmat rămâne în motor; prezentarea nu recalculează puncte. |
+| Meniu și Automat | Modulele comune `table-menu`, `profile` și `auto-game`. | Contractele de meniu livrate; ceas controlat pentru oprire, pauză, reluare și sosirea la scor. |
+| Secvența Rentz | Adaptorul cere banda liberă și dezactivează poziționarea unei cărți per loc. | Ancore neschimbate; cele patru șiruri folosesc geometria Rentz, independent de levată. |
+
+Fețele depuse păstrează dimensiunea comună pe toate cele șapte sub-jocuri cu levate, la aceeași fereastră și scară de font. Numărul de locuri schimbă sloturile, nu scara feței; ferestrele foarte scunde păstrează în Android adaptarea explicită la bugetul măsurat. [Integrarea nativă](../docs/rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser)
+
 ### Secvența vizibilă a unei mâini Rentz
 
 - La o mutare umană, feedback-ul comun ridică mai întâi cartea selectată.
@@ -46,10 +60,10 @@ Consumatorul fixează Card Table Browser 0.2.13. [Proveniența pachetului](lib/b
 - Cărțile Rentz legale păstrează evidențierea din APK și când jocul automat este activ: conturul și umplerea folosesc tokenurile `CardHighlight.IN_PLACE` ale shell-ului comun. Modul automat dezactivează atingerea, nu și semnalizarea; regula WEB se aplică numai când secvența Rentz este pe masă.
 - Snapshot-urile conțin doar mâna proprie și secvența publică, niciodată mâinile adversarilor.
 
-- Pentru patru jucători păstrăm ancorele comune ale locurilor și reducem numai benzile verticale rezervate în jurul centrului. Rămân 6 px de separare față de casetele standard de 52 px, iar zona cărților câștigă 23 px.
-- `RentzPageLayout` reutilizează `TableGeometry.fullWidthCardBand` din biblioteca Whist pentru întreaga bandă liberă la secvența cu patru locuri. Rectangulele jucătorilor și geometria mâinii rămân exact cele comune.
+- La secvență păstrăm ancorele comune ale locurilor și măsurăm banda disponibilă între casetele efective, fără o distanță fixă dedusă dintr-un singur ecran.
+- `RentzPageLayout` reutilizează `TableGeometry.fullWidthCardBand` pentru secvența cu 3–6 locuri. Rectangulele jucătorilor și geometria mâinii rămân exact cele comune; levatele păstrează centrul rezervat de `BoardSpec`.
 - Rândurile citesc `clientWidth` și `clientHeight`, înainte de transformarea comună a scenei. Scalarea paginii se aplică o singură dată, inclusiv fonturilor indicilor.
-- Celelalte configurații păstrează inset-urile comune; testele verifică geometria compactă și faptul că randarea urmează numărul real de locuri.
+- Inset-urile specifice se aplică exclusiv secvenței Rentz; celelalte sub-jocuri consumă sloturile și dimensiunile comune.
 
 - Înainte de prima randare, adaptorul validează întregul lot de snapshot-uri.
 - Fiecare pas trebuie să schimbe exact un slot liber în carte jucată; la mutarea umană, aceeași carte trebuie să dispară din mâna proprie, iar mutarea adversarului nu poate modifica mâna umană.
@@ -134,6 +148,7 @@ Componentele verifică ordinea evenimentelor, toate pozițiile jucătorului prop
 
 - Build-ul verifică hash-urile JAR-urilor comune fixate.
 - Testul `hand-presentation.mjs` din pachetul de teste comun este rulat cu setup-ul Rentz: verifică hint-ul pentru o atingere greșită, ridicarea cărții legale, anularea și aplicarea unică a mutării, fără browser sau emulator.
+- Build-ul execută și contractele comune de meniu și tipografie, comparația AAR–TeaVM a mesei și testele modulului comun AutoPlay. Mock-urile înlocuiesc numai măsurarea DOM și așteptarea; geometria și programatorul rămân cele livrate de bibliotecă.
 
 - Aceste verificări înlocuiesc verificările de logică, stare, alegeri AI, scor, istoric, profil și realizări care altfel ar fi repetate prin emulator.
 - Se folosesc aceleași surse de motor, aceleași comenzi `GameSession` și același JAR nativ de nume ca bază de comparație; testele nu simulează sau injectează rezultatele partidei.

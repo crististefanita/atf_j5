@@ -11,6 +11,7 @@ public final class RentzPageComponentTest {
 
     public static void main(String[] args) {
         pageCommandStartsTheRealGameSession();
+        everyTrickTableUsesTheLibraryCardSlots();
         rentzSequenceUsesTheSharedFreeBandWithoutMovingAnySeat();
         rentzCardPlaybackIsAnIncrementalPublicProjection();
         rentzLegalCardActionsRemainAvailableAfterAnAutomaticStep();
@@ -21,27 +22,56 @@ public final class RentzPageComponentTest {
     }
 
     private static void rentzSequenceUsesTheSharedFreeBandWithoutMovingAnySeat() {
-        for(int width:new int[]{280,320,374,414,600}) for(int height:new int[]{440,640,800}) {
+        for(int players=3;players<=6;players++)
+          for(int width:new int[]{280,320,374,414,600}) for(int height:new int[]{440,640,800}) {
             var input=Map.of("width",Integer.toString(width),"height",Integer.toString(height),
-                "mode","RENTZ","seatHeight","66","bidOptions","0","players","4",
+                "mode","RENTZ","seatHeight","66","bidOptions","0","players",Integer.toString(players),
                 "viewport","896","handWidth",Integer.toString(width),"cards","8");
             var common=BrowserGeometry.measure(new ro.rentzlab.browser.RentzBrowser(()->31L),input);
             var parameters=new java.util.HashMap<>(input);
             parameters.put("rentzSequence","true");
             var response=new JSONObject(RentzPage.commandLocal("/api/layout",new JSONObject(parameters).toString(),null,null,null,null));
-            var actual=response.getJSONObject("result").getJSONObject("board");
+            var result=response.getJSONObject("result");
+            check("Sequence never enters the shared one-card-per-seat renderer", result.isNull("played"));
+            check("Sequence has no trick face overrides", result.getJSONObject("playedStyle").isEmpty());
+            var actual=result.getJSONObject("board");
             var viewport=new ro.cardtable.ui.table.TableViewportPolicy(896);
             var band=ro.cardtable.ui.table.TableGeometry.fullWidthCardBand(common.board(),viewport.regionGapDp());
             check("Rentz consumes the shared free band top without moving seats "+width+"/"+height,
                 actual.getJSONObject("center").getInt("top")==band.top());
             check("Rentz consumes the shared free band bottom "+width+"/"+height,
                 actual.getJSONObject("center").getInt("bottom")==band.bottom());
-            for(int seat=0;seat<4;seat++) {
+            for(int seat=0;seat<players;seat++) {
                 var rectangle=actual.getJSONArray("seats").getJSONObject(seat);
                 var expected=common.board().seats().get(seat);
                 check("Whist seat anchors remain exact "+width+"/"+height+"/"+seat,
                     rectangle.getInt("left")==expected.left() && rectangle.getInt("top")==expected.top()
                     && rectangle.getInt("right")==expected.right() && rectangle.getInt("bottom")==expected.bottom());
+            }
+        }
+    }
+
+    private static void everyTrickTableUsesTheLibraryCardSlots() {
+        int[][] rows = {{1, 0, 0}, {2, 1, 0, 1}, {1, 1, 0, 0, 1}, {1, 1, 0, 0, 0, 1}};
+        int[][] lefts = {{157, 97, 217}, {157, 37, 157, 277}, {157, 37, 97, 217, 277}, {157, 37, 37, 157, 277, 277}};
+        for (int players = 3; players <= 6; players++) {
+            for (var contract : ro.rentzlab.core.Contract.values()) {
+                if (contract == ro.rentzlab.core.Contract.RENTZ) continue;
+                var input = Map.of("width", "360", "height", "440", "mode", contract.name(),
+                        "seatHeight", "66", "bidOptions", "0", "players", Integer.toString(players),
+                        "viewport", "569", "handWidth", "360", "cards", "8");
+                var response = new JSONObject(RentzPage.commandLocal("/api/layout", new JSONObject(input).toString(), null, null, null, null));
+                var result = response.getJSONObject("result");
+                var played = result.getJSONObject("played");
+                String context = contract + "/" + players;
+                check("Compact face width stays 46 for " + context, played.getInt("cardWidthDp") == 46);
+                check("Compact face height stays 64 for " + context, played.getInt("cardHeightDp") == 64);
+                check("No trick falls back to flex layout for " + context, played.getJSONArray("slots").length() == players);
+                for (int seat = 0; seat < players; seat++) {
+                    var slot = played.getJSONArray("slots").getJSONObject(seat);
+                    check("Clockwise card slot row " + context + "/" + seat, slot.getInt("row") == rows[players - 3][seat]);
+                    check("Clockwise card slot left " + context + "/" + seat, slot.getInt("leftDp") == lefts[players - 3][seat]);
+                }
             }
         }
     }

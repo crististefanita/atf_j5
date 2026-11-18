@@ -17,9 +17,9 @@
 .rentz-score-table { min-width: 0; }
 #table .whist-score .rentz-score-table .whist-score-grid :is(th, td) { font-weight: 400; }
 .whist-score .rentz-score-table {
-  --whist-score-col-0: 52%;
-  --whist-score-col-1: 24%;
-  --whist-score-col-2: 24%;
+  --whist-score-col-0: var(--rentz-score-col-0);
+  --whist-score-col-1: var(--rentz-score-col-1);
+  --whist-score-col-2: var(--rentz-score-col-2);
 }
 .whist-score :is(h1, .whist-score-hand, .whist-score-winner) { font-weight: 400; }
 .rentz-score-scroll { max-width: 100%; overflow-x: auto; }
@@ -48,7 +48,7 @@
   width: 100%;
   overflow: visible;
 }
-.whist-match .center {
+.whist-match[data-rentz-sequence="true"] .center {
   inset-block: var(--rentz-center-top, 72px) var(--rentz-center-bottom, 67px);
 }
 .rentz-sequence[data-layout-ready="true"] .rentz-sequence-row { display: block; }

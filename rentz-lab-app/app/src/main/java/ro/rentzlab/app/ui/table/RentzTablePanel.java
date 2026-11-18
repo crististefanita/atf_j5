@@ -1,5 +1,8 @@
 package ro.rentzlab.app.ui.table;
 
+import static ro.rentzlab.app.ui.table.RentzCardSpace.CHOICE_HEIGHT_DP;
+import static ro.rentzlab.app.ui.table.RentzCardSpace.CHOICE_MARGIN_DP;
+
 import ro.rentzlab.app.ui.chrome.RentzTurnBadge;
 
 import android.animation.ValueAnimator;
@@ -28,8 +31,6 @@ import java.util.function.Consumer;
 /** Rentz central modes compose neutral seats, public cards and a single shared hand renderer. */
 public final class RentzTablePanel extends LinearLayout {
     public record Actions(Runnable reveal, Runnable choose, Runnable blind, Runnable next, Consumer<String> card) { }
-    private static final int CHOICE_HEIGHT_DP = 48;
-    private static final int CHOICE_MARGIN_DP = 3;
     private final Context context;
     private final RentzUiText copy;
     private final boolean paused;
@@ -50,11 +51,11 @@ public final class RentzTablePanel extends LinearLayout {
         int width = Math.min(760, Math.max(240, WindowContent.widthDp(context) - 40));
         boolean cards = view.phase() == RentzMatch.Phase.PLAY && view.contract() != Contract.RENTZ || holding;
         boolean sequence = view.contract() == Contract.RENTZ && view.phase() != RentzMatch.Phase.CHOOSE;
-        var trick = PlayedCardMetrics.forTable(view.players(), width, fontScale, viewport);
+        var trick = RentzCardSpace.profile(view.players(), width, fontScale, viewport).playedCards();
         int choiceRowPx = dp(CHOICE_HEIGHT_DP) + dp(CHOICE_MARGIN_DP);
         int footer = sequence && (arrival || view.phase() == RentzMatch.Phase.DEAL_END) ? choiceRowPx : 0;
         // Keep the measured seat plan across contract selection, play and the turn indicators.
-        var cardBoard = new RentzCardBoard(context, view.players(), footer, 2 * choiceRowPx, viewport, trick,
+        var cardBoard = new RentzCardBoard(context, view.players(), footer, 2 * choiceRowPx, viewport, trick, sequence,
                 (widthPx, budgetPx) -> {
                     if (sequence) return sequence(view, actions, RentzCardSpace.sequence(view.players(), widthPx,
                             budgetPx - footer, density, fontScale), arrival ? RentzTableContent.arrival(view, copy, names) : null);

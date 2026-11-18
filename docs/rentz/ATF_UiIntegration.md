@@ -220,7 +220,7 @@ Ajutorul afișează grila pentru 3–6 jucători din profilul efectiv, verificat
 
 | Parte | Responsabilitate |
 |---|---|
-| Masa comună | Levada păstrează `BoardLayout`, `PlayedCardsView` și ancorele `TableSeatLayout` folosite în Whist. |
+| Masa comună | Levada folosește `TableGeometry.BoardSpec`, `PlayedCardsView` și ancorele `TableSeatLayout`; adaptorul măsoară casetele și rezervă separat secvența Rentz. |
 | Secvențe | Cele patru șiruri folosesc banda dintre aceleași chenare din alegerea sub-jocului. La înălțime redusă se adaptează grila în banda disponibilă. |
 | Cărțile din secvențe | Cele patru rânduri sunt centrate între chenare și folosesc lățimea mesei. La patru locuri, banda centrală folosește 23 px suplimentari fără mutarea ancorelor. Textul și spațiul dintre cărți depind de dimensiunea slotului. |
 | Tura la secvențe | Cărțile legale din mâna activă au o nuanță discretă. Fiecare loc automat este afișat înainte de pauza de 550 ms; pasa forțată folosește aceeași pauză. Ordinea cadru → worker → checkpoint și anularea la lifecycle sunt definite în [contractul de lifecycle](ATF_Lifecycle.md). |
@@ -252,14 +252,17 @@ Biblioteca comună deține ancorele locurilor și măsurarea mesei; adaptorul Re
 
 | Zonă | Contract de adaptare | Verificare |
 |---|---|---|
-| Locuri | Păstrează dreptunghiurile comune; extinde centrul cu patru jucători prin `TableGeometry.fullWidthCardBand`. | Ancore identice și separare între rânduri și jucători. |
+| Locuri | `RentzCardSpace.profile` furnizează aceleași sloturi `PlayedCardMetrics` și rezervarea mâinii; `BoardSpec` stabilește centrul. Numai secvența Rentz folosește `fullWidthCardBand`, la 3–6 locuri. | Confruntă adaptorul nativ și AAR-ul fixat cu răspunsul TeaVM pentru aceleași măsurători. |
+| Fețe depuse | Cele șapte contracte cu levate folosesc aceleași dimensiuni și sloturi comune. Patru locuri formează crucea; celelalte mese folosesc rândurile exportate de bibliotecă. | Poziții de referință independente, una și toate cărțile vizibile, indici de loc în ordine diferită, fonturi și ferestre compacte. |
 | Dimensiuni | Măsoară `clientWidth/clientHeight` înainte de scalarea scenei. | Scalare subunitară și supraunitară, fără micșorare dublă. |
 | Hint legal | Marchează starea secvenței prin atribut DOM; nu depinde de selectorul CSS `:has`. | Conturul rămâne activ cu sau fără AutoPlay, inclusiv pe Chrome mobil mai vechi. |
 | Browser mobil | Folosește înălțimea vizibilă pentru container, inclusiv cu bara de adresă deschisă. | Mock de viewport și verificare Chrome offline pe dispozitiv. |
 | Actualizarea paginii | O singură revizie de conținut identifică toate importurile, workerul, stilurile și fontul. | Cache deja populat, schimbare numai în adaptorul de scor, dependență lipsă și recitirea octeților publicați. |
 | Punctaj | P = punctele mâinii; T = total după mână, cu legendă sub tabel. | Confruntă rândul confirmat, ordinea locurilor și cumulul. |
-| Prezentarea rezultatului | Refolosește grila comună cu un rând per loc și coloanele Jucător/P/T, fără bold. Contribuțiile apar la cerere. Istoricul complet își păstrează grila pe mâini. | Mese de 3–6, RO/EN, valori semnate și celule fără îngroșare în browser. |
+| Prezentarea rezultatului | Refolosește grila și `ScoreGridStyle`, inclusiv ponderile native Jucător/P/T, fără bold. Contribuțiile apar la cerere. Istoricul complet își păstrează grila pe mâini. | Mese de 3–6, RO/EN, valori semnate și celule fără îngroșare în browser. |
 | Levate | Fiecare carte, inclusiv cea proprie, are cadru în playback. `TrickCollectionMotion` fixează afișarea și colectarea la câștigător. | Toate fețele pe masă înainte de colectare; nicio trecere la scor înainte de finalizarea ei, inclusiv cu mișcare redusă. |
 | Reluare | Păstrează toate rândurile confirmate și identitatea sub-jocului. | Rentz plus alt sub-joc, istoric înainte și după reîncărcare. |
 
 [Mecanismul și pașii MCP](../../atf-ui-browser/README.md#acceptanța-web-prin-browser-mcp)
+
+Contractele livrate în JAR-ul de teste califică viewportul, feedback-ul mâinii, meniul și proporțiile feței. `verify-shared-ui.mjs` confruntă și funcția efectivă de poziționare cu referința citită din AAR; `verify-shared-automation.mjs` controlează așteptarea modulului comun, fără să copieze programatorul. Rasterul, gesturile native și bugetul ferestrelor extreme rămân verificări pe platformă.

@@ -78,14 +78,15 @@ finally { Pop-Location }
 $commonTestRoot = Join-Path $run 'common-component-tests'
 $null = New-Item -ItemType Directory -Force -Path $commonTestRoot
 Push-Location $commonTestRoot
-try { & jar xf $commonTests 'hand-presentation.mjs' 'viewport-contract.mjs' }
+try { & jar xf $commonTests 'hand-presentation.mjs' 'viewport-contract.mjs' 'menu-presentation.mjs' 'card-typography.mjs' 'card-typography.tsv' }
 finally { Pop-Location }
 $commonWeb = Join-Path $commonRoot 'ro/cardtable/browser/web'
 Get-ChildItem -LiteralPath $commonWeb -File | Copy-Item -Destination $site
 Get-ChildItem -LiteralPath (Join-Path $pages 'web') -File | Copy-Item -Destination $site
-if (!(Test-Path -LiteralPath (Join-Path $commonTestRoot 'hand-presentation.mjs')) -or
-        !(Test-Path -LiteralPath (Join-Path $commonTestRoot 'viewport-contract.mjs'))) {
-    throw 'The shared Card Table Browser component contracts are missing.'
+foreach ($contract in @('hand-presentation.mjs', 'viewport-contract.mjs', 'menu-presentation.mjs', 'card-typography.mjs', 'card-typography.tsv')) {
+    if (!(Test-Path -LiteralPath (Join-Path $commonTestRoot $contract))) {
+        throw "The shared Card Table Browser component contract is missing: $contract"
+    }
 }
 & node (Join-Path $commonTestRoot 'viewport-contract.mjs') (Join-Path $commonRoot 'ro/cardtable/browser/web/viewport.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Shared browser viewport component checks failed.' }
@@ -253,13 +254,22 @@ $nativeReferenceClasses = Join-Path $run 'rentz-native-layout-reference'
 $null = New-Item -ItemType Directory -Force -Path $nativeReferenceClasses
 $nativeCardSpace = Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/table/RentzCardSpace.java'
 $nativeReferenceSource = Join-Path $PSScriptRoot 'tests/ro/rentzlab/app/ui/table/RentzNativeSequenceMetricsReference.java'
+$nativePresentationSource = Join-Path $PSScriptRoot 'tests/ro/rentzlab/app/ui/table/RentzNativePresentationReference.java'
 $nativeReferenceClasspath = @($classpath, $nativeUiClasses) -join [IO.Path]::PathSeparator
-& javac --release 17 -encoding UTF-8 -cp $nativeReferenceClasspath -d $nativeReferenceClasses $nativeCardSpace $nativeReferenceSource
+& javac --release 17 -encoding UTF-8 -cp $nativeReferenceClasspath -d $nativeReferenceClasses $nativeCardSpace $nativeReferenceSource $nativePresentationSource
 if ($LASTEXITCODE -ne 0) { throw 'Could not compile the native Rentz sequence layout reference.' }
 $nativeMetrics = Join-Path $run 'rentz-native-sequence-metrics.tsv'
 $nativeReferenceRuntime = @($nativeReferenceClasses, $nativeUiClasses) -join [IO.Path]::PathSeparator
 & java -cp $nativeReferenceRuntime 'ro.rentzlab.app.ui.table.RentzNativeSequenceMetricsReference' | Set-Content -LiteralPath $nativeMetrics -Encoding utf8
 if ($LASTEXITCODE -ne 0) { throw 'Could not emit native Rentz sequence layout metrics.' }
+$nativePresentation = Join-Path $run 'rentz-native-presentation.json'
+& java -cp (@($nativeReferenceRuntime, $classpath) -join [IO.Path]::PathSeparator) `
+    'ro.rentzlab.app.ui.table.RentzNativePresentationReference' | Set-Content -LiteralPath $nativePresentation -Encoding utf8
+if ($LASTEXITCODE -ne 0) { throw 'Could not read the pinned Android UI presentation reference.' }
+& node (Join-Path $pages 'verify-shared-ui.mjs') $site $commonTestRoot $nativePresentation
+if ($LASTEXITCODE -ne 0) { throw 'Shared native/browser UI adoption checks failed.' }
+& node (Join-Path $pages 'verify-shared-automation.mjs') $site
+if ($LASTEXITCODE -ne 0) { throw 'Shared AutoPlay component checks failed.' }
 & node (Join-Path $pages 'verify-rentz-ui.mjs') $nativeMetrics $tableScript `
     (Join-Path $site 'table.css') (Join-Path $site 'rentz.css') (Join-Path $site 'index.html')
 if ($LASTEXITCODE -ne 0) { throw 'Rentz sequence renderer component verification failed.' }

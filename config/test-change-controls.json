@@ -3,6 +3,16 @@
   "base": "ad2cf63ece9c5c4393748cf1df66c1adf9841d9a",
   "controls": [
     {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzSharedPresentationTest.java",
+      "owner": "Rentz UI adoption",
+      "reason": "Isolate evaluated native presentation comparisons from legacy JUnit-only cases.",
+      "criterion": "Preserve exact shared card dimensions, seat anchors, reserved trick center and hand clearance for 3 to 6 seats, compact and tall viewports and fonts 1 to 2; every audited test contains evaluated comparisons.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser",
+      "expires": "2026-12-18",
+      "sha256": "556c0857acd72b0e0f76210a96738f08ce3c216cd5157ffba3b46a61174a8bdb",
+      "allowDelete": false
+    },
+    {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/evidence/AndroidSourceEvidence.java",
       "owner": "Rentz release and infrastructure",
       "reason": "Separate native evidence qualification and inventory older build dependencies.",
@@ -166,7 +176,7 @@
       "criterion": "Keep the measured seat anchors across 3 to 6 players. Verify the Rentz outline for single and multiple legal cards during manual and delegated turns, with taps disabled during delegation and with marks refreshed after moves and passes.",
       "proof": "docs/rentz/ATF_UiIntegration.md",
       "expires": "2026-11-20",
-      "sha256": "be86c4d72589cc6606e86d79d96d683027f8d5003251ceb91dbe36b4b8f33ac2",
+      "sha256": "df0795abe2d956afa84806b0e8bd563bdc32f590cd7fbe3307a3cf4e58baecea",
       "allowDelete": false
     },
     {
@@ -976,7 +986,7 @@
       "criterion": "Verify the loaded PlayerSeatView, highlight and geometry classes against the pinned AAR, with no engine dependencies.",
       "proof": "../../whist_back/component-suites/card-highlight-20261111/whist-lab-app-card-table-ui-testDebugUnitTest.html",
       "expires": "2026-11-20",
-      "sha256": "de1669d313680931ded290ed976e87f0ba64307bcbc30504b4a9a0c6ee7c5312",
+      "sha256": "0139e54d352018b5025f03da2f51714b9a48aa6a70d7456405ae538b2be4a8ef",
       "allowDelete": false
     },
     {
@@ -1624,7 +1634,7 @@
       "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
       "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
       "expires": "2026-12-18",
-      "sha256": "817b4094edf61e8da737a6a79dd1a4c83f3020f4e49782e006332421bb4b95b8",
+      "sha256": "a59c859a9c43515715e017e00c1b7dcadacbb162f23bd6a1a1b5f2ef303bd9a2",
       "allowDelete": false
     },
     {

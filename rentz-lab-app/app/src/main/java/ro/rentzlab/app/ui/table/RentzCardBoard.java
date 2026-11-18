@@ -8,16 +8,18 @@ import ro.cardtable.ui.table.PlayedCardMetrics;
 import ro.cardtable.ui.table.TableGeometry;
 import ro.cardtable.ui.table.TableSizing;
 import ro.cardtable.ui.table.TableViewportPolicy;
+import ro.cardtable.ui.hand.HandLayoutMetrics;
 
 import java.util.function.BiFunction;
 
-/** Uses Whist's full-width play positions and measures Rentz content in the free center band. */
+/** Uses the shared reserved trick center; only Rentz sequence content consumes the free band. */
 final class RentzCardBoard extends ViewGroup {
     private final int players;
     private final int footerPx;
     private final int chooserHeightPx;
     private final TableViewportPolicy viewport;
     private final PlayedCardMetrics.Layout trick;
+    private final boolean sequence;
     private final BiFunction<Integer, Integer, View> render;
     private final FrameLayout center;
     private RentzCardSpace.Plan plan;
@@ -25,7 +27,7 @@ final class RentzCardBoard extends ViewGroup {
     private int previousBudget = -1;
 
     RentzCardBoard(Context context, int players, int footerPx, int chooserHeightPx,
-                   TableViewportPolicy viewport, PlayedCardMetrics.Layout trick,
+                   TableViewportPolicy viewport, PlayedCardMetrics.Layout trick, boolean sequence,
                    BiFunction<Integer, Integer, View> render) {
         super(context);
         this.players = players;
@@ -33,6 +35,7 @@ final class RentzCardBoard extends ViewGroup {
         this.chooserHeightPx = chooserHeightPx;
         this.viewport = viewport;
         this.trick = trick;
+        this.sequence = sequence;
         this.render = render;
         center = new FrameLayout(context);
         setClipChildren(false);
@@ -54,15 +57,16 @@ final class RentzCardBoard extends ViewGroup {
         for (int index = 0; index < players; index++) getChildAt(index).measure(exact(seatWidth), exact(seatHeight));
 
         int gap = Math.round(viewport.regionGapDp() * density);
-        int reference = RentzCardSpace.trickHeightPx(density, trick);
+        int reference = Math.max(chooserHeightPx, RentzCardSpace.trickHeightPx(density, trick));
         int minimum = RentzCardSpace.boardMinimumHeight(players, seatHeight, gap, chooserHeightPx,
                 RentzCardSpace.minimumTrickHeightPx(density, trick.rows()), footerPx);
         int offered = MeasureSpec.getMode(heightSpec) == MeasureSpec.UNSPECIFIED
                 ? Math.max(Math.round(viewport.minimumBoardHeightDp() * density),
                         TableGeometry.minimumHeight(players, seatHeight, reference, gap)) : MeasureSpec.getSize(heightSpec);
         int height = Math.max(offered, minimum);
-        plan = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap, reference);
-        int budget = plan.band().height();
+        plan = RentzCardSpace.plan(width, height, players, seatWidth, seatHeight, gap, reference,
+                Math.round(HandLayoutMetrics.LIFT_CLEARANCE_DP * density));
+        int budget = sequence ? plan.band().height() : plan.center().bottom() - plan.center().top();
         if (width != previousWidth || budget != previousBudget) {
             center.removeAllViews();
             View content = render.apply(width, budget);
@@ -83,7 +87,7 @@ final class RentzCardBoard extends ViewGroup {
             getChildAt(index).layout(seat.left(), seat.top(), seat.right(), seat.bottom());
         }
         int centerHeight = center.getMeasuredHeight();
-        int centerTop = plan.band().centeredTop(centerHeight);
+        int centerTop = plan.contentTop(centerHeight, sequence);
         center.layout(0, centerTop, right - left, centerTop + centerHeight);
     }
 
