@@ -50,18 +50,28 @@ function Get-RentzSourceInventory {
     }
     $bootstrap=$script:InventoryBootstrap
     if((Get-RentzInventoryClassIdentity $bootstrap.classes)-cne$bootstrap.identity){throw 'TEST-INVENTORY: bootstrap class bytes changed'}
-    $roots=@($Layout.roots|Where-Object{$_.role-in@('main','test')}|ForEach-Object{[string]$_.role+'='+[string]$_.path})
+    $sourceBuilds=@($Layout.roots|Where-Object{$_.role-in@('main','test')}|Group-Object -Property {
+        if($_.psobject.Properties['build']) {
+            if($_.build-isnot[string]-or$_.build-cnotmatch'^[a-z][a-z0-9-]*$'){throw 'TEST-INVENTORY: invalid source build'}
+            $_.build
+        } else { 'native' }
+    })
+    $external=@()
     if($Layout.psobject.Properties['externalNonTestBases']){
         if($Layout.externalNonTestBases-isnot[array]-or@($Layout.externalNonTestBases|Where-Object{$_-isnot[string]-or$_-notmatch'^[A-Za-z_$][A-Za-z0-9_.$]*$'}).Count){throw 'TEST-INVENTORY: invalid external interface registry'}
-        $roots+=@($Layout.externalNonTestBases|ForEach-Object{'external='+[string]$_})
+        $external=@($Layout.externalNonTestBases|ForEach-Object{'external='+[string]$_})
     }
-    if(-not$roots.Count){throw 'TEST-INVENTORY: no declared source roots'}
-    $command=@('-Xmx256m','-XX:ActiveProcessorCount=2',('-Djava.io.tmpdir='+$bootstrap.work+'/runtime'),'-cp',$bootstrap.classes,'atf.rentz.discovery.TestSourceInventory',[IO.Path]::GetFullPath($ProjectRoot))+$roots
-    $output=Invoke-RentzInventoryProcess -Executable (Join-Path $JavaHome 'bin/java.exe') -CommandArgs $command -Runtime ($bootstrap.work+'/runtime')
+    if(-not$sourceBuilds.Count){throw 'TEST-INVENTORY: no declared source roots'}
+    $bridgeRows=@(foreach($build in $sourceBuilds) {
+        $roots=@($build.Group|ForEach-Object{[string]$_.role+'='+[string]$_.path})+$external
+        $command=@('-Xmx256m','-XX:ActiveProcessorCount=2',('-Djava.io.tmpdir='+$bootstrap.work+'/runtime'),'-cp',$bootstrap.classes,'atf.rentz.discovery.TestSourceInventory',[IO.Path]::GetFullPath($ProjectRoot))+$roots
+        $output=Invoke-RentzInventoryProcess -Executable (Join-Path $JavaHome 'bin/java.exe') -CommandArgs $command -Runtime ($bootstrap.work+'/runtime')
+        $buildLines=@(($output.TrimEnd([char[]]@([char]10,[char]13)))-split [Environment]::NewLine)
+        if(-not$buildLines.Count-or$buildLines[0]-cne'ATF-TEST-INVENTORY-2'){throw 'TEST-INVENTORY: bridge protocol absent'}
+        $buildLines|Select-Object -Skip 1
+    })
     if((Get-RentzInventoryClassIdentity $bootstrap.classes)-cne$bootstrap.identity){throw 'TEST-INVENTORY: bootstrap changed during inspection'}
-    $lines=@(($output.TrimEnd([char[]]@([char]10,[char]13)))-split [Environment]::NewLine)
-    if(-not$lines.Count-or$lines[0]-cne'ATF-TEST-INVENTORY-2'){throw 'TEST-INVENTORY: bridge protocol absent'}
-    $entries=@(foreach($line in $lines|Select-Object -Skip 1){
+    $entries=@(foreach($line in $bridgeRows){
         $cells=$line.Split([char]9)
         if($cells.Count-ne9-or@($cells[2..4]|Where-Object{$_-cnotin@('true','false')}).Count){throw 'TEST-INVENTORY: malformed bridge row'}
         $file=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($cells[0]))

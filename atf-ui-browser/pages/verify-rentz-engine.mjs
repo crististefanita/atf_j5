@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { pathToFileURL } from "node:url";
+import { componentAudit } from './component-audit.mjs';
+const recordCheck = componentAudit('compiled-engine');
 
 const engine = await import(pathToFileURL(process.argv[2]).href);
 const { verifyHandPresentation } = await import(pathToFileURL(process.argv[3]).href);
@@ -15,8 +17,9 @@ function nativeHandOrder(labels) {
     || nativeRank(left) - nativeRank(right));
 }
 
-function check(description, condition) {
-  assert.ok(condition, description);
+function check(description, expected, actual) {
+  if (arguments.length === 3) recordCheck(description, expected, actual);
+  else recordCheck(description, true, Boolean(expected));
   checks++;
 }
 
@@ -165,7 +168,7 @@ for (let players = 3; players <= 6; players++) {
     const contributionLines = awardLines.filter(line => line.startsWith("  "));
     const historyCells = view.history.grid.rows[0].cells;
     const orderedAwards = playerLines.map((line, row) => {
-      const match = line.match(/^(?:\d+\. )?(.+?) · Δ (-?\d+) · Σ (-?\d+)$/);
+      const match = line.match(/^(?:\d+\. )?(.+?) · P (-?\d+) · T (-?\d+)$/);
       const seat = match ? view.seats.findIndex(value => value.name === match[1]) : -1;
       check(`${players}/${difficulty}: score line exposes confirmed delta and total for seat ${seat}`,
         !!match && seat >= 0 && Number(match[2]) === Number(historyCells[seat]?.bid)
@@ -185,6 +188,31 @@ for (let players = 3; players <= 6; players++) {
       !resumed.status && resumed.result.view.history.grid.rows.length === 1);
     const next = call("/api/action", { revision: resumed.result.revision, action: "next" });
     check(`${players}/${difficulty}: next-hand transition remains available after restore`, !next.status);
+    if (players === 4) {
+      const firstRow = JSON.stringify(view.history.grid.rows[0]);
+      let second = next;
+      for (let step = 0; step < 100 && second.result.view.history.grid.rows.length < 2; step++) {
+        const current = second.result.view;
+        const action = current.actions.find(a => a.key === "auto-step")?.key
+          ?? current.actions.find(a => a.key === "reveal")?.key
+          ?? current.actions.find(a => a.key === "choose:TRICKS")?.key;
+        check(`${difficulty}: second consecutive contract always offers a public action`, typeof action === "string");
+        second = call("/api/action", {revision:second.result.revision, action});
+        check(`${difficulty}: second consecutive action succeeds`, !second.status);
+      }
+      const rows = second.result.view.history.grid.rows;
+      check(`${difficulty}: two complete contracts are retained`, 2, rows.length);
+      check(`${difficulty}: first Rentz row is unchanged by later play`, firstRow, JSON.stringify(rows[0]));
+      check(`${difficulty}: another contract follows Rentz`, rows[1].status !== rows[0].status);
+      for (let seat = 0; seat < players; seat++) {
+        check(`${difficulty}: cumulative total equals both contributions for seat ${seat}`,
+          Number(rows[0].cells[seat].bid) + Number(rows[1].cells[seat].bid), Number(rows[1].cells[seat].total));
+      }
+      check(`${difficulty}: result table contains only the just-completed hand`,
+        [rows[1]], second.result.view.score.table.grid.rows);
+      const restored = call("/api/state");
+      check(`${difficulty}: checkpoint preserves the complete two-contract history`, rows, restored.result.view.history.grid.rows);
+    }
   }
 }
 

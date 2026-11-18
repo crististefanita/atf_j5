@@ -51,7 +51,7 @@ public final class RentzTableContentTest {
                 var view = session.view(); var seats = RentzTableContent.seats(view, copy, session.displayNames("Ana"), false);
                 audit.equal("Active actor " + contract + "/" + actions, List.of(view.turn()), seats.stream().filter(seat -> seat.active()).map(seat -> seat.seat()).toList());
                 for (var seat : seats) {
-                    audit.equal("Own stats " + contract + "/" + actions + "/" + seat.seat(), List.of("Δ", "Σ"), seat.facts().stream().map(f -> f.label()).toList());
+                    audit.equal("Own stats " + contract + "/" + actions + "/" + seat.seat(), List.of("P", "T"), seat.facts().stream().map(f -> f.label()).toList());
                     audit.equal("Exact confirmed total " + contract + "/" + actions + "/" + seat.seat(), view.totals().get(seat.seat()).toString(), seat.facts().get(1).value());
                 }
                 var cards = RentzTableContent.hand(view, copy, false);
@@ -108,7 +108,7 @@ public final class RentzTableContentTest {
                         String details = language == RentzUiText.Language.RO ? "Puncte: " : "Points: ";
                         audit.equal("Seat position " + label + "/" + index, index, seat.seat());
                         audit.equal("Score marker order " + label + "/" + index,
-                                List.of("Δ " + points, "Σ " + total), seat.facts().stream().map(fact -> fact.inlineText()).toList());
+                                List.of("P " + points, "T " + total), seat.facts().stream().map(fact -> fact.inlineText()).toList());
                         audit.equal("Accessible description " + label + "/" + index,
                                 names.get(index) + ". " + details + points + ". Total: " + total, seat.description());
                     }

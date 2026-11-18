@@ -14,6 +14,8 @@ import ro.cardtable.ui.screens.ScreenViews;
 import ro.rentzlab.app.lifecycle.SessionController;
 import ro.rentzlab.app.lifecycle.TurnTrace;
 import ro.rentzlab.app.ui.copy.RentzUiText;
+import ro.rentzlab.app.ui.chrome.RentzGameHeader;
+import ro.rentzlab.app.ui.chrome.RentzGameMenu;
 import ro.rentzlab.app.ui.navigation.*;
 import ro.rentzlab.app.ui.profile.*;
 import ro.rentzlab.app.ui.screens.*;

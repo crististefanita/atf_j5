@@ -231,11 +231,25 @@ export function rentzCenterInsets(players) {
   return players === 4 ? { top: 58, bottom: 58 } : { top: 72, bottom: 67 };
 }
 
+/** Lowers the four-seat Rentz sequence only by the lower slack left in its measured lane. */
+export function rentzSequenceLowerShift(players, laneHeight, panelHeight, preferred = 24) {
+  if (!Number.isInteger(players) || players < 3 || players > 6) {
+    throw new RangeError("Rentz table needs 3–6 players.");
+  }
+  if (![laneHeight, panelHeight, preferred].every(Number.isFinite) || laneHeight < 0 || panelHeight < 0 || preferred < 0) {
+    throw new RangeError("Rentz sequence dimensions must be finite and non-negative.");
+  }
+  if (players !== 4) return 0;
+  return Math.min(preferred, Math.max(0, Math.floor((laneHeight - panelHeight) / 2)));
+}
+
 /** Applies one measured native-compatible layout to the four sequence rows. */
-export function applyRentzSequenceLayout(panel, width, height, fontScale = 1) {
+export function applyRentzSequenceLayout(panel, width, height, fontScale = 1, laneHeight = height, panelHeight = height) {
   const model = rentzSequenceModels.get(panel);
   if (!model) throw new TypeError("Rentz sequence panel was not created by rentzSequence.");
   const metrics = rentzSequenceLayout(model.players, width, height, fontScale);
+  panel.style.setProperty("--rentz-sequence-lower-shift",
+    `${rentzSequenceLowerShift(model.players, laneHeight, panelHeight)}px`);
   panel.dataset.layoutReady = "true";
   panel.dataset.layoutPlayers = String(model.players);
   panel.dataset.stackedIndex = String(metrics.stackedIndex);
@@ -313,14 +327,21 @@ export function rentzSequence(rows, element, language, arrival = null) {
   const measure = () => {
     const bounds = panel.getBoundingClientRect?.();
     if (!bounds || bounds.width < 1 || bounds.height < 1) return;
-    const footer = summary?.getBoundingClientRect?.().height ?? 0;
+    const laneBounds = panel.parentElement?.getBoundingClientRect?.();
+    // The shared shell scales the whole stage. DOMRect is already scaled; CSS metrics are not.
+    const width = panel.clientWidth ?? bounds.width;
+    const height = panel.clientHeight ?? bounds.height;
+    const laneHeight = panel.parentElement?.clientHeight ?? laneBounds?.height ?? height;
+    const footer = summary?.offsetHeight ?? summary?.getBoundingClientRect?.().height ?? 0;
     const textScale = Number.parseFloat(globalThis.getComputedStyle?.(panel)
       ?.getPropertyValue("--whist-text-scale")) || 1;
-    applyRentzSequenceLayout(panel, Math.floor(bounds.width), Math.max(1, Math.floor(bounds.height - footer)), textScale);
+    applyRentzSequenceLayout(panel, Math.floor(width), Math.max(1, Math.floor(height - footer)), textScale,
+      Math.floor(laneHeight), Math.floor(height));
   };
   if (typeof ResizeObserver === "function") {
     const observer = new ResizeObserver(measure);
     observer.observe(panel);
+    if (panel.parentElement) observer.observe(panel.parentElement);
   } else if (typeof requestAnimationFrame === "function") requestAnimationFrame(measure);
   else if (typeof setTimeout === "function") setTimeout(measure, 0);
   return panel;

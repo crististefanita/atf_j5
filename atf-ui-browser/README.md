@@ -36,6 +36,8 @@ Consumatorul fixează Card Table Browser 0.2.13. [Proveniența pachetului](lib/b
 - Snapshot-urile conțin doar mâna proprie și secvența publică, niciodată mâinile adversarilor.
 
 - Pentru patru jucători păstrăm ancorele comune ale locurilor și reducem numai benzile verticale rezervate în jurul centrului. Rămân 6 px de separare față de casetele standard de 52 px, iar zona cărților câștigă 23 px.
+- `RentzPageLayout` reutilizează `TableGeometry.fullWidthCardBand` din biblioteca Whist pentru întreaga bandă liberă la secvența cu patru locuri. Rectangulele jucătorilor și geometria mâinii rămân exact cele comune.
+- Rândurile citesc `clientWidth` și `clientHeight`, înainte de transformarea comună a scenei. Scalarea paginii se aplică o singură dată, inclusiv fonturilor indicilor.
 - Celelalte configurații păstrează inset-urile comune; testele verifică geometria compactă și faptul că randarea urmează numărul real de locuri.
 
 - Înainte de prima randare, adaptorul validează întregul lot de snapshot-uri.
@@ -83,6 +85,7 @@ Săgețile punctate întorc observațiile publice. Așteptarea fixează ritmul r
 
 - `ScoreSettlement` păstrează ordinea de sosire la Rentz; la celelalte sub-jocuri păstrează ordinea locurilor.
 - Fiecare rând de rezultat adaptează delta, totalul confirmat și contribuțiile din istoricul motorului.
+- Istoricul și rezultatul folosesc **P** pentru punctele mâinii și **T** pentru totalul după mână, cu legenda imediat sub grilă. `rentz-score.mjs` adaptează rendererul comun: păstrează două coloane pentru fiecare loc și identifică mâna împreună cu sub-jocul. Nu recalculează puncte.
 - `ScoreStandings` aplică departajarea competitivă și eticheta totalului final folosite de APK.
 - Testele compară adaptoarele Android și WEB cu rezultatul motorului pentru mese de 3–6 jucători și verifică un singur zero la Rentz.
 
@@ -92,7 +95,7 @@ Săgețile punctate întorc observațiile publice. Așteptarea fixează ritmul r
 | Paritate cu biblioteca APK | NFC, limita de zece puncte Unicode, intrări valide/invalide și lista deterministă de adversari, comparate cu JAR-ul `card-table-names`; profilul TeaVM verifică și zece litere Unicode din afara planului de bază, apoi respinge a unsprezecea; normalizarea se compară cu sursa Android `DisplayName` | Shim-urile necesare TeaVM nu schimbă contractul de profil Android |
 | Componente pentru API-ul TeaVM și adaptorul DOM | Pornire pentru 3–6 locuri și Normal/Greu; cărți ascunse până la dezvăluire; alegerea Rentz; ancora de deschidere pentru fiecare dimensiune de masă; mutări legale; o mână Rentz completă; cadrele reale ale motorului trec prin adaptorul DOM cu randare mock; placa finală coincide cu starea confirmată; sosirea Rentz înaintea scorului; punctaj, progres, reluare și următoarea mână | Motorul compilat și secvența WEB reală respectă contractele APK fără DOM sau emulator |
 | Componente DOM și transport local | Validarea atomică a tuturor snapshot-urilor; identitatea cărții mutate din mână pe secvență; mâna neschimbată la mutările adverse; locul activ înaintea întârzierii; acțiunile legale din mână identice cu sloturile legale din secvență înainte și după `auto-step`; evidențierea legală în mod manual și automat; bifa „Joc automat” prezentă la fiecare cadru; geometria centrului la 3–6 locuri; selectorul și antetul contractului selectat; sosirea Rentz de 1,8 secunde și revenirea la scor | Un payload inconsistent nu poate produce randare parțială; cardurile legale rămân marcate când automatizarea oprește atingerea, iar checkbox-ul nu clipește în redare; spațiul la patru locuri crește fără să schimbe ancorele comune; shell-ul nu afișează panoul Whist „Atu” |
-| Verificare în browser MCP | Încărcarea pachetului static, creare profil, pornirea unei mese, Rentz și o mutare legală | Integrarea dintre browser, worker și artefactele publicate local |
+| Verificare în browser MCP | Patru locuri, Greu, Rentz complet și încă un sub-joc complet; P/T în rezultat și istoricul ambelor mâini; cumul pe fiecare loc, reluare prin reîncărcare și cărți depuse pe ecran compact și înalt | Integrarea dintre controalele reale, browser, worker, persistență și artefactele construite |
 
 - Build-ul verifică hash-urile JAR-urilor comune fixate.
 - Testul `hand-presentation.mjs` din pachetul de teste comun este rulat cu setup-ul Rentz: verifică hint-ul pentru o atingere greșită, ridicarea cărții legale, anularea și aplicarea unică a mutării, fără browser sau emulator.
@@ -123,6 +126,28 @@ $pages = Join-Path $env:RENTZ_WORK_ROOT 'browser-pages'
 ```
 
 `Test-RentzBrowserComponents.ps1` rulează testele JVM ale adaptorului și ale sesiunii comune, apoi extrage runtime-ul și testul versionate și verifică toate cele 51 de cazuri din contractul de viewport. Build-ul WEB rulează, în ordine, testele JVM ale endpoint-ului, comparația cu biblioteca APK, compilarea TeaVM, verificările Node asupra motorului generat și verificările DOM. O eroare la oricare strat oprește build-ul.
+
+### Acceptanța WEB prin browser MCP
+
+[Fluxul reutilizabil](tests/rentz-web-flow.mjs) primește TAB-ul MCP și un callback care salvează captura JPEG originală și checkpoint-ul în directorul extern al rulării. Comenzile trec numai prin controalele publice. Scriptul nu injectează distribuiri, scoruri sau rezultate.
+
+| Pas | Verificare |
+|---|---|
+| `start()` | Configurează patru locuri, Greu, dezvăluie cărțile și alege Rentz din dropdown. |
+| `waitForScore()` → `score(1)` | Așteaptă sfârșitul real și confruntă premiile 300/200/100/0, perechile P/T și detaliile. Așteptarea este limitată la 40 de secunde pe apel. |
+| `next()` → `waitForScore()` → `score(n)` | Termină următorul sub-joc; verifică identitatea și cumulul. Continuă până există și un sub-joc distinct de Rentz. |
+| `history()` → `restore()` | Confruntă toate rândurile, numele și legenda înainte și după reîncărcare. |
+| `geometry(titlu)` | Măsoară DOM-ul vizibil cu cărți depuse: patru rânduri, patru locuri, checkbox prezent și nicio intersecție cu jucătorii. |
+
+AI-ul poate alege legitim din nou Rentz pentru alt alegător. În acel caz, etapa pentru un sub-joc distinct se continuă prin controalele normale; repetarea legală nu este defect de produs și nu califică singură scenariul mixt.
+
+Verificările numerice extinse, cazurile de refuz și matricea 3–6 locuri rămân în componente. DOM-ul mock folosește chiar rendererul din JAR; motorul compilat joacă două mâini consecutive și verifică istoricul după restaurare. `component-comparisons` păstrează comparațiile evaluate de build pentru raportare, fără reconstruirea verdictului din numărul de linii al logului.
+
+[Publicatorul Extent](tests/atf/rentz/browser/reporting/RentzWebAcceptanceReport.java) consumă comparațiile și checkpoint-urile.
+
+- Folosește biblioteca Reporting declarată de checkout-ul calificat.
+- Păstrează originalele JPEG/PNG; pentru contractul PNG al bibliotecii reîncodifică numai pixelii decodați, fără corecție vizuală.
+- Distinge candidatul local, pagina publică, browserul mobil offline și calificarea APK.
 
 ## Pornire locală
 

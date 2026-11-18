@@ -1,4 +1,4 @@
-#table .whist-match:has(.rentz-sequence) .fan .card.legal-card {
+#table .whist-match[data-rentz-sequence="true"] .fan .card.legal-card {
   background: var(--whist-hint-legal-fill);
   border: var(--whist-hint-stroke) solid var(--whist-hint-legal-line);
 }
@@ -14,6 +14,10 @@
   overflow: hidden;
   gap: 0;
 }
+.rentz-score-table { min-width: 0; }
+.rentz-score-scroll { max-width: 100%; overflow-x: auto; }
+.rentz-score-table .history-legend { margin: 6px 0 0; font-size: 12px; color: #69756a; }
+.whist-score-awards { white-space: pre-line; font-size: 14px; line-height: 1.4; }
 .rentz-sequence {
   box-sizing: border-box;
   width: min(760px, max(240px, calc(100% - 40px)));
@@ -22,6 +26,7 @@
   min-height: 0;
   flex: 1 1 0;
   margin: auto;
+  transform: translateY(var(--rentz-sequence-lower-shift, 0px));
   display: grid;
   grid-template-rows: repeat(4, minmax(0, 1fr)) auto;
   align-content: stretch;

@@ -14,6 +14,15 @@ import java.util.Set;
 public final class RentzScoreContentTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
 
+    @Test public void shortScoreLabelsAndLegendMatchTheBrowserProjection() {
+        audit.equal("Hand points marker", "P", RentzScoreContent.HAND_POINTS_MARK);
+        audit.equal("Running total marker", "T", RentzScoreContent.TOTAL_MARK);
+        audit.equal("Romanian legend", "P: punctele mâinii · T: total după mână",
+                RentzScoreContent.legend(new RentzUiText(RentzUiText.Language.RO)));
+        audit.equal("English legend", "P: hand points · T: running total",
+                RentzScoreContent.legend(new RentzUiText(RentzUiText.Language.EN)));
+    }
+
     @Test public void helpShowsOnlyThePlacesAvailableAtEachTable() {
         var rows = RentzScoreContent.finishingAwards(GameSession.scoringProfile());
         audit.equal("Three through six seats with zero awards at actual places", List.of(
@@ -95,8 +104,8 @@ public final class RentzScoreContentTest {
                 RentzScoreContent.finalStandings(end));
         var names = List.of("Ana", "Mihai", "Ioana", "Dan", "Eva", "Radu");
         audit.equal("Android final labels use the shared platform-neutral format", List.of(
-                "1. Mihai · Σ 20", "1. Ioana · Σ 20", "3. Radu · Σ 5", "4. Dan · Σ 0",
-                "5. Ana · Σ -30", "5. Eva · Σ -30"),
+                "1. Mihai · T 20", "1. Ioana · T 20", "3. Radu · T 5", "4. Dan · T 0",
+                "5. Ana · T -30", "5. Eva · T -30"),
                 RentzScoreContent.finalStandings(end).stream()
                         .map(row -> RentzScoreContent.standingLabel(row, names.get(row.seat()))).toList());
         audit.equal("Final ranking does not mutate seat totals", totals, end.totals());

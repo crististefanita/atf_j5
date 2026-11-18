@@ -1,4 +1,4 @@
-package ro.rentzlab.app.ui.table;
+package ro.rentzlab.app.ui.chrome;
 
 import java.util.ArrayList;
 import java.util.List;

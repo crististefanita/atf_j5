@@ -117,7 +117,7 @@ Acceptanța de release compară dreptunghiurile mesei de patru locuri înainte �
 ### Decontarea unei secvențe Rentz
 
 - Actorul automat primește un cadru propriu înaintea întârzierii de 550 ms. Logul APK-ului izolat leagă cadrul, pornirea și revizia comenzii confirmate. [Ciclul de viață](ATF_Lifecycle.md)
-- În WEB, aceeași acțiune produce snapshot-uri publice înainte și după fiecare carte. Înainte de randare, adaptorul validează întregul lot: actorul corespunde locului activ, fiecare pas adaugă exact o carte unică, cartea umană pleacă din mâna proprie în aceeași tranziție, iar mutările adverse păstrează mâna umană. Payload-ul nu poate conține mâini adverse; orice abatere respinge lotul înainte de prima randare, fără stare parțială. Pentru AI, indicatorul locului precedă intervalul de 550 ms, iar bifa „Joc automat” rămâne vizibilă prin păstrarea acțiunii-marker din starea anterioară; în pauza de sosire rămâne vizibilă, dar dezactivată. La patru jucători, centrul câștigă 23 px pe verticală; ancorele locurilor rămân cele comune, cu minimum 6 px de separare față de casetele standard. La ultima carte, snapshot-ul final rămâne vizibil pe durata sosirii de 1,8 secunde, apoi apare scorul. Componentele verifică ordinea, sloturile, checkbox-ul, geometria compactă, durata și lipsa mâinilor adverse înainte de orice verificare în browser.
+- În WEB, aceeași acțiune produce snapshot-uri publice înainte și după fiecare carte. Înainte de randare, adaptorul validează întregul lot: actorul corespunde locului activ, fiecare pas adaugă exact o carte unică, cartea umană pleacă din mâna proprie în aceeași tranziție, iar mutările adverse păstrează mâna umană. Payload-ul nu poate conține mâini adverse; orice abatere respinge lotul înainte de prima randare, fără stare parțială. Pentru AI, indicatorul locului precedă intervalul de 550 ms, iar bifa „Joc automat” rămâne vizibilă prin păstrarea acțiunii-marker din starea anterioară; în pauza de sosire rămâne vizibilă, dar dezactivată. La patru jucători, secvența folosește banda liberă calculată din planul comun; ancorele locurilor nu se modifică. La ultima carte, snapshot-ul final rămâne vizibil pe durata sosirii de 1,8 secunde, apoi apare scorul. Componentele verifică ordinea, sloturile, checkbox-ul, geometria compactă, durata și lipsa mâinilor adverse înainte de orice verificare în browser.
 - La terminare, cadrul sosirii prezintă câștigătorul și totalul public al cărților neplasate. Fereastra de 1,8 secunde începe la prima randare. Chenarele păstrează totalurile anterioare până la scor.
 - Tabla terminală păstrează cărțile jucate și sloturile libere. În zona suprapusă, indicele lizibil se termină la marginea următoarei cărți jucate.
 - Ecranul de punctaj afișează mâna confirmată. Revenirea la tablă păstrează revizia și continuarea. [Proba Android](ATF_Android.md#livrabile-și-limite)
@@ -187,7 +187,7 @@ Varianta izolată are receipt propriu. Runnerul curent folosește alegeri script
 
 ## Istoricul adaptiv Rentz
 
-Grila folosește lățimi măsurate, subcoloane aliniate și antet fix. Coloana fixă arată numărul mâinii, sub-jocul, alegătorul și marcajul ×2. Grupurile de scor arată **Δ** pentru mână și **Σ** pentru totalul confirmat.
+Grila folosește lățimi măsurate, subcoloane aliniate și antet fix. Coloana fixă arată numărul mâinii, sub-jocul, alegătorul și marcajul ×2. Grupurile de scor arată **P** pentru mână și **T** pentru totalul confirmat.
 
 | Situație | Comportament |
 |---|---|
@@ -235,13 +235,28 @@ Ajutorul afișează grila pentru 3–6 jucători din profilul efectiv, verificat
 - Testul de adopție verifică octeții `GameTitleBar` din AAR-ul fixat. Contractul de măsurare și ținta tactilă sunt calificate în producătorul comun.
 - `RentzCardSpaceTest` reutilizează cele patru profile native comune (320×599, 360×740, 393×800 cu font 2× și 600×1140), peste profilele Rentz compacte, scunde și late. La 3–6 locuri compară aceleași dreptunghiuri de ancorare și verifică banda centrală.
 
-[Adaptorul antetului](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/screens/RentzGameHeader.java) · [Componentele antetului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/screens/RentzGameHeaderComponentTest.java) · [Calificarea nativă a antetului comun](https://github.com/crististefanita/whist/blob/main/whist-lab-app/app/src/test/java/ro/whistlab/app/screens/AutoGameHeaderComponentTest.java)
+[Adaptorul antetului](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/chrome/RentzGameHeader.java) · [Componentele antetului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/chrome/RentzGameHeaderComponentTest.java) · [Calificarea nativă a antetului comun](https://github.com/crististefanita/whist/blob/main/whist-lab-app/app/src/test/java/ro/whistlab/app/screens/AutoGameHeaderComponentTest.java)
 
 ### De la ultima levată la următorul sub-joc
 
 - Bugetul începe la primul desen al mesei: 1.000 ms pentru cărțile nemișcate și 500 ms pentru deplasare și estompare la câștigător. La o pornire rece, checkpoint-ul aflat exact la final de levată permite o singură reluare vizuală. O levată nouă începută păstrează cărțile ei; jurnalul nu primește comenzi pentru animație.
 - Un checkpoint deja punctat se deschide direct, fără o sarcină AI care să redeseneze masa. Termenul absolut este verificat și înainte de desen. Cărțile expirate dispar din masa curentă înainte de construirea paginii de punctaj.
 - Pe ferestre accelerate hardware cu scara implicită, Rentz programează mișcarea, micșorarea și estomparea pe rendererul Android, în aceeași fereastră de 1.500 ms. Cărțile ajung la câștigător înainte de estompare. Traseul software folosește animatorul comun.
-- După colectarea ultimei levate, ecranul „Punctajul mâinii” preia contractul, multiplicatorul, contribuțiile, **Δ** și **Σ** din același rezultat confirmat ca istoricul. Jocul așteaptă acțiunea „Mâna următoare”; masa și istoricul rămân accesibile.
+- După colectarea ultimei levate, ecranul „Punctajul mâinii” preia contractul, multiplicatorul, contribuțiile, **P** și **T** din același rezultat confirmat ca istoricul. Jocul așteaptă acțiunea „Mâna următoare”; masa și istoricul rămân accesibile.
 - În alegerea normală, după dezvăluirea cărților, jucătorul poate cere o sugestie AI calculată pe opțiunile legale, cu profilul și dificultatea partidei. Alegerea oarbă nu afișează sugestii. O recomandare nu selectează și nu confirmă automat sub-jocul.
 - Separăm termenul exact verificat în componente de intervalul observabil în înregistrarea emulatorului. Extent păstrează și măsurătorile care ies din toleranță.
+
+### Adaptarea secvenței și a scorului în browser
+
+Biblioteca comună deține ancorele locurilor și măsurarea mesei; adaptorul Rentz specializează numai secvența și proiecția punctajului.
+
+| Zonă | Contract de adaptare | Verificare |
+|---|---|---|
+| Locuri | Păstrează dreptunghiurile comune; extinde centrul cu patru jucători prin `TableGeometry.fullWidthCardBand`. | Ancore identice și separare între rânduri și jucători. |
+| Dimensiuni | Măsoară `clientWidth/clientHeight` înainte de scalarea scenei. | Scalare subunitară și supraunitară, fără micșorare dublă. |
+| Hint legal | Marchează starea secvenței prin atribut DOM; nu depinde de selectorul CSS `:has`. | Conturul rămâne activ cu sau fără AutoPlay, inclusiv pe Chrome mobil mai vechi. |
+| Browser mobil | Folosește înălțimea vizibilă pentru container, inclusiv cu bara de adresă deschisă. | Mock de viewport și verificare Chrome offline pe dispozitiv. |
+| Punctaj | P = punctele mâinii; T = total după mână, cu legendă sub tabel. | Confruntă rândul confirmat, ordinea locurilor și cumulul. |
+| Reluare | Păstrează toate rândurile confirmate și identitatea sub-jocului. | Rentz plus alt sub-joc, istoric înainte și după reîncărcare. |
+
+[Mecanismul și pașii MCP](../../atf-ui-browser/README.md#acceptanța-web-prin-browser-mcp)

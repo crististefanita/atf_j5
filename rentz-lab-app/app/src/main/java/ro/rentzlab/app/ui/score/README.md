@@ -2,7 +2,7 @@
 
 ## Pe scurt
 
-Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din stânga identifică mâna, sub-jocul și alegătorul. Fiecare jucător are două valori, **Δ** pentru punctele mâinii și **Σ** pentru totalul confirmat.
+Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din stânga identifică mâna, sub-jocul și alegătorul. Fiecare jucător are două valori, **P** pentru punctele mâinii și **T** pentru totalul confirmat.
 
 | Responsabilitate | Sursă |
 |---|---|
@@ -17,7 +17,7 @@ Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din st
 
 | | Coloana mâinii | Coloanele jucătorilor |
 |---|---|---|
-| Antet | „Mână · joc” | Nume, Δ și Σ |
+| Antet | „Mână · joc” | Nume, P și T |
 | Rânduri | Identitatea mâinii și alegătorul | Delta și totalul pentru fiecare loc |
 
 - Derularea orizontală mută împreună antetul jucătorilor și valorile lor.

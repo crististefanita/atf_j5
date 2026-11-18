@@ -619,8 +619,10 @@ Case 'Pushed README requires one clean game section for each distribution channe
         $asset = "https://github.com/$repo/releases/download/v1.2.0/RentzLab-1.2.0.apk"
         $listedPage = if ($repo -ceq 'example/game') { $page } else { 'release/1.2.0/README.md' }
         $releaseLine = "- [Rentz Lab]($listedPage)`n"
-        $clean = "# Rentz`n`n## Jocul`n`n$releaseLine- [Descarcă APK-ul]($asset)`n`n## Documentație`n"
-        Confirm-ReadmeGameLinks $clean $listedPage $asset
+        $browser = 'https://example.github.io/game/'
+        $browserLine = "- [Joacă online]($browser)`n"
+        $clean = "# Rentz`n`n## Jocul`n`n$releaseLine- [Descarcă APK-ul]($asset)`n$browserLine`n## Documentație`n"
+        Confirm-ReadmeGameLinks $clean $listedPage $asset $browser
         $invalid = @(
             $clean.Replace('## Jocul', '## Ediție cu acces autorizat')
             $clean.Replace("## Jocul`n`n", "## Jocul`n`nAutentifică-te în GitHub.`n`n")
@@ -632,10 +634,13 @@ Case 'Pushed README requires one clean game section for each distribution channe
             $clean.Replace($releaseLine, '')
             $clean.Replace($listedPage, ($listedPage -replace '1\.2\.0', '1.1.0'))
             $clean.Replace($releaseLine, '').Replace("($asset)`n", "($asset)`n$releaseLine")
+            $clean.Replace($browserLine, '')
+            $clean.Replace($browser, 'https://example.github.io/foreign/')
+            "$clean`n$browserLine"
         )
         foreach ($candidate in $invalid) {
             $rejected = $false
-            try { Confirm-ReadmeGameLinks $candidate $listedPage $asset } catch { $rejected = $true }
+            try { Confirm-ReadmeGameLinks $candidate $listedPage $asset $browser } catch { $rejected = $true }
             Require $rejected "README verifier accepted invalid navigation for $repo"
         }
     }

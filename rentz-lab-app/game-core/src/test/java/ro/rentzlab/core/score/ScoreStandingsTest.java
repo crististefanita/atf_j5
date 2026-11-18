@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
+@ro.rentzlab.testing.RentzComponentLayer
 final class ScoreStandingsTest {
     @Test void competitionRanksRetainTiesAndStableSeatOrder() {
         var totals = List.of(-30, 20, 20, 0, -30, 5);

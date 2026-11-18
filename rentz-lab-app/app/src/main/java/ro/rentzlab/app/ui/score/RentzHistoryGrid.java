@@ -88,7 +88,7 @@ public final class RentzHistoryGrid extends ScrollView {
             numbers.setBackgroundColor(fill);
             for (int seat = 0; seat < players.size(); seat++) {
                 var value = row.values().get(seat);
-                String description = players.get(seat) + ". Δ " + value.delta() + ". Σ " + value.total()
+                String description = players.get(seat) + ". P " + value.delta() + ". T " + value.total()
                         + ". " + copy.text("Hand ", "Mâna ") + row.hand();
                 addGroup(numbers, scores(Integer.toString(value.delta()), Integer.toString(value.total()), description), fill);
             }
@@ -99,7 +99,7 @@ public final class RentzHistoryGrid extends ScrollView {
         body.addView(scores, remainingWidth(LayoutParams.WRAP_CONTENT));
         content.addView(rows, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0));
 
-        legend = text(copy.text("Δ: hand points · Σ: confirmed total", "Δ: punctele mâinii · Σ: total confirmat"), false, Gravity.START);
+        legend = text(RentzScoreContent.legend(copy), false, Gravity.START);
         content.addView(legend, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         headings.setOnScrollChangeListener((view, x, y, oldX, oldY) -> sync(scores, x));
         scores.setOnScrollChangeListener((view, x, y, oldX, oldY) -> sync(headings, x));

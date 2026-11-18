@@ -122,6 +122,15 @@ class ReleasePromotionCoordinationTest {
         } finally {
             if (git.isAlive()) git.destroyForcibly();
         }
+        Process config = new ProcessBuilder("git", "-C", directory.toString(), "config", "core.longpaths", "true")
+                .redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();
+        try {
+            if (!config.waitFor(SYNC_TIMEOUT_SECONDS, TimeUnit.SECONDS) || config.exitValue() != 0) {
+                throw new IOException("Cannot configure long-path Git fixture");
+            }
+        } finally {
+            if (config.isAlive()) config.destroyForcibly();
+        }
     }
 
     private record Channel(GitPromotionChannel first, GitPromotionChannel second) { }

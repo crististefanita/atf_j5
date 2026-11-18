@@ -301,15 +301,15 @@ final class RentzTable implements BrowserGame.Match {
         var row = row(last);
         return new History(history.headings(), List.of(row.stream().map(HistoryCell::total).toList()),
                 new HistoryGrid(names, List.of(new HistoryRow(last.number(), contractLabel(last.contract(), last.blind()), row)),
-                        text("Mână", "Hand"), text("Puncte mână", "Hand points"), text("Total", "Total"),
-                        text("Punctajul mâinii și totalul cumulativ", "Hand points and cumulative total")));
+                        text("Mână", "Hand"), text("P", "P"), text("T", "T"),
+                        text("P: punctele mâinii · T: total după mână", "P: hand points · T: running total")));
     }
 
     private HistoryGrid historyGrid(Observation state) {
         var rows = state.completedHands().stream().map(hand -> new HistoryRow(hand.number(),
                 contractLabel(hand.contract(), hand.blind()), row(hand))).toList();
-        return new HistoryGrid(names, rows, text("Mână", "Hand"), text("Puncte mână", "Hand points"),
-                text("Total", "Total"), text("Punctajul mâinii și totalul cumulativ", "Hand points and cumulative total"));
+        return new HistoryGrid(names, rows, text("Mână", "Hand"), text("P", "P"),
+                text("T", "T"), text("P: punctele mâinii · T: total după mână", "P: hand points · T: running total"));
     }
 
     private List<HistoryCell> row(ro.rentzlab.core.RentzMatch.HandResult hand) {
@@ -352,7 +352,7 @@ final class RentzTable implements BrowserGame.Match {
     static List<String> finalStandings(List<Integer> totals, List<String> names) {
         if (totals.size() != names.size()) throw new IllegalArgumentException("Every total needs one seat name");
         return ScoreStandings.rank(totals).stream()
-                .map(place -> ScoreStandings.label(place, names.get(place.seat()))).toList();
+                .map(place -> ScoreStandings.label(place, names.get(place.seat())).replace(" · Σ ", " · T ")).toList();
     }
 
     private String pointsLine(ro.rentzlab.core.RentzMatch.HandResult hand) {
@@ -360,7 +360,7 @@ final class RentzTable implements BrowserGame.Match {
         for (var player : ScoreSettlement.project(hand.contract(), hand.points(), hand.totals(), hand.scoring())) {
             String heading = player.finishPlace() == 0 ? names.get(player.seat())
                     : player.finishPlace() + ". " + names.get(player.seat());
-            lines.add(heading + " · Δ " + player.delta() + " · Σ " + player.total());
+            lines.add(heading + " · P " + player.delta() + " · T " + player.total());
             for (var contribution : player.contributions()) {
                 String label = contribution.category() == Contract.RENTZ
                         ? text("Premiu de sosire", "Finishing award")

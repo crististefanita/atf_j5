@@ -49,7 +49,7 @@ try {
 & node (Join-Path $sharedRoot 'viewport-contract.mjs') (Join-Path $sharedRoot 'ro/cardtable/browser/web/viewport.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Shared browser viewport component checks failed.' }
 $tests = @(
-    Join-Path $PSScriptRoot 'tests/RentzBrowserComponentTest.java'
+    Join-Path $PSScriptRoot 'tests/ro/rentzlab/browser/RentzBrowserComponentTest.java'
     Join-Path $PSScriptRoot 'tests/ro/cardtable/browser/BrowserSessionRentzContractTest.java'
 )
 $previousJavaOptions = $env:JAVA_TOOL_OPTIONS

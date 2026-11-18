@@ -52,7 +52,7 @@ public final class RentzPage {
                 case "/api/setup" -> game.setup(TrickCollectionMotion.keyframes());
                 case "/api/state" -> session.state();
                 case "/api/rankings" -> session.rankings();
-                case "/api/layout" -> BrowserGeometry.measure(game, parameters(input));
+                case "/api/layout" -> RentzPageLayout.measure(game, parameters(input));
                 case "/api/start" -> session.start(game, revision, parameters(input));
                 case "/api/action" -> session.act(revision, input.optString("action"));
                 case "/api/hand-feedback" -> session.handFeedback(revision, parameters(input));

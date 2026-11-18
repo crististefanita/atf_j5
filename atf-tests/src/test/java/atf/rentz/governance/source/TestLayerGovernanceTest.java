@@ -15,17 +15,19 @@ class TestLayerGovernanceTest {
     @Test void everyExecutableTestDeclaresExactlyOneLayerForItsBuild() throws Exception {
         var root = GovernanceProject.root();
         var layout = new ObjectMapper().readTree(root.resolve("config/java-source-layout.json").toFile());
-        var roots = new ArrayList<java.nio.file.Path>();
+        var builds = new java.util.TreeMap<String, List<java.nio.file.Path>>();
         var tests = new java.util.HashSet<java.nio.file.Path>();
         var external = new java.util.HashSet<String>();
         layout.path("externalNonTestBases").forEach(value -> external.add(value.asText()));
         for (var entry : layout.required("roots")) {
-            if (!entry.required("role").asText().equals("tools")) roots.add(root.resolve(entry.required("path").asText()));
+            String build = entry.path("build").asText("native");
+            assertTrue(build.matches("[a-z][a-z0-9-]*"), "Invalid source build");
+            if (!entry.required("role").asText().equals("tools")) builds.computeIfAbsent(build, ignored -> new ArrayList<>()).add(root.resolve(entry.required("path").asText()));
             if (entry.required("role").asText().equals("test")) tests.add(root.resolve(entry.required("path").asText()));
         }
         var findings = new ArrayList<String>();
         int executable = 0;
-        for (var type : TestSourceInventory.scan(root, roots, tests, external)) {
+        for (var roots : builds.values()) for (var type : TestSourceInventory.scan(root, roots, tests, external)) {
             String relative = type.file();
             boolean testRoot = false;
             for (var entry : layout.required("roots")) {
@@ -45,6 +47,18 @@ class TestLayerGovernanceTest {
         }
         assertTrue(executable > 0, "Empty inventory cannot qualify test layers");
         assertEquals(List.of(), findings, "GOV-TEST-LAYER: executable tests need an unambiguous build-specific layer");
+    }
+
+    @Test void buildVariantsRemainInventoriedButDuplicatesInOneBuildStillFail(@org.junit.jupiter.api.io.TempDir java.nio.file.Path root) throws Exception {
+        var nativeRoot=root.resolve("native");
+        var browserRoot=root.resolve("browser");
+        for(var source:List.of(nativeRoot,browserRoot)) {
+            java.nio.file.Files.createDirectories(source);
+            java.nio.file.Files.writeString(source.resolve("Name.java"),"package profile; public final class Name {}");
+        }
+        assertEquals(1,TestSourceInventory.scan(root,List.of(nativeRoot)).size());
+        assertEquals(1,TestSourceInventory.scan(root,List.of(browserRoot)).size());
+        assertThrows(IllegalArgumentException.class,()->TestSourceInventory.scan(root,List.of(nativeRoot,browserRoot)));
     }
 
     @Test void qualifiedComposedAndModifierAnnotationsResolveWithoutLabelingFixtures() {

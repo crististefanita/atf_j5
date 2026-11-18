@@ -32,6 +32,7 @@ Lansatoarele și controalele infrastructurii folosesc PowerShell 7.
 | JVM de componente | Directorul temporar al procesului este în workspace-ul înregistrat, separat de sursa live. |
 | Colecții offline | [Selectorul](../../scripts/TestCollections.psm1) citește registrul, iar lansatorul confruntă populația executată cu cea selectată; [calificarea](ATF_Qualification.md) separă Maven, Android JVM și controalele PowerShell. |
 | Android JVM | [Lansatorul dedicat](../../scripts/test-rentz-android-jvm.ps1) copiază sursa calificării în workspace Android; nu produce APK și nu rezervă dispozitiv. |
+| Browser | [Compilarea paginii](../../atf-ui-browser/Build-RentzPages.ps1) și [componentele adaptorului](../../atf-ui-browser/Test-RentzBrowserComponents.ps1) au intrări explicite în registru. Snapshot-ul componentelor include `atf-ui-browser`, iar toate rădăcinile Java, inclusiv compilatorul TeaVM și probele CLI, rămân în inventarul de surse și sub limita de opt fișiere pe pachet. |
 | Calibrarea realizărilor | [Lansatorul offline](../../scripts/run-achievement-calibration.ps1) folosește catalogul și simulatorul compilate într-o rulare Android JVM admisă. Cronologia și statisticile partidelor se scriu în colecția `learning`. |
 
 ## Inventarul documentației

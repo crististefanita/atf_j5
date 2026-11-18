@@ -1,3 +1,5 @@
+package ro.rentzlab.browser.compiler;
+
 import org.teavm.backend.javascript.JSModuleType;
 import org.teavm.tooling.ConsoleTeaVMToolLog;
 import org.teavm.tooling.TeaVMProblemRenderer;

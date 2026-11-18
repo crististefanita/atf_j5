@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import ro.rentzlab.core.Contract;
 import ro.rentzlab.core.HandScoring;
 
+@ro.rentzlab.testing.RentzComponentLayer
 final class ScoreSettlementTest {
     @Test void rentzRowsFollowFinishOrderAndPreserveSeatLedgerAndContributions() {
         var contribution = new HandScoring.Contribution(Contract.RENTZ, 1, 10);

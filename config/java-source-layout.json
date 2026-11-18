@@ -67,6 +67,51 @@
       "path": "atf-tests/tools",
       "role": "tools",
       "forbidden": []
+    },
+    {
+      "path": "atf-ui-browser/src/main/java",
+      "role": "main",
+      "forbidden": [
+        "android",
+        "org.junit",
+        "atf.testkit",
+        "atf.reporting"
+      ],
+      "build": "browser"
+    },
+    {
+      "path": "atf-ui-browser/pages/src/main/java",
+      "role": "main",
+      "forbidden": [
+        "android",
+        "org.junit",
+        "atf.testkit",
+        "atf.reporting"
+      ],
+      "build": "browser"
+    },
+    {
+      "path": "atf-ui-browser/pages/tools/src/main/java",
+      "role": "main",
+      "forbidden": [
+        "android",
+        "org.junit",
+        "atf.testkit",
+        "atf.reporting"
+      ],
+      "build": "browser"
+    },
+    {
+      "path": "atf-ui-browser/tests",
+      "role": "test",
+      "forbidden": [],
+      "build": "browser"
+    },
+    {
+      "path": "atf-ui-browser/pages/src/test/java",
+      "role": "test",
+      "forbidden": [],
+      "build": "browser"
     }
   ],
   "productionBoundaries": [

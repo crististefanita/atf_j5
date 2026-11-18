@@ -20,7 +20,7 @@ Antetul folosește `GameTitleBar` din AAR-ul fixat. Contractul stabil este în [
 
 | Strat | Contract și verificare |
 |---|---|
-| Adaptor | [RentzGameHeader](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/screens/RentzGameHeader.java) păstrează oprirea disponibilă cu AI în așteptare. [Componentele](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/screens/RentzGameHeaderComponentTest.java) verifică RO/EN, control activ și pornire blocată. |
+| Adaptor | [RentzGameHeader](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/chrome/RentzGameHeader.java) păstrează oprirea disponibilă cu AI în așteptare. [Componentele](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/chrome/RentzGameHeaderComponentTest.java) verifică RO/EN, control activ și pornire blocată. |
 | Geometrie offline | Profilele Whist 320×599, 360×740, 393×800 (font 2×) și 600×1140 completează profilele Rentz scund și lat. [Matricea de afișaj](../rentz/ATF_UiIntegration.md#antetul-mesei-și-autoplay) |
 | Lifecycle offline | [Componentele AutoPlay](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/AutoPlayComponentTest.java) refuză răspunsul livrat după oprire și păstrează tura adversarului. |
 | Acceptanță Android rămasă | Confirmați la font mărit o singură intenție per atingere, resetarea vizuală la mâna nouă, pauză/navigare și reluarea între două mutări. [Contractul lifecycle](../rentz/ATF_Lifecycle.md) |
@@ -45,3 +45,9 @@ Păstrați AAR-ul Android `0.1.19` și pachetul Browser `0.2.13` cu JAR-ul de te
 | U09 | Comparați grila și legenda scorului între jocuri înainte de extracție: mutați numai geometria și stilul neutru în componenta comună; păstrați categoriile, punctajul și modelul de accesibilitate în adaptoarele jocurilor. Calificați lățimi compacte și late în RO/EN. |
 
 [Strategia de testare](../rentz/ATF_TestingStrategy.md) · [Admiterea bibliotecilor](../rentz/ATF_UiIntegration.md#admiterea-bibliotecilor-de-produs)
+
+## Paritatea WEB: spațiu, scor și istoric
+
+Contractul stabil și testele rapide sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser). Acceptanța prin browser cere o secvență Rentz completă în patru locuri și încă un sub-joc complet, cu P/T, un singur premiu zero la Rentz, cumul corect și istoric păstrat după reîncărcare. O pagină încărcată fără aceste verificări nu califică randarea.
+
+Pentru Android rămân exclusiv verificările de raster și de gesturi deja enumerate mai sus. Nu închideți aceste observații pe baza simulării DOM sau a probei WEB.

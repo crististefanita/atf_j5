@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { presentRentzArrival, presentRentzPlayback, rentzArrivalView, rentzChoiceDropdown, rentzSequence,
-  rentzSequenceLayout, rentzCenterInsets, applyRentzSequenceLayout } from "./web/rentz-ui.mjs";
+  rentzSequenceLayout, rentzCenterInsets, rentzSequenceLowerShift, applyRentzSequenceLayout } from "./web/rentz-ui.mjs";
 import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { pathToFileURL } from "node:url";
+import { rentzScoreTable } from "./web/rentz-score.mjs";
+import { componentAudit } from './component-audit.mjs';
+import { runInNewContext } from 'node:vm';
+const recordCheck = componentAudit('browser-rendering');
 
 class FakeElement {
   constructor(tag, text = "", className = "") {
@@ -13,8 +19,9 @@ class FakeElement {
     this.dataset = {};
     this.style = { properties: {}, setProperty: (key, value) => { this.style.properties[key] = value; } };
     this.listeners = {};
+    this.classList = { add: value => { this.className += ` ${value}`; } };
   }
-  append(child) { this.children.push(child); }
+  append(...children) { this.children.push(...children); }
   setAttribute(key, value) { this.attributes[key] = value; }
   addEventListener(name, listener) { this.listeners[name] = listener; }
   click() { this.listeners.click?.(); }
@@ -31,7 +38,7 @@ globalThis.ResizeObserver = FakeResizeObserver;
 
 let checks = 0;
 const check = (message, expected, actual) => {
-  assert.deepEqual(actual, expected, message);
+  recordCheck(message, expected, actual);
   checks++;
 };
 async function rejectedPlaybackIsAtomic(description, frames, expectedMessage) {
@@ -74,6 +81,19 @@ panel.setBounds(280, 168);
 sequenceObserver.trigger();
 check("resize observer recalculates geometry when the viewport becomes compact", `${rentzSequenceLayout(3, 280, 168).rowHeight}px`,
   panel.children[0].style.height);
+
+const scaledPanel = rentzSequence(["♣", "♦", "♥", "♠"].map(suit=>({suit,cells:Array.from({length:8},(_,i)=>({label:`${i+7}${suit}`,played:true,opening:i===4,legal:false,action:""}))})), element, "ro");
+const scaledObserver = FakeResizeObserver.instances.at(-1);
+scaledPanel.clientWidth=374;
+scaledPanel.clientHeight=248;
+for(const scale of [.45,.62,1,1.5]) {
+  scaledPanel.setBounds(374*scale,248*scale);
+  scaledObserver.trigger();
+  check(`viewport scale ${scale} cannot shrink Rentz card metrics twice`,
+    `${rentzSequenceLayout(4,374,248).faceHeight}px`,scaledPanel.children[0].children[0].style.height);
+  check(`viewport scale ${scale} preserves readable logical card indices`,
+    `${rentzSequenceLayout(4,374,248).labelSizePx}px`,scaledPanel.children[0].children[0].style.fontSize);
+}
 
 check("sequence is an accessible group", "group", panel.attributes.role);
 check("sequence uses the Romanian accessible name", "Șirurile Rentz", panel.attributes["aria-label"]);
@@ -120,6 +140,16 @@ for (const players of [3, 5, 6]) {
 const fourPlayerInsets = rentzCenterInsets(4);
 check("four-player table keeps six pixels of clearance around 52px player boxes",
   true, fourPlayerInsets.top >= 58 && fourPlayerInsets.bottom >= 58);
+check("four-player sequence uses the lower shift when the lane has room", 24,
+  rentzSequenceLowerShift(4, 320, 248));
+check("four-player sequence caps its shift at half the measured slack", 6,
+  rentzSequenceLowerShift(4, 260, 248));
+check("four-player sequence stays centered when the lane is full", 0,
+  rentzSequenceLowerShift(4, 248, 248));
+for (const players of [3, 5, 6]) {
+  check(`sequence positioning is unchanged at ${players} seats`, 0,
+    rentzSequenceLowerShift(players, 320, 248));
+}
 check("four-player Rentz reserves 23 extra vertical pixels for played cards", 23,
   defaultCenterInsets.top + defaultCenterInsets.bottom - fourPlayerInsets.top - fourPlayerInsets.bottom);
 check("compact four-player cards gain a larger readable face from the extra center space", true,
@@ -135,7 +165,12 @@ const denseRows = ["♣", "♦", "♥", "♠"].map((suit, suitIndex) => ({
     opening: column === 6, played: suitIndex === 1 && column === 2 })),
 }));
 const densePanel = rentzSequence(denseRows, element, "ro");
-const denseLayout = applyRentzSequenceLayout(densePanel, 280, 235, 1);
+const denseLayout = applyRentzSequenceLayout(densePanel, 280, 235, 1, 320, 248);
+const fourSeatRows = denseRows.map(row => ({ ...row, cells: row.cells.slice(0, 8) }));
+const fourSeatPanel = rentzSequence(fourSeatRows, element, "ro");
+applyRentzSequenceLayout(fourSeatPanel, 280, 235, 1, 320, 248);
+check("measured four-seat Rentz sequence lower shift reaches the panel", "24px",
+  fourSeatPanel.style.properties["--rentz-sequence-lower-shift"]);
 check("compact table uses the native overlapping card advance", true, denseLayout.advance < denseLayout.faceWidth);
 check("played faces use the native card width", `${denseLayout.faceWidth}px`,
   densePanel.children[1].children[2].style.width);
@@ -151,6 +186,8 @@ const rentzCss = readFileSync(new URL("./web/rentz.css", import.meta.url), "utf8
 check("empty sequence slots use the Android sequence text color", true, rentzCss.includes("color: #c2d3c5;"));
 check("black card faces use the Android card text color", true, rentzCss.includes("#2a352f"));
 check("red card faces use the Android card text color", true, rentzCss.includes("#ad393a"));
+check("four-seat sequence applies the measured lower shift", true,
+  rentzCss.includes("transform: translateY(var(--rentz-sequence-lower-shift, 0px))"));
 check("Rentz arrival uses the Android idle-seat text color", true, rentzCss.includes("color: #d3efe2;"));
 check("Rentz sequence indices keep Android's left edge alignment", true,
   rentzCss.includes("justify-content: flex-start;"));
@@ -164,12 +201,57 @@ const generatedShell = readFileSync(process.argv[3], "utf8");
 const generatedTableCss = readFileSync(process.argv[4], "utf8");
 const generatedRentzCss = readFileSync(process.argv[5], "utf8");
 const generatedPage = readFileSync(process.argv[6], "utf8");
+const { viewportGeometry } = await import(pathToFileURL(join(dirname(process.argv[3]),"viewport.mjs")));
+const resizeBody=generatedShell.match(/const resize = \(\) => \{([\s\S]*?)\n\};\nresize\(\);/);
+assert.ok(resizeBody,"The shared resize entry point remains discoverable");
+for(const visibleHeight of [480,570,740]) {
+  const viewport={style:{}};
+  const context={animation:null,window:{visualViewport:{width:393,height:visibleHeight}},
+    document:{documentElement:{clientWidth:393,style:{setProperty(){}}}},
+    viewport,frame:{dataset:{},style:{}},stage:{style:{setProperty(){}},firstElementChild:null},
+    history:{style:{setProperty(){}}},navigator:{userAgent:"Android Mobile"},innerHeight:visibleHeight+56,
+    getComputedStyle:()=>({paddingLeft:"0",paddingRight:"0",paddingTop:"0",paddingBottom:"0"}),
+    isPhone:()=>true,viewportGeometry};
+  runInNewContext(`(()=>{${resizeBody[1]}})()`,context);
+  check(`mobile browser viewport excludes address-bar overflow at ${visibleHeight}px`,`${visibleHeight}px`,viewport.style.minHeight);
+}
+const { historyGrid } = await import(pathToFileURL(join(dirname(process.argv[3]), "records.mjs")));
+for (const players of [3, 4, 5, 6]) {
+  const grid = { players: Array.from({length:players}, (_, i) => `Loc ${i + 1}`), cardsLabel: "Mână",
+    bidLabel: "P", pointsLabel: "T", legend: "P: punctele mâinii · T: total după mână",
+    rows: [
+      {cards:1, status:"Rentz", cells:Array.from({length:players}, (_, i) => ({bid:String(i * 25),total:String(i * 25),description:`Loc ${i}`,missed:false,series:0}))},
+      {cards:2, status:"Levate", cells:Array.from({length:players}, (_, i) => ({bid:"-25",total:String(i * 25 - 25),description:`Loc ${i}`,missed:false,series:0}))}
+    ] };
+  const result = rentzScoreTable({grid}, element, historyGrid);
+  const table = result.children[0].children[0];
+  check(`${players}p: result uses the shared P/T history renderer`, "record-history", table.className);
+  check(`${players}p: every player has exactly two column labels`, Array.from({length:players},()=>["P","T"]).flat(),
+    table.children[0].children[1].children.slice(1).map(e=>e.textContent));
+  check(`${players}p: score and full history retain both contract labels`, ["1 · Rentz", "2 · Levate"],
+    table.children[1].children.map(row=>row.children[0].textContent));
+  check(`${players}p: all result rows align with all player pairs`, [1 + players * 2,1 + players * 2],
+    table.children[1].children.map(row=>row.children.length));
+  check(`${players}p: legend follows the result grid`, grid.legend, result.children[1].textContent);
+  check(`${players}p: negative point contribution is preserved`, "-25",
+    table.children[1].children[1].children[1].children[0].textContent);
+}
+let malformedHistoryRejected=false;
+try { rentzScoreTable({grid:{players:["A","B","C"],rows:[{cells:[]}] }},element,historyGrid); }
+catch(error) { malformedHistoryRejected=/one P\/T pair/.test(String(error)); }
+check("a malformed history row is rejected before a broken score table is rendered",true,malformedHistoryRejected);
+check("published score page consumes the Rentz P/T grid rather than the incompatible flat fallback", true,
+  generatedShell.includes("rentzScoreTable(match.score.table, element, historyGrid)"));
+check("published full history adapts the contract name using the same renderer", true,
+  generatedShell.includes("rentzHistoryGrid(data.grid, element, historyGrid)"));
 const sharedLegalCardRule = generatedTableCss.match(
   /#table:not\(\[data-automatic\]\) \.whist-match \.fan \.legal-card:not\(\.suggested-card\)\s*\{([^}]*)\}/);
 check("shared shell keeps the manual legal-card cue available as a comparison", true,
   !!sharedLegalCardRule && sharedLegalCardRule[1].includes("border: 2px solid #dcb569"));
 const rentzLegalCardRule = generatedRentzCss.match(
-  /#table \.whist-match:has\(\.rentz-sequence\) \.fan \.card\.legal-card\s*\{([^}]*)\}/);
+  /#table \.whist-match\[data-rentz-sequence="true"\] \.fan \.card\.legal-card\s*\{([^}]*)\}/);
+check("legal-card cue does not require CSS :has on older mobile Chrome",true,
+  generatedShell.includes('content.dataset.rentzSequence = "true";'));
 check("Rentz legal-card styling is scoped to the Rentz sequence and survives automatic mode", true,
   !!rentzLegalCardRule
     && rentzLegalCardRule[1].includes("background: var(--whist-hint-legal-fill)")

@@ -1,5 +1,7 @@
 package ro.rentzlab.app.ui.table;
 
+import ro.rentzlab.app.ui.chrome.RentzTurnBadge;
+
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;

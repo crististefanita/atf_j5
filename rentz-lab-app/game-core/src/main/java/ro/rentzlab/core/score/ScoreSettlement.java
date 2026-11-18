@@ -1,6 +1,7 @@
 package ro.rentzlab.core.score;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import ro.rentzlab.core.Contract;
@@ -10,7 +11,7 @@ import ro.rentzlab.core.HandScoring;
 public final class ScoreSettlement {
     public record PlayerLine(int seat, int finishPlace, int delta, int total,
             List<HandScoring.Contribution> contributions) {
-        public PlayerLine { contributions = List.copyOf(contributions); }
+        public PlayerLine { contributions = immutableCopy(contributions); }
     }
 
     private ScoreSettlement() { }
@@ -35,10 +36,17 @@ public final class ScoreSettlement {
             int seat = rentzOrder ? finishOrder.get(row) : row;
             int finishPlace = rentzOrder ? row + 1 : 0;
             List<HandScoring.Contribution> contributions = scoring.bySeat().size() == seats
-                    ? scoring.bySeat().get(seat) : List.of();
+                    ? scoring.bySeat().get(seat) : Collections.emptyList();
             result.add(new PlayerLine(seat, finishPlace, deltas.get(seat), totals.get(seat), contributions));
         }
-        return List.copyOf(result);
+        return immutableCopy(result);
+    }
+
+    private static <T> List<T> immutableCopy(List<T> values) {
+        Objects.requireNonNull(values, "values");
+        var copy = new ArrayList<T>(values.size());
+        for (T value : values) copy.add(Objects.requireNonNull(value, "value"));
+        return Collections.unmodifiableList(copy);
     }
 
     private static boolean isCompleteSeatOrder(List<Integer> order, int seats) {

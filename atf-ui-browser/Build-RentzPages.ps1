@@ -12,6 +12,9 @@ if (($root.Equals($checkout, [StringComparison]::OrdinalIgnoreCase)) -or
     throw 'Use an external build directory; generated Pages files do not belong in the source tree.'
 }
 $null = New-Item -ItemType Directory -Force -Path $root
+$previousBrowserAudit = $env:RENTZ_BROWSER_AUDIT
+$env:RENTZ_BROWSER_AUDIT = Join-Path $root 'component-comparisons'
+try {
 $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -JsonLibrary $JsonLibrary -BuildOnly
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
@@ -63,7 +66,7 @@ try {
     $env:JAVA_TOOL_OPTIONS = (($previousJavaOptions, "-Djava.io.tmpdir=$javaTemp" | Where-Object { $_ }) -join ' ')
     $compilerLog = Join-Path $run 'teavm.log'
     & java '-XX:ActiveProcessorCount=3' '-Xmx1g' -cp (@($classes, $classpath) -join [IO.Path]::PathSeparator) `
-        (Join-Path $pages 'CompileRentzPage.java') $site *> $compilerLog
+        (Join-Path $pages 'tools/src/main/java/ro/rentzlab/browser/compiler/CompileRentzPage.java') $site *> $compilerLog
 } finally { $env:JAVA_TOOL_OPTIONS = $previousJavaOptions }
 if ($LASTEXITCODE -ne 0) { throw "Rentz browser engine compilation failed. See $compilerLog" }
 
@@ -106,7 +109,24 @@ foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAncho
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
     if ($count -ne 1) { throw "Card Table Browser 0.2.13 adapter anchor changed; expected one match, found $count." }
 }
-$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
+$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable } from "./rentz-score.mjs";')
+$scoreAnchor = 'scoreGrid(match.score.table, true)'
+$historyAnchor = 'historyGrid(data.grid, element)'
+$layoutAnchor = 'width, height, mode: state.view.header?.mode ?? "", seatHeight:'
+foreach ($anchor in @($scoreAnchor, $historyAnchor, $layoutAnchor)) {
+    if (([regex]::Matches($markup, [regex]::Escape($anchor))).Count -ne 1) {
+        throw 'The shared score renderer anchor changed; Rentz P/T adaptation cannot be applied safely.'
+    }
+}
+$markup = $markup.Replace($scoreAnchor, '(match.score.table.grid ? rentzScoreTable(match.score.table, element, historyGrid) : scoreGrid(match.score.table, true))')
+$markup = $markup.Replace($historyAnchor, 'rentzHistoryGrid(data.grid, element, historyGrid)')
+$markup = $markup.Replace($layoutAnchor, 'width, height, rentzSequence: !!board.querySelector(".rentz-sequence"), mode: state.view.header?.mode ?? "", seatHeight:')
+$viewportAnchor = '  if (width <= 0 || height <= 0) return;'
+if (([regex]::Matches($markup, [regex]::Escape($viewportAnchor))).Count -ne 1) {
+    throw 'The shared viewport resize anchor changed; visible-height adaptation cannot be applied safely.'
+}
+$markup = $markup.Replace($viewportAnchor, $viewportAnchor + "`n" +
+    '  viewport.style.minHeight = (visual?.height ?? innerHeight) + "px";')
 $markup = $markup.Replace($rentzHeaderAnchor,
   '  const title = element("h1", match.header.title);' + "`n" +
   '  title.hidden = match.header.mode === "RENTZ";' + "`n" +
@@ -121,7 +141,9 @@ $rentzRender = $renderAnchor + "`n" + (@(
   '  }'
 ) -join "`n")
 $markup = $markup.Replace($renderAnchor, $rentzRender)
-$markup = $markup.Replace($contentAnchor, $contentAnchor + "`n" + '  if (match.rentzArrival) content.dataset.rentzArrival = "true";')
+$markup = $markup.Replace($contentAnchor, $contentAnchor + "`n" +
+  '  if (match.rentzArrival) content.dataset.rentzArrival = "true";' + "`n" +
+  '  if (match.rentzSequence?.length) content.dataset.rentzSequence = "true";')
 $rentzCenterRender = $centerAnchor + "`n" + (@(
   '  if (match.header?.mode === "RENTZ") {'
   '    const insets = rentzCenterInsets(match.seats.length);'
@@ -187,7 +209,7 @@ if ($rentzStyleLinks -ne 1) { throw "Rentz page must load its adapter stylesheet
 [IO.File]::WriteAllText($index, $html, [Text.UTF8Encoding]::new($false))
 [IO.File]::WriteAllText((Join-Path $site '.nojekyll'), '', [Text.UTF8Encoding]::new($false))
 
-foreach ($required in @('index.html', 'rentz-engine.mjs', 'engine-worker.mjs', 'local-transport.mjs', 'rentz-ui.mjs', 'rentz.css', 'table.mjs', 'hand-feedback.mjs', 'card-suits.woff2', 'card-suits-OFL.txt')) {
+foreach ($required in @('index.html', 'rentz-engine.mjs', 'engine-worker.mjs', 'local-transport.mjs', 'rentz-ui.mjs', 'rentz-score.mjs', 'rentz.css', 'table.mjs', 'hand-feedback.mjs', 'card-suits.woff2', 'card-suits-OFL.txt')) {
     if (!(Test-Path -LiteralPath (Join-Path $site $required))) { throw "Rentz Pages output is missing $required" }
 }
 foreach ($script in @('rentz-ui.mjs', 'table.mjs', 'engine-worker.mjs', 'local-transport.mjs')) {
@@ -233,3 +255,4 @@ if ($LASTEXITCODE -ne 0) { throw 'Rentz sequence renderer component verification
 & node (Join-Path $pages 'verify-rentz-transport.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Rentz transient event transport verification failed.' }
 $site
+} finally { $env:RENTZ_BROWSER_AUDIT = $previousBrowserAudit }

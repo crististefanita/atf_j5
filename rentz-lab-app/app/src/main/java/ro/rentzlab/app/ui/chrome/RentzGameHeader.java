@@ -1,4 +1,4 @@
-package ro.rentzlab.app.ui.screens;
+package ro.rentzlab.app.ui.chrome;
 
 import android.graphics.Color;
 import android.text.TextUtils;

@@ -96,7 +96,7 @@
       "criterion": "Require the qualified routes and authenticated APK bytes. Retirement requires both Extent artifacts to match the RAG source, length and SHA-256.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-09",
-      "sha256": "7ec60b9919241d389cd6037812208153baec1eeffc5be69d19ee9e77bf64907e",
+      "sha256": "bc7f877cc418c0680f0081cb8ff1d91cd253bcfdec1719c0d0ca167fb6c6e737",
       "allowDelete": false
     },
     {
@@ -166,7 +166,7 @@
       "criterion": "Keep the measured seat anchors across 3 to 6 players. Verify the Rentz outline for single and multiple legal cards during manual and delegated turns, with taps disabled during delegation and with marks refreshed after moves and passes.",
       "proof": "docs/rentz/ATF_UiIntegration.md",
       "expires": "2026-11-20",
-      "sha256": "864cc60ddd661cae001cbdd9870404dac6cbe31f6ce6796f3ee84188b8fe91aa",
+      "sha256": "be86c4d72589cc6606e86d79d96d683027f8d5003251ceb91dbe36b4b8f33ac2",
       "allowDelete": false
     },
     {
@@ -616,7 +616,7 @@
       "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-12",
-      "sha256": "9d819feccc00e46ec6658afe29a950f5e8045dc9ab7d563189f9671fb6a06702",
+      "sha256": "806b28737c524fa5e688eb0024b3431d0e06bf1fd393fad6ef7fe25880910c6e",
       "allowDelete": false
     },
     {
@@ -692,11 +692,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/source/TestLayerGovernanceTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q15–Q16: inherited executable-source inventory, independent Jupiter probes and complete external evaluation admission; preserve parallel UI and library changes.",
-      "criterion": "Before/after tests retain a healthy full neighbor; overrides, generic signatures, cross-package visibility and annotation inheritance match Jupiter. Every protocol/source/budget/population/aggregate corruption refuses admission without changing strategic thresholds.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q15-q16-8e2c2092/TDD.md",
+      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
+      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
       "expires": "2026-11-20",
-      "sha256": "16669a48dd76eb7e011ba74c618c1702844439a79b07560c824ff95866827891",
+      "sha256": "c8009aff8c013a1a17f219cb492c177e48a912fa072ff4507afe173dbade8f79",
       "allowDelete": false
     },
     {
@@ -802,11 +802,11 @@
     {
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz Android qualification",
-      "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The legacy launcher refuses the current UI contract before reading a binary or sending device operations. The selector receipt must contain 84 distinct passing checks, including the table-size and closing-state probes.",
-      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "reason": "Update the positive README fixture to the mandatory browser link and preserve all rejection cases.",
+      "criterion": "Keep exactly documentation, current APK and current online game links in order; reject absent, duplicate or foreign browser links.",
+      "proof": "Pushed README requires one clean game section for each distribution channel",
       "expires": "2026-12-15",
-      "sha256": "e83891f1fa08dadac195862675b35c04daa7f782e8955f3a5ad46d47aada1cd8",
+      "sha256": "a768f8f891c2ab19cf47f8adfb028e060d91d2651e801961a3f84fe267b40747",
       "allowDelete": false
     },
     {
@@ -842,21 +842,21 @@
     {
       "path": "config/infrastructure-workspaces.json",
       "owner": "Rentz Android qualification",
-      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
-      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
-      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-12",
-      "sha256": "21397a0a4634337139431535d673e798b755ccfe77a5301e51a2a0abe6dbc5b8",
+      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
+      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
+      "expires": "2026-12-18",
+      "sha256": "014ac60815570156b6c1d9482c8aeda5b01adc043dcae4d804a1a9f4510d56c9",
       "allowDelete": false
     },
     {
       "path": "config/java-source-layout.json",
       "owner": "Rentz release",
-      "reason": "0.1.2 · Reconcile the protected release snapshot against the existing review base.",
-      "criterion": "Separate production and test markers; verify all reviewed external interfaces on the actual Maven test classpath.",
-      "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
-      "expires": "2026-11-20",
-      "sha256": "c51938609ec7f8bbe268aed823c34258ee5c731e15dbc12876e90abac1b285aa",
+      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
+      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
+      "expires": "2026-12-18",
+      "sha256": "ecfba3f5760a0f56f2364d34eb85f4a480918cfe293065a237454dc18fe22425",
       "allowDelete": false
     },
     {
@@ -976,7 +976,7 @@
       "criterion": "Verify the loaded PlayerSeatView, highlight and geometry classes against the pinned AAR, with no engine dependencies.",
       "proof": "../../whist_back/component-suites/card-highlight-20261111/whist-lab-app-card-table-ui-testDebugUnitTest.html",
       "expires": "2026-11-20",
-      "sha256": "03b1428c38db51c60a96b9cac32bd39814f851e741a8ea200bea5a3849c43ae9",
+      "sha256": "de1669d313680931ded290ed976e87f0ba64307bcbc30504b4a9a0c6ee7c5312",
       "allowDelete": false
     },
     {
@@ -1022,11 +1022,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java",
       "owner": "Rentz UI",
-      "reason": "Qualify every Help award in the JVM, including the production accessibility strings.",
-      "criterion": "Verify exact payouts and RO/EN descriptions for every actual place at 3 to 6 seats. Keep the alternate profile, history and standings neighbors. Replay the finishing order from legal plays and check each exact place and award against the confirmed row.",
-      "proof": "docs/rentz/ATF_TestingStrategy.md#când-mutăm-o-verificare",
-      "expires": "2026-12-10",
-      "sha256": "525dafbed3d917f0fe037a0e8076a75affb1863fba063d37e26a7ac1938c30af",
+      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
+      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
+      "expires": "2026-12-18",
+      "sha256": "ea49772dcfca2a861481d356a9b862052671b78f6f3140e6ba49721777d098b4",
       "allowDelete": false
     },
     {
@@ -1042,11 +1042,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java",
       "owner": "Rentz UI",
-      "reason": "Qualify signed score projections independent of native display.",
-      "criterion": "Check all positions for three through six seats, both locales, negative and positive scores, and restoration.",
-      "proof": "docs/rentz/ATF_UiIntegration.md#auditul-cititorului-extent",
-      "expires": "2026-12-10",
-      "sha256": "e94ad263f8084991a79c20655abf4d3eb2517999cee3a09fb08a6608e4c8c446",
+      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
+      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
+      "expires": "2026-12-18",
+      "sha256": "bd2afc001b1dfae63ab94c4885fcbc2548a43957bf5ffc4a9bd8a1defde09430",
       "allowDelete": false
     },
     {
@@ -1162,11 +1162,11 @@
     {
       "path": "scripts/run-rentz-components.ps1",
       "owner": "Rentz release",
-      "reason": "Generate an auditable atf-reporting Extent for the full selected component suite.",
-      "criterion": "Hash and reconcile all selected Surefire XML. Use the ATF runtime classpath for Extent and register the workspace against the tested source for Android JVM evidence. Read the JSON summary from stdout and preserve JVM diagnostics separately. Failed or empty runs remain FAIL.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "7e8e6d98cdd850f3e8c404248d5dcb15ce3cdf0dd6c88e23a9c861fac7dc3b96",
+      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
+      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
+      "expires": "2026-12-18",
+      "sha256": "b58d1b515d2e28625bbb02f8121726208fca5bdc0c61fe6fda3b9158b00b0fb1",
       "allowDelete": false
     },
     {
@@ -1192,11 +1192,11 @@
     {
       "path": "scripts/TestSourceInventory.psm1",
       "owner": "Rentz consumer",
-      "reason": "Q17–Q18 · Nested discovery and XML ownership, effective arena actors and independent admission.",
-      "criterion": "Jupiter and Surefire establish the selected Nested population; invalid or ambiguous ownership fails. Trusted context verifies the effective candidate, control, opponents and objective before promotion.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q17-q18/TDD.md",
+      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
+      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
       "expires": "2026-11-20",
-      "sha256": "a54963673ab98d05dd3c7188ba2df08f4cc499014ddaa91f6634c94491598535",
+      "sha256": "4dd5f10069018aae0dcdb10c5ce5e8695aa21ee0e4d19872d345cfbf8eff7bdb",
       "allowDelete": false
     },
     {
@@ -1206,7 +1206,7 @@
       "criterion": "RAG rejects local APKs and checksums under release. A verified production or preview guide and a newer staged candidate keep the existing version and identity rules.",
       "proof": "ReleaseCatalogStorageTest and docs/rentz/ATF_Release.md",
       "expires": "2026-12-14",
-      "sha256": "d1c08d8b7ef7ea82df8a69d9b2d7f3f0c04665aec2a5a3074850ad3a459f9efb",
+      "sha256": "425091131547b37cae03757488496d9341c4c88bddaf74b34cd3c95259d85efe",
       "allowDelete": false
     },
     {
@@ -1316,7 +1316,7 @@
       "criterion": "VersionCode increases to 31 and the test-only seed stays isolated from normal game starts.",
       "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
       "expires": "2027-02-12",
-      "sha256": "a73dd9c7cd3835029c5c19646e1422576ee5016572fd8ec193bd5096a2df940b",
+      "sha256": "f4a9cf02907f10aba7949cd003f29d4bc2ac256b8b71ef5cf966cdc031f03f6e",
       "allowDelete": false
     },
     {
@@ -1326,7 +1326,7 @@
       "criterion": "Preserve the current published edition until the candidate passes offline, native, signed build and authenticated distribution checks.",
       "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
       "expires": "2027-02-12",
-      "sha256": "b64d61b4024de7299ec0218b108283365f0bcd584b69b1f79e55a804eaef3cb2",
+      "sha256": "a1296fc3a96b4911ff029a410fb46288990835ba56c58cf0cd4570918b2f2c64",
       "allowDelete": false
     },
     {
@@ -1444,7 +1444,7 @@
       "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes. Compare persisted integral receipt values exactly.",
       "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
       "expires": "2026-12-10",
-      "sha256": "1cd2c33de8332179c916f9cf9220d446e163c6e3d3cc06856851be24a00fb00d",
+      "sha256": "d25fdefd60d4a9402d2ada55b4e7f78a5d29980b5beda692487423912fea4f31",
       "allowDelete": false
     },
     {
@@ -1454,7 +1454,7 @@
       "criterion": "An acknowledged draft gets three read-only inventory attempts. No repeat POST, asset upload or promotion before verification. Conflicts and newer stable editions remain blocked.",
       "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
       "expires": "2026-12-14",
-      "sha256": "932f26eb913369d51c35c0fc394f5b92d8f98d42b65c0a2f71f6547bc9d72e1d",
+      "sha256": "271e66e4b1fc8352695738a4d4bbac1032a6ec1091f4ce450c5ee66d14d79302",
       "allowDelete": false
     },
     {
@@ -1504,7 +1504,7 @@
       "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
       "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
       "expires": "2026-12-10",
-      "sha256": "eb21230ca0a34025c548deaa39ef54a284d2f51fc6613aadcef91eb4ccc97d90",
+      "sha256": "bd268c322e7204baf664d72f3ec9b940fe8d9afb8760e48d798ebe83a12d4e9c",
       "allowDelete": false
     },
     {
@@ -1514,7 +1514,7 @@
       "criterion": "Require separate GitHub account IDs and a private test repository, verify replace-and-release semantics, and keep unqualified evidence BLOCKED.",
       "proof": "docs/rentz/ATF_Release.md#calificarea-permisiunilor-pe-github",
       "expires": "2026-12-10",
-      "sha256": "57355f76f5ea9878dad489dee6632a9422b09037529b27dc404d89e6cb51d85d",
+      "sha256": "1c56d9b9e1539f1d79a7e2984da397397ffaf328b264035f5871d90677a40672",
       "allowDelete": false
     },
     {
@@ -1524,7 +1524,7 @@
       "criterion": "Require separate GitHub account IDs and a private test repository, verify replace-and-release semantics, and keep unqualified evidence BLOCKED.",
       "proof": "docs/rentz/ATF_Release.md#calificarea-permisiunilor-pe-github",
       "expires": "2026-12-10",
-      "sha256": "71c9ccdac6b115e5fb3bdfd364a7b2dac2a9e0a1e72bb2f74e185379e5c1528f",
+      "sha256": "574ab05e78a5651f33205bf2d05cb1327e60b5fecd60a4a16fb694b5e2e27a1d",
       "allowDelete": false
     },
     {
@@ -1616,6 +1616,103 @@
       "expires": "2026-12-14",
       "sha256": "5dcf2e8ee7ff74f9ed3b78070ff4d0414afb6bce0d94981469e30f7a675ca7f5",
       "allowDelete": false
+    },
+    {
+      "path": "atf-ui-browser/pages/src/test/java/ro/cardtable/browser/RentzPageComponentTest.java",
+      "owner": "Rentz WEB/APK parity",
+      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
+      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
+      "expires": "2026-12-18",
+      "sha256": "817b4094edf61e8da737a6a79dd1a4c83f3020f4e49782e006332421bb4b95b8",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-ui-browser/pages/src/test/java/ro/cardtable/names/PlayerNamesParityTest.java",
+      "owner": "Rentz WEB/APK integration",
+      "reason": "Inventory the live source and test contracts without dropping native coverage.",
+      "criterion": "Keep exact shared seat anchors, immutable cumulative score projections and native presentation checks. Existing refusal gates remain enforced.",
+      "proof": "Canonical regression, Android JVM components and browser component comparisons",
+      "expires": "2026-12-18",
+      "allowDelete": false,
+      "sha256": "41814aaf448b9add2206b2fe0347efd994f1d8774eba9828f821e507a37c625b"
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/score/ScoreSettlementTest.java",
+      "owner": "Rentz WEB/APK integration",
+      "reason": "Inventory the live source and test contracts without dropping native coverage.",
+      "criterion": "Keep exact shared seat anchors, immutable cumulative score projections and native presentation checks. Existing refusal gates remain enforced.",
+      "proof": "Canonical regression, Android JVM components and browser component comparisons",
+      "expires": "2026-12-18",
+      "allowDelete": false,
+      "sha256": "31366b6b844f034f9dab3f98c23f6cc0aef8a424dfeb72e14051526ec2f0e241"
+    },
+    {
+      "path": "rentz-lab-app/game-core/src/test/java/ro/rentzlab/core/score/ScoreStandingsTest.java",
+      "owner": "Rentz WEB/APK integration",
+      "reason": "Inventory the live source and test contracts without dropping native coverage.",
+      "criterion": "Keep exact shared seat anchors, immutable cumulative score projections and native presentation checks. Existing refusal gates remain enforced.",
+      "proof": "Canonical regression, Android JVM components and browser component comparisons",
+      "expires": "2026-12-18",
+      "allowDelete": false,
+      "sha256": "2ad624f9934d1dc783cf11afd979275bc03cf1a853b132e4d1ab50d48c6fa35e"
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/screens/RentzGameHeaderComponentTest.java",
+      "owner": "Rentz UI cohesion",
+      "reason": "Move the unchanged native chrome contract to its own package.",
+      "criterion": "Retain every native assertion and public behavior; only package and imports change.",
+      "proof": "Android JVM regression",
+      "expires": "2026-12-18",
+      "allowDelete": true
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/chrome/RentzGameHeaderComponentTest.java",
+      "owner": "Rentz UI cohesion",
+      "reason": "Move the unchanged native chrome contract to its own package.",
+      "criterion": "Retain every native assertion and public behavior; only package and imports change.",
+      "proof": "Android JVM regression",
+      "expires": "2026-12-18",
+      "allowDelete": false,
+      "sha256": "9e35abb797ec348ddbae1bff2fbe99e6bd79cc3fe006c4160d679a5a3d271814"
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/screens/RentzGameMenuComponentTest.java",
+      "owner": "Rentz UI cohesion",
+      "reason": "Move the unchanged native chrome contract to its own package.",
+      "criterion": "Retain every native assertion and public behavior; only package and imports change.",
+      "proof": "Android JVM regression",
+      "expires": "2026-12-18",
+      "allowDelete": true
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/chrome/RentzGameMenuComponentTest.java",
+      "owner": "Rentz UI cohesion",
+      "reason": "Move the unchanged native chrome contract to its own package.",
+      "criterion": "Retain every native assertion and public behavior; only package and imports change.",
+      "proof": "Android JVM regression",
+      "expires": "2026-12-18",
+      "allowDelete": false,
+      "sha256": "0305f2a9bb1a0a12a61d88681dcb0338c7ce4ad14cac08baebeae925b3f96d1b"
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTurnBadgeComponentTest.java",
+      "owner": "Rentz UI cohesion",
+      "reason": "Move the unchanged native chrome contract to its own package.",
+      "criterion": "Retain every native assertion and public behavior; only package and imports change.",
+      "proof": "Android JVM regression",
+      "expires": "2026-12-18",
+      "allowDelete": true
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/chrome/RentzTurnBadgeComponentTest.java",
+      "owner": "Rentz UI cohesion",
+      "reason": "Move the unchanged native chrome contract to its own package.",
+      "criterion": "Retain every native assertion and public behavior; only package and imports change.",
+      "proof": "Android JVM regression",
+      "expires": "2026-12-18",
+      "allowDelete": false,
+      "sha256": "aefd81bd525d02c1be9f251008b32a4bd1dd9383d0b64cddb45d55797a763cab"
     }
   ]
 }

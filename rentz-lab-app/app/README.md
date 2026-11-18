@@ -25,7 +25,7 @@ Modulul oferă o interfață nativă minimală pentru motorul Rentz: masă cu tr
 | [SavedJson](src/main/java/ro/rentzlab/app/SavedJson.java) | Citire strictă a unui singur document și valori exacte înaintea restaurării. |
 | [Componente de sesiune](src/test/java/ro/rentzlab/app/GameSessionTest.java) | Refuz fără jurnalizare, restaurare, istoric și frontiera informației. |
 | [Componente UI proprii](src/test/java/ro/rentzlab/app/ui/) | Contracte Rentz reale, proiecții publice, profil, permis de cadru, scor și AAR; comparații capturate la evaluare. |
-| [Istoric adaptiv](src/main/java/ro/rentzlab/app/ui/score/README.md) | Antet fix vertical și coloană fixă orizontal. Δ și Σ sunt aliniate și preluate din mâinile confirmate. |
+| [Istoric adaptiv](src/main/java/ro/rentzlab/app/ui/score/README.md) | Antet fix vertical și coloană fixă orizontal. P și T sunt aliniate și preluate din mâinile confirmate. |
 | [Componente ale salvării](src/test/java/ro/rentzlab/app/SessionJsonValidationTest.java) | Intrări invalide, limite numerice, compatibilitate explicită și vecini valizi. |
 | [Componente de lifecycle](src/test/java/ro/rentzlab/app/lifecycle/) | Intercalări deterministe, proprietar înlocuit, anulare ignorată, refuz IO și livrări întârziate, fără emulator. |
 

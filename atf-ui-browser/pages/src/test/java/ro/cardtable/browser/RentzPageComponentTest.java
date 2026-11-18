@@ -11,11 +11,74 @@ public final class RentzPageComponentTest {
 
     public static void main(String[] args) {
         pageCommandStartsTheRealGameSession();
+        rentzSequenceUsesTheSharedFreeBandWithoutMovingAnySeat();
         rentzCardPlaybackIsAnIncrementalPublicProjection();
         rentzLegalCardActionsRemainAvailableAfterAnAutomaticStep();
         rentzArrivalIsAOneShotPublicProjectionBeforeTheScore();
+        historyKeepsWhistShortLabelsAndTheSettledScoreProjection();
         otherContractsDoNotEmitARentzArrival();
         System.out.println("Rentz Pages component checks passed: " + checks);
+    }
+
+    private static void rentzSequenceUsesTheSharedFreeBandWithoutMovingAnySeat() {
+        for(int width:new int[]{280,320,374,414,600}) for(int height:new int[]{440,640,800}) {
+            var input=Map.of("width",Integer.toString(width),"height",Integer.toString(height),
+                "mode","RENTZ","seatHeight","66","bidOptions","0","players","4",
+                "viewport","896","handWidth",Integer.toString(width),"cards","8");
+            var common=BrowserGeometry.measure(new ro.rentzlab.browser.RentzBrowser(()->31L),input);
+            var parameters=new java.util.HashMap<>(input);
+            parameters.put("rentzSequence","true");
+            var response=new JSONObject(RentzPage.commandLocal("/api/layout",new JSONObject(parameters).toString(),null,null,null,null));
+            var actual=response.getJSONObject("result").getJSONObject("board");
+            var viewport=new ro.cardtable.ui.table.TableViewportPolicy(896);
+            var band=ro.cardtable.ui.table.TableGeometry.fullWidthCardBand(common.board(),viewport.regionGapDp());
+            check("Rentz consumes the shared free band top without moving seats "+width+"/"+height,
+                actual.getJSONObject("center").getInt("top")==band.top());
+            check("Rentz consumes the shared free band bottom "+width+"/"+height,
+                actual.getJSONObject("center").getInt("bottom")==band.bottom());
+            for(int seat=0;seat<4;seat++) {
+                var rectangle=actual.getJSONArray("seats").getJSONObject(seat);
+                var expected=common.board().seats().get(seat);
+                check("Whist seat anchors remain exact "+width+"/"+height+"/"+seat,
+                    rectangle.getInt("left")==expected.left() && rectangle.getInt("top")==expected.top()
+                    && rectangle.getInt("right")==expected.right() && rectangle.getInt("bottom")==expected.bottom());
+            }
+        }
+    }
+
+    private static void historyKeepsWhistShortLabelsAndTheSettledScoreProjection() {
+        var checkpoint = startPage(20261118, "4", "HARD");
+        JSONObject view = null;
+        for (int step = 0; step < 96; step++) {
+            var current = pageState(checkpoint);
+            view = current.getJSONObject("view");
+            if (view.optJSONObject("score") != null) break;
+            String action = nextAction(view, "RENTZ");
+            var reply = pageAction(checkpoint, current.getLong("revision"), action);
+            checkpoint = reply.optString("checkpoint", checkpoint);
+        }
+        if (view == null || view.optJSONObject("score") == null) {
+            throw new AssertionError("The four-seat Rentz fixture did not reach the settled score page.");
+        }
+        var grid = view.getJSONObject("history").getJSONObject("grid");
+        check("Page DTO maps per-hand points to P", "P".equals(grid.optString("bidLabel")));
+        check("Page DTO maps running totals to T", "T".equals(grid.optString("pointsLabel")));
+        check("Page DTO carries the concise legend beneath the score table",
+                "P: punctele mâinii · T: total după mână".equals(grid.optString("legend")));
+        var settled = view.getJSONObject("scoreDetails").optString("awards");
+        check("Score page uses the same P/T notation", settled.contains(" · P ") && settled.contains(" · T "));
+        var row = grid.getJSONArray("rows").getJSONObject(0);
+        var cells = row.getJSONArray("cells");
+        var state = pageState(checkpoint).getJSONObject("view");
+        var completed = state.getJSONObject("history").getJSONArray("rows").getJSONArray(0);
+        var names = grid.getJSONArray("players");
+        for (int seat = 0; seat < cells.length(); seat++) {
+            var cell = cells.getJSONObject(seat);
+            check("Page history keeps the confirmed running total in seat order " + seat,
+                    cell.getString("total").equals(completed.getString(seat + 2)));
+            String projection = names.getString(seat) + " · P " + cell.getString("bid") + " · T " + cell.getString("total");
+            check("Score details preserve both confirmed values for seat " + seat, settled.contains(projection));
+        }
     }
 
     private static void pageCommandStartsTheRealGameSession() {

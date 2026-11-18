@@ -14,8 +14,8 @@ import java.util.Optional;
 
 /** Exact confirmed deltas and totals; seat order is never sorted by score or edited names. */
 public final class RentzScoreContent {
-    public static final String HAND_POINTS_MARK = "Δ";
-    public static final String TOTAL_MARK = "Σ";
+    public static final String HAND_POINTS_MARK = "P";
+    public static final String TOTAL_MARK = "T";
     public record Value(int delta, int total) { }
     public record Row(int hand, int chooser, Contract contract, String label, List<Value> values, HandScoring scoring) {
         public Row { values = List.copyOf(values); }
@@ -32,6 +32,9 @@ public final class RentzScoreContent {
     public static List<Row> rows(List<RentzMatch.HandResult> history, RentzUiText copy) {
         return history.stream().map(hand -> row(hand, copy)).collect(immutable());
     }
+    public static String legend(RentzUiText copy) {
+        return copy.text("P: hand points · T: running total", "P: punctele mâinii · T: total după mână");
+    }
     public static Optional<Row> currentHand(RentzMatch.Observation view, List<RentzMatch.HandResult> history, RentzUiText copy) {
         if (view.phase() != RentzMatch.Phase.DEAL_END && view.phase() != RentzMatch.Phase.MATCH_END || history.isEmpty())
             return Optional.empty();
@@ -44,7 +47,8 @@ public final class RentzScoreContent {
                 .map(place -> new Standing(place.seat(), place.rank(), place.total())).collect(immutable());
     }
     public static String standingLabel(Standing standing, String playerName) {
-        return ScoreStandings.label(new ScoreStandings.Place(standing.seat(), standing.place(), standing.total()), playerName);
+        return ScoreStandings.label(new ScoreStandings.Place(standing.seat(), standing.place(), standing.total()), playerName)
+                .replace(" · Σ ", " · T ");
     }
     private static Row row(RentzMatch.HandResult hand, RentzUiText copy) {
         return new Row(hand.number(), hand.chooser(), hand.contract(), copy.playedContract(hand.contract(), hand.blind()),

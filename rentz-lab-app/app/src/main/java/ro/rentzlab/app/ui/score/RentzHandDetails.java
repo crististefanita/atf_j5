@@ -39,7 +39,7 @@ public final class RentzHandDetails extends ScrollView {
         for (var player : details) {
             String place = player.place() == 0 ? "" : player.place() + ". ";
             line(content, place + players.get(player.seat()), true);
-            line(content, "Δ " + player.score().delta() + "   ·   Σ " + player.score().total(), false);
+            line(content, "P " + player.score().delta() + "   ·   T " + player.score().total(), false);
             for (var contribution : player.contributions()) {
                 String label = contribution.category() == Contract.RENTZ
                         ? copy.text("Finishing award", "Premiu de sosire")

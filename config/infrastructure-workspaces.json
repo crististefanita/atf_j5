@@ -25,7 +25,9 @@
     "rentz-lab-app",
     "rentz-reference",
     "scripts",
-    "release"
+    "release",
+    ".github",
+    "atf-ui-browser"
   ],
   "artifactDirectories": [
     "android-acceptance",
@@ -82,7 +84,11 @@
     "atf-tests/tools/test-runtime-retention.ps1",
     "atf-tests/tools/run-shared-ui-sanity.ps1",
     "atf-tests/tools/run-trick-collection-sanity.ps1",
-    "atf-tests/tools/test-ui-selectors.ps1"
+    "atf-tests/tools/test-ui-selectors.ps1",
+    "atf-ui-browser/Build-RentzPages.ps1",
+    "atf-ui-browser/Start-RentzBrowser.ps1",
+    "atf-ui-browser/Test-RentzBrowserComponents.ps1",
+    "atf-ui-browser/Verify-CardTableBrowser.ps1"
   ],
   "reviewedTempReaders": [
     {

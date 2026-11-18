@@ -1,4 +1,4 @@
-package ro.rentzlab.app.ui.screens;
+package ro.rentzlab.app.ui.chrome;
 
 import org.junit.Rule;
 import org.junit.Test;
