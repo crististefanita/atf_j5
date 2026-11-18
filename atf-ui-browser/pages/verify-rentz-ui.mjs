@@ -65,6 +65,7 @@ const autoGateFlow = new RentzWebFlow({playwright: {
   locator: selector => ({waitFor: async options => {
     assert.equal(selector, '#table[aria-busy="true"]');
     assert.equal(options.state, 'hidden');
+    assert.equal(options.timeout, 40000, 'A real multi-card playback can exceed the default selector deadline');
     autoGateCalls.push('visible transition finishes'); transitionFinished = true;
   }}),
   getByRole: () => ({check: async () => {
@@ -280,7 +281,7 @@ check("Rentz legal-card cue uses the Android fill and outline tokens in manual a
 check("published page loads the Rentz cue after the shared card-table stylesheet", true,
   (() => {
     const sharedStyle = generatedPage.match(/<link rel="stylesheet" href="\.\/table\.css(?:\?[^\"]*)?">/);
-    const rentzStyle = generatedPage.match(/<link rel="stylesheet" href="\.\/rentz\.css">/);
+    const rentzStyle = generatedPage.match(/<link rel="stylesheet" href="\.\/rentz\.css(?:\?[^\"]*)?">/);
     return !!sharedStyle && !!rentzStyle && rentzStyle.index > sharedStyle.index;
   })());
 check("Rentz header removes the extra product title used by the generic Whist shell", true,

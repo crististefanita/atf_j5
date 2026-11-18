@@ -269,5 +269,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Rentz transient event transport verification f
 if ($LASTEXITCODE -ne 0) { throw 'Browser asset graph versioning failed.' }
 & node (Join-Path $pages 'verify-pages-assets.mjs') $site
 if ($LASTEXITCODE -ne 0) { throw 'Published browser asset graph verification failed.' }
+& node (Join-Path $pages 'verify-rentz-ui.mjs') $nativeMetrics $tableScript `
+    (Join-Path $site 'table.css') (Join-Path $site 'rentz.css') (Join-Path $site 'index.html')
+if ($LASTEXITCODE -ne 0) { throw 'Final packaged browser renderer verification failed.' }
 $site
 } finally { $env:RENTZ_BROWSER_AUDIT = $previousBrowserAudit }

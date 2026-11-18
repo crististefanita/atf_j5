@@ -34,7 +34,7 @@ export class RentzWebFlow {
     if (automatic) await this.automatic();
   }
   async automatic() {
-    await this.tab.playwright.locator('#table[aria-busy="true"]').waitFor({state:'hidden'});
+    await this.tab.playwright.locator('#table[aria-busy="true"]').waitFor({state:'hidden',timeout:40000});
     await this.tab.playwright.getByRole('checkbox',{name:'Joc automat',exact:true}).check();
     this.actions.push('Enable Joc automat through checkbox');
   }
