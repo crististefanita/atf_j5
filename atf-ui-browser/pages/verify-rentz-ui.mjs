@@ -7,6 +7,7 @@ import { pathToFileURL } from "node:url";
 import { rentzScoreTable } from "./web/rentz-score.mjs";
 import { componentAudit } from './component-audit.mjs';
 import { runInNewContext } from 'node:vm';
+import { RentzWebFlow } from "../tests/rentz-web-flow.mjs";
 const recordCheck = componentAudit('browser-rendering');
 
 class FakeElement {
@@ -58,6 +59,22 @@ async function rejectedPlaybackIsAtomic(description, frames, expectedMessage) {
   check(`${description} is rejected before changing the rendered table`, [], effects);
 }
 const element = (tag, text, className) => new FakeElement(tag, text, className);
+const autoGateCalls = [];
+let transitionFinished = false;
+const autoGateFlow = new RentzWebFlow({playwright: {
+  locator: selector => ({waitFor: async options => {
+    assert.equal(selector, '#table[aria-busy="true"]');
+    assert.equal(options.state, 'hidden');
+    autoGateCalls.push('visible transition finishes'); transitionFinished = true;
+  }}),
+  getByRole: () => ({check: async () => {
+    assert.equal(transitionFinished, true, 'A re-render must finish before the checkbox is checked');
+    autoGateCalls.push('checkbox checked');
+  }})
+}}, async () => {});
+await autoGateFlow.automatic();
+check("MCP AutoPlay waits for the public busy marker before touching a replacement checkbox",
+  ['visible transition finishes', 'checkbox checked'], autoGateCalls);
 const rows = ["♣", "♦", "♥", "♠"].map((suit, suitIndex) => ({
   suit,
   cells: ["9", "10", "J", "Q", "K", "A"].map((rank, column) => ({
