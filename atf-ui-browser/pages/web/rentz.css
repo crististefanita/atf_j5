@@ -21,7 +21,7 @@
   --whist-score-col-1: 24%;
   --whist-score-col-2: 24%;
 }
-.whist-score .whist-score-winner { font-weight: 400; }
+.whist-score :is(h1, .whist-score-hand, .whist-score-winner) { font-weight: 400; }
 .rentz-score-scroll { max-width: 100%; overflow-x: auto; }
 .rentz-score-table .history-legend { margin: 6px 0 0; font-size: 12px; color: #69756a; }
 .whist-score-awards { white-space: pre-line; font-size: 14px; line-height: 1.4; }

@@ -42,6 +42,8 @@ public final class RentzSettlementTable extends LinearLayout {
                 cell.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
                 cell.setGravity(column == 0 ? Gravity.CENTER_VERTICAL | Gravity.START : Gravity.CENTER);
                 cell.setSingleLine(true);
+                cell.setAutoSizeTextTypeUniformWithConfiguration(10, header ? 11 : 13, 1,
+                        android.util.TypedValue.COMPLEX_UNIT_SP);
                 cell.setEllipsize(android.text.TextUtils.TruncateAt.END);
                 row.addView(cell, new LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, weights.get(column)));
             }

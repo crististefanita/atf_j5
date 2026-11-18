@@ -96,12 +96,12 @@ Pentru toate sub-jocurile cu levate, `RentzTable` proiectează fiecare carte acc
 
 ```mermaid
 flowchart LR
-    A[Actor marcat] --> B[O carte depusă]
-    B --> C{Levată completă?}
+    A[Actor marcat] -->|depune| B[O carte depusă]
+    B -->|verifică| C{Levată completă?}
     C -->|Nu| A
     C -->|Da| D[Toate fețele vizibile: 1.000 ms]
-    D --> E[Colectare la câștigător: 500 ms]
-    E --> F[Levată nouă sau punctaj]
+    D -->|colectează| E[Colectare la câștigător: 500 ms]
+    E -->|continuă| F[Levată nouă sau punctaj]
 ```
 
 <details>
