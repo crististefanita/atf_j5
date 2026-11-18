@@ -21,6 +21,14 @@
   "anonymousDownload": "DENIED",
   "anonymousRepositoryApiHttp": 404,
   "anonymousDirectApkHttp": 404,
+  "availability": {
+    "status": "UNAVAILABLE",
+    "checkedUtc": "2026-11-17T22:56:55Z",
+    "authenticatedDistributionRepositoryApiHttp": 404,
+    "authenticatedDistributionReleaseApiHttp": 404,
+    "authenticatedSourceReleaseListApiHttp": 200,
+    "authenticatedSourceReleaseCount": 0
+  },
   "latestTag": "v0.27.0",
   "qualificationScope": "STANDARD",
   "nativeUi": "PASS",

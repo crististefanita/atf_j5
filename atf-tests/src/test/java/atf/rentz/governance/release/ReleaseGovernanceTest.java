@@ -95,6 +95,83 @@ class ReleaseGovernanceTest {
                 () -> ReleaseCatalog.verifyRestrictedGuide(restricted.replace("## Jocul", "## Ediție cu acces autorizat"),
                         "example/private-editions", "1.2.0")).getMessage());
     }
+
+    @Test void currentMainReadmeMatchesTheVerifiedUnavailableDownloadAndLiveBrowserRoute() throws Exception {
+        Path root=ReleaseCatalog.root();
+        var index=ReleaseCatalog.read(root.resolve("release/index.json"));
+        String version=index.required("currentVersion").asText();
+        var receipt=ReleaseCatalog.read(root.resolve("release/restricted-"+version+".json"));
+        assertEquals("UNAVAILABLE",receipt.path("availability").path("status").asText(),
+                "The README must not advertise an APK whose authenticated release endpoint is gone");
+        assertEquals(404,receipt.path("availability").path("authenticatedDistributionRepositoryApiHttp").asInt());
+        assertEquals(404,receipt.path("availability").path("authenticatedDistributionReleaseApiHttp").asInt());
+        assertEquals(200,receipt.path("availability").path("authenticatedSourceReleaseListApiHttp").asInt());
+        assertEquals(0,receipt.path("availability").path("authenticatedSourceReleaseCount").asInt());
+        String readme=Files.readString(root.resolve("README.md"),StandardCharsets.UTF_8);
+        assertDoesNotThrow(()->ReleaseCatalog.verifyUnavailableGuide(readme,"release/README.md",
+                index.required("browserUrl").asText()));
+    }
+
+    @Test void unavailableMainReadmeRejectsOldApkRoutesDuplicateLinksAndWrongBrowserTargets() throws Exception {
+        Path root=ReleaseCatalog.root();
+        String readme=Files.readString(root.resolve("README.md"),StandardCharsets.UTF_8);
+        String docs="release/README.md",browser=ReleaseCatalog.read(root.resolve("release/index.json"))
+                .required("browserUrl").asText();
+        String oldAsset="https://github.com/example/old/releases/download/v0.27.0/RentzLab-0.27.0.apk";
+        for(String invalid:List.of(
+                readme.replace("- APK indisponibil momentan — nu există un release descărcabil în depozitul Rentz.",
+                        "- [Descarcă APK]("+oldAsset+")"),
+                readme.replace("- [Joacă Rentz online]("+browser+")", "- [Joacă Rentz online](https://example.invalid/rentz/)"),
+                readme.replace("- [Joacă Rentz online]("+browser+")", "- [Joacă Rentz online]("+browser+")\n- [Joacă din nou]("+browser+")"),
+                readme.replace("- [Ediția Android și disponibilitatea APK]("+docs+")", "- [Ediția Android](release/0.26.0/README.md)"))) {
+            assertThrows(IOException.class,()->ReleaseCatalog.verifyUnavailableGuide(invalid,docs,browser));
+        }
+    }
+
+    @Test void aPublishedReadmeRequiresDocumentationThenTheExactApkThenTheBrowserLink() {
+        String browser="https://crististefanita.github.io/rentz/";
+        String docs="release/README.md";
+        String apk="https://github.com/crististefanita/rentz/releases/download/v0.28.0/RentzLab-0.28.0.apk";
+        String active="# Rentz Lab\n\n## Jocul\n\n- [Ediția Android]("+docs+")\n- [Descarcă APK]("+apk+")\n"
+                +"- [Joacă Rentz online]("+browser+")\n\n## Documentație\n\n[Catalog]("+docs+")\n";
+        assertDoesNotThrow(()->ReleaseCatalog.verifyActiveGuide(active,docs,apk,browser));
+        for(String invalid:List.of(
+                active.replace("- [Descarcă APK]("+apk+")\n- [Joacă Rentz online]("+browser+")",
+                        "- [Joacă Rentz online]("+browser+")\n- [Descarcă APK]("+apk+")"),
+                active.replace("- [Joacă Rentz online]("+browser+")", "- [Joacă Rentz online]("+browser+")\n- [Web duplicat]("+browser+")"),
+                active.replace(apk,"https://github.com/example/old/releases/download/v0.27.0/RentzLab-0.27.0.apk"),
+                active.replace("- [Ediția Android]("+docs+")\n", ""))) {
+            assertThrows(IOException.class,()->ReleaseCatalog.verifyActiveGuide(invalid,docs,apk,browser));
+        }
+    }
+
+    @Test void browserLinkMustUseTheCanonicalHttpsPageWithoutDecorations() {
+        String browser="https://crististefanita.github.io/rentz/";
+        String docs="release/README.md";
+        String apk="https://github.com/crististefanita/rentz/releases/download/v0.28.0/RentzLab-0.28.0.apk";
+        String active="# Rentz Lab\n\n## Jocul\n\n- [Ediția Android]("+docs+")\n- [Descarcă APK]("+apk+")\n"
+                +"- [Joacă Rentz online]("+browser+")\n\n## Documentație\n\n[Catalog]("+docs+")\n";
+        for(String invalidBrowser:List.of(
+                "http://crististefanita.github.io/rentz/",
+                "https://example.invalid/rentz/",
+                "https://crististefanita.github.io/other/",
+                browser+"?source=readme",
+                browser+"#game",
+                "https://user@crististefanita.github.io/rentz/",
+                "https://crististefanita.github.io:443/rentz/")) {
+            String changed=active.replace(browser,invalidBrowser);
+            assertThrows(IOException.class,()->ReleaseCatalog.verifyActiveGuide(changed,docs,apk,invalidBrowser),
+                    "Reject noncanonical browser URL: "+invalidBrowser);
+        }
+    }
+
+    @Test void releaseReadmeGateChecksTheSameThreeLinksAsTheLocalCatalog() throws Exception {
+        String verifier=Files.readString(ReleaseCatalog.root().resolve("scripts/verify-release-readme.ps1"));
+        assertTrue(verifier.contains("function Confirm-ReadmeGameLinks([string]$Readme, [string]$DocumentationUrl, [string]$ApkUrl, [string]$BrowserUrl)"));
+        assertTrue(verifier.contains("$expected = @($DocumentationUrl, $ApkUrl, $BrowserUrl)"));
+        assertTrue(verifier.contains("Confirm-ReadmeGameLinks $readme $readmeReleaseUrl $direct $catalog.browserUrl"));
+    }
+
     @Test void theMainGuideRejectsASecondReleaseHiddenBehindALocalDocumentationLink() {
         String guide = guide("PUBLISHED").replace("https://github.com/example/game/releases/tag/v1.2.0",
                 "release/1.2.0/README.md")

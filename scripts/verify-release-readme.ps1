@@ -66,20 +66,23 @@ function Confirm-RestrictedApk($Proof,[string]$File,[string]$Version,[string]$So
     return $Proof.link
 }
 
-function Confirm-ReadmeGameLinks([string]$Readme, [string]$ReleaseUrl, [string]$ApkUrl) {
+function Confirm-ReadmeGameLinks([string]$Readme, [string]$DocumentationUrl, [string]$ApkUrl, [string]$BrowserUrl) {
     $text = $Readme.Replace("`r`n", "`n")
     $sections = [regex]::Matches($text, '(?ms)^## Jocul[ \t]*(?:\n|\z)(.*?)(?=^## |\z)')
     if ($sections.Count -ne 1) { throw 'The pushed README must contain exactly one Jocul section.' }
 
     $section = $sections[0]
     $lines = @($section.Groups[1].Value -split '\n' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-    $expected = @(if ($ReleaseUrl) { $ReleaseUrl }; $ApkUrl)
+    $expected = @($DocumentationUrl, $ApkUrl, $BrowserUrl)
     if ($lines.Count -ne $expected.Count) { throw 'Jocul must contain exactly the qualified links for this distribution channel.' }
     for ($i = 0; $i -lt $expected.Count; $i++) {
         $link = [regex]::Match($lines[$i], '^- \[[^\[\]]+\]\(([^()\s]+)\)$')
         if (!$link.Success -or $link.Groups[1].Value -cne $expected[$i]) {
             throw 'Jocul must contain the qualified links in order, without additional copy.'
         }
+    }
+    if(([regex]::Matches($text,[regex]::Escape($BrowserUrl))).Count -ne 1){
+        throw 'The published browser game must have exactly one current link in the README.'
     }
     $outside = $text.Remove($section.Index, $section.Length)
     foreach ($link in [regex]::Matches($outside, '\]\(([^)\s]+)\)')) {
@@ -202,15 +205,16 @@ git -C $project merge-base --is-ancestor $source $head
 if($LASTEXITCODE){throw 'The pushed README must descend from the qualified source.'}
 $readme = (git -C $project show ($head+':README.md')) -join "`n"
 if($LASTEXITCODE){throw 'The pushed README is missing.'}
-$readmeReleaseUrl = if ($Restricted) { "release/$version/README.md" } else { $releaseUrl }
-if ($Restricted) {
-    git -C $project cat-file -e "${head}:$readmeReleaseUrl"
-    if ($LASTEXITCODE) { throw 'The pushed edition documentation is missing.' }
-}
-Confirm-ReadmeGameLinks $readme $readmeReleaseUrl $direct
 $catalog = (git -C $project show ($head+':release/index.json')) -join "`n"
 if($LASTEXITCODE){throw 'The pushed release catalog is missing.'}
 $catalog = $catalog | ConvertFrom-Json
+$readmeReleaseUrl = 'release/README.md'
+if($catalog.browserUrl -cne 'https://crististefanita.github.io/rentz/'){
+    throw 'The pushed release catalog does not identify the governed browser game.'
+}
+git -C $project cat-file -e "${head}:$readmeReleaseUrl"
+if ($LASTEXITCODE) { throw 'The pushed release documentation is missing.' }
+Confirm-ReadmeGameLinks $readme $readmeReleaseUrl $direct $catalog.browserUrl
 if($Restricted){
     $tracked = (git -C $project show ($head+":release/restricted-$version.json")) -join "`n"
     if($LASTEXITCODE){throw 'The pushed restricted distribution record is missing.'}

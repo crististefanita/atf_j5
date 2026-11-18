@@ -81,12 +81,19 @@ public final class ReleaseCatalog {
         if(publication.path("channel").asText().equals("authenticated-only")) {
             require(state.equals("PUBLISHED") && !manifest.has("publicDownload"),"RELEASE-RESTRICTED-STATE");
             downloadRepository=verifyRestrictedReceipt(root,repository,version,identity,publication);
-            if (readmePreview.isMissingNode()) verifyRestrictedGuide(guide, downloadRepository, version);
-            else verifyPreviewGuide(guide, downloadRepository, version, buildVersion, readmePreview);
+            JsonNode receipt=read(root.resolve("release/restricted-"+version+".json"));
+            if(receipt.path("availability").path("status").asText().equals("UNAVAILABLE")) {
+                verifyUnavailableGuide(guide,"release/README.md",browserUrl(index));
+            } else if (readmePreview.isMissingNode()) {
+                String direct=new ApkDownloadTarget(downloadRepository,version,number(identity,"apkBytes"),
+                        identity.path("sha256").asText()).publicUrl();
+                verifyActiveGuide(guide,"release/README.md",direct,browserUrl(index));
+            } else verifyPreviewGuide(guide, downloadRepository, version, buildVersion, readmePreview);
         } else {
             require(readmePreview.isMissingNode(), "RELEASE-README-PREVIEW-CHANNEL");
             String publicUrl=publicDownloadUrl(manifest.path("publicDownload"),identity,version,state);
-            verifyMainGuide(guide,repository,version,state,publicUrl);
+            if(state.equals("PUBLISHED"))verifyActiveGuide(guide,"release/README.md",publicUrl,browserUrl(index));
+            else verifyMainGuide(guide,repository,version,state,publicUrl);
         }
         for(String retired:List.of("dist","artifacts","releases"))require(!Files.exists(root.resolve(retired)),"RELEASE-RETIRED: "+retired);
         if(state.equals("DRAFT")) {
@@ -136,13 +143,78 @@ public final class ReleaseCatalog {
                 && proof.path("link").asText().equals(new ApkDownloadTarget(distribution,version,
                         number(identity,"apkBytes"),identity.path("sha256").asText()).publicUrl()),
                 "RELEASE-RESTRICTED-IDENTITY");
+        verifyCurrentAvailability(proof.path("availability"),repository);
         return distribution;
+    }
+
+    private static void verifyCurrentAvailability(JsonNode availability,String sourceRepository) throws IOException {
+        require(availability.isObject() && availability.path("status").asText().equals("UNAVAILABLE"),
+                "RELEASE-AVAILABILITY-STATE");
+        try {
+            Instant checked=Instant.parse(availability.path("checkedUtc").asText());
+            require(!checked.isAfter(Instant.now().plusSeconds(300)),"RELEASE-AVAILABILITY-TIME");
+        } catch (DateTimeParseException malformed) {
+            throw new IOException("RELEASE-AVAILABILITY-TIME",malformed);
+        }
+        require(number(availability,"authenticatedDistributionRepositoryApiHttp")==404
+                && number(availability,"authenticatedDistributionReleaseApiHttp")==404
+                && number(availability,"authenticatedSourceReleaseListApiHttp")==200
+                && number(availability,"authenticatedSourceReleaseCount")==0
+                && sourceRepository.equals("crististefanita/rentz"),"RELEASE-AVAILABILITY-RECEIPT");
     }
 
     public static void verifyRestrictedGuide(String guide,String repository,String version) throws IOException {
         verifyGuide(guide, List.of("release/" + version + "/README.md",
                 "https://github.com/" + repository + "/releases/download/v" + version
                 + "/RentzLab-" + version + ".apk"));
+    }
+
+    public static void verifyActiveGuide(String guide,String documentationUrl,String apkUrl,String browserUrl) throws IOException {
+        require(isBrowserUrl(browserUrl),"RELEASE-BROWSER-URL");
+        verifyGuide(guide,List.of(documentationUrl,apkUrl,browserUrl));
+        require(count(guide,browserUrl)==1,"RELEASE-MAIN-WEB-LINK");
+    }
+
+    public static void verifyUnavailableGuide(String guide,String documentationUrl,String browserUrl) throws IOException {
+        require(isBrowserUrl(browserUrl),"RELEASE-BROWSER-URL");
+        String normalized=guide.replace("\r\n","\n");
+        var section=GAME_SECTION.matcher(normalized);
+        require(section.find(),"RELEASE-MAIN-SECTION");
+        String content=section.group(1);
+        String outside=normalized.substring(0,section.start())+normalized.substring(section.end());
+        require(!section.find(),"RELEASE-MAIN-SECTION");
+        List<String> lines=content.lines().map(String::strip).filter(line->!line.isEmpty()).toList();
+        String status="- APK indisponibil momentan — nu există un release descărcabil în depozitul Rentz.";
+        List<String> expected=List.of("- [Ediția Android și disponibilitatea APK]("+documentationUrl+")",
+                status,"- [Joacă Rentz online]("+browserUrl+")");
+        require(lines.equals(expected),"RELEASE-MAIN-LINKS");
+        require(links(content).equals(List.of(documentationUrl,browserUrl)),"RELEASE-MAIN-LINKS");
+        require(count(normalized,browserUrl)==1,"RELEASE-MAIN-WEB-LINK");
+        require(!RELEASE_LINK.matcher(outside).find(),"RELEASE-MAIN-EXTRA-DOWNLOAD");
+        require(links(outside).contains("release/README.md"),"RELEASE-MAIN-CATALOG");
+    }
+
+    private static String browserUrl(JsonNode index) throws IOException {
+        String value=index.path("browserUrl").asText();
+        require(isBrowserUrl(value),"RELEASE-BROWSER-URL");
+        return value;
+    }
+
+    private static boolean isBrowserUrl(String value) {
+        try {
+            URI uri=URI.create(value);
+            return "https".equals(uri.getScheme()) && "crististefanita.github.io".equals(uri.getHost())
+                    && "/rentz/".equals(uri.getRawPath()) && uri.getRawUserInfo()==null && uri.getPort()==-1
+                    && uri.getRawQuery()==null && uri.getRawFragment()==null;
+        } catch (IllegalArgumentException malformed) {
+            return false;
+        }
+    }
+
+    private static int count(String text,String value) {
+        int count=0,from=0;
+        while((from=text.indexOf(value,from))>=0){count++;from+=value.length();}
+        return count;
     }
 
     private static Path editionBinaries(Path root, Path edition, String version, String apkName, String configured) throws IOException {

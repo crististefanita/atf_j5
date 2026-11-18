@@ -8,7 +8,8 @@ Proiectul ATF J5 modelează regulile Rentz în Java și verifică motorul folosi
 
 ## Jocul
 
-- [Descarcă Rentz Lab 0.27.0](https://github.com/crististefanita/atf_j5_releases/releases/download/v0.27.0/RentzLab-0.27.0.apk)
+- [Ediția Android și disponibilitatea APK](release/README.md)
+- APK indisponibil momentan — nu există un release descărcabil în depozitul Rentz.
 - [Joacă Rentz online](https://crististefanita.github.io/rentz/)
 
 ## Arhitectura ATF
