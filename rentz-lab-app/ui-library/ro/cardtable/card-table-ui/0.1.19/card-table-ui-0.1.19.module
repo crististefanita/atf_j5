@@ -1,0 +1,96 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "ro.cardtable",
+    "module": "card-table-ui",
+    "version": "0.1.19",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.6.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "releaseVariantReleaseApiPublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-api"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.10"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "card-table-ui-0.1.19.aar",
+          "url": "card-table-ui-0.1.19.aar",
+          "size": 139968,
+          "sha512": "b386086d95d1b3548fc03e97e90728217ace5c563976b5e27bdc0229aa3ba4aecb96acbab439e006467df5959d9cae77758f1f69102d8636d03c4e2867356bdf",
+          "sha256": "8a8f8cf2a613ac53547cb6ec55e1903d19322e7483fb5e43f58e9dd45fea22c3",
+          "sha1": "d714c3a79871ebbb78c6abbf9694c6cbe3194285",
+          "md5": "d6e42d25c3d9112064fe7052b660caf2"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseRuntimePublication",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.libraryelements": "aar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.10"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "card-table-ui-0.1.19.aar",
+          "url": "card-table-ui-0.1.19.aar",
+          "size": 139968,
+          "sha512": "b386086d95d1b3548fc03e97e90728217ace5c563976b5e27bdc0229aa3ba4aecb96acbab439e006467df5959d9cae77758f1f69102d8636d03c4e2867356bdf",
+          "sha256": "8a8f8cf2a613ac53547cb6ec55e1903d19322e7483fb5e43f58e9dd45fea22c3",
+          "sha1": "d714c3a79871ebbb78c6abbf9694c6cbe3194285",
+          "md5": "d6e42d25c3d9112064fe7052b660caf2"
+        }
+      ]
+    },
+    {
+      "name": "releaseVariantReleaseSourcePublication",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "card-table-ui-0.1.19-sources.jar",
+          "url": "card-table-ui-0.1.19-sources.jar",
+          "size": 55212,
+          "sha512": "b6e36c7caeab6503a1893287e4ac85dcb5a959842314c8147a9974824aeb47a4f5fc5d83ff0459ad8abe517defff2c55c8f7728baa9d69599fc72c284bca13f9",
+          "sha256": "6170c5a935553252dda94677c247c923e1cb399b9f0fed459a0a309bccd90f0c",
+          "sha1": "244d83763a762b5ce1ed49f76b40b341e74755a6",
+          "md5": "dd263377a579fe355b391fe3c05b0b14"
+        }
+      ]
+    }
+  ]
+}
