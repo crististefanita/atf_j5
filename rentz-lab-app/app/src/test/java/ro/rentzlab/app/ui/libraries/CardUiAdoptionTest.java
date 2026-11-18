@@ -30,7 +30,8 @@ public final class CardUiAdoptionTest {
                 ro.cardtable.ui.table.trump.TrumpTileMetrics.class, ro.cardtable.ui.table.TableViewportPolicy.class, ro.cardtable.ui.turn.TurnPacing.class,
                 ro.cardtable.ui.achievements.AchievementScreen.class, ro.cardtable.ui.achievements.AchievementNoticeView.class,
                 ro.cardtable.ui.cards.CardHighlight.class, ro.cardtable.ui.cards.CardHighlightView.class,
-                ro.cardtable.ui.hand.HandFan.class, ro.cardtable.ui.table.TableGeometry.VerticalBand.class);
+                ro.cardtable.ui.hand.HandFan.class, ro.cardtable.ui.table.TableGeometry.VerticalBand.class,
+                ro.cardtable.ui.screens.GameTitleBar.class);
         verifyClassBytes(Files.readAllBytes(root.resolve("ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar")),
                 ro.cardtable.names.PlayerNames.class);
         audit.rejects("No Whist engine on Android JVM classpath", ClassNotFoundException.class, () -> Class.forName("ro.whistlab.core.session.GameSession"));

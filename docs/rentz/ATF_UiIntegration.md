@@ -1,8 +1,8 @@
-# Integrarea nucleului Android comun
+# Integrarea nucleului UI comun
 
 ## Pe scurt
 
-Nucleul vizual produs de Whist oferă componente neutre pentru meniul de pornire, profil, widgeturi, cărți, temă și geometria mâinii. Configurația live consumă AAR-ul fixat în repository-ul local, iar adaptoarele Rentz furnizează datele și comenzile proprii. Calificarea componentelor, controlul Android și release-ul publicat păstrează dovezi distincte.
+Whist publică nucleul Android ca AAR și shell-ul Web ca JAR. Ambele folosesc contracte comune de geometrie, cărți și tranziții, iar adaptoarele Rentz furnizează textele, datele, comenzile și regulile jocului. Renderer-ele rămân specifice platformei; profilele și comportamentul observabil se califică separat, prin componente și acceptanță.
 
 ## Frontiera consumatorului
 
@@ -11,6 +11,8 @@ Nucleul vizual produs de Whist oferă componente neutre pentru meniul de pornire
 | `HomeMenuContent` și `HomeMenu` | Texte RO/EN, starea reluării și callback-uri către rutele reale; primul profil și preferințele sunt ale aplicației. |
 | `PlayerNameDialog` și `NameEdit` | Politica numelui, identitatea locului și salvarea; erorile și resetarea păstrează semantica declarată. |
 | `ScreenViews` | Etichetele selectorilor și protecția ferestrei, furnizate explicit; aceeași geometrie și aceleași stiluri ale widgeturilor. |
+| `GameTitleBar` | Măsoară spațiul pentru acțiune, titlu și controlul opțional. Adaptorul `RentzGameHeader` furnizează progresul mâinii, sub-jocul, textele RO/EN și starea AutoPlay. |
+| `atf-ui-browser` | Shell-ul și contractul de viewport pentru Web; adaptorul Rentz furnizează conținutul, comenzile și stocarea profilului. Randarea rămâne specifică platformei, iar contractele de geometrie și interacțiune sunt comune. |
 | `CardFace` și `CardFaceDrawable` | Proiecție numai după dezvăluirea permisă; fără obiecte Whist, mâini adverse sau seed. |
 | `HandLayoutMetrics` | Opt cărți per loc în modelul curent, o carte centrată și tratamentul explicit al mâinii goale. |
 
@@ -194,6 +196,7 @@ Grila folosește lățimi măsurate, subcoloane aliniate și antet fix. Coloana 
 | Istoric gol sau mână în curs | Se afișează numai rezultatele confirmate. Istoricul gol are un mesaj explicit. |
 
 - Testele de componentă confruntă lățimile și înălțimile și reconstruiesc toate cele 48 de mâini ale unei mese de șase din jurnalul canonic. Punctele provin din motor, iar oracolul adună separat deltele pe fiecare loc. [Componentele istoricului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/)
+- Extracția comună pentru istoric rămâne limitată la geometrie și stil neutru. Categoriile Rentz, modelul punctajului, legenda și descrierile accesibile rămân în adaptorul jocului; orice cod comun ulterior trebuie să accepte proiecții de date fără reguli de scor.
 - Sanity-ul `-HistoryOnly` citește `historyFixture` și `historyFixtureSha256` din receipt. Fixture-ul identifică jurnalul și valorile publice de la cele două capete ale istoricului. Traseul nativ deschide dialogul, derulează pe ambele axe și confruntă revizia și totalurile la întoarcerea în meniu. [Lansatorul Android](../../atf-tests/tools/run-shared-ui-sanity.ps1)
 - Adaugă `-HistoryMatrix` pentru profilul compact de 720 × 1280 și fereastra scundă de 720 × 740, ambele la 360 dpi, font 1,5 și interfață EN. Proba API 28 măsoară ultimul grup de scor și rândul 48, verifică legenda la capăt și mărește din nou dialogul deschis.
 - Invariantele grilei și capcanele la extinderea testelor sunt lângă cod. [README-ul grilei](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md)
@@ -221,6 +224,14 @@ Ajutorul afișează grila pentru 3–6 jucători din profilul efectiv, verificat
 | Tura la secvențe | Cărțile legale din mâna activă au o nuanță discretă. Fiecare loc automat este afișat înainte de pauza de 550 ms; pasa forțată folosește aceeași pauză. Ordinea cadru → worker → checkpoint și anularea la lifecycle sunt definite în [contractul de lifecycle](ATF_Lifecycle.md). |
 
 [Componentele geometriei](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzCardSpaceTest.java) verifică ordinea comună a numelor și cărților, centrajul și absența intersecțiilor. [Testul de adopție](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java) confruntă clasele încărcate cu AAR-ul comun. [Feedback-ul UI](../feedback/ATF_Rentz_UI_ToDo.md) păstrează verificările de făcut pe dispozitiv.
+
+### Antetul mesei și AutoPlay
+
+`RentzGameHeader` este adaptorul subțire al aplicației: proiectează progresul mâinii, numele sub-jocului și textele de accesibilitate în `GameTitleBar`. Biblioteca măsoară titlul și bifa după lățimea efectivă, mută bifa pe rândul următor dacă ar comprima titlul și păstrează ținta tactilă de 48 dp. Activitatea Rentz rămâne proprietarul stării, al verificării cadrului și al anulării deciziei automate; biblioteca primește doar valoarea curentă și callback-ul boolean.
+
+Componentele Rentz verifică textul și starea bifei în RO/EN, inclusiv ascunderea după încheierea mâinii și dezactivarea în timpul unei ture automate. Testul de adopție verifică octeții `GameTitleBar` din AAR-ul fixat. Contractul de măsurare și ținta tactilă sunt calificate în producătorul comun. `RentzCardSpaceTest` reutilizează suplimentar cele patru profile native comune (320×599, 360×740, 393×800 cu font 2× și 600×1140), peste profilele Rentz compacte, scunde și late; la 3–6 locuri compară aceleași dreptunghiuri de ancorare și verifică banda centrală.
+
+[Adaptorul antetului](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/screens/RentzGameHeader.java) · [Componentele antetului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/screens/RentzGameHeaderComponentTest.java) · [Calificarea nativă a antetului comun](https://github.com/crististefanita/whist/blob/main/whist-lab-app/app/src/test/java/ro/whistlab/app/screens/AutoGameHeaderComponentTest.java)
 
 ### De la ultima levată la următorul sub-joc
 

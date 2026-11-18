@@ -29,6 +29,11 @@ public final class RentzCardSpaceTest {
     private static final Window TALL = new Window(372, 872, 58, 640, 1f);
     private static final Window LARGE_TEXT = new Window(320, 640, 65, 408, 1.35f);
     private static final Window SHORT = new Window(560, 360, 54, 168, 1.2f);
+    // Keep the consumer geometry checked at the shared library's qualified Whist viewport profiles.
+    private static final Window SHARED_COMPACT = new Window(320, 599, 60, 399, 1f);
+    private static final Window SHARED_COMPACT_LARGE_TEXT = new Window(360, 740, 70, 540, 1.5f);
+    private static final Window SHARED_TALL_LARGE_TEXT = new Window(393, 800, 70, 600, 2f);
+    private static final Window SHARED_TABLET = new Window(600, 1140, 70, 940, 1.5f);
 
     @Test public void threeSeatsReserveFourSuitRowsUnderBothOpponents() {
         assertWindows(3, new int[]{1, 2}, new int[]{0});
@@ -366,7 +371,8 @@ public final class RentzCardSpaceTest {
     }
 
     private static void assertWindows(int players, int[] upper, int[] lower) {
-        for (var window : List.of(COMPACT, TALL, LARGE_TEXT, SHORT)) {
+        for (var window : List.of(COMPACT, TALL, LARGE_TEXT, SHORT, SHARED_COMPACT,
+                SHARED_COMPACT_LARGE_TEXT, SHARED_TALL_LARGE_TEXT, SHARED_TABLET)) {
             var viewport = new TableViewportPolicy(window.height(), window.fontScale());
             int gap = viewport.regionGapDp();
             int seatWidth = TableSizing.seatWidthDp(window.width(), viewport.isCompact());

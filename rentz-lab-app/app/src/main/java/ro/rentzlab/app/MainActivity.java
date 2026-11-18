@@ -4,7 +4,6 @@ import static ro.rentzlab.app.ui.collection.UiLists.immutable;
 
 import android.app.*;
 import android.os.*;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -196,7 +195,6 @@ public final class MainActivity extends Activity {
             return;
         }
         var page = views.gamePage(); views.applyTableWindowChrome();
-        var header = new LinearLayout(this); header.setGravity(Gravity.CENTER_VERTICAL);
         var options = new Button(this); options.setText("☰"); options.setTextSize(20); options.setAllCaps(false);
         options.setBackgroundColor(android.graphics.Color.TRANSPARENT); options.setTextColor(android.graphics.Color.WHITE);
         options.setContentDescription(copy.text("Options", "Opțiuni")); options.setEnabled(!arrival && !automaticTurn && !controller.isBusy());
@@ -209,42 +207,15 @@ public final class MainActivity extends Activity {
             menu.getMenu().add(copy.mainMenu()).setOnMenuItemClickListener(item -> { route("MENU"); return true; });
             menu.show();
         });
-        header.addView(options, new LinearLayout.LayoutParams(views.dp(48), views.dp(48)));
-        var heading = new LinearLayout(this);
-        heading.setOrientation(LinearLayout.VERTICAL);
-        heading.setGravity(Gravity.CENTER_VERTICAL);
-        heading.setMinimumHeight(views.dp(48));
-        var progress = views.text(copy.handProgress(view.handNumber(), view.players() * 8),
-                14, android.graphics.Color.WHITE, true);
-        progress.setSingleLine(true);
-        progress.setIncludeFontPadding(false);
-        heading.addView(progress, views.matchWrap());
-        var contract = views.text(copy.playedContract(view.contract(), view.blind()),
-                12, android.graphics.Color.WHITE, false);
-        contract.setSingleLine(true);
-        contract.setIncludeFontPadding(false);
-        contract.setAutoSizeTextTypeUniformWithConfiguration(9, 12, 1, android.util.TypedValue.COMPLEX_UNIT_SP);
-        contract.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        if (view.contract() == null) contract.setVisibility(View.INVISIBLE);
-        heading.addView(contract, views.matchWrap());
-        header.addView(heading, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        if (playable) {
-            var toggle = new CheckBox(this);
-            toggle.setText(copy.autoPlay());
-            toggle.setTextSize(13);
-            toggle.setSingleLine(true);
-            toggle.setTextColor(android.graphics.Color.WHITE);
-            toggle.setButtonTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE));
-            toggle.setChecked(autoPlay);
-            toggle.setOnCheckedChangeListener((button, checked) -> {
-                if (!gameFrame(frame)) return;
-                if (checked) autoPlay = true;
-                else stopAutoPlay();
-                redraw();
-            });
-            header.addView(toggle, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, views.dp(48)));
-        }
-        page.addView(header);
+        var header = RentzGameHeader.content(copy, view.handNumber(), view.players() * 8,
+                view.contract(), view.blind(), autoPlay, playable,
+                !arrival && !automaticTurn && !controller.isBusy());
+        page.addView(RentzGameHeader.build(views, copy, header, options, checked -> {
+            if (!gameFrame(frame)) return;
+            if (checked) autoPlay = true;
+            else stopAutoPlay();
+            redraw();
+        }), views.matchWrap());
         var actions = new RentzTablePanel.Actions(
                 () -> command(permit, () -> new GameSession.Command(GameSession.Action.REVEAL, 0, null, null, false)),
                 () -> choose(permit, frame, false), () -> choose(permit, frame, true),
