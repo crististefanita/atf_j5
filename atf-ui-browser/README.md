@@ -24,7 +24,16 @@ Cartea și actorul ajung la browser prin observația publică. Sesiunea este pro
 
 Shell-ul comun gestionează masa, dialogurile, comenzile cu revizie, animațiile și aspectul adaptiv. J5 păstrează conținutul specific Rentz: cele opt sub-jocuri, succesiunea cărților, punctajul, profilul, realizările și istoria.
 
-Pachetul public primește o revizie calculată din conținutul tuturor resurselor. HTML-ul, importurile statice și dinamice, workerul, stilurile și fontul cer aceeași revizie în URL. Astfel, un browser care a deschis o ediție anterioară poate încărca împreună shell-ul și adaptorul noi. Build-ul recitește manifestul și amprenta fiecărui fișier și refuză dependențele lipsă sau împachetarea repetată a aceluiași director generat. Profilul și sesiunea salvate păstrează cheia locală existentă.
+### Resursele publicate
+
+O revizie de conținut identifică întregul pachet încărcat de browser.
+
+| Responsabilitate | Contract |
+|---|---|
+| Actualizare | HTML-ul, importurile statice și dinamice, workerul, stilurile și fontul cer aceeași revizie în URL. |
+| Coerență | Browserul care a deschis o ediție anterioară încarcă împreună shell-ul și adaptorul noi. |
+| Integritate | Build-ul recitește manifestul și fiecare amprentă; refuză dependențele lipsă și împachetarea repetată. |
+| Persistență | Profilul și sesiunea păstrează cheia locală existentă. |
 
 Consumatorul fixează Card Table Browser 0.2.13. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
 
