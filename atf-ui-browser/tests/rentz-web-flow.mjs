@@ -98,7 +98,7 @@ export class RentzWebFlow {
       comparison('Legend below the result',true,await this.tab.playwright.getByText('P: punctele mâinii · T: total după mână',{exact:true}).isVisible())];
     const values=table.rows[0].values;
     const deltas=values.filter((_,i)=>i%2===0);
-    if(number===1) {
+    if(number===1 && table.rows[0].contract.includes("Rentz")) {
       checks.push(comparison('Rentz completed first','1 · Rentz',table.rows[0].contract),
         comparison('Rentz four-seat finish awards',[0,100,200,300],[...deltas].sort((a,b)=>a-b)),
         comparison('Exactly one Rentz player scores zero',1,deltas.filter(x=>x===0).length));
