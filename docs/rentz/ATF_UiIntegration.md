@@ -40,7 +40,7 @@ exclusiveContent {
 Dependența se declară în modulul aplicației, după admitere:
 
 ```groovy
-implementation 'ro.cardtable:card-table-ui:0.1.17'
+implementation 'ro.cardtable:card-table-ui:0.1.18'
 implementation 'ro.cardtable:card-table-names:0.1.0'
 ```
 
@@ -103,6 +103,8 @@ Proba `-RentzCardMarksOnly` verifică pe emulator acțiunile accesibile și culo
 
 ### Schimbarea contractului la masă
 
+- Indicatorul de tură rezervă înaintea poziționării înălțimea maximă măsurată a etichetelor Alege, Joacă și Pasează, în limba și la scara textului curente. Schimbarea numărului de rânduri nu mută chenarele.
+- Meniul comun păstrează accesul direct la istoricul scorului, apoi acțiunile specifice fazei; oprirea AutoPlay rămâne disponibilă numai când automatizarea este activă. Construirea meniului nu execută nicio comandă.
 - Alegerea sub-jocului și jocul păstrează aceleași dreptunghiuri ale locurilor pentru același ecran. Masa măsoară locurile o singură dată pe cadru, apoi adaptează comenzile de alegere, secvența sau levata la banda rămasă. Indicatorul Alege, Joacă sau Pasează arată actorul curent deasupra chenarului.
 - Pe un ecran scund, levata reduce mai întâi distanța dintre rânduri și păstrează ordinea cărților. Bugetul se verifică în pixeli, cu aceeași rotunjire separată a poziției și a înălțimii ultimului rând ca la randarea Android.
 - Masa și ecranul de punctaj afișează progresul `Mâna x/y` pe primul rând și contractul pe rândul următor. Marcajul `×2` rămâne lângă contract.

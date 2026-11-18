@@ -67,9 +67,12 @@ public final class RentzTablePanel extends LinearLayout {
         center = cardBoard.center();
         board.setTag("game-board"); board.setContentDescription(copy.text("Rentz table", "Masa Rentz"));
         String turnBadge = RentzTableContent.turnLabel(view, copy, forcedPass).toUpperCase(java.util.Locale.ROOT);
+        int seatWidth = dp(TableSizing.seatWidthDp(width, viewport.isCompact()));
+        int badgeHeight = RentzTurnBadge.reservedHeight(copy,
+                label -> PlayerSeatView.measureActionHeightPx(context, label, seatWidth));
         for (var seat : RentzTableContent.seats(view, copy, names, holding, forcedPass, arrival)) {
             var frame = new PlayerSeatFrame(context, viewport.isCompact()).buildInlineFacts(seat, viewport.seatVerticalPaddingDp());
-            board.addView(new PlayerSeatView(context, frame, turnBadge, seat.active(), seat.seat(), viewport.isCompact()));
+            board.addView(new PlayerSeatView(context, frame, turnBadge, seat.active(), seat.seat(), viewport.isCompact(), badgeHeight));
         }
         board.addView(center);
         var boardParams = new LayoutParams(dp(width), 0, 1f); boardParams.gravity = Gravity.CENTER_HORIZONTAL;

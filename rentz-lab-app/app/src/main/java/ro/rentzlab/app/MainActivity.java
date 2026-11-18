@@ -197,14 +197,18 @@ public final class MainActivity extends Activity {
         var page = views.gamePage(); views.applyTableWindowChrome();
         var options = new Button(this); options.setText("☰"); options.setTextSize(20); options.setAllCaps(false);
         options.setBackgroundColor(android.graphics.Color.TRANSPARENT); options.setTextColor(android.graphics.Color.WHITE);
-        options.setContentDescription(copy.text("Options", "Opțiuni")); options.setEnabled(!arrival && !automaticTurn && !controller.isBusy());
+        options.setContentDescription(copy.text("Options", "Opțiuni"));
+        options.setEnabled(!arrival && (autoPlay || !automaticTurn && !controller.isBusy()));
         options.setOnClickListener(ignored -> {
-            if (!gameFrame(frame) || controller.isBusy()) return;
+            if (!gameFrame(frame) || controller.isBusy() && !autoPlay) return;
             var menu = new PopupMenu(this, options);
-            if (settlement.isPresent()) menu.getMenu().add(copy.text("Hand score", "Punctajul mâinii"))
-                    .setOnMenuItemClickListener(item -> { showSettledTable = false; redraw(); return true; });
-            menu.getMenu().add(copy.history()).setOnMenuItemClickListener(item -> { openHistory(); return true; });
-            menu.getMenu().add(copy.mainMenu()).setOnMenuItemClickListener(item -> { route("MENU"); return true; });
+            for (var entry : RentzGameMenu.items(copy, settlement.isPresent(), autoPlay,
+                    this::openHistory, () -> { showSettledTable = false; redraw(); },
+                    () -> { stopAutoPlay(); redraw(); }, () -> route("MENU"))) {
+                menu.getMenu().add(entry.label()).setOnMenuItemClickListener(item -> {
+                    entry.action().run(); return true;
+                });
+            }
             menu.show();
         });
         var header = RentzGameHeader.content(copy, view.handNumber(), view.players() * 8,

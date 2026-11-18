@@ -27,7 +27,7 @@ Antetul folosește `GameTitleBar` din AAR-ul fixat. Contractul stabil este în [
 
 ## P1 · Admiterea bibliotecilor și paritatea Whist
 
-Păstrați AAR-ul Android `0.1.17` și pachetul Browser `0.2.10` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
+Păstrați AAR-ul Android `0.1.18` și pachetul Browser `0.2.11` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
 
 | Prioritate | Cerință rămasă | Criteriu de închidere |
 |---|---|---|

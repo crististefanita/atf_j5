@@ -16,8 +16,8 @@ $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -Jso
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.10.jar'
-$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.10-tests.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.11.jar'
+$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.11-tests.jar'
 $commonTestsExpected = (Get-Content -LiteralPath "$commonTests.sha256" -Raw).Trim()
 if ((Get-FileHash -Algorithm SHA256 -LiteralPath $commonTests).Hash -ine $commonTestsExpected) {
     throw 'Shared browser component test checksum mismatch.'
@@ -104,7 +104,7 @@ $choiceAnchor = @(
 ) -join "`n"
 foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAnchor, $automationAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
-    if ($count -ne 1) { throw "Card Table Browser 0.2.10 adapter anchor changed; expected one match, found $count." }
+    if ($count -ne 1) { throw "Card Table Browser 0.2.11 adapter anchor changed; expected one match, found $count." }
 }
 $markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";')
 $markup = $markup.Replace($rentzHeaderAnchor,
@@ -198,14 +198,14 @@ foreach ($script in @('rentz-ui.mjs', 'table.mjs', 'engine-worker.mjs', 'local-t
     (Join-Path $commonTestRoot 'hand-presentation.mjs') (Join-Path $site 'hand-feedback.mjs') `
     (Join-Path $site 'rentz-ui.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Generated Rentz engine component checks failed.' }
-$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.17/card-table-ui-0.1.17.aar'
+$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.18/card-table-ui-0.1.18.aar'
 $nativeUiProvenance = Get-Content -LiteralPath (Join-Path $checkout 'rentz-lab-app/ui-library/provenance.json') -Raw | ConvertFrom-Json
-$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.17/card-table-ui-0.1.17.aar' })
+$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.18/card-table-ui-0.1.18.aar' })
 if ($nativeUiPin.Count -ne 1 -or
         (Get-FileHash -Algorithm SHA256 -LiteralPath $nativeUiAar).Hash -ine $nativeUiPin[0].sha256) {
     throw 'The native Rentz layout reference does not match the pinned Android UI AAR.'
 }
-$nativeUiClasses = Join-Path $run 'card-table-ui-0.1.17-classes.jar'
+$nativeUiClasses = Join-Path $run 'card-table-ui-0.1.18-classes.jar'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archive = [IO.Compression.ZipFile]::OpenRead($nativeUiAar)
 try {

@@ -34,9 +34,9 @@ try {
 } finally { $archive.Dispose() }
 $classes = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -BuildOnly
 if ($LASTEXITCODE -ne 0 -or !$classes) { throw 'Rentz browser adapter build failed.' }
-$sourceCommit = '1440273c74ea693598776857db5a5c5a8b8d361f'
-$sharedRuntime = & (Join-Path $PSScriptRoot 'Verify-CardTableBrowser.ps1') -Version '0.2.10' -SourceCommit $sourceCommit
-$sharedTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.10-tests.jar'
+$sourceCommit = 'b13ad9107c3e8e706210f4c3117899613a4fa868'
+$sharedRuntime = & (Join-Path $PSScriptRoot 'Verify-CardTableBrowser.ps1') -Version '0.2.11' -SourceCommit $sourceCommit
+$sharedTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.11-tests.jar'
 $sharedRoot = Join-Path $root 'shared-viewport-contract'
 $null = New-Item -ItemType Directory -Force -Path $sharedRoot
 Push-Location $sharedRoot

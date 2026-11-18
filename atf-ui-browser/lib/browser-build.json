@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "0.2.10",
-  "sourceCommit": "1440273c74ea693598776857db5a5c5a8b8d361f",
-  "inputSha256": "9cf801e71e916c8a4a4cd0917ac1e80e6a27741f4a61a10186be99de5aaa27c7",
+  "version": "0.2.11",
+  "sourceCommit": "b13ad9107c3e8e706210f4c3117899613a4fa868",
+  "inputSha256": "0873a32df278849500b8bdc0ca09af27e3ae6bed3f94f7a8deb83ff98b4722b0",
   "inputs": [
     {
       "path": "atf-ui-browser/Package-CardTableBrowser.ps1",
@@ -10,7 +10,7 @@
     },
     {
       "path": "atf-ui-browser/Start-CardTableBrowser.ps1",
-      "sha256": "1cd42a179a3f248655a71586f23f4ddded897a9c4f658e7c79c05fd23eb3b805"
+      "sha256": "431cc80ec781d769eab455b052748a8ad97f9292fbcc83e228030deac81206ac"
     },
     {
       "path": "atf-ui-browser/src/main/java/ro/cardtable/browser/BrowserExperience.java",
@@ -66,7 +66,7 @@
     },
     {
       "path": "atf-ui-browser/src/main/web/index.html",
-      "sha256": "6df864bef10b79d72c18b4322a495e883b49eb63a0f4cafddc78078635c9adac"
+      "sha256": "0a93beb74948a03d2fa0d9c3548a5e16f419892114a2e52be9aae9c58bf3f871"
     },
     {
       "path": "atf-ui-browser/src/main/web/profile.mjs",
@@ -77,12 +77,16 @@
       "sha256": "82cfb6173518eb6806f22ca87792d4917732fca723363ffff37fd2d8d17c14de"
     },
     {
+      "path": "atf-ui-browser/src/main/web/table-menu.mjs",
+      "sha256": "35a0c61d807c72daff91116c1fb0670aed2f444452b5f2d3c3252838428ac040"
+    },
+    {
       "path": "atf-ui-browser/src/main/web/table.css",
       "sha256": "25b5c3fcb87917d383d14e385c50b86de4642cc8933d9e47ede997f7668152c1"
     },
     {
       "path": "atf-ui-browser/src/main/web/table.mjs",
-      "sha256": "233ad5b1ad37f6f08dde595d89ee32ddae4ad962e40d40f7737a61164abcc175"
+      "sha256": "e3c0dabc7b3837961b397332d9c012f2962965a6b73817b3115237c01b7974f8"
     },
     {
       "path": "atf-ui-browser/src/main/web/viewport.mjs",
@@ -98,7 +102,7 @@
     },
     {
       "path": "atf-ui-browser/tests/menu-presentation.mjs",
-      "sha256": "f2f6c1b13c641e32ecc1fe80839dcb40b1e56341d5aead7c9f04be34a0e13aa6"
+      "sha256": "b8f8910ba8367986da427f4aa56956646dc36d67ca8bc5143ac41dbde5151354"
     },
     {
       "path": "atf-ui-browser/tests/packaged-sanity.mjs",
@@ -151,6 +155,10 @@
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/hand/HandLayoutMetrics.java",
       "sha256": "ae8d40c40c05fb826c8759c65a89837e8173a4ca743e095a345d62ef315572cc"
+    },
+    {
+      "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/menu/TableMenuContent.java",
+      "sha256": "f20d4373b2d1f68b4f5c91b449068e1a1262e161a6028f6da8800baf9a51254a"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/seat/SeatContent.java",
@@ -211,24 +219,24 @@
   ],
   "files": [
     {
-      "path": "atf-ui-browser-0.2.10.jar",
-      "bytes": 136241,
-      "sha256": "d9745a26b35ef5d026efe0bfc999782d223493e8828d60e3e06aaffe8ce9b9d9"
+      "path": "atf-ui-browser-0.2.11.jar",
+      "bytes": 139333,
+      "sha256": "30c766a718993a567ccf99c1165c1d273b4df1b30056903476405efa58cd0407"
     },
     {
-      "path": "atf-ui-browser-0.2.10.jar.sha256",
+      "path": "atf-ui-browser-0.2.11.jar.sha256",
       "bytes": 65,
-      "sha256": "8b76d1c6e488616a8cd8e6a69c48f0549216cb0a8fede1840eb18d8a8a4c6e2f"
+      "sha256": "87fa3e30aceb08576f12716412ad280b92f16ec865964eed825ea4ba5304a8a4"
     },
     {
-      "path": "atf-ui-browser-0.2.10-tests.jar",
-      "bytes": 10498,
-      "sha256": "d8e7f3eddc9531c2deaf78a7d822a1b88cafc43bf319f9a045e7ed333f0926b0"
+      "path": "atf-ui-browser-0.2.11-tests.jar",
+      "bytes": 10975,
+      "sha256": "08cd41e83dc55769e72fc885bd064bb98a89946962035692a91011998bb6c5a0"
     },
     {
-      "path": "atf-ui-browser-0.2.10-tests.jar.sha256",
+      "path": "atf-ui-browser-0.2.11-tests.jar.sha256",
       "bytes": 65,
-      "sha256": "5b0cdf7f4626424e49bfae6d8967c20fb83cbda5c68858d87b1894c7e352399a"
+      "sha256": "4cb82c19b66a6359a6019105c973fb30848049d5ec2cd49ffbe40ac315635a7a"
     }
   ]
 }
