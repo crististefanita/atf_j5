@@ -14,6 +14,27 @@ import java.util.Set;
 public final class RentzScoreContentTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
 
+    @Test public void compactSettlementHasOneRowPerSeatWithExactSignedPoints() {
+        for (int players : List.of(3, 4, 5, 6)) for (var language : RentzUiText.Language.values()) {
+            var copy = new RentzUiText(language);
+            var names = java.util.stream.IntStream.range(0, players).mapToObj(seat -> "Loc " + seat).toList();
+            var values = java.util.stream.IntStream.range(0, players)
+                    .mapToObj(seat -> new RentzScoreContent.Value(seat * 25 - 50, 100 - seat * 50)).toList();
+            var row = new RentzScoreContent.Row(2, 1, Contract.TRICKS, "Levate", values, null);
+            var table = RentzScoreContent.settlement(row, names, copy);
+            audit.equal("Compact headers " + language, List.of(copy.text("Player", "Jucător"), "P", "T"), table.get(0));
+            audit.equal("One row per seat " + players, players + 1, table.size());
+            for (int seat = 0; seat < players; seat++) {
+                audit.equal("Stable seat, signed delta and total " + players + "/" + seat,
+                        List.of(names.get(seat), Integer.toString(values.get(seat).delta()), Integer.toString(values.get(seat).total())), table.get(seat + 1));
+            }
+            audit.rejects("No editable projected scores", UnsupportedOperationException.class, table.get(1)::clear);
+            audit.rejects("Missing seat cannot shift another player's score", IllegalArgumentException.class,
+                    () -> RentzScoreContent.settlement(row, names.subList(1, names.size()), copy));
+            audit.equal("Projection does not mutate confirmed scores", values, row.values());
+        }
+    }
+
     @Test public void shortScoreLabelsAndLegendMatchTheBrowserProjection() {
         audit.equal("Hand points marker", "P", RentzScoreContent.HAND_POINTS_MARK);
         audit.equal("Running total marker", "T", RentzScoreContent.TOTAL_MARK);

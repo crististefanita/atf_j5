@@ -51,3 +51,7 @@ Păstrați AAR-ul Android `0.1.19` și pachetul Browser `0.2.13` cu JAR-ul de te
 Contractul stabil și testele rapide sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser). Acceptanța prin browser cere o secvență Rentz completă în patru locuri și încă un sub-joc complet, cu P/T, un singur premiu zero la Rentz, cumul corect și istoric păstrat după reîncărcare. O pagină încărcată fără aceste verificări nu califică randarea.
 
 Pentru Android rămân exclusiv verificările de raster și de gesturi deja enumerate mai sus. Nu închideți aceste observații pe baza simulării DOM sau a probei WEB.
+
+### P2 · Acceptanța nativă a rezultatului compact
+
+Pagina de punctaj folosește acum tabelul neutru Jucător/P/T, cu contribuțiile la cerere. Componentele validează proiecția pentru 3–6 locuri și ambele limbi; înaintea calificării unui APK, confirmați rasterul la font mărit, derularea pe ferestre scunde și deschiderea/închiderea detaliilor fără pierderea accesului la „Mâna următoare”. Nu echivalați compilarea sau verificarea WEB cu această acceptanță Android.

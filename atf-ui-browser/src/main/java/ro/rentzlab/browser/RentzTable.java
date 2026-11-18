@@ -18,6 +18,7 @@ import ro.cardtable.browser.BrowserGame.Score;
 import ro.cardtable.browser.BrowserGame.ScoreDetails;
 import ro.cardtable.browser.BrowserGame.Seat;
 import ro.cardtable.browser.BrowserGame.View;
+import ro.cardtable.ui.animation.TrickCollectionMotion;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.achievements.AchievementHand;
 import ro.rentzlab.app.GameSession.Command;
@@ -99,8 +100,8 @@ final class RentzTable implements BrowserGame.Match {
             if (game.hasForcedHumanPass()) submit(GameSession.Action.PASS, null, null, false, Origin.AUTOMATIC);
             else if (game.hasPendingHumanDecision()) game.advanceHumanTurn();
             else throw new IllegalStateException("There is no human decision to automate");
-            captureRentzPlay(before, game.view(), sequenceSteps, true);
-            captureManualCollection(before, game.view(), cues);
+            if (!captureRentzPlay(before, game.view(), sequenceSteps, true))
+                captureTrickPlay(before, game.view(), steps, cues, true);
             advanceBots(steps, cues, sequenceSteps);
             playback = List.copyOf(steps);
             collections = List.copyOf(cues);
@@ -120,8 +121,8 @@ final class RentzTable implements BrowserGame.Match {
             case "next" -> submit(GameSession.Action.NEXT_HAND, null, null, false, Origin.MANUAL);
             default -> throw new IllegalArgumentException("Unknown Rentz action");
         }
-        captureRentzPlay(before, game.view(), sequenceSteps, false);
-        captureManualCollection(before, game.view(), cues);
+        if (!captureRentzPlay(before, game.view(), sequenceSteps, false))
+            captureTrickPlay(before, game.view(), steps, cues, false);
         advanceBots(steps, cues, sequenceSteps);
         playback = List.copyOf(steps);
         collections = List.copyOf(cues);
@@ -143,7 +144,7 @@ final class RentzTable implements BrowserGame.Match {
                 Observation before = game.view();
                 game.advanceBotTurn();
                 Observation after = game.view();
-                if (!captureRentzPlay(before, after, sequenceSteps, true)) captureBotPlay(before, after, steps, cues);
+                if (!captureRentzPlay(before, after, sequenceSteps, true)) captureTrickPlay(before, after, steps, cues, true);
             } else {
                 return;
             }
@@ -151,17 +152,17 @@ final class RentzTable implements BrowserGame.Match {
         throw new IllegalStateException("Rentz bot turn bound exceeded");
     }
 
-    private void captureBotPlay(Observation before, Observation after, List<PlayStep> steps,
-            List<CollectionCue> cues) {
-        if (after.events().size() <= before.events().size()) return;
+    private void captureTrickPlay(Observation before, Observation after, List<PlayStep> steps,
+            List<CollectionCue> cues, boolean automated) {
+        if (before.contract() == Contract.RENTZ || after.events().size() <= before.events().size()) return;
         var event = after.events().get(after.events().size() - 1);
         if (event.action() != ro.rentzlab.core.RentzMatch.Action.PLAY || event.card() == null) return;
         var played = new Played(event.seat(), face(event.card()), event.card().label(),
                 names.get(event.seat()) + " · " + event.card().label());
         boolean startsTrick = before.contract() != Contract.RENTZ && before.trick().isEmpty();
         CollectionCue cue = collection(before, after);
-        steps.add(new PlayStep(played, startsTrick, AUTOMATED_ACTION_DELAY_MILLIS, cue,
-                after.contract() == null ? "" : contractName(after.contract()), seatFacts(after)));
+        steps.add(new PlayStep(played, startsTrick, automated ? AUTOMATED_ACTION_DELAY_MILLIS : 0, cue,
+                after.contract() == null ? "" : contractName(after.contract()), seatFacts(before)));
         if (cue != null) cues.add(cue);
     }
 
@@ -196,14 +197,9 @@ final class RentzTable implements BrowserGame.Match {
         return result;
     }
 
-    private void captureManualCollection(Observation before, Observation after, List<CollectionCue> cues) {
-        CollectionCue cue = collection(before, after);
-        if (cue != null) cues.add(cue);
-    }
-
     private CollectionCue collection(Observation before, Observation after) {
         if (before.contract() == null || before.contract() == Contract.RENTZ
-                || after.board().size() <= before.board().size()) return null;
+                || after.events().size() <= before.events().size()) return null;
         var plays = new ArrayList<>(before.trick());
         if (after.events().isEmpty()) return null;
         var last = after.events().get(after.events().size() - 1);
@@ -213,7 +209,9 @@ final class RentzTable implements BrowserGame.Match {
         int winner = TrickRules.winner(plays);
         var cards = plays.stream().map(play -> new Played(play.seat(), face(play.card()), play.card().label(),
                 names.get(play.seat()) + " · " + play.card().label())).toList();
-        return new CollectionCue(winner, 500, 450, cards, 250, seatFacts(after));
+        var timing = TrickCollectionMotion.timing(TrickCollectionMotion.DISPLAY_MILLIS, 0);
+        return new CollectionCue(winner, TrickCollectionMotion.DISPLAY_MILLIS,
+                timing.durationMillis(), cards, timing.delayMillis(), seatFacts(after));
     }
 
     private List<String> seatFacts(Observation state) {

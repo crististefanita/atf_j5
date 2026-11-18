@@ -11,6 +11,7 @@ Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din st
 | Randarea și gesturile | [RentzHistoryGrid](RentzHistoryGrid.java) măsoară cu fontul Android activ, aliniază celulele și sincronizează pozițiile de derulare. |
 | Dialogul | [RentzHistoryView](../screens/RentzHistoryView.java) rezolvă numele afișate, mesajul pentru istoricul gol și dimensiunea ferestrei. |
 | Detaliul mâinii | [RentzHandDetails](RentzHandDetails.java) afișează profilul, alegătorul, multiplicatorul din titlu, contribuțiile și scorurile confirmate. |
+| Rezultatul compact | [RentzSettlementTable](RentzSettlementTable.java) adaptează dimensiunile și paleta `ScoreGridStyle`: un rând per loc, coloane Jucător/P/T și text normal. Detaliile se deschid separat, fără a repeta contribuțiile în pagina principală. |
 | Ajutorul din meniu | [RentzAwardGrid](RentzAwardGrid.java) afișează premiile profilului efectiv, în ordinea sosirii, pentru mesele de 3–6 jucători. |
 
 ## Cum se păstrează contextul

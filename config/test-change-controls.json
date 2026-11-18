@@ -1026,7 +1026,7 @@
       "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
       "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
       "expires": "2026-12-18",
-      "sha256": "ea49772dcfca2a861481d356a9b862052671b78f6f3140e6ba49721777d098b4",
+      "sha256": "ba50ce1c23c36c88f33c5e9e9a3e20416055aff19c3165dcbc944c95aea81e06",
       "allowDelete": false
     },
     {

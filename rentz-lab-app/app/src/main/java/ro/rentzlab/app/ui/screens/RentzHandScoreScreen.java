@@ -4,11 +4,14 @@ import android.graphics.Color;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.app.AlertDialog;
 import java.util.List;
 import ro.cardtable.ui.screens.ScreenViews;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.app.ui.score.RentzHandDetails;
 import ro.rentzlab.app.ui.score.RentzScoreContent;
+import ro.rentzlab.app.ui.score.RentzSettlementTable;
 
 /** A completed hand gets its own score page, using the same facts as the history dialog. */
 public final class RentzHandScoreScreen {
@@ -22,13 +25,27 @@ public final class RentzHandScoreScreen {
         views.applyStandardWindowChrome();
         var page = views.gamePage();
         page.setBackgroundColor(ScreenViews.BACKGROUND);
-        views.addText(page, copy.handProgress(row.hand(), hands), 13, ScreenViews.ACCENT, true, 12, 0);
+        views.addText(page, copy.handProgress(row.hand(), hands), 13, ScreenViews.ACCENT, false, 12, 0);
         views.addText(page, row.label(), 13, ScreenViews.ACCENT, false, 0, 4);
-        views.addText(page, copy.text("Hand score", "Punctajul mâinii"), 24, ScreenViews.PINE, true, 0, 8);
+        views.addText(page, copy.text("Hand score", "Punctajul mâinii"), 24, ScreenViews.PINE, false, 0, 8);
         var progress = new FrameLayout(views.activity());
         page.addView(progress, views.matchWrap());
-        page.addView(new RentzHandDetails(views.activity(), row, names, copy, null, standings),
-                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        var scroll = new ScrollView(views.activity());
+        var content = new LinearLayout(views.activity());
+        content.setOrientation(LinearLayout.VERTICAL);
+        scroll.addView(content);
+        content.addView(new RentzSettlementTable(views.activity(), row, names, copy), views.matchWrap());
+        views.addText(content, RentzScoreContent.legend(copy), 12, ScreenViews.PINE, false, 6, 8);
+        page.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        var details = views.actionButton(copy.text("Scoring details", "Calculul punctajului"),
+                "hand-score-details", true, () -> new AlertDialog.Builder(views.activity())
+                        .setTitle(copy.text("Scoring details", "Calculul punctajului"))
+                        .setView(new RentzHandDetails(views.activity(), row, names, copy, null, standings))
+                        .setPositiveButton(copy.text("Close", "Închide"), null).show(), false, 14);
+        details.setBackgroundColor(Color.TRANSPARENT);
+        details.setStateListAnimator(null);
+        details.setElevation(0);
+        page.addView(details, views.matchWrap());
         if (next != null) views.addButton(page, copy.text("Next hand", "Mâna următoare"), "rentz-next-hand", canContinue, next, true);
         var actions = new LinearLayout(views.activity());
         addAction(actions, copy.history(), history);

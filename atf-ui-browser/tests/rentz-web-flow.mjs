@@ -19,13 +19,13 @@ export class RentzWebFlow {
     this.actions.push(`Click ${name}`);
     return this.tab.playwright.domSnapshot();
   }
-  async start(automatic = true) {
+  async start(automatic = true, contract = "Rentz") {
     await this.click('Partidă nouă');
     await this.tab.playwright.getByRole('combobox',{name:'Jucători',exact:true}).selectOption({label:'4'});
     await this.tab.playwright.getByRole('combobox',{name:'Nivelul adversarilor',exact:true}).selectOption({label:'Greu'});
     await this.click('Începe partida');
     await this.click('Arată cărțile');
-    await this.tab.playwright.getByRole('combobox',{name:'Alege sub-jocul',exact:true}).selectOption({label:'Rentz'});
+    await this.tab.playwright.getByRole('combobox',{name:'Alege sub-jocul',exact:true}).selectOption({label:contract});
     await this.tab.playwright.getByRole('group',{name:'Șirurile Rentz',exact:true}).waitFor({state:'visible'});
     this.actions.push('Select Rentz after reveal');
     await this.geometry('Four-seat Rentz geometry before play');
@@ -76,11 +76,22 @@ export class RentzWebFlow {
     }));
   }
   async score(number) {
-    const table=await this.table('.whist-score .record-history');
-    const text=await this.tab.playwright.locator('.whist-score-awards').innerText();
-    const checks=[comparison('One confirmed result row',1,table.rows.length),
-      comparison('Two compact headings per seat',['P','T','P','T','P','T','P','T'],table.labels),
-      comparison('Four named players',4,table.names.length),
+    const visible=await this.tab.playwright.locator('.whist-score .whist-score-grid').evaluate(table=>({
+      labels:Array.from(table.tHead.rows[0].cells).map(c=>c.textContent.trim()),
+      rows:Array.from(table.tBodies[0].rows).map(row=>Array.from(row.cells).map(c=>c.textContent.trim())),
+      weights:Array.from(table.querySelectorAll('th,td')).map(c=>getComputedStyle(c).fontWeight)
+    }));
+    const summary=await this.tab.playwright.locator('.whist-score-status').innerText();
+    const match=summary.match(/^(.*?) · Mâna (\d+)$/);
+    if(!match) throw new Error('Unknown visible settlement identity: '+summary);
+    const table={names:visible.rows.map(row=>row[0]),labels:Array.from({length:4},()=>['P','T']).flat(),
+      rows:[{contract:match[2]+' · '+match[1],values:visible.rows.flatMap(row=>row.slice(1).map(Number))}]};
+    await this.click('Calculul punctajului');
+    const text=await this.tab.playwright.locator('dialog[open]').innerText();
+    await this.click('Închide');
+    const checks=[comparison('Compact settlement headings',['Jucător','P','T'],visible.labels),
+      comparison('One row per player',4,visible.rows.length),
+      comparison('No bold score cells',true,visible.weights.every(weight=>weight==='400')),
       comparison('One P/T pair per seat',8,table.rows[0].values.length),
       comparison('Legend below the result',true,await this.tab.playwright.getByText('P: punctele mâinii · T: total după mână',{exact:true}).isVisible())];
     const values=table.rows[0].values;
@@ -99,10 +110,24 @@ export class RentzWebFlow {
         text.includes(`${table.names[seat]} · P ${values[seat*2]} · T ${values[seat*2+1]}`)),
         comparison(`Cumulative points at seat ${seat}`,(previous?.rows[0].values[seat*2+1]??0)+deltas[seat],values[seat*2+1]));
     }
+    if(number===1) this.first=table;
     if(number===2) this.second=table;
     await this.observe(`Complete contract ${number}: ${table.rows[0].contract}`,checks);
     this.completed.push(table);
     return table;
+  }
+  async collection() {
+    await this.tab.playwright.locator('#table[data-collecting="true"]').waitFor({state:'visible',timeout:20000});
+    const facts=await this.tab.playwright.evaluate(()=>({
+      cards:Array.from(document.querySelectorAll('.cards-on-table .played-card')).map(card=>card.dataset.seat),
+      copies:document.querySelectorAll('.collection .card').length,
+      score:!!document.querySelector('.whist-score')
+    }));
+    await this.observe('All four trick faces remain visible before collection',[
+      comparison('Four cards on the table',4,facts.cards.length),
+      comparison('One card per player',4,new Set(facts.cards).size),
+      comparison('Four common collection faces',4,facts.copies),
+      comparison('Score waits for collection',false,facts.score)]);
   }
   async next() {
     await this.click('Mâna următoare');

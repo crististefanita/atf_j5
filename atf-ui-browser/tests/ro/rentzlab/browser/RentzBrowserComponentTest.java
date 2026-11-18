@@ -20,6 +20,7 @@ public final class RentzBrowserComponentTest {
     private RentzBrowserComponentTest() { }
 
     public static void main(String[] args) {
+        everyTrickCardIsVisible();
         setupSupportsEveryTableSize();
         checks += ro.cardtable.browser.BrowserSessionRentzContractTest.run();
         browserPaletteDefinesTheSharedShellTheme();
@@ -506,6 +507,55 @@ public final class RentzBrowserComponentTest {
     private static String firstLegalAction(RentzTable table) {
         return table.view().hand().stream().map(BrowserGame.Card::action).filter(action -> !action.isBlank())
                 .findFirst().orElseThrow(() -> new AssertionError("Human Rentz turn has no exposed legal card"));
+    }
+
+    private static void everyTrickCardIsVisible() {
+        var positions = new java.util.HashSet<Integer>();
+        for (int players : List.of(3, 4, 5, 6)) for (var contract : Contract.values()) {
+            if (contract == Contract.RENTZ) continue;
+            for (boolean automatic : List.of(false, true)) {
+                var table = start(new RentzBrowser(() -> 44119L + contract.ordinal()), players);
+                table.act("reveal"); table.act("choose:" + contract.name());
+                int commands = 0;
+                while (table.observation().phase() == ro.rentzlab.core.RentzMatch.Phase.PLAY) {
+                    var before = table.observation();
+                    table.act(automatic ? "auto-step" : firstLegalAction(table));
+                    var after = table.observation();
+                    var events = after.events().subList(before.events().size(), after.events().size()).stream()
+                            .filter(event -> event.action() == ro.rentzlab.core.RentzMatch.Action.PLAY).toList();
+                    var frames = table.playback();
+                    String context = players + "/" + contract + "/" + automatic + "/" + commands;
+                    equal("Every accepted card has a frame including the human " + context,
+                            events.stream().map(event -> event.seat() + ":" + event.card().label()).toList(),
+                            frames.stream().map(frame -> frame.play().seat() + ":" + frame.play().faceLabel()).toList());
+                    var trick = new java.util.ArrayList<>(before.trick());
+                    for (int index = 0; index < frames.size(); index++) {
+                        var frame = frames.get(index); var event = events.get(index);
+                        if (event.seat() == 0 && players == 4) positions.add(trick.size());
+                        equal("Only a new trick clears the table " + context, trick.isEmpty(), frame.startsTrick());
+                        equal("Manual immediate, automatic marks actor first " + context,
+                                event.seat() == 0 && !automatic ? 0 : RentzTable.AUTOMATED_ACTION_DELAY_MILLIS, (int) frame.delayMillis());
+                        trick.add(new ro.rentzlab.core.TrickRules.Play(event.seat(), event.card()));
+                        if (trick.size() < players) equal("No partial collection " + context, null, frame.collection());
+                        else {
+                            var cue = frame.collection(); truth("A full table collects " + context, cue != null);
+                            equal("Every face collects in order " + context,
+                                    trick.stream().map(play -> play.seat() + ":" + play.card().label()).toList(),
+                                    cue.cards().stream().map(play -> play.seat() + ":" + play.faceLabel()).toList());
+                            equal("Rules winner " + context, ro.rentzlab.core.TrickRules.winner(trick), cue.winningSeat());
+                            var timing = ro.cardtable.ui.animation.TrickCollectionMotion.timing(
+                                    ro.cardtable.ui.animation.TrickCollectionMotion.DISPLAY_MILLIS, 0);
+                            equal("Shared Whist display " + context, ro.cardtable.ui.animation.TrickCollectionMotion.DISPLAY_MILLIS, cue.displayMillis());
+                            equal("Shared Whist hold " + context, timing.delayMillis(), cue.holdMillis());
+                            equal("Shared Whist travel " + context, timing.durationMillis(), cue.travelMillis());
+                            trick.clear();
+                        }
+                    }
+                    if (++commands > 64) throw new AssertionError("Hand did not settle " + context);
+                }
+            }
+        }
+        equal("Human first, middle and last", Set.of(0, 1, 2, 3), positions);
     }
 
     private static void equal(String label, Object expected, Object actual) {

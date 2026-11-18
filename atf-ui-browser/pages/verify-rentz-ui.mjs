@@ -4,7 +4,7 @@ import { presentRentzArrival, presentRentzPlayback, rentzArrivalView, rentzChoic
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { rentzScoreTable } from "./web/rentz-score.mjs";
+import { rentzScoreTable, rentzHistoryGrid } from "./web/rentz-score.mjs";
 import { componentAudit } from './component-audit.mjs';
 import { runInNewContext } from 'node:vm';
 import { RentzWebFlow } from "../tests/rentz-web-flow.mjs";
@@ -233,34 +233,31 @@ for(const visibleHeight of [480,570,740]) {
   check(`mobile browser viewport excludes address-bar overflow at ${visibleHeight}px`,`${visibleHeight}px`,viewport.style.minHeight);
 }
 const { historyGrid } = await import(pathToFileURL(join(dirname(process.argv[3]), "records.mjs")));
-for (const players of [3, 4, 5, 6]) {
-  const grid = { players: Array.from({length:players}, (_, i) => `Loc ${i + 1}`), cardsLabel: "Mână",
-    bidLabel: "P", pointsLabel: "T", legend: "P: punctele mâinii · T: total după mână",
-    rows: [
-      {cards:1, status:"Rentz", cells:Array.from({length:players}, (_, i) => ({bid:String(i * 25),total:String(i * 25),description:`Loc ${i}`,missed:false,series:0}))},
-      {cards:2, status:"Levate", cells:Array.from({length:players}, (_, i) => ({bid:"-25",total:String(i * 25 - 25),description:`Loc ${i}`,missed:false,series:0}))}
-    ] };
-  const result = rentzScoreTable({grid}, element, historyGrid);
-  const table = result.children[0].children[0];
-  check(`${players}p: result uses the shared P/T history renderer`, "record-history", table.className);
-  check(`${players}p: every player has exactly two column labels`, Array.from({length:players},()=>["P","T"]).flat(),
-    table.children[0].children[1].children.slice(1).map(e=>e.textContent));
-  check(`${players}p: score and full history retain both contract labels`, ["1 · Rentz", "2 · Levate"],
-    table.children[1].children.map(row=>row.children[0].textContent));
-  check(`${players}p: all result rows align with all player pairs`, [1 + players * 2,1 + players * 2],
-    table.children[1].children.map(row=>row.children.length));
-  check(`${players}p: legend follows the result grid`, grid.legend, result.children[1].textContent);
-  check(`${players}p: negative point contribution is preserved`, "-25",
-    table.children[1].children[1].children[1].children[0].textContent);
+const sharedScoreSource = generatedShell.slice(generatedShell.indexOf("function scoreGrid("), generatedShell.indexOf("function showHistory(")).trim();
+const sharedScoreGrid = runInNewContext("(" + sharedScoreSource + ")", {element});
+for (const players of [3, 4, 5, 6]) for (const language of ["ro", "en"]) {
+  const grid = {players:Array.from({length:players}, (_,i)=>"Loc " + (i+1)), legend:"P: punctele mâinii · T: total după mână",
+    cardsLabel:"Mână",bidLabel:"P",pointsLabel:"T",
+    rows:[{cards:1,status:"Levate",cells:Array.from({length:players},(_,i)=>({bid:String(i*25-50),total:String(i*25+10),description:"",missed:false,series:0}))}]};
+  let result;
+  assert.doesNotThrow(()=>{result=rentzScoreTable({grid},element,sharedScoreGrid,language);}, "Result must project each seat into the shared three-column score renderer");
+  const table=result.children[0],header=table.children.find(row=>row.tagName==="thead"),body=table.children.find(row=>row.tagName==="tbody");
+  check(players+"p: result uses shared Whist grid", "whist-score-grid", table.className);
+  check(players+"p: short headings in "+language,JSON.stringify([language==="ro"?"Jucător":"Player","P","T"]),JSON.stringify(header.children[0].children.map(cell=>cell.textContent)));
+  check(players+"p: one visible row per player",players,body.children.length);
+  for(let i=0;i<players;i++) check(players+"p: signed scores retain seat identity "+i,
+    JSON.stringify([grid.players[i],grid.rows[0].cells[i].bid,grid.rows[0].cells[i].total]),JSON.stringify(body.children[i].children.map(cell=>cell.textContent)));
+  check(players+"p: quiet legend follows table",grid.legend,result.children[1].textContent);
+  const history=rentzHistoryGrid({...grid,rows:[...grid.rows,{...grid.rows[0],cards:2,status:"Whist"}]},element,historyGrid);
+  check(players+"p: full history keeps contract labels",["1 · Levate","2 · Whist"],history.children[1].children.map(row=>row.children[0].textContent));
 }
-let malformedHistoryRejected=false;
-try { rentzScoreTable({grid:{players:["A","B","C"],rows:[{cells:[]}] }},element,historyGrid); }
-catch(error) { malformedHistoryRejected=/one P\/T pair/.test(String(error)); }
-check("a malformed history row is rejected before a broken score table is rendered",true,malformedHistoryRejected);
-check("published score page consumes the Rentz P/T grid rather than the incompatible flat fallback", true,
-  generatedShell.includes("rentzScoreTable(match.score.table, element, historyGrid)"));
-check("published full history adapts the contract name using the same renderer", true,
-  generatedShell.includes("rentzHistoryGrid(data.grid, element, historyGrid)"));
+for(const rows of [[],[{cells:[]}],[{cells:[{},{},{}]},{cells:[{},{},{}]}]]) {
+  assert.throws(()=>rentzScoreTable({grid:{players:["A","B","C"],rows}},element,sharedScoreGrid,"ro"), TypeError,"Reject missing, malformed or ambiguous current hand");
+}
+check("score adaptation uses shared score renderer",true,generatedShell.includes("rentzScoreTable(match.score.table, element, scoreGrid, language)"));
+check("full history keeps its renderer",true,generatedShell.includes("rentzHistoryGrid(data.grid, element, historyGrid)"));
+check("contributions remain available in quiet details",true,generatedShell.includes("rentzScoreRules(details)"));
+check("score values override the shared bold human cells",true,/\.whist-score \.rentz-score-table \.whist-score-grid :is\(th, td\)\s*\{[^}]*font-weight: 400/.test(generatedRentzCss));
 const sharedLegalCardRule = generatedTableCss.match(
   /#table:not\(\[data-automatic\]\) \.whist-match \.fan \.legal-card:not\(\.suggested-card\)\s*\{([^}]*)\}/);
 check("shared shell keeps the manual legal-card cue available as a comparison", true,

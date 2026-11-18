@@ -35,6 +35,18 @@ public final class RentzScoreContent {
     public static String legend(RentzUiText copy) {
         return copy.text("P: hand points · T: running total", "P: punctele mâinii · T: total după mână");
     }
+    /** Presentation only: the confirmed values stay in seat order on both platforms. */
+    public static List<List<String>> settlement(Row row, List<String> names, RentzUiText copy) {
+        if (names.size() < 3 || names.size() > 6 || row.values().size() != names.size())
+            throw new IllegalArgumentException("Settlement needs one confirmed score per seat");
+        var table = new java.util.ArrayList<List<String>>();
+        table.add(List.of(copy.text("Player", "Jucător"), HAND_POINTS_MARK, TOTAL_MARK));
+        for (int seat = 0; seat < names.size(); seat++) {
+            var value = row.values().get(seat);
+            table.add(List.of(names.get(seat), Integer.toString(value.delta()), Integer.toString(value.total())));
+        }
+        return List.copyOf(table);
+    }
     public static Optional<Row> currentHand(RentzMatch.Observation view, List<RentzMatch.HandResult> history, RentzUiText copy) {
         if (view.phase() != RentzMatch.Phase.DEAL_END && view.phase() != RentzMatch.Phase.MATCH_END || history.isEmpty())
             return Optional.empty();

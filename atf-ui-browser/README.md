@@ -85,9 +85,33 @@ Săgețile punctate întorc observațiile publice. Așteptarea fixează ritmul r
 
 - `ScoreSettlement` păstrează ordinea de sosire la Rentz; la celelalte sub-jocuri păstrează ordinea locurilor.
 - Fiecare rând de rezultat adaptează delta, totalul confirmat și contribuțiile din istoricul motorului.
-- Istoricul și rezultatul folosesc **P** pentru punctele mâinii și **T** pentru totalul după mână, cu legenda imediat sub grilă. `rentz-score.mjs` adaptează rendererul comun: păstrează două coloane pentru fiecare loc și identifică mâna împreună cu sub-jocul. Nu recalculează puncte.
+- Rezultatul folosește rendererul comun de punctaj: un rând pentru fiecare jucător și coloanele Jucător, P, T, cu text normal și legendă imediat sub tabel. Contribuțiile exacte rămân în „Calculul punctajului”.
+- Istoricul complet păstrează două coloane P/T pentru fiecare loc și identifică mâna împreună cu sub-jocul. `rentz-score.mjs` adaptează cele două prezentări fără să recalculeze puncte.
 - `ScoreStandings` aplică departajarea competitivă și eticheta totalului final folosite de APK.
 - Testele compară adaptoarele Android și WEB cu rezultatul motorului pentru mese de 3–6 jucători și verifică un singur zero la Rentz.
+
+### Levatele folosesc animația comună
+
+Pentru toate sub-jocurile cu levate, `RentzTable` proiectează fiecare carte acceptată într-un `PlayStep`, inclusiv cartea proprie. Rendererul comun `playCards` marchează actorul, depune cărțile în ordinea jocului și păstrează masa completă până la colectare. Mutarea manuală este imediată; o mutare automată păstrează ritmul `TurnPacing`.
+
+```mermaid
+flowchart LR
+    A[Actor marcat] --> B[O carte depusă]
+    B --> C{Levată completă?}
+    C -->|Nu| A
+    C -->|Da| D[Toate fețele vizibile: 1.000 ms]
+    D --> E[Colectare la câștigător: 500 ms]
+    E --> F[Levată nouă sau punctaj]
+```
+
+<details>
+<summary>Legendă</summary>
+
+Duratele provin din `TrickCollectionMotion`, aceeași bibliotecă folosită de Android. Secvența Rentz rămâne distinctă: păstrează șirurile pe masă și folosește sosirea finală, fără colectare de levate.
+
+</details>
+
+Componentele verifică ordinea evenimentelor, toate pozițiile jucătorului propriu, câștigătorul și temporizarea la 3–6 locuri. Testul cu ceas și DOM simulat execută funcția comună extrasă din pachet, inclusiv cu mișcare redusă; numai finalizarea colectării permite golirea mesei. Proba MCP confirmă fețele și tabelul realmente randate.
 
 | Strat | Verifică fără emulator | Ce protejează |
 |---|---|---|
