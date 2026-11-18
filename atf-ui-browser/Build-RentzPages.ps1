@@ -265,5 +265,9 @@ if ($LASTEXITCODE -ne 0) { throw 'Could not emit native Rentz sequence layout me
 if ($LASTEXITCODE -ne 0) { throw 'Rentz sequence renderer component verification failed.' }
 & node (Join-Path $pages 'verify-rentz-transport.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Rentz transient event transport verification failed.' }
+& node (Join-Path $pages 'package-assets.mjs') $site
+if ($LASTEXITCODE -ne 0) { throw 'Browser asset graph versioning failed.' }
+& node (Join-Path $pages 'verify-pages-assets.mjs') $site
+if ($LASTEXITCODE -ne 0) { throw 'Published browser asset graph verification failed.' }
 $site
 } finally { $env:RENTZ_BROWSER_AUDIT = $previousBrowserAudit }

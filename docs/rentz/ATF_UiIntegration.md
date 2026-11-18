@@ -256,6 +256,7 @@ Biblioteca comună deține ancorele locurilor și măsurarea mesei; adaptorul Re
 | Dimensiuni | Măsoară `clientWidth/clientHeight` înainte de scalarea scenei. | Scalare subunitară și supraunitară, fără micșorare dublă. |
 | Hint legal | Marchează starea secvenței prin atribut DOM; nu depinde de selectorul CSS `:has`. | Conturul rămâne activ cu sau fără AutoPlay, inclusiv pe Chrome mobil mai vechi. |
 | Browser mobil | Folosește înălțimea vizibilă pentru container, inclusiv cu bara de adresă deschisă. | Mock de viewport și verificare Chrome offline pe dispozitiv. |
+| Actualizarea paginii | O singură revizie de conținut identifică toate importurile, workerul, stilurile și fontul. | Cache deja populat, schimbare numai în adaptorul de scor, dependență lipsă și recitirea octeților publicați. |
 | Punctaj | P = punctele mâinii; T = total după mână, cu legendă sub tabel. | Confruntă rândul confirmat, ordinea locurilor și cumulul. |
 | Prezentarea rezultatului | Refolosește grila comună cu un rând per loc și coloanele Jucător/P/T, fără bold. Contribuțiile apar la cerere. Istoricul complet își păstrează grila pe mâini. | Mese de 3–6, RO/EN, valori semnate și celule fără îngroșare în browser. |
 | Levate | Fiecare carte, inclusiv cea proprie, are cadru în playback. `TrickCollectionMotion` fixează afișarea și colectarea la câștigător. | Toate fețele pe masă înainte de colectare; nicio trecere la scor înainte de finalizarea ei, inclusiv cu mișcare redusă. |
