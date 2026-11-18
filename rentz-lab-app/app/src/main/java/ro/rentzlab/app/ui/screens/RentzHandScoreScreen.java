@@ -37,9 +37,9 @@ public final class RentzHandScoreScreen {
         content.addView(new RentzSettlementTable(views.activity(), row, names, copy), views.matchWrap());
         views.addText(content, RentzScoreContent.legend(copy), 12, ScreenViews.PINE, false, 6, 8);
         page.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        var details = views.actionButton(copy.text("Scoring details", "Calculul punctajului"),
+        var details = views.actionButton(copy.text("Scoring details", "Detalii de punctaj"),
                 "hand-score-details", true, () -> new AlertDialog.Builder(views.activity())
-                        .setTitle(copy.text("Scoring details", "Calculul punctajului"))
+                        .setTitle(copy.text("Scoring details", "Detalii de punctaj"))
                         .setView(new RentzHandDetails(views.activity(), row, names, copy, null, standings))
                         .setPositiveButton(copy.text("Close", "Închide"), null).show(), false, 14);
         details.setBackgroundColor(Color.TRANSPARENT);

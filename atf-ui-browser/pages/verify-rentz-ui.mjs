@@ -4,7 +4,7 @@ import { presentRentzArrival, presentRentzPlayback, rentzArrivalView, rentzChoic
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { rentzScoreTable, rentzHistoryGrid } from "./web/rentz-score.mjs";
+import { rentzScoreTable, rentzHistoryGrid, rentzScoreRules } from "./web/rentz-score.mjs";
 import { componentAudit } from './component-audit.mjs';
 import { runInNewContext } from 'node:vm';
 import { RentzWebFlow } from "../tests/rentz-web-flow.mjs";
@@ -233,6 +233,8 @@ for(const visibleHeight of [480,570,740]) {
   check(`mobile browser viewport excludes address-bar overflow at ${visibleHeight}px`,`${visibleHeight}px`,viewport.style.minHeight);
 }
 const { historyGrid } = await import(pathToFileURL(join(dirname(process.argv[3]), "records.mjs")));
+check("contributions are preserved once in quiet detail paragraphs",["Ana · P -10 · T 20","Levată × 1 · -10","Profil confirmat"],
+  rentzScoreRules({awards:"Ana · P -10 · T 20\nLevată × 1 · -10",rules:["Profil confirmat"]}));
 const sharedScoreSource = generatedShell.slice(generatedShell.indexOf("function scoreGrid("), generatedShell.indexOf("function showHistory(")).trim();
 const sharedScoreGrid = runInNewContext("(" + sharedScoreSource + ")", {element});
 for (const players of [3, 4, 5, 6]) for (const language of ["ro", "en"]) {

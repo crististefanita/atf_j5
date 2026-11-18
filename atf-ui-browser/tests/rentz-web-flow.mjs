@@ -26,9 +26,11 @@ export class RentzWebFlow {
     await this.click('Începe partida');
     await this.click('Arată cărțile');
     await this.tab.playwright.getByRole('combobox',{name:'Alege sub-jocul',exact:true}).selectOption({label:contract});
-    await this.tab.playwright.getByRole('group',{name:'Șirurile Rentz',exact:true}).waitFor({state:'visible'});
-    this.actions.push('Select Rentz after reveal');
-    await this.geometry('Four-seat Rentz geometry before play');
+    this.actions.push('Select ' + contract + ' after reveal');
+    if (contract === 'Rentz') {
+      await this.tab.playwright.getByRole('group',{name:'Șirurile Rentz',exact:true}).waitFor({state:'visible'});
+      await this.geometry('Four-seat Rentz geometry before play');
+    }
     if (automatic) await this.automatic();
   }
   async automatic() {
@@ -86,7 +88,7 @@ export class RentzWebFlow {
     if(!match) throw new Error('Unknown visible settlement identity: '+summary);
     const table={names:visible.rows.map(row=>row[0]),labels:Array.from({length:4},()=>['P','T']).flat(),
       rows:[{contract:match[2]+' · '+match[1],values:visible.rows.flatMap(row=>row.slice(1).map(Number))}]};
-    await this.click('Calculul punctajului');
+    await this.click('Detalii de punctaj');
     const text=await this.tab.playwright.locator('dialog[open]').innerText();
     await this.click('Închide');
     const checks=[comparison('Compact settlement headings',['Jucător','P','T'],visible.labels),

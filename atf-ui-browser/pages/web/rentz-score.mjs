@@ -29,5 +29,5 @@ export function rentzScoreTable(data, element, scoreGrid, language) {
 
 /** Keep the exact contributions available without duplicating the primary score table. */
 export function rentzScoreRules(details) {
-  return [details.awards, ...details.rules].filter(Boolean);
+  return [...(details.awards ?? "").split("\n"), ...details.rules].filter(Boolean);
 }
