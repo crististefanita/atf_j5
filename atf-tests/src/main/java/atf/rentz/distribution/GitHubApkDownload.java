@@ -32,6 +32,37 @@ public final class GitHubApkDownload {
     }
     public record Proof(String version, String publicUrl, long bytes, String sha256, String zipCrc, int httpStatus, Path file) { }
 
+    /** Acquire the companion checksum through the same bounded, origin-restricted transport. */
+    public Proof downloadChecksum(ApkDownloadTarget target, Path outputDirectory) throws IOException, InterruptedException {
+        JsonNode release = metadata(api.resolve("repos/" + target.repository() + "/releases/tags/v" + target.version()));
+        require(release.path("tag_name").asText().equals("v" + target.version())
+                && release.path("draft").isBoolean() && !release.path("draft").booleanValue(),
+                "Release identity or publication state differs");
+        String name = target.fileName() + ".sha256", url = target.publicUrl() + ".sha256";
+        var matches = java.util.stream.StreamSupport.stream(release.path("assets").spliterator(), false)
+                .filter(asset -> name.equals(asset.path("name").asText())).toList();
+        require(matches.size() == 1, "Expected exactly one checksum asset");
+        JsonNode asset = matches.getFirst();
+        long size = asset.path("size").asLong(-1), id = asset.path("id").asLong(-1);
+        require(asset.path("size").isIntegralNumber() && asset.path("size").canConvertToLong()
+                && size > 0 && size <= 512 && asset.path("id").isIntegralNumber()
+                && asset.path("id").canConvertToLong() && id > 0
+                && "uploaded".equals(asset.path("state").asText())
+                && url.equals(asset.path("browser_download_url").asText()), "Checksum asset identity differs");
+        var response = response(api.resolve("repos/" + target.repository() + "/releases/assets/" + id), "application/octet-stream");
+        byte[] bytes;
+        try (var input = response.body()) { bytes = input.readNBytes(513); }
+        require(bytes.length == size, "Checksum response is incomplete or exceeds its budget");
+        String digest = atf.rentz.distribution.evidence.ReleaseEvidenceFiles.sha256(bytes);
+        require(("sha256:" + digest).equals(asset.path("digest").asText()), "Checksum asset digest differs");
+        require(new String(bytes, java.nio.charset.StandardCharsets.US_ASCII).strip()
+                .equals(target.sha256() + "  " + target.fileName()), "Checksum content differs from qualified APK");
+        Files.createDirectories(outputDirectory);
+        Path destination = outputDirectory.resolve(name);
+        Files.write(destination, bytes, java.nio.file.StandardOpenOption.CREATE_NEW);
+        return new Proof(target.version(), url, bytes.length, digest, "NOT_APPLICABLE", response.statusCode(), destination);
+    }
+
     public Proof download(ApkDownloadTarget target, Path outputDirectory) throws IOException, InterruptedException {
         JsonNode release = metadata(api.resolve("repos/" + target.repository() + "/releases/tags/v" + target.version()));
         require(release.path("tag_name").asText().equals("v" + target.version()) && release.path("draft").isBoolean()

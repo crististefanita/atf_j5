@@ -20,6 +20,7 @@ Rentz combină sub-jocuri cu levate și construirea secvențelor pe culori. Mode
 | Sesiune nativă, identitate APK și acceptanță delimitată | [Android](ATF_Android.md) |
 | Admiterea bibliotecii grafice și adaptoare specifice | [Integrarea UI](ATF_UiIntegration.md) |
 | Inventar, workspace-uri și curățare verificabilă | [Infrastructură](ATF_Infrastructure.md) |
+| Date unice, dovezi originale și mutare sigură | [Retenție](ATF_Retention.md) |
 | Reutilizare a infrastructurii | [Transfer](ATF_Transfer.md) |
 
 ## Modificarea unei reguli

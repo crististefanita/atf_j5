@@ -30,7 +30,7 @@ class LibraryAdoptionTest {
     @Test void theCurrentFivePhysicalPairsHaveAnExplicitConsumerAdoptionGate()throws Exception{
         assertTrue(Files.isRegularFile(root().resolve("config/library-adoption.json")),"A permanent, executable consumer manifest is required");
         var pairs=LibraryAdoption.inspect(root());assertEquals(5,pairs.size());
-        assertTrue(pairs.stream().anyMatch(pair -> pair.coordinate().equals("atf.api:atf-reporting:1.0.0-j24")),
+        assertTrue(pairs.stream().anyMatch(pair -> pair.coordinate().equals("atf.api:atf-reporting:1.0.0-j25")),
                 "Consumer adoption must follow the root POM's current reporting version, not historical provenance");
         for(var pair:pairs)LibraryAdoption.loaded(pair,Class.forName(pair.marker()));
     }

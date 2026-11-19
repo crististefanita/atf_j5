@@ -27,6 +27,7 @@ public final class ReleasePublication {
     public interface Remote {
         boolean sourceOnMain(Plan plan) throws IOException;
         boolean privateRepository(String repository) throws IOException;
+        default boolean publicRepository(String repository) throws IOException { return false; }
         String tagCommit(String repository, String tag) throws IOException;
         void pushTag(String repository, String tag, String commit) throws IOException;
         List<Release> releases(String repository) throws IOException;
@@ -70,11 +71,11 @@ public final class ReleasePublication {
         require(remote.sourceOnMain(plan), "SOURCE-NOT-MAIN");
         trace.accept(new Step("Verified source on main", plan.commit()));
         String repository = plan.releaseRepository();
-        require(remote.privateRepository(repository), "REPOSITORY-NOT-PRIVATE");
-        trace.accept(new Step("Verified private repository", repository));
+        requireRepository(plan, remote);
+        trace.accept(new Step("Verified publication repository", repository));
 
         String sourceTag = inspectTag(remote, plan, plan.sourceRepository());
-        String releaseTag = inspectTag(remote, plan, repository);
+        String releaseTag = repository.equals(plan.sourceRepository()) ? sourceTag : inspectTag(remote, plan, repository);
         List<Release> inventory = remote.releases(repository);
         Release release = discover(remote, plan, knownId, inventory);
         if (release == null || release.draft()) requirePromotionOrder(plan, inventory, trace);
@@ -87,7 +88,7 @@ public final class ReleasePublication {
         }
 
         ensureTag(remote, plan, plan.sourceRepository(), sourceTag, trace);
-        ensureTag(remote, plan, repository, releaseTag, trace);
+        if (!repository.equals(plan.sourceRepository())) ensureTag(remote, plan, repository, releaseTag, trace);
         if (release == null) {
             trace.accept(new Step("Attempt", "Create draft"));
             long id = remote.createDraft(plan);
@@ -110,7 +111,7 @@ public final class ReleasePublication {
             trace.accept(new Step("Verified asset " + payload.name(),
                     "ID " + assets.get(payload.name()).id() + ", SHA-256 " + payload.sha256()));
         }
-        require(remote.privateRepository(repository), "REPOSITORY-NOT-PRIVATE");
+        requireRepository(plan, remote);
         require(inspectTag(remote, plan, plan.sourceRepository()) != null
                 && inspectTag(remote, plan, repository) != null, "TAG-NOT-OBSERVED");
         release = discover(remote, plan, id);
@@ -148,6 +149,7 @@ public final class ReleasePublication {
         try (var lease = remote.reservePromotion(plan)) {
             trace.accept(new Step("Promotion channel owner", lease.owner()));
             require(remote.sourceOnMain(plan), "SOURCE-NOT-MAIN");
+            requireRepository(plan, remote);
             Release current = discover(remote, plan, id);
             require(inspectAssets(remote, plan, current).size() == 2, "ASSET-INVENTORY");
             if (!current.draft()) return;
@@ -164,6 +166,13 @@ public final class ReleasePublication {
                 if (lease.pending()) trace.accept(new Step("Promotion channel held for recovery", lease.owner()));
             }
         }
+    }
+
+    private static void requireRepository(Plan plan, Remote remote) throws IOException {
+        boolean sameRepository = plan.sourceRepository().equals(plan.releaseRepository());
+        require(sameRepository ? remote.publicRepository(plan.releaseRepository())
+                : remote.privateRepository(plan.releaseRepository()),
+                sameRepository ? "REPOSITORY-NOT-PUBLIC" : "REPOSITORY-NOT-PRIVATE");
     }
 
     private static void requirePromotionOrder(Plan plan, List<Release> inventory, Consumer<Step> trace) throws IOException {

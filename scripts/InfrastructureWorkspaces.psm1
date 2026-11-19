@@ -96,9 +96,8 @@ function Get-AtfDataRoot {
     param([string]$ProjectRoot=(Split-Path -Parent $PSScriptRoot))
     $project=[IO.Path]::GetFullPath($ProjectRoot)
     $configured=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT')
-    if($configured){
-        $data=[IO.Path]::GetFullPath($configured)
-    }else{
+    $permanent=$null
+    if(-not$configured-or(Test-Path -LiteralPath (Join-Path $project '.git'))){
         $top=git -C $project rev-parse --show-toplevel
         if($LASTEXITCODE-ne0-or-not$top-or[IO.Path]::GetFullPath([string]$top)-cne$project){throw 'Default data root requires the ATF repository root.'}
         $common=Get-AtfGitCommonDirectory -RepositoryRoot $project
@@ -108,10 +107,15 @@ function Get-AtfDataRoot {
         if((Split-Path -Leaf $checkout)-cne'atf_j5'-or-not(Test-Path -LiteralPath (Join-Path $checkout 'config/infrastructure-workspaces.json') -PathType Leaf)){
             throw 'Default data root requires a verified atf_j5 Git common directory.'
         }
-        $data=Join-Path (Split-Path -Parent (Split-Path -Parent $checkout)) 'rentz_back/j5-active'
+        $permanent=Join-Path (Split-Path -Parent (Split-Path -Parent $checkout)) 'rentz_back/.imp'
     }
+    $data=if($configured){[IO.Path]::GetFullPath($configured)}else{$permanent}
     $forbidden=@($project,[IO.Path]::GetTempPath().TrimEnd('\','/'))
     foreach($boundary in $forbidden){if($data.Equals($boundary,[StringComparison]::OrdinalIgnoreCase)-or$data.StartsWith($boundary+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Data root must be outside sources and the operating-system temporary directory.'}}
+    if($permanent-and-not($data.Equals($permanent,[StringComparison]::OrdinalIgnoreCase)-or$data.StartsWith($permanent+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase))){
+        throw 'Configured storage must stay inside the permanent rentz_back/.imp root.'
+    }
+    Assert-AtfPhysicalPath -Path $data
     return $data
 }
 
@@ -136,6 +140,8 @@ function Assert-AtfArtifactPath {
     param([Parameter(Mandatory)][string]$Path,[string]$ProjectRoot=(Split-Path -Parent $PSScriptRoot))
     $policy=Get-AtfWorkspacePolicy -ProjectRoot $ProjectRoot
     $data=Get-AtfDataRoot -ProjectRoot $ProjectRoot;$full=[IO.Path]::GetFullPath($Path)
+    $temporary=[IO.Path]::GetTempPath().TrimEnd('\','/')
+    if($full.Equals($temporary,[StringComparison]::OrdinalIgnoreCase)-or$full.StartsWith($temporary+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Artifact destination must be outside the operating-system temporary directory.'}
     if(-not$full.StartsWith($data+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Artifact destination is outside the registered data root.'}
     $collection=([IO.Path]::GetRelativePath($data,$full)-split'[\\/]')[0]
     if($collection-notin$policy.artifactDirectories-or$collection-eq'infrastructure'){throw 'Artifact collection is not registered for product output.'}

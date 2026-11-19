@@ -35,7 +35,7 @@ O revizie de conținut identifică întregul pachet încărcat de browser.
 | Integritate | Build-ul recitește manifestul și fiecare amprentă; refuză dependențele lipsă și împachetarea repetată. |
 | Persistență | Profilul și sesiunea păstrează cheia locală existentă. |
 
-Consumatorul fixează Card Table Browser 0.2.23. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
+Consumatorul fixează Card Table Browser 0.2.24. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
 
 ### Reutilizarea prezentării native
 
@@ -221,8 +221,8 @@ README-ul principal va lega jocul online după ce workflow-ul publică pagina ș
 ## Surse
 
 - [Regulile și arhitectura motorului Rentz](../rentz-lab-app/game-core/README.md)
-- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.23.jar) · [checksum](lib/atf-ui-browser-0.2.23.jar.sha256)
-- [Testul comun de componentă](lib/atf-ui-browser-0.2.23-tests.jar) · [checksum](lib/atf-ui-browser-0.2.23-tests.jar.sha256)
+- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.24.jar) · [checksum](lib/atf-ui-browser-0.2.24.jar.sha256)
+- [Testul comun de componentă](lib/atf-ui-browser-0.2.24-tests.jar) · [checksum](lib/atf-ui-browser-0.2.24-tests.jar.sha256)
 
 ### Textul scorului și continuitatea comună
 

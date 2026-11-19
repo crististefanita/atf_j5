@@ -108,7 +108,7 @@ Case 'Data root cannot point inside operating-system Temp' {$saved=[Environment]
 Case 'Default data root stays anchored to the shared checkout in a nested worktree' {
     $base=Join-Path $fixture 'git'
     $canonical=Join-Path $base 'src/atf_j5'
-    $expected=Join-Path $base 'rentz_back/j5-active'
+    $expected=Join-Path $base 'rentz_back/.imp'
     $nested=Join-Path $expected 'worktrees/atf_j5'
     $padding='x'*[Math]::Max(16,(280-(Join-Path $nested 'payload/probe.txt').Length))
     $relative="payload/$padding/probe.txt"
@@ -157,11 +157,19 @@ Case 'Default data root refuses an unverified non-Git source path' {
         catch{Require ($_.Exception.Message-match'Default data root requires') 'Wrong unverified-source failure'}
     }finally{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$saved)}
 }
+Case 'A real checkout cannot allocate into a disposable legacy data root' {
+    $saved=$env:RENTZ_DATA_ROOT
+    try {
+        $env:RENTZ_DATA_ROOT='C:\work\rentz_back\disposable-sibling'
+        try { Get-AtfDataRoot -ProjectRoot $project|Out-Null; throw 'Disposable sibling accepted' }
+        catch { Require ($_.Exception.Message-match'permanent.*\.imp') 'Legacy sibling was not rejected by permanent storage policy' }
+    } finally { $env:RENTZ_DATA_ROOT=$saved }
+}
 Case 'Registry paths cannot escape through parent segments' {$c=Setup 'escape';$c.policy.producerScripts=@('../outside.ps1');$c.policy|ConvertTo-Json -Depth 6|Set-Content -LiteralPath "$($c.project)/config/infrastructure-workspaces.json";try{Get-AtfWorkspacePolicy -ProjectRoot $c.project|Out-Null;throw 'Escape accepted'}catch{Require ($_.Exception.Message-match'must stay inside') 'Wrong escape failure'}}
 Case 'Unknown registry properties fail closed' {$c=Setup 'unknown';$c.policy|Add-Member -NotePropertyName allowEverything -NotePropertyValue $true;$c.policy|ConvertTo-Json -Depth 6|Set-Content -LiteralPath "$($c.project)/config/infrastructure-workspaces.json";try{Get-AtfWorkspacePolicy -ProjectRoot $c.project|Out-Null;throw 'Unknown field accepted'}catch{Require ($_.Exception.Message-match'Unknown or missing') 'Wrong unknown-field failure'}}
 Case 'Duplicate JSON properties are rejected' {$c=Setup 'duplicate-property';$file="$($c.project)/config/infrastructure-workspaces.json";$raw=[IO.File]::ReadAllText($file);[IO.File]::WriteAllText($file,$raw.Replace('"schemaVersion": 1','"schemaVersion": 1, "schemaVersion": 1'));try{Get-AtfWorkspacePolicy -ProjectRoot $c.project|Out-Null;throw 'Duplicate property accepted'}catch{Require ($_.Exception.Message-match'Duplicate registry properties') 'Wrong duplicate-property failure'}}
 Case 'Runtime output cannot escape into an unregistered collection' {try{Assert-AtfArtifactPath -Path (Join-Path (Get-AtfDataRoot -ProjectRoot $project) 'random-unregistered/run') -ProjectRoot $project;throw 'Unknown collection accepted'}catch{Require ($_.Exception.Message-match'not registered') 'Wrong collection failure'}}
-Case 'Runtime output cannot target system Temp' {try{Assert-AtfArtifactPath -Path (Join-Path ([IO.Path]::GetTempPath()) 'random-output') -ProjectRoot $project;throw 'Output escape accepted'}catch{Require ($_.Exception.Message-match'outside the registered data root') 'Wrong output-boundary failure'}}
+Case 'Runtime output cannot target system Temp' {try{Assert-AtfArtifactPath -Path (Join-Path ([IO.Path]::GetTempPath()) 'random-output') -ProjectRoot $project;throw 'Output escape accepted'}catch{Require ($_.Exception.Message-match'outside the operating-system temporary directory') 'Wrong output-boundary failure'}}
 Case 'Junction escape is detected without following its destination' {$c=Setup 'junction';$outside=Join-Path $fixture 'junction-destination';New-Item -ItemType Directory -Path $outside|Out-Null;$link=Join-Path $c.project 'linked-output';New-Item -ItemType Junction -Path $link -Value $outside|Out-Null;Require (((Findings $c).code)-contains'INFRA-REPARSE-POINT') 'Junction was not diagnosed';try{Assert-AtfPhysicalPath -Path (Join-Path $link 'new-output');throw 'Junction accepted'}catch{Require ($_.Exception.Message-match'reparse point') 'Wrong junction failure'};Require (@(Get-ChildItem -LiteralPath $outside -Force).Count-eq0) 'Junction destination was modified'}
 Case 'The execution gate stops on an undocumented directory' {$c=Setup 'gate';New-Item -ItemType Directory -Path "$($c.project)/unregistered"|Out-Null;$saved=[Environment]::GetEnvironmentVariable('RENTZ_DATA_ROOT');try{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$c.data);try{Assert-AtfInfrastructure -ProjectRoot $c.project;throw 'Execution gate accepted invalid source'}catch{Require ($_.Exception.Message-match'Infrastructure governance refused execution') 'Wrong execution-gate failure'}}finally{[Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$saved)};Require (-not(Test-Path -LiteralPath "$($c.data)/infrastructure/workspaces")) 'The gate allocated output before refusing'}
 Case 'Retention inventory keeps referenced, active, linked and Git targets' {

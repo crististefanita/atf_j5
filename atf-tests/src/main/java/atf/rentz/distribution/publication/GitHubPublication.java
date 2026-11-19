@@ -71,6 +71,25 @@ final class GitHubPublication implements Remote {
                 && "private".equals(data.path("visibility").asText());
     }
 
+    @Override public boolean publicRepository(String repository) throws IOException {
+        JsonNode data = get(repository, "", false);
+        return repository.equalsIgnoreCase(data.path("full_name").asText())
+                && data.path("private").isBoolean() && !data.path("private").booleanValue()
+                && "public".equals(data.path("visibility").asText())
+                && data.path("permissions").path("push").isBoolean()
+                && data.path("permissions").path("push").booleanValue();
+    }
+
+    void verifyPublishedLatest(Plan plan, long id) throws IOException {
+        if (!publicRepository(plan.releaseRepository())
+                || !plan.commit().equals(tagCommit(plan.sourceRepository(), plan.tag()))) throw invalid();
+        Release latest = release(get(plan.releaseRepository(), "/releases/latest", false));
+        Release current = release(plan.releaseRepository(), id);
+        if (latest.id() != id || !latest.tag().equals(plan.tag()) || latest.draft() || latest.prerelease()
+                || current == null || current.id() != id || !current.tag().equals(plan.tag())
+                || current.draft() || current.prerelease()) throw invalid();
+    }
+
     @Override public String tagCommit(String repository, String tag) throws IOException {
         JsonNode ref = get(repository, "/git/ref/tags/" + tag, true);
         if (ref == null) return null;

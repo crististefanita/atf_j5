@@ -61,7 +61,7 @@ public final class PublicationCommand {
         assertNoSymlinkPath(output);
         Files.createDirectory(output);
         ObjectNode result = JSON.createObjectNode().put("schemaVersion", 1).put("status", "BLOCKED")
-                .put("scope", "Restricted GitHub publication; distribution verification is a separate step");
+                .put("scope", "Public same-repository GitHub publication; download verification is a separate step");
         List<Step> steps = new ArrayList<>();
         boolean published = false;
         try {
@@ -88,7 +88,11 @@ public final class PublicationCommand {
                     && git.tree().equals(current.path("candidate").path("sourceTree").asText()), "WORKTREE-DRIFT");
             String token = System.getenv("GH_TOKEN");
             if (token == null || token.isBlank()) token = System.getenv("GITHUB_TOKEN");
-            long releaseId = resumeWithJournal(plan, new GitHubPublication(root, token), journal, steps::add);
+            var remote = new GitHubPublication(root, token);
+            long releaseId = resumeWithJournal(plan, remote, journal, steps::add);
+            result.put("releaseId", releaseId);
+            PublicDistributionAudit.verify(plan, remote, releaseId, token, output.resolve("distribution"));
+            steps.add(new Step("Independent downloads", "Authenticated and anonymous APK + checksum; SHA-256 and ZIP CRC verified"));
             result.put("releaseId", releaseId).put("status", "PASS");
             published = true;
         } catch (IOException | RuntimeException failure) {
@@ -135,8 +139,7 @@ public final class PublicationCommand {
         payloadBytes(product);
         byte[] checksumBytes = readExternalFile(checksum, 512);
         require(new String(checksumBytes, StandardCharsets.US_ASCII).strip().equals(product.sha256() + "  " + name), "CHECKSUM");
-        String owner = repository.substring(0, repository.indexOf('/'));
-        return new Plan(repository, owner + "/atf_j5_releases", version, commit, product,
+        return new Plan(repository, repository, version, commit, product,
                 new Payload(name + ".sha256", checksum, checksumBytes.length, sha256(checksumBytes)));
     }
 
@@ -202,7 +205,7 @@ public final class PublicationCommand {
     private static void publishExtent(Path output, JsonNode result, List<Step> steps, boolean passed) {
         AtfReportStatus status = passed ? AtfReportStatus.PASS : AtfReportStatus.FAIL;
         try (var session = new ExtentReportSession(output, new ReportingSettings(240, ReportingSettings.DISABLE_BODY_DISPLAY_LIMIT));
-             var scenario = session.startScenario("Rentz · Restricted publication", "Reconciliation of GitHub side effects", List.of("release", "rag"));
+             var scenario = session.startScenario("Rentz · GitHub publication", "Reconciliation of GitHub side effects", List.of("release", "rag"));
              var phase = scenario.startPhase("Reconciled publication");
              var comparison = phase.startAssertionStep("Remote verdict")) {
             comparison.assertions(List.of(new AtfAssertion("Published exact release", "PASS", result.path("status").asText(), passed)));

@@ -9,18 +9,20 @@ param(
     [string]$PublicationEvidence='',
     [switch]$RestrictedPublication,
     [switch]$ResumeRestrictedPublication,
+    [switch]$ResumePublicPublication,
     [string]$PublicationJournal='',
     [string]$PublicationChecksum='',
     [string]$PromotionTestRepository='',
     [string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe'
 )
 $ErrorActionPreference='Stop'
-if($ResumeRestrictedPublication){
+if($ResumeRestrictedPublication){throw 'Implicit private publication is retired. Use ResumePublicPublication for the source repository.'}
+if($ResumePublicPublication){
     if(!$BuildRun-or!$NativeUiRun-or!$UiBuildRun-or!$PublicationJournal-or!$PublicationChecksum-or$DocumentationRun-or$PublicationEvidence-or$RestrictedPublication){
-        throw 'Restricted resumption requires build, native UI, UI build, journal and checksum. Run post-publication verification separately.'
+        throw 'Public resumption requires build, native UI, UI build, journal and checksum. Run remote README verification separately.'
     }
-}elseif($PublicationJournal-or$PublicationChecksum){throw 'PublicationJournal and PublicationChecksum require ResumeRestrictedPublication.'}
-if($PromotionTestRepository-and($DocumentationRun-or$BuildRun-or$NativeUiRun-or$UiBuildRun-or$PublicationEvidence-or$ResumeRestrictedPublication)){
+}elseif($PublicationJournal-or$PublicationChecksum){throw 'PublicationJournal and PublicationChecksum require ResumePublicPublication.'}
+if($PromotionTestRepository-and($DocumentationRun-or$BuildRun-or$NativeUiRun-or$UiBuildRun-or$PublicationEvidence-or$ResumePublicPublication)){
     throw 'Channel qualification has its own scope and uses component evidence only.'
 }
 if($RestrictedPublication-and-not$PublicationEvidence){throw 'RestrictedPublication requires PublicationEvidence.'}
@@ -135,12 +137,27 @@ try{
                 $project $PromotionTestRepository (Join-Path $RunRoot 'promotion-channel') $component.sourceCommit
             if($LASTEXITCODE-ne0){throw "Channel qualification stopped. Read the promotion-channel receipt in $RunRoot."}
         }
-        if($ResumeRestrictedPublication){
+        if($ResumePublicPublication){
             $publicationJvm=@($jvm[0..($jvm.Count-2)])
+            $previousToken=$env:GH_TOKEN
+            $previousPrompt=$env:GIT_TERMINAL_PROMPT
+            $previousInteractive=$env:GCM_INTERACTIVE
+            try{
+            if(-not$env:GH_TOKEN-and-not$env:GITHUB_TOKEN){
+                $env:GIT_TERMINAL_PROMPT='0';$env:GCM_INTERACTIVE='Never'
+                $credential=@("protocol=https`nhost=github.com`n`n" | git -C $project credential fill 2>$null)
+                $secret=@($credential | Where-Object {$_ -cmatch '^password=.'})
+                if($LASTEXITCODE-ne0-or$secret.Count-ne1){throw 'Authenticated GitHub publication requires an existing cached credential or GH_TOKEN.'}
+                $env:GH_TOKEN=$secret[0].Substring(9)
+                $credential=$null;$secret=$null
+            }
             & $Java @publicationJvm 'atf.rentz.distribution.publication.PublicationCommand' `
                 $project (Join-Path $reportRoot 'release-rag-report.json') $ComponentRun $BuildRun $NativeUiRun $UiBuildRun `
                 ([IO.Path]::GetFullPath($PublicationChecksum)) ([IO.Path]::GetFullPath($PublicationJournal)) (Join-Path $RunRoot 'publication-resume')
-            if($LASTEXITCODE-ne0){throw "Restricted publication stopped. Read the publication-resume receipt in $RunRoot."}
+            if($LASTEXITCODE-ne0){throw "Public publication stopped. Read the publication-resume receipt in $RunRoot."}
+            }finally{
+                $env:GH_TOKEN=$previousToken;$env:GIT_TERMINAL_PROMPT=$previousPrompt;$env:GCM_INTERACTIVE=$previousInteractive
+            }
         }
     }finally{
         [Environment]::SetEnvironmentVariable('RENTZ_DATA_ROOT',$previousDataRoot,'Process')

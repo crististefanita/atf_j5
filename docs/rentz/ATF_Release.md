@@ -66,7 +66,7 @@ După verdictul `readyForProductBuild=true`, construiți produsul cu identitatea
 
 RAG citește dovezile originale, aplică verificările de calificare și înregistrează verdictul.
 
-- Evaluatorul Java primește rădăcina externă `rentz_back/j5-active` calculată din Git common directory sau din `RENTZ_DATA_ROOT`. Workspace-ul de componente se înregistrează pe rădăcina sursei testate. RAG validează aceeași rădăcină la citirea dovezii Android JVM, inclusiv când scriptul este lansat din alt checkout.
+- Evaluatorul Java primește rădăcina permanentă `rentz_back/.imp`, calculată din Git common directory. `RENTZ_DATA_ROOT` poate selecta numai această rădăcină sau un descendent al ei. Workspace-ul de componente se înregistrează pe rădăcina sursei testate. RAG validează aceeași rădăcină la citirea dovezii Android JVM, inclusiv când scriptul este lansat din alt checkout.
 - `READY_FOR_MAIN_PROMOTION_REVIEW` permite revizuirea operatorului.
 - Publicarea și probele de descărcare au porți proprii.
 
@@ -151,19 +151,19 @@ Verificatorul nativ stabilește verdictul execuției din receipt. Validarea Exte
 
 [Calificarea componentelor](ATF_Qualification.md) · [Protocolul Android](ATF_Android.md) · [Catalogul livrării](../../release/README.md)
 
-### Reluarea publicării restricționate
+### Reluarea publicării GitHub
 
-Din checkout-ul calificat, utilizați acreditările Git pentru tag și `GH_TOKEN` sau `GITHUB_TOKEN` pentru [API-ul GitHub Releases](https://docs.github.com/en/rest/releases/releases). Păstrați același fișier de jurnal extern între încercări și un director nou pentru fiecare rulare RAG.
+Din checkout-ul calificat, utilizați acreditările Git pentru tag și [API-ul GitHub Releases](https://docs.github.com/en/rest/releases/releases). Lansatorul folosește `GH_TOKEN`, `GITHUB_TOKEN` sau acreditarea Git existentă, păstrată numai în memoria procesului. Păstrați același jurnal în `.imp` între încercări și un director nou pentru fiecare rulare RAG.
 
 ```powershell
-.\scripts\run-release-rag.ps1 -Question 'publicare GitHub restricționată' `
+.\scripts\run-release-rag.ps1 -Question 'publicare GitHub' `
   -ComponentRun $components -BuildRun $build -NativeUiRun $native -UiBuildRun $uiBuild `
-  -ResumeRestrictedPublication -PublicationJournal $journal -PublicationChecksum $checksum -RunRoot $attempt
+  -ResumePublicPublication -PublicationJournal $journal -PublicationChecksum $checksum -RunRoot $attempt
 ```
 
 | Stare observată | Efect |
 |---|---|
-| Sursa calificată se află pe `main`, iar canalul de artefacte este privat | RAG recitește porțile și reconciliază tagurile ambelor repository-uri. |
+| Sursa calificată se află pe `main`, iar repository-ul sursei este public și permite scrierea | RAG recitește toate cele șapte porți și reconciliază un singur tag în același repository. Nu deduce un canal separat. |
 | Există un draft unic pentru tag | Confirmă release ID și salvează identitatea înainte de upload. Verifică inventarul complet al draftului. |
 | GitHub confirmă crearea, iar draftul încă lipsește din inventar | Salvează ID-ul și citește inventarul de cel mult trei ori. Un ID diferit, un duplicat, o sursă diferită sau o ediție stabilă mai nouă opresc publicarea. |
 | APK-ul sau checksum-ul are nume, stare, mărime și SHA-256 identice | Reutilizează fișierul și încarcă doar ce lipsește. |
@@ -179,11 +179,11 @@ Din checkout-ul calificat, utilizați acreditările Git pentru tag și `GH_TOKEN
 - **Recitirea porților.** Valorile întregi din raport și din evaluarea curentă trebuie să fie egale exact. Un număr schimbat sau înlocuit cu text blochează publicarea.
 - **Jurnal și raport.** Jurnalul fixează repository-urile, tagul, commitul, hash-urile și ID-ul observat. Raportul Extent păstrează pașii confirmați și diagnosticul ultimei încercări. [Implementare și mock-uri](../../atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePublicationResumeTest.java)
 
-Verificarea README-ului remote, descărcarea autentificată și refuzul accesului anonim se fac după publicare. Pentru retragere se aplică aceleași [porți de distribuție](#distribuție-cu-autentificare).
+După publicare, comanda descarcă independent APK-ul și checksum-ul cu și fără autentificare. Verifică tagul exact, `latest`, inventarul, SHA-256 și toate CRC-urile arhivei. Păstrează receipt-urile și Extent în `publication-resume/distribution`. README-ul remote se verifică separat după actualizarea linkului. O descărcare eșuată păstrează jurnalul; reluarea reconciliază release-ul existent fără upload sau promovare repetată.
 
 ### Rezervarea canalului de promovare
 
-Fiecare canal privat de distribuție are o referință Git comună, `refs/tags/atf-rentz-promotion-lock`. Procesul o creează numai dacă este liberă și înregistrează în Extent SHA-ul proprietarului. Operarea cere acces Git pentru crearea și ștergerea acelei referințe.
+Fiecare canal de distribuție are o referință Git comună, `refs/tags/atf-rentz-promotion-lock`. Procesul o creează numai dacă este liberă și înregistrează în Extent SHA-ul proprietarului. Operarea cere acces Git pentru crearea și ștergerea acelei referințe.
 
 | Stare | Efect |
 |---|---|

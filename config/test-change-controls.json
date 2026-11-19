@@ -472,11 +472,11 @@
     {
       "path": "scripts/run-release-rag.ps1",
       "owner": "Rentz release",
-      "reason": "Qualify the live Git permission boundary independently from APK release.",
-      "criterion": "Require separate GitHub account IDs and a private test repository, verify replace-and-release semantics, and keep unqualified evidence BLOCKED.",
-      "proof": "docs/rentz/ATF_Release.md#calificarea-permisiunilor-pe-github",
+      "reason": "Publish only in the public source repository and independently verify both access modes without an implicit legacy channel.",
+      "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
       "expires": "2026-12-10",
-      "sha256": "a3d0209bb0df870500ff0aa448f1e3aa3e4cb0e5842d46fe6a0414cbb8e41ee5",
+      "sha256": "2baafc958a8e5dc2015c652f050afb6f4bce944c27a59f58b5e95bc7dc4370d4",
       "allowDelete": false
     },
     {
@@ -602,11 +602,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseDownloadComponentTest.java",
       "owner": "Rentz consumer",
-      "reason": "Incoming release adapter tests retained; exact current bytes reviewed without attributing browser or Android acceptance.",
-      "criterion": "Mock transport/Git/catalog contracts and independent refusal cases remain; real distribution acceptance is separate.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "reason": "Publish only in the public source repository and independently verify both access modes without an implicit legacy channel.",
+      "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
       "expires": "2026-11-20",
-      "sha256": "b3fa42d6192c9542add4f9931c6ab4645de907899234b8fecc278cbf011653f5",
+      "sha256": "20c79df8ad13127c00e762caa28db15e5c51fcb60f8258a711bfe97646056336",
       "allowDelete": false
     },
     {
@@ -726,7 +726,7 @@
       "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
       "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "10041a70da544aea93d1a29683e00832bb405e7afddb4cec55c0f421170498dd",
+      "sha256": "db9302209e1d4d18a9e6d294d31ca8cec7b5089ca05b1d8819b5945e2279c815",
       "allowDelete": false
     },
     {
@@ -852,11 +852,11 @@
     {
       "path": "config/infrastructure-workspaces.json",
       "owner": "Rentz Android qualification",
-      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
-      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
-      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
+      "reason": "Keep all active data inside the permanent .imp root and refuse disposable overrides and OS temporary output.",
+      "criterion": "Real Git worktrees share the verified permanent root; preserve signing, path traversal, long-path and non-Git fixture controls.",
+      "proof": "docs/rentz/ATF_Retention.md",
       "expires": "2026-12-18",
-      "sha256": "014ac60815570156b6c1d9482c8aeda5b01adc043dcae4d804a1a9f4510d56c9",
+      "sha256": "caa5f381263eaccca5ed07e94984b61e5be63dd10ccb4812c74c02b93e4716ee",
       "allowDelete": false
     },
     {
@@ -886,7 +886,7 @@
       "criterion": "The reactor builds required production and ATF modules offline and preserves the selected Surefire population.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "0d084472ab6f4273863bb900d6ace02c637de5d2e00ac25cbfd4bcf574e33e6f",
+      "sha256": "5a292c6240cf9824a5e9caddb5fb7c045cb74ddbb128a552f39fc1890cdf41e6",
       "allowDelete": false
     },
     {
@@ -1292,21 +1292,21 @@
     {
       "path": "atf-tests/tools/test-workspace-governance.ps1",
       "owner": "Rentz release",
-      "reason": "Cover default data-root resolution and worktree source identity without weakening workspace owner checks.",
-      "criterion": "Nested worktrees resolve the shared root. Component stages name the tested checkout when the runner is invoked elsewhere. A tracked path longer than 260 characters checks out byte-for-byte with process-local Git settings. Unverified source paths and foreign descriptors fail closed.",
-      "proof": "docs/rentz/ATF_Infrastructure.md",
+      "reason": "Keep all active data inside the permanent .imp root and refuse disposable overrides and OS temporary output.",
+      "criterion": "Real Git worktrees share the verified permanent root; preserve signing, path traversal, long-path and non-Git fixture controls.",
+      "proof": "docs/rentz/ATF_Retention.md",
       "expires": "2026-12-12",
-      "sha256": "d6fffc9ea175cdd2a3deed0f6cc2edaffd5e994d3f26f627a1ce72adac50d480",
+      "sha256": "fd43fb73ccbedadf4452ebf6af84dd7378f3b4802b34251486fa3df5e99b9d0d",
       "allowDelete": false
     },
     {
       "path": "scripts/InfrastructureWorkspaces.psm1",
       "owner": "Rentz release",
-      "reason": "Anchor the default external data root to the shared Git common directory for nested worktrees.",
-      "criterion": "A linked worktree resolves the canonical rentz_back root; an unverified source fails closed. Workspace owner, ID, source identity and physical path stay validated; the explicit override remains supported.",
-      "proof": "docs/rentz/ATF_Infrastructure.md",
+      "reason": "Keep all active data inside the permanent .imp root and refuse disposable overrides and OS temporary output.",
+      "criterion": "Real Git worktrees share the verified permanent root; preserve signing, path traversal, long-path and non-Git fixture controls.",
+      "proof": "docs/rentz/ATF_Retention.md",
       "expires": "2026-12-12",
-      "sha256": "728ba49dfff87a67b0514a9e88510197d1a7df2461c71d9eecd38cb1d6eb7d78",
+      "sha256": "0ec06e0336c54751471c7d96dcb30f8c7fff333f217dcf04aa44a9e724104d6e",
       "allowDelete": false
     },
     {
@@ -1326,7 +1326,7 @@
       "criterion": "Product 0.28.0 / 32; fixed seed remains exclusive to the isolated UI-sanity build.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "a552de1e8e38da9b7f806d01bc32b477037ea74f68ca39393606f26c59b48616",
+      "sha256": "b8a71f0916be10fcd610e8c67a8d731b897ecf05e60abfd840d12467edb92dca",
       "allowDelete": false
     },
     {
@@ -1336,7 +1336,7 @@
       "criterion": "Single latest edition, numeric APK, exact source tag and public canonical asset; preserve original component/native/RAG evidence and historical source tags.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "940da424254e35c75e886a0310eda8ad24b59b4f3d96128f039787136b60e534",
+      "sha256": "cfa4572f1e14ab057c3c2c59c171aa33003c7d708a9b915306d788f175a056d6",
       "allowDelete": false
     },
     {
@@ -1366,7 +1366,7 @@
       "criterion": "The declared Maven version selects exactly one matching JAR/POM; component, release and UI receipts record the same artifact and SHA-256; malformed identities fail closed.",
       "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
       "expires": "2026-11-20",
-      "sha256": "43cc14d6ee142079f862b5fb0f95dad7ce3123b18853e32a5f6cc9fdc30d989c",
+      "sha256": "07e2ff85268c1d412a85600f691e418cef02678054ba7c77d9d7a5df78aa0865",
       "allowDelete": false
     },
     {
@@ -1392,22 +1392,22 @@
     {
       "path": "lib/atf-reporting-1.0.0-j24.jar",
       "owner": "Rentz release",
-      "reason": "Pin the reporting-library migration and source-bound adapters.",
-      "criterion": "The declared Maven version selects exactly one matching JAR/POM; component, release and UI receipts record the same artifact and SHA-256; malformed identities fail closed.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "reason": "Retire the superseded physical library after admitting the current verified binary; history remains in Git.",
+      "criterion": "Exactly one current reporting pair and current Browser runtime/tests remain, with producer provenance and component qualification.",
+      "proof": "docs/rentz/ATF_Qualification.md",
       "expires": "2026-11-20",
       "sha256": "8dd71735de004853210a91169297d8965691f6c4bf6781195594be50f70b69ef",
-      "allowDelete": false
+      "allowDelete": true
     },
     {
       "path": "lib/atf-reporting-1.0.0-j24.pom",
       "owner": "Rentz release",
-      "reason": "Pin the reporting-library migration and source-bound adapters.",
-      "criterion": "The declared Maven version selects exactly one matching JAR/POM; component, release and UI receipts record the same artifact and SHA-256; malformed identities fail closed.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "reason": "Retire the superseded physical library after admitting the current verified binary; history remains in Git.",
+      "criterion": "Exactly one current reporting pair and current Browser runtime/tests remain, with producer provenance and component qualification.",
+      "proof": "docs/rentz/ATF_Qualification.md",
       "expires": "2026-11-20",
       "sha256": "2d18f1d8f3b68e17788baeea60cc011be4d5f1a8c0c0709a2f7801297d2c60da",
-      "allowDelete": false
+      "allowDelete": true
     },
     {
       "path": "lib/atf-reporting-1.0.0-j21.jar",
@@ -1430,41 +1430,41 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/ReleasePublication.java",
       "owner": "Rentz release",
-      "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
-      "criterion": "An acknowledged draft gets three read-only inventory attempts. No repeat POST, asset upload or promotion before verification. Conflicts and newer stable editions remain blocked.",
-      "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
+      "reason": "Publish only in the public source repository and independently verify both access modes without an implicit legacy channel.",
+      "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
       "expires": "2026-12-14",
-      "sha256": "f8704d535bc775ccb1ebac91dd26c7af07f43f3ccc94d03f6b3307a39927ac6b",
+      "sha256": "3c1c06b658b92688bcbe2a09906857fe7ac8d3686bbf352ef2a257ae128c686a",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/GitHubPublication.java",
       "owner": "Rentz release",
-      "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
-      "criterion": "Refuse concurrent PATCH from another journal, preserve the ref on uncertain PATCH, and release only the exact current owner.",
-      "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
+      "reason": "Publish only in the public source repository and independently verify both access modes without an implicit legacy channel.",
+      "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
       "expires": "2026-12-10",
-      "sha256": "a3c58dac5d99891edc3ac45f8f6a17428eb36470c22e4fa992a247a7ef810ad3",
+      "sha256": "fb1ea3d9be2ef206dc3c54d2033e32a6f4e73b733f175d6496d38833fddafc7c",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/PublicationCommand.java",
       "owner": "Rentz release",
-      "reason": "Recover an interrupted restricted GitHub publication from verified remote state.",
-      "criterion": "Verify source, private destination, exact tags, saved draft ID and both asset hashes. Retry only after rediscovery and block rejected or ambiguous writes. Compare persisted integral receipt values exactly.",
-      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-restricționate",
+      "reason": "Publish only in the public source repository and independently verify both access modes without an implicit legacy channel.",
+      "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
       "expires": "2026-12-10",
-      "sha256": "d25fdefd60d4a9402d2ada55b4e7f78a5d29980b5beda692487423912fea4f31",
+      "sha256": "a218b292e6b56e595d3d2d77813b16f1a82d8e5c680d286f8b6e43396a71b1e6",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePublicationResumeTest.java",
       "owner": "Rentz release",
-      "reason": "Serialize candidate promotions across independent operators on the same distribution channel.",
-      "criterion": "An acknowledged draft gets three read-only inventory attempts. No repeat POST, asset upload or promotion before verification. Conflicts and newer stable editions remain blocked.",
-      "proof": "docs/rentz/ATF_Release.md#rezervarea-canalului-de-promovare",
+      "reason": "Publish only in the public source repository and independently verify both access modes without an implicit legacy channel.",
+      "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
       "expires": "2026-12-14",
-      "sha256": "271e66e4b1fc8352695738a4d4bbac1032a6ec1091f4ce450c5ee66d14d79302",
+      "sha256": "65800e8a7449391953abee568dbb15ef926b54519aa77a130ff08419744bbf61",
       "allowDelete": false
     },
     {
@@ -1751,7 +1751,7 @@
       "criterion": "Verify the source commit and SHA-256 pin, compile against the physical JAR and preserve the shared viewport, card and adapter checks.",
       "proof": "atf-ui-browser/README.md",
       "expires": "2026-12-19",
-      "sha256": "873a25921c7aaf66086fb4240803d89faae9170bb38834c45c89753541ff72a7",
+      "sha256": "17ebb4d317c66c0c6fb8ab78bf7cee2bab25ad5fe93939726c54185d170472a6",
       "allowDelete": false
     },
     {
@@ -1771,7 +1771,37 @@
       "criterion": "Pinned JAR checksum, extraction exit code and presence of every executable contract are required; keep actual renderer and collection comparisons.",
       "proof": "atf-ui-browser/README.md",
       "expires": "2026-12-19",
-      "sha256": "3cadec358ae37c76bb905b3cc752385dcd52c3c27da2bd91a94fa56d4fd593f4",
+      "sha256": "08cda28b9f7b138f14bff17e8ec6c9e04e3120c5758df9f915a0afcebf59eee2",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/PublicDistributionAudit.java",
+      "owner": "Rentz release qualification",
+      "reason": "Admit the current verified reporting binary and source-owned public distribution audit.",
+      "criterion": "Preserve the seven release gates, exact source and asset identity, independent authenticated and anonymous downloads, and evaluated Extent assertions.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
+      "expires": "2026-12-19",
+      "sha256": "bb1b596e0326643a584a16bf8359a0b41d9228797d866a86a956ab65383e8df8",
+      "allowDelete": false
+    },
+    {
+      "path": "lib/atf-reporting-1.0.0-j25.jar",
+      "owner": "Rentz release qualification",
+      "reason": "Admit the current verified reporting binary and source-owned public distribution audit.",
+      "criterion": "Preserve the seven release gates, exact source and asset identity, independent authenticated and anonymous downloads, and evaluated Extent assertions.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
+      "expires": "2026-12-19",
+      "sha256": "e27f0293ec6b8d3ac824d00dc1ffcb4c19685c5d12f80e8e00d0333c2c145026",
+      "allowDelete": false
+    },
+    {
+      "path": "lib/atf-reporting-1.0.0-j25.pom",
+      "owner": "Rentz release qualification",
+      "reason": "Admit the current verified reporting binary and source-owned public distribution audit.",
+      "criterion": "Preserve the seven release gates, exact source and asset identity, independent authenticated and anonymous downloads, and evaluated Extent assertions.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
+      "expires": "2026-12-19",
+      "sha256": "0f193e28c30598a94d319bcb6eb32272030de65eca6b110b338f2b273dcf20d3",
       "allowDelete": false
     }
   ]

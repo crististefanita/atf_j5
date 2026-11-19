@@ -72,6 +72,50 @@ class ReleaseDownloadComponentTest {
             assertFalse(Files.exists(temporary.resolve(fixture.expected.fileName())), "No invalid final .apk is published");
         }
     }
+    @ParameterizedTest @ValueSource(strings={"healthy", "wrong-content", "short", "duplicate", "unbounded", "digest", "invalid-id"})
+    void checksumDownloadIsBoundedAndMustIdentifyTheQualifiedApk(String defect) throws Exception {
+        var target = new ApkDownloadTarget("example/game", "1.2.0", 901, "b".repeat(64));
+        byte[] bytes = ((defect.equals("wrong-content") ? "c".repeat(64) : target.sha256())
+                + "  " + target.fileName() + "\n").getBytes(StandardCharsets.US_ASCII);
+        byte[] body = defect.equals("short") ? java.util.Arrays.copyOf(bytes, bytes.length - 1) : bytes;
+        var json = new ObjectMapper();
+        var release = json.createObjectNode().put("tag_name", "v1.2.0").put("draft", false);
+        var asset = release.putArray("assets").addObject().put("id", defect.equals("invalid-id") ? 0 : 8)
+                .put("name", target.fileName() + ".sha256").put("size", defect.equals("unbounded") ? 513 : bytes.length)
+                .put("digest", "sha256:" + (defect.equals("digest") ? "a".repeat(64) : digest(bytes)))
+                .put("state", "uploaded").put("browser_download_url", target.publicUrl() + ".sha256");
+        if (defect.equals("duplicate")) ((com.fasterxml.jackson.databind.node.ArrayNode) release.path("assets")).add(asset.deepCopy());
+        var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/repos/example/game/releases/tags/v1.2.0", exchange -> {
+            byte[] data = json.writeValueAsBytes(release); exchange.sendResponseHeaders(200, data.length);
+            try (var output = exchange.getResponseBody()) { output.write(data); }
+        });
+        server.createContext("/repos/example/game/releases/assets/8", exchange -> {
+            exchange.sendResponseHeaders(200, body.length);
+            try (var output = exchange.getResponseBody()) { output.write(body); }
+        });
+        server.start();
+        try {
+            var client = new GitHubApkDownload(URI.create("http://127.0.0.1:" + server.getAddress().getPort() + "/"), null);
+            if (defect.equals("healthy")) {
+                var proof = client.downloadChecksum(target, temporary);
+                assertEquals(digest(bytes), proof.sha256(), "Exact independent checksum digest");
+                assertEquals(target.sha256() + "  " + target.fileName(), Files.readString(proof.file()).strip(), "Exact APK binding");
+            } else {
+                var failed = assertThrows(IOException.class, () -> client.downloadChecksum(target, temporary));
+                String expected = switch (defect) {
+                    case "duplicate" -> "Expected exactly one checksum asset";
+                    case "unbounded", "invalid-id" -> "Checksum asset identity differs";
+                    case "short" -> "Checksum response is incomplete or exceeds its budget";
+                    case "digest" -> "Checksum asset digest differs";
+                    default -> "Checksum content differs from qualified APK";
+                };
+                assertEquals(expected, failed.getMessage(), "Specific rejection before a final checksum is created");
+                assertFalse(Files.exists(temporary.resolve(target.fileName() + ".sha256")), "No invalid final checksum");
+            }
+        } finally { server.stop(0); }
+    }
+
     private static String expectedFailure(String defect) {
         return switch (defect) {
             case "404" -> "Release download HTTP 404";

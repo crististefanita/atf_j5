@@ -10,7 +10,7 @@ Lansatoarele și controalele infrastructurii folosesc PowerShell 7.
 |---|---|
 | Grupul checkout-urilor | Numai proiectele ATF declarate în registru; nu primește staging sau rezultate. |
 | Sursa Rentz | Modulele, configurația, documentația și scripturile declarate. |
-| Depozitul extern | `RENTZ_DATA_ROOT`, implicit `rentz_back/j5-active` lângă grupul checkout-urilor. Git identifică checkout-ul principal, astfel încât toate worktree-urile folosesc aceeași rădăcină. Arhivele stau separat. |
+| Depozitul extern | `rentz_back/.imp` lângă grupul checkout-urilor. Git identifică checkout-ul principal, astfel încât toate worktree-urile folosesc aceeași rădăcină permanentă. `RENTZ_DATA_ROOT` poate selecta numai această rădăcină sau un descendent al ei. |
 | `distribution` | Artefacte publicate și dovezi de verificare a descărcării; conținutul se păstrează ca livrare externă și nu este workspace de build. |
 | `infrastructure/workspaces` | Copii de compilare și fixture-uri cu descriptor `.atf-workspace.json`; identitatea directorului trebuie să coincidă cu descriptorul. |
 | `.atf-signing` în checkout-ul principal | Cheia persistentă Rentz și credențiala DPAPI. Directorul are ACL privat, este ignorat de Git și rămâne la locul lui când curățăm datele generate. |

@@ -182,8 +182,8 @@ class ReleasePublicationResumeTest {
         var qualified = PublicationCommand.qualifiedPlan(rag, rag.deepCopy(), build, checksum);
         AuditedAssertions.assertEquals("owner/rentz", qualified.sourceRepository(),
                 "The renamed source repository is carried into the publication plan");
-        AuditedAssertions.assertEquals("owner/atf_j5_releases", qualified.releaseRepository(),
-                "The existing APK release repository remains distinct from the source repository");
+        AuditedAssertions.assertEquals("owner/rentz", qualified.releaseRepository(),
+                "The qualified public APK uses the source repository without an implicit second repository");
         AuditedAssertions.assertEquals(hash, qualified.apk().sha256(),
                 "All seven source-bound gates admit exact APK");
         Path recordedReport = scratch.resolve("release-rag-report.json");
@@ -362,6 +362,31 @@ class ReleasePublicationResumeTest {
         @Override public void close() { server.stop(0); }
     }
 
+    @Test void publicRestIdentityRequiresExactRepositoryVisibilityAndPushPermission() throws Exception {
+        var state = new java.util.concurrent.atomic.AtomicReference<Map<String, Object>>();
+        var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/repos/owner/rentz", request -> {
+            byte[] bytes = new ObjectMapper().writeValueAsBytes(state.get()); request.sendResponseHeaders(200, bytes.length);
+            try (var output = request.getResponseBody()) { output.write(bytes); }
+        });
+        server.start();
+        try {
+            URI endpoint = URI.create("http://127.0.0.1:" + server.getAddress().getPort() + "/");
+            var transport = new GitHubPublication(scratch, "test_credential", endpoint, endpoint,
+                    ignored -> new PromotionLease("fixture-owner", () -> { }));
+            state.set(Map.of("full_name", "owner/rentz", "private", false, "visibility", "public", "permissions", Map.of("push", true)));
+            AuditedAssertions.assertEquals(true, transport.publicRepository("owner/rentz"), "Exact public repository with write access");
+            for (var invalid : List.<Map<String, Object>>of(
+                    Map.of("full_name", "owner/foreign", "private", false, "visibility", "public", "permissions", Map.of("push", true)),
+                    Map.of("full_name", "owner/rentz", "private", true, "visibility", "private", "permissions", Map.of("push", true)),
+                    Map.of("full_name", "owner/rentz", "private", false, "visibility", "public", "permissions", Map.of("push", false)),
+                    Map.of("full_name", "owner/rentz", "private", false, "visibility", "public"))) {
+                state.set(invalid);
+                AuditedAssertions.assertEquals(false, transport.publicRepository("owner/rentz"), "Reject foreign, private, read-only or unproven permissions");
+            }
+        } finally { server.stop(0); }
+    }
+
     private static java.util.Map<String, Object> assetJson(long id, Payload payload) {
         return java.util.Map.of("id", id, "name", payload.name(), "state", "uploaded",
                 "size", payload.bytes(), "digest", "sha256:" + payload.sha256());
@@ -395,12 +420,42 @@ class ReleasePublicationResumeTest {
         return mock;
     }
 
+    @Test void publicSameRepositoryPushesOneTagAndResumesWithoutRepeatedWrites() throws Exception {
+        var publicPlan = new Plan(PLAN.sourceRepository(), PLAN.sourceRepository(), PLAN.version(), COMMIT, APK, CHECKSUM);
+        var github = new Mock();
+        github.publicChannel = true;
+        AuditedAssertions.assertEquals(81L, ReleasePublication.resume(publicPlan, github, 0, remembered::add, trace::add),
+                "Publish the qualified public edition in its source repository");
+        AuditedAssertions.assertEquals(List.of("tag:owner/rentz", "draft", "upload:" + APK.name(),
+                "upload:" + CHECKSUM.name(), "publish"), github.writes,
+                "One shared tag, exact assets and one final promotion");
+        github.writes.clear();
+        ReleasePublication.resume(publicPlan, github, 81, remembered::add, trace::add);
+        AuditedAssertions.assertEquals(List.of(), github.writes, "A resumed published edition is read only");
+    }
+
+    @Test void publicModeRejectsWrongVisibilityAndForeignSourceTagBeforeAnyWrite() throws Exception {
+        var publicPlan = new Plan(PLAN.sourceRepository(), PLAN.sourceRepository(), PLAN.version(), COMMIT, APK, CHECKSUM);
+        var github = new Mock();
+        IOException wrongVisibility = AuditedAssertions.assertThrows(IOException.class,
+                () -> ReleasePublication.resume(publicPlan, github, 0, remembered::add, trace::add),
+                "A same-repository public publication requires public visibility and write access");
+        AuditedAssertions.assertEquals("PUBLICATION-REPOSITORY-NOT-PUBLIC", wrongVisibility.getMessage(), "Fail closed");
+        github.publicChannel = true;
+        github.sourceTag = "f".repeat(40);
+        IOException wrongTag = AuditedAssertions.assertThrows(IOException.class,
+                () -> ReleasePublication.resume(publicPlan, github, 0, remembered::add, trace::add), "Reject a foreign tag");
+        AuditedAssertions.assertEquals("PUBLICATION-TAG-CONFLICT", wrongTag.getMessage(), "Preserve source identity");
+        AuditedAssertions.assertEquals(List.of(), github.writes, "Never mutate a refused public channel");
+    }
+
     private static final class Mock implements Remote {
         final List<String> writes = new ArrayList<>();
         final List<Asset> assets = new ArrayList<>();
         String sourceTag;
         String releaseTag;
         boolean onMain = true;
+        boolean publicChannel;
         boolean interruptUpload;
         boolean interruptDraft;
         boolean rejectPush;
@@ -412,7 +467,8 @@ class ReleasePublicationResumeTest {
         Release item;
 
         @Override public boolean sourceOnMain(Plan plan) { return onMain; }
-        @Override public boolean privateRepository(String repository) { return true; }
+        @Override public boolean privateRepository(String repository) { return !publicChannel; }
+        public boolean publicRepository(String repository) { return publicChannel; }
         @Override public String tagCommit(String repository, String tag) {
             return repository.equals(PLAN.sourceRepository()) ? sourceTag : releaseTag;
         }

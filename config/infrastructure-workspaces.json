@@ -96,9 +96,10 @@
       "role": "allocator",
       "functions": [
         "Get-AtfDataRoot",
-        "Assert-AtfInfrastructure"
+        "Assert-AtfInfrastructure",
+        "Assert-AtfArtifactPath"
       ],
-      "reason": "Citește limita TEMP pentru refuzul destinațiilor și inventarierea familiei istorice; alocarea rămâne sub rădăcina înregistrată."
+      "reason": "Read the process temporary boundary only to reject source or artifact escapes; allocation uses the registered permanent root."
     },
     {
       "path": "scripts/test-infrastructure-governance.ps1",
