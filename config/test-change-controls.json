@@ -1767,7 +1767,7 @@
     {
       "path": "atf-ui-browser/Build-RentzPages.ps1",
       "owner": "Rentz shared browser admission",
-      "reason": "Use one extracted and verified contract inventory including the shared playback exports.",
+      "reason": "Adopt Browser 0.2.24 while retaining explicit extraction and execution of every shared test contract.",
       "criterion": "Pinned JAR checksum, extraction exit code and presence of every executable contract are required; keep actual renderer and collection comparisons.",
       "proof": "atf-ui-browser/README.md",
       "expires": "2026-12-19",
