@@ -11,8 +11,8 @@ const engine = await load(join(site, 'rentz-engine.mjs'));
 const { verifyCardTypography } = await load(join(contracts, 'card-typography.mjs'));
 const { verifyHistoryMenu, verifyGameMenuDismissal } = await load(join(contracts, 'menu-presentation.mjs'));
 const { verifyScorePresentation } = await load(join(contracts, 'score-presentation.mjs'));
-const { verifySeatFitting, verifyActorLabels } = await load(join(contracts, 'seat-presentation.mjs'));
-const { fitSeatLine } = await load(join(site, 'seat-presentation.mjs'));
+const { verifySeatFitting, verifyActorLabels, verifySeatRetention } = await load(join(contracts, 'seat-presentation.mjs'));
+const { fitSeatLine, retainSeatFrames } = await load(join(site, 'seat-presentation.mjs'));
 const { historyFirst } = await load(join(site, 'table-menu.mjs'));
 const { dismissGameMenuOnOutsideClick } = await load(join(site, 'profile.mjs'));
 const native = JSON.parse(readFileSync(nativeFile, 'utf8').replace(/^\uFEFF/, ''));
@@ -33,6 +33,13 @@ check('Delivered dismissal contract survives a menu redraw',
 
 // Execute the actual packaged renderer function. Only the browser's measurement surface is mocked.
 const table = readFileSync(join(site, 'table.mjs'), 'utf8');
+check('Stable seat elements survive AI/human handoffs and resize across 3–6 places',
+  {tables: 96, transitions: 480, resizeAdmitted: true, incompatibleTablesUntouched: 4}, verifySeatRetention(retainSeatFrames));
+const retainAt = table.indexOf('  retainSeatFrames(stage.querySelector(');
+check('The actual shared renderer retains measured seats at commit, after preparing the complete view', true,
+  retainAt > table.indexOf('    await placeTable(content);')
+    && table.indexOf('  stage.replaceChildren(content);', retainAt) > retainAt
+    && table.includes('position.dataset.seat = String(seatIndex)'));
 check('Measured seat ink keeps its text and height while scores change',
   {cases: 75, heightChanges: 0, textChanges: 0, idempotent: true}, verifySeatFitting(fitSeatLine));
 const actorSource = table.match(/function markSeat\(node, active, bidding, actorLabel\) \{[\s\S]*?\n\}/)?.[0];

@@ -13,13 +13,14 @@ public final class RentzGameHeaderComponentTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
 
     @Test public void localizedHeaderKeepsTheCommonMenuAndAutoPlayOutsideTheTitleAcrossMeasuredWindows() {
-        for (int width : new int[]{240, 280, 360, 414, 600}) for (float font : new float[]{1, 1.5f, 2}) {
+        for (int players : new int[]{3, 4, 5, 6})
+        for (int width : new int[]{240, 280, 320, 360, 393, 414, 600, 800}) for (float font : new float[]{1, 1.5f, 2}) {
             for (var language : RentzUiText.Language.values()) {
                 var copy = new RentzUiText(language);
                 int toggle = (int) Math.ceil(copy.autoPlay().length() * 7 * font + 28);
                 var plan = ro.cardtable.ui.screens.GameTitleLayout.measure(width, 48, 8,
-                        (int) Math.ceil(copy.handProgress(32, 48).length() * 8 * font), toggle);
-                String key = width + "/" + font + "/" + language;
+                        (int) Math.ceil(copy.handProgress(players * 8, players * 8).length() * 8 * font), toggle);
+                String key = players + "/" + width + "/" + font + "/" + language;
                 audit.equal("Menu touch region remains reserved " + key, 56, plan.titleLeft());
                 audit.truth("A title always receives positive measured space " + key, plan.titleWidth() > 0);
                 if (plan.trailingOnTitleLine()) audit.truth("AutoPlay never intersects the title " + key,

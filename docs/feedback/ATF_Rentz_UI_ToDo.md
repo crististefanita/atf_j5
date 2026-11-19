@@ -27,11 +27,11 @@ Antetul folosește `GameTitleBar` din AAR-ul fixat. Contractul stabil este în [
 
 ## P1 · Admiterea bibliotecilor și paritatea Whist
 
-Păstrați AAR-ul Android `0.1.21` și pachetul Browser `0.2.15` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
+Păstrați AAR-ul Android `0.1.21` și pachetul Browser `0.2.16` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
 
 | Prioritate | Cerință rămasă | Criteriu de închidere |
 |---|---|---|
-| P1 | Paritatea pe profile dinamice | Componentele confruntă sloturile și dreptunghiurile AAR–TeaVM; pe platformă confirmați după redimensionare și font mărit că toate chenarele rămân fixe între alegere, joc și colectare. Proba nativă identifică profilul, APK-ul și regiunea observată. |
+| P1 | Paritatea pe profile dinamice | Componentele confruntă sloturile și dreptunghiurile AAR–TeaVM și păstrează identitatea elementelor WEB între AI și jucător; pe platformă confirmați după redimensionare și font mărit stabilitatea vizuală a chenarelor între alegere, joc și colectare. O egalitate de coordonate nu închide singură observația de mișcare percepută. Proba nativă identifică profilul, APK-ul și regiunea observată. |
 | P1 | Secvența Rentz la 3–6 jucători | Măsurați banda centrală și toate cele patru șiruri, inclusiv ultima carte și pasul forțat. Nu schimbați geometria comună a locurilor pentru a compensa conținutul specific. |
 | P1 | Oprirea AutoPlay în ambele adaptoare | Oprirea rămâne accesibilă când AI-ul calculează; livrarea întârziată nu aplică o comandă. În Web, includeți și oprirea între două cadre de playback. |
 | P2 | Meniuri și fonturi comune | Contractele livrate de meniu și proporțiile tipografice sunt verificate fără emulator. Calificați rasterul la font mărit, focusul tastaturii și clickul în exterior pe platformă; nu repetați calculele pure prin E2E. |

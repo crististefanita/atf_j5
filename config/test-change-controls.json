@@ -1052,11 +1052,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java",
       "owner": "Rentz UI",
-      "reason": "Restore the original APK Δ:/Σ: captions without changing table rules or scoring.",
-      "criterion": "Retain every actor, legal-card, signed-score and seat-order assertion; change only the captions required by the original Rentz presentation contract.",
+      "reason": "Extend the preserved projection oracles with observed one-card AI/human handoffs at 3–6 places and mock-measured shared geometry across viewport/font profiles.",
+      "criterion": "Retain all actor, legal-card, signed-score and seat-order checks. Each table must observe all actors and a real AI-to-human handoff; synthetic text measurements qualify geometry only.",
       "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
       "expires": "2026-12-18",
-      "sha256": "0cea444008a7e91b3c12167de66e5ea1b95389a37eff9e589b0a5b3180108f7c",
+      "sha256": "2f72b7f32f0630d4270890e8964f2d6afbf9cfe82ba1e5b6aeb6a964b8bf0743",
       "allowDelete": false
     },
     {
@@ -1679,12 +1679,12 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/chrome/RentzGameHeaderComponentTest.java",
       "owner": "Rentz UI cohesion",
-      "reason": "Extend the retained native chrome checks with the public common title-layout contract.",
-      "criterion": "Retain every control-state, localization and cancellation assertion; add measured compact/wide and font-scale scenarios while preserving the menu touch region and AutoPlay stop action.",
+      "reason": "Extend the existing common header measurements to all 3–6-player progress captions, eight widths, three fonts and both languages.",
+      "criterion": "Retain every header, control-state and touch-region assertion; expand the measured matrix without changing the native header or relaxing bounds.",
       "proof": "Android JVM regression",
       "expires": "2026-12-18",
       "allowDelete": false,
-      "sha256": "2a9a3f3bff91d501f1bb91d174d7acb97b96307ab4b0f6c47f88449a36316ab8"
+      "sha256": "234a17defeea9a21c9568dcc74938b837d8ea3796312caf453aedaea2f66c0dc"
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/screens/RentzGameMenuComponentTest.java",
