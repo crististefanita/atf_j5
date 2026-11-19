@@ -1753,6 +1753,16 @@
       "expires": "2026-12-19",
       "sha256": "873a25921c7aaf66086fb4240803d89faae9170bb38834c45c89753541ff72a7",
       "allowDelete": false
+    },
+    {
+      "path": "atf-ui-browser/pages/verify-trick-playback.mjs",
+      "owner": "Shared browser consumer",
+      "reason": "Replace the duplicated generic playback oracle with exports from the pinned common test JAR.",
+      "criterion": "Execute the prepared Rentz renderer and actual collection module through the shared clock/DOM contracts, preserving original comparisons in the consumer audit.",
+      "proof": "atf-ui-browser/README.md",
+      "expires": "2026-12-19",
+      "sha256": "627f00bd482b6a77e353a854b86f4646730bcef0c3ddb15a69046e403fcc4d4b",
+      "allowDelete": false
     }
   ]
 }
