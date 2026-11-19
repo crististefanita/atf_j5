@@ -125,6 +125,8 @@ public final class RentzBrowserComponentTest {
             }
         }
         var palette = browser.palette().stream().collect(Collectors.toMap(BrowserGame.Token::name, BrowserGame.Token::color));
+        equal("Shared Android menu touch target", "48px", palette.get("--whist-menu-touch"));
+        equal("Shared Android leading title gap", "8px", palette.get("--whist-title-gap"));
         equal("Shared rank proportions", Float.toString(ro.cardtable.ui.cards.CardFaceMetrics.RANK_SCALE),palette.get("--whist-rank-scale"));
         equal("Shared played face outline", "#"+Integer.toHexString(ro.cardtable.ui.table.PlayedCardStyle.OUTLINE).substring(2),palette.get("--whist-played-line"));
         equal("Shared score human row", "#"+Integer.toHexString(ro.cardtable.ui.table.ScoreGridStyle.HUMAN_ROW).substring(2),palette.get("--whist-score-human"));
@@ -150,7 +152,7 @@ public final class RentzBrowserComponentTest {
                 "--whist-face-suit-baseline", "--whist-face-suit-size", "--whist-face-inverted-size", "--whist-played-radius",
                 "--whist-played-stroke", "--whist-hint-stroke", "--whist-hand-face-width", "--whist-hand-face-height",
                 "--whist-trump-face-width", "--whist-trump-face-height", "--whist-hand-slot", "--whist-score-head",
-                "--whist-score-row");
+                "--whist-score-row", "--whist-menu-touch", "--whist-title-gap");
         truth("Rentz defines all CSS custom properties required by the J4 browser shell", tokens.keySet().containsAll(required));
         equal("Browser paper matches the Android background", "#f6f5ed", tokens.get("--whist-paper"));
         equal("Browser card surface matches native Rentz cards", "#fffef8", tokens.get("--whist-surface"));

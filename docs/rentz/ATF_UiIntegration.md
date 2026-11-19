@@ -241,6 +241,7 @@ Ajutorul afișează grila pentru 3–6 jucători din profilul efectiv, verificat
 
 - Componentele Rentz verifică textul și starea bifei în RO/EN, inclusiv ascunderea după încheierea mâinii. Un control inactiv nu pornește automatizarea în timpul unei ture blocate; un control activ păstrează acțiunea de oprire chiar dacă AI-ul calculează.
 - Testul de adopție verifică octeții `GameTitleBar` din AAR-ul fixat. Contractul de măsurare și ținta tactilă sunt calificate în producătorul comun.
+- Tema WEB furnizează explicit `--whist-menu-touch: 48px` și `--whist-title-gap: 8px`, corespunzătoare țintei și spațiului logic din antetul Android; componentele adaptorului și ale motorului compilat refuză lipsa acestor valori.
 - `RentzCardSpaceTest` reutilizează cele patru profile native comune (320×599, 360×740, 393×800 cu font 2× și 600×1140), peste profilele Rentz compacte, scunde și late. La 3–6 locuri compară aceleași dreptunghiuri de ancorare și verifică banda centrală.
 
 [Adaptorul antetului](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/chrome/RentzGameHeader.java) · [Componentele antetului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/chrome/RentzGameHeaderComponentTest.java) · [Calificarea nativă a antetului comun](https://github.com/crististefanita/whist/blob/main/whist-lab-app/app/src/test/java/ro/whistlab/app/screens/AutoGameHeaderComponentTest.java)

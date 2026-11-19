@@ -75,6 +75,7 @@ public final class RentzBrowser implements BrowserGame {
                 color("played-red", PlayedCardStyle.RED), color("played-dark", PlayedCardStyle.DARK),
                 color("played-player", PlayedCardStyle.PLAYER),
                 dimension("rank-scale", Float.toString(CardFaceMetrics.RANK_SCALE)),
+                dimension("menu-touch", "48px"), dimension("title-gap", "8px"),
                 dimension("hand-label", HandLayoutMetrics.cardLabelSizeSp() / 16.0 + "rem"),
                 dimension("hand-rank-cap", 2 * CardFaceMetrics.INDEX_SIZE_SP + "px"),
                 dimension("face-index-top", CardFaceMetrics.INDEX_TOP_DP + "px"),

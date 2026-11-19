@@ -19,6 +19,9 @@ const native = JSON.parse(readFileSync(nativeFile, 'utf8').replace(/^\uFEFF/, ''
 engine.initialize(0, 31);
 const call = (path, values = {}) => JSON.parse(engine.commandLocal(path, JSON.stringify(values), null, null, null, null)).result;
 const setup = call('/api/setup');
+const palette = new Map(setup.palette.map(token => [token.name, token.color]));
+check('Shared menu target matches the Android header 48dp touch contract', '48px', palette.get('--whist-menu-touch') ?? 'missing');
+check('Shared title keeps the Android header 8dp gap after the menu', '8px', palette.get('--whist-title-gap') ?? 'missing');
 for (const expected of await verifyCardTypography(setup)) {
   const actual = native.faces.find(face => face.height === expected.height);
   check(`The delivered shared typography fixture exists in the Android AAR at ${expected.height}dp`, true, !!actual);
