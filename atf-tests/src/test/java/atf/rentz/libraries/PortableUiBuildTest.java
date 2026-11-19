@@ -11,26 +11,70 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @AtfComponentTest
 class PortableUiBuildTest {
-    private static final List<String> PORTABLE = List.of("score/ScoreTableContent", "score/HistoryContent",
+    private static final List<String> PORTABLE = List.of("score/ScoreTableContent", "score/ScoreTypography", "score/HistoryContent",
             "score/HistoryGridMetrics", "score/HistoryScrollSync", "screens/GameTitleLayout", "seat/SeatTypography");
     @Test void androidAndBrowserPinTheSamePortablePresentationSources() throws Exception {
         Path root = LibraryAdoptionTest.root();
         var json = new ObjectMapper();
-        sameInputs(json.readTree(root.resolve("rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.21/card-ui-build.json").toFile()),
+        sameInputs(nativeReceipt(root, json),
                 json.readTree(root.resolve("atf-ui-browser/lib/browser-build.json").toFile()));
     }
     @Test void aDifferentPortableInputCannotPassCrossPlatformQualification() throws Exception {
         Path root = LibraryAdoptionTest.root();
         var json = new ObjectMapper();
-        var android = json.readTree(root.resolve("rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.21/card-ui-build.json").toFile());
+        var android = nativeReceipt(root, json);
         var browser = json.readTree(root.resolve("atf-ui-browser/lib/browser-build.json").toFile());
         sameInputs(android, browser);
-        var changed = browser.deepCopy();
-        String path = portablePath(PORTABLE.getFirst());
-        var input = java.util.stream.StreamSupport.stream(changed.required("inputs").spliterator(), false)
-                .filter(row -> path.equals(row.required("path").asText())).findFirst().orElseThrow();
-        ((ObjectNode) input).put("sha256", "0".repeat(64));
-        assertThrows(AssertionError.class, () -> sameInputs(android, changed), "A changed model cannot pass by keeping the library version");
+        for (String type : PORTABLE) {
+            var changed = browser.deepCopy();
+            String path = portablePath(type);
+            var input = java.util.stream.StreamSupport.stream(changed.required("inputs").spliterator(), false)
+                    .filter(row -> path.equals(row.required("path").asText())).findFirst().orElseThrow();
+            ((ObjectNode) input).put("sha256", "0".repeat(64));
+            assertThrows(AssertionError.class, () -> sameInputs(android, changed),
+                    "A changed portable model cannot pass by keeping the library version: " + type);
+        }
+    }
+
+    private static JsonNode nativeReceipt(Path root, ObjectMapper json) throws Exception {
+        Path repository = root.resolve("rentz-lab-app/ui-library");
+        var pin = json.readTree(repository.resolve("provenance.json").toFile());
+        String coordinate = pin.required("coordinate").asText();
+        assertTrue(coordinate.matches("ro[.]cardtable:card-table-ui:[0-9]+[.][0-9]+[.][0-9]+"), "Explicit native coordinate");
+        String relative = "ro/cardtable/card-table-ui/" + coordinate.substring(coordinate.lastIndexOf(':') + 1) + "/card-ui-build.json";
+        var hashes = java.util.stream.StreamSupport.stream(pin.required("files").spliterator(), false)
+                .filter(row -> relative.equals(row.required("path").asText())).toList();
+        assertEquals(1, hashes.size(), "The admitted native build receipt must be pinned exactly once");
+        byte[] bytes = Files.readAllBytes(repository.resolve(relative));
+        assertEquals(hashes.getFirst().required("sha256").asText(),
+                java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes)),
+                "Read the exact native producer receipt");
+        var receipt = json.readTree(bytes);
+        assertEquals(coordinate, receipt.required("coordinate").asText(), "The receipt belongs to the admitted native version");
+        return receipt;
+    }
+
+    @Test void nativeBuildReceiptCannotBeUnpinnedOrReplaced(@org.junit.jupiter.api.io.TempDir Path fixture) throws Exception {
+        Path root = LibraryAdoptionTest.root(), repository = fixture.resolve("rentz-lab-app/ui-library");
+        Files.createDirectories(repository);
+        var json = new ObjectMapper();
+        var pin = (ObjectNode) json.readTree(root.resolve("rentz-lab-app/ui-library/provenance.json").toFile());
+        var missing = pin.deepCopy();
+        missing.putArray("files");
+        json.writeValue(repository.resolve("provenance.json").toFile(), missing);
+        assertThrows(AssertionError.class, () -> nativeReceipt(fixture, json), "A version alone cannot identify its source receipt");
+        json.writeValue(repository.resolve("provenance.json").toFile(), pin);
+        String relative = java.util.stream.StreamSupport.stream(pin.required("files").spliterator(), false)
+                .map(row -> row.required("path").asText()).filter(path -> path.endsWith("/card-ui-build.json"))
+                .findFirst().orElseThrow();
+        Path target = repository.resolve(relative);
+        Files.createDirectories(target.getParent());
+        byte[] original = Files.readAllBytes(root.resolve("rentz-lab-app/ui-library").resolve(relative));
+        Files.write(target, original);
+        assertEquals(pin.required("coordinate").asText(), nativeReceipt(fixture, json).required("coordinate").asText(),
+                "The exact original receipt remains valid");
+        Files.writeString(target, new String(original, java.nio.charset.StandardCharsets.UTF_8) + " ");
+        assertThrows(AssertionError.class, () -> nativeReceipt(fixture, json), "Even valid JSON cannot replace the pinned receipt bytes");
     }
     private static void sameInputs(JsonNode android, JsonNode browser) {
         for (String type : PORTABLE) {

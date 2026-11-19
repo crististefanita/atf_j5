@@ -46,6 +46,18 @@ implementation 'ro.cardtable:card-table-names:0.1.0'
 
 Aceste intrări sunt active în configurația live. [Repository-ul admis](../../rentz-lab-app/ui-library/README.md) păstrează artefactele și hash-urile; testele refuză dependența de motorul Whist.
 
+### Rolurile textului de scor
+
+`ScoreTypography` deține dimensiunile logice comune. Android consumă valorile în `sp`; adaptorul browser publică tokenurile `rem` din aceeași enumerare, iar CSS-ul comun le consumă prin variabile.
+
+| Frontieră | Verificare |
+|---|---|
+| Pachetul nativ | Receipt-ul din coordonata admisă are SHA-256 în proveniență; clasele încărcate provin din AAR-ul declarat. |
+| Modele portabile | [Paritatea surselor](../../atf-tests/src/test/java/atf/rentz/libraries/PortableUiBuildTest.java) compară toate modelele declarate, inclusiv tipografia, și refuză schimbarea fiecărei intrări. |
+| Adaptor WEB | [Proba compilată](../../atf-ui-browser/pages/verify-shared-ui.mjs) confruntă enumerarea citită din AAR cu paleta motorului TeaVM și consumul tokenurilor în CSS-ul livrat. Un fallback CSS nu dovedește injectarea tokenului. |
+
+Etichetele și calculele Rentz rămân ale jocului. Actualizarea bibliotecii nu înlocuiește `Δ`/`Σ` din istoric sau `Δ:`/`Σ:` din rezultatul mâinii.
+
 ## Componente și acceptanță
 
 - Verificați proiecțiile pe date Rentz reale, callback-uri unice, limbă și nume, legalitatea comenzii și tratamentul refuzului.

@@ -97,6 +97,9 @@ public final class RentzBrowser implements BrowserGame {
             tokens.add(new Token("--rentz-score-col-" + index, columns.get(index) * 100 / total + "%"));
         }
         tokens.add(new Token("--rentz-history-separator", RentzScoreLayout.HISTORY_SEPARATOR_DP + "px"));
+        for (var role : ro.cardtable.ui.score.ScoreTypography.values()) {
+            tokens.add(new Token(role.cssName(), role.rem()));
+        }
         return List.copyOf(tokens);
     }
 

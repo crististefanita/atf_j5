@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "coordinate": "ro.cardtable:card-table-ui:0.1.21",
-  "inputSha256": "80dc60baa9ba8e5bbc84ea6d88a31f312d264a86692bd57c829cf8854179443b",
+  "coordinate": "ro.cardtable:card-table-ui:0.1.22",
+  "inputSha256": "bcee5d7351fce75c644ee63d69e69c3306ce7cb64e512ddf1c1e2d22b3e4d767",
   "inputs": [
     {
       "path": "whist-lab-app/atf-card-table-ui/build.gradle",
-      "sha256": "91210296340828cc2b247c44feb83772710106a9fee4a6cebdb178642a08ca17"
+      "sha256": "3370ad2d0d0359a31eabdc53ee20eb0e5c5d9a8e931cad8866677365e9870187"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/AndroidManifest.xml",
@@ -113,31 +113,35 @@
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/HistoryContent.java",
-      "sha256": "844e848f786079e23d821678d43c3ca88846ed678f6a180dd18e6f460432d208"
+      "sha256": "27b03f25b50832d515db4f2d9454ec7cf0205620d7c1f6ec035ac3f1b387b21a"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/HistoryGridMetrics.java",
-      "sha256": "38849b55e597ac234ec949547380c6ea84641d41e7e40ce884320687ca50403e"
+      "sha256": "7e728c37d9a1b40651230e730e52ec647bb69f0136b5ac17582f7633ace58b20"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/HistoryScrollSync.java",
-      "sha256": "ca1c3bb526f88a2e057aafc41dbddd5270a7ab2716ea8fdfc2964de5a7d7a893"
+      "sha256": "ebc92e068e165fc37834576e34ec067977011cae5cdc9731e7495d0155270341"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/README.md",
-      "sha256": "d615f977421b6f95240352bc8dfef18380e66a658d96269918b7b55ed9888f80"
+      "sha256": "de9b366ea204a71137c800d9c7b5e0fb68aa1baa13b6c53a9a60bd5f9c21a75f"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/ScoreHistoryView.java",
-      "sha256": "45de0c8d60608dc16390478fe462c3ad893baad73af2c3c021faa2bc1a23502d"
+      "sha256": "155da2c59b3231f01606774cae94c42a7eba21d4c15b87bac7aeb9f0983b945f"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/ScoreTableContent.java",
-      "sha256": "38ac7d2b53e558dfc2eb0875429a53f6d48147e275e01a8c65985c7046272237"
+      "sha256": "9ba8eec3afc8e7be4012e0f26689ad8817a0256bf6c38ef6e8ac70b7ed70cbae"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/ScoreTableView.java",
-      "sha256": "2ea106cc52f1101964b63a47f1f133f79cbff36deec297bbb795de411542210c"
+      "sha256": "8598853b30d59d3af42d7c174edaedc3e6e4fe2fdd972b9faae5e32e6ae73ee2"
+    },
+    {
+      "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/ScoreTypography.java",
+      "sha256": "925f03b0529910db390c6af66592c2d6a2b3e746f2ecbc7da3b944351d608b6d"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/screens/GameTitleBar.java",
@@ -149,7 +153,7 @@
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/screens/ScreenViews.java",
-      "sha256": "10bc254f67900e7c3ee9d32567630f0cc42f900a01cb5f1e89260a30ecf43108"
+      "sha256": "63a0c11e92997b08946ecf0bb5b7e63d36e965a5d1e2830fa22f3ab9b98fb968"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/seat/FittedSeatLine.java",
@@ -181,7 +185,7 @@
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/seat/SeatTypography.java",
-      "sha256": "3e046c8a2fc3fb5cad2461c49aefdfacc95e64f16a2b457d20dee347e0ab2afd"
+      "sha256": "99a2a8c2c4dda652245d54f67558d1076171bf1c1c8d221db8061c09783fd15f"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/table/PlayedCardContent.java",
@@ -257,7 +261,7 @@
     },
     {
       "path": "whist-lab-app/gradle.properties",
-      "sha256": "5a7e0fd5a51720a4a83628eb49d9b942c11c885cd29f5302a03a7c5819c4dcaa"
+      "sha256": "f11ad66a46a2310a3feee522481a9c3ddeec8796461434942b0c1d210d8e3dbe"
     },
     {
       "path": "whist-lab-app/gradle/wrapper/gradle-wrapper.jar",
@@ -265,7 +269,7 @@
     },
     {
       "path": "whist-lab-app/gradle/wrapper/gradle-wrapper.properties",
-      "sha256": "5c0c1bb89c2c1dbefd1494435dd493cc5c73f07383ea0ff85dd7ed14378d5838"
+      "sha256": "89f62533208a72b7a8cc2892b6b3540c445fa6175508297d932dae57d653591a"
     },
     {
       "path": "whist-lab-app/gradlew.bat",
@@ -278,20 +282,20 @@
   ],
   "files": [
     {
-      "path": "card-table-ui-0.1.21.aar",
-      "sha256": "a21b3b4a968bca4e5da3c9436c827b5fd97e8d81b800c0feaa2715c986f10ecd"
+      "path": "card-table-ui-0.1.22.aar",
+      "sha256": "ba43fe05a4c30d13f5fb6ef9eae1a1e20e886e1706d9208302cfd70fa0c1f09a"
     },
     {
-      "path": "card-table-ui-0.1.21.pom",
-      "sha256": "9365373c9986869236dfe0f0243e84b057758630f42e7652ae5992a93d654273"
+      "path": "card-table-ui-0.1.22.pom",
+      "sha256": "759b581619ebd403017864ebb173800d3f3d55867102d378863fa7e87e405fd5"
     },
     {
-      "path": "card-table-ui-0.1.21.module",
-      "sha256": "40bf782889d1fe2cfcb41fe15552eb652f7f6750bca28864d9df098f6bfee8d8"
+      "path": "card-table-ui-0.1.22.module",
+      "sha256": "cd573f094d4fdee0fbe27c15794a7a7b0ee0a88cd516bd5d2de7fa881c5a4c24"
     },
     {
-      "path": "card-table-ui-0.1.21-sources.jar",
-      "sha256": "f996b639e3cd9fae5d5dec732c81ef9d9a0f68f70e95135643524421c5635794"
+      "path": "card-table-ui-0.1.22-sources.jar",
+      "sha256": "5f10bbea0463b26e753479c0db59e0c462c730be15b8e16bf207ff0f1a703d19"
     }
   ]
 }

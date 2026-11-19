@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ro.cardtable</groupId>
   <artifactId>card-table-ui</artifactId>
-  <version>0.1.21</version>
+  <version>0.1.22</version>
   <packaging>aar</packaging>
   <name>Card Table UI</name>
   <description>Game-independent Android Views and hand geometry</description>

@@ -982,11 +982,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java",
       "owner": "Rentz UI",
-      "reason": "Qualify the pinned shared Android widgets and loaded binary bytes without requiring the sibling WEB checkout layout.",
-      "criterion": "Retain native archive, loaded-class and namespace assertions; move all six cross-platform source hash comparisons to PortableUiBuildTest with a rejecting altered-receipt fixture.",
-      "proof": "../../whist_back/component-suites/card-highlight-20261111/whist-lab-app-card-table-ui-testDebugUnitTest.html",
+      "reason": "Admit the coherent Android 0.1.22 and Browser 0.2.25 pair, including score typography and the exact native producer receipt.",
+      "criterion": "Keep every physical archive and loaded-class comparison; pin the current native receipt and reject each of the seven changed portable inputs independently.",
+      "proof": "rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz",
       "expires": "2026-11-20",
-      "sha256": "a8f70f3e78f93c8f3eb7479d1db090f86d1f1042144803948a7de17fb5755438",
+      "sha256": "a9667e7e175335cb12278cb2f975bcd17bef8f842b62619f053f299ddd2da8fb",
       "allowDelete": false
     },
     {
@@ -1326,7 +1326,7 @@
       "criterion": "Product 0.28.0 / 32; fixed seed remains exclusive to the isolated UI-sanity build.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "b8a71f0916be10fcd610e8c67a8d731b897ecf05e60abfd840d12467edb92dca",
+      "sha256": "dc89e1867d8ca0316ed2a00fd613f7bae0f0364c272501710809ac2f97c0e947",
       "allowDelete": false
     },
     {
@@ -1727,11 +1727,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/libraries/PortableUiBuildTest.java",
       "owner": "Rentz portable UI build",
-      "reason": "Keep WEB rebuild triggers aligned with native Java projections compiled by the browser adapter.",
-      "criterion": "Cover actual compiled native inputs in Pages triggers, retain the negative narrow-trigger fixture, compare all six portable source hashes across platforms and reject a changed receipt.",
-      "proof": "docs/rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser",
+      "reason": "Admit the coherent Android 0.1.22 and Browser 0.2.25 pair, including score typography and the exact native producer receipt.",
+      "criterion": "Keep every physical archive and loaded-class comparison; pin the current native receipt and reject each of the seven changed portable inputs independently.",
+      "proof": "rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz",
       "expires": "2026-12-18",
-      "sha256": "ee9c48e9329e5dd07792880de18a4bc4dcec201ccac7ec22573d240f41203606",
+      "sha256": "8a2f1035323eb300ee8f9d73634806f091569c4fe515199b1932bfe85c3fb0ae",
       "allowDelete": false
     },
     {
@@ -1747,11 +1747,11 @@
     {
       "path": "atf-ui-browser/Test-RentzBrowserComponents.ps1",
       "owner": "Shared browser consumer",
-      "reason": "Adopt the versioned shared runtime and test JAR without weakening component assertions.",
-      "criterion": "Verify the source commit and SHA-256 pin, compile against the physical JAR and preserve the shared viewport, card and adapter checks.",
+      "reason": "Admit the coherent Browser 0.2.25 and native 0.1.22 pair while retaining all shared renderer, geometry and timing contracts.",
+      "criterion": "Preserve exact JAR checksums and source pins, executable shared contracts and native/browser comparisons, including all delivered score text roles.",
       "proof": "atf-ui-browser/README.md",
       "expires": "2026-12-19",
-      "sha256": "17ebb4d317c66c0c6fb8ab78bf7cee2bab25ad5fe93939726c54185d170472a6",
+      "sha256": "75ae1775625f4bde2a03f88ae6a07bde2f85a36e5b41ff232be1325810fca278",
       "allowDelete": false
     },
     {
@@ -1767,11 +1767,11 @@
     {
       "path": "atf-ui-browser/Build-RentzPages.ps1",
       "owner": "Rentz shared browser admission",
-      "reason": "Adopt Browser 0.2.24 while retaining explicit extraction and execution of every shared test contract.",
-      "criterion": "Pinned JAR checksum, extraction exit code and presence of every executable contract are required; keep actual renderer and collection comparisons.",
+      "reason": "Admit the coherent Browser 0.2.25 and native 0.1.22 pair while retaining all shared renderer, geometry and timing contracts.",
+      "criterion": "Preserve exact JAR checksums and source pins, executable shared contracts and native/browser comparisons, including all delivered score text roles.",
       "proof": "atf-ui-browser/README.md",
       "expires": "2026-12-19",
-      "sha256": "08cda28b9f7b138f14bff17e8ec6c9e04e3120c5758df9f915a0afcebf59eee2",
+      "sha256": "5e10ae8fd63568c804ea62d48f62f0038be4eb32500f813f9fbb7cf69e826c91",
       "allowDelete": false
     },
     {

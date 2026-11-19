@@ -3,7 +3,7 @@
   "component": {
     "group": "ro.cardtable",
     "module": "card-table-ui",
-    "version": "0.1.21",
+    "version": "0.1.22",
     "attributes": {
       "org.gradle.status": "release"
     }
@@ -33,13 +33,13 @@
       ],
       "files": [
         {
-          "name": "card-table-ui-0.1.21.aar",
-          "url": "card-table-ui-0.1.21.aar",
-          "size": 164339,
-          "sha512": "e1e6e8abd104152859b90602dcea026ad6332add0145b19cd514a5538f179a098ef4fe7028c65eced823b7b1e4cdc0dc0f55ed144b45746cacbd94f111fe5f9e",
-          "sha256": "a21b3b4a968bca4e5da3c9436c827b5fd97e8d81b800c0feaa2715c986f10ecd",
-          "sha1": "59c56830f044b4015d4cc93599c0c467b0993373",
-          "md5": "d4f1af9afdbbae4e03bf90c2a9a2f83f"
+          "name": "card-table-ui-0.1.22.aar",
+          "url": "card-table-ui-0.1.22.aar",
+          "size": 165875,
+          "sha512": "703681f295da485d87c023820d26439b62536ca7d08b8aa17bc31e913083ca983e2f3ae70344bd3ed6bcbd97389f31bd2989240575845fe26a32da2447a567e8",
+          "sha256": "ba43fe05a4c30d13f5fb6ef9eae1a1e20e886e1706d9208302cfd70fa0c1f09a",
+          "sha1": "1bd40c3e155eac25ef9da7fac897e707310bd15b",
+          "md5": "d314cca223d4ddb7dc2f0e91b5cfcc8a"
         }
       ]
     },
@@ -62,13 +62,13 @@
       ],
       "files": [
         {
-          "name": "card-table-ui-0.1.21.aar",
-          "url": "card-table-ui-0.1.21.aar",
-          "size": 164339,
-          "sha512": "e1e6e8abd104152859b90602dcea026ad6332add0145b19cd514a5538f179a098ef4fe7028c65eced823b7b1e4cdc0dc0f55ed144b45746cacbd94f111fe5f9e",
-          "sha256": "a21b3b4a968bca4e5da3c9436c827b5fd97e8d81b800c0feaa2715c986f10ecd",
-          "sha1": "59c56830f044b4015d4cc93599c0c467b0993373",
-          "md5": "d4f1af9afdbbae4e03bf90c2a9a2f83f"
+          "name": "card-table-ui-0.1.22.aar",
+          "url": "card-table-ui-0.1.22.aar",
+          "size": 165875,
+          "sha512": "703681f295da485d87c023820d26439b62536ca7d08b8aa17bc31e913083ca983e2f3ae70344bd3ed6bcbd97389f31bd2989240575845fe26a32da2447a567e8",
+          "sha256": "ba43fe05a4c30d13f5fb6ef9eae1a1e20e886e1706d9208302cfd70fa0c1f09a",
+          "sha1": "1bd40c3e155eac25ef9da7fac897e707310bd15b",
+          "md5": "d314cca223d4ddb7dc2f0e91b5cfcc8a"
         }
       ]
     },
@@ -82,13 +82,13 @@
       },
       "files": [
         {
-          "name": "card-table-ui-0.1.21-sources.jar",
-          "url": "card-table-ui-0.1.21-sources.jar",
-          "size": 63411,
-          "sha512": "56e696c1244eb3ef1b9ffbcfe1baa857805afc9ca4383ec7357befab174ca7c4ece69d8aa9a1d4f160dfe018db06fec98f9f9f0ae4fbf380fc2dc090828a80a4",
-          "sha256": "f996b639e3cd9fae5d5dec732c81ef9d9a0f68f70e95135643524421c5635794",
-          "sha1": "44ddc0157858928d4091f55f5cbd4179b1eb9664",
-          "md5": "c8eb025d914151e882c648bf27d3eded"
+          "name": "card-table-ui-0.1.22-sources.jar",
+          "url": "card-table-ui-0.1.22-sources.jar",
+          "size": 64104,
+          "sha512": "a9331a477ececf75e5dd1ef04961e2a7f841ed37361ab8a6295ed72ceaeae6e7dc2d61140bb7f1093af37a33eb6b8f9b272bdb1a37108ad0c7be7c4359538c38",
+          "sha256": "5f10bbea0463b26e753479c0db59e0c462c730be15b8e16bf207ff0f1a703d19",
+          "sha1": "e0d167c93fdb688bc116b241b7f3588db4ea347d",
+          "md5": "baba89aa1ec0b9743751063779b5a259"
         }
       ]
     }

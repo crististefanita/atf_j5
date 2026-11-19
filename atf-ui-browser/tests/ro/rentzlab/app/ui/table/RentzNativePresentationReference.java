@@ -39,7 +39,9 @@ public final class RentzNativePresentationReference {
                         "slots", cards.slots().stream().map(slot -> List.of(slot.seat(), slot.row(), slot.leftDp())).toList()));
             }
         }
-        System.out.println(new JSONObject(Map.of("faces", faces, "boards", boards)));
+        var scoreTypography = new java.util.LinkedHashMap<String, String>();
+        for (var role : ro.cardtable.ui.score.ScoreTypography.values()) scoreTypography.put(role.cssName(), role.rem());
+        System.out.println(new JSONObject(Map.of("faces", faces, "boards", boards, "scoreTypography", scoreTypography)));
     }
 
     private static List<Integer> rect(TableGeometry.Rect rect) {
