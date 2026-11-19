@@ -185,6 +185,54 @@ public final class TrickPreviewTest {
         }
     }
 
+    @Test public void everyTrickContractKeepsItsFinalCollectionBeforeReleasingTheScoreAtThreeToSixPlaces() {
+        for (int players = 3; players <= 6; players++) for (var contract : Contract.values()) {
+            if (contract == Contract.RENTZ) continue;
+            var match = new RentzMatch(players, 20261119 + players, ScoreProfile.laboratory());
+            match.choose(0, contract, false);
+            var preview = new TrickPreview();
+            preview.reset(match.observe(0));
+            var trick = new java.util.ArrayList<TrickRules.Play>();
+            var violations = new java.util.ArrayList<String>();
+            int moves = 0, collections = 0;
+            long now = 100;
+            while (match.observe(0).phase() == RentzMatch.Phase.PLAY) {
+                var actor = match.observe(match.observe(0).turn());
+                var card = actor.legal().get(0);
+                trick.add(new TrickRules.Play(actor.seat(), card));
+                match.play(actor.seat(), card);
+                var after = match.observe(0);
+                var shown = preview.display(after, now);
+                if (trick.size() < players) {
+                    if (!shown.equals(trick) || preview.collection(now).isPresent()) violations.add("premature collection/" + moves);
+                } else {
+                    var lead = trick.get(0).card().suit();
+                    int winner = trick.stream().filter(play -> play.card().suit() == lead)
+                            .max(java.util.Comparator.comparingInt(play -> play.card().rank())).orElseThrow().seat();
+                    if (!shown.equals(trick) || preview.collection(now).orElseThrow().winner() != winner)
+                        violations.add("faces or winner/" + moves);
+                    if (!preview.awaitingFirstFrame() || preview.remaining(now + 5000) != 1500)
+                        violations.add("deadline spent before visible frame/" + moves);
+                    preview.markVisible(now);
+                    if (!preview.display(after, now + 1499).equals(trick) || preview.remaining(now + 1499) != 1)
+                        violations.add("last visible frame/" + moves);
+                    if (preview.remaining(now + 1500) != 0 || preview.collection(now + 1500).isPresent()
+                            || !preview.display(after, now + 1500).equals(after.trick()))
+                        violations.add("score gate deadline/" + moves);
+                    trick.clear(); collections++; now += 1500;
+                }
+                now += 100;
+                if (++moves > players * 8) throw new AssertionError("The real hand did not terminate");
+            }
+            String key = players + "/" + contract;
+            audit.equal("Real complete hand keeps every collection and its final score deadline " + key, List.of(), violations);
+            audit.equal("No partial final trick " + key, 0, trick.size());
+            audit.equal("Every observed play belongs to a complete collection " + key, moves, collections * players);
+            audit.truth("The completed hand reaches the native score phase " + key, match.observe(0).phase() == RentzMatch.Phase.DEAL_END);
+            audit.truth("No expired collection replays at the score " + key, preview.collection(now).isEmpty());
+        }
+    }
+
     private static RentzMatch.Observation rentzBoundary(int players, RentzMatch.Phase phase) {
         var scores=java.util.Collections.nCopies(players, 0);
         return new RentzMatch.Observation(0, players, 0, 0, 1, phase, Contract.RENTZ, false, true,

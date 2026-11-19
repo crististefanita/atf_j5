@@ -24,7 +24,7 @@ public final class RentzTableContentTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
     private final RentzUiText copy = new RentzUiText(RentzUiText.Language.EN);
     @Test public void observedAiHumanHandoffsKeepTheMeasuredSeatPlanAtThreeToSixPlaces() {
-        for (int count : new int[]{3, 4, 5, 6}) for (var contract : new Contract[]{Contract.RENTZ, Contract.TRICKS, Contract.WHIST}) {
+        for (int count : new int[]{3, 4, 5, 6}) for (var contract : Contract.values()) {
             var session = ready(count, contract);
             var names = session.displayNames("Ana");
             Map<String, List<TableGeometry.Rect>> baseline = mockMeasuredPlans(session.view(), names);

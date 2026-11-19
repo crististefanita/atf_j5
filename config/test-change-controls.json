@@ -1056,17 +1056,17 @@
       "criterion": "Retain all actor, legal-card, signed-score and seat-order checks. Each table must observe all actors and a real AI-to-human handoff; synthetic text measurements qualify geometry only.",
       "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
       "expires": "2026-12-18",
-      "sha256": "2f72b7f32f0630d4270890e8964f2d6afbf9cfe82ba1e5b6aeb6a964b8bf0743",
+      "sha256": "d4e4204b6424be8aa58afb973ea91781093d4247a360d8a29ebc38858fdbf35d",
       "allowDelete": false
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/TrickPreviewTest.java",
       "owner": "Rentz UI",
-      "reason": "S05 and U10–U13 · Qualify the common table presentation and effective score help.",
-      "criterion": "Keep the 1500 ms deadline and winner destination. Verify the first movement, fade and no-replay boundary. Three table sizes cover delayed Rentz arrival, public remaining-card counts, unchanged confirmed awards and trick collection.",
+      "reason": "Extend the preserved collection oracles to complete hands for every trick contract at three to six places.",
+      "criterion": "Retain all existing timing, motion, restore and Rentz-arrival checks. Every trick contract keeps all public faces, the independent winner and the first-visible-frame 1500 ms deadline through its final score boundary at all four table sizes.",
       "proof": "../../rentz_back/ui-review/restart-collection-j5/README.md",
       "expires": "2026-11-20",
-      "sha256": "6dfc2f49d6058340ae1b689c5f1c9e17033eac92b75afbe0d29cd6d6f6f2e6ab",
+      "sha256": "9b6901a8a5ad9f0c38164b79622a70ba38583ac22390bf24287bad01137a6861",
       "allowDelete": false
     },
     {

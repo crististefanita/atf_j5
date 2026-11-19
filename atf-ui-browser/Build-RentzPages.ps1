@@ -19,8 +19,8 @@ $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -Jso
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.16.jar'
-$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.16-tests.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.18.jar'
+$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.18-tests.jar'
 $commonTestsExpected = (Get-Content -LiteralPath "$commonTests.sha256" -Raw).Trim()
 if ((Get-FileHash -Algorithm SHA256 -LiteralPath $commonTests).Hash -ine $commonTestsExpected) {
     throw 'Shared browser component test checksum mismatch.'
@@ -108,7 +108,7 @@ $choiceAnchor = @(
 ) -join "`n"
 foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAnchor, $automationAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
-    if ($count -ne 1) { throw "Card Table Browser 0.2.16 adapter anchor changed; expected one match, found $count." }
+    if ($count -ne 1) { throw "Card Table Browser 0.2.18 adapter anchor changed; expected one match, found $count." }
 }
 $markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence, rentzMenuRoutes } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable, rentzScoreRules } from "./rentz-score.mjs";')
 $scoreAnchor = 'scoreGrid(match.score.table, true)'
@@ -235,6 +235,8 @@ foreach ($script in @('rentz-ui.mjs', 'table.mjs', 'engine-worker.mjs', 'local-t
 }
 & node (Join-Path $pages 'verify-trick-playback.mjs') $tableScript
 if ($LASTEXITCODE -ne 0) { throw 'Shared trick playback component checks failed.' }
+& node (Join-Path $pages 'verify-trick-contracts.mjs') $site
+if ($LASTEXITCODE -ne 0) { throw 'Complete trick-contract presentation checks failed.' }
 & node (Join-Path $pages 'verify-rentz-engine.mjs') (Join-Path $site 'rentz-engine.mjs') `
     (Join-Path $commonTestRoot 'hand-presentation.mjs') (Join-Path $site 'hand-feedback.mjs') `
     (Join-Path $site 'rentz-ui.mjs')
