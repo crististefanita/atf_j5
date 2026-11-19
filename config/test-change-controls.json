@@ -811,12 +811,12 @@
     },
     {
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
-      "owner": "Rentz Android qualification",
-      "reason": "Update the positive README fixture to the mandatory browser link and preserve all rejection cases.",
-      "criterion": "Keep exactly documentation, current APK and current online game links in order; reject absent, duplicate or foreign browser links.",
-      "proof": "Pushed README requires one clean game section for each distribution channel",
-      "expires": "2026-12-15",
-      "sha256": "a768f8f891c2ab19cf47f8adfb028e060d91d2651e801961a3f84fe267b40747",
+      "owner": "Rentz release qualification",
+      "reason": "Align real PowerShell README fixtures with APK then browser; documentation remains outside the game section.",
+      "criterion": "Retain missing, duplicate, stale, reordered, decorated and suffixed-link rejections in both channel fixtures.",
+      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
+      "expires": "2026-12-19",
+      "sha256": "e00d7f9330cd7cade0011ac2a1f584742688598dc878c290781d293d98edd792",
       "allowDelete": false
     },
     {
