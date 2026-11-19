@@ -19,8 +19,8 @@ $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -Jso
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.20.jar'
-$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.20-tests.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.21.jar'
+$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.21-tests.jar'
 $commonTestsExpected = (Get-Content -LiteralPath "$commonTests.sha256" -Raw).Trim()
 if ((Get-FileHash -Algorithm SHA256 -LiteralPath $commonTests).Hash -ine $commonTestsExpected) {
     throw 'Shared browser component test checksum mismatch.'
@@ -108,7 +108,7 @@ $choiceAnchor = @(
 ) -join "`n"
 foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAnchor, $automationAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
-    if ($count -ne 1) { throw "Card Table Browser 0.2.20 adapter anchor changed; expected one match, found $count." }
+    if ($count -ne 1) { throw "Card Table Browser 0.2.21 adapter anchor changed; expected one match, found $count." }
 }
 $markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence, refreshRentzSequence, rentzMenuRoutes } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable, rentzScoreRules } from "./rentz-score.mjs";')
 $preparedLayoutAnchor = '    await placeTable(content);'
@@ -132,14 +132,14 @@ if (([regex]::Matches($markup, [regex]::Escape($menuRoutesAnchor))).Count -ne 1)
 }
 $markup = $markup.Replace($menuRoutesAnchor, '  for (const route of rentzMenuRoutes(routes, match)) {')
 $awardsAnchor = '  if (details.awards) page.append(element("p", details.awards, "whist-score-awards"));'
-$rulesAnchor = 'profileDialogs.message(copy("scoringDetails", "Calculul punctajului"), details.rules)'
+$rulesAnchor = 'profileDialogs.message(copy("scoringDetails", "Calculul punctajului"), details.rules, "game-score-rules")'
 foreach ($anchor in @($awardsAnchor, $rulesAnchor)) {
     if (([regex]::Matches($markup, [regex]::Escape($anchor))).Count -ne 1) {
         throw 'The shared settlement details anchor changed; quiet score adaptation cannot be applied safely.'
     }
 }
 $markup = $markup.Replace($awardsAnchor, '')
-$markup = $markup.Replace($rulesAnchor, 'profileDialogs.message(copy("scoringDetails", "Calculul punctajului"), rentzScoreRules(details))')
+$markup = $markup.Replace($rulesAnchor, 'profileDialogs.message(copy("scoringDetails", "Calculul punctajului"), rentzScoreRules(details), "game-score-rules")')
 $markup = $markup.Replace($historyAnchor, 'rentzHistoryGrid(data.grid, element, historyGrid)')
 $markup = $markup.Replace($layoutAnchor, 'width, height, rentzSequence: !!board.querySelector(".rentz-sequence"), mode: state.view.header?.mode ?? "", seatHeight:')
 $viewportAnchor = '  if (width <= 0 || height <= 0) return;'

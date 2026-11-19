@@ -1743,6 +1743,16 @@
       "expires": "2026-12-19",
       "sha256": "6fd509711ecf52bf59b80d83d3fc7fa2fa8d9cbe2be4a2d467a1d9033d6692a7",
       "allowDelete": false
+    },
+    {
+      "path": "atf-ui-browser/Test-RentzBrowserComponents.ps1",
+      "owner": "Shared browser consumer",
+      "reason": "Adopt the versioned shared runtime and test JAR without weakening component assertions.",
+      "criterion": "Verify the source commit and SHA-256 pin, compile against the physical JAR and preserve the shared viewport, card and adapter checks.",
+      "proof": "atf-ui-browser/README.md",
+      "expires": "2026-12-19",
+      "sha256": "4d25ccfb4814e57912e05ab8f833f33956023e94ac278757b1d75a167090f673",
+      "allowDelete": false
     }
   ]
 }

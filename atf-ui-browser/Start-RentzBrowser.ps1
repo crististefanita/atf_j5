@@ -83,8 +83,8 @@ if ($BrowserRoot) {
         -JavaInputs $sources -Libraries @($JsonLibrary) -MainClass $main -Port $Port -ListenAddress $ListenAddress -BuildOnly:$BuildOnly
     return
 }
-$library = & (Join-Path $PSScriptRoot 'Verify-CardTableBrowser.ps1') -Version '0.2.20' `
-    -SourceCommit '35351bb227290c7374094b1b1ff9445c808fe969'
+$library = & (Join-Path $PSScriptRoot 'Verify-CardTableBrowser.ps1') -Version '0.2.21' `
+    -SourceCommit 'a04aa2dce56b2c65b011df84200882b31b9caa22'
 $build = Join-Path $root ('browser-' + [guid]::NewGuid().ToString('N'))
 $classes = Join-Path $build 'classes'
 $javaTemp = Join-Path $root 'java-temp'
