@@ -239,7 +239,7 @@ foreach ($script in @('rentz-ui.mjs', 'table.mjs', 'engine-worker.mjs', 'local-t
     & node --check (Join-Path $site $script)
     if ($LASTEXITCODE -ne 0) { throw "Generated browser script is invalid: $script" }
 }
-& node (Join-Path $pages 'verify-trick-playback.mjs') $tableScript
+& node (Join-Path $pages 'verify-trick-playback.mjs') $tableScript $commonTestRoot
 if ($LASTEXITCODE -ne 0) { throw 'Shared trick playback component checks failed.' }
 & node (Join-Path $pages 'verify-trick-contracts.mjs') $site
 if ($LASTEXITCODE -ne 0) { throw 'Complete trick-contract presentation checks failed.' }
