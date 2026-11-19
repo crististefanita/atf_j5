@@ -29,6 +29,7 @@ final class PublicDistributionAudit {
         var mapper = new ObjectMapper();
         remote.verifyPublishedLatest(plan, id);
         List<ReleasePublication.Asset> assets = remote.assets(plan.releaseRepository(), id);
+        if (assets.size() != 2) throw new IOException("PUBLICATION-DOWNLOAD-ASSET");
         try (var report = new ExtentReportSession(output.resolve("download-extent.html"), ReportingSettings.defaults());
              var scenario = report.startScenario("Rentz · Public APK acquisition", "Two independent GitHub access modes", List.of("release", "download"))) {
             for (boolean loggedIn : List.of(true, false)) {
@@ -45,10 +46,9 @@ final class PublicDistributionAudit {
                         List<Map<String, Object>> rows = loggedIn ? authenticated : anonymous;
                         for (var proof : List.of(apk, checksum)) {
                             String name = proof.file().getFileName().toString();
+                            var expected = name.equals(plan.apk().name()) ? plan.apk() : plan.checksum();
+                            verifyAsset(expected, proof, assets);
                             var asset = assets.stream().filter(row -> row.name().equals(name)).toList();
-                            if (asset.size() != 1 || asset.getFirst().bytes() != proof.bytes()
-                                    || !asset.getFirst().sha256().equals(proof.sha256()))
-                                throw new IOException("PUBLICATION-DOWNLOAD-ASSET");
                             Files.move(proof.file(), output.resolve(channel + "-" + name));
                             rows.add(Map.of("id", asset.getFirst().id(), "name", name, "url", proof.publicUrl(),
                                     "http", proof.httpStatus(), "bytes", proof.bytes(), "sha256", proof.sha256()));
@@ -80,5 +80,14 @@ final class PublicDistributionAudit {
             mapper.writerWithDefaultPrettyPrinter().writeValue(output.resolve("public-download.json").toFile(), publicProof);
             scenario.complete(AtfReportStatus.PASS);
         }
+    }
+
+    static void verifyAsset(ReleasePublication.Payload expected, GitHubApkDownload.Proof proof,
+                            List<ReleasePublication.Asset> assets) throws IOException {
+        String name = proof.file().getFileName().toString();
+        var matches = assets.stream().filter(row -> row.name().equals(name)).toList();
+        if (!expected.name().equals(name) || matches.size() != 1 || matches.getFirst().bytes() != proof.bytes()
+                || !matches.getFirst().sha256().equals(proof.sha256()) || expected.bytes() != proof.bytes()
+                || !expected.sha256().equals(proof.sha256())) throw new IOException("PUBLICATION-DOWNLOAD-ASSET");
     }
 }

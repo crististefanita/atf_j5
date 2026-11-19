@@ -420,6 +420,20 @@ class ReleasePublicationResumeTest {
         return mock;
     }
 
+    @Test void downloadedChecksumCannotChangeEvenWhenRemoteMetadataAgreesWithItsNewBytes() throws Exception {
+        var proof = new atf.rentz.distribution.GitHubApkDownload.Proof(PLAN.version(), "fixture-url", CHECKSUM.bytes(),
+                "d".repeat(64), "NOT_APPLICABLE", 200, Path.of(CHECKSUM.name()));
+        var remote = List.of(new Asset(12, CHECKSUM.name(), "uploaded", CHECKSUM.bytes(), proof.sha256()));
+        var failure = AuditedAssertions.assertThrows(IOException.class,
+                () -> PublicDistributionAudit.verifyAsset(CHECKSUM, proof, remote), "Bind to the original qualified checksum");
+        AuditedAssertions.assertEquals("PUBLICATION-DOWNLOAD-ASSET", failure.getMessage(),
+                "Self-consistent replacement metadata cannot replace the qualified payload");
+        var exact = new atf.rentz.distribution.GitHubApkDownload.Proof(PLAN.version(), "fixture-url", CHECKSUM.bytes(),
+                CHECKSUM.sha256(), "NOT_APPLICABLE", 200, Path.of(CHECKSUM.name()));
+        PublicDistributionAudit.verifyAsset(CHECKSUM, exact, List.of(asset(12, CHECKSUM)));
+        AuditedAssertions.assertEquals(CHECKSUM.sha256(), exact.sha256(), "The exact checksum remains eligible");
+    }
+
     @Test void publicSameRepositoryPushesOneTagAndResumesWithoutRepeatedWrites() throws Exception {
         var publicPlan = new Plan(PLAN.sourceRepository(), PLAN.sourceRepository(), PLAN.version(), COMMIT, APK, CHECKSUM);
         var github = new Mock();

@@ -1464,7 +1464,7 @@
       "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads.",
       "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
       "expires": "2026-12-14",
-      "sha256": "65800e8a7449391953abee568dbb15ef926b54519aa77a130ff08419744bbf61",
+      "sha256": "b918d3a74b69f6b44761ce5d00fe5dd39d7d4889bcfdb64d0e2963bf660ccad5",
       "allowDelete": false
     },
     {
@@ -1781,7 +1781,7 @@
       "criterion": "Preserve the seven release gates, exact source and asset identity, independent authenticated and anonymous downloads, and evaluated Extent assertions.",
       "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
       "expires": "2026-12-19",
-      "sha256": "bb1b596e0326643a584a16bf8359a0b41d9228797d866a86a956ab65383e8df8",
+      "sha256": "12127ac52b14c1f81a855259705c0f45540e9f9e1cbe587732742e55881bb199",
       "allowDelete": false
     },
     {
