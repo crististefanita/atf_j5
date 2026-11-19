@@ -1323,20 +1323,20 @@
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
       "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
-      "criterion": "Preserve complete localized labels, exactly one accessible scale, signed score columns, existing callbacks and shared viewport behavior.",
+      "criterion": "Keep published 0.30.0 separate from candidate 0.31.0 / code 35. UI 0.1.24 and Browser 0.2.27 require source-bound components, native restoration, three complete games, RAG and signed downloads before publication.",
       "proof": "atf-ui-browser/README.md#acțiunile-scorului",
       "expires": "2026-12-19",
-      "sha256": "c6084f3dccf3f5e175da944af807ffc3bf25ced927c1c314caf827daf1844133",
+      "sha256": "ff5e60ac0d71e9bc26ff8c7baa4c3cc9e81d50e2bbd3ae9f1f24fc9c996a76ab",
       "allowDelete": false
     },
     {
       "path": "release/index.json",
       "owner": "Rentz release",
       "reason": "Promote the latest verified public Rentz catalog only after native acceptance, signed build and both independent downloads. Prepare the next numeric minor candidate without replacing the published README link.",
-      "criterion": "Single latest edition, numeric APK, exact source tag and public canonical asset; preserve original component/native/RAG evidence and historical source tags. Candidate 0.30.0/code 34 remains separate from published 0.29.0 until native preservation, three games, RAG and signed-byte acquisition pass.",
+      "criterion": "Keep published 0.30.0 separate from candidate 0.31.0 / code 35. UI 0.1.24 and Browser 0.2.27 require source-bound components, native restoration, three complete games, RAG and signed downloads before publication.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "8c678a0d8a4275cbfad4c337a2bf5ed3c5795b4b4a7611672c94ec4240787e80",
+      "sha256": "4a91a5e717fcc5c04212d53e583bb70ef4668e784f31354dcbd193ee96a8bedc",
       "allowDelete": false
     },
     {
