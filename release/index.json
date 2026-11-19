@@ -5,5 +5,9 @@
   "browserUrl": "https://crististefanita.github.io/rentz/",
   "versions": [
     "0.29.0"
-  ]
+  ],
+  "candidate": {
+    "version": "0.30.0",
+    "versionCode": 34
+  }
 }

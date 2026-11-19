@@ -1322,21 +1322,21 @@
     {
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
-      "reason": "Advance numeric candidate version and Android versionCode.",
-      "criterion": "Product 0.28.0 / 32; fixed seed remains exclusive to the isolated UI-sanity build.",
+      "reason": "Advance numeric candidate version and Android versionCode. Prepare the next numeric minor candidate without replacing the published README link.",
+      "criterion": "Product 0.28.0 / 32; fixed seed remains exclusive to the isolated UI-sanity build. Candidate 0.30.0/code 34 remains separate from published 0.29.0 until native preservation, three games, RAG and signed-byte acquisition pass.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "dc89e1867d8ca0316ed2a00fd613f7bae0f0364c272501710809ac2f97c0e947",
+      "sha256": "584a6d4eecabac502af49ebfa850f36ecf009cf59d724ca68cbceef5730a5471",
       "allowDelete": false
     },
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Promote the latest verified public Rentz catalog only after native acceptance, signed build and both independent downloads.",
-      "criterion": "Single latest edition, numeric APK, exact source tag and public canonical asset; preserve original component/native/RAG evidence and historical source tags.",
+      "reason": "Promote the latest verified public Rentz catalog only after native acceptance, signed build and both independent downloads. Prepare the next numeric minor candidate without replacing the published README link.",
+      "criterion": "Single latest edition, numeric APK, exact source tag and public canonical asset; preserve original component/native/RAG evidence and historical source tags. Candidate 0.30.0/code 34 remains separate from published 0.29.0 until native preservation, three games, RAG and signed-byte acquisition pass.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "2bcfe8d78d96510582be45898c14b59858ea63514e2911c3b13892fd092d5f1f",
+      "sha256": "8c678a0d8a4275cbfad4c337a2bf5ed3c5795b4b4a7611672c94ec4240787e80",
       "allowDelete": false
     },
     {
