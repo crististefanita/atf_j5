@@ -288,4 +288,9 @@ Istoricul folosește antetele compacte `Δ` și `Σ`, fără două puncte. Rezul
 
 ## Spațiul deasupra jucătorului
 
-Pe Android, `PlayerSeatView` include eticheta de acțiune în înălțimea măsurată a locului. În WEB, chenarul și eticheta exterioară sunt măsurate separat: shell-ul comun furnizează `actorClearance`, iar `RentzPageLayout` îl exclude din banda celor patru șiruri. Pozițiile locurilor rămân cele ale bibliotecii comune. Testele confruntă aceleași profile cu și fără rezervă, păstrează ancorele și refuză suprapunerea benzii peste etichetă.
+| Strat | Responsabilitate |
+|---|---|
+| Android | `PlayerSeatView` include eticheta în înălțimea măsurată a locului. |
+| Shell WEB comun | Măsoară separat eticheta exterioară și furnizează `actorClearance`. |
+| Adaptor Rentz | `RentzPageLayout` exclude rezerva din banda celor patru șiruri; ancorele locurilor rămân cele comune. |
+| Componente | Confruntă profilele cu și fără rezervă și refuză suprapunerea benzii peste etichetă. |

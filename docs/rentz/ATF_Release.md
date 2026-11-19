@@ -132,7 +132,12 @@ Verificatorul nativ stabilește verdictul execuției din receipt. Validarea Exte
 
 ## Publicare și descărcare
 
-Canalul produsului este GitHub Releases public, în același repository cu sursele Rentz. URL-ul identifică exact repository-ul, tagul numeric și `RentzLab-<versiune>.apk`. Descărcările autentificată și anonimă au receipts separate și sunt confruntate cu APK-ul semnat. Fluxurile restricționate de mai jos rămân probe ale infrastructurii pentru un canal privat explicit, fără să schimbe distribuția curentă a jocului.
+| Contract | Aplicare |
+|---|---|
+| Canal | GitHub Releases public, în repository-ul Rentz. |
+| Identitate | URL-ul fixează repository-ul, tagul numeric și `RentzLab-<versiune>.apk`. |
+| Descărcare | Receipts separate pentru acces autentificat și anonim, confruntate cu APK-ul semnat. |
+| Canal privat | Fluxurile restricționate sunt probe ale infrastructurii pentru un canal explicit, separate de distribuția curentă. |
 
 1. Promovați commitul calificat pe `main`, creați tagul pe sursa calificată și publicați APK-ul semnat cu checksum în repository-ul Rentz. Pentru un canal privat explicit, porniți [reluarea publicării](#reluarea-publicării-restricționate) cu artefactul semnat și checksum-ul lui.
 2. Citiți receipt-ul publicării înaintea pregătirii catalogului. La întrerupere, păstrați același jurnal și recitiți starea remote.
