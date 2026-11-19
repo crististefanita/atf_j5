@@ -35,7 +35,7 @@ O revizie de conținut identifică întregul pachet încărcat de browser.
 | Integritate | Build-ul recitește manifestul și fiecare amprentă; refuză dependențele lipsă și împachetarea repetată. |
 | Persistență | Profilul și sesiunea păstrează cheia locală existentă. |
 
-Consumatorul fixează Card Table Browser 0.2.20. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
+Consumatorul fixează Card Table Browser 0.2.23. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
 
 ### Reutilizarea prezentării native
 
@@ -221,5 +221,11 @@ README-ul principal va lega jocul online după ce workflow-ul publică pagina ș
 ## Surse
 
 - [Regulile și arhitectura motorului Rentz](../rentz-lab-app/game-core/README.md)
-- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.20.jar) · [checksum](lib/atf-ui-browser-0.2.20.jar.sha256)
-- [Testul comun de componentă](lib/atf-ui-browser-0.2.20-tests.jar) · [checksum](lib/atf-ui-browser-0.2.20-tests.jar.sha256)
+- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.23.jar) · [checksum](lib/atf-ui-browser-0.2.23.jar.sha256)
+- [Testul comun de componentă](lib/atf-ui-browser-0.2.23-tests.jar) · [checksum](lib/atf-ui-browser-0.2.23-tests.jar.sha256)
+
+### Textul scorului și continuitatea comună
+
+- Textele scorului Web folosesc scara comună 1,5 o singură dată. Rolul dialogului de calcul rămâne explicit în adaptor; regulile și valorile provin din Rentz.
+- JAR-ul de teste livrează și `shared-presentation.test.mjs`: constructorul real, ordinea AI/jucător, colectarea și tipografia în Chromium. Probele specifice Rentz păstrează oraclele celor șapte contracte de levate și ale secvenței.
+- Contractele portabile și comparațiile DOM nu înlocuiesc acceptanța pixelilor Android. Artefactul Android nu se schimbă prin actualizarea JAR-ului Web.
