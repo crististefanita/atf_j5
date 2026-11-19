@@ -1,10 +1,9 @@
 {
   "schemaVersion": 1,
   "repository": "crististefanita/rentz",
-  "currentVersion": "0.28.0",
-  "candidate": { "version": "0.29.0", "versionCode": 33 },
+  "currentVersion": "0.29.0",
   "browserUrl": "https://crististefanita.github.io/rentz/",
   "versions": [
-    "0.28.0"
+    "0.29.0"
   ]
 }
