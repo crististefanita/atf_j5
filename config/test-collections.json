@@ -55,7 +55,8 @@
         "ArenaAdmissionTest",
         "AndroidReservationComponentTest",
         "RetirementEvidenceTest",
-        "AndroidSandboxEvidenceTest"
+        "AndroidSandboxEvidenceTest",
+        "GitHubRetirementAdapterTest"
       ],
       "androidJvm": false,
       "runtimeControls": true

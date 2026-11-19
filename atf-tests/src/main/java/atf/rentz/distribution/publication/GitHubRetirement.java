@@ -15,12 +15,16 @@ import java.util.regex.Pattern;
 /** The GitHub adapter shares the publication channel; it has no source-tag deletion operation. */
 final class GitHubRetirement implements ReleaseRetirement.Remote {
     private final GitHubPublication github;
-    private final GitPromotionChannel channel;
+    interface Channel {
+        ReleasePublication.PromotionLease reserve(String tag) throws IOException;
+        String owner() throws IOException;
+    }
+    private final Channel channel;
     private final Path archive;
     private final ReleaseRetirement.Plan plan;
     private ReleasePublication.PromotionLease lease;
     private Long pendingDelete;
-    GitHubRetirement(GitHubPublication github, GitPromotionChannel channel, Path archive, ReleaseRetirement.Plan plan) {
+    GitHubRetirement(GitHubPublication github, Channel channel, Path archive, ReleaseRetirement.Plan plan) {
         this.github = github; this.channel = channel; this.archive = archive; this.plan = plan;
     }
     @Override public ReleaseRetirement.State observe(ReleaseRetirement.Plan expected) throws IOException {
@@ -88,8 +92,9 @@ final class GitHubRetirement implements ReleaseRetirement.Remote {
         String tagSource = github.tagCommit(plan.repository(), edition.tag());
         if (tagSource == null) throw new IOException("RETIREMENT-ARCHIVE-TAG");
         proof.put("preservedTagSource", tagSource);
-        Files.write(archive.resolve("release-" + edition.id() + ".json"), mapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsBytes(proof), StandardOpenOption.CREATE_NEW, StandardOpenOption.SYNC);
+        byte[] bytes = mapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(proof);
+        if (bytes.length > 8 * 1024 * 1024) throw new IOException("RETIREMENT-ARCHIVE-LIMIT");
+        Files.write(archive.resolve("release-" + edition.id() + ".json"), bytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.SYNC);
     }
     @Override public void deleteRelease(long id) throws IOException {
         pendingDelete = id; lease.startPatch(); github.deleteRelease(plan.repository(), id);

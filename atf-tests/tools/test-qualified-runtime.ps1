@@ -671,7 +671,7 @@ Case 'Retirement reopens both qualified Extent files and rejects missing or fore
     }, $true)
     Require ($null -ne $gate) 'The retirement authorization assignment is missing'
     $authorize = [scriptblock]::Create($gate.Extent.Text)
-    $latestAuthenticated = $true
+    $latestEligible = $true
     $extentEvidence = @(Confirm-RetirementReports $claims $source $component $native $project)
     . $authorize
     Require ($retirementAllowed -and $extentEvidence.Count -eq 2) 'Both exact Extent artifacts should permit retirement'

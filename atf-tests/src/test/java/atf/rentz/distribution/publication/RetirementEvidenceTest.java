@@ -27,6 +27,19 @@ class RetirementEvidenceTest {
     static final String APK = "RentzLab-0.29.0.apk", URL = "https://github.com/example/rentz/releases/download/v0.29.0/" + APK;
     final ObjectMapper json = new ObjectMapper();
 
+    @Test void invalidProofProducesABlockedReceiptAndExtentBeforeOpeningTheRemoteChannel() throws Exception {
+        var f = fixture(); ((ObjectNode) f.readmeJson.path("retirement")).put("allowed",false); f.saveReadme();
+        Path output = folder.resolve("attempt");
+        var refused = assertThrows(IOException.class, () -> RetirementCommand.main(new String[]{f.root.toString(), f.rag.toString(),
+                f.readme.toString(), folder.toString(), f.components.toString(), f.nativeExtent.toString(),
+                folder.resolve("never-read-tool-receipt.json").toString(), output.toString()}));
+        assertEquals("RETIREMENT-README-PROOF", refused.getMessage(), "Refused before tools, credentials and transport");
+        var receipt = json.readTree(output.resolve("release-retirement.json").toFile());
+        assertEquals("BLOCKED", receipt.path("status").asText(), "Refusal remains a separate attempted-operation receipt");
+        assertTrue(Files.size(output.resolve("release-retirement-extent.html")) > 0, "The refused command is auditable in Extent");
+        assertTrue(Files.notExists(output.resolve("downloads")), "No remote download or mutation was attempted");
+    }
+
     @Test void readmeVerifierAdmitsPublicAndPrivateChannelsWithoutAdmittingStaleOrUnboundMetadata() throws Exception {
         Path root = atf.rentz.distribution.ReleaseCatalog.root(), output = folder.resolve("eligibility.json");
         var process = new ProcessBuilder("pwsh", "-NoLogo", "-NoProfile", "-File",

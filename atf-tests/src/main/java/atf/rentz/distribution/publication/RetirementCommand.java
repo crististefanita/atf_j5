@@ -57,12 +57,25 @@ public final class RetirementCommand {
             String message = failure.getMessage();
             receipt.put("diagnostic", message != null && message.matches("(RETIREMENT|PUBLICATION|RAG)-[A-Z0-9-]+") ? message : "RETIREMENT-INTERRUPTED");
         }
+        var archives = receipt.putArray("archives"); Path archiveRoot = output.resolve("retired-metadata");
+        try { if (Files.isDirectory(archiveRoot)) try (var files = Files.list(archiveRoot)) {
+            for (var file : files.sorted().toList()) {
+                byte[] bytes = readExternalFile(file, 8L * 1024 * 1024);
+                archives.addObject().put("file",file.getFileName().toString()).put("bytes",bytes.length).put("sha256",sha256(bytes));
+            }
+        } } catch (IOException | RuntimeException failure) { passed = false; receipt.put("status","BLOCKED").put("diagnostic","RETIREMENT-AUDIT-CAPTURE"); }
         Files.write(output.resolve("release-retirement.json"), mapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(receipt), StandardOpenOption.CREATE_NEW);
         AtfReportStatus status = passed ? AtfReportStatus.PASS : AtfReportStatus.FAIL;
         try (var report = new ExtentReportSession(output.resolve("release-retirement-extent.html"), ReportingSettings.defaults());
              var scenario = report.startScenario("Rentz · Release retirement", "Original evidence and current channel authority", List.of("rag", "retirement"));
              var phase = scenario.startPhase("Coordinated retirement"); var step = phase.startAssertionStep("Retirement receipt")) {
             step.assertions(List.of(new AtfAssertion("Qualified retirement", "PASS", receipt.path("status").asText() + " " + receipt.path("diagnostic").asText(), passed)));
+            phase.observation(new atf.reporting.model.ReportObservation("Source authority and retained audit", List.of(
+                    new atf.reporting.model.ReportField("Product identity",receipt.path("identity").toString()),
+                    new atf.reporting.model.ReportField("Original qualification SHA-256",receipt.path("qualificationSha256").asText("-")),
+                    new atf.reporting.model.ReportField("Tool qualification SHA-256",receipt.path("toolQualificationSha256").asText("-")),
+                    new atf.reporting.model.ReportField("Removed release IDs",receipt.path("removedReleaseIds").toString()),
+                    new atf.reporting.model.ReportField("Preserved metadata",archives.toString())),List.of(),List.of()));
             step.complete(status); phase.complete(status); scenario.complete(status);
         }
         if (!passed) throw new IOException(receipt.path("diagnostic").asText());

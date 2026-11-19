@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /** A single remote ref coordinates promotion across independent checkouts and journals. */
-final class GitPromotionChannel {
+final class GitPromotionChannel implements GitHubRetirement.Channel {
     static final String REF = "refs/tags/atf-rentz-promotion-lock";
     private final Path checkout;
     private final String remote;
@@ -32,7 +32,7 @@ final class GitPromotionChannel {
         if (git("init", "--quiet", "--template=").exit() != 0) throw new IOException("PUBLICATION-CHANNEL-GIT");
     }
 
-    PromotionLease reserve(String tag) throws IOException {
+    @Override public PromotionLease reserve(String tag) throws IOException {
         String tree = objectId(git("mktree"));
         String owner = objectId(git("-c", "user.name=Rentz publication", "-c", "user.email=rentz-publication@localhost",
                 "commit-tree", "--no-gpg-sign", tree, "-m", "Rentz promotion " + tag + " " + UUID.randomUUID()));
@@ -44,7 +44,7 @@ final class GitPromotionChannel {
         return new PromotionLease(owner, () -> release(owner));
     }
 
-    String owner() throws IOException {
+    @Override public String owner() throws IOException {
         Result result = git("ls-remote", "--refs", remote, REF);
         if (result.exit() != 0) throw new IOException("PUBLICATION-CHANNEL-READ");
         if (result.output().isEmpty()) return null;

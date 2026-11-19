@@ -816,7 +816,7 @@
       "criterion": "Retain missing, duplicate, stale, reordered, decorated and suffixed-link rejections in both channel fixtures.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "e00d7f9330cd7cade0011ac2a1f584742688598dc878c290781d293d98edd792",
+      "sha256": "7cf3a4c0d591605f8bc7c47848b53e2ac6513ffdbf8a430017a4f76d6f5b353e",
       "allowDelete": false
     },
     {
@@ -876,7 +876,7 @@
       "criterion": "In-batch aliases, historical aliases and false cluster sufficiency are refused; exact development replay, signed seeds, distinct tables, old rows and adjacent arena contracts remain covered. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
       "proof": "../../rentz_back/infrastructure/governance/20261107-q20/TDD.md; docs/rentz/ATF_Release.md",
       "expires": "2026-12-19",
-      "sha256": "3e36e16cea49c1670d4d5e6fbd2d754ef696c9a00a1a547cfd239d9ee34a4b33",
+      "sha256": "7cc93891eaf4ab1d2b80c4259eb15572deabb9b92716ca684de665ffa2583121",
       "allowDelete": false
     },
     {
@@ -1504,7 +1504,7 @@
       "criterion": "Require separate GitHub account IDs and a private test repository, verify replace-and-release semantics, and keep unqualified evidence BLOCKED.",
       "proof": "docs/rentz/ATF_Release.md#calificarea-permisiunilor-pe-github",
       "expires": "2026-12-10",
-      "sha256": "5e2d56b1c105f5b329a588eec6d2438112d5071258695e27b0d424be6c96ddf0",
+      "sha256": "f4b1a88fb459802c286051aacbc951fac8f6bae4c1596393381ec346323c00d1",
       "allowDelete": false
     },
     {
@@ -1821,7 +1821,7 @@
       "criterion": "Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
       "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
       "expires": "2026-12-19",
-      "sha256": "f2de5280657284621541fe557a571f7274cac7cb2c8a0dbe473f5e7a05ac016a",
+      "sha256": "8c3a6541193bbe56afe3c682c69bb9d229cd9b5323b7f4b8f16018b0e3febcf7",
       "allowDelete": false
     },
     {
@@ -1831,7 +1831,7 @@
       "criterion": "Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
       "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
       "expires": "2026-12-19",
-      "sha256": "692d8b2a209ff6d4bd2a2b3d5202c3cfb24b36693ba48b35a3c6cf7069339fa9",
+      "sha256": "9a59d5acb436482a4c10689d8280c9bc377697a0f0d3714dd96e9ffa332e925b",
       "allowDelete": false
     },
     {
@@ -1891,7 +1891,7 @@
       "criterion": "Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
       "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
       "expires": "2026-12-19",
-      "sha256": "87410eee50bfb0e6e6182926894ba898c3840d29186c4fadf345caf90e513103",
+      "sha256": "6ddb4b592db4bddbe8e2f6583a3f5a25c3ab39714c64168e37293a014ef8580e",
       "allowDelete": false
     },
     {
@@ -1923,6 +1923,16 @@
       "expires": "2026-12-19",
       "sha256": "bef60218789881709c82e1593db514ec36968f7e0d462e93e3da289d73ff62b6",
       "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/GitHubRetirementAdapterTest.java",
+      "owner": "Rentz public retirement adapter",
+      "reason": "Exercise the production GitHub adapter with a local server and injected ownership channel.",
+      "criterion": "Archive old metadata durably before DELETE, retain tags, require current authority, preserve original proofs and refuse malformed or incomplete evidence before credentials or transport.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "allowDelete": false,
+      "sha256": "4cbb8c50a8e7c95361f0e912bfb7578108d16dc8163aed959841611aef6605b1"
     }
   ]
 }
