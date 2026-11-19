@@ -1336,7 +1336,7 @@
       "criterion": "Single latest edition, numeric APK, exact source tag and public canonical asset; preserve original component/native/RAG evidence and historical source tags.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "cfa4572f1e14ab057c3c2c59c171aa33003c7d708a9b915306d788f175a056d6",
+      "sha256": "ba24524fe9d6b0aaa39d2136a214879d99971c0f443f8f4e16dc5be92520eb6e",
       "allowDelete": false
     },
     {
