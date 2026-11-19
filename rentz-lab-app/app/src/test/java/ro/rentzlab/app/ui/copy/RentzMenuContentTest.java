@@ -11,6 +11,23 @@ import org.junit.*;
 @AndroidComponentLayer
 public final class RentzMenuContentTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
+    @Test public void portableCopyPreservesTheNativeLocaleAndContractVocabulary() {
+        var english = List.of("Tricks", "Queens", "Diamonds", "King of hearts", "Totals", "Whist", "Ten of clubs", "Rentz");
+        for (var language : RentzUiText.Language.values()) {
+            var nativeCopy = new RentzUiText(language);
+            var portable = new RentzText(language == RentzUiText.Language.RO);
+            audit.equal("Existing native locale API remains stable", language, nativeCopy.language());
+            audit.equal("Same history route label", nativeCopy.history(), portable.history());
+            audit.equal("Same AutoPlay caption", nativeCopy.autoPlay(), portable.autoPlay());
+            audit.equal("Same stop intention", nativeCopy.stopAutoPlayHand(), portable.stopAutoPlayHand());
+            for (var contract : Contract.values()) {
+                String expected = language == RentzUiText.Language.RO ? contract.label() : english.get(contract.ordinal());
+                audit.equal("Native contract vocabulary " + language + "/" + contract, expected, nativeCopy.contract(contract));
+                audit.equal("Portable contract vocabulary " + language + "/" + contract, expected, portable.contract(contract));
+                audit.equal("Same blind marker " + language + "/" + contract, expected + " ×2", portable.playedContract(contract, true));
+            }
+        }
+    }
     @Test public void bothLanguagesUseTheCommonHomeWithRealRentzRoutes() {
         for (var language : RentzUiText.Language.values()) {
             var copy = new RentzUiText(language); var seen = new ArrayList<String>();

@@ -11,6 +11,15 @@ import ro.rentzlab.app.ui.copy.RentzUiText;
 @AndroidComponentLayer
 public final class RentzGameMenuComponentTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
+    @Test public void browserAvailabilityUsesTheNativeConfirmedHandGate() {
+        for (var language : RentzUiText.Language.values()) {
+            var copy = new RentzUiText(language);
+            audit.equal("A live hand has no confirmed score route " + language, List.of("score-sheet"), RentzGameMenu.unavailable(copy, false));
+            audit.equal("A settled hand keeps all native routes " + language, List.of(), RentzGameMenu.unavailable(copy, true));
+            audit.rejects("Projected availability is immutable", UnsupportedOperationException.class,
+                    () -> RentzGameMenu.unavailable(copy, false).clear());
+        }
+    }
     @Test public void historyIsDirectAndStopRemainsConditionalInBothLanguages() {
         for (var language : RentzUiText.Language.values()) for (boolean active : new boolean[]{false, true}) {
             var copy = new RentzUiText(language);

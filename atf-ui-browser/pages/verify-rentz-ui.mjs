@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { presentRentzArrival, presentRentzPlayback, rentzArrivalView, rentzChoiceDropdown, rentzSequence,
-  rentzSequenceLayout, rentzCenterInsets, rentzSequenceLowerShift, applyRentzSequenceLayout } from "./web/rentz-ui.mjs";
+  rentzSequenceLayout, rentzCenterInsets, rentzSequenceLowerShift, applyRentzSequenceLayout, rentzMenuRoutes } from "./web/rentz-ui.mjs";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -42,6 +42,11 @@ const check = (message, expected, actual) => {
   recordCheck(message, expected, actual);
   checks++;
 };
+function refuses(message, action) {
+  let observed = "No exception";
+  try { action(); } catch (error) { observed = error.name; }
+  check(message, "TypeError", observed);
+}
 async function rejectedPlaybackIsAtomic(description, frames, expectedMessage) {
   const effects = [];
   let failure;
@@ -243,7 +248,16 @@ for (const players of [3, 4, 5, 6]) for (const language of ["ro", "en"]) {
     cardsLabel:"Mână",bidLabel:"P",pointsLabel:"T",
     rows:[{cards:1,status:"Levate",cells:Array.from({length:players},(_,i)=>({bid:String(i*25-50),total:String(i*25+10),description:"",missed:false,series:0}))}]};
   let result;
-  assert.doesNotThrow(()=>{result=rentzScoreTable({grid},element,sharedScoreGrid,language);}, "Result must project each seat into the shared three-column score renderer");
+  const data={grid,headings:[language==="ro"?"Jucător":"Player","P","T"],
+    rows:grid.players.map((name,seat)=>[name,grid.rows[0].cells[seat].bid,grid.rows[0].cells[seat].total])};
+  let sharedInput;
+  assert.doesNotThrow(()=>{result=rentzScoreTable(data,element,(value,human)=>{sharedInput=value;return sharedScoreGrid(value,human);});}, "Result forwards the native three-column projection to the shared renderer");
+  check(players+"p: renderer receives the original canonical data",true,sharedInput===data);
+  for (const changed of [{headings:["Player","Bid","T"]},{rows:[...data.rows].reverse()},
+      {rows:data.rows.map((row,index)=>index===0?[row[0],"wrong",row[2]]:row)}]) {
+    refuses(`${players}/${language}: reject disagreement with the confirmed native P/T projection ${JSON.stringify(changed)}`,
+      ()=>rentzScoreTable({...data,...changed},element,sharedScoreGrid));
+  }
   const table=result.children[0],header=table.children.find(row=>row.tagName==="thead"),body=table.children.find(row=>row.tagName==="tbody");
   check(players+"p: result uses shared Whist grid", "whist-score-grid", table.className);
   check(players+"p: short headings in "+language,JSON.stringify([language==="ro"?"Jucător":"Player","P","T"]),JSON.stringify(header.children[0].children.map(cell=>cell.textContent)));
@@ -257,7 +271,15 @@ for (const players of [3, 4, 5, 6]) for (const language of ["ro", "en"]) {
 for(const rows of [[],[{cells:[]}],[{cells:[{},{},{}]},{cells:[{},{},{}]}]]) {
   assert.throws(()=>rentzScoreTable({grid:{players:["A","B","C"],rows}},element,sharedScoreGrid,"ro"), TypeError,"Reject missing, malformed or ambiguous current hand");
 }
-check("score adaptation uses shared score renderer",true,generatedShell.includes("rentzScoreTable(match.score.table, element, scoreGrid, language)"));
+check("score adaptation uses shared score renderer",true,generatedShell.includes("rentzScoreTable(match.score.table, element, scoreGrid)"));
+const menuRoutes=["score-history","score-sheet","stop-auto","settings","rankings","home"].map(id=>({id,action(){}}));
+check("live menu omits a native score route without a confirmed hand",
+  ["score-history","stop-auto","settings","rankings","home"],
+  rentzMenuRoutes(menuRoutes,{rentzMenuUnavailable:["score-sheet"]}).map(route=>route.id));
+check("settled menu keeps the shared route objects and callback identities",true,
+  rentzMenuRoutes(menuRoutes,{rentzMenuUnavailable:[]}).every((route,index)=>route===menuRoutes[index]));
+refuses("Missing native menu availability fails closed",()=>rentzMenuRoutes(menuRoutes,{}));
+check("shared menu renderer consumes native availability",true,generatedShell.includes("for (const route of rentzMenuRoutes(routes, match))"));
 check("full history keeps its renderer",true,generatedShell.includes("rentzHistoryGrid(data.grid, element, historyGrid)"));
 check("contributions remain available in quiet details",true,generatedShell.includes("rentzScoreRules(details)"));
 check("score values override the shared bold human cells",true,/\.whist-score \.rentz-score-table \.whist-score-grid :is\(th, td\)\s*\{[^}]*font-weight: 400/.test(generatedRentzCss));

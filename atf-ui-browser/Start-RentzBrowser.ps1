@@ -41,6 +41,11 @@ $sources = @(
     Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/profile/LocalProfile.java'
     Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/profile/DisplayName.java'
     Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/table/RentzCardSpace.java'
+    Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/collection/UiLists.java'
+    Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/copy/RentzText.java'
+    Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/RentzScoreContent.java'
+    Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/RentzScoreLayout.java'
+    Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/chrome/RentzGameMenu.java'
 )
 $gradleOutputRoot = Join-Path $root 'gradle-output'
 $generatedAchievementCatalog = Join-Path $gradleOutputRoot 'app/generated/sources/rentzAchievements/java/ro/rentzlab/app/achievements/GameplayAchievementCatalogData.java'

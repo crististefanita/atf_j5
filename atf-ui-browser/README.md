@@ -45,11 +45,14 @@ Consumatorul fixează Card Table Browser 0.2.13. [Proveniența pachetului](lib/b
 |---|---|---|
 | Locuri și levată | `TableGeometry.BoardSpec`, `TableSizing`, `PlayedCardMetrics`; `boardProfile` transmite explicit sloturile către renderer. | Aceleași dreptunghiuri și sloturi pentru 3–6 locuri, măsurate în AAR și în motorul Web compilat. |
 | Fețe și marcaj | `CardFaceMetrics`, `HandLayoutMetrics`, `PlayedCardStyle`, `CardHighlight`. | Fixture-ul tipografic livrat în JAR-ul de teste se confruntă cu AAR-ul; funcția reală `placePlayed` primește DOM mock. |
-| Scor | `ScoreGridStyle` furnizează culori, înălțimi și ponderi; adaptorul selectează Jucător/P/T. | Scorul confirmat rămâne în motor; prezentarea nu recalculează puncte. |
-| Meniu și Automat | Modulele comune `table-menu`, `profile` și `auto-game`. | Contractele de meniu livrate; ceas controlat pentru oprire, pauză, reluare și sosirea la scor. |
+| Scor și istoric | `RentzScoreContent` proiectează o singură dată valorile confirmate; `RentzScoreLayout` selectează rolurile Jucător/P/T din `ScoreGridStyle`. WEB transmite proiecția direct rendererului comun. | Aceleași rânduri, totaluri, etichete și multiplicatori în ambele adaptoare; reprezentările contradictorii sunt refuzate. |
+| Meniu | `RentzGameMenu` specializează `TableMenuContent`; WEB filtrează rutele indisponibile folosind aceeași proiecție. Modulele comune `table-menu` și `profile` păstrează callbacks și închiderea. | Scor indisponibil înainte de confirmarea mâinii; istoric direct, oprire condiționată, păstrarea rutelor WEB de profil și clasamente. |
+| Automat | `TurnPacing` furnizează cadența; `auto-game` deține programarea în browser. Controllerul Android păstrează reviziile și lifecycle-ul. | Ceas controlat pentru oprire, pauză, reluare și sosirea la scor; callback-ul nativ întârziat nu modifică alt ecran. |
 | Secvența Rentz | Adaptorul cere banda liberă și dezactivează poziționarea unei cărți per loc. | Ancore neschimbate; cele patru șiruri folosesc geometria Rentz, independent de levată. |
 
 Fețele depuse păstrează dimensiunea comună pe toate cele șapte sub-jocuri cu levate, la aceeași fereastră și scară de font. Numărul de locuri schimbă sloturile, nu scara feței; ferestrele foarte scunde păstrează în Android adaptarea explicită la bugetul măsurat. [Integrarea nativă](../docs/rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser)
+
+`RentzText` conține vocabularul portabil al jocului. `RentzUiText` îl adaptează la dialogurile native; browserul compilează modelul portabil fără clase Android. Istoricul păstrează aceeași paletă și același separator, iar măsurătorile simulate verifică ferestre compacte, înalte și font mărit; rasterizarea și gesturile se califică separat pe platformă.
 
 ### Secvența vizibilă a unei mâini Rentz
 

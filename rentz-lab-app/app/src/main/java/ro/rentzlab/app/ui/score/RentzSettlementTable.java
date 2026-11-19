@@ -24,8 +24,7 @@ public final class RentzSettlementTable extends LinearLayout {
         shape.setStroke(dp(1), ScoreGridStyle.RULE);
         setBackground(shape);
         var data = RentzScoreContent.settlement(hand, names, copy);
-        var weights = List.of(ScoreGridStyle.COLUMN_WEIGHTS.get(0),
-                ScoreGridStyle.COLUMN_WEIGHTS.get(3), ScoreGridStyle.COLUMN_WEIGHTS.get(4));
+        var weights = RentzScoreLayout.SETTLEMENT_WEIGHTS;
         for (int index = 0; index < data.size(); index++) {
             boolean header = index == 0;
             var row = new LinearLayout(context);

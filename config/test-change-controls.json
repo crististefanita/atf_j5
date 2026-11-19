@@ -976,7 +976,7 @@
       "criterion": "Both languages expose exactly one localized achievements control wired to the real route. Keep the score and resume contracts.",
       "proof": "../../rentz_back/components/j5-achievements-shared-20261111-final/result.json",
       "expires": "2026-11-20",
-      "sha256": "f6f2a64fff5052a86f2c156908b691cefdb883c72c78de786ef018337a7c7704",
+      "sha256": "46cecb8aa216234040d3d1e83de27486849b5908fe0f221715a953aae7b2e21c",
       "allowDelete": false
     },
     {
@@ -986,7 +986,7 @@
       "criterion": "Verify the loaded PlayerSeatView, highlight and geometry classes against the pinned AAR, with no engine dependencies.",
       "proof": "../../whist_back/component-suites/card-highlight-20261111/whist-lab-app-card-table-ui-testDebugUnitTest.html",
       "expires": "2026-11-20",
-      "sha256": "0139e54d352018b5025f03da2f51714b9a48aa6a70d7456405ae538b2be4a8ef",
+      "sha256": "0d1f75002fff64e255c5835f596242107d3a4fbc73841e69ebb3aaf64b71fd8f",
       "allowDelete": false
     },
     {
@@ -1016,7 +1016,7 @@
       "criterion": "Check complete signed numbers, player group alignment and transfer of vertical scrolling in the compact window.",
       "proof": "../../rentz_back/ui-review/release-0.1.2/README.md",
       "expires": "2026-11-20",
-      "sha256": "be14ad16c3c238cf97b32250c8f7c96fb19eb9729056afad94aa8cb089d2c60c",
+      "sha256": "5cd5ae0c10c25ee32c9461b1d158bb064c068e61095526e1971cd15849a3df3d",
       "allowDelete": false
     },
     {
@@ -1703,7 +1703,7 @@
       "proof": "Android JVM regression",
       "expires": "2026-12-18",
       "allowDelete": false,
-      "sha256": "0305f2a9bb1a0a12a61d88681dcb0338c7ce4ad14cac08baebeae925b3f96d1b"
+      "sha256": "b5438ac76358fdc0c1ac1a35d8b9707a92ebf7e23f2187e33537146ada06614b"
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTurnBadgeComponentTest.java",

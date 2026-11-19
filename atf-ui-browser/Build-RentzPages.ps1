@@ -110,7 +110,7 @@ foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAncho
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
     if ($count -ne 1) { throw "Card Table Browser 0.2.13 adapter anchor changed; expected one match, found $count." }
 }
-$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable, rentzScoreRules } from "./rentz-score.mjs";')
+$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence, rentzMenuRoutes } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable, rentzScoreRules } from "./rentz-score.mjs";')
 $scoreAnchor = 'scoreGrid(match.score.table, true)'
 $historyAnchor = 'historyGrid(data.grid, element)'
 $layoutAnchor = 'width, height, mode: state.view.header?.mode ?? "", seatHeight:'
@@ -119,7 +119,12 @@ foreach ($anchor in @($scoreAnchor, $historyAnchor, $layoutAnchor)) {
         throw 'The shared score renderer anchor changed; Rentz P/T adaptation cannot be applied safely.'
     }
 }
-$markup = $markup.Replace($scoreAnchor, '(match.score.table.grid ? rentzScoreTable(match.score.table, element, scoreGrid, language) : scoreGrid(match.score.table, true))')
+$markup = $markup.Replace($scoreAnchor, '(match.score.table.grid ? rentzScoreTable(match.score.table, element, scoreGrid) : scoreGrid(match.score.table, true))')
+$menuRoutesAnchor = '  for (const route of routes) {'
+if (([regex]::Matches($markup, [regex]::Escape($menuRoutesAnchor))).Count -ne 1) {
+    throw 'The shared menu renderer changed; native Rentz route availability cannot be bound safely.'
+}
+$markup = $markup.Replace($menuRoutesAnchor, '  for (const route of rentzMenuRoutes(routes, match)) {')
 $awardsAnchor = '  if (details.awards) page.append(element("p", details.awards, "whist-score-awards"));'
 $rulesAnchor = 'profileDialogs.message(copy("scoringDetails", "Calculul punctajului"), details.rules)'
 foreach ($anchor in @($awardsAnchor, $rulesAnchor)) {

@@ -9,6 +9,31 @@ import ro.rentzlab.app.testing.UiAuditRule;
 public final class HistoryGridMetricsTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
 
+    @Test public void measuredLargeTextKeepsEveryScoreAndTheLastHistoryRowReachable() {
+        for (int players = 3; players <= 6; players++) for (int width : new int[]{280, 360, 414, 600}) {
+            for (float font : new float[]{1f, 1.5f, 2f}) for (int height : new int[]{320, 568, 896}) {
+                // Explicit measurement fixtures, not a substitute for Android font rasterization.
+                int delta = (int) Math.ceil(52 * font), total = (int) Math.ceil(65 * font);
+                var grid = HistoryGridMetrics.fit(width, (int) Math.ceil(180 * font),
+                        (int) Math.ceil(100 * font), delta, total, RentzScoreLayout.HISTORY_SEPARATOR_DP, players);
+                String context = players + "/" + width + "x" + height + "/font=" + font;
+                audit.truth("Measured signed numbers remain complete " + context, grid.delta() >= delta && grid.total() >= total);
+                audit.truth("Pinned metadata leaves a visible score pane " + context, grid.hand() <= width * .4);
+                audit.equal("Every player's last column remains in the scroll extent " + context,
+                        players * (grid.delta() + grid.total() + RentzScoreLayout.HISTORY_SEPARATOR_DP), grid.scoresWidth());
+                int heading = (int) Math.ceil(70 * font), legend = (int) Math.ceil(32 * font);
+                int first = (int) Math.ceil(58 * font), allRows = players * 8 * first;
+                int body = HistoryGridMetrics.bodyHeight(height, heading, legend, allRows, first);
+                if (height >= heading + legend + first) {
+                    audit.truth("Fixed headings and legend leave a complete readable row " + context,
+                            body >= first && body <= height - heading - legend);
+                } else {
+                    audit.equal("Short window delegates the last row to the outer scroller " + context, allRows, body);
+                }
+            }
+        }
+    }
+
     @Test public void phoneAndTabletReserveScoresWithoutShrinkingSignedNumbers() {
         for (int players = 3; players <= 6; players++) {
             for (int viewport : new int[]{320, 393, 600, 800}) {

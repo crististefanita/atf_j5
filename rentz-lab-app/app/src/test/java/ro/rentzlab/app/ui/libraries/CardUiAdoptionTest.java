@@ -35,6 +35,8 @@ public final class CardUiAdoptionTest {
                 ro.cardtable.ui.cards.CardFaceView.class, ro.cardtable.ui.cards.CardFaceDrawable.class,
                 ro.cardtable.ui.table.ScoreGridStyle.class, ro.cardtable.ui.table.PlayedCardStyle.class,
                 ro.cardtable.ui.hand.HandLayoutMetrics.class, ro.cardtable.ui.theme.TableColors.class,
+                ro.cardtable.ui.menu.TableMenuContent.class, ro.cardtable.ui.menu.HomeMenuContent.class,
+                ro.cardtable.ui.menu.HomeMenu.class,
                 ro.cardtable.ui.animation.TrickCollectionMotion.class);
         verifyClassBytes(Files.readAllBytes(root.resolve("ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar")),
                 ro.cardtable.names.PlayerNames.class);

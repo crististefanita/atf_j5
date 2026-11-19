@@ -42,7 +42,7 @@ Păstrați AAR-ul Android `0.1.19` și pachetul Browser `0.2.13` cu JAR-ul de te
 |---|---|
 | U02, U03 | Calificați rutele negative la font mărit: anularea, resetarea numelui, refuzul de salvare și confirmarea înlocuirii sesiunii. Aliniați filtrul UTF-16 al dialogului comun cu politica Rentz în puncte de cod. |
 | Istoric | Porniți tragerea de pe coloana fixă, inclusiv după fling. Confirmați deplasarea rândurilor la tragere și deschiderea exact a unui detaliu la atingere. |
-| U09 | Comparați grila și legenda scorului între jocuri înainte de extracție: mutați numai geometria și stilul neutru în componenta comună; păstrați categoriile, punctajul și modelul de accesibilitate în adaptoarele jocurilor. Calificați lățimi compacte și late în RO/EN. |
+| U09 | Biblioteca fixată expune stilul grilei, fără un widget Android neutru pentru coloane configurabile și istoricul sincronizat. Înaintea extracției în producător, definiți rolurile coloanelor, identitatea mâinii, callback-ul de detalii și derularea antet/corp; păstrați categoriile și calculul scorului în Rentz. Contractele comune trebuie să califice RO/EN, 3–6 locuri, ferestre compacte și font mărit. Nu copiați rendererul aplicației Whist. |
 
 [Strategia de testare](../rentz/ATF_TestingStrategy.md) · [Admiterea bibliotecilor](../rentz/ATF_UiIntegration.md#admiterea-bibliotecilor-de-produs)
 

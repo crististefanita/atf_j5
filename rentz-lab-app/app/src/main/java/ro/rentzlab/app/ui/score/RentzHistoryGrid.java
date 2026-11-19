@@ -14,15 +14,15 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import ro.cardtable.ui.theme.TablePalette;
+import ro.cardtable.ui.table.ScoreGridStyle;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 
 /** The row panes share a vertical scroll. The two score panes share a horizontal position. */
 public final class RentzHistoryGrid extends ScrollView {
-    private static final int HEADER = 0xffdfeada;
-    private static final int LIGHT_ROW = 0xfffffef8;
-    private static final int DARK_ROW = 0xfff1f5ee;
-    private static final int DIVIDER = 0xffb4c3af;
+    private static final int HEADER = ScoreGridStyle.HEADER;
+    private static final int LIGHT_ROW = ScoreGridStyle.PAPER;
+    private static final int DARK_ROW = ScoreGridStyle.STRIPE;
+    private static final int DIVIDER = ScoreGridStyle.RULE;
     private final ScrollView rows;
     private final HorizontalScrollView headings, scores;
     private final LinearLayout header, scoreHeadings, scoreRows;
@@ -38,7 +38,7 @@ public final class RentzHistoryGrid extends ScrollView {
     public RentzHistoryGrid(Context context, List<RentzScoreContent.Row> history, List<String> players,
             RentzUiText copy, Consumer<RentzScoreContent.Row> openDetails) {
         super(context);
-        separator = dp(1);
+        separator = dp(RentzScoreLayout.HISTORY_SEPARATOR_DP);
         setTag("score-history-table");
         setId(ro.rentzlab.app.R.id.history_content);
         var content = column();
@@ -183,7 +183,7 @@ public final class RentzHistoryGrid extends ScrollView {
         var view = new TextView(getContext());
         view.setText(value);
         view.setTextSize(13);
-        view.setTextColor(TablePalette.ACTIVE_SEAT_TEXT);
+        view.setTextColor(ScoreGridStyle.INK);
         view.setGravity(horizontalGravity | Gravity.CENTER_VERTICAL);
         view.setPadding(dp(6), dp(5), dp(6), dp(5));
         if (bold) view.setTypeface(Typeface.DEFAULT, Typeface.BOLD);

@@ -20,6 +20,8 @@ public final class RentzBrowserComponentTest {
     private RentzBrowserComponentTest() { }
 
     public static void main(String[] args) {
+        settlementUsesTheNativeThreeColumnContract();
+        everyContractSharesTheNativeScoreAndMenuProjection();
         sharedPresentationComesFromTheLibrary();
         everyTrickCardIsVisible();
         setupSupportsEveryTableSize();
@@ -40,6 +42,45 @@ public final class RentzBrowserComponentTest {
         browserFinalStandingsUseAndroidCompetitionTies();
         profileAndAchievementProgressSurviveAdapterRecreation();
         System.out.println("Rentz browser component checks passed: " + checks);
+    }
+
+    private static void settlementUsesTheNativeThreeColumnContract() {
+        var table = start(new RentzBrowser(() -> 20261119L), 4);
+        table.act("reveal");
+        table.act("choose:RENTZ");
+        finishOneHand(table);
+        var score = table.view().score().table();
+        equal("Settlement already contains the native Jucator/P/T headings", List.of("Jucător", "P", "T"), score.headings());
+        equal("The shared renderer receives one canonical row per seat", 4, score.rows().size());
+    }
+
+    private static void everyContractSharesTheNativeScoreAndMenuProjection() {
+        for (int players = 3; players <= 6; players++) for (String language : List.of("ro", "en")) {
+            var copy = new ro.rentzlab.app.ui.copy.RentzText(language.equals("ro"));
+            for (var contract : Contract.values()) for (boolean blind : List.of(false, true)) {
+                var table = start(new RentzBrowser(() -> 190011L), players);
+                table.setLanguage(language);
+                String context = players + "/" + language + "/" + contract + "/" + blind;
+                equal("No unsupported live score route " + context, List.of("score-sheet"), RentzBrowser.unavailableMenuActions(table.view()));
+                if (!blind) table.act("reveal");
+                table.act((blind ? "blind:" : "choose:") + contract.name());
+                equal("Same native contract caption " + context, copy.playedContract(contract, blind), table.view().header().bids());
+                finishOneHand(table);
+                var nativeRow = ro.rentzlab.app.ui.score.RentzScoreContent.row(table.completedHands().get(0), copy);
+                var nativeTable = ro.rentzlab.app.ui.score.RentzScoreContent.settlement(nativeRow, table.names(), copy);
+                var view = table.view();
+                equal("Native settlement headings " + context, nativeTable.get(0), view.score().table().headings());
+                equal("Native settlement rows " + context, nativeTable.subList(1, nativeTable.size()), view.score().table().rows());
+                equal("Native history caption " + context, nativeRow.label(), view.history().grid().rows().get(0).status());
+                equal("Native history legend " + context, ro.rentzlab.app.ui.score.RentzScoreContent.legend(copy), view.history().grid().legend());
+                equal("Confirmed hand enables the shared score route " + context, List.of(), RentzBrowser.unavailableMenuActions(view));
+                for (int seat = 0; seat < players; seat++) {
+                    equal("Native P/T pair " + context + "/" + seat,
+                            List.of(Integer.toString(nativeRow.values().get(seat).delta()), Integer.toString(nativeRow.values().get(seat).total())),
+                            List.of(view.history().grid().rows().get(0).cells().get(seat).bid(), view.history().grid().rows().get(0).cells().get(seat).total()));
+                }
+            }
+        }
     }
 
     private static void sharedPresentationComesFromTheLibrary() {

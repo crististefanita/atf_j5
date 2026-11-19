@@ -153,6 +153,12 @@ for (let players = 3; players <= 6; players++) {
     }
     check(`${players}/${difficulty}: complete Rentz hand reaches score history`, completed);
     check(`${players}/${difficulty}: score history has every table seat`, view.history.grid.rows[0].cells.length === players);
+    check(`${players}/${difficulty}: compiled settlement keeps the canonical native column roles`,
+      ["Jucător","P","T"], view.score.table.headings);
+    check(`${players}/${difficulty}: compiled settlement and full history have identical confirmed values`,
+      view.history.grid.players.map((name,seat)=>[name,view.history.grid.rows[0].cells[seat].bid,view.history.grid.rows[0].cells[seat].total]),
+      view.score.table.rows);
+    check(`${players}/${difficulty}: confirmed hand enables the native score-menu route`, [], view.rentzMenuUnavailable);
     const rentzDeltas = view.history.grid.rows[0].cells.map(cell => Number(cell.bid));
     const awardsByPlayers = {
       3: [300, 200, 0], 4: [300, 200, 100, 0],

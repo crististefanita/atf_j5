@@ -8,7 +8,7 @@ import ro.rentzlab.core.Contract;
 import ro.rentzlab.core.score.ScoreSettlement;
 import ro.rentzlab.core.ScoreProfile;
 import ro.rentzlab.core.score.ScoreStandings;
-import ro.rentzlab.app.ui.copy.RentzUiText;
+import ro.rentzlab.app.ui.copy.RentzText;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,14 +29,14 @@ public final class RentzScoreContent {
                 .mapToObj(profile::finishRewardsFor)
                 .collect(immutable());
     }
-    public static List<Row> rows(List<RentzMatch.HandResult> history, RentzUiText copy) {
+    public static List<Row> rows(List<RentzMatch.HandResult> history, RentzText copy) {
         return history.stream().map(hand -> row(hand, copy)).collect(immutable());
     }
-    public static String legend(RentzUiText copy) {
+    public static String legend(RentzText copy) {
         return copy.text("P: hand points · T: running total", "P: punctele mâinii · T: total după mână");
     }
     /** Presentation only: the confirmed values stay in seat order on both platforms. */
-    public static List<List<String>> settlement(Row row, List<String> names, RentzUiText copy) {
+    public static List<List<String>> settlement(Row row, List<String> names, RentzText copy) {
         if (names.size() < 3 || names.size() > 6 || row.values().size() != names.size())
             throw new IllegalArgumentException("Settlement needs one confirmed score per seat");
         var table = new java.util.ArrayList<List<String>>();
@@ -47,7 +47,7 @@ public final class RentzScoreContent {
         }
         return List.copyOf(table);
     }
-    public static Optional<Row> currentHand(RentzMatch.Observation view, List<RentzMatch.HandResult> history, RentzUiText copy) {
+    public static Optional<Row> currentHand(RentzMatch.Observation view, List<RentzMatch.HandResult> history, RentzText copy) {
         if (view.phase() != RentzMatch.Phase.DEAL_END && view.phase() != RentzMatch.Phase.MATCH_END || history.isEmpty())
             return Optional.empty();
         var last = history.get(history.size() - 1);
@@ -55,14 +55,17 @@ public final class RentzScoreContent {
     }
     public static List<Standing> finalStandings(RentzMatch.Observation view) {
         if (view.phase() != RentzMatch.Phase.MATCH_END) return List.of();
-        return ScoreStandings.rank(view.totals()).stream()
+        return finalStandings(view.totals());
+    }
+    public static List<Standing> finalStandings(List<Integer> totals) {
+        return ScoreStandings.rank(totals).stream()
                 .map(place -> new Standing(place.seat(), place.rank(), place.total())).collect(immutable());
     }
     public static String standingLabel(Standing standing, String playerName) {
         return ScoreStandings.label(new ScoreStandings.Place(standing.seat(), standing.place(), standing.total()), playerName)
                 .replace(" · Σ ", " · T ");
     }
-    private static Row row(RentzMatch.HandResult hand, RentzUiText copy) {
+    public static Row row(RentzMatch.HandResult hand, RentzText copy) {
         return new Row(hand.number(), hand.chooser(), hand.contract(), copy.playedContract(hand.contract(), hand.blind()),
                 java.util.stream.IntStream.range(0, hand.points().size()).mapToObj(seat ->
                         new Value(hand.points().get(seat), hand.totals().get(seat))).collect(immutable()), hand.scoring());

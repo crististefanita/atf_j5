@@ -258,11 +258,15 @@ Biblioteca comună deține ancorele locurilor și măsurarea mesei; adaptorul Re
 | Hint legal | Marchează starea secvenței prin atribut DOM; nu depinde de selectorul CSS `:has`. | Conturul rămâne activ cu sau fără AutoPlay, inclusiv pe Chrome mobil mai vechi. |
 | Browser mobil | Folosește înălțimea vizibilă pentru container, inclusiv cu bara de adresă deschisă. | Mock de viewport și verificare Chrome offline pe dispozitiv. |
 | Actualizarea paginii | O singură revizie de conținut identifică toate importurile, workerul, stilurile și fontul. | Cache deja populat, schimbare numai în adaptorul de scor, dependență lipsă și recitirea octeților publicați. |
-| Punctaj | P = punctele mâinii; T = total după mână, cu legendă sub tabel. | Confruntă rândul confirmat, ordinea locurilor și cumulul. |
+| Punctaj | `RentzScoreContent` și `RentzText` sunt compilate în ambele adaptoare. P = punctele mâinii; T = total după mână, cu legendă sub tabel. | Confruntă proiecția nativă cu rândurile WEB pentru fiecare sub-joc, limbă și alegere normală/oarbă. |
 | Prezentarea rezultatului | Refolosește grila și `ScoreGridStyle`, inclusiv ponderile native Jucător/P/T, fără bold. Contribuțiile apar la cerere. Istoricul complet își păstrează grila pe mâini. | Mese de 3–6, RO/EN, valori semnate și celule fără îngroșare în browser. |
 | Levate | Fiecare carte, inclusiv cea proprie, are cadru în playback. `TrickCollectionMotion` fixează afișarea și colectarea la câștigător. | Toate fețele pe masă înainte de colectare; nicio trecere la scor înainte de finalizarea ei, inclusiv cu mișcare redusă. |
 | Reluare | Păstrează toate rândurile confirmate și identitatea sub-jocului. | Rentz plus alt sub-joc, istoric înainte și după reîncărcare. |
+| Meniu | `RentzGameMenu` furnizează disponibilitatea rutelor peste `TableMenuContent`; adaptorul DOM păstrează callbacks și rutele WEB de profil și clasamente. | Ruta de scor cere o mână confirmată; lipsa proiecției este refuzată înainte de afișarea meniului. |
+| Automat | Cadența vine direct din `TurnPacing`. Programarea DOM și lifecycle-ul Android își păstrează proprietarii. | Oprire, pauză, revizie și livrare întârziată, folosind componentele comune și ceas controlat. |
 
 [Mecanismul și pașii MCP](../../atf-ui-browser/README.md#acceptanța-web-prin-browser-mcp)
 
 Contractele livrate în JAR-ul de teste califică viewportul, feedback-ul mâinii, meniul și proporțiile feței. `verify-shared-ui.mjs` confruntă și funcția efectivă de poziționare cu referința citită din AAR; `verify-shared-automation.mjs` controlează așteptarea modulului comun, fără să copieze programatorul. Rasterul, gesturile native și bugetul ferestrelor extreme rămân verificări pe platformă.
+
+Pentru istoric, fixture-urile de măsurare acoperă lățimi de la 280 la 600, înălțimi scunde și înalte și scări de font de la 1× la 2×. Verifică păstrarea numerelor semnate, ultimul jucător și ultima mână în zona derulabilă. Aceste fixture-uri validează contractul de măsurare; nu simulează rasterizarea fontului Android.

@@ -19,6 +19,10 @@ import ro.cardtable.browser.BrowserGame.ScoreDetails;
 import ro.cardtable.browser.BrowserGame.Seat;
 import ro.cardtable.browser.BrowserGame.View;
 import ro.cardtable.ui.animation.TrickCollectionMotion;
+import ro.cardtable.ui.turn.TurnPacing;
+import ro.rentzlab.app.ui.copy.RentzText;
+import ro.rentzlab.app.ui.chrome.RentzGameMenu;
+import ro.rentzlab.app.ui.score.RentzScoreContent;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.achievements.AchievementHand;
 import ro.rentzlab.app.GameSession.Command;
@@ -28,14 +32,12 @@ import ro.rentzlab.core.RentzBoard;
 import ro.rentzlab.core.RentzMatch.Observation;
 import ro.rentzlab.core.RentzMatch.Phase;
 import ro.rentzlab.core.TrickRules;
-import ro.rentzlab.core.score.ScoreStandings;
-import ro.rentzlab.core.score.ScoreSettlement;
 import ro.rentzlab.core.sequence.SequenceOpening;
 
 /** Browser projection of the same session used by Android. Opponent hands never cross this boundary. */
 final class RentzTable implements BrowserGame.Match {
     /** Keep bot playback on the pinned card-table-ui first-frame cadence. */
-    static final int AUTOMATED_ACTION_DELAY_MILLIS = 550;
+    static final int AUTOMATED_ACTION_DELAY_MILLIS = (int) TurnPacing.ACTION_DELAY_MILLIS;
     private static final List<ro.rentzlab.core.Card.Suit> HAND_SUITS = List.of(
             ro.rentzlab.core.Card.Suit.SPADES, ro.rentzlab.core.Card.Suit.HEARTS,
             ro.rentzlab.core.Card.Suit.CLUBS, ro.rentzlab.core.Card.Suit.DIAMONDS);
@@ -47,7 +49,7 @@ final class RentzTable implements BrowserGame.Match {
     private List<PlayStep> playback = List.of();
     private List<CollectionCue> collections = List.of();
     private List<Map<String, Object>> sequencePlayback = List.of();
-    private String language = "ro";
+    private RentzText copy = new RentzText(true);
 
     RentzTable(GameSession game, String name) {
         this.game = game;
@@ -85,7 +87,7 @@ final class RentzTable implements BrowserGame.Match {
 
     @Override public void setLanguage(String value) {
         if (!"ro".equals(value) && !"en".equals(value)) throw new IllegalArgumentException("Unsupported language");
-        language = value;
+        copy = new RentzText("ro".equals(value));
     }
 
     @Override public void act(String action) {
@@ -194,6 +196,7 @@ final class RentzTable implements BrowserGame.Match {
         result.put("score", view.score());
         result.put("scoreDetails", view.scoreDetails());
         result.put("rentzSequence", RentzBrowser.sequence(state));
+        result.put("rentzMenuUnavailable", RentzGameMenu.unavailable(copy, view.score() != null));
         return result;
     }
 
@@ -254,7 +257,7 @@ final class RentzTable implements BrowserGame.Match {
             case MATCH_END -> text("Partidă încheiată", "Match complete");
         };
         var header = new BrowserGame.Header("RENTZ", text("Rentz", "Rentz"), progress,
-                state.contract() == null ? "" : contractName(state.contract()),
+                copy.playedContract(state.contract(), state.blind()),
                 state.contract() == null ? "—" : contractName(state.contract()),
                 text("Sub-jocul selectat", "Selected contract"), 22f, 14f, 13f);
         var history = history(state);
@@ -278,43 +281,40 @@ final class RentzTable implements BrowserGame.Match {
                         contractName(contract) + (blind ? text(" · pe nevăzute", " · blind") : ""))));
             }
         }
-        if (game.hasPendingHumanDecision()) moves.add(new Action("auto-step", text("Joc automat", "Auto play")));
+        if (game.hasPendingHumanDecision()) moves.add(new Action("auto-step", copy.autoPlay()));
         return List.copyOf(moves);
     }
 
     private History history(Observation state) {
         var headings = new ArrayList<>(List.of(text("Mână", "Hand"), text("Sub-joc", "Contract")));
         headings.addAll(names);
-        return new History(headings, state.completedHands().stream().map(hand -> {
-            var row = new ArrayList<>(List.of(Integer.toString(hand.number()), contractLabel(hand.contract(), hand.blind())));
-            hand.totals().forEach(total -> row.add(Integer.toString(total)));
+        var confirmed = RentzScoreContent.rows(state.completedHands(), copy);
+        return new History(headings, confirmed.stream().map(hand -> {
+            var row = new ArrayList<>(List.of(Integer.toString(hand.hand()), hand.label()));
+            hand.values().forEach(value -> row.add(Integer.toString(value.total())));
             return List.copyOf(row);
-        }).toList(), historyGrid(state));
+        }).toList(), historyGrid(confirmed));
     }
 
     private History currentHandHistory(Observation state) {
-        var history = history(state);
-        var last = state.completedHands().isEmpty() ? null : state.completedHands().get(state.completedHands().size() - 1);
-        if (last == null) return History.EMPTY;
-        var row = row(last);
-        return new History(history.headings(), List.of(row.stream().map(HistoryCell::total).toList()),
-                new HistoryGrid(names, List.of(new HistoryRow(last.number(), contractLabel(last.contract(), last.blind()), row)),
-                        text("Mână", "Hand"), text("P", "P"), text("T", "T"),
-                        text("P: punctele mâinii · T: total după mână", "P: hand points · T: running total")));
+        var confirmed = RentzScoreContent.currentHand(state, state.completedHands(), copy);
+        if (confirmed.isEmpty()) return History.EMPTY;
+        var row = confirmed.orElseThrow();
+        var data = RentzScoreContent.settlement(row, names, copy);
+        return new History(data.get(0), data.subList(1, data.size()), historyGrid(List.of(row)));
     }
 
-    private HistoryGrid historyGrid(Observation state) {
-        var rows = state.completedHands().stream().map(hand -> new HistoryRow(hand.number(),
-                contractLabel(hand.contract(), hand.blind()), row(hand))).toList();
-        return new HistoryGrid(names, rows, text("Mână", "Hand"), text("P", "P"),
-                text("T", "T"), text("P: punctele mâinii · T: total după mână", "P: hand points · T: running total"));
+    private HistoryGrid historyGrid(List<RentzScoreContent.Row> confirmed) {
+        var rows = confirmed.stream().map(hand -> new HistoryRow(hand.hand(), hand.label(), row(hand))).toList();
+        return new HistoryGrid(names, rows, text("Mână", "Hand"), RentzScoreContent.HAND_POINTS_MARK,
+                RentzScoreContent.TOTAL_MARK, RentzScoreContent.legend(copy));
     }
 
-    private List<HistoryCell> row(ro.rentzlab.core.RentzMatch.HandResult hand) {
+    private List<HistoryCell> row(RentzScoreContent.Row hand) {
         var cells = new ArrayList<HistoryCell>();
-        for (int seat = 0; seat < hand.points().size(); seat++) {
-            int delta = hand.points().get(seat);
-            int total = hand.totals().get(seat);
+        for (int seat = 0; seat < hand.values().size(); seat++) {
+            int delta = hand.values().get(seat).delta();
+            int total = hand.values().get(seat).total();
             cells.add(new HistoryCell(Integer.toString(delta), Integer.toString(total),
                     names.get(seat) + " · " + text("Puncte", "Points") + " " + delta + " · "
                             + text("Total", "Total") + " " + total, false, 0));
@@ -349,16 +349,16 @@ final class RentzTable implements BrowserGame.Match {
 
     static List<String> finalStandings(List<Integer> totals, List<String> names) {
         if (totals.size() != names.size()) throw new IllegalArgumentException("Every total needs one seat name");
-        return ScoreStandings.rank(totals).stream()
-                .map(place -> ScoreStandings.label(place, names.get(place.seat())).replace(" · Σ ", " · T ")).toList();
+        return RentzScoreContent.finalStandings(totals).stream()
+                .map(place -> RentzScoreContent.standingLabel(place, names.get(place.seat()))).toList();
     }
 
     private String pointsLine(ro.rentzlab.core.RentzMatch.HandResult hand) {
         var lines = new ArrayList<String>();
-        for (var player : ScoreSettlement.project(hand.contract(), hand.points(), hand.totals(), hand.scoring())) {
-            String heading = player.finishPlace() == 0 ? names.get(player.seat())
-                    : player.finishPlace() + ". " + names.get(player.seat());
-            lines.add(heading + " · P " + player.delta() + " · T " + player.total());
+        for (var player : RentzScoreContent.details(RentzScoreContent.row(hand, copy))) {
+            String heading = player.place() == 0 ? names.get(player.seat())
+                    : player.place() + ". " + names.get(player.seat());
+            lines.add(heading + " · P " + player.score().delta() + " · T " + player.score().total());
             for (var contribution : player.contributions()) {
                 String label = contribution.category() == Contract.RENTZ
                         ? text("Premiu de sosire", "Finishing award")
@@ -370,23 +370,14 @@ final class RentzTable implements BrowserGame.Match {
     }
 
     private String contractLabel(Contract contract, boolean blind) {
-        return contractName(contract) + (blind ? text(" · pe nevăzute ×2", " · blind ×2") : "");
+        return copy.playedContract(contract, blind);
     }
 
     private String contractName(Contract contract) {
-        return switch (contract) {
-            case TRICKS -> text("Levate", "Tricks");
-            case QUEENS -> text("Dame", "Queens");
-            case DIAMONDS -> text("Carouri", "Diamonds");
-            case KING_HEARTS -> text("Regele de cupă", "King of hearts");
-            case TOTALS -> text("Totale", "Totals");
-            case WHIST -> "Whist";
-            case TEN_CLUBS -> text("Zece de treflă", "Ten of clubs");
-            case RENTZ -> "Rentz";
-        };
+        return copy.contract(contract);
     }
 
-    private String text(String romanian, String english) { return "en".equals(language) ? english : romanian; }
+    private String text(String romanian, String english) { return copy.text(english, romanian); }
 
     static List<List<MapCell>> sequence(Observation state) {
         if (state.contract() != Contract.RENTZ) return List.of();

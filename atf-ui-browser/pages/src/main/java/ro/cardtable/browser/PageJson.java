@@ -65,7 +65,8 @@ final class PageJson {
             return fields("heading", view.heading(), "subtitle", view.subtitle(), "prompt", view.prompt(),
                     "seats", view.seats(), "hand", view.hand(), "played", view.played(), "center", view.center(),
                     "actions", view.actions(), "history", view.history(), "header", view.header(), "score", view.score(),
-                    "scoreDetails", view.scoreDetails(), "rentzSequence", RentzPage.sequence());
+                    "scoreDetails", view.scoreDetails(), "rentzSequence", RentzPage.sequence(),
+                    "rentzMenuUnavailable", ro.rentzlab.browser.RentzBrowser.unavailableMenuActions(view));
         if (value instanceof Header header)
             return fields("mode", header.mode(), "title", header.title(), "progress", header.progress(), "bids", header.bids(),
                     "trump", header.trump(), "trumpDescription", header.trumpDescription(), "titleSize", header.titleSize(),

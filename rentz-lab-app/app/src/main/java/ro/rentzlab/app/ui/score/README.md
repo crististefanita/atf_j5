@@ -6,7 +6,8 @@ Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din st
 
 | Responsabilitate | Sursă |
 |---|---|
-| Proiecția datelor | [RentzScoreContent](RentzScoreContent.java) adaptează [ScoreSettlement](../../../../../../../../../game-core/src/main/java/ro/rentzlab/core/score/ScoreSettlement.java) și [ScoreStandings](../../../../../../../../../game-core/src/main/java/ro/rentzlab/core/score/ScoreStandings.java), comune cu browserul, pentru ordinea locurilor, delta, total și contribuțiile confirmate. |
+| Proiecția datelor | [RentzScoreContent](RentzScoreContent.java) adaptează [ScoreSettlement](../../../../../../../../../game-core/src/main/java/ro/rentzlab/core/score/ScoreSettlement.java) și [ScoreStandings](../../../../../../../../../game-core/src/main/java/ro/rentzlab/core/score/ScoreStandings.java). Aceeași clasă este compilată pentru WEB: ordinea locurilor, P/T, contribuțiile și clasamentul au o singură proiecție. |
+| Limbaj și roluri | [RentzText](../copy/RentzText.java) este portabil; [RentzScoreLayout](RentzScoreLayout.java) selectează ponderile din `ScoreGridStyle` și separatorul comun adaptoarelor. Widgeturile și măsurarea rămân specifice platformei. |
 | Calculul dimensiunilor | [HistoryGridMetrics](HistoryGridMetrics.java) primește lățimi măsurate în pixeli. Rezervă loc pentru scoruri și stabilește când derulează toate elementele din zona de conținut. |
 | Randarea și gesturile | [RentzHistoryGrid](RentzHistoryGrid.java) măsoară cu fontul Android activ, aliniază celulele și sincronizează pozițiile de derulare. |
 | Dialogul | [RentzHistoryView](../screens/RentzHistoryView.java) rezolvă numele afișate, mesajul pentru istoricul gol și dimensiunea ferestrei. |
@@ -44,4 +45,4 @@ Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din st
 - În ajutor, un loc existent cu premiu zero afișează `0`, iar un loc care nu există la acea masă are marcajul `—`. Prețurile levatelor din același ecran vin din același profil.
 - Reluarea reexecută jurnalul canonic și reconstruiește rezultatele publice. Un sumar sintetic fără detalii arată explicit lipsa lor.
 
-Modelul de măsurare și stilul de grilă urmează reperul Whist J4. Contractul de scor și pașii pentru build, fixture și raport sunt documentați în ghidul de integrare. [Istoricul adaptiv în ATF](../../../../../../../../../../docs/rentz/ATF_UiIntegration.md#istoricul-adaptiv-rentz)
+Stilul neutru vine din biblioteca Whist; punctajele și vocabularul rămân în adaptorul Rentz. Rendererul WEB primește tabelul canonic, fără să reconstruiască punctele din alte celule. [Istoricul adaptiv în ATF](../../../../../../../../../../docs/rentz/ATF_UiIntegration.md#istoricul-adaptiv-rentz)

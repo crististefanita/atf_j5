@@ -20,6 +20,10 @@ import ro.cardtable.ui.table.ScoreGridStyle;
 import ro.cardtable.ui.table.TableViewportPolicy;
 import ro.cardtable.ui.theme.TableColors;
 import ro.rentzlab.app.ui.table.RentzCardSpace;
+import ro.rentzlab.app.ui.copy.RentzText;
+import ro.rentzlab.app.ui.chrome.RentzGameMenu;
+import ro.rentzlab.app.ui.score.RentzScoreLayout;
+import ro.rentzlab.app.ui.score.RentzScoreContent;
 import ro.rentzlab.ai.RentzPlayer;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.core.RentzMatch.Observation;
@@ -40,6 +44,10 @@ public final class RentzBrowser implements BrowserGame {
     }
 
     @Override public String title() { return "Rentz Lab"; }
+
+    public static List<String> unavailableMenuActions(BrowserGame.View view) {
+        return RentzGameMenu.unavailable(new RentzText(true), view.score() != null);
+    }
 
     /** Reuse the common card-table shell; the engine and the Rentz contract remain J5-owned. */
     @Override public String surface() { return "whist"; }
@@ -80,11 +88,12 @@ public final class RentzBrowser implements BrowserGame {
                 dimension("trump-face-width", "32px"), dimension("trump-face-height", "48px"),
                 dimension("hand-slot", (HandLayoutMetrics.CARD_HEIGHT_DP + HandLayoutMetrics.LIFT_CLEARANCE_DP) + "px"),
                 dimension("score-head", ScoreGridStyle.HEADER_DP + "px"), dimension("score-row", ScoreGridStyle.ROW_DP + "px")));
-        var columns = List.of(ScoreGridStyle.COLUMN_WEIGHTS.get(0), ScoreGridStyle.COLUMN_WEIGHTS.get(3), ScoreGridStyle.COLUMN_WEIGHTS.get(4));
+        var columns = RentzScoreLayout.SETTLEMENT_WEIGHTS;
         double total = columns.stream().mapToDouble(Float::doubleValue).sum();
         for (int index = 0; index < columns.size(); index++) {
             tokens.add(new Token("--rentz-score-col-" + index, columns.get(index) * 100 / total + "%"));
         }
+        tokens.add(new Token("--rentz-history-separator", RentzScoreLayout.HISTORY_SEPARATOR_DP + "px"));
         return List.copyOf(tokens);
     }
 
@@ -173,6 +182,7 @@ public final class RentzBrowser implements BrowserGame {
 
     @Override public Map<String, Object> interfaceCopy(String language) {
         boolean ro = !"en".equals(language);
+        var copy = new RentzText(ro);
         String modeTitle = "Rentz";
         ScoreProfile scoring = ScoreProfile.laboratory();
         var schedule = Map.of("3", ro ? "3 jucători · 24 mâini" : "3 players · 24 hands",
@@ -201,23 +211,23 @@ public final class RentzBrowser implements BrowserGame {
                 entry("language", ro ? "Limba" : "Language"), entry("home", "Rentz Lab"),
                 entry("newGame", ro ? "Partidă nouă" : "New match"), entry("resume", ro ? "Continuă partida" : "Resume match"),
                 entry("setup", ro ? "Setări de joc" : "Game setup"), entry("start", ro ? "Începe partida" : "Start match"),
-                entry("back", ro ? "Înapoi" : "Back"), entry("name", ro ? "Numele tău" : "Your name"),
+                entry("back", copy.back()), entry("name", ro ? "Numele tău" : "Your name"),
                 entry("save", ro ? "Salvează" : "Save"), entry("reset", ro ? "Resetează numele" : "Reset name"),
                 entry("cancel", ro ? "Anulează" : "Cancel"), entry("nameHint", ro ? "Alege un nume scurt pentru masa de joc." : "Choose a short table name."),
                 entry("nameError", ro ? "Numele nu este valid." : "That name is not valid."),
-                entry("achievements", ro ? "Realizări" : "Achievements"), entry("progress", ro ? "Progresul realizărilor" : "Achievement progress"),
-                entry("close", ro ? "Închide" : "Close"), entry("help", ro ? "Cum se joacă" : "How to play"),
+                entry("achievements", copy.achievements()), entry("progress", ro ? "Progresul realizărilor" : "Achievement progress"),
+                entry("close", copy.close()), entry("help", ro ? "Cum se joacă" : "How to play"),
                 entry("instructions", ro ? "Rentz · reguli și punctaj" : "Rentz · rules and scoring"),
                 entry("instructionsSubtitle", ro ? "Regulile jocului" : "Game rules"),
                 entry("rulesAndSchedule", ro ? "Reguli și program" : "Rules and schedule"), entry("modeRules", modeRules),
                 entry("scoringDetails", ro ? "Detalii de punctaj" : "Scoring details"),
                 entry("scoreSheet", ro ? "Scorul partidei" : "Match score"),
-                entry("stopAutoGame", ro ? "Oprește jocul automat" : "Stop auto play"),
+                entry("stopAutoGame", copy.stopAutoPlayHand()),
                 entry("bidNow", ro ? "ALEGE" : "CHOOSE"), entry("playNow", ro ? "JOACĂ" : "PLAY"),
                 entry("rules", rules), entry("streaks", ro ? "Serii" : "Streaks"),
                 entry("bid", ro ? "Alege sub-jocul" : "Choose contract"),
-                entry("history", ro ? "Istoricul scorului" : "Score history"),
-                entry("mainMenu", ro ? "Meniu principal" : "Main menu"), entry("gameMenu", ro ? "Meniul partidei" : "Match menu"),
+                entry("history", copy.history()),
+                entry("mainMenu", copy.mainMenu()), entry("gameMenu", ro ? "Meniul partidei" : "Match menu"),
                 entry("trump", ro ? "Sub-joc" : "Contract"), entry("hand", ro ? "Cărțile tale" : "Your cards"),
                 entry("savedGameError", ro ? "Partida salvată nu a putut fi restaurată." : "The saved match could not be restored."),
                 entry("storageError", ro ? "Salvarea locală nu este disponibilă în acest browser." : "Local saving is unavailable in this browser."),
@@ -227,25 +237,21 @@ public final class RentzBrowser implements BrowserGame {
 
     private static String finishingAwards(ScoreProfile scoring, boolean ro) {
         var rows = new ArrayList<String>();
+        var awards = RentzScoreContent.finishingAwards(scoring);
+        var copy = new RentzText(ro);
         for (int players = 3; players <= 6; players++) {
-            String points = scoring.finishRewardsFor(players).stream()
+            String points = awards.get(players - 3).stream()
                     .map(value -> value == 0 ? "0" : (value > 0 ? "+" : "−") + Math.abs(value))
                     .collect(java.util.stream.Collectors.joining(" / "));
-            rows.add(players + (ro ? " jucători: " : " players: ") + points);
+            rows.add(copy.finishingAwardTable(players) + ": " + points);
         }
         return String.join("; ", rows);
     }
 
     private static String trickScoring(ScoreProfile scoring, boolean ro) {
-        return String.format(java.util.Locale.ROOT,
-                ro ? "Levată %s · damă %s · caro %s · K♥ %s. Whist %s · 10♣ %s. La Totale se adună primele patru categorii. Alegerea pe nevăzute dublează punctele mâinii."
-                        : "Trick %s · queen %s · diamond %s · K♥ %s. Whist %s · 10♣ %s. Totals combines the first four categories. Blind choice doubles the hand points.",
-                score(-scoring.trickPenalty()), score(-scoring.queenPenalty()), score(-scoring.diamondPenalty()),
-                score(-scoring.kingPenalty()), score(scoring.trickReward()), score(scoring.tenReward()));
-    }
-
-    private static String score(int value) {
-        return value > 0 ? "+" + value : Integer.toString(value).replace('-', '−');
+        return new RentzText(ro).trickScoring(scoring) + (ro
+                ? " La Totale se adună primele patru categorii. Alegerea pe nevăzute dublează punctele mâinii."
+                : " Totals combines the first four categories. Blind choice doubles the hand points.");
     }
 
     @Override public Match start(Map<String, String> config) {
