@@ -1751,7 +1751,7 @@
       "criterion": "Verify the source commit and SHA-256 pin, compile against the physical JAR and preserve the shared viewport, card and adapter checks.",
       "proof": "atf-ui-browser/README.md",
       "expires": "2026-12-19",
-      "sha256": "a46084d8d2087af9c17613a361d0b9bf8bb558cd51a33dbf3292a945e984399b",
+      "sha256": "873a25921c7aaf66086fb4240803d89faae9170bb38834c45c89753541ff72a7",
       "allowDelete": false
     }
   ]
