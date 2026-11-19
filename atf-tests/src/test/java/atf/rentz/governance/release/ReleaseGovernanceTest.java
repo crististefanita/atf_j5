@@ -96,27 +96,26 @@ class ReleaseGovernanceTest {
                         "example/private-editions", "1.2.0")).getMessage());
     }
 
-    @Test void currentMainReadmeMatchesTheVerifiedUnavailableDownloadAndLiveBrowserRoute() throws Exception {
+    @Test void currentMainReadmeMatchesTheVerifiedPublicDownloadAndLiveBrowserRoute() throws Exception {
         Path root=ReleaseCatalog.root();
         var index=ReleaseCatalog.read(root.resolve("release/index.json"));
-        String version=index.required("currentVersion").asText();
-        var receipt=ReleaseCatalog.read(root.resolve("release/restricted-"+version+".json"));
-        assertEquals("UNAVAILABLE",receipt.path("availability").path("status").asText(),
-                "The README must not advertise an APK whose authenticated release endpoint is gone");
-        assertEquals(404,receipt.path("availability").path("authenticatedDistributionRepositoryApiHttp").asInt());
-        assertEquals(404,receipt.path("availability").path("authenticatedDistributionReleaseApiHttp").asInt());
-        assertEquals(200,receipt.path("availability").path("authenticatedSourceReleaseListApiHttp").asInt());
-        assertEquals(0,receipt.path("availability").path("authenticatedSourceReleaseCount").asInt());
+        var edition=ReleaseCatalog.verify(root,true);
+        assertEquals("PUBLISHED",edition.state());
+        assertEquals("public",edition.manifest().required("publication").required("channel").asText());
+        assertEquals(200,edition.manifest().required("publicDownload").required("httpStatus").asInt());
         String readme=Files.readString(root.resolve("README.md"),StandardCharsets.UTF_8);
-        assertDoesNotThrow(()->ReleaseCatalog.verifyUnavailableGuide(readme,"release/README.md",
+        assertDoesNotThrow(()->ReleaseCatalog.verifyActiveGuide(readme,"release/README.md",edition.target().publicUrl(),
                 index.required("browserUrl").asText()));
     }
 
     @Test void unavailableMainReadmeRejectsOldApkRoutesDuplicateLinksAndWrongBrowserTargets() throws Exception {
         Path root=ReleaseCatalog.root();
-        String readme=Files.readString(root.resolve("README.md"),StandardCharsets.UTF_8);
         String docs="release/README.md",browser=ReleaseCatalog.read(root.resolve("release/index.json"))
                 .required("browserUrl").asText();
+        String readme="# Rentz Lab\n\n## Jocul\n\n- [Ediția Android și disponibilitatea APK]("+docs+")\n"
+                +"- APK indisponibil momentan — nu există un release descărcabil în depozitul Rentz.\n"
+                +"- [Joacă Rentz online]("+browser+")\n\n## Documentație\n\n[Catalog]("+docs+")\n";
+        assertDoesNotThrow(()->ReleaseCatalog.verifyUnavailableGuide(readme,docs,browser));
         String oldAsset="https://github.com/example/old/releases/download/v0.27.0/RentzLab-0.27.0.apk";
         for(String invalid:List.of(
                 readme.replace("- APK indisponibil momentan — nu există un release descărcabil în depozitul Rentz.",
@@ -125,6 +124,48 @@ class ReleaseGovernanceTest {
                 readme.replace("- [Joacă Rentz online]("+browser+")", "- [Joacă Rentz online]("+browser+")\n- [Joacă din nou]("+browser+")"),
                 readme.replace("- [Ediția Android și disponibilitatea APK]("+docs+")", "- [Ediția Android](release/0.26.0/README.md)"))) {
             assertThrows(IOException.class,()->ReleaseCatalog.verifyUnavailableGuide(invalid,docs,browser));
+        }
+    }
+
+    @Test void unavailableReceiptRetainsItsExactHttpAndEmptySourceChecksIndependentlyOfTheCurrentEdition() throws Exception {
+        Path root=ReleaseCatalog.root(),fixture=temporary.resolve("unavailable");
+        var index=ReleaseCatalog.read(root.resolve("release/index.json"));
+        String version=index.required("currentVersion").asText(),repository=index.required("repository").asText();
+        Path original=root.resolve("release/"+version),copy=fixture.resolve("release/"+version);
+        try(var files=Files.walk(original)) {
+            for(Path file:files.filter(Files::isRegularFile).toList()) {
+                Path target=copy.resolve(original.relativize(file));Files.createDirectories(target.getParent());Files.copy(file,target);
+            }
+        }
+        Files.copy(root.resolve("release/index.json"),fixture.resolve("release/index.json"));
+        Files.copy(root.resolve("release/README.md"),fixture.resolve("release/README.md"));
+        Path gradle=fixture.resolve("rentz-lab-app/app/build.gradle");Files.createDirectories(gradle.getParent());Files.copy(root.resolve("rentz-lab-app/app/build.gradle"),gradle);
+        var manifest=(com.fasterxml.jackson.databind.node.ObjectNode)ReleaseCatalog.read(copy.resolve("release-validation.json"));
+        var identity=manifest.required("release");
+        ((com.fasterxml.jackson.databind.node.ObjectNode)manifest.required("publication")).put("channel","authenticated-only");
+        manifest.remove("publicDownload");
+        JSON().writeValue(copy.resolve("release-validation.json").toFile(),manifest);
+        var proof=JSON().createObjectNode().put("state","PUBLISHED").put("provider","GitHub").put("channel","authenticated-only")
+                .put("authenticatedDownload","PASS").put("version",version).put("sourceTag","v"+version)
+                .put("releaseRepository",repository.split("/")[0]+"/retired-fixture")
+                .put("sourceCommit",identity.required("sourceCommit").asText()).put("applicationId",identity.required("applicationId").asText())
+                .put("certificateSha256",identity.required("certificateSha256").asText()).put("apkSha256",identity.required("sha256").asText())
+                .put("apkBytes",identity.required("apkBytes").asLong()).put("versionCode",identity.required("versionCode").asLong())
+                .put("releaseId",manifest.required("publication").required("releaseId").asLong()).put("assetId",1)
+                .put("link","https://github.com/"+repository.split("/")[0]+"/retired-fixture/releases/download/v"+version+"/RentzLab-"+version+".apk");
+        var availability=proof.putObject("availability").put("status","UNAVAILABLE").put("checkedUtc",java.time.Instant.now().toString())
+                .put("authenticatedDistributionRepositoryApiHttp",404).put("authenticatedDistributionReleaseApiHttp",404)
+                .put("authenticatedSourceReleaseListApiHttp",200).put("authenticatedSourceReleaseCount",0);
+        Path receipt=fixture.resolve("release/restricted-"+version+".json");
+        String browser=index.required("browserUrl").asText();
+        Files.writeString(fixture.resolve("README.md"),"# Rentz Lab\n\n## Jocul\n\n- [Ediția Android și disponibilitatea APK](release/README.md)\n"
+                +"- APK indisponibil momentan — nu există un release descărcabil în depozitul Rentz.\n- [Joacă Rentz online]("+browser+")\n\n## Documentație\n\n[Catalog](release/README.md)\n");
+        JSON().writeValue(receipt.toFile(),proof);
+        assertDoesNotThrow(()->ReleaseCatalog.verify(fixture,true));
+        for(String field:List.of("authenticatedDistributionRepositoryApiHttp","authenticatedDistributionReleaseApiHttp","authenticatedSourceReleaseListApiHttp","authenticatedSourceReleaseCount")) {
+            int originalValue=availability.required(field).asInt();availability.put(field,originalValue+1);JSON().writeValue(receipt.toFile(),proof);
+            assertEquals("RELEASE-AVAILABILITY-RECEIPT",assertThrows(IOException.class,()->ReleaseCatalog.verify(fixture,true)).getMessage());
+            availability.put(field,originalValue);
         }
     }
 

@@ -622,11 +622,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz Android qualification",
-      "reason": "Align current published navigation with the requested APK and online links.",
-      "criterion": "Reject swapped, duplicate, stale or decorated links; documentation remains mandatory outside Jocul.",
+      "reason": "Bind the live README test to the verified public edition and keep unavailable-channel checks in independent fixtures.",
+      "criterion": "A positive unavailable guide precedes its negative mutations; preserve exact 404/404/200/0 receipt controls, current public payload identity and strict APK/browser ordering.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "4c8152dbe93c7eabc0a9e82b567ad37217f9378c1b92e728b5cbc4cf5e36fa5a",
+      "sha256": "05acf86a9f1f5fac88c0a3554145a4c8fc32c9fb26be09086262dd9e5b80b6bd",
       "allowDelete": false
     },
     {

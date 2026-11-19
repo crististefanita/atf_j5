@@ -240,6 +240,8 @@ README-ul principal introduce jocul și arhitectura ATF. După publicare, secți
 
 Catalogul verifică unicitatea secțiunii, ordinea și adresele. Verificatorul post-publicare cere aceeași formă în README-ul remote. Condițiile de acces, compatibilitatea Android și dovezile ediției se citesc în documentele de distribuție și în dosarul ediției.
 
+Testele verifică README-ul activ față de catalogul curent. Indisponibilitatea are fixture separat, validat pozitiv înaintea mutărilor negative; publicarea unei ediții nu anulează controalele pentru canalul dispărut.
+
 ### Distribuție cu autentificare
 
 Distribuiți candidatul numai după calificarea RAG locală și verificarea semnăturii. Folosiți un canal cu acces restricționat la conturile permise. Un prerelease GitHub dintr-un repository public are aceeași vizibilitate publică a artefactelor.
