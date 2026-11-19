@@ -245,7 +245,7 @@ const sharedScoreSource = generatedShell.slice(generatedShell.indexOf("function 
 const sharedScoreGrid = runInNewContext("(" + sharedScoreSource + ")", {element});
 for (const players of [3, 4, 5, 6]) for (const language of ["ro", "en"]) {
   const grid = {players:Array.from({length:players}, (_,i)=>"Loc " + (i+1)), legend:"Δ: punctele mâinii · Σ: total după mână",
-    cardsLabel:"Mână",bidLabel:"Δ:",pointsLabel:"Σ:",
+    cardsLabel:"Mână",bidLabel:"Δ",pointsLabel:"Σ",
     rows:[{cards:1,status:"Levate",cells:Array.from({length:players},(_,i)=>({bid:String(i*25-50),total:String(i*25+10),description:"",missed:false,series:0}))}]};
   let result;
   const data={grid,headings:[language==="ro"?"Jucător":"Player","Δ:","Σ:"],

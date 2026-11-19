@@ -91,8 +91,8 @@ public final class RentzPageComponentTest {
             throw new AssertionError("The four-seat Rentz fixture did not reach the settled score page.");
         }
         var grid = view.getJSONObject("history").getJSONObject("grid");
-        check("Page DTO maps per-hand points to Δ", "Δ:".equals(grid.optString("bidLabel")));
-        check("Page DTO maps running totals to Σ", "Σ:".equals(grid.optString("pointsLabel")));
+        check("Page DTO maps per-hand points to Δ", "Δ".equals(grid.optString("bidLabel")));
+        check("Page DTO maps running totals to Σ", "Σ".equals(grid.optString("pointsLabel")));
         check("Page DTO carries the concise legend beneath the score table",
                 "Δ: punctele mâinii · Σ: total după mână".equals(grid.optString("legend")));
         var settled = view.getJSONObject("scoreDetails").optString("awards");

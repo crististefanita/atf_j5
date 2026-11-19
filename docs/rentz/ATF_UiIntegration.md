@@ -281,3 +281,11 @@ Biblioteca comună deține ancorele locurilor și măsurarea mesei; adaptorul Re
 Contractele livrate în JAR-ul de teste califică viewportul, feedback-ul mâinii, meniul și proporțiile feței. `verify-shared-ui.mjs` confruntă și funcția efectivă de poziționare cu referința citită din AAR; `verify-shared-automation.mjs` controlează așteptarea modulului comun, fără să copieze programatorul. Rasterul, gesturile native și bugetul ferestrelor extreme rămân verificări pe platformă.
 
 Pentru istoric, fixture-urile de măsurare acoperă lățimi de la 280 la 600, înălțimi scunde și înalte și scări de font de la 1× la 2×. Verifică păstrarea numerelor semnate, ultimul jucător și ultima mână în zona derulabilă. Aceste fixture-uri validează contractul de măsurare; nu simulează rasterizarea fontului Android.
+
+## Antetele istoricului
+
+Istoricul folosește antetele compacte `Δ` și `Σ`, fără două puncte. Rezultatul mâinii și informațiile de la masă păstrează `Δ:` și `Σ:`. Valorile, ordinea locurilor și legenda sunt comune proiecției native compilate pentru WEB; widgetul comun primește aceste etichete de la adaptorul Rentz.
+
+## Spațiul deasupra jucătorului
+
+Pe Android, `PlayerSeatView` include eticheta de acțiune în înălțimea măsurată a locului. În WEB, chenarul și eticheta exterioară sunt măsurate separat: shell-ul comun furnizează `actorClearance`, iar `RentzPageLayout` îl exclude din banda celor patru șiruri. Pozițiile locurilor rămân cele ale bibliotecii comune. Testele confruntă aceleași profile cu și fără rezervă, păstrează ancorele și refuză suprapunerea benzii peste etichetă.

@@ -91,7 +91,7 @@ public final class ReleaseCatalog {
             } else verifyPreviewGuide(guide, downloadRepository, version, buildVersion, readmePreview);
         } else {
             require(readmePreview.isMissingNode(), "RELEASE-README-PREVIEW-CHANNEL");
-            String publicUrl=publicDownloadUrl(manifest.path("publicDownload"),identity,version,state);
+            String publicUrl=publicDownloadUrl(manifest.path("publicDownload"),identity,version,state,repository);
             if(state.equals("PUBLISHED"))verifyActiveGuide(guide,"release/README.md",publicUrl,browserUrl(index));
             else verifyMainGuide(guide,repository,version,state,publicUrl);
         }
@@ -171,7 +171,8 @@ public final class ReleaseCatalog {
 
     public static void verifyActiveGuide(String guide,String documentationUrl,String apkUrl,String browserUrl) throws IOException {
         require(isBrowserUrl(browserUrl),"RELEASE-BROWSER-URL");
-        verifyGuide(guide,List.of(documentationUrl,apkUrl,browserUrl));
+        verifyGuide(guide,List.of(apkUrl,browserUrl));
+        require(links(guide).contains(documentationUrl),"RELEASE-MAIN-CATALOG");
         require(count(guide,browserUrl)==1,"RELEASE-MAIN-WEB-LINK");
     }
 
@@ -278,8 +279,8 @@ public final class ReleaseCatalog {
     private static List<String> links(String markdown) {
         return LINK.matcher(markdown).results().map(match -> match.group(1)).toList();
     }
-    private static String publicDownloadUrl(JsonNode proof, JsonNode identity, String version, String state) throws IOException {
-        if (proof.isMissingNode()) return null;
+    static String publicDownloadUrl(JsonNode proof, JsonNode identity, String version, String state, String repository) throws IOException {
+        if (proof.isMissingNode() && !state.equals("PUBLISHED")) return null;
         require(proof.isObject() && state.equals("PUBLISHED"), "RELEASE-PUBLIC-DOWNLOAD-STATE");
         String value = proof.path("url").asText();
         URI uri;
@@ -291,7 +292,8 @@ public final class ReleaseCatalog {
         }
         require("https".equals(uri.getScheme()) && uri.getHost() != null && uri.getRawUserInfo() == null
                 && uri.getPort() == -1 && uri.getRawQuery() == null && uri.getRawFragment() == null
-                && ("/v" + version + "/" + identity.path("apkName").asText()).equals(uri.getRawPath()),
+                && "github.com".equals(uri.getHost())
+                && ("/"+repository+"/releases/download/v"+version+"/"+identity.path("apkName").asText()).equals(uri.getRawPath()),
                 "RELEASE-PUBLIC-DOWNLOAD-URL");
         require(number(proof,"httpStatus") == 200 && number(proof,"bytes") == number(identity,"apkBytes")
                 && proof.path("sha256").asText().equals(identity.path("sha256").asText()),

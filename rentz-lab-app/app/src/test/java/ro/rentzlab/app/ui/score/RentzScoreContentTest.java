@@ -28,7 +28,7 @@ public final class RentzScoreContentTest {
             original.clear();
             String key = players + "/" + language;
             audit.equal("Widget captions retain the APK symbols " + key, List.of(copy.text("Player", "Jucător"), "Δ:", "Σ:"), table.columns().stream().map(c -> c.label()).toList());
-            audit.equal("History captions belong to Rentz " + key, List.of("Δ:", "Σ:"), history.columns());
+            audit.equal("History captions belong to Rentz " + key, List.of("Δ", "Σ"), history.columns());
             audit.equal("Renamed or identical players retain seat identities " + key,
                     java.util.stream.IntStream.range(0, players).mapToObj(seat -> "seat:" + seat).toList(), history.players().stream().map(p -> p.id()).toList());
             audit.equal("Confirmed label retains game, blind marker and chooser " + key, "2 · " + row.label() + "\nAlex", history.rows().get(0).label());

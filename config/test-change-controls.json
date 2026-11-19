@@ -102,11 +102,11 @@
     {
       "path": "scripts/verify-release-readme.ps1",
       "owner": "Rentz release",
-      "reason": "Close the authenticated distribution channel after the qualified source and README reach the remote.",
-      "criterion": "Require the qualified routes and authenticated APK bytes. Retirement requires both Extent artifacts to match the RAG source, length and SHA-256.",
+      "reason": "Use the same two-link navigation contract after publication.",
+      "criterion": "Exact APK then canonical browser, no extra routes and documentation mandatory outside Jocul.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
-      "expires": "2026-12-09",
-      "sha256": "bc7f877cc418c0680f0081cb8ff1d91cd253bcfdec1719c0d0ca167fb6c6e737",
+      "expires": "2026-12-19",
+      "sha256": "387924593869ab2f782fdf79e9d4cdeae65d0e81bb6549e472e2d09d06e1b477",
       "allowDelete": false
     },
     {
@@ -622,11 +622,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/release/ReleaseGovernanceTest.java",
       "owner": "Rentz Android qualification",
-      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
-      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
-      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-12",
-      "sha256": "806b28737c524fa5e688eb0024b3431d0e06bf1fd393fad6ef7fe25880910c6e",
+      "reason": "Align current published navigation with the requested APK and online links.",
+      "criterion": "Reject swapped, duplicate, stale or decorated links; documentation remains mandatory outside Jocul.",
+      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
+      "expires": "2026-12-19",
+      "sha256": "4c8152dbe93c7eabc0a9e82b567ad37217f9378c1b92e728b5cbc4cf5e36fa5a",
       "allowDelete": false
     },
     {
@@ -1032,11 +1032,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java",
       "owner": "Rentz UI",
-      "reason": "Preserve the original Rentz Δ:/Σ: vocabulary while extracting neutral score/history widgets.",
-      "criterion": "Retain every award, cumulative score, restore and place-order oracle; extend immutable model, duplicate-name identity and stable detail-callback coverage for 3–6 seats in RO/EN.",
-      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
-      "expires": "2026-12-18",
-      "sha256": "3032ef55ee13238e627e9a9306145bdd859e74b046882ac4ec6554a5dd84d1f2",
+      "reason": "History captions are Delta and Sigma without colons.",
+      "criterion": "Preserve all score, settlement, details and ranking comparisons; change history labels only.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#antetele-istoricului",
+      "expires": "2026-12-19",
+      "sha256": "48fac3ce889a9b5c938fc53dcf74f6b2b723930ae27ac4dcaec46cf873969827",
       "allowDelete": false
     },
     {
@@ -1212,11 +1212,11 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/ReleaseCatalog.java",
       "owner": "Rentz release",
-      "reason": "Keep edition documentation in source and qualified APKs in the managed distribution store.",
-      "criterion": "RAG rejects local APKs and checksums under release. A verified production or preview guide and a newer staged candidate keep the existing version and identity rules.",
-      "proof": "ReleaseCatalogStorageTest and docs/rentz/ATF_Release.md",
-      "expires": "2026-12-14",
-      "sha256": "425091131547b37cae03757488496d9341c4c88bddaf74b34cd3c95259d85efe",
+      "reason": "Bind the public GitHub APK to its repository and exact version; separate game links from documentation.",
+      "criterion": "Accept only APK then browser in Jocul, retain documentation outside and all checksum, receipt and source gates.",
+      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
+      "expires": "2026-12-19",
+      "sha256": "7547c3152927a7d807b81bd5eadc2be17491f5ed76a10b6ee436b5d29d2115bb",
       "allowDelete": false
     },
     {
@@ -1322,21 +1322,21 @@
     {
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
-      "reason": "Pin the extracted common Android widgets without producing a new APK.",
-      "criterion": "VersionCode remains 31, versionName remains 0.27.0 and the test seed stays isolated; only the product UI dependency advances to 0.1.21 with verified provenance.",
-      "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
-      "expires": "2027-02-12",
-      "sha256": "934eac9977a5721dcd0881590c03cf7e392f8c11dcccb8d4d1ef6d7b041d9430",
+      "reason": "Advance numeric candidate version and Android versionCode.",
+      "criterion": "Product 0.28.0 / 32; fixed seed remains exclusive to the isolated UI-sanity build.",
+      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
+      "expires": "2026-12-19",
+      "sha256": "a552de1e8e38da9b7f806d01bc32b477037ea74f68ca39393606f26c59b48616",
       "allowDelete": false
     },
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Record the verified publication of Rentz Lab 0.27.0.",
-      "criterion": "Preserve the current published edition until the candidate passes offline, native, signed build and authenticated distribution checks.",
-      "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
-      "expires": "2027-02-12",
-      "sha256": "a1296fc3a96b4911ff029a410fb46288990835ba56c58cf0cd4570918b2f2c64",
+      "reason": "Prepare numeric minor candidate 0.28.0.",
+      "criterion": "Published 0.27.0 identity remains unchanged until qualified download of the successor.",
+      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
+      "expires": "2026-12-19",
+      "sha256": "6999772eda16a90c411d2a486cae85229120cc5011140f6554cb6790d21ea345",
       "allowDelete": false
     },
     {
@@ -1630,11 +1630,11 @@
     {
       "path": "atf-ui-browser/pages/src/test/java/ro/cardtable/browser/RentzPageComponentTest.java",
       "owner": "Rentz WEB/APK parity",
-      "reason": "Restore Rentz Δ:/Σ: notation in the existing compiled-page score and history contracts.",
-      "criterion": "Retain every engine, DTO, award, restoration and complete-hand expectation; the captions and legend agree with the original APK, independently of Whist labels.",
-      "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
-      "expires": "2026-12-18",
-      "sha256": "ba4e47340b591a69216f24d0f45ce2ffde472026ac4725cc7a3573fb16ac5bfd",
+      "reason": "History column captions omit punctuation; settlement notation is unchanged.",
+      "criterion": "Assert bare Delta/Sigma history labels and preserve canonical settlement values and explanatory legend.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#antetele-istoricului",
+      "expires": "2026-12-19",
+      "sha256": "7fa9335af795838ca3985250b49faeffd60c576293e36d9d9b36bbb2255896d9",
       "allowDelete": false
     },
     {
@@ -1732,6 +1732,16 @@
       "proof": "docs/rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser",
       "expires": "2026-12-18",
       "sha256": "ee9c48e9329e5dd07792880de18a4bc4dcec201ccac7ec22573d240f41203606",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/ReleasePublicLinkTest.java",
+      "owner": "Rentz release qualification",
+      "reason": "Cover public GitHub identity and malformed or foreign download proofs.",
+      "criterion": "Exact repository, version, file, response, bytes and hash; reject missing proof and unqualified publication.",
+      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
+      "expires": "2026-12-19",
+      "sha256": "6fd509711ecf52bf59b80d83d3fc7fa2fa8d9cbe2be4a2d467a1d9033d6692a7",
       "allowDelete": false
     }
   ]

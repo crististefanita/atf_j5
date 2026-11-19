@@ -436,8 +436,8 @@ public final class RentzBrowserComponentTest {
         var view = table.view();
         var grid = view.history().grid();
         equal("Hand number heading", "Mână", grid.cardsLabel());
-        equal("Per-hand points use the Rentz original symbol", "Δ:", grid.bidLabel());
-        equal("Running total uses the Rentz original symbol", "Σ:", grid.pointsLabel());
+        equal("Per-hand points use the Rentz original symbol", "Δ", grid.bidLabel());
+        equal("Running total uses the Rentz original symbol", "Σ", grid.pointsLabel());
         equal("History explains short headings below the table", "Δ: punctele mâinii · Σ: total după mână", grid.legend());
         equal("One complete Rentz history row", 1, grid.rows().size());
         var row = grid.rows().get(0);
@@ -457,8 +457,8 @@ public final class RentzBrowserComponentTest {
         table.act("choose:RENTZ");
         finishOneHand(table);
         var grid = table.view().history().grid();
-        equal("English history keeps compact per-hand label", "Δ:", grid.bidLabel());
-        equal("English history keeps compact total label", "Σ:", grid.pointsLabel());
+        equal("English history keeps compact per-hand label", "Δ", grid.bidLabel());
+        equal("English history keeps compact total label", "Σ", grid.pointsLabel());
         equal("English legend concisely distinguishes the values", "Δ: hand points · Σ: running total", grid.legend());
         var score = table.view().scoreDetails();
         truth("Completed-hand score uses the same Δ/Σ notation", score.awards().contains(" · Δ: ")

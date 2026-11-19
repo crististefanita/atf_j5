@@ -14,9 +14,12 @@ final class RentzPageLayout {
         int viewport = Integer.parseInt(parameters.get("viewport"));
         var policy = new TableViewportPolicy(viewport);
         var band = TableGeometry.fullWidthCardBand(common.board(), policy.regionGapDp());
+        int actorClearance = Integer.parseInt(parameters.getOrDefault("actorClearance", "0"));
+        if (actorClearance < 0 || actorClearance > 256 || actorClearance + 4 > band.height())
+            throw new IllegalArgumentException("Rentz action-line clearance is outside the card band");
         var previous = common.board().center();
         var center = band.height() < 4 ? previous
-                : new TableGeometry.Rect(previous.left(), band.top(), previous.right(), band.bottom());
+                : new TableGeometry.Rect(previous.left(), band.top(), previous.right(), band.bottom() - actorClearance);
         return new BrowserGeometry.Layout(new TableGeometry.Plan(common.board().seats(), center), common.hand(),
                 common.boardHeight(), null, common.bids(), Map.of());
     }

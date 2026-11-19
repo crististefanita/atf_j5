@@ -23,7 +23,7 @@ export function rentzScoreTable(data, element, scoreGrid) {
   }
   const content = element("div", "", "rentz-score-table");
   if (data.headings?.length !== 3 || data.rows?.length !== grid.players.length
-      || data.headings[1] !== grid.bidLabel || data.headings[2] !== grid.pointsLabel
+      || data.headings[1] !== "Δ:" || data.headings[2] !== "Σ:"
       || data.rows.some((row, seat) => row.length !== 3 || row[0] !== grid.players[seat]
         || row[1] !== grid.rows[0].cells[seat].bid || row[2] !== grid.rows[0].cells[seat].total)) {
     throw new TypeError("Rentz settlement needs the canonical native three-column projection.");

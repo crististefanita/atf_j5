@@ -76,7 +76,7 @@ public final class RentzScoreContent {
             return new HistoryContent.Row("hand:" + row.hand(), label, label, values);
         }).toList();
         return new HistoryContent(copy.text("Hand · game", "Mână · joc"), legend(copy),
-                copy.text("Hand scoring details", "Detaliul punctajului mâinii"), players, List.of(HAND_POINTS_MARK, TOTAL_MARK), rows);
+                copy.text("Hand scoring details", "Detaliul punctajului mâinii"), players, List.of("Δ", "Σ"), rows);
     }
     public static java.util.function.Consumer<String> detailAction(List<Row> history, java.util.function.Consumer<Row> open) {
         var snapshot = history.stream().collect(java.util.stream.Collectors.toUnmodifiableMap(row -> "hand:" + row.hand(), row -> row));

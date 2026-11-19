@@ -73,7 +73,7 @@ function Confirm-ReadmeGameLinks([string]$Readme, [string]$DocumentationUrl, [st
 
     $section = $sections[0]
     $lines = @($section.Groups[1].Value -split '\n' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-    $expected = @($DocumentationUrl, $ApkUrl, $BrowserUrl)
+    $expected = @($ApkUrl, $BrowserUrl)
     if ($lines.Count -ne $expected.Count) { throw 'Jocul must contain exactly the qualified links for this distribution channel.' }
     for ($i = 0; $i -lt $expected.Count; $i++) {
         $link = [regex]::Match($lines[$i], '^- \[[^\[\]]+\]\(([^()\s]+)\)$')
@@ -85,6 +85,7 @@ function Confirm-ReadmeGameLinks([string]$Readme, [string]$DocumentationUrl, [st
         throw 'The published browser game must have exactly one current link in the README.'
     }
     $outside = $text.Remove($section.Index, $section.Length)
+    if($outside -notmatch ("\]\("+[regex]::Escape($DocumentationUrl)+"\)")){throw "Release documentation must remain linked outside Jocul."}
     foreach ($link in [regex]::Matches($outside, '\]\(([^)\s]+)\)')) {
         if ($link.Groups[1].Value -match '/releases/(tag|download)/|\.apk(?:[?#].*)?$') {
             throw 'The pushed README contains another release or download link outside Jocul.'

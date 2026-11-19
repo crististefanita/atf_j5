@@ -128,11 +128,11 @@ class ReleaseGovernanceTest {
         }
     }
 
-    @Test void aPublishedReadmeRequiresDocumentationThenTheExactApkThenTheBrowserLink() {
+    @Test void aPublishedReadmeRequiresOnlyTheExactApkThenTheBrowserLink() {
         String browser="https://crististefanita.github.io/rentz/";
         String docs="release/README.md";
         String apk="https://github.com/crististefanita/rentz/releases/download/v0.28.0/RentzLab-0.28.0.apk";
-        String active="# Rentz Lab\n\n## Jocul\n\n- [Ediția Android]("+docs+")\n- [Descarcă APK]("+apk+")\n"
+        String active="# Rentz Lab\n\n## Jocul\n\n- [Descarcă APK]("+apk+")\n"
                 +"- [Joacă Rentz online]("+browser+")\n\n## Documentație\n\n[Catalog]("+docs+")\n";
         assertDoesNotThrow(()->ReleaseCatalog.verifyActiveGuide(active,docs,apk,browser));
         for(String invalid:List.of(
@@ -140,7 +140,7 @@ class ReleaseGovernanceTest {
                         "- [Joacă Rentz online]("+browser+")\n- [Descarcă APK]("+apk+")"),
                 active.replace("- [Joacă Rentz online]("+browser+")", "- [Joacă Rentz online]("+browser+")\n- [Web duplicat]("+browser+")"),
                 active.replace(apk,"https://github.com/example/old/releases/download/v0.27.0/RentzLab-0.27.0.apk"),
-                active.replace("- [Ediția Android]("+docs+")\n", ""))) {
+                active.replace("- [Descarcă APK]", "- [Ediția Android]("+docs+")\n- [Descarcă APK]"))) {
             assertThrows(IOException.class,()->ReleaseCatalog.verifyActiveGuide(invalid,docs,apk,browser));
         }
     }
@@ -149,7 +149,7 @@ class ReleaseGovernanceTest {
         String browser="https://crististefanita.github.io/rentz/";
         String docs="release/README.md";
         String apk="https://github.com/crististefanita/rentz/releases/download/v0.28.0/RentzLab-0.28.0.apk";
-        String active="# Rentz Lab\n\n## Jocul\n\n- [Ediția Android]("+docs+")\n- [Descarcă APK]("+apk+")\n"
+        String active="# Rentz Lab\n\n## Jocul\n\n- [Descarcă APK]("+apk+")\n"
                 +"- [Joacă Rentz online]("+browser+")\n\n## Documentație\n\n[Catalog]("+docs+")\n";
         for(String invalidBrowser:List.of(
                 "http://crististefanita.github.io/rentz/",
@@ -165,10 +165,10 @@ class ReleaseGovernanceTest {
         }
     }
 
-    @Test void releaseReadmeGateChecksTheSameThreeLinksAsTheLocalCatalog() throws Exception {
+    @Test void releaseReadmeGateChecksTheSameTwoLinksAsTheLocalCatalog() throws Exception {
         String verifier=Files.readString(ReleaseCatalog.root().resolve("scripts/verify-release-readme.ps1"));
         assertTrue(verifier.contains("function Confirm-ReadmeGameLinks([string]$Readme, [string]$DocumentationUrl, [string]$ApkUrl, [string]$BrowserUrl)"));
-        assertTrue(verifier.contains("$expected = @($DocumentationUrl, $ApkUrl, $BrowserUrl)"));
+        assertTrue(verifier.contains("$expected = @($ApkUrl, $BrowserUrl)"));
         assertTrue(verifier.contains("Confirm-ReadmeGameLinks $readme $readmeReleaseUrl $direct $catalog.browserUrl"));
     }
 

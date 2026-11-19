@@ -132,13 +132,15 @@ Verificatorul nativ stabilește verdictul execuției din receipt. Validarea Exte
 
 ## Publicare și descărcare
 
-1. Promovați commitul calificat pe `main`. Pentru GitHub restricționat, porniți [reluarea publicării](#reluarea-publicării-restricționate) cu artefactul semnat și checksum-ul lui.
+Canalul produsului este GitHub Releases public, în același repository cu sursele Rentz. URL-ul identifică exact repository-ul, tagul numeric și `RentzLab-<versiune>.apk`. Descărcările autentificată și anonimă au receipts separate și sunt confruntate cu APK-ul semnat. Fluxurile restricționate de mai jos rămân probe ale infrastructurii pentru un canal privat explicit, fără să schimbe distribuția curentă a jocului.
+
+1. Promovați commitul calificat pe `main`, creați tagul pe sursa calificată și publicați APK-ul semnat cu checksum în repository-ul Rentz. Pentru un canal privat explicit, porniți [reluarea publicării](#reluarea-publicării-restricționate) cu artefactul semnat și checksum-ul lui.
 2. Citiți receipt-ul publicării înaintea pregătirii catalogului. La întrerupere, păstrați același jurnal și recitiți starea remote.
 3. Verificați README → release curent → asset: bytes efectivi, SHA-256 și toate CRC-urile. Un răspuns 404 salvat cu extensia APK rămâne eroare.
 4. Păstrați distinct accesul autentificat, accesul fără sesiune și blocarea browserului. Tokenul API nu se transmite originilor CDN; o probă Android poate consuma numai redirectul temporar al asset-ului, fără expunerea lui în rapoarte.
 5. Rulați intrarea explicită de acceptanță a distribuției cu classpath-ul calificat și tokenul numai în mediu. Nu o includeți implicit în regresia offline.
 6. Actualizați catalogul și secțiunea **Jocul** din README conform [contractului de navigare](#linkurile-din-readme).
-7. După push, rulați `scripts/verify-release-readme.ps1 -Restricted` cu raportul RAG calificat și directorul probelor de distribuție. Verificatorul citește README-ul din commitul remote, confruntă linkurile și octeții descărcați și salvează `readme-publication` în depozitul extern.
+7. După push, rulați `scripts/verify-release-readme.ps1` (adăugați `-Restricted` numai pentru un canal privat explicit) cu raportul RAG calificat și directorul probelor de distribuție. Verificatorul citește README-ul din commitul remote, confruntă linkurile și octeții descărcați și salvează `readme-publication` în depozitul extern.
 8. Retrageți edițiile anterioare când `readme-publication.retirement.allowed` este `true`. Pe lângă tagul `latest` și descărcarea autentificată, verificatorul recitește Extent-ul componentelor și cel nativ. Pentru apelul direct, transmiteți `-ComponentExtent` și `-NativeExtent` cu căile fișierelor originale.
 9. Păstrați tagurile Git și dovezile de audit. După retragere, confruntați din nou inventarul și descărcarea ediției curente.
 
@@ -222,14 +224,14 @@ Folosiți un repository privat de test fără ediții și trei conturi GitHub di
 
 ### Linkurile din README
 
-README-ul principal începe cu jocul, descărcarea și prima partidă. Secțiunea **Jocul** conține câte o legătură pe rând.
+README-ul principal introduce jocul și arhitectura ATF. După publicare, secțiunea **Jocul** conține exact două legături: APK-ul calificat, apoi jocul online. Catalogul și ghidul livrării rămân în secțiunile de documentație.
 
 | Stare | Legături în ordine |
 |---|---|
 | `DRAFT` | Dosarul ediției |
 | `PREPARED` | Dosarul ediției, APK-ul local |
-| `PUBLISHED`, acces restricționat | Dosarul ediției, APK-ul direct din canalul calificat |
-| `PUBLISHED`, acces public | Pagina release-ului, APK-ul direct din canalul calificat |
+| `PUBLISHED`, acces restricționat | APK-ul direct verificat, jocul online |
+| `PUBLISHED`, acces public | APK-ul GitHub direct verificat, jocul online |
 
 Catalogul verifică unicitatea secțiunii, ordinea și adresele. Verificatorul post-publicare cere aceeași formă în README-ul remote. Condițiile de acces, compatibilitatea Android și dovezile ediției se citesc în documentele de distribuție și în dosarul ediției.
 
