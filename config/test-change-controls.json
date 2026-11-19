@@ -5,11 +5,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzSharedPresentationTest.java",
       "owner": "Rentz UI adoption",
-      "reason": "Isolate evaluated native presentation comparisons from legacy JUnit-only cases.",
-      "criterion": "Preserve exact shared card dimensions, seat anchors, reserved trick center and hand clearance for 3 to 6 seats, compact and tall viewports and fonts 1 to 2; every audited test contains evaluated comparisons.",
-      "proof": "docs/rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser",
-      "expires": "2026-12-18",
-      "sha256": "556c0857acd72b0e0f76210a96738f08ce3c216cd5157ffba3b46a61174a8bdb",
+      "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
+      "criterion": "Preserve complete localized labels, exactly one accessible scale, signed score columns, existing callbacks and shared viewport behavior.",
+      "proof": "atf-ui-browser/README.md#acțiunile-scorului",
+      "expires": "2026-12-19",
+      "sha256": "8801ba91219a197411eac01186428d3701a47227783b64e770ee9ff3a2ad15b8",
       "allowDelete": false
     },
     {
@@ -982,11 +982,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java",
       "owner": "Rentz UI",
-      "reason": "Admit the coherent Android 0.1.22 and Browser 0.2.25 pair, including score typography and the exact native producer receipt.",
-      "criterion": "Keep every physical archive and loaded-class comparison; pin the current native receipt and reject each of the seven changed portable inputs independently.",
-      "proof": "rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz",
-      "expires": "2026-11-20",
-      "sha256": "a9667e7e175335cb12278cb2f975bcd17bef8f842b62619f053f299ddd2da8fb",
+      "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
+      "criterion": "Preserve complete localized labels, exactly one accessible scale, signed score columns, existing callbacks and shared viewport behavior.",
+      "proof": "atf-ui-browser/README.md#acțiunile-scorului",
+      "expires": "2026-12-19",
+      "sha256": "ee7db3dca2a395ab80bd633112be4b4f9be3a73a018c8c9a21d9c687cae2d36b",
       "allowDelete": false
     },
     {
@@ -1322,11 +1322,11 @@
     {
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
-      "reason": "Advance numeric candidate version and Android versionCode. Prepare the next numeric minor candidate without replacing the published README link.",
-      "criterion": "Product 0.28.0 / 32; fixed seed remains exclusive to the isolated UI-sanity build. Candidate 0.30.0/code 34 remains separate from published 0.29.0 until native preservation, three games, RAG and signed-byte acquisition pass.",
-      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
+      "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
+      "criterion": "Preserve complete localized labels, exactly one accessible scale, signed score columns, existing callbacks and shared viewport behavior.",
+      "proof": "atf-ui-browser/README.md#acțiunile-scorului",
       "expires": "2026-12-19",
-      "sha256": "584a6d4eecabac502af49ebfa850f36ecf009cf59d724ca68cbceef5730a5471",
+      "sha256": "c6084f3dccf3f5e175da944af807ffc3bf25ced927c1c314caf827daf1844133",
       "allowDelete": false
     },
     {
@@ -1747,11 +1747,11 @@
     {
       "path": "atf-ui-browser/Test-RentzBrowserComponents.ps1",
       "owner": "Shared browser consumer",
-      "reason": "Admit the coherent Browser 0.2.25 and native 0.1.22 pair while retaining all shared renderer, geometry and timing contracts.",
-      "criterion": "Preserve exact JAR checksums and source pins, executable shared contracts and native/browser comparisons, including all delivered score text roles.",
-      "proof": "atf-ui-browser/README.md",
+      "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
+      "criterion": "Preserve complete localized labels, exactly one accessible scale, signed score columns, existing callbacks and shared viewport behavior.",
+      "proof": "atf-ui-browser/README.md#acțiunile-scorului",
       "expires": "2026-12-19",
-      "sha256": "75ae1775625f4bde2a03f88ae6a07bde2f85a36e5b41ff232be1325810fca278",
+      "sha256": "01532f95d67d1f00036148797f4fdfa9dc02664271c82e0d614c375c711c5be2",
       "allowDelete": false
     },
     {
@@ -1767,11 +1767,11 @@
     {
       "path": "atf-ui-browser/Build-RentzPages.ps1",
       "owner": "Rentz shared browser admission",
-      "reason": "Admit the coherent Browser 0.2.25 and native 0.1.22 pair while retaining all shared renderer, geometry and timing contracts.",
-      "criterion": "Preserve exact JAR checksums and source pins, executable shared contracts and native/browser comparisons, including all delivered score text roles.",
-      "proof": "atf-ui-browser/README.md",
+      "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
+      "criterion": "Preserve complete localized labels, exactly one accessible scale, signed score columns, existing callbacks and shared viewport behavior.",
+      "proof": "atf-ui-browser/README.md#acțiunile-scorului",
       "expires": "2026-12-19",
-      "sha256": "5e10ae8fd63568c804ea62d48f62f0038be4eb32500f813f9fbb7cf69e826c91",
+      "sha256": "9e83c436c8c5737173b602ddc4c717db5009205e845f3e81e4bb2c2cd77c3d9a",
       "allowDelete": false
     },
     {

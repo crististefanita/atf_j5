@@ -1,10 +1,7 @@
 package ro.rentzlab.app.ui.screens;
 
-import android.graphics.Color;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.app.AlertDialog;
 import java.util.List;
 import ro.cardtable.ui.screens.ScreenViews;
@@ -23,31 +20,27 @@ public final class RentzHandScoreScreen {
             List<RentzScoreContent.Standing> standings,
             Runnable next, boolean canContinue, Runnable history, Runnable table, Runnable menu) {
         views.applyStandardWindowChrome();
-        var page = views.gamePage();
+        var page = views.page(null, null);
         page.setBackgroundColor(ScreenViews.BACKGROUND);
         views.addText(page, copy.handProgress(row.hand(), hands), 13, ScreenViews.ACCENT, false, 12, 0);
         views.addText(page, row.label(), 13, ScreenViews.ACCENT, false, 0, 4);
         views.addText(page, copy.text("Hand score", "Punctajul mâinii"), 24, ScreenViews.PINE, false, 0, 8);
         var progress = new FrameLayout(views.activity());
         page.addView(progress, views.matchWrap());
-        var scroll = new ScrollView(views.activity());
         var content = new LinearLayout(views.activity());
         content.setOrientation(LinearLayout.VERTICAL);
-        scroll.addView(content);
         content.addView(new RentzSettlementTable(views.activity(), row, names, copy), views.matchWrap());
         views.addText(content, RentzScoreContent.legend(copy), 12, ScreenViews.PINE, false, 6, 8);
-        page.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-        var details = views.actionButton(copy.text("Scoring details", "Detalii de punctaj"),
+        page.addView(content, views.matchWrap());
+        var details = views.scoreActionButton(copy.text("Scoring details", "Detalii de punctaj"),
                 "hand-score-details", true, () -> new AlertDialog.Builder(views.activity())
                         .setTitle(copy.text("Scoring details", "Detalii de punctaj"))
                         .setView(new RentzHandDetails(views.activity(), row, names, copy, null, standings))
-                        .setPositiveButton(copy.text("Close", "Închide"), null).show(), false, 14);
-        details.setBackgroundColor(Color.TRANSPARENT);
-        details.setStateListAnimator(null);
-        details.setElevation(0);
+                        .setPositiveButton(copy.text("Close", "Închide"), null).show(), false);
         page.addView(details, views.matchWrap());
-        if (next != null) views.addButton(page, copy.text("Next hand", "Mâna următoare"), "rentz-next-hand", canContinue, next, true);
+        if (next != null) views.addScoreAction(page, copy.text("Next hand", "Mâna următoare"), "rentz-next-hand", canContinue, next, true);
         var actions = new LinearLayout(views.activity());
+        actions.setOrientation(LinearLayout.VERTICAL);
         addAction(actions, copy.history(), history);
         addAction(actions, copy.text("View table", "Vezi masa"), table);
         addAction(actions, copy.mainMenu(), menu);
@@ -56,10 +49,7 @@ public final class RentzHandScoreScreen {
     }
 
     private void addAction(LinearLayout actions, String label, Runnable action) {
-        var button = views.actionButton(label, label, true, action, false, 14);
-        button.setBackgroundColor(Color.TRANSPARENT);
-        button.setStateListAnimator(null);
-        button.setElevation(0);
-        actions.addView(button, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        var button = views.scoreActionButton(label, label, true, action, false);
+        actions.addView(button, views.matchWrap());
     }
 }

@@ -19,8 +19,8 @@ $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -Jso
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.25.jar'
-$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.25-tests.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.27.jar'
+$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.27-tests.jar'
 $commonTestsExpected = (Get-Content -LiteralPath "$commonTests.sha256" -Raw).Trim()
 if ((Get-FileHash -Algorithm SHA256 -LiteralPath $commonTests).Hash -ine $commonTestsExpected) {
     throw 'Shared browser component test checksum mismatch.'
@@ -77,7 +77,7 @@ try { & jar xf $library 'ro/cardtable/browser/web' }
 finally { Pop-Location }
 $commonTestRoot = Join-Path $run 'common-component-tests'
 $null = New-Item -ItemType Directory -Force -Path $commonTestRoot
-$commonContracts = @('hand-presentation.mjs', 'viewport-contract.mjs', 'menu-presentation.mjs', 'score-presentation.mjs', 'seat-presentation.mjs', 'card-typography.mjs', 'card-typography.tsv', 'trick-playback.mjs')
+$commonContracts = @('fixtures.mjs', 'hand-presentation.mjs', 'viewport-contract.mjs', 'menu-presentation.mjs', 'score-presentation.mjs', 'seat-presentation.mjs', 'card-typography.mjs', 'card-typography.tsv', 'trick-playback.mjs')
 Push-Location $commonTestRoot
 try { & jar xf $commonTests @commonContracts }
 finally { Pop-Location }
@@ -110,7 +110,7 @@ $choiceAnchor = @(
 ) -join "`n"
 foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAnchor, $automationAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
-    if ($count -ne 1) { throw "Card Table Browser 0.2.25 adapter anchor changed; expected one match, found $count." }
+    if ($count -ne 1) { throw "Card Table Browser 0.2.27 adapter anchor changed; expected one match, found $count." }
 }
 $markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence, refreshRentzSequence, rentzMenuRoutes } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable, rentzScoreRules } from "./rentz-score.mjs";')
 $preparedLayoutAnchor = '    await placeTable(content);'
@@ -249,14 +249,14 @@ if ($LASTEXITCODE -ne 0) { throw 'Complete trick-contract presentation checks fa
     (Join-Path $commonTestRoot 'hand-presentation.mjs') (Join-Path $site 'hand-feedback.mjs') `
     (Join-Path $site 'rentz-ui.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Generated Rentz engine component checks failed.' }
-$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.22/card-table-ui-0.1.22.aar'
+$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.aar'
 $nativeUiProvenance = Get-Content -LiteralPath (Join-Path $checkout 'rentz-lab-app/ui-library/provenance.json') -Raw | ConvertFrom-Json
-$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.22/card-table-ui-0.1.22.aar' })
+$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.aar' })
 if ($nativeUiPin.Count -ne 1 -or
         (Get-FileHash -Algorithm SHA256 -LiteralPath $nativeUiAar).Hash -ine $nativeUiPin[0].sha256) {
     throw 'The native Rentz layout reference does not match the pinned Android UI AAR.'
 }
-$nativeUiClasses = Join-Path $run 'card-table-ui-0.1.22-classes.jar'
+$nativeUiClasses = Join-Path $run 'card-table-ui-0.1.24-classes.jar'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archive = [IO.Compression.ZipFile]::OpenRead($nativeUiAar)
 try {
@@ -285,6 +285,8 @@ $nativePresentation = Join-Path $run 'rentz-native-presentation.json'
 if ($LASTEXITCODE -ne 0) { throw 'Could not read the pinned Android UI presentation reference.' }
 & node (Join-Path $pages 'verify-shared-ui.mjs') $site $commonTestRoot $nativePresentation
 if ($LASTEXITCODE -ne 0) { throw 'Shared native/browser UI adoption checks failed.' }
+& node (Join-Path $pages 'verify-score-actions.mjs') $site $commonTestRoot $nativePresentation (Join-Path $root 'score-actions')
+if ($LASTEXITCODE -ne 0) { throw 'Shared score action accessibility component checks failed.' }
 & node (Join-Path $pages 'verify-shared-automation.mjs') $site
 if ($LASTEXITCODE -ne 0) { throw 'Shared AutoPlay component checks failed.' }
 & node (Join-Path $pages 'verify-rentz-ui.mjs') $nativeMetrics $tableScript `

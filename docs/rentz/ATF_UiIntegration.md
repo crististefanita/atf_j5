@@ -336,3 +336,11 @@ Istoricul folosește antetele compacte `Δ` și `Σ`, fără două puncte. Rezul
 | Shell WEB comun | Măsoară separat eticheta exterioară și furnizează `actorClearance`. |
 | Adaptor Rentz | `RentzPageLayout` exclude rezerva din banda celor patru șiruri; ancorele locurilor rămân cele comune. |
 | Componente | Confruntă profilele cu și fără rezervă și refuză suprapunerea benzii peste etichetă. |
+
+## Acțiunile scorului
+
+Acțiunile de rezultat folosesc rolurile comune de 24/21 unități logice, cu 50% peste rolurile de bază 16/14. Adaptorul Android folosește fabrica `ScreenViews.scoreActionButton`; Web folosește aceleași tokenuri exportate din bibliotecă.
+
+- Etichetele lungi se împachetează, iar înălțimea urmează conținutul cu țintă tactilă minimă de 48 de unități. Pagina completă rămâne derulabilă.
+- Cifrele tabelului, punctele și dialogurile generice își păstrează rolurile; profilul, regulile și callback-urile rămân ale jocului.
+- Testele consumă JAR-ul comun de teste și compară rolurile cu AAR-ul efectiv. Acoperiți RO/EN, ferestre scunde, text mărit și ultima acțiune, fără a echivala componentele cu rasterizarea nativă.

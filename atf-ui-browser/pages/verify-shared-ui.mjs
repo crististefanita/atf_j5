@@ -25,7 +25,7 @@ check('The delivered renderer keeps the same card origin across playback and hum
   verifyCenterContinuity(readFileSync(join(site, 'table.mjs'), 'utf8'), { rentzChoiceDropdown, action() {}, language: 'ro' }));
 check('Common hidden action-line measurement is phase-stable and leaves no probes', {cases:8,absentBadge:0,probesRemoved:true,visibleBadgeUntouched:true}, verifySeatActionClearance(measureSeatActionClearance));
 const palette = new Map(setup.palette.map(token => [token.name, token.color]));
-check('The actual native AAR exposes all twelve logical score text roles', 12, Object.keys(native.scoreTypography).length);
+check('The actual native AAR exposes all fourteen logical score text roles', 14, Object.keys(native.scoreTypography).length);
 const scoreCss = readFileSync(join(site, 'table.css'), 'utf8');
 for (const [role, value] of Object.entries(native.scoreTypography)) {
   check(`One actual palette entry for ${role}`, 1, setup.palette.filter(token => token.name === role).length);

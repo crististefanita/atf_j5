@@ -27,7 +27,7 @@ Antetul folosește `GameTitleBar` din AAR-ul fixat. Contractul stabil este în [
 
 ## P1 · Admiterea bibliotecilor și paritatea Whist
 
-Păstrați AAR-ul Android `0.1.22` și pachetul Browser `0.2.25` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
+Păstrați AAR-ul Android `0.1.24` și pachetul Browser `0.2.27` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
 
 | Prioritate | Cerință rămasă | Criteriu de închidere |
 |---|---|---|
@@ -51,3 +51,7 @@ Pentru contractele cu levate, păstrați matricea completă în [componente](../
 ## P2 · Acceptanța nativă a rezultatului compact
 
 Pagina de punctaj folosește tabelul neutru Jucător/Δ:/Σ:, cu contribuțiile la cerere. Pe mesele APK de 3, 5 și 6 locuri rămân rasterul la font mărit, derularea pe ferestre scunde și detaliile fără pierderea accesului la „Mâna următoare”. [Contractul și testele rapide](../rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser) păstrează separat proiecția comună și observația de platformă.
+
+## Acceptanța acțiunilor mărite
+
+Păstrați separat acceptanța raster a APK-ului: etichete complete și derulare până la ultima acțiune, în RO/EN cu text mărit. Componentele califică rolurile și callback-urile comune, iar pixelii Android cer observația unui APK identificat.

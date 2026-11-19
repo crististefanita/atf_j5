@@ -14,6 +14,17 @@ import ro.rentzlab.app.testing.UiAuditRule;
 public final class RentzSharedPresentationTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
 
+    @Test public void scoreActionsUseTheSharedReadableRolesAndOneAccessibleScale() {
+        for (float scale : new float[]{1f, 1.5f, 2f}) {
+            audit.equal("Shared primary result action at scale " + scale, 24f * scale,
+                    ro.cardtable.ui.score.ScoreTypography.ACTION_PRIMARY.sp() * scale);
+            audit.equal("Shared secondary result action at scale " + scale, 21f * scale,
+                    ro.cardtable.ui.score.ScoreTypography.ACTION_SECONDARY.sp() * scale);
+        }
+        audit.equal("Dense numeric cells retain their size", 13, ro.cardtable.ui.score.ScoreTypography.VALUE.sp());
+        audit.equal("Generic quiet dialogs retain their size", 14, ro.cardtable.ui.score.ScoreTypography.QUIET.sp());
+    }
+
     @Test public void everyTrickUsesTheUnchangedSharedFaceAndTheMeasuredCenter() {
         for (int viewportHeight : new int[]{520, 599, 740, 896, 1140}) {
             for (float font : new float[]{1f, 1.5f, 2f}) {

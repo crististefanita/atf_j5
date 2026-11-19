@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "coordinate": "ro.cardtable:card-table-ui:0.1.22",
+  "coordinate": "ro.cardtable:card-table-ui:0.1.24",
   "namesCoordinate": "ro.cardtable:card-table-names:0.1.0",
   "producer": "whist",
-  "qualification": "https://github.com/crististefanita/whist/blob/2d248e393c86f6f80814cef77204e7aef06d9be1/whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/README.md",
+  "qualification": "https://github.com/crististefanita/whist/blob/a577476c657593abc19c8ad13dab4104a7b78be3/whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/README.md",
   "files": [
     {
       "path": "ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar",
@@ -22,26 +22,26 @@
       "sha256": "92a5fb18ad5e183f89a09392b177803b0b42227f83cf5a278012760291d3c030"
     },
     {
-      "path": "ro/cardtable/card-table-ui/0.1.22/card-table-ui-0.1.22.aar",
-      "sha256": "ba43fe05a4c30d13f5fb6ef9eae1a1e20e886e1706d9208302cfd70fa0c1f09a"
+      "path": "ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.aar",
+      "sha256": "d15433a107d12411ca95dd1e484574cddbd30887f5239efd96003b73c2541d84"
     },
     {
-      "path": "ro/cardtable/card-table-ui/0.1.22/card-table-ui-0.1.22.pom",
-      "sha256": "759b581619ebd403017864ebb173800d3f3d55867102d378863fa7e87e405fd5"
+      "path": "ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.pom",
+      "sha256": "69446074f9b22cac71c7fce6238b55418e687e0fcbde0d4d109393516dd4312e"
     },
     {
-      "path": "ro/cardtable/card-table-ui/0.1.22/card-table-ui-0.1.22.module",
-      "sha256": "cd573f094d4fdee0fbe27c15794a7a7b0ee0a88cd516bd5d2de7fa881c5a4c24"
+      "path": "ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.module",
+      "sha256": "0124eb235cfa612bd9239969bf9330368d165015d9e4763fba73290e60611908"
     },
     {
-      "path": "ro/cardtable/card-table-ui/0.1.22/card-table-ui-0.1.22-sources.jar",
-      "sha256": "5f10bbea0463b26e753479c0db59e0c462c730be15b8e16bf207ff0f1a703d19"
+      "path": "ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24-sources.jar",
+      "sha256": "1fdd422411d42de6c5b20e5cdfad7181ec1b30d9d69dbaaded6c396118e8d79c"
     },
     {
-      "path": "ro/cardtable/card-table-ui/0.1.22/card-ui-build.json",
-      "sha256": "bd2579b799440747d0a59938d1a9d55df2221e588cacb20a8b6ef3f3fc18f041"
+      "path": "ro/cardtable/card-table-ui/0.1.24/card-ui-build.json",
+      "sha256": "7d5e354050c2aa9a1e84b48f12d4c461c3d742b6656e2017301dae36f07459db"
     }
   ],
-  "producerCommit": "2d248e393c86f6f80814cef77204e7aef06d9be1",
-  "producerSourceFingerprint": "bcee5d7351fce75c644ee63d69e69c3306ce7cb64e512ddf1c1e2d22b3e4d767"
+  "producerCommit": "a577476c657593abc19c8ad13dab4104a7b78be3",
+  "producerSourceFingerprint": "17418bda087e1b002be4c05547db280132e2181583dc0b7de358b40a254e58a4"
 }

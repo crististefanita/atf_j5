@@ -35,7 +35,7 @@ O revizie de conținut identifică întregul pachet încărcat de browser.
 | Integritate | Build-ul recitește manifestul și fiecare amprentă; refuză dependențele lipsă și împachetarea repetată. |
 | Persistență | Profilul și sesiunea păstrează cheia locală existentă. |
 
-Consumatorul fixează Card Table Browser 0.2.25. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
+Consumatorul fixează Card Table Browser 0.2.27. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
 
 ### Reutilizarea prezentării native
 
@@ -222,8 +222,8 @@ README-ul principal va lega jocul online după ce workflow-ul publică pagina ș
 ## Surse
 
 - [Regulile și arhitectura motorului Rentz](../rentz-lab-app/game-core/README.md)
-- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.25.jar) · [checksum](lib/atf-ui-browser-0.2.25.jar.sha256)
-- [Testul comun de componentă](lib/atf-ui-browser-0.2.25-tests.jar) · [checksum](lib/atf-ui-browser-0.2.25-tests.jar.sha256)
+- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.27.jar) · [checksum](lib/atf-ui-browser-0.2.27.jar.sha256)
+- [Testul comun de componentă](lib/atf-ui-browser-0.2.27-tests.jar) · [checksum](lib/atf-ui-browser-0.2.27-tests.jar.sha256)
 
 ### Textul scorului și continuitatea comună
 
@@ -231,3 +231,11 @@ README-ul principal va lega jocul online după ce workflow-ul publică pagina ș
 - JAR-ul de teste livrează și `shared-presentation.test.mjs`: constructorul real, ordinea AI/jucător, colectarea și tipografia în Chromium. Probele specifice Rentz păstrează oraclele celor șapte contracte de levate și ale secvenței.
 - Build-ul Pages extrage și verifică toate contractele din aceeași listă. Exporturile de playback vin din JAR-ul fixat; lipsa unui fișier oprește calificarea înaintea executării adaptorului.
 - Contractele portabile și comparațiile DOM nu înlocuiesc acceptanța pixelilor Android. Artefactul Android nu se schimbă prin actualizarea JAR-ului Web.
+
+## Acțiunile scorului
+
+Acțiunile de rezultat folosesc rolurile comune de 24/21 unități logice, cu 50% peste rolurile de bază 16/14. Adaptorul Android folosește fabrica `ScreenViews.scoreActionButton`; Web folosește aceleași tokenuri exportate din bibliotecă.
+
+- Etichetele lungi se împachetează, iar înălțimea urmează conținutul cu țintă tactilă minimă de 48 de unități. Pagina completă rămâne derulabilă.
+- Cifrele tabelului, punctele și dialogurile generice își păstrează rolurile; profilul, regulile și callback-urile rămân ale jocului.
+- Testele consumă JAR-ul comun de teste și compară rolurile cu AAR-ul efectiv. Acoperiți RO/EN, ferestre scunde, text mărit și ultima acțiune, fără a echivala componentele cu rasterizarea nativă.
