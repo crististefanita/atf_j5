@@ -2,17 +2,17 @@
 
 ## Frontiera permanentă
 
-Sursele versionate rămân în checkout-ul Git. Datele de lucru necesare continuării au o singură frontieră: `C:\work\rentz_back\.imp`. Alocarea respinge Windows TEMP și directoarele vecine care pot fi șterse.
+Sursele versionate rămân în checkout-ul Git. Datele de lucru necesare continuării au o singură frontieră: `rentz_back/.imp`, calculată față de checkout-ul principal. Alocarea respinge Windows TEMP și directoarele vecine care pot fi șterse.
 
 ```mermaid
 flowchart LR
-    G["Git: surse și reguli"] --> W["Workspace în .imp"]
-    W --> Q["Calificare nouă"]
-    Q --> E["Dovezi originale"]
-    Q --> D["APK și WEB"]
-    E --> R["Recitire RAG"]
-    D --> R
-    R --> C["Inventar și curățare"]
+    G["Git: surse și reguli"] -->|materializează| W["Workspace în .imp"]
+    W -->|execută| Q["Calificare nouă"]
+    Q -->|produce| E["Dovezi originale"]
+    Q -->|produce| D["APK și WEB"]
+    E -->|alimentează| R["Recitire RAG"]
+    D -->|alimentează| R
+    R -->|autorizează| C["Inventar și curățare"]
 ```
 
 <details>

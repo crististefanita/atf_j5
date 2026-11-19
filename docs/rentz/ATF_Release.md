@@ -139,7 +139,7 @@ Verificatorul nativ stabilește verdictul execuției din receipt. Validarea Exte
 | Descărcare | Receipts separate pentru acces autentificat și anonim, confruntate cu APK-ul semnat. |
 | Canal privat | Fluxurile restricționate sunt probe ale infrastructurii pentru un canal explicit, separate de distribuția curentă. |
 
-1. Promovați commitul calificat pe `main`, creați tagul pe sursa calificată și publicați APK-ul semnat cu checksum în repository-ul Rentz. Pentru un canal privat explicit, porniți [reluarea publicării](#reluarea-publicării-restricționate) cu artefactul semnat și checksum-ul lui.
+1. Promovați commitul calificat pe `main`, creați tagul pe sursa calificată și publicați APK-ul semnat cu checksum în repository-ul Rentz. Pentru un canal privat explicit, porniți [reluarea publicării](#reluarea-publicării-github) cu artefactul semnat și checksum-ul lui.
 2. Citiți receipt-ul publicării înaintea pregătirii catalogului. La întrerupere, păstrați același jurnal și recitiți starea remote.
 3. Verificați README → release curent → asset: bytes efectivi, SHA-256 și toate CRC-urile. Un răspuns 404 salvat cu extensia APK rămâne eroare.
 4. Păstrați distinct accesul autentificat, accesul fără sesiune și blocarea browserului. Tokenul API nu se transmite originilor CDN; o probă Android poate consuma numai redirectul temporar al asset-ului, fără expunerea lui în rapoarte.
@@ -179,7 +179,9 @@ Din checkout-ul calificat, utilizați acreditările Git pentru tag și [API-ul G
 - **Recitirea porților.** Valorile întregi din raport și din evaluarea curentă trebuie să fie egale exact. Un număr schimbat sau înlocuit cu text blochează publicarea.
 - **Jurnal și raport.** Jurnalul fixează repository-urile, tagul, commitul, hash-urile și ID-ul observat. Raportul Extent păstrează pașii confirmați și diagnosticul ultimei încercări. [Implementare și mock-uri](../../atf-tests/src/test/java/atf/rentz/distribution/publication/ReleasePublicationResumeTest.java)
 
-După publicare, comanda descarcă independent APK-ul și checksum-ul cu și fără autentificare. Verifică tagul exact, `latest`, inventarul, SHA-256 și toate CRC-urile arhivei. Păstrează receipt-urile și Extent în `publication-resume/distribution`. README-ul remote se verifică separat după actualizarea linkului. O descărcare eșuată păstrează jurnalul; reluarea reconciliază release-ul existent fără upload sau promovare repetată.
+- **Descărcare independentă.** Comanda descarcă APK-ul și checksum-ul cu și fără autentificare. Verifică tagul exact, `latest`, inventarul, SHA-256 și toate CRC-urile arhivei.
+- **Dovezi și navigare.** Păstrează receipt-urile și Extent în `publication-resume/distribution`. README-ul remote se verifică separat după actualizarea linkului.
+- **Reluare.** O descărcare eșuată păstrează jurnalul; următoarea încercare reconciliază release-ul existent fără upload sau promovare repetată.
 
 ### Rezervarea canalului de promovare
 
