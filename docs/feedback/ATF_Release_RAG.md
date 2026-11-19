@@ -1,12 +1,5 @@
 # Feedback · RAG pentru release
 
-## Conservarea pachetului izolat și predarea rezervării
-
-**P2 · Echipa de integrare Android · calificare nativă rămasă.** Sursa orchestrează conservarea, testul și restaurarea sub aceeași rezervare. Mock-urile și controalele RAG verifică refuzul proprietarului străin, copia coruptă, pachetul necunoscut și comparația octeților, independent de UID. [Mecanism stabil](../rentz/ATF_Release.md#conservarea-sesiunii-android)
-
-- La următoarea acceptanță autorizată pe dispozitiv, porniți cu un pachet izolat preexistent, date cunoscute și afișaj salvat. Confirmați restaurarea octeților și a afișajului, apoi eliberarea numai a rezervării proprii.
-- Păstrați receipt-ul nativ și Extent. Probele offline nu califică instalarea reală; nu declarați închiderea acestui ultim criteriu din mock-uri.
-
 ## Retragerea edițiilor pe canalul public
 
 **P2 · Echipa de distribuție Rentz · calificare operațională rămasă.** Eligibilitatea publică, admiterea celor două Extent originale și retragerea coordonată sunt implementate cu refuzuri de componentă. Comanda RAG păstrează tagurile, arhivează metadata înainte de DELETE și scrie receipt separat. [Mecanism stabil](../rentz/ATF_Release.md#retragerea-edițiilor-publice)

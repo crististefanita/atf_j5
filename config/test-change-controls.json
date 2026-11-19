@@ -1323,7 +1323,7 @@
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
       "reason": "Advance numeric candidate version and Android versionCode. Prepare the next numeric minor candidate without replacing the published README link.",
-      "criterion": "Product 0.28.0 / 32; fixed seed remains exclusive to the isolated UI-sanity build. Candidate 0.30.0/code 34 remains separate from published 0.29.0 until native preservation, three games, RAG and signed-byte acquisition pass.",
+      "criterion": "One numeric current edition, exact signed APK and source tag, source-bound component/native/RAG proof and verified canonical downloads; preserve historical tags and original audit receipts.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
       "sha256": "584a6d4eecabac502af49ebfa850f36ecf009cf59d724ca68cbceef5730a5471",
@@ -1333,10 +1333,10 @@
       "path": "release/index.json",
       "owner": "Rentz release",
       "reason": "Promote the latest verified public Rentz catalog only after native acceptance, signed build and both independent downloads. Prepare the next numeric minor candidate without replacing the published README link.",
-      "criterion": "Single latest edition, numeric APK, exact source tag and public canonical asset; preserve original component/native/RAG evidence and historical source tags. Candidate 0.30.0/code 34 remains separate from published 0.29.0 until native preservation, three games, RAG and signed-byte acquisition pass.",
+      "criterion": "One numeric current edition, exact signed APK and source tag, source-bound component/native/RAG proof and verified canonical downloads; preserve historical tags and original audit receipts.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "8c678a0d8a4275cbfad4c337a2bf5ed3c5795b4b4a7611672c94ec4240787e80",
+      "sha256": "0cc756d3ed03a9f27c4a8f5f1a9aac09f47994526dd707e0feee0000ba482600",
       "allowDelete": false
     },
     {
