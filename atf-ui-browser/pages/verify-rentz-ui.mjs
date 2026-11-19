@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { presentRentzArrival, presentRentzPlayback, rentzArrivalView, rentzChoiceDropdown, rentzSequence,
-  rentzSequenceLayout, rentzCenterInsets, rentzSequenceLowerShift, applyRentzSequenceLayout, rentzMenuRoutes } from "./web/rentz-ui.mjs";
+  rentzSequenceLayout, rentzCenterInsets, rentzSequenceLowerShift, applyRentzSequenceLayout, refreshRentzSequence, rentzMenuRoutes } from "./web/rentz-ui.mjs";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -104,6 +104,26 @@ panel.setBounds(280, 168);
 sequenceObserver.trigger();
 check("resize observer recalculates geometry when the viewport becomes compact", `${rentzSequenceLayout(3, 280, 168).rowHeight}px`,
   panel.children[0].style.height);
+
+for (const players of [3, 4, 5, 6]) {
+  const delayed = rentzSequence(rows.map(row => ({ ...row,
+    cells: Array.from({length: players * 2}, (_, i) => ({...row.cells[i % row.cells.length]})) })), element, "ro");
+  const observer = FakeResizeObserver.instances.at(-1);
+  delayed.clientWidth = 353; delayed.clientHeight = 248;
+  delayed.setBounds(353, 248);
+  delayed.parentElement = { clientHeight: 217 };
+  observer.trigger();
+  check(`delayed panel measurement cannot exceed the current card lane at ${players} seats`,
+    `${rentzSequenceLayout(players, 353, 217).rowHeight}px`, delayed.children[0].style.height);
+  delayed.parentElement.clientHeight = 193;
+  refreshRentzSequence(delayed);
+  check(`prepared board is measured synchronously before exposure at ${players} seats`,
+    `${rentzSequenceLayout(players, 353, 193).faceHeight}px`, delayed.children[0].children[0].style.height);
+  observer.trigger();
+  check(`late observer preserves the committed card metrics at ${players} seats`,
+    `${rentzSequenceLayout(players, 353, 193).rowHeight}px`, delayed.children[0].style.height);
+}
+refreshRentzSequence(null);
 
 const scaledPanel = rentzSequence(["♣", "♦", "♥", "♠"].map(suit=>({suit,cells:Array.from({length:8},(_,i)=>({label:`${i+7}${suit}`,played:true,opening:i===4,legal:false,action:""}))})), element, "ro");
 const scaledObserver = FakeResizeObserver.instances.at(-1);
@@ -224,6 +244,8 @@ const generatedShell = readFileSync(process.argv[3], "utf8");
 const generatedTableCss = readFileSync(process.argv[4], "utf8");
 const generatedRentzCss = readFileSync(process.argv[5], "utf8");
 const generatedPage = readFileSync(process.argv[6], "utf8");
+check("prepared Rentz rows are measured immediately after shared table placement", true,
+  generatedShell.includes('await placeTable(content);\n    refreshRentzSequence(content.querySelector(".rentz-sequence"));'));
 const { viewportGeometry } = await import(pathToFileURL(join(dirname(process.argv[3]),"viewport.mjs")));
 const resizeBody=generatedShell.match(/const resize = \(\) => \{([\s\S]*?)\n\};\nresize\(\);/);
 assert.ok(resizeBody,"The shared resize entry point remains discoverable");

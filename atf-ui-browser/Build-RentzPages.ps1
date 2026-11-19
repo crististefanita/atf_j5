@@ -110,7 +110,13 @@ foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAncho
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
     if ($count -ne 1) { throw "Card Table Browser 0.2.20 adapter anchor changed; expected one match, found $count." }
 }
-$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence, rentzMenuRoutes } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable, rentzScoreRules } from "./rentz-score.mjs";')
+$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence, refreshRentzSequence, rentzMenuRoutes } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable, rentzScoreRules } from "./rentz-score.mjs";')
+$preparedLayoutAnchor = '    await placeTable(content);'
+if (([regex]::Matches($markup, [regex]::Escape($preparedLayoutAnchor))).Count -ne 1) {
+    throw 'The shared prepared-table layout anchor changed; sequence measurement cannot be bound safely.'
+}
+$markup = $markup.Replace($preparedLayoutAnchor, $preparedLayoutAnchor + "`n" +
+    '    refreshRentzSequence(content.querySelector(".rentz-sequence"));')
 $scoreAnchor = 'scoreGrid(match.score.table, true)'
 $historyAnchor = 'historyGrid(data.grid, element)'
 $layoutAnchor = 'width, height, mode: state.view.header?.mode ?? "", seatHeight:'

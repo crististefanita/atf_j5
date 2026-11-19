@@ -285,6 +285,11 @@ export function applyRentzSequenceLayout(panel, width, height, fontScale = 1, la
   return metrics;
 }
 
+/** Measures the prepared board after the shared shell has assigned its final card lane. */
+export function refreshRentzSequence(panel) {
+  if (panel) rentzSequenceModels.get(panel)?.measure();
+}
+
 export function rentzSequence(rows, element, language, arrival = null) {
   if (!Array.isArray(rows) || rows.length !== 4 || !Array.isArray(rows[0]?.cells)
       || rows[0].cells.length % 2 !== 0 || rows.some(row => row.cells.length !== rows[0].cells.length)) {
@@ -321,21 +326,25 @@ export function rentzSequence(rows, element, language, arrival = null) {
   }
   const summary = rentzArrivalPanel(arrival, element, language);
   if (summary) panel.append(summary);
-  rentzSequenceModels.set(panel, { players, rows: rowNodes });
+  const model = { players, rows: rowNodes };
+  rentzSequenceModels.set(panel, model);
   const measure = () => {
     const bounds = panel.getBoundingClientRect?.();
     if (!bounds || bounds.width < 1 || bounds.height < 1) return;
     const laneBounds = panel.parentElement?.getBoundingClientRect?.();
     // The shared shell scales the whole stage. DOMRect is already scaled; CSS metrics are not.
     const width = panel.clientWidth ?? bounds.width;
-    const height = panel.clientHeight ?? bounds.height;
-    const laneHeight = panel.parentElement?.clientHeight ?? laneBounds?.height ?? height;
+    const panelHeight = panel.clientHeight ?? bounds.height;
+    const laneHeight = panel.parentElement?.clientHeight ?? laneBounds?.height ?? panelHeight;
+    // A delayed observer can still report the previous 248px panel inside a shorter lane.
+    const height = Math.min(panelHeight, laneHeight);
     const footer = summary?.offsetHeight ?? summary?.getBoundingClientRect?.().height ?? 0;
     const textScale = Number.parseFloat(globalThis.getComputedStyle?.(panel)
       ?.getPropertyValue("--whist-text-scale")) || 1;
     applyRentzSequenceLayout(panel, Math.floor(width), Math.max(1, Math.floor(height - footer)), textScale,
       Math.floor(laneHeight), Math.floor(height));
   };
+  model.measure = measure;
   if (typeof ResizeObserver === "function") {
     const observer = new ResizeObserver(measure);
     observer.observe(panel);
