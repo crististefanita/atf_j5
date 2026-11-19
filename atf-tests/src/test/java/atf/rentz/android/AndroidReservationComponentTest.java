@@ -35,7 +35,7 @@ class AndroidReservationComponentTest {
             "existing-package-restored","absent-package-stays-absent","unsafe-tar-before-uninstall",
             "corrupt-backup-keeps-lease","foreign-lease-before-restore","foreign-installed-apk-preserved",
             "wrong-restored-file-refused","changed-archive-metadata-preserves-content","known-test-apk-is-removed-before-restore",
-            "lost-uninstall-response-is-recoverable","phase-cannot-move-backwards"})
+            "lost-uninstall-response-is-recoverable","phase-cannot-move-backwards","empty-regular-file-roundtrip"})
     void preservationAndOwnershipContract(String name) {
         var matches = new java.util.ArrayList<JsonNode>(); results.forEach(row -> { if (row.path("name").asText().equals(name)) matches.add(row); });
         assertEquals(1, matches.size(), "Exactly one executed scenario: " + name);

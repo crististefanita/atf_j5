@@ -1858,10 +1858,10 @@
       "path": "atf-tests/src/test/java/atf/rentz/android/AndroidReservationComponentTest.java",
       "owner": "Rentz source-owned release and UI adapters",
       "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
-      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership. Empty regular TAR files retain their canonical empty SHA-256 and survive the same verified restore; links and malformed archives remain refused.",
       "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
       "expires": "2026-12-19",
-      "sha256": "c7d2247622f6be80e4743d3b1793ec2cc028a5d67c17987aa2ffaf29b0151feb",
+      "sha256": "977d4350e4ba9b917c75967dd0cf7a9727c94af82da42fae7547316c2146bcc1",
       "allowDelete": false
     },
     {
@@ -1898,10 +1898,10 @@
       "path": "atf-tests/src/test/resources/android-reservation.ps1",
       "owner": "Rentz source-owned release and UI adapters",
       "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
-      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership. Empty regular TAR files retain their canonical empty SHA-256 and survive the same verified restore; links and malformed archives remain refused.",
       "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
       "expires": "2026-12-19",
-      "sha256": "d6d8821a98f17fbb2b761339c06a4a610956687da00a82325d07ba43506fb151",
+      "sha256": "ebdb90c6e69a6daa0aead9be78884f8313b4b21e94c0fa3c46a1d4018c9c170d",
       "allowDelete": false
     },
     {
@@ -1918,10 +1918,10 @@
       "path": "rentz-reference/tools/RentzSandbox.psm1",
       "owner": "Rentz source-owned release and UI adapters",
       "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
-      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership. Empty regular TAR files retain their canonical empty SHA-256 and survive the same verified restore; links and malformed archives remain refused.",
       "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
       "expires": "2026-12-19",
-      "sha256": "bef60218789881709c82e1593db514ec36968f7e0d462e93e3da289d73ff62b6",
+      "sha256": "45ea07d0db6b3d2854d92048d01ef090b0bd388a670fe95396c73d1d02f60208",
       "allowDelete": false
     },
     {

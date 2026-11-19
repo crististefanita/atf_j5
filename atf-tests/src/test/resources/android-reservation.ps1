@@ -106,4 +106,11 @@ Case 'phase-cannot-move-backwards' {
  $before=[IO.File]::ReadAllText($c.lease);$denied=$false;try{Set-RentzAndroidLeasePhase -Path $c.lease -RunRoot $c.run -Phase TEST|Out-Null}catch{$denied=$true}
  Check ($denied-and[IO.File]::ReadAllText($c.lease)-ceq$before) 'A completed phase was reopened'
 }
+Case 'empty-regular-file-roundtrip' {
+ $c=Context 'empty-file' $true 'files/empty';$c.state.data=TarBytes -Name 'files/empty' -Data ''
+ Save $c|Out-Null;Restore $c|Out-Null
+ $identity=Get-Content "$($c.run)/sandbox-backup/identity.json" -Raw|ConvertFrom-Json
+ Check ($identity.files.Count-eq1-and$identity.files[0].bytes-eq0-and
+  $identity.files[0].sha256-ceq'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855') 'Empty regular file was lost or hashed as missing'
+}
 $results|ConvertTo-Json -Depth 5|Set-Content "$Output/results.json" -Encoding utf8NoBOM

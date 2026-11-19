@@ -15,7 +15,8 @@ function Get-RentzSandboxManifest([string]$Path) {
             if(!$canonical-or!$names.Add($canonical)){throw 'ANDROID-BACKUP: duplicate TAR member.'}
             if($entry.EntryType-eq[System.Formats.Tar.TarEntryType]::Directory){continue}
             if($entry.EntryType-notin@([System.Formats.Tar.TarEntryType]::RegularFile,[System.Formats.Tar.TarEntryType]::V7RegularFile)){throw 'ANDROID-BACKUP: links and special entries are forbidden.'}
-            $digest=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($entry.DataStream)).ToLowerInvariant()
+            $hash=if($entry.Length-eq0){[Security.Cryptography.SHA256]::HashData([byte[]]::new(0))}else{[Security.Cryptography.SHA256]::HashData($entry.DataStream)}
+            $digest=[Convert]::ToHexString([byte[]]$hash).ToLowerInvariant()
             $rows.Add([pscustomobject]@{path=$canonical;bytes=$entry.Length;sha256=$digest})
         }
     }finally{$reader.Dispose();$stream.Dispose()}
