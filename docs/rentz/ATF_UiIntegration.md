@@ -6,6 +6,20 @@ Whist publică nucleul Android ca AAR și shell-ul Web ca JAR. Ambele folosesc c
 
 ## Frontiera consumatorului
 
+Scorul detaliat are un singur prezentator de produs: `RentzScoreDetails`. Primește rezultatul confirmat, numele în ordinea locurilor și textele RO/EN. Returnează rânduri imuabile cu identitatea locului, ordinea de sosire, Δ:/Σ: și contribuțiile exacte. Android adaptează rândurile în widgeturi derulabile; WEB le adaptează în `BrowserGame.ScoreDetails`. Istoricul păstrează antetele Δ și Σ fără două puncte.
+
+```mermaid
+flowchart LR
+    M[Rezultat confirmat din motor] --> S[RentzScoreContent]
+    S --> P[RentzScoreDetails: conținut comun]
+    P --> A[RentzHandDetails: adaptor Android]
+    P --> W[RentzTable: adaptor WEB]
+    A --> N[Widgeturi native]
+    W --> B[Shell Browser comun]
+```
+
+Adaptoarele nu recalculează puncte, premii sau clasamente. Probele de componentă confruntă rândurile cu motorul pentru toate contractele și mesele de 3–6 jucători, inclusiv nume identice, contribuții negative, limbi diferite și ordine de sosire. Contractele bibliotecii acoperă separat geometria pe rezoluții; identitatea conținutului nu demonstrează singură randarea nativă. [Prezentator](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/RentzScoreDetails.java) · [Probe comune](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java)
+
 | Intrare comună | Responsabilitatea Rentz |
 |---|---|
 | `HomeMenuContent` și `HomeMenu` | Texte RO/EN, starea reluării și callback-uri către rutele reale; primul profil și preferințele sunt ale aplicației. |

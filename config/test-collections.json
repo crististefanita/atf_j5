@@ -52,7 +52,10 @@
         "RuntimeAttestationTest",
         "TestSourceInventoryTest",
         "InheritedTestInventoryTest",
-        "ArenaAdmissionTest"
+        "ArenaAdmissionTest",
+        "AndroidReservationComponentTest",
+        "RetirementEvidenceTest",
+        "AndroidSandboxEvidenceTest"
       ],
       "androidJvm": false,
       "runtimeControls": true

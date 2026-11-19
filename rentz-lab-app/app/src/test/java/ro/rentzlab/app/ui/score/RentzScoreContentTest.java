@@ -14,6 +14,40 @@ import java.util.Set;
 public final class RentzScoreContentTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
 
+    @Test public void detailPresenterIsSharedByBothAdaptersForEveryContractAndTableSize() {
+        for (int players = 3; players <= 6; players++) for (boolean romanian : List.of(true, false)) {
+            var copy = new ro.rentzlab.app.ui.copy.RentzText(romanian);
+            var presenter = new RentzScoreDetails(copy);
+            var names = java.util.stream.IntStream.range(0, players).mapToObj(seat -> "Alex").toList();
+            for (Contract contract : Contract.values()) {
+                var values = java.util.stream.IntStream.range(0, players)
+                        .mapToObj(seat -> new RentzScoreContent.Value(seat * 25 - 50, 100 - seat * 50)).toList();
+                var contributions = java.util.stream.IntStream.range(0, players).mapToObj(seat ->
+                        List.of(new HandScoring.Contribution(contract, 1, values.get(seat).delta()))).toList();
+                var order = contract == Contract.RENTZ ? java.util.stream.IntStream.range(0, players).boxed().toList() : List.<Integer>of();
+                var row = new RentzScoreContent.Row(1, 0, contract, copy.contract(contract), values, new HandScoring(contributions, order));
+                var details = presenter.present(row, names);
+                String context = players + "/" + romanian + "/" + contract;
+                audit.equal("Exactly one detail per seat " + context, players, details.size());
+                for (int seat = 0; seat < players; seat++) {
+                    var detail = details.get(seat); var score = values.get(seat);
+                    audit.equal("Stable seat identity with duplicate names " + context, seat, detail.seat());
+                    audit.equal("Same product marks on Android and WEB " + context,
+                            "Δ: " + score.delta() + " · Σ: " + score.total(), detail.points());
+                    audit.equal("Finishing place belongs only to Rentz " + context,
+                            (contract == Contract.RENTZ ? (seat + 1) + ". " : "") + "Alex", detail.heading());
+                    String label = contract == Contract.RENTZ ? copy.text("Finishing award", "Premiu de sosire") : copy.contract(contract) + " × 1";
+                    audit.equal("Localized contribution without duplicated adapter rules " + context,
+                            List.of(label + " · " + score.delta()), detail.contributions());
+                }
+                audit.rejects("Immutable presenter output " + context, UnsupportedOperationException.class, details::clear);
+                audit.rejects("Immutable contribution output " + context, UnsupportedOperationException.class, details.get(0).contributions()::clear);
+                audit.rejects("Missing name cannot reassign scores " + context, IllegalArgumentException.class,
+                        () -> presenter.present(row, names.subList(1, names.size())));
+            }
+        }
+    }
+
     @Test public void commonWidgetModelsKeepRentzSymbolsSeatOrderAndConfirmedDetailIdentity() {
         for (int players = 3; players <= 6; players++) for (var language : RentzUiText.Language.values()) {
             var copy = new RentzUiText(language);

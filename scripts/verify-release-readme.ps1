@@ -93,6 +93,16 @@ function Confirm-ReadmeGameLinks([string]$Readme, [string]$DocumentationUrl, [st
     }
 }
 
+function Confirm-RetirementChannel([bool]$Restricted,$Catalog,$Proof,$Github,[string]$Version,[string]$Tag,[string]$Head,[string]$Repository) {
+    if($Restricted){
+        return $Proof.authenticated.provider -ceq 'GitHub' -and $Catalog.currentVersion -ceq $Version -and
+            $Proof.latestTag -ceq $Tag -and $Proof.readmeCommit -ceq $Head
+    }
+    return $Catalog.currentVersion -ceq $Version -and $Github.repository -ceq $Repository -and
+        $Github.latest -ceq $Tag -and $Github.releaseId -is [ValueType] -and
+        ($Github.releaseId -is [long]-or$Github.releaseId -is [int]) -and $Github.releaseId -gt 0
+}
+
 function Confirm-RetirementReports($Gates,[string]$Source,[string]$ComponentExtent,[string]$NativeExtent,[string]$ProjectRoot) {
     $reports = [ordered]@{'component-extent-report'=$ComponentExtent;'native-ui-report'=$NativeExtent}
     foreach($id in $reports.Keys){
@@ -237,12 +247,11 @@ if($Restricted){
 
 $null = New-Item -ItemType Directory -Path $RunRoot
 $report = Join-Path $RunRoot 'readme-publication.json'
-$latestAuthenticated = $Restricted -and $proof.authenticated.provider -ceq 'GitHub' -and
-    $catalog.currentVersion -ceq $version -and $proof.latestTag -ceq $tag -and $proof.readmeCommit -ceq $head
-$extentEvidence = @(if($latestAuthenticated){
+$latestEligible = Confirm-RetirementChannel ([bool]$Restricted) $catalog $proof $github $version $tag $head $repository
+$extentEvidence = @(if($latestEligible){
     Confirm-RetirementReports $rag.gates $source $ComponentExtent $NativeExtent $project
 })
-$retirementAllowed = $latestAuthenticated -and $extentEvidence.Count -eq 2 -and
+$retirementAllowed = $latestEligible -and $extentEvidence.Count -eq 2 -and
     @($extentEvidence | Where-Object status -CNE 'PASS').Count -eq 0
 [ordered]@{
     gate = 'readme-publication'

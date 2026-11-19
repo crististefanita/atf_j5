@@ -32,12 +32,12 @@
     },
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/evidence/NativeUiEvidence.java",
-      "owner": "Rentz Android qualification",
-      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
-      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
-      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-12",
-      "sha256": "640bb95fc1aa814c640dadf28d9fac697d79d63718dc1ee5dcc9bbf7eff71646",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt. Extend the source-owned reservation and retirement contracts.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification. One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest; docs/rentz/ATF_Release.md",
+      "expires": "2026-12-19",
+      "sha256": "3fdebd508db6c47b4ad2117fe726d3e2d847da58f4e8aeb9f6a6f8ea89175d74",
       "allowDelete": false
     },
     {
@@ -101,12 +101,12 @@
     },
     {
       "path": "scripts/verify-release-readme.ps1",
-      "owner": "Rentz release",
-      "reason": "Use the same two-link navigation contract after publication.",
-      "criterion": "Exact APK then canonical browser, no extra routes and documentation mandatory outside Jocul.",
-      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Use the same two-link navigation contract after publication. Extend the source-owned reservation and retirement contracts.",
+      "criterion": "Exact APK then canonical browser, no extra routes and documentation mandatory outside Jocul. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme; docs/rentz/ATF_Release.md",
       "expires": "2026-12-19",
-      "sha256": "387924593869ab2f782fdf79e9d4cdeae65d0e81bb6549e472e2d09d06e1b477",
+      "sha256": "92e842ed41d07a4f21b9d5db81f269fb1c0cc5e0fab0f2c986153c17008a8b0b",
       "allowDelete": false
     },
     {
@@ -471,22 +471,22 @@
     },
     {
       "path": "scripts/run-release-rag.ps1",
-      "owner": "Rentz release",
-      "reason": "Publish only in the public source repository and independently verify both access modes without an implicit legacy channel.",
-      "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads.",
-      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
-      "expires": "2026-12-10",
-      "sha256": "2baafc958a8e5dc2015c652f050afb6f4bce944c27a59f58b5e95bc7dc4370d4",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Publish only in the public source repository and independently verify both access modes without an implicit legacy channel. Extend the source-owned reservation and retirement contracts.",
+      "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github; docs/rentz/ATF_Release.md",
+      "expires": "2026-12-19",
+      "sha256": "8bc69284e6432c8813ca0e3fc72348201113fe4c403bbb142e264c9dba466260",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/changes/TestChangeGovernanceTest.java",
-      "owner": "Rentz Android qualification",
-      "reason": "Protect the shared Browser build and executable component-adoption boundaries in addition to native qualification.",
-      "criterion": "Missing, changed or expired review blocks each Browser boundary; existing transport, source, workspace and release controls remain mandatory.",
-      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-12",
-      "sha256": "db741f41ce763efd426381f0ecc270dd5f9ff53c3314487a4b89af4f1335d6dd",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Protect the shared Browser build and executable component-adoption boundaries in addition to native qualification. Extend the source-owned reservation and retirement contracts.",
+      "criterion": "Missing, changed or expired review blocks each Browser boundary; existing transport, source, workspace and release controls remain mandatory. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest; docs/rentz/ATF_Release.md",
+      "expires": "2026-12-19",
+      "sha256": "47d97b218233d6ca2730845f42917684f41d6e9a8667716a267bdf3169a75627",
       "allowDelete": false
     },
     {
@@ -851,12 +851,12 @@
     },
     {
       "path": "config/infrastructure-workspaces.json",
-      "owner": "Rentz Android qualification",
-      "reason": "Keep all active data inside the permanent .imp root and refuse disposable overrides and OS temporary output.",
-      "criterion": "Real Git worktrees share the verified permanent root; preserve signing, path traversal, long-path and non-Git fixture controls.",
-      "proof": "docs/rentz/ATF_Retention.md",
-      "expires": "2026-12-18",
-      "sha256": "caa5f381263eaccca5ed07e94984b61e5be63dd10ccb4812c74c02b93e4716ee",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Keep all active data inside the permanent .imp root and refuse disposable overrides and OS temporary output. Extend the source-owned reservation and retirement contracts.",
+      "criterion": "Real Git worktrees share the verified permanent root; preserve signing, path traversal, long-path and non-Git fixture controls. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Retention.md; docs/rentz/ATF_Release.md",
+      "expires": "2026-12-19",
+      "sha256": "e7c23428c4ace02a49af40cecf2d3b23b7a4c8ea8b91a2270e77b33d229309d4",
       "allowDelete": false
     },
     {
@@ -871,12 +871,12 @@
     },
     {
       "path": "config/test-collections.json",
-      "owner": "Rentz consumer",
-      "reason": "Q20 · Bind evaluation seed identity to the actual v1 generator and protect the learning collection.",
-      "criterion": "In-batch aliases, historical aliases and false cluster sufficiency are refused; exact development replay, signed seeds, distinct tables, old rows and adjacent arena contracts remain covered.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q20/TDD.md",
-      "expires": "2026-11-20",
-      "sha256": "5660e017bd0f3daef550964266bb063519b0d20670dfdab2220f94b5f0185f8b",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Q20 · Bind evaluation seed identity to the actual v1 generator and protect the learning collection. Extend the source-owned reservation and retirement contracts.",
+      "criterion": "In-batch aliases, historical aliases and false cluster sufficiency are refused; exact development replay, signed seeds, distinct tables, old rows and adjacent arena contracts remain covered. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q20/TDD.md; docs/rentz/ATF_Release.md",
+      "expires": "2026-12-19",
+      "sha256": "3e36e16cea49c1670d4d5e6fbd2d754ef696c9a00a1a547cfd239d9ee34a4b33",
       "allowDelete": false
     },
     {
@@ -1031,12 +1031,12 @@
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java",
-      "owner": "Rentz UI",
-      "reason": "History captions are Delta and Sigma without colons.",
-      "criterion": "Preserve all score, settlement, details and ranking comparisons; change history labels only.",
-      "proof": "docs/rentz/ATF_UiIntegration.md#antetele-istoricului",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "History captions are Delta and Sigma without colons. Extend the source-owned reservation and retirement contracts.",
+      "criterion": "Preserve all score, settlement, details and ranking comparisons; change history labels only. One immutable presenter preserves seat identity, localized contributions and exact delta/total marks in both adapters for every contract and 3 to 6 seats.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#antetele-istoricului; docs/rentz/ATF_Release.md",
       "expires": "2026-12-19",
-      "sha256": "48fac3ce889a9b5c938fc53dcf74f6b2b723930ae27ac4dcaec46cf873969827",
+      "sha256": "867528a3ffe60e63459b3c651f398336bad01e0543e4e26d0a81b95a28bab680",
       "allowDelete": false
     },
     {
@@ -1281,12 +1281,12 @@
     },
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
-      "owner": "Rentz Android qualification",
-      "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The focused Android route compares chooser and first play at 3, 5 and 6 places, with the same compact viewport and exact seat positions. The focused Rentz ending keeps action pacing, score and terminal table evidence distinct from the release route. The short viewport records a visible Rentz arrival before score and one completed trick at each target table size.",
-      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-14",
-      "sha256": "937a061d448dc869761be60f47d2165647f4af0df1782557b463a6995b775c2b",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance. Extend the source-owned reservation and retirement contracts.",
+      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The focused Android route compares chooser and first play at 3, 5 and 6 places, with the same compact viewport and exact seat positions. The focused Rentz ending keeps action pacing, score and terminal table evidence distinct from the release route. The short viewport records a visible Rentz arrival before score and one completed trick at each target table size. One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest; docs/rentz/ATF_Release.md",
+      "expires": "2026-12-19",
+      "sha256": "bf6a869620bf4685fc5ff055fbf6176465a099c41b74507169441dc345f7b822",
       "allowDelete": false
     },
     {
@@ -1439,12 +1439,12 @@
     },
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/GitHubPublication.java",
-      "owner": "Rentz release",
-      "reason": "Publish only in the public source repository and independently verify both access modes without an implicit legacy channel.",
-      "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads.",
-      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
-      "expires": "2026-12-10",
-      "sha256": "fb1ea3d9be2ef206dc3c54d2033e32a6f4e73b733f175d6496d38833fddafc7c",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Publish only in the public source repository and independently verify both access modes without an implicit legacy channel. Extend the source-owned reservation and retirement contracts.",
+      "criterion": "Preserve all seven gates, tag and asset identity, numeric promotion ordering and resumability; reject unbounded or foreign checksum downloads. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github; docs/rentz/ATF_Release.md",
+      "expires": "2026-12-19",
+      "sha256": "3586b28d36a18f32e613782a2a39a0034588516d57780e3c3e2548483ec0c1be",
       "allowDelete": false
     },
     {
@@ -1589,12 +1589,12 @@
     },
     {
       "path": "rentz-reference/tools/RentzAndroid.psm1",
-      "owner": "Rentz Android qualification",
-      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
-      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
-      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
-      "expires": "2026-12-12",
-      "sha256": "d4f27c8fc6c0c934d950d7c7448ac42c566754e87219d32b6bc3d86d007a044e",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt. Extend the source-owned reservation and retirement contracts.",
+      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification. One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest; docs/rentz/ATF_Release.md",
+      "expires": "2026-12-19",
+      "sha256": "eb499252a64bf9eaa4c0586d8b43c565485f2e0dc37e527e16babe58e3cfa7d2",
       "allowDelete": false
     },
     {
@@ -1802,6 +1802,126 @@
       "proof": "docs/rentz/ATF_Release.md#reluarea-publicării-github",
       "expires": "2026-12-19",
       "sha256": "0f193e28c30598a94d319bcb6eb32272030de65eca6b110b338f2b273dcf20d3",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/evidence/AndroidSandboxEvidence.java",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "509c535092ba08266c3493a8f87e34cdbb49f5afc44ff3a7f3b3e179eda1171b",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/GitHubRetirement.java",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "f2de5280657284621541fe557a571f7274cac7cb2c8a0dbe473f5e7a05ac016a",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/publication/RetirementCommand.java",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "692d8b2a209ff6d4bd2a2b3d5202c3cfb24b36693ba48b35a3c6cf7069339fa9",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/retirement/ReleaseRetirement.java",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "d7a243a41bc0cc27595b1c5563ecb5e426200605b03830165367a93d249acdf4",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/main/java/atf/rentz/distribution/retirement/RetirementEvidence.java",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "ab172aa21f7af064430d66bd994e6eb39dc1e7b366262d7f7ae342273ebaf13b",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/android/AndroidReservationComponentTest.java",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "c7d2247622f6be80e4743d3b1793ec2cc028a5d67c17987aa2ffaf29b0151feb",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/android/AndroidSandboxEvidenceTest.java",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "4356250c809aac644021f58b6699aebbd1de74e6fe0ad443770ead34bfa97be1",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/ReleaseRetirementTest.java",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "398b89b5fe0e82a2f874c395b1e83ed4f5e5cfe7d435aa49ed91cd8c967cc6e6",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/distribution/publication/RetirementEvidenceTest.java",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "87410eee50bfb0e6e6182926894ba898c3840d29186c4fadf345caf90e513103",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/resources/android-reservation.ps1",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "d6d8821a98f17fbb2b761339c06a4a610956687da00a82325d07ba43506fb151",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/resources/retirement-eligibility.ps1",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "5467e7269cc0267c2475cbc21371ce4e669918da5508b00fba29b01254d081cf",
+      "allowDelete": false
+    },
+    {
+      "path": "rentz-reference/tools/RentzSandbox.psm1",
+      "owner": "Rentz source-owned release and UI adapters",
+      "reason": "Preserve one Android reservation and verify public retirement independently; share score detail content across WEB and Android.",
+      "criterion": "One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
+      "proof": "docs/rentz/ATF_Release.md#retragerea-edițiilor-publice",
+      "expires": "2026-12-19",
+      "sha256": "bef60218789881709c82e1593db514ec36968f7e0d462e93e3da289d73ff62b6",
       "allowDelete": false
     }
   ]

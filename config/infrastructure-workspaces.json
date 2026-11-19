@@ -88,7 +88,10 @@
     "atf-ui-browser/Build-RentzPages.ps1",
     "atf-ui-browser/Start-RentzBrowser.ps1",
     "atf-ui-browser/Test-RentzBrowserComponents.ps1",
-    "atf-ui-browser/Verify-CardTableBrowser.ps1"
+    "atf-ui-browser/Verify-CardTableBrowser.ps1",
+    "rentz-reference/tools/RentzSandbox.psm1",
+    "atf-tests/src/test/resources/android-reservation.ps1",
+    "atf-tests/src/test/resources/retirement-eligibility.ps1"
   ],
   "reviewedTempReaders": [
     {

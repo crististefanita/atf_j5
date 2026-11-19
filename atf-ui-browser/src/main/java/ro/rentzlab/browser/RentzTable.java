@@ -23,6 +23,7 @@ import ro.cardtable.ui.turn.TurnPacing;
 import ro.rentzlab.app.ui.copy.RentzText;
 import ro.rentzlab.app.ui.chrome.RentzGameMenu;
 import ro.rentzlab.app.ui.score.RentzScoreContent;
+import ro.rentzlab.app.ui.score.RentzScoreDetails;
 import ro.rentzlab.app.ui.table.RentzTableContent;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.achievements.AchievementHand;
@@ -351,15 +352,10 @@ final class RentzTable implements BrowserGame.Match {
 
     private String pointsLine(ro.rentzlab.core.RentzMatch.HandResult hand) {
         var lines = new ArrayList<String>();
-        for (var player : RentzScoreContent.details(RentzScoreContent.row(hand, copy))) {
-            String heading = player.place() == 0 ? names.get(player.seat())
-                    : player.place() + ". " + names.get(player.seat());
-            lines.add(heading + " · Δ: " + player.score().delta() + " · Σ: " + player.score().total());
+        for (var player : new RentzScoreDetails(copy).present(RentzScoreContent.row(hand, copy), names)) {
+            lines.add(player.heading() + " · " + player.points());
             for (var contribution : player.contributions()) {
-                String label = contribution.category() == Contract.RENTZ
-                        ? text("Premiu de sosire", "Finishing award")
-                        : contractName(contribution.category()) + " × " + contribution.count();
-                lines.add("  " + label + " · " + contribution.points());
+                lines.add("  " + contribution);
             }
         }
         return String.join("\n", lines);

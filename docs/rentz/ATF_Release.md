@@ -105,6 +105,59 @@ Verificatorul nativ stabilește verdictul execuției din receipt. Validarea Exte
 - **Produs:** acceptanța nativă cu trei jocuri consecutive complete este obligatorie pentru fiecare APK candidat, inclusiv pentru refactorizări. Include Rentz și două contracte distincte, are rezervare proprie, registru de expuneri izolat și Extent auditat; registrul comun de învățare rămâne nemodificat. Lipsa ei nu devine PASS.
 - **Date:** primul APK semnat are o identitate de cheie separată de prototipurile Debug. Nu dezinstalați automat un prototip cu date pentru a forța instalarea release-ului; migrarea datelor este o operație distinctă.
 
+## Conservarea sesiunii Android
+
+Runnerul păstrează **aceeași rezervare** în pregătire, execuție și restaurare. Schimbarea fazei se scrie sub blocarea exclusivă a fișierului, fără o stare intermediară liberă.
+
+```mermaid
+stateDiagram-v2
+    [*] --> PREPARE: rezervare exclusivă
+    PREPARE --> TEST: backup verificat înainte de dezinstalare
+    TEST --> RESTORE: succes sau eșec al testului
+    RESTORE --> [*]: date și afișaj verificate, eliberare proprie
+    RESTORE --> Recuperare: restaurare incompletă
+    Recuperare --> RESTORE: același proprietar și backup intact
+```
+
+| Fază | Contract |
+|---|---|
+| Pregătire | Dacă pachetul izolat există, salvează APK-ul, arhiva și manifestul fișierelor înaintea primei comenzi distructive. Absența inițială este înregistrată explicit. |
+| Execuție | Verifică proprietarul înainte și după fiecare comandă. Niciun pachet principal nu este țintă de ștergere. |
+| Restaurare | Refuză un APK instalat necunoscut; reinstalează doar copia originală verificată și compară fișierele după cale, lungime și SHA-256. UID-ul și timpii arhivei nu definesc egalitatea conținutului. |
+| Închidere | Recitește afișajul și pachetele protejate. Eliberează numai rezervarea proprie și numai după restaurare; la eroare păstrează rezervarea și copia pentru recuperare. |
+
+Poarta nativă cere amprentele transportului, oracolului și conservării, precum și dovada restaurării din aceeași rezervare. Mock-urile verifică proprietarul străin, răspunsul pierdut după dezinstalare, arhivele nesigure și fișierele alterate. Acceptanța pe dispozitiv califică separat efectul real al instalării și al restaurării. [Orchestrare](../../atf-tests/tools/run-shared-ui-sanity.ps1) · [Conservare](../../rentz-reference/tools/RentzSandbox.psm1) · [Probe offline](../../atf-tests/src/test/java/atf/rentz/android/AndroidReservationComponentTest.java)
+
+## Retragerea edițiilor publice
+
+Retragerea este o operație explicită după publicare. Un raport local ori un link funcțional, luat separat, nu autorizează ștergerea.
+
+```mermaid
+flowchart LR
+    Q[Calificare originală: șapte porți] --> E[Două Extent originale și octeții descărcați]
+    E --> R[README remote și descărcări noi]
+    R --> L[Rezervarea comună de promovare]
+    L --> A[Recitire autoritate și arhivare metadata]
+    A --> D[DELETE numai pentru ediții stabile mai vechi]
+    D --> C[Confirmare prin inventarul remote]
+    C --> P[Receipt separat și Extent]
+```
+
+- **Două surse de dovadă.** Regresia curentă califică uneltele care execută retragerea. Calificarea originală fixează versiunea, commitul produsului, APK-ul și cele două rapoarte originale. Niciuna nu este rescrisă pentru a o adapta la HEAD.
+- **Autoritate actuală.** Verifică dreptul de scriere, `main`, tagul exact, `latest` și singurul link APK din README. Descarcă din nou APK-ul și checksum-ul, autentificat și anonim, cu SHA-256 și CRC. Repetă verificarea autorității sub aceeași rezervare folosită la promovare și înaintea fiecărui DELETE.
+- **Arie limitată.** Compară numeric versiunile stabile. Păstrează ediția curentă, drafturile, prerelease-urile, etichetele fără versiune și toate tagurile sursei. Arhivează metadata ediției și asset-urilor înainte de ștergere; tagurile au numai operații de citire în adaptorul retragerii.
+- **Răspuns incert.** Nu repetă DELETE automat. Recitește inventarul; dacă rezultatul nu poate fi confirmat, păstrează rezervarea pentru recuperare. O încercare nouă are propriul dosar de audit și confruntă din nou starea remote.
+
+```powershell
+.\scripts\run-release-rag.ps1 -Question 'retragere ediții publice' `
+  -ComponentRun $currentComponents -RunRoot $attempt -RetireSupersededReleases `
+  -OriginalQualification $originalRag -ReadmeVerification $verifiedReadme `
+  -PublicationEvidence $originalDownloads `
+  -OriginalComponentExtent $componentExtent -OriginalNativeExtent $nativeExtent
+```
+
+Variabilele indică dovezi originale păstrate extern, în inventarul ATF. Verificarea README trebuie să fi recitit ambele Extent și să declare eligibilitatea. Comanda produce `release-retirement.json`, `release-retirement-extent.html`, descărcări noi și metadata arhivate. Credenciala existentă se citește din mediul procesului sau din Git Credential Manager; nu intră în argumente sau rapoarte. Lipsa unui raport, un SHA diferit, un README vechi, o ediție stabilă mai nouă ori un cont fără scriere blochează retragerea. [Politică și mock-uri](../../atf-tests/src/test/java/atf/rentz/distribution/publication/ReleaseRetirementTest.java) · [Admiterea dovezilor](../../atf-tests/src/main/java/atf/rentz/distribution/retirement/RetirementEvidence.java)
+
 ## Semnare și păstrarea cheii
 
 - Cheia Rentz se păstrează în `.atf-signing` din checkout-ul principal. Toate worktree-urile folosesc această locație. Directorul este privat și exclus din Git.

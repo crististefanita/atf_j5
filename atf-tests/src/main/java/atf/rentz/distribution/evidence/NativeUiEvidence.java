@@ -100,6 +100,8 @@ public final class NativeUiEvidence {
                     || !ui.path("displayAndPackagesPreserved").asBoolean(false) || !ui.path("leaseReleased").asBoolean(false)
                     || !ui.path("cleanupFailures").isArray() || !ui.path("cleanupFailures").isEmpty())
                 throw new IOException("RAG-UI-CLOSEOUT");
+            if (Files.exists(root.resolve("rentz-reference/tools/RentzSandbox.psm1"), LinkOption.NOFOLLOW_LINKS))
+                AndroidSandboxEvidence.verify(root, ui);
             JsonNode contracts = ui.path("subgames");
             if (!contracts.isArray() || contracts.size() != REQUIRED_COMPLETE_GAMES || !contracts.get(0).asText().equals("RENTZ"))
                 throw new IOException("RAG-UI-SUBGAMES");
@@ -224,9 +226,12 @@ public final class NativeUiEvidence {
         // Historical runner sources used no separate oracle or module identity receipt.
         if (Files.notExists(oracle, LinkOption.NOFOLLOW_LINKS) && hashes.isMissingNode()) return;
         Path transport = root.resolve("rentz-reference/tools/RentzAndroid.psm1");
-        if (!hashes.isObject() || hashes.size() != 2
+        Path sandbox = root.resolve("rentz-reference/tools/RentzSandbox.psm1");
+        boolean preservation = Files.exists(sandbox, LinkOption.NOFOLLOW_LINKS);
+        if (!hashes.isObject() || hashes.size() != (preservation ? 3 : 2)
                 || !matchesModule(transport, hashes.path("transport"))
-                || !matchesModule(oracle, hashes.path("oracle")))
+                || !matchesModule(oracle, hashes.path("oracle"))
+                || preservation && !matchesModule(sandbox, hashes.path("sandbox")))
             throw new IOException("RAG-UI-TOOL-IDENTITY");
     }
 

@@ -9,7 +9,6 @@ import android.widget.TextView;
 import java.util.List;
 import ro.cardtable.ui.theme.TablePalette;
 import ro.rentzlab.app.ui.copy.RentzUiText;
-import ro.rentzlab.core.Contract;
 
 /** Renders public settlement facts. A single scroll contains the profile and every player. */
 public final class RentzHandDetails extends ScrollView {
@@ -34,20 +33,16 @@ public final class RentzHandDetails extends ScrollView {
             chooser += "\n" + copy.text("Scoring profile · ", "Profil de punctaj · ") + scoreProfileId;
         }
         line(content, chooser, false);
-        var details = RentzScoreContent.details(hand);
+        var details = new RentzScoreDetails(copy).present(hand, players);
         if (details.isEmpty()) line(content, copy.text("Scoring details unavailable", "Detaliul punctajului este indisponibil"), false);
         for (var player : details) {
-            String place = player.place() == 0 ? "" : player.place() + ". ";
-            line(content, place + players.get(player.seat()), true);
-            line(content, "P " + player.score().delta() + "   ·   T " + player.score().total(), false);
+            line(content, player.heading(), true);
+            line(content, player.points(), false);
             for (var contribution : player.contributions()) {
-                String label = contribution.category() == Contract.RENTZ
-                        ? copy.text("Finishing award", "Premiu de sosire")
-                        : copy.contract(contribution.category()) + " × " + contribution.count();
-                line(content, label + "   ·   " + contribution.points(), false);
+                line(content, contribution, false);
             }
         }
-        if (!details.isEmpty() && details.get(0).place() > 0) {
+        if (!details.isEmpty() && !hand.scoring().finishOrder().isEmpty()) {
             line(content, copy.text("Last place is assigned to the player still holding cards.",
                     "Ultimul loc revine jucătorului care mai are cărți."), false);
         }

@@ -24,6 +24,48 @@ function Read-RentzAndroidLease {
     }finally{$stream.Dispose()}
 }
 
+function Assert-RentzAndroidReservation {
+    param([string]$Path,[string]$RunRoot)
+    $own=Get-Content -LiteralPath (Join-Path $RunRoot 'lease.json') -Raw|ConvertFrom-Json
+    $current=Read-RentzAndroidLease -Path $Path
+    if(!$current.active-or$current.leaseId-cne$own.leaseId-or$current.serial-cne$own.serial){throw 'ANDROID-LEASE: foreign owner; no command sent.'}
+    return $current
+}
+
+function Start-RentzAndroidLease {
+    param([string]$Path,[string]$RunRoot,[string]$Owner,[string]$Serial='127.0.0.1:5555')
+    if(!(Test-Path -LiteralPath $RunRoot -PathType Container)-or(Test-Path -LiteralPath (Join-Path $RunRoot 'lease.json'))){throw 'ANDROID-LEASE: fresh run required.'}
+    $stream=Open-RentzAndroidLeaseFile -Path $Path
+    try{
+        $reader=[IO.StreamReader]::new($stream,[Text.Encoding]::UTF8,$true,1024,$true)
+        try{$text=$reader.ReadToEnd()}finally{$reader.Dispose()}
+        if($text){$previous=$text|ConvertFrom-Json;if($previous.active-isnot[bool]-or$previous.active){throw 'ANDROID-LEASE: Android is reserved by another owner.'}}
+        $lease=[ordered]@{active=$true;leaseId=[guid]::NewGuid().ToString('N');serial=$Serial;owner=$Owner;run=[IO.Path]::GetFullPath($RunRoot);phase='PREPARE';acquiredUtc=[datetime]::UtcNow.ToString('o')}
+        $bytes=[Text.UTF8Encoding]::new($false).GetBytes(($lease|ConvertTo-Json))
+        $own=[IO.File]::Open((Join-Path $RunRoot 'lease.json'),[IO.FileMode]::CreateNew)
+        try{$own.Write($bytes);$own.Flush($true)}finally{$own.Dispose()}
+        $stream.SetLength(0);$stream.Position=0;$stream.Write($bytes);$stream.Flush($true)
+        return [pscustomobject]$lease
+    }finally{$stream.Dispose()}
+}
+
+function Set-RentzAndroidLeasePhase {
+    param([string]$Path,[string]$RunRoot,[ValidateSet('PREPARE','TEST','RESTORE')][string]$Phase)
+    $own=Get-Content -LiteralPath (Join-Path $RunRoot 'lease.json') -Raw|ConvertFrom-Json
+    $stream=Open-RentzAndroidLeaseFile -Path $Path -Existing
+    try{
+        $reader=[IO.StreamReader]::new($stream,[Text.Encoding]::UTF8,$true,1024,$true)
+        try{$current=$reader.ReadToEnd()|ConvertFrom-Json}finally{$reader.Dispose()}
+        if(!$current.active-or$current.leaseId-cne$own.leaseId-or$current.serial-cne$own.serial){throw 'ANDROID-LEASE: phase handoff requires the current owner.'}
+        $order=@('PREPARE','TEST','RESTORE')
+        if($current.phase-cnotin$order-or$order.IndexOf($Phase)-lt$order.IndexOf([string]$current.phase)){throw 'ANDROID-LEASE: phase cannot move backwards or start from an invalid state.'}
+        $current|Add-Member -NotePropertyName phase -NotePropertyValue $Phase -Force
+        $bytes=[Text.UTF8Encoding]::new($false).GetBytes(($current|ConvertTo-Json))
+        $stream.SetLength(0);$stream.Position=0;$stream.Write($bytes);$stream.Flush($true)
+        return $current
+    }finally{$stream.Dispose()}
+}
+
 function Close-RentzAndroidLease {
     param([Parameter(Mandatory)][string]$Path,[Parameter(Mandatory)][string]$LeaseId,[Parameter(Mandatory)][string]$Serial)
     $stream=Open-RentzAndroidLeaseFile -Path $Path -Existing
@@ -154,4 +196,4 @@ function Read-RentzHierarchy {
     [pscustomobject]@{document=$doc;nodes=$nodes;hierarchy=$read.File}
 }
 
-Export-ModuleMember -Function Invoke-RentzAdb,Save-RentzObservation,Read-RentzHierarchy,Open-RentzAndroidLeaseFile,Close-RentzAndroidLease
+Export-ModuleMember -Function Invoke-RentzAdb,Save-RentzObservation,Read-RentzHierarchy,Open-RentzAndroidLeaseFile,Close-RentzAndroidLease,Start-RentzAndroidLease,Set-RentzAndroidLeasePhase,Assert-RentzAndroidReservation

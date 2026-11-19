@@ -90,6 +90,7 @@ class TestChangeGovernanceTest {
                 || path.equals("scripts/build-rentz-android.ps1")
                 || path.equals("atf-tests/tools/run-shared-ui-sanity.ps1")
                 || path.equals("rentz-reference/tools/RentzAndroid.psm1")
+                || path.equals("rentz-reference/tools/RentzSandbox.psm1")
                 || path.equals("rentz-reference/tools/RentzUiOracle.psm1")
                 || path.equals("atf-tests/tools/test-ui-selectors.ps1")
                 || path.equals("atf-tests/tools/test-workspace-governance.ps1")
@@ -102,6 +103,7 @@ class TestChangeGovernanceTest {
                 || path.equals("atf-tests/src/main/java/atf/rentz/distribution/editorial/DocumentationReconciliation.java")
                 || path.startsWith("atf-tests/src/main/java/atf/rentz/distribution/evidence/")
                 || path.startsWith("atf-tests/src/main/java/atf/rentz/distribution/publication/")
+                || path.startsWith("atf-tests/src/main/java/atf/rentz/distribution/retirement/")
                 || path.startsWith("atf-tests/src/main/java/atf/rentz/reporting/")
                 || path.equals("atf-tests/tools/run-arena.ps1") || path.equals("atf-tests/tools/run-android-sanity.ps1")
                 || path.equals("atf-tests/tools/test-runtime-controls.ps1")
@@ -151,6 +153,8 @@ class TestChangeGovernanceTest {
         assertTrue(protectedPath("scripts/build-rentz-android.ps1"));
         assertTrue(protectedPath("atf-tests/tools/run-shared-ui-sanity.ps1"));
         assertTrue(protectedPath("rentz-reference/tools/RentzAndroid.psm1"));
+        assertTrue(protectedPath("rentz-reference/tools/RentzSandbox.psm1"));
+        assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/retirement/ReleaseRetirement.java"));
         assertTrue(protectedPath("rentz-reference/tools/RentzUiOracle.psm1"));
         assertTrue(protectedPath("atf-tests/tools/test-ui-selectors.ps1"));
         assertTrue(protectedPath("atf-tests/tools/test-workspace-governance.ps1"));

@@ -181,8 +181,14 @@ final class GitHubPublication implements Remote {
         throw new IOException("PUBLICATION-INCOMPLETE-INVENTORY");
     }
 
-    private JsonNode get(String repository, String path, boolean optional) throws IOException {
+    JsonNode get(String repository, String path, boolean optional) throws IOException {
         return request("GET", api.resolve("repos/" + repository + path), HttpRequest.BodyPublishers.noBody(), null, 200, optional);
+    }
+
+    void deleteRelease(String repository, long id) throws IOException {
+        if (id <= 0) throw invalid();
+        request("DELETE", api.resolve("repos/" + repository + "/releases/" + id),
+                HttpRequest.BodyPublishers.noBody(), null, 204, false);
     }
 
     private JsonNode write(String method, String repository, String path, Map<String, Object> value, int status) throws IOException {
@@ -204,6 +210,10 @@ final class GitHubPublication implements Remote {
                 if (response.statusCode() != expected) throw new IOException("PUBLICATION-" + method + "-HTTP-" + response.statusCode());
                 byte[] bytes = stream.readNBytes(RESPONSE_LIMIT + 1);
                 if (bytes.length > RESPONSE_LIMIT) throw invalid();
+                if (expected == 204) {
+                    if (bytes.length != 0) throw invalid();
+                    return JSON.nullNode();
+                }
                 JsonNode json = JSON.readTree(bytes);
                 if (json == null || json.isNull()) throw invalid();
                 return json;

@@ -12,6 +12,7 @@ Assert-AtfInfrastructure -ProjectRoot $project
 $uiTools=[ordered]@{
     transport=(Join-Path $project 'rentz-reference/tools/RentzAndroid.psm1')
     oracle=(Join-Path $project 'rentz-reference/tools/RentzUiOracle.psm1')
+    sandbox=(Join-Path $project 'rentz-reference/tools/RentzSandbox.psm1')
 }
 $uiToolHashes=[ordered]@{}
 foreach($tool in $uiTools.GetEnumerator()){
@@ -1165,14 +1166,8 @@ function RunCompactScores($terminal){
     }
 }
 try{
-    $stream=Open-RentzAndroidLeaseFile -Path $leasePath
-    try{
-        $reader=[IO.StreamReader]::new($stream,[Text.Encoding]::UTF8,$true,1024,$true);$text=$reader.ReadToEnd();$reader.Dispose()
-        if($text-and($text|ConvertFrom-Json).active){throw 'Android is reserved by another owner.'}
-        $lease=[ordered]@{active=$true;leaseId=$leaseId;serial='127.0.0.1:5555';owner='Rentz shared UI minimal sanity';run=$raw;acquiredUtc=[datetime]::UtcNow.ToString('o')}
-        $json=$lease|ConvertTo-Json;$json|Set-Content -LiteralPath (Join-Path $raw 'lease.json') -Encoding utf8NoBOM
-        $bytes=[Text.UTF8Encoding]::new($false).GetBytes($json);$stream.SetLength(0);$stream.Position=0;$stream.Write($bytes);$stream.Flush($true);$owned=$true
-    }finally{$stream.Dispose()}
+    $lease=Start-RentzAndroidLease -Path $leasePath -RunRoot $raw -Owner 'Rentz shared UI minimal sanity'
+    $leaseId=$lease.leaseId;$owned=$true
     Adb @('get-state') 'device'|Out-Null
     $power=(Adb @('shell','dumpsys','power') 'power-before').Output
     $wasAsleep=$power-match'mWakefulness=Asleep'
@@ -1198,8 +1193,9 @@ try{
     $activity=(Adb @('shell','dumpsys','activity','activities') 'foreground').Output
     $match=[regex]::Match($activity,'mResumedActivity:.*? ([a-zA-Z0-9_.]+/[a-zA-Z0-9_.$]+) ');if($match.Success){$initialActivity=$match.Groups[1].Value}
     $packagesBefore=((Adb @('shell','pm','path','ro.whistlab.app') 'whist-before' -Allowed @(0,1)).Output+(Adb @('shell','pm','path','ro.rentzlab.app') 'rentz-before' -Allowed @(0,1)).Output)
-    $existing=Adb @('shell','pm','path','ro.rentzlab.app.uisanity') 'sanity-existing' -Allowed @(0,1)
-    if($existing.Output-match'package:'){throw 'The isolated test package already exists; identity and data need reconciliation before reuse.'}
+    $sandboxPort={param($request) Adb $request.Arguments $request.Label -Binary:$request.Binary -Allowed $request.AllowedExitCodes}
+    Save-RentzTestSandbox -RunRoot $raw -LeasePath $leasePath -Command $sandboxPort|Out-Null
+    Set-RentzAndroidLeasePhase -Path $leasePath -RunRoot $raw -Phase TEST|Out-Null
     Adb @('install',$build.apk) 'install'|Out-Null;$installed=$true
     $launch=@('shell','am','start','-W','-n','ro.rentzlab.app.uisanity/ro.rentzlab.app.MainActivity')
     if($ConsecutiveSubgames-or$TableEndings){
@@ -1303,6 +1299,7 @@ ScriptStackTrace: "+$_.ScriptStackTrace
     if($owned){try{Adb @('shell','logcat','-d','-t','300','-s','RentzTurn:D','RentzLab:E','AndroidRuntime:E') 'failure-logcat'|Out-Null}catch{$cleanup.Add($_.Exception.ToString())}}
 }finally{
     if($owned){
+        try{Set-RentzAndroidLeasePhase -Path $leasePath -RunRoot $raw -Phase RESTORE|Out-Null}catch{$cleanup.Add($_.Exception.ToString())}
         if($displayChanged){
             try{Adb @('shell','wm','size',$restoreSize) 'restore-history-size'|Out-Null}catch{$cleanup.Add($_.Exception.ToString())}
             try{Adb @('shell','wm','density',$restoreDensity) 'restore-history-density'|Out-Null}catch{$cleanup.Add($_.Exception.ToString())}
@@ -1318,7 +1315,10 @@ ScriptStackTrace: "+$_.ScriptStackTrace
             }
             foreach($remote in $remotes){Adb @('shell','rm','-f',$remote) 'remove-owned-hierarchy'|Out-Null}
         }catch{$cleanup.Add($_.Exception.ToString())}
-        if($installed){try{Adb @('shell','am','force-stop','ro.rentzlab.app.uisanity') 'finish-stop'|Out-Null;Adb @('uninstall','ro.rentzlab.app.uisanity') 'uninstall-owned'|Out-Null}catch{$cleanup.Add($_.Exception.ToString())}}
+        try{
+            $sandboxPort={param($request) Adb $request.Arguments $request.Label -Binary:$request.Binary -Allowed $request.AllowedExitCodes}
+            Restore-RentzTestSandbox -RunRoot $raw -LeasePath $leasePath -TestApkSha256 $build.apkSha256 -Command $sandboxPort|Out-Null
+        }catch{$cleanup.Add($_.Exception.ToString())}
         try{
             $finalSize=(Adb @('shell','wm','size') 'final-size').Output;$finalDensity=(Adb @('shell','wm','density') 'final-density').Output;$finalFont=(Adb @('shell','settings','get','system','font_scale') 'final-font').Output
             $packagesAfter=((Adb @('shell','pm','path','ro.whistlab.app') 'whist-after' -Allowed @(0,1)).Output+(Adb @('shell','pm','path','ro.rentzlab.app') 'rentz-after' -Allowed @(0,1)).Output)
@@ -1326,8 +1326,13 @@ ScriptStackTrace: "+$_.ScriptStackTrace
             if($wasAsleep){Adb @('shell','input','keyevent','KEYCODE_SLEEP') 'restore-sleep'|Out-Null}
         }catch{$cleanup.Add($_.Exception.ToString())}
         try{
-            $released=Close-RentzAndroidLease -Path $leasePath -LeaseId $leaseId -Serial '127.0.0.1:5555'
-            if(!$released){$cleanup.Add('ANDROID-LEASE: own active reservation was not present at cleanup.')}
+            if($initialSize-and($initialSize-cne$finalSize-or$initialDensity-cne$finalDensity-or$initialFont-cne$finalFont-or$packagesBefore-cne$packagesAfter)){
+                throw 'ANDROID-RESTORE: display or protected package paths differ; reservation retained.'
+            }
+            if($cleanup.Count-eq0){
+                $released=Close-RentzAndroidLease -Path $leasePath -LeaseId $leaseId -Serial '127.0.0.1:5555'
+                if(!$released){$cleanup.Add('ANDROID-LEASE: own active reservation was not present at cleanup.')}
+            }else{Write-Warning 'Reservation retained for recovery; inspect sandbox-backup and cleanupFailures.'}
         }catch{$cleanup.Add($_.Exception.ToString())}
     }
 }
@@ -1380,6 +1385,13 @@ if($component){
 $extentHash='';if($extentPath-and(Test-Path -LiteralPath $extentPath -PathType Leaf)){$extentHash=(Get-FileHash -LiteralPath $extentPath -Algorithm SHA256).Hash.ToLowerInvariant()}
 $result=[ordered]@{status=$(if($failure){'FAIL'}else{'PASS'});scope=$scope;helpAwardsOnly=[bool]$HelpAwardsOnly;historyOnly=[bool]$HistoryOnly;historyMatrix=[bool]$HistoryMatrix;historyDetails=[bool]$HistoryDetails;seatExtremes=[bool]$SeatExtremes;consecutiveSubgames=[bool]$ConsecutiveSubgames;compactConsecutive=[bool]$CompactConsecutive;subgames=$consecutiveContracts;completedGames=$completedGames.ToArray();gameAudit=$consecutiveOracle;package='ro.rentzlab.app.uisanity';serial='127.0.0.1:5555';versionName=$build.versionName;api=$api;apkSha256=$build.apkSha256;build=$build;rawRoot=$raw;extentReport=$extentPath;extentReportSha256=$extentHash;reportingLibrary=$reportingLibrary.name;reportingLibrarySha256=$reportingLibrary.sha256;runnerSha256=(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash.ToLowerInvariant();developmentLedger=$developmentLedger;developmentLedgerScope=$(if($HelpAwardsOnly){'NOT_USED'}else{'RUN_ISOLATED_COPY'});isolatedDevelopmentLedgerSha256Before=$isolatedDevelopmentLedgerSha256Before;isolatedDevelopmentLedgerSha256After=$isolatedDevelopmentLedgerSha256After;sharedDevelopmentLedger=$sharedDevelopmentLedger;sharedDevelopmentLedgerSha256Before=$sharedDevelopmentLedgerSha256Before;sharedDevelopmentLedgerSha256After=$sharedDevelopmentLedgerSha256After;sharedDevelopmentLedgerUnchanged=$sharedDevelopmentLedgerUnchanged;developmentExposures=$developmentExposures.ToArray();failure=$failure;cleanupFailures=$cleanup.ToArray();display=$display;displayAndPackagesPreserved=[bool]$preserved;leaseReleased=$released;checkpoints=$points.ToArray()}
 $result.uiToolHashes=$uiToolHashes
+$result.sandboxPreservation=[ordered]@{status='BLOCKED';leaseId=$leaseId}
+$identityFile=Join-Path $raw 'sandbox-backup/identity.json';$restoredFile=Join-Path $raw 'sandbox-backup/restored.json'
+if($released-and(Test-Path -LiteralPath $identityFile)-and(Test-Path -LiteralPath $restoredFile)){
+    $result.sandboxPreservation.status='PASS'
+    $result.sandboxPreservation.identitySha256=(Get-FileHash -LiteralPath $identityFile).Hash.ToLowerInvariant()
+    $result.sandboxPreservation.restoredSha256=(Get-FileHash -LiteralPath $restoredFile).Hash.ToLowerInvariant()
+}
 $result.tableEndings=[bool]$TableEndings
 $result.shortTables=[bool]$ShortTables
 $result|ConvertTo-Json -Depth 20|Set-Content -LiteralPath (Join-Path $RunRoot 'result.json') -Encoding utf8NoBOM

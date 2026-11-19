@@ -13,9 +13,35 @@ param(
     [string]$PublicationJournal='',
     [string]$PublicationChecksum='',
     [string]$PromotionTestRepository='',
+    [switch]$RetireSupersededReleases,
+    [string]$OriginalQualification='',
+    [string]$ReadmeVerification='',
+    [string]$OriginalComponentExtent='',
+    [string]$OriginalNativeExtent='',
     [string]$Java='C:\tools\Java21\jdk-21.0.12.1+1\bin\java.exe'
 )
 $ErrorActionPreference='Stop'
+function Invoke-RentzAuthenticated([scriptblock]$Operation) {
+    $previousToken=$env:GH_TOKEN;$previousPrompt=$env:GIT_TERMINAL_PROMPT;$previousInteractive=$env:GCM_INTERACTIVE
+    try{
+        if(-not$env:GH_TOKEN-and-not$env:GITHUB_TOKEN){
+            $env:GIT_TERMINAL_PROMPT='0';$env:GCM_INTERACTIVE='Never'
+            $credential=@("protocol=https`nhost=github.com`n`n" | git -C $project credential fill 2>$null)
+            $secret=@($credential | Where-Object {$_ -cmatch '^password=.'})
+            if($LASTEXITCODE-ne0-or$secret.Count-ne1){throw 'Authenticated GitHub action requires an existing cached credential or GH_TOKEN.'}
+            $env:GH_TOKEN=$secret[0].Substring(9);$credential=$null;$secret=$null
+        }
+        & $Operation
+    }finally{
+        $env:GH_TOKEN=$previousToken;$env:GIT_TERMINAL_PROMPT=$previousPrompt;$env:GCM_INTERACTIVE=$previousInteractive
+    }
+}
+if($RetireSupersededReleases){
+    if(!$OriginalQualification-or!$ReadmeVerification-or!$OriginalComponentExtent-or!$OriginalNativeExtent-or!$PublicationEvidence-or
+        $DocumentationRun-or$BuildRun-or$NativeUiRun-or$UiBuildRun-or$RestrictedPublication-or$ResumePublicPublication-or$PromotionTestRepository){
+        throw 'Retirement requires original qualification, README verification, both original Extents and public download evidence; it is separate from publication.'
+    }
+}elseif($OriginalQualification-or$ReadmeVerification-or$OriginalComponentExtent-or$OriginalNativeExtent){throw 'Original retirement inputs require RetireSupersededReleases.'}
 if($ResumeRestrictedPublication){throw 'Implicit private publication is retired. Use ResumePublicPublication for the source repository.'}
 if($ResumePublicPublication){
     if(!$BuildRun-or!$NativeUiRun-or!$UiBuildRun-or!$PublicationJournal-or!$PublicationChecksum-or$DocumentationRun-or$PublicationEvidence-or$RestrictedPublication){
@@ -32,7 +58,7 @@ Import-Module (Join-Path $PSScriptRoot 'InfrastructureWorkspaces.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'RuntimeQualification.psm1') -Force
 Assert-AtfInfrastructure -ProjectRoot $project
 $ragDataRoot=Get-AtfDataRoot -ProjectRoot $project
-foreach($path in @($ComponentRun,$DocumentationRun,$BuildRun,$NativeUiRun,$UiBuildRun,$PublicationEvidence,$PublicationJournal,$PublicationChecksum)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
+foreach($path in @($ComponentRun,$DocumentationRun,$BuildRun,$NativeUiRun,$UiBuildRun,$PublicationEvidence,$PublicationJournal,$PublicationChecksum,$OriginalQualification,$ReadmeVerification,$OriginalComponentExtent,$OriginalNativeExtent)|Where-Object{-not[string]::IsNullOrWhiteSpace($_)}){Assert-AtfArtifactPath -Path $path -ProjectRoot $project}
 Assert-AtfArtifactPath -Path $RunRoot -ProjectRoot $project
 $ComponentRun=[IO.Path]::GetFullPath($ComponentRun);$RunRoot=[IO.Path]::GetFullPath($RunRoot)
 if($DocumentationRun){$DocumentationRun=[IO.Path]::GetFullPath($DocumentationRun)}
@@ -104,6 +130,19 @@ Assert-AtfArtifactPath -Path $scratch -ProjectRoot $project
 $null=New-Item -ItemType Directory -Path $scratch
 $jvm=@('-Xmx256m','-cp',$classpath,"-Djava.io.tmpdir=$scratch",$ragClass)
 try{
+    if($RetireSupersededReleases){
+        if($component.status-cne'PASS'-or!$component.componentExtentQualified){throw 'Retirement requires passing current regression with qualified Extent.'}
+        $retirementJvm=@($jvm[0..($jvm.Count-2)])
+        Invoke-RentzAuthenticated {
+        & $Java @retirementJvm 'atf.rentz.distribution.publication.RetirementCommand' $project `
+            ([IO.Path]::GetFullPath($OriginalQualification)) ([IO.Path]::GetFullPath($ReadmeVerification)) `
+            ([IO.Path]::GetFullPath($PublicationEvidence)) ([IO.Path]::GetFullPath($OriginalComponentExtent)) `
+            ([IO.Path]::GetFullPath($OriginalNativeExtent)) $componentFile (Join-Path $RunRoot 'retirement')
+        if($LASTEXITCODE-ne0){throw "Retirement blocked; inspect the separate receipt in $RunRoot."}
+        }
+        Write-Output (Join-Path $RunRoot 'retirement/release-retirement.json')
+        return
+    }
     if($DocumentationRun){
         & $Java @jvm '--reconcile-documentation' $project $reportRoot $ComponentRun $DocumentationRun
         if($LASTEXITCODE-ne0){throw "Documentation reconciliation could not read its evidence: $RunRoot"}
@@ -139,24 +178,11 @@ try{
         }
         if($ResumePublicPublication){
             $publicationJvm=@($jvm[0..($jvm.Count-2)])
-            $previousToken=$env:GH_TOKEN
-            $previousPrompt=$env:GIT_TERMINAL_PROMPT
-            $previousInteractive=$env:GCM_INTERACTIVE
-            try{
-            if(-not$env:GH_TOKEN-and-not$env:GITHUB_TOKEN){
-                $env:GIT_TERMINAL_PROMPT='0';$env:GCM_INTERACTIVE='Never'
-                $credential=@("protocol=https`nhost=github.com`n`n" | git -C $project credential fill 2>$null)
-                $secret=@($credential | Where-Object {$_ -cmatch '^password=.'})
-                if($LASTEXITCODE-ne0-or$secret.Count-ne1){throw 'Authenticated GitHub publication requires an existing cached credential or GH_TOKEN.'}
-                $env:GH_TOKEN=$secret[0].Substring(9)
-                $credential=$null;$secret=$null
-            }
+            Invoke-RentzAuthenticated {
             & $Java @publicationJvm 'atf.rentz.distribution.publication.PublicationCommand' `
                 $project (Join-Path $reportRoot 'release-rag-report.json') $ComponentRun $BuildRun $NativeUiRun $UiBuildRun `
                 ([IO.Path]::GetFullPath($PublicationChecksum)) ([IO.Path]::GetFullPath($PublicationJournal)) (Join-Path $RunRoot 'publication-resume')
             if($LASTEXITCODE-ne0){throw "Public publication stopped. Read the publication-resume receipt in $RunRoot."}
-            }finally{
-                $env:GH_TOKEN=$previousToken;$env:GIT_TERMINAL_PROMPT=$previousPrompt;$env:GCM_INTERACTIVE=$previousInteractive
             }
         }
     }finally{
@@ -184,10 +210,10 @@ try{
 $reportFile=Join-Path $reportRoot 'release-rag-report.json'
 if($PublicationEvidence){
     $inputs=@{RagReport=$reportFile;PublicationEvidence=$PublicationEvidence;RunRoot=(Join-Path $RunRoot 'publication')}
+    $inputs.ComponentExtent=Join-Path $ComponentRun 'component-suite-extent.html'
+    if($NativeUiRun){$inputs.NativeExtent=Join-Path $NativeUiRun 'android-extent.html'}
     if($RestrictedPublication){
         $inputs.Restricted=$true
-        $inputs.ComponentExtent=Join-Path $ComponentRun 'component-suite-extent.html'
-        if($NativeUiRun){$inputs.NativeExtent=Join-Path $NativeUiRun 'android-extent.html'}
     }
     & (Join-Path $PSScriptRoot 'verify-release-readme.ps1') @inputs
 }

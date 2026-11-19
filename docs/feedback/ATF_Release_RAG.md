@@ -2,19 +2,17 @@
 
 ## Conservarea pachetului izolat și predarea rezervării
 
-**P2 · Echipa de integrare Android.** Conservarea unui pachet de test preexistent și acceptanța folosesc rezervări distincte. Un alt operator poate ocupa emulatorul între ele. Refuzul comenzilor străine funcționează, dar reluarea și restaurarea au nevoie de orchestrare comună în surse.
+**P2 · Echipa de integrare Android · calificare nativă rămasă.** Sursa orchestrează conservarea, testul și restaurarea sub aceeași rezervare. Mock-urile și controalele RAG verifică refuzul proprietarului străin, copia coruptă, pachetul necunoscut și comparația octeților, independent de UID. [Mecanism stabil](../rentz/ATF_Release.md#conservarea-sesiunii-android)
 
-- Integrați backup-ul verificat, absența inițială și restaurarea în aceeași rezervare sau într-o predare atomică explicită. Pachetul principal nu intră în aria de ștergere.
-- Acoperiți cu mock-uri concurența dintre conservare, lansare și restaurare. Un proprietar străin nu primește comenzi, backup-ul rămâne intact, iar comparația fișierelor restaurate verifică octeții, separat de UID și metadatele arhivei.
-- Închiderea cere control negativ, vecin valid și o acceptanță nativă cu restaurarea pachetului preexistent. [Transportul și rezervarea](../../rentz-reference/tools/RentzAndroid.psm1)
+- La următoarea acceptanță autorizată pe dispozitiv, porniți cu un pachet izolat preexistent, date cunoscute și afișaj salvat. Confirmați restaurarea octeților și a afișajului, apoi eliberarea numai a rezervării proprii.
+- Păstrați receipt-ul nativ și Extent. Probele offline nu califică instalarea reală; nu declarați închiderea acestui ultim criteriu din mock-uri.
 
 ## Retragerea edițiilor pe canalul public
 
-**P2 · Echipa de distribuție Rentz.** Publicarea în repository-ul sursei verifică descărcările autentificate și anonime. Eligibilitatea retragerii din verificatorul README rămâne însă definită pentru canalul restricționat; publicarea publică nu autorizează implicit ștergerea edițiilor precedente.
+**P2 · Echipa de distribuție Rentz · calificare operațională rămasă.** Eligibilitatea publică, admiterea celor două Extent originale și retragerea coordonată sunt implementate cu refuzuri de componentă. Comanda RAG păstrează tagurile, arhivează metadata înainte de DELETE și scrie receipt separat. [Mecanism stabil](../rentz/ATF_Release.md#retragerea-edițiilor-publice)
 
-- Extindeți eligibilitatea printr-un contract public explicit: ultima ediție, tagul exact, linkul unic din README remote, ambele descărcări și cele două rapoarte originale trebuie confirmate înaintea retragerii.
-- Testați refuzul pentru raport lipsă, SHA diferit, README vechi, ediție mai nouă și cont fără scriere. Păstrați tagurile și dovezile de audit; nu recreați un repository separat pentru APK.
-- Închiderea cere probe de componentă și receipt de retragere separat de publicare. [Verificatorul README](../../scripts/verify-release-readme.ps1)
+- La o retragere reală autorizată, folosiți dovezile originale și verificarea README eligibilă, apoi păstrați `release-retirement.json` și Extent. Confirmați ediția curentă, tagurile și auditul după operație.
+- Nu confundați un inventar fără ediții vechi sau un transport mock cu dovada unei ștergeri reale. Nicio ștergere GitHub nu este necesară pentru validarea offline a codului.
 
 ## Calificarea permisiunilor pe canalul GitHub
 
