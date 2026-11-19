@@ -19,8 +19,8 @@ $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -Jso
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.13.jar'
-$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.13-tests.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.15.jar'
+$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.15-tests.jar'
 $commonTestsExpected = (Get-Content -LiteralPath "$commonTests.sha256" -Raw).Trim()
 if ((Get-FileHash -Algorithm SHA256 -LiteralPath $commonTests).Hash -ine $commonTestsExpected) {
     throw 'Shared browser component test checksum mismatch.'
@@ -78,12 +78,12 @@ finally { Pop-Location }
 $commonTestRoot = Join-Path $run 'common-component-tests'
 $null = New-Item -ItemType Directory -Force -Path $commonTestRoot
 Push-Location $commonTestRoot
-try { & jar xf $commonTests 'hand-presentation.mjs' 'viewport-contract.mjs' 'menu-presentation.mjs' 'card-typography.mjs' 'card-typography.tsv' }
+try { & jar xf $commonTests 'hand-presentation.mjs' 'viewport-contract.mjs' 'menu-presentation.mjs' 'score-presentation.mjs' 'seat-presentation.mjs' 'card-typography.mjs' 'card-typography.tsv' }
 finally { Pop-Location }
 $commonWeb = Join-Path $commonRoot 'ro/cardtable/browser/web'
 Get-ChildItem -LiteralPath $commonWeb -File | Copy-Item -Destination $site
 Get-ChildItem -LiteralPath (Join-Path $pages 'web') -File | Copy-Item -Destination $site
-foreach ($contract in @('hand-presentation.mjs', 'viewport-contract.mjs', 'menu-presentation.mjs', 'card-typography.mjs', 'card-typography.tsv')) {
+foreach ($contract in @('hand-presentation.mjs', 'viewport-contract.mjs', 'menu-presentation.mjs', 'score-presentation.mjs', 'seat-presentation.mjs', 'card-typography.mjs', 'card-typography.tsv')) {
     if (!(Test-Path -LiteralPath (Join-Path $commonTestRoot $contract))) {
         throw "The shared Card Table Browser component contract is missing: $contract"
     }
@@ -108,7 +108,7 @@ $choiceAnchor = @(
 ) -join "`n"
 foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAnchor, $automationAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
-    if ($count -ne 1) { throw "Card Table Browser 0.2.13 adapter anchor changed; expected one match, found $count." }
+    if ($count -ne 1) { throw "Card Table Browser 0.2.15 adapter anchor changed; expected one match, found $count." }
 }
 $markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence, rentzMenuRoutes } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable, rentzScoreRules } from "./rentz-score.mjs";')
 $scoreAnchor = 'scoreGrid(match.score.table, true)'
@@ -147,7 +147,9 @@ $markup = $markup.Replace($rentzHeaderAnchor,
   '  title.hidden = match.header.mode === "RENTZ";' + "`n" +
   '  top.append(navigation, title);')
 $markup = $markup.Replace($rentzDetailsAnchor,
-  '  if (match.header.mode === "RENTZ") details.append(status);' + "`n" +
+  '  if (match.header.mode === "RENTZ") {' + "`n" +
+  '    top.classList.add("rentz-title-row"); status.classList.add("rentz-title-lines"); top.insertBefore(status, title); details.hidden = true;' + "`n" +
+  '  }' + "`n" +
   '  else details.append(status, trump);')
 $rentzRender = $renderAnchor + "`n" + (@(
   '  if (match.rentzSequence?.length) {'
@@ -237,14 +239,14 @@ if ($LASTEXITCODE -ne 0) { throw 'Shared trick playback component checks failed.
     (Join-Path $commonTestRoot 'hand-presentation.mjs') (Join-Path $site 'hand-feedback.mjs') `
     (Join-Path $site 'rentz-ui.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Generated Rentz engine component checks failed.' }
-$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.19/card-table-ui-0.1.19.aar'
+$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.21/card-table-ui-0.1.21.aar'
 $nativeUiProvenance = Get-Content -LiteralPath (Join-Path $checkout 'rentz-lab-app/ui-library/provenance.json') -Raw | ConvertFrom-Json
-$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.19/card-table-ui-0.1.19.aar' })
+$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.21/card-table-ui-0.1.21.aar' })
 if ($nativeUiPin.Count -ne 1 -or
         (Get-FileHash -Algorithm SHA256 -LiteralPath $nativeUiAar).Hash -ine $nativeUiPin[0].sha256) {
     throw 'The native Rentz layout reference does not match the pinned Android UI AAR.'
 }
-$nativeUiClasses = Join-Path $run 'card-table-ui-0.1.19-classes.jar'
+$nativeUiClasses = Join-Path $run 'card-table-ui-0.1.21-classes.jar'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archive = [IO.Compression.ZipFile]::OpenRead($nativeUiAar)
 try {

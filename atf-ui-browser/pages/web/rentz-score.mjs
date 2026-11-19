@@ -2,7 +2,7 @@
 export function rentzHistoryGrid(data, element, historyGrid) {
   if (!data || data.players.length < 3 || data.players.length > 6
       || data.rows.some(row => row.cells.length !== data.players.length)) {
-    throw new TypeError("Rentz history needs one P/T pair per seat.");
+    throw new TypeError("Rentz history needs one Δ/Σ pair per seat.");
   }
   const grid = historyGrid(data, element);
   grid.classList.add("rentz-history-grid");
@@ -14,12 +14,12 @@ export function rentzHistoryGrid(data, element, historyGrid) {
   return grid;
 }
 
-/** A settlement shows one row per seat; the complete history keeps its P/T pairs. */
+/** A settlement shows one row per seat; the complete history keeps its Δ/Σ pairs. */
 export function rentzScoreTable(data, element, scoreGrid) {
   const grid = data?.grid;
   if (!grid || !Array.isArray(grid.players) || grid.players.length < 3 || grid.players.length > 6
       || grid.rows?.length !== 1 || grid.rows[0].cells?.length !== grid.players.length) {
-    throw new TypeError("Rentz settlement needs one confirmed hand and one P/T pair per seat.");
+    throw new TypeError("Rentz settlement needs one confirmed hand and one Δ/Σ pair per seat.");
   }
   const content = element("div", "", "rentz-score-table");
   if (data.headings?.length !== 3 || data.rows?.length !== grid.players.length

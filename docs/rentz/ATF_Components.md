@@ -25,7 +25,7 @@ O regulă se verifică prin API-ul minim care îi observă efectul. Partida virt
 | Registru strict | Proprietăți duplicate la orice nivel, tipuri coercibile, câmpuri incompatibile și conținut suplimentar; refuz fără schimbarea octeților și păstrarea expunerii în vecinul valid. | [EvaluationRegistryValidationTest](../../atf-tests/src/test/java/atf/rentz/EvaluationRegistryValidationTest.java) |
 | Partidă virtuală | Conservare, epuizarea alegerilor, rotație, scor și limită de acțiuni. | Cazurile generate din `RentzRulesTest`. |
 | UI Rentz fără dispozitiv | Meniu RO/EN, profil, reveal, selecție legală, actor, secvențe, scor, restaurare și callback-uri depășite; comparații capturate în execuție. | [Componente UI](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/) și [atlas](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/README.md). |
-| Istoric adaptiv fără dispozitiv | Dimensiuni pe 3–6 locuri, valori cu semn, legendă pe mai multe rânduri și 288 de perechi P/T din 48 de mâini. Codec-ul reface jurnalul folosit de sanity. | [Componentele istoricului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/) și [contractul grilei](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md). |
+| Istoric adaptiv fără dispozitiv | Dimensiuni pe 3–6 locuri, valori cu semn, legendă pe mai multe rânduri și 288 de perechi Δ/Σ din 48 de mâini. Codec-ul reface jurnalul folosit de sanity. | [Componentele istoricului](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/) și [contractul grilei](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/README.md). |
 | Selectori nativi fără dispozitiv | Item AdapterView neclickabil, vecin dezactivat, text pasiv și ținte ambigue. | [Probele selectorilor](../../atf-tests/tools/test-ui-selectors.ps1). |
 | Sesiune Android fără dispozitiv | Refuz fără jurnalizare, proiecție proprie, reluare deterministă, identități incompatibile și eligibilitatea pe nevăzute la ultima alegere. | [GameSessionTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/GameSessionTest.java), executat prin Gradle. |
 | Codec fără dispozitiv | Document unic strict, tipuri și domenii numerice exacte, payload de comandă, format vechi explicit și restaurare validă. | [SessionJsonValidationTest](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/SessionJsonValidationTest.java), executat prin Gradle. |
@@ -73,7 +73,7 @@ Din rădăcina proiectului, în PowerShell 7, cu JDK 21, Maven, SDK Android și 
 .\scripts\run-rentz-components.ps1 -Collection regression
 ```
 
-Lansatorul copiază sursele și bibliotecile, verifică populațiile Maven și Android JVM și păstrează XML-urile în afara proiectului. [Calificarea offline](ATF_Qualification.md) deține colecțiile și porțile; Test Kit înregistrează comparațiile efectiv evaluate, iar [publicatorul](../../atf-tests/src/test/java/atf/rentz/RentzRulePublication.java) transmite rezultatul bibliotecii Extent.
+Lansatorul copiază sursele, bibliotecile și workflow-urile în același manifest verificat prin hash. Verifică populațiile Maven și Android JVM și păstrează XML-urile în afara proiectului. [Calificarea offline](ATF_Qualification.md) deține colecțiile și porțile; Test Kit înregistrează comparațiile efectiv evaluate, iar [publicatorul](../../atf-tests/src/test/java/atf/rentz/RentzRulePublication.java) transmite rezultatul bibliotecii Extent.
 
 | Dovadă | Ce poate verifica cititorul |
 |---|---|

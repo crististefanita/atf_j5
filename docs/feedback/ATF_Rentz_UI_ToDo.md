@@ -27,7 +27,7 @@ Antetul folosește `GameTitleBar` din AAR-ul fixat. Contractul stabil este în [
 
 ## P1 · Admiterea bibliotecilor și paritatea Whist
 
-Păstrați AAR-ul Android `0.1.19` și pachetul Browser `0.2.13` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
+Păstrați AAR-ul Android `0.1.21` și pachetul Browser `0.2.15` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
 
 | Prioritate | Cerință rămasă | Criteriu de închidere |
 |---|---|---|
@@ -42,16 +42,16 @@ Păstrați AAR-ul Android `0.1.19` și pachetul Browser `0.2.13` cu JAR-ul de te
 |---|---|
 | U02, U03 | Calificați rutele negative la font mărit: anularea, resetarea numelui, refuzul de salvare și confirmarea înlocuirii sesiunii. Aliniați filtrul UTF-16 al dialogului comun cu politica Rentz în puncte de cod. |
 | Istoric | Porniți tragerea de pe coloana fixă, inclusiv după fling. Confirmați deplasarea rândurilor la tragere și deschiderea exact a unui detaliu la atingere. |
-| U09 | Biblioteca fixată expune stilul grilei, fără un widget Android neutru pentru coloane configurabile și istoricul sincronizat. Înaintea extracției în producător, definiți rolurile coloanelor, identitatea mâinii, callback-ul de detalii și derularea antet/corp; păstrați categoriile și calculul scorului în Rentz. Contractele comune trebuie să califice RO/EN, 3–6 locuri, ferestre compacte și font mărit. Nu copiați rendererul aplicației Whist. |
+| U09 | Widgeturile `ScoreTableView` și `ScoreHistoryView` sunt extrase în biblioteca comună, iar Rentz furnizează proiecția `Δ:/Σ:`, identitățile mâinilor și callback-ul detaliilor. Rămân de calificat pe Android rasterul la font mărit, drag/fling pornit din coloana fixă, sincronizarea antetului și restaurarea poziției. Testele JVM cu măsurători și porturi de scroll nu închid aceste criterii native. |
 
 [Strategia de testare](../rentz/ATF_TestingStrategy.md) · [Admiterea bibliotecilor](../rentz/ATF_UiIntegration.md#admiterea-bibliotecilor-de-produs)
 
 ## Paritatea WEB: spațiu, scor și istoric
 
-Contractul stabil și testele rapide sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser). Acceptanța prin browser cere o secvență Rentz completă în patru locuri și încă un sub-joc complet, cu P/T, un singur premiu zero la Rentz, cumul corect și istoric păstrat după reîncărcare. O pagină încărcată fără aceste verificări nu califică randarea.
+Contractul stabil și testele rapide sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser). Acceptanța prin browser cere o secvență Rentz completă în patru locuri și încă un sub-joc complet, cu Δ:/Σ:, un singur premiu zero la Rentz, cumul corect și istoric păstrat după reîncărcare. O pagină încărcată fără aceste verificări nu califică randarea.
 
 Pentru Android rămân exclusiv verificările de raster și de gesturi deja enumerate mai sus. Nu închideți aceste observații pe baza simulării DOM sau a probei WEB.
 
 ### P2 · Acceptanța nativă a rezultatului compact
 
-Pagina de punctaj folosește acum tabelul neutru Jucător/P/T, cu contribuțiile la cerere. Componentele validează proiecția pentru 3–6 locuri și ambele limbi; înaintea calificării unui APK, confirmați rasterul la font mărit, derularea pe ferestre scunde și deschiderea/închiderea detaliilor fără pierderea accesului la „Mâna următoare”. Nu echivalați compilarea sau verificarea WEB cu această acceptanță Android.
+Pagina de punctaj folosește acum tabelul neutru Jucător/Δ:/Σ:, cu contribuțiile la cerere. Componentele validează proiecția pentru 3–6 locuri și ambele limbi; înaintea calificării unui APK, confirmați rasterul la font mărit, derularea pe ferestre scunde și deschiderea/închiderea detaliilor fără pierderea accesului la „Mâna următoare”. Nu echivalați compilarea sau verificarea WEB cu această acceptanță Android.

@@ -10,6 +10,9 @@ const load = path => import(pathToFileURL(path).href);
 const engine = await load(join(site, 'rentz-engine.mjs'));
 const { verifyCardTypography } = await load(join(contracts, 'card-typography.mjs'));
 const { verifyHistoryMenu, verifyGameMenuDismissal } = await load(join(contracts, 'menu-presentation.mjs'));
+const { verifyScorePresentation } = await load(join(contracts, 'score-presentation.mjs'));
+const { verifySeatFitting, verifyActorLabels } = await load(join(contracts, 'seat-presentation.mjs'));
+const { fitSeatLine } = await load(join(site, 'seat-presentation.mjs'));
 const { historyFirst } = await load(join(site, 'table-menu.mjs'));
 const { dismissGameMenuOnOutsideClick } = await load(join(site, 'profile.mjs'));
 const native = JSON.parse(readFileSync(nativeFile, 'utf8').replace(/^\uFEFF/, ''));
@@ -30,6 +33,25 @@ check('Delivered dismissal contract survives a menu redraw',
 
 // Execute the actual packaged renderer function. Only the browser's measurement surface is mocked.
 const table = readFileSync(join(site, 'table.mjs'), 'utf8');
+check('Measured seat ink keeps its text and height while scores change',
+  {cases: 75, heightChanges: 0, textChanges: 0, idempotent: true}, verifySeatFitting(fitSeatLine));
+const actorSource = table.match(/function markSeat\(node, active, bidding, actorLabel\) \{[\s\S]*?\n\}/)?.[0];
+check('One actual shared actor renderer is available', true, !!actorSource);
+const markActor = runInNewContext(`${actorSource}; markSeat`, {copy: (key, fallback) => fallback});
+check('The actor label belongs to the game and survives in-place playback',
+  {localizedLabels: 5, nativeHumanLabelVisible: true, legacyBiddingPolicyRetained: true}, verifyActorLabels(markActor));
+class ScoreElement {
+  constructor(tag, text = '') { this.tagName = tag; this.textContent = text; this.children = []; this.style = {}; this.dataset = {}; this.classList = {add() {}}; }
+  append(...children) { this.children.push(...children); }
+  setAttribute(key, value) { this[key] = value; }
+}
+const scoreElement = (tag, text = '') => new ScoreElement(tag, text);
+const scoreSource = table.match(/function scoreGrid\(data, native = false\) \{[\s\S]*?\n\}/)?.[0];
+check('One actual delivered score renderer is available', true, !!scoreSource);
+const renderScore = runInNewContext(`${scoreSource}; scoreGrid`, {element: scoreElement});
+const renderHistory = (await load(join(site, 'records.mjs'))).historyGrid;
+check('Delivered score contracts preserve consumer captions and signed values',
+  {cases: 8, columnFamilies: 2, scoringCalculations: 0}, verifyScorePresentation(renderScore, renderHistory, scoreElement));
 const source = table.match(/function placePlayed\(cards\) \{[\s\S]*?\n\}/)?.[0];
 check('Exactly one shared card-placement function is available', 1, table.match(/function placePlayed\(cards\)/g)?.length ?? 0);
 const playedLayouts = new WeakMap();

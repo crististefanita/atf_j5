@@ -16,7 +16,7 @@ public final class RentzPageComponentTest {
         rentzCardPlaybackIsAnIncrementalPublicProjection();
         rentzLegalCardActionsRemainAvailableAfterAnAutomaticStep();
         rentzArrivalIsAOneShotPublicProjectionBeforeTheScore();
-        historyKeepsWhistShortLabelsAndTheSettledScoreProjection();
+        historyKeepsOriginalRentzSymbolsAndTheSettledScoreProjection();
         otherContractsDoNotEmitARentzArrival();
         System.out.println("Rentz Pages component checks passed: " + checks);
     }
@@ -76,7 +76,7 @@ public final class RentzPageComponentTest {
         }
     }
 
-    private static void historyKeepsWhistShortLabelsAndTheSettledScoreProjection() {
+    private static void historyKeepsOriginalRentzSymbolsAndTheSettledScoreProjection() {
         var checkpoint = startPage(20261118, "4", "HARD");
         JSONObject view = null;
         for (int step = 0; step < 96; step++) {
@@ -91,12 +91,12 @@ public final class RentzPageComponentTest {
             throw new AssertionError("The four-seat Rentz fixture did not reach the settled score page.");
         }
         var grid = view.getJSONObject("history").getJSONObject("grid");
-        check("Page DTO maps per-hand points to P", "P".equals(grid.optString("bidLabel")));
-        check("Page DTO maps running totals to T", "T".equals(grid.optString("pointsLabel")));
+        check("Page DTO maps per-hand points to Δ", "Δ:".equals(grid.optString("bidLabel")));
+        check("Page DTO maps running totals to Σ", "Σ:".equals(grid.optString("pointsLabel")));
         check("Page DTO carries the concise legend beneath the score table",
-                "P: punctele mâinii · T: total după mână".equals(grid.optString("legend")));
+                "Δ: punctele mâinii · Σ: total după mână".equals(grid.optString("legend")));
         var settled = view.getJSONObject("scoreDetails").optString("awards");
-        check("Score page uses the same P/T notation", settled.contains(" · P ") && settled.contains(" · T "));
+        check("Score page uses the same Δ/Σ notation", settled.contains(" · Δ: ") && settled.contains(" · Σ: "));
         var row = grid.getJSONArray("rows").getJSONObject(0);
         var cells = row.getJSONArray("cells");
         var state = pageState(checkpoint).getJSONObject("view");
@@ -106,7 +106,7 @@ public final class RentzPageComponentTest {
             var cell = cells.getJSONObject(seat);
             check("Page history keeps the confirmed running total in seat order " + seat,
                     cell.getString("total").equals(completed.getString(seat + 2)));
-            String projection = names.getString(seat) + " · P " + cell.getString("bid") + " · T " + cell.getString("total");
+            String projection = names.getString(seat) + " · Δ: " + cell.getString("bid") + " · Σ: " + cell.getString("total");
             check("Score details preserve both confirmed values for seat " + seat, settled.contains(projection));
         }
     }

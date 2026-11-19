@@ -20,6 +20,7 @@ public final class RentzBrowserComponentTest {
     private RentzBrowserComponentTest() { }
 
     public static void main(String[] args) {
+        boardFactsAndActorLabelsUseTheNativeRentzProjection();
         settlementUsesTheNativeThreeColumnContract();
         everyContractSharesTheNativeScoreAndMenuProjection();
         sharedPresentationComesFromTheLibrary();
@@ -36,12 +37,39 @@ public final class RentzBrowserComponentTest {
         automaticTurnsKeepTheirOrderAndTiming();
         rentzPlaybackKeepsThePlayedCardAndSequenceInLockstep();
         completedHandHistorySeparatesDeltaAndTotal();
-        scoreHistoryUsesWhistShortLabelsAndLocalizedLegend();
+        scoreHistoryUsesRentzSymbolsAndLocalizedLegend();
         browserScoreProjectionMatchesTheSettledEngineForEveryContract();
         browserRentzAwardsOnlyOneZeroForEveryTableSize();
         browserFinalStandingsUseAndroidCompetitionTies();
         profileAndAchievementProgressSurviveAdapterRecreation();
         System.out.println("Rentz browser component checks passed: " + checks);
+    }
+
+    private static void boardFactsAndActorLabelsUseTheNativeRentzProjection() {
+        for (int players = 3; players <= 6; players++) for (boolean romanian : List.of(true, false)) {
+            var session = new ro.rentzlab.app.GameSession(players, 20261119L + players, ro.rentzlab.ai.RentzPlayer.Difficulty.NORMAL);
+            var table = new RentzTable(session, "Ana"); table.setLanguage(romanian ? "ro" : "en");
+            var copy = new ro.rentzlab.app.ui.copy.RentzText(romanian);
+            var names = session.displayNames("Ana");
+            for (int step = 0; step < 5; step++) {
+                var nativeSeats = ro.rentzlab.app.ui.table.RentzTableContent.seats(session.view(), copy, names, false);
+                var actual = table.view();
+                for (int seat = 0; seat < players; seat++) {
+                    equal("Native Δ: fact " + players + "/" + romanian + "/" + step + "/" + seat,
+                            nativeSeats.get(seat).facts().get(0).inlineText(), actual.seats().get(seat).firstFact());
+                    equal("Native Σ: fact " + players + "/" + romanian + "/" + step + "/" + seat,
+                            nativeSeats.get(seat).facts().get(1).inlineText(), actual.seats().get(seat).secondFact());
+                }
+                if (step == 0) {
+                    equal("Native choosing actor is explicit in the common header", romanian ? "ALEGE" : "CHOOSING", actual.header().actorLabel());
+                    table.act("choose:RENTZ");
+                } else {
+                    if (session.hasForcedHumanPass()) session.apply(new ro.rentzlab.app.GameSession.Command(ro.rentzlab.app.GameSession.Action.PASS, 0, null, null, false));
+                    else if (session.hasPendingHumanDecision()) table.act("auto-step");
+                    else session.advanceBotTurn();
+                }
+            }
+        }
     }
 
     private static void settlementUsesTheNativeThreeColumnContract() {
@@ -50,7 +78,7 @@ public final class RentzBrowserComponentTest {
         table.act("choose:RENTZ");
         finishOneHand(table);
         var score = table.view().score().table();
-        equal("Settlement already contains the native Jucator/P/T headings", List.of("Jucător", "P", "T"), score.headings());
+        equal("Settlement already contains the native Jucator/Δ/Σ headings", List.of("Jucător", "Δ:", "Σ:"), score.headings());
         equal("The shared renderer receives one canonical row per seat", 4, score.rows().size());
     }
 
@@ -75,7 +103,7 @@ public final class RentzBrowserComponentTest {
                 equal("Native history legend " + context, ro.rentzlab.app.ui.score.RentzScoreContent.legend(copy), view.history().grid().legend());
                 equal("Confirmed hand enables the shared score route " + context, List.of(), RentzBrowser.unavailableMenuActions(view));
                 for (int seat = 0; seat < players; seat++) {
-                    equal("Native P/T pair " + context + "/" + seat,
+                    equal("Native Δ/Σ pair " + context + "/" + seat,
                             List.of(Integer.toString(nativeRow.values().get(seat).delta()), Integer.toString(nativeRow.values().get(seat).total())),
                             List.of(view.history().grid().rows().get(0).cells().get(seat).bid(), view.history().grid().rows().get(0).cells().get(seat).total()));
                 }
@@ -104,7 +132,7 @@ public final class RentzBrowserComponentTest {
         double total = (double) weights.get(0) + weights.get(3) + weights.get(4);
         for (int index = 0; index < 3; index++) {
             float weight = weights.get(index == 0 ? 0 : index + 2);
-            equal("Native Jucator/P/T column proportion " + index, weight * 100 / total + "%", palette.get("--rentz-score-col-" + index));
+            equal("Native Jucator/Δ/Σ column proportion " + index, weight * 100 / total + "%", palette.get("--rentz-score-col-" + index));
         }
     }
 
@@ -406,9 +434,9 @@ public final class RentzBrowserComponentTest {
         var view = table.view();
         var grid = view.history().grid();
         equal("Hand number heading", "Mână", grid.cardsLabel());
-        equal("Per-hand points use the Whist short heading", "P", grid.bidLabel());
-        equal("Running total uses the Whist short heading", "T", grid.pointsLabel());
-        equal("History explains short headings below the table", "P: punctele mâinii · T: total după mână", grid.legend());
+        equal("Per-hand points use the Rentz original symbol", "Δ:", grid.bidLabel());
+        equal("Running total uses the Rentz original symbol", "Σ:", grid.pointsLabel());
+        equal("History explains short headings below the table", "Δ: punctele mâinii · Σ: total după mână", grid.legend());
         equal("One complete Rentz history row", 1, grid.rows().size());
         var row = grid.rows().get(0);
         equal("Hand row identifies the selected contract", "Rentz", row.status());
@@ -420,19 +448,19 @@ public final class RentzBrowserComponentTest {
         }
     }
 
-    private static void scoreHistoryUsesWhistShortLabelsAndLocalizedLegend() {
+    private static void scoreHistoryUsesRentzSymbolsAndLocalizedLegend() {
         var table = start(new RentzBrowser(() -> 982L), 4);
         table.setLanguage("en");
         table.act("reveal");
         table.act("choose:RENTZ");
         finishOneHand(table);
         var grid = table.view().history().grid();
-        equal("English history keeps compact per-hand label", "P", grid.bidLabel());
-        equal("English history keeps compact total label", "T", grid.pointsLabel());
-        equal("English legend concisely distinguishes the values", "P: hand points · T: running total", grid.legend());
+        equal("English history keeps compact per-hand label", "Δ:", grid.bidLabel());
+        equal("English history keeps compact total label", "Σ:", grid.pointsLabel());
+        equal("English legend concisely distinguishes the values", "Δ: hand points · Σ: running total", grid.legend());
         var score = table.view().scoreDetails();
-        truth("Completed-hand score uses the same P/T notation", score.awards().contains(" · P ")
-                && score.awards().contains(" · T "));
+        truth("Completed-hand score uses the same Δ/Σ notation", score.awards().contains(" · Δ: ")
+                && score.awards().contains(" · Σ: "));
         truth("Completed-hand history preserves every settled value",
                 grid.rows().get(0).cells().stream().allMatch(cell -> !cell.bid().isBlank() && !cell.total().isBlank()));
     }
@@ -456,14 +484,14 @@ public final class RentzBrowserComponentTest {
             var expectedAwards = java.util.stream.IntStream.range(0, hand.scoring().finishOrder().size())
                     .mapToObj(place -> {
                         int seat = hand.scoring().finishOrder().get(place);
-                        return (place + 1) + ". " + table.names().get(seat) + " · P " + hand.points().get(seat)
-                                + " · T " + hand.totals().get(seat) + "\n  Premiu de sosire · " + hand.points().get(seat);
+                        return (place + 1) + ". " + table.names().get(seat) + " · Δ: " + hand.points().get(seat)
+                                + " · Σ: " + hand.totals().get(seat) + "\n  Premiu de sosire · " + hand.points().get(seat);
                     }).collect(Collectors.joining("\n"));
             equal("Browser score details show native Rentz finish order for " + players,
                     expectedAwards, table.view().scoreDetails().awards());
             equal("Browser score details show exactly one zero award for " + players, 1L,
                     java.util.Arrays.stream(table.view().scoreDetails().awards().split("\\n"))
-                            .filter(line -> !line.startsWith("  ") && line.contains(" · P 0 · T ")).count());
+                            .filter(line -> !line.startsWith("  ") && line.contains(" · Δ: 0 · Σ: ")).count());
 
             var row = table.view().history().grid().rows().get(0);
             equal("Score history exposes one score cell per seat for " + players, players, row.cells().size());
@@ -490,8 +518,8 @@ public final class RentzBrowserComponentTest {
                 var expected = (contract == Contract.RENTZ ? hand.scoring().finishOrder()
                         : java.util.stream.IntStream.range(0, players).boxed().toList()).stream()
                         .map(seat -> (contract == Contract.RENTZ ? (hand.scoring().finishOrder().indexOf(seat) + 1) + ". " : "")
-                                + table.names().get(seat) + " · P " + hand.points().get(seat)
-                                + " · T " + hand.totals().get(seat)).toList();
+                                + table.names().get(seat) + " · Δ: " + hand.points().get(seat)
+                                + " · Σ: " + hand.totals().get(seat)).toList();
                 equal("Browser score projection matches engine delta/total ordering " + players + "/" + contract,
                         expected, displayLines);
                 equal("Browser score projection keeps all contributions " + players + "/" + contract,
@@ -499,7 +527,7 @@ public final class RentzBrowserComponentTest {
                         table.view().scoreDetails().awards().lines().filter(line -> line.startsWith("  ")).count());
                 if (contract == Contract.RENTZ) {
                     equal("Rentz has one zero in the displayed result " + players, 1L,
-                            displayLines.stream().filter(line -> line.contains(" · P 0 · T ")).count());
+                            displayLines.stream().filter(line -> line.contains(" · Δ: 0 · Σ: ")).count());
                 }
             }
         }
@@ -509,8 +537,8 @@ public final class RentzBrowserComponentTest {
         var totals = List.of(-30, 20, 20, 0, -30, 5);
         var names = List.of("Ana", "Mihai", "Ioana", "Dan", "Eva", "Radu");
         equal("Web final standings keep Android competition ranks and total labels for tied totals", List.of(
-                "1. Mihai · T 20", "1. Ioana · T 20", "3. Radu · T 5", "4. Dan · T 0",
-                "5. Ana · T -30", "5. Eva · T -30"),
+                "1. Mihai · Σ: 20", "1. Ioana · Σ: 20", "3. Radu · Σ: 5", "4. Dan · Σ: 0",
+                "5. Ana · Σ: -30", "5. Eva · Σ: -30"),
                 RentzTable.finalStandings(totals, names));
         equal("Ranking projection does not reorder source totals", List.of(-30, 20, 20, 0, -30, 5), totals);
     }

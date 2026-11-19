@@ -6,7 +6,7 @@ import ro.cardtable.ui.cards.CardFace;
 import ro.cardtable.ui.hand.HandCard;
 import ro.cardtable.ui.seat.SeatContent;
 import ro.cardtable.ui.table.PlayedCardContent;
-import ro.rentzlab.app.ui.copy.RentzUiText;
+import ro.rentzlab.app.ui.copy.RentzText;
 import ro.rentzlab.app.ui.score.RentzScoreContent;
 import ro.rentzlab.core.*;
 import java.util.Comparator;
@@ -30,13 +30,13 @@ public final class RentzTableContent {
         return new CardFace(label.substring(0, label.length() - 1), symbol(card.suit()),
                 card.suit() == Card.Suit.HEARTS || card.suit() == Card.Suit.DIAMONDS);
     }
-    public static List<SeatContent> seats(RentzMatch.Observation view, RentzUiText copy, List<String> names, boolean paused) {
+    public static List<SeatContent> seats(RentzMatch.Observation view, RentzText copy, List<String> names, boolean paused) {
         return seats(view, copy, names, paused, false);
     }
-    static List<SeatContent> seats(RentzMatch.Observation view, RentzUiText copy, List<String> names, boolean paused, boolean passing) {
+    static List<SeatContent> seats(RentzMatch.Observation view, RentzText copy, List<String> names, boolean paused, boolean passing) {
         return seats(view, copy, names, paused, passing, false);
     }
-    static List<SeatContent> seats(RentzMatch.Observation view, RentzUiText copy, List<String> names,
+    static List<SeatContent> seats(RentzMatch.Observation view, RentzText copy, List<String> names,
             boolean paused, boolean passing, boolean arrival) {
         return IntStream.range(0, view.players()).mapToObj(seat -> {
             boolean active = !paused && (view.phase() == RentzMatch.Phase.PLAY || view.phase() == RentzMatch.Phase.CHOOSE) && view.turn() == seat;
@@ -51,12 +51,12 @@ public final class RentzTableContent {
                     + (active ? ". " + turnLabel(view, copy, passing) : ""));
         }).collect(immutable());
     }
-    static String arrival(RentzMatch.Observation view, RentzUiText copy, List<String> names) {
+    static String arrival(RentzMatch.Observation view, RentzText copy, List<String> names) {
         int unplayed = view.players() * 8 - view.board().size();
         return copy.text("Rentz finish", "Sosire Rentz") + " · " + names.get(view.finishOrder().get(0))
                 + "\n" + copy.text("Unplayed cards", "Cărți neplasate") + " · " + unplayed;
     }
-    public static List<HandCard> hand(RentzMatch.Observation view, RentzUiText copy, boolean paused) {
+    public static List<HandCard> hand(RentzMatch.Observation view, RentzText copy, boolean paused) {
         if (!view.revealed()) return List.of();
         return view.hand().stream().sorted(HAND_ORDER).map(card -> {
             boolean legal = !paused && isPlayerTurn(view) && view.legal().contains(card);
@@ -68,7 +68,7 @@ public final class RentzTableContent {
         return view.legal().stream().filter(card -> id(card).equals(id)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Card is not currently legal"));
     }
-    static String turnLabel(RentzMatch.Observation view, RentzUiText copy, boolean passing) {
+    public static String turnLabel(RentzMatch.Observation view, RentzText copy, boolean passing) {
         return passing ? copy.text("Passing", "Pasează") : copy.seatTurn(view.phase() == RentzMatch.Phase.CHOOSE);
     }
     static Set<String> highlightedCards(RentzMatch.Observation view) {

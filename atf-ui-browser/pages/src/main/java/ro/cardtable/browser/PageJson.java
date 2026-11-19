@@ -70,7 +70,7 @@ final class PageJson {
         if (value instanceof Header header)
             return fields("mode", header.mode(), "title", header.title(), "progress", header.progress(), "bids", header.bids(),
                     "trump", header.trump(), "trumpDescription", header.trumpDescription(), "titleSize", header.titleSize(),
-                    "progressSize", header.progressSize(), "bidSize", header.bidSize());
+                    "progressSize", header.progressSize(), "bidSize", header.bidSize(), "actorLabel", header.actorLabel());
         if (value instanceof ScoreDetails details)
             return fields("liveTitle", details.liveTitle(), "summary", details.summary(), "pendingBid", details.pendingBid(),
                     "winner", details.winner(), "awards", details.awards(), "rules", details.rules(), "liveTable", details.liveTable());

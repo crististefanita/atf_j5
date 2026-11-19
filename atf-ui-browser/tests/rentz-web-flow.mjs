@@ -94,8 +94,8 @@ export class RentzWebFlow {
     const checks=[comparison('Compact settlement headings',['Jucător','P','T'],visible.labels),
       comparison('One row per player',4,visible.rows.length),
       comparison('No bold score cells',true,visible.weights.every(weight=>weight==='400')),
-      comparison('One P/T pair per seat',8,table.rows[0].values.length),
-      comparison('Legend below the result',true,await this.tab.playwright.getByText('P: punctele mâinii · T: total după mână',{exact:true}).isVisible())];
+      comparison('One Δ/Σ pair per seat',8,table.rows[0].values.length),
+      comparison('Legend below the result',true,await this.tab.playwright.getByText('Δ: punctele mâinii · Σ: total după mână',{exact:true}).isVisible())];
     const values=table.rows[0].values;
     const deltas=values.filter((_,i)=>i%2===0);
     if(number===1 && table.rows[0].contract.includes("Rentz")) {
@@ -109,7 +109,7 @@ export class RentzWebFlow {
     const previous=this.completed.at(-1);
     for(let seat=0;seat<4;seat++) {
       checks.push(comparison(`Result details match history for ${table.names[seat]}`,true,
-        text.includes(`${table.names[seat]} · P ${values[seat*2]} · T ${values[seat*2+1]}`)),
+        text.includes(`${table.names[seat]} · Δ: ${values[seat*2]} · Σ: ${values[seat*2+1]}`)),
         comparison(`Cumulative points at seat ${seat}`,(previous?.rows[0].values[seat*2+1]??0)+deltas[seat],values[seat*2+1]));
     }
     if(number===1) this.first=table;
@@ -142,12 +142,12 @@ export class RentzWebFlow {
     await this.click('Istoricul scorului');
     const table=await this.table('dialog[open] .record-history');
     const expected=this.completed.map(result=>result.rows[0]);
-    await this.observe('Full mixed-contract P/T history',[
+    await this.observe('Full mixed-contract Δ/Σ history',[
       comparison('At least two distinct sub-games completed',true,new Set(expected.map(row=>row.contract.split(' · ')[1])).size>=2),
       comparison('All completed contracts in chronological order',expected,table.rows),
       comparison('Seat order remains stable',this.first.names,table.names),
-      comparison('P/T headings preserved',this.first.labels,table.labels),
-      comparison('Legend visible below history',true,await this.tab.playwright.getByText('P: punctele mâinii · T: total după mână',{exact:true}).last().isVisible())]);
+      comparison('Δ/Σ headings preserved',this.first.labels,table.labels),
+      comparison('Legend visible below history',true,await this.tab.playwright.getByText('Δ: punctele mâinii · Σ: total după mână',{exact:true}).last().isVisible())]);
     await this.click('Închide');
   }
   async restore() {

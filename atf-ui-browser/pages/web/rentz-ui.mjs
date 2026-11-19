@@ -5,8 +5,6 @@ export function rentzArrivalView(state, arrival, language, autoStepAction = null
       || !Number.isInteger(arrival.durationMillis) || arrival.durationMillis <= 0) {
     throw new Error("Rentz arrival payload does not match the settled public view.");
   }
-  const hand = language === "en" ? "Hand" : "Mână";
-  const total = language === "en" ? "Total" : "Total";
   return {
     ...state,
     view: {
@@ -15,8 +13,8 @@ export function rentzArrivalView(state, arrival, language, autoStepAction = null
       actions: autoStepAction?.key === "auto-step" ? [autoStepAction] : [],
       seats: match.seats.map((seat, index) => ({
         ...seat,
-        firstFact: `${hand} …`,
-        secondFact: `${total} ${arrival.previousTotals[index]}`,
+        firstFact: `Δ: …`,
+        secondFact: `Σ: ${arrival.previousTotals[index]}`,
         active: false,
       })),
       score: null,

@@ -12,7 +12,7 @@ on:
       - rentz-lab-app/app/src/main/java/ro/rentzlab/app/GameSession.java
       - rentz-lab-app/app/src/main/java/ro/rentzlab/app/achievements/**
       - rentz-lab-app/app/src/main/java/ro/rentzlab/app/profile/**
-      - rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/profile/DisplayName.java
+      - rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/**
   workflow_dispatch:
 
 permissions:

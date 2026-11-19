@@ -40,7 +40,7 @@ public final class RentzWebAcceptanceReport {
                 }
             }
             if (componentsOnly) return;
-            var raw=report.startScenario("RentzFourSeatMixedContractWebFlow","Real UI controls: complete Rentz, another contract, P/T history and reload. Each checkpoint identifies MCP or offline mobile Chrome. APK qualification is separate.",List.of("e2e","web","4-seats"));
+            var raw=report.startScenario("RentzFourSeatMixedContractWebFlow","Real UI controls: complete Rentz, another contract, Δ/Σ history and reload. Each checkpoint identifies MCP or offline mobile Chrome. APK qualification is separate.",List.of("e2e","web","4-seats"));
             try(var ui=UiExtentReportSession.adaptScenario(raw,ReportEvidenceProfile.forScreenshotPolicy(ReportScreenshotPolicy.EACH_CHECKPOINT),"Original browser JPEG/PNG; decoded losslessly to PNG for the reporting contract")) {
                 boolean good=true;
                 try(var phase=ui.startPhase("TEST BODY")) {

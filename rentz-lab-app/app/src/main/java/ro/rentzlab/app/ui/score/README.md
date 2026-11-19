@@ -2,24 +2,24 @@
 
 ## Pe scurt
 
-Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din stânga identifică mâna, sub-jocul și alegătorul. Fiecare jucător are două valori, **P** pentru punctele mâinii și **T** pentru totalul confirmat.
+Grila prezintă câte un rând pentru fiecare mână confirmată. Coloana din stânga identifică mâna, sub-jocul și alegătorul. Fiecare jucător are două valori, **Δ:** pentru punctele mâinii și **Σ:** pentru totalul confirmat.
 
 | Responsabilitate | Sursă |
 |---|---|
-| Proiecția datelor | [RentzScoreContent](RentzScoreContent.java) adaptează [ScoreSettlement](../../../../../../../../../game-core/src/main/java/ro/rentzlab/core/score/ScoreSettlement.java) și [ScoreStandings](../../../../../../../../../game-core/src/main/java/ro/rentzlab/core/score/ScoreStandings.java). Aceeași clasă este compilată pentru WEB: ordinea locurilor, P/T, contribuțiile și clasamentul au o singură proiecție. |
-| Limbaj și roluri | [RentzText](../copy/RentzText.java) este portabil; [RentzScoreLayout](RentzScoreLayout.java) selectează ponderile din `ScoreGridStyle` și separatorul comun adaptoarelor. Widgeturile și măsurarea rămân specifice platformei. |
-| Calculul dimensiunilor | [HistoryGridMetrics](HistoryGridMetrics.java) primește lățimi măsurate în pixeli. Rezervă loc pentru scoruri și stabilește când derulează toate elementele din zona de conținut. |
-| Randarea și gesturile | [RentzHistoryGrid](RentzHistoryGrid.java) măsoară cu fontul Android activ, aliniază celulele și sincronizează pozițiile de derulare. |
+| Proiecția datelor | [RentzScoreContent](RentzScoreContent.java) adaptează [ScoreSettlement](../../../../../../../../../game-core/src/main/java/ro/rentzlab/core/score/ScoreSettlement.java) și [ScoreStandings](../../../../../../../../../game-core/src/main/java/ro/rentzlab/core/score/ScoreStandings.java). Aceeași clasă este compilată pentru WEB: ordinea locurilor, Δ:/Σ:, contribuțiile și clasamentul au o singură proiecție. |
+| Limbaj și roluri | [RentzText](../copy/RentzText.java) este portabil; [RentzScoreLayout](RentzScoreLayout.java) selectează ponderile din `ScoreGridStyle` și separatorul comun adaptoarelor. AAR-ul deține widgeturile Android; browserul consumă aceleași modele portabile. |
+| Calculul dimensiunilor | [HistoryGridMetrics](HistoryGridMetrics.java) este o fațadă de compatibilitate peste `ro.cardtable.ui.score.HistoryGridMetrics`; nu mai duplică algoritmul. |
+| Randarea și gesturile | [RentzHistoryGrid](RentzHistoryGrid.java) păstrează ID-urile aplicației și callback-ul mâinii; `ScoreHistoryView` din AAR măsoară textul, aliniază celulele și sincronizează derularea. |
 | Dialogul | [RentzHistoryView](../screens/RentzHistoryView.java) rezolvă numele afișate, mesajul pentru istoricul gol și dimensiunea ferestrei. |
 | Detaliul mâinii | [RentzHandDetails](RentzHandDetails.java) afișează profilul, alegătorul, multiplicatorul din titlu, contribuțiile și scorurile confirmate. |
-| Rezultatul compact | [RentzSettlementTable](RentzSettlementTable.java) adaptează dimensiunile și paleta `ScoreGridStyle`: un rând per loc, coloane Jucător/P/T și text normal. Detaliile se deschid separat, fără a repeta contribuțiile în pagina principală. |
+| Rezultatul compact | [RentzSettlementTable](RentzSettlementTable.java) transmite conținutul confirmat către `ScoreTableView` din AAR: un rând per loc, coloane Jucător/Δ:/Σ: și text normal. Detaliile se deschid separat. |
 | Ajutorul din meniu | [RentzAwardGrid](RentzAwardGrid.java) afișează premiile profilului efectiv, în ordinea sosirii, pentru mesele de 3–6 jucători. |
 
 ## Cum se păstrează contextul
 
 | | Coloana mâinii | Coloanele jucătorilor |
 |---|---|---|
-| Antet | „Mână · joc” | Nume, P și T |
+| Antet | „Mână · joc” | Nume, Δ: și Σ: |
 | Rânduri | Identitatea mâinii și alegătorul | Delta și totalul pentru fiecare loc |
 
 - Derularea orizontală mută împreună antetul jucătorilor și valorile lor.

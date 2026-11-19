@@ -41,6 +41,7 @@ $sources = @(
     Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/profile/LocalProfile.java'
     Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/profile/DisplayName.java'
     Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/table/RentzCardSpace.java'
+    Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/table/RentzTableContent.java'
     Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/collection/UiLists.java'
     Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/copy/RentzText.java'
     Join-Path $checkout 'rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/RentzScoreContent.java'
@@ -82,8 +83,8 @@ if ($BrowserRoot) {
         -JavaInputs $sources -Libraries @($JsonLibrary) -MainClass $main -Port $Port -ListenAddress $ListenAddress -BuildOnly:$BuildOnly
     return
 }
-$library = & (Join-Path $PSScriptRoot 'Verify-CardTableBrowser.ps1') -Version '0.2.13' `
-    -SourceCommit '41d247d50627b66f438af2af6d580cb600ba2a4a'
+$library = & (Join-Path $PSScriptRoot 'Verify-CardTableBrowser.ps1') -Version '0.2.15' `
+    -SourceCommit 'adef6e368c0841d2c58930fd16450ad614aaa7b6'
 $build = Join-Path $root ('browser-' + [guid]::NewGuid().ToString('N'))
 $classes = Join-Path $build 'classes'
 $javaTemp = Join-Path $root 'java-temp'

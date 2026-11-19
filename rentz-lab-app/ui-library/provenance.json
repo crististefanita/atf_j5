@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "coordinate": "ro.cardtable:card-table-ui:0.1.19",
+  "coordinate": "ro.cardtable:card-table-ui:0.1.21",
   "namesCoordinate": "ro.cardtable:card-table-names:0.1.0",
   "producer": "whist",
-  "qualification": "https://github.com/crististefanita/whist/blob/62aa35aa80cc2286be4346abccb89607124b9301/whist-lab-app/atf-card-table-ui/README.md",
+  "qualification": "https://github.com/crististefanita/whist/blob/adef6e368c0841d2c58930fd16450ad614aaa7b6/whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/README.md",
   "files": [
     {
-      "sha256": "8a8f8cf2a613ac53547cb6ec55e1903d19322e7483fb5e43f58e9dd45fea22c3",
-      "path": "ro/cardtable/card-table-ui/0.1.19/card-table-ui-0.1.19.aar"
+      "path": "ro/cardtable/card-table-ui/0.1.21/card-table-ui-0.1.21.aar",
+      "sha256": "a21b3b4a968bca4e5da3c9436c827b5fd97e8d81b800c0feaa2715c986f10ecd"
     },
     {
-      "sha256": "74da8281452c7990d81a1dd9997d74b69d04b14991c2e068a02b5fd7782945ac",
-      "path": "ro/cardtable/card-table-ui/0.1.19/card-table-ui-0.1.19.pom"
+      "path": "ro/cardtable/card-table-ui/0.1.21/card-table-ui-0.1.21.pom",
+      "sha256": "9365373c9986869236dfe0f0243e84b057758630f42e7652ae5992a93d654273"
     },
     {
-      "sha256": "bbbb97eb9a4981c58238078f22506e7e5f5a56dd7a17cd5733efdb328febebcb",
-      "path": "ro/cardtable/card-table-ui/0.1.19/card-table-ui-0.1.19.module"
+      "path": "ro/cardtable/card-table-ui/0.1.21/card-table-ui-0.1.21.module",
+      "sha256": "40bf782889d1fe2cfcb41fe15552eb652f7f6750bca28864d9df098f6bfee8d8"
     },
     {
-      "sha256": "6170c5a935553252dda94677c247c923e1cb399b9f0fed459a0a309bccd90f0c",
-      "path": "ro/cardtable/card-table-ui/0.1.19/card-table-ui-0.1.19-sources.jar"
+      "path": "ro/cardtable/card-table-ui/0.1.21/card-table-ui-0.1.21-sources.jar",
+      "sha256": "f996b639e3cd9fae5d5dec732c81ef9d9a0f68f70e95135643524421c5635794"
     },
     {
       "path": "ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar",
@@ -38,6 +38,6 @@
       "sha256": "92a5fb18ad5e183f89a09392b177803b0b42227f83cf5a278012760291d3c030"
     }
   ],
-  "producerCommit": "62aa35aa80cc2286be4346abccb89607124b9301",
-  "producerSourceFingerprint": "1acf43a4b661d45511848854652e148da26f58e22c80f2ce353d41db959d163c"
+  "producerCommit": "adef6e368c0841d2c58930fd16450ad614aaa7b6",
+  "producerSourceFingerprint": "80dc60baa9ba8e5bbc84ea6d88a31f312d264a86692bd57c829cf8854179443b"
 }

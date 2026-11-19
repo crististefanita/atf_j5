@@ -17,6 +17,7 @@ import ro.cardtable.ui.cards.CardHighlight;
 import ro.cardtable.ui.hand.HandLayoutMetrics;
 import ro.cardtable.ui.table.PlayedCardStyle;
 import ro.cardtable.ui.table.ScoreGridStyle;
+import ro.cardtable.ui.seat.SeatTypography;
 import ro.cardtable.ui.table.TableViewportPolicy;
 import ro.cardtable.ui.theme.TableColors;
 import ro.rentzlab.app.ui.table.RentzCardSpace;
@@ -87,7 +88,8 @@ public final class RentzBrowser implements BrowserGame {
                 dimension("hand-face-height", HandLayoutMetrics.CARD_HEIGHT_DP + "px"),
                 dimension("trump-face-width", "32px"), dimension("trump-face-height", "48px"),
                 dimension("hand-slot", (HandLayoutMetrics.CARD_HEIGHT_DP + HandLayoutMetrics.LIFT_CLEARANCE_DP) + "px"),
-                dimension("score-head", ScoreGridStyle.HEADER_DP + "px"), dimension("score-row", ScoreGridStyle.ROW_DP + "px")));
+                dimension("score-head", ScoreGridStyle.HEADER_DP + "px"), dimension("score-row", ScoreGridStyle.ROW_DP + "px"),
+                dimension("seat-name-size", SeatTypography.NAME_SP / 16.0 + "rem"), dimension("seat-fact-size", SeatTypography.FACT_SP / 16.0 + "rem")));
         var columns = RentzScoreLayout.SETTLEMENT_WEIGHTS;
         double total = columns.stream().mapToDouble(Float::doubleValue).sum();
         for (int index = 0; index < columns.size(); index++) {

@@ -239,28 +239,28 @@ for(const visibleHeight of [480,570,740]) {
   check(`mobile browser viewport excludes address-bar overflow at ${visibleHeight}px`,`${visibleHeight}px`,viewport.style.minHeight);
 }
 const { historyGrid } = await import(pathToFileURL(join(dirname(process.argv[3]), "records.mjs")));
-check("contributions are preserved once in quiet detail paragraphs",["Ana · P -10 · T 20","Levată × 1 · -10","Profil confirmat"],
-  rentzScoreRules({awards:"Ana · P -10 · T 20\nLevată × 1 · -10",rules:["Profil confirmat"]}));
+check("contributions are preserved once in quiet detail paragraphs",["Ana · Δ: -10 · Σ: 20","Levată × 1 · -10","Profil confirmat"],
+  rentzScoreRules({awards:"Ana · Δ: -10 · Σ: 20\nLevată × 1 · -10",rules:["Profil confirmat"]}));
 const sharedScoreSource = generatedShell.slice(generatedShell.indexOf("function scoreGrid("), generatedShell.indexOf("function showHistory(")).trim();
 const sharedScoreGrid = runInNewContext("(" + sharedScoreSource + ")", {element});
 for (const players of [3, 4, 5, 6]) for (const language of ["ro", "en"]) {
-  const grid = {players:Array.from({length:players}, (_,i)=>"Loc " + (i+1)), legend:"P: punctele mâinii · T: total după mână",
-    cardsLabel:"Mână",bidLabel:"P",pointsLabel:"T",
+  const grid = {players:Array.from({length:players}, (_,i)=>"Loc " + (i+1)), legend:"Δ: punctele mâinii · Σ: total după mână",
+    cardsLabel:"Mână",bidLabel:"Δ:",pointsLabel:"Σ:",
     rows:[{cards:1,status:"Levate",cells:Array.from({length:players},(_,i)=>({bid:String(i*25-50),total:String(i*25+10),description:"",missed:false,series:0}))}]};
   let result;
-  const data={grid,headings:[language==="ro"?"Jucător":"Player","P","T"],
+  const data={grid,headings:[language==="ro"?"Jucător":"Player","Δ:","Σ:"],
     rows:grid.players.map((name,seat)=>[name,grid.rows[0].cells[seat].bid,grid.rows[0].cells[seat].total])};
   let sharedInput;
   assert.doesNotThrow(()=>{result=rentzScoreTable(data,element,(value,human)=>{sharedInput=value;return sharedScoreGrid(value,human);});}, "Result forwards the native three-column projection to the shared renderer");
   check(players+"p: renderer receives the original canonical data",true,sharedInput===data);
-  for (const changed of [{headings:["Player","Bid","T"]},{rows:[...data.rows].reverse()},
+  for (const changed of [{headings:["Player","Bid","Σ:"]},{rows:[...data.rows].reverse()},
       {rows:data.rows.map((row,index)=>index===0?[row[0],"wrong",row[2]]:row)}]) {
-    refuses(`${players}/${language}: reject disagreement with the confirmed native P/T projection ${JSON.stringify(changed)}`,
+    refuses(`${players}/${language}: reject disagreement with the confirmed native Δ/Σ projection ${JSON.stringify(changed)}`,
       ()=>rentzScoreTable({...data,...changed},element,sharedScoreGrid));
   }
   const table=result.children[0],header=table.children.find(row=>row.tagName==="thead"),body=table.children.find(row=>row.tagName==="tbody");
   check(players+"p: result uses shared Whist grid", "whist-score-grid", table.className);
-  check(players+"p: short headings in "+language,JSON.stringify([language==="ro"?"Jucător":"Player","P","T"]),JSON.stringify(header.children[0].children.map(cell=>cell.textContent)));
+  check(players+"p: short headings in "+language,JSON.stringify([language==="ro"?"Jucător":"Player","Δ:","Σ:"]),JSON.stringify(header.children[0].children.map(cell=>cell.textContent)));
   check(players+"p: one visible row per player",players,body.children.length);
   for(let i=0;i<players;i++) check(players+"p: signed scores retain seat identity "+i,
     JSON.stringify([grid.players[i],grid.rows[0].cells[i].bid,grid.rows[0].cells[i].total]),JSON.stringify(body.children[i].children.map(cell=>cell.textContent)));
@@ -309,7 +309,7 @@ check("published page loads the Rentz cue after the shared card-table stylesheet
 check("Rentz header removes the extra product title used by the generic Whist shell", true,
   generatedShell.includes('title.hidden = match.header.mode === "RENTZ";'));
 check("Rentz header omits the trump panel and preserves the selected-game line", true,
-  generatedShell.includes('if (match.header.mode === "RENTZ") details.append(status);')
+  generatedShell.includes('top.insertBefore(status, title); details.hidden = true;')
     && generatedShell.includes('else details.append(status, trump);'));
 check("Rentz render derives four-player card-space insets from the actual seat count", true,
   generatedShell.includes("const insets = rentzCenterInsets(match.seats.length);")
@@ -330,7 +330,7 @@ const settled = {
     seats: [
       { name: "Ana", firstFact: "Mână 8", secondFact: "Total 300", active: false },
       { name: "Mihai", firstFact: "Mână 8", secondFact: "Total -100", active: false },
-      { name: "Ioana", firstFact: "Mână 8", secondFact: "Total 50", active: false },
+      { name: "Ioana", firstFact: "Mână 8", secondFact: "Σ: 50", active: false },
     ],
   },
 };
@@ -343,7 +343,7 @@ const waitingWithAuto = rentzArrivalView(settled, arrival, "ro", autoStepAction)
 check("arrival keeps the auto-play checkbox visible using its marker", [autoStepAction], waitingWithAuto.view.actions);
 check("arrival view has no stale completion prompt", "", waiting.view.prompt);
 check("arrival seats show pending hand points and pre-hand totals", [
-  ["Mână …", "Total 100", false], ["Mână …", "Total -200", false], ["Mână …", "Total 50", false],
+  ["Δ: …", "Σ: 100", false], ["Δ: …", "Σ: -200", false], ["Δ: …", "Σ: 50", false],
 ], waiting.view.seats.map(seat => [seat.firstFact, seat.secondFact, seat.active]));
 check("original result remains available unchanged for the score screen", "Rezultatul mâinii", settled.view.score.title);
 const arrivalBoard = rentzSequence(rows, element, "ro", { ...arrival, language: "ro" });

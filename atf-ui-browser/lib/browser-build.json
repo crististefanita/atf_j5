@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "version": "0.2.13",
-  "sourceCommit": "41d247d50627b66f438af2af6d580cb600ba2a4a",
-  "inputSha256": "3757e6b612095d53101a888cbdf09bb4215a536705666d18c85b869ee8afd6bd",
+  "version": "0.2.15",
+  "sourceCommit": "adef6e368c0841d2c58930fd16450ad614aaa7b6",
+  "inputSha256": "b627f051e175e539a96f199bec06cbbd6bf81638f97f07bcd0bcf2bf483706ab",
   "inputs": [
     {
       "path": "atf-ui-browser/Package-CardTableBrowser.ps1",
-      "sha256": "3096f376957555de02efae211e45bdf3bffe6da2845498ae308f88f335ea7311"
+      "sha256": "e2d62d89b7d1a12deb75ebafd35a78b14286b1eba80c4cc53d058fd426900bec"
     },
     {
       "path": "atf-ui-browser/Start-CardTableBrowser.ps1",
-      "sha256": "431cc80ec781d769eab455b052748a8ad97f9292fbcc83e228030deac81206ac"
+      "sha256": "435884f1d91d8553867bb3ad6eabd5fa5cb9451a21e1282af49999b6b287253a"
     },
     {
       "path": "atf-ui-browser/src/main/java/ro/cardtable/browser/BrowserExperience.java",
@@ -18,15 +18,15 @@
     },
     {
       "path": "atf-ui-browser/src/main/java/ro/cardtable/browser/BrowserGame.java",
-      "sha256": "f634c86c4018ade17423e364295debe9d022291d6729a3c3ea15ce2d1484e0af"
+      "sha256": "d530a5dc1551599e665a3d6c1f3c392a903790e002d43b321bc5fd052a8fba81"
     },
     {
       "path": "atf-ui-browser/src/main/java/ro/cardtable/browser/BrowserGeometry.java",
-      "sha256": "033529723b2f6d08de5eb09490aa3c12880bde47ad3ef29151b00dd33a995dea"
+      "sha256": "1ee6b4b9c8ddbb94a4e69f9f1f93cfee981d9dc3afce88200102675eb429d6bb"
     },
     {
       "path": "atf-ui-browser/src/main/java/ro/cardtable/browser/BrowserHandAdapter.java",
-      "sha256": "19150c94ab0eede65e31698f67c415a4655ade48f7dafc596230ad3b0a481ab7"
+      "sha256": "70320931021d1f08532e104ec4693e692c4e449eb27c7ea1e93a42e54406cb05"
     },
     {
       "path": "atf-ui-browser/src/main/java/ro/cardtable/browser/BrowserJson.java",
@@ -34,7 +34,7 @@
     },
     {
       "path": "atf-ui-browser/src/main/java/ro/cardtable/browser/BrowserServer.java",
-      "sha256": "74b17ef1c37796fefbb9099c50b9de3ad9c98e1971d3255102d803688b3cfe6d"
+      "sha256": "dbef865d4c249a6834e18fd24acc0ed87e45ebe208b1f295d39a603d70b6cfc5"
     },
     {
       "path": "atf-ui-browser/src/main/java/ro/cardtable/browser/BrowserSession.java",
@@ -50,7 +50,7 @@
     },
     {
       "path": "atf-ui-browser/src/main/web/card-suits-OFL.txt",
-      "sha256": "b118dd41337806a5d4797052c77caf3bd096aed783e5eb21b4d11154351e1ac0"
+      "sha256": "dee1e0758c6ce86a7aee4aa812387de573fbe1b9a78bfc8332515fac2762aba5"
     },
     {
       "path": "atf-ui-browser/src/main/web/card-suits.woff2",
@@ -66,7 +66,7 @@
     },
     {
       "path": "atf-ui-browser/src/main/web/index.html",
-      "sha256": "40c6b93f1fbcc5177a14cd139ac52c9c9070c50c730d17aed6c2a9594b2f2142"
+      "sha256": "8ede89aef0c2f137e6b21d90940333436e527ff55b148a1393d1835df745492f"
     },
     {
       "path": "atf-ui-browser/src/main/web/profile.mjs",
@@ -77,24 +77,28 @@
       "sha256": "82cfb6173518eb6806f22ca87792d4917732fca723363ffff37fd2d8d17c14de"
     },
     {
+      "path": "atf-ui-browser/src/main/web/seat-presentation.mjs",
+      "sha256": "bd9e36e4ef5fbcb19dcebe2215219d6853e28d022fc7a9ef43f2fc7878debb44"
+    },
+    {
       "path": "atf-ui-browser/src/main/web/table-menu.mjs",
-      "sha256": "35a0c61d807c72daff91116c1fb0670aed2f444452b5f2d3c3252838428ac040"
+      "sha256": "0073eab4c969b7a102dd73338d38eb4bff4605cb3bfb8e6a5134efbfcc463bc0"
     },
     {
       "path": "atf-ui-browser/src/main/web/table.css",
-      "sha256": "a49e78934e344b909a98040d642dc24d36eb80dda578d26eb0cbb526968f2463"
+      "sha256": "46840fdc9e93b60f10ece59454114bc4a8f997963d90f9355974620865f7e056"
     },
     {
       "path": "atf-ui-browser/src/main/web/table.mjs",
-      "sha256": "0b4ca188f41f2f64b34060b956c66eb22854267d3019d22ff1a23ab32423d0ff"
+      "sha256": "1eb6bc48cb8079956144be08584a280c090f1f1e84f9a6890cdeccb5a26c292d"
     },
     {
       "path": "atf-ui-browser/src/main/web/viewport.mjs",
-      "sha256": "c28aee5da26609f75b73211164fa67a6bdccc68b4d6c62a752bf098c67741b7b"
+      "sha256": "17a5521b039af1a3cf65c22362e0494f81c22a8fb57ea3f438c02ec8292cc178"
     },
     {
       "path": "atf-ui-browser/tests/card-typography.mjs",
-      "sha256": "74cf3c31507825b2e23080830d8f0733115e6bdd3ff2fce17e1dac4c89d2a298"
+      "sha256": "5bfda36671a54c2a5b47084a9bca5230196a28ebd901eae21db157f07537efec"
     },
     {
       "path": "atf-ui-browser/tests/fixtures.mjs",
@@ -106,23 +110,31 @@
     },
     {
       "path": "atf-ui-browser/tests/menu-presentation.mjs",
-      "sha256": "b8f8910ba8367986da427f4aa56956646dc36d67ca8bc5143ac41dbde5151354"
+      "sha256": "1d06b044327599cec7b4e31e1e6124e0ca256a446064a5b23201b93552022df0"
     },
     {
       "path": "atf-ui-browser/tests/packaged-sanity.mjs",
-      "sha256": "78b733aba74824aa418c4608c2518559fc1193018d4c6af8c0e3ade53f0c4e58"
+      "sha256": "6e90c03e9296193878ee9e0ab54b07408f7297d90615b65bfc58dc915f1fa384"
+    },
+    {
+      "path": "atf-ui-browser/tests/score-presentation.mjs",
+      "sha256": "15bd8bcc95a2c61a269a2da7c6762c399bb2b8386d6af631da90a1246cd8615b"
+    },
+    {
+      "path": "atf-ui-browser/tests/seat-presentation.mjs",
+      "sha256": "8ebf9f4eee25052acf4941841a69aaa5c26cf1f949e7970def4abb213ebc21d7"
     },
     {
       "path": "atf-ui-browser/tests/trump-text-fit.mjs",
-      "sha256": "d65966294a815a4fdbbd675bb0ea405df745a9577ed0d69ee93d4fc5dc051d4e"
+      "sha256": "e43160db2a1e80bfe5cdb2abbd75e6f3183ff03ecdf23b425e49d25a513b5619"
     },
     {
       "path": "atf-ui-browser/tests/viewport-contract.mjs",
-      "sha256": "31568d54ae8bc8012fc0a8bab1ae28b161195ca15868d786ef2b1c5b312b8e79"
+      "sha256": "fbacb3ce3d7858532d975dc74ee8fdbd45278611a6f32817bad2372849b4bdbe"
     },
     {
       "path": "whist-lab-app/app/src/test/resources/whist-trump-text-fit.tsv",
-      "sha256": "485c9e658b0483dacdbbbec740071cbd3863027b25e9234fb308ad3c75dd90e0"
+      "sha256": "f5b66bf7fe9a42a00c55340cec77786294dd2d77f3d1fc0dd99005b856534842"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/animation/CollectionTarget.java",
@@ -138,7 +150,7 @@
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/cards/CardFaceInk.java",
-      "sha256": "73b801dd3825c08209b356bcf33404d4d9037ffca139a838cd2270f6b313d050"
+      "sha256": "a31779c744d9fd3cd5117274c5e29244afe5781811dfcac8c808732d81e501b7"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/cards/CardFaceMetrics.java",
@@ -162,11 +174,35 @@
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/menu/TableMenuContent.java",
-      "sha256": "f20d4373b2d1f68b4f5c91b449068e1a1262e161a6028f6da8800baf9a51254a"
+      "sha256": "fafbaf4e11c413861624956e7181c4834b01008a84dd81e398a019909e14d9e6"
+    },
+    {
+      "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/HistoryContent.java",
+      "sha256": "844e848f786079e23d821678d43c3ca88846ed678f6a180dd18e6f460432d208"
+    },
+    {
+      "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/HistoryGridMetrics.java",
+      "sha256": "38849b55e597ac234ec949547380c6ea84641d41e7e40ce884320687ca50403e"
+    },
+    {
+      "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/HistoryScrollSync.java",
+      "sha256": "ca1c3bb526f88a2e057aafc41dbddd5270a7ab2716ea8fdfc2964de5a7d7a893"
+    },
+    {
+      "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/ScoreTableContent.java",
+      "sha256": "38ac7d2b53e558dfc2eb0875429a53f6d48147e275e01a8c65985c7046272237"
+    },
+    {
+      "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/screens/GameTitleLayout.java",
+      "sha256": "bb8c0962e907e24a04f5c28135d5c1cf6f677b89df7a4dac5c73ae5010b43cc4"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/seat/SeatContent.java",
       "sha256": "76917b58a5740f08fbf42cbf6111ec4e664362713f80387fc9073ddee1922dff"
+    },
+    {
+      "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/seat/SeatTypography.java",
+      "sha256": "3e046c8a2fc3fb5cad2461c49aefdfacc95e64f16a2b457d20dee347e0ab2afd"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/table/PlayedCardContent.java",
@@ -202,7 +238,7 @@
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/table/trump/TrumpTileMetrics.java",
-      "sha256": "9d46d105c5c4bfc5147a482a1b4171a7bd688b01e090edec9b2f5479dc76a789"
+      "sha256": "ce2a07dee3e303c874854f5b56e6631871ff3151906d3f9af3b506658dab80ac"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/theme/TableColors.java",
@@ -214,7 +250,7 @@
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/test/resources/card-typography.tsv",
-      "sha256": "f279e760e52f6f1440fcc16b96961e47506d6e033795755ad7c5551001f23aaf"
+      "sha256": "f6d58f3eae26c1d8d574ec700561e6bde3782e8febd427a7469d93c25ad334cb"
     },
     {
       "path": "whist-lab-app/atf-card-table-ui/src/test/resources/hand-feedback.tsv",
@@ -227,24 +263,24 @@
   ],
   "files": [
     {
-      "path": "atf-ui-browser-0.2.13.jar",
-      "bytes": 139684,
-      "sha256": "eae5a3e04342c177730d3fb86528b50968597ba3a8a91839cc1d7cce836b1968"
+      "path": "atf-ui-browser-0.2.15.jar",
+      "bytes": 155396,
+      "sha256": "9fbc638100e5937542fcca431af797bdbf0499d55ab5c135d7ebd91d6abe169e"
     },
     {
-      "path": "atf-ui-browser-0.2.13.jar.sha256",
+      "path": "atf-ui-browser-0.2.15.jar.sha256",
       "bytes": 65,
-      "sha256": "6f1d3f03bc0641e906063f1d166ba03e66ecf4f88f7cfe82bd6ccdebc942ccf0"
+      "sha256": "18b4c4e9aa7937f7f9a2a3e127a37742e3390e690a97966bbb370d4fb7043998"
     },
     {
-      "path": "atf-ui-browser-0.2.13-tests.jar",
-      "bytes": 11867,
-      "sha256": "09340a7c4a99abf63e7b3485394f3b9fa103eb64d3388f902287cb5a589b1b75"
+      "path": "atf-ui-browser-0.2.15-tests.jar",
+      "bytes": 13749,
+      "sha256": "88352087774464335076a6f60778bec1e8578558d4d2dc55ac2b33078b564f52"
     },
     {
-      "path": "atf-ui-browser-0.2.13-tests.jar.sha256",
+      "path": "atf-ui-browser-0.2.15-tests.jar.sha256",
       "bytes": 65,
-      "sha256": "ab79fe7443c9db9b275f0aea95951fb8fe21a1d4ec91b266b9cc97b51ce4e691"
+      "sha256": "b1f0f0adf47274a53305e430ad01b8408ba6e53e0ec2c036eb4c83fe4a1cc339"
     }
   ]
 }

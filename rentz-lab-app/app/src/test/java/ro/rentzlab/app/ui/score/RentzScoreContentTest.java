@@ -14,6 +14,36 @@ import java.util.Set;
 public final class RentzScoreContentTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
 
+    @Test public void commonWidgetModelsKeepRentzSymbolsSeatOrderAndConfirmedDetailIdentity() {
+        for (int players = 3; players <= 6; players++) for (var language : RentzUiText.Language.values()) {
+            var copy = new RentzUiText(language);
+            var names = java.util.Collections.nCopies(players, "Alex");
+            var values = java.util.stream.IntStream.range(0, players).mapToObj(seat -> new RentzScoreContent.Value(-25 * seat, 300 - 50 * seat)).toList();
+            var row = new RentzScoreContent.Row(2, players - 1, Contract.QUEENS, copy.playedContract(Contract.QUEENS, true), values, null);
+            var original = new ArrayList<>(List.of(row));
+            var table = RentzScoreContent.settlementContent(row, names, copy);
+            var history = RentzScoreContent.historyContent(original, names, copy);
+            var selected = new ArrayList<RentzScoreContent.Row>();
+            var open = RentzScoreContent.detailAction(original, selected::add);
+            original.clear();
+            String key = players + "/" + language;
+            audit.equal("Widget captions retain the APK symbols " + key, List.of(copy.text("Player", "Jucător"), "Δ:", "Σ:"), table.columns().stream().map(c -> c.label()).toList());
+            audit.equal("History captions belong to Rentz " + key, List.of("Δ:", "Σ:"), history.columns());
+            audit.equal("Renamed or identical players retain seat identities " + key,
+                    java.util.stream.IntStream.range(0, players).mapToObj(seat -> "seat:" + seat).toList(), history.players().stream().map(p -> p.id()).toList());
+            audit.equal("Confirmed label retains game, blind marker and chooser " + key, "2 · " + row.label() + "\nAlex", history.rows().get(0).label());
+            audit.equal("Projecting content never invokes navigation " + key, List.of(), selected);
+            open.accept("hand:2"); audit.equal("Stable callback returns original hand after source-list mutation " + key, List.of(row), selected);
+            audit.rejects("A stale or foreign row cannot open another hand " + key, IllegalArgumentException.class, () -> open.accept("hand:99"));
+            for (int seat = 0; seat < players; seat++) {
+                audit.equal("Widget score snapshot " + key + "/" + seat, List.of("Alex", "" + values.get(seat).delta(), "" + values.get(seat).total()),
+                        table.rows().get(seat).cells().stream().map(c -> c.text()).toList());
+                audit.equal("History snapshot is identical " + key + "/" + seat, List.of("" + values.get(seat).delta(), "" + values.get(seat).total()),
+                        history.rows().get(0).values().get(seat).stream().map(c -> c.text()).toList());
+            }
+        }
+    }
+
     @Test public void compactSettlementHasOneRowPerSeatWithExactSignedPoints() {
         for (int players : List.of(3, 4, 5, 6)) for (var language : RentzUiText.Language.values()) {
             var copy = new RentzUiText(language);
@@ -22,7 +52,7 @@ public final class RentzScoreContentTest {
                     .mapToObj(seat -> new RentzScoreContent.Value(seat * 25 - 50, 100 - seat * 50)).toList();
             var row = new RentzScoreContent.Row(2, 1, Contract.TRICKS, "Levate", values, null);
             var table = RentzScoreContent.settlement(row, names, copy);
-            audit.equal("Compact headers " + language, List.of(copy.text("Player", "Jucător"), "P", "T"), table.get(0));
+            audit.equal("Compact headers " + language, List.of(copy.text("Player", "Jucător"), "Δ:", "Σ:"), table.get(0));
             audit.equal("One row per seat " + players, players + 1, table.size());
             for (int seat = 0; seat < players; seat++) {
                 audit.equal("Stable seat, signed delta and total " + players + "/" + seat,
@@ -36,11 +66,11 @@ public final class RentzScoreContentTest {
     }
 
     @Test public void shortScoreLabelsAndLegendMatchTheBrowserProjection() {
-        audit.equal("Hand points marker", "P", RentzScoreContent.HAND_POINTS_MARK);
-        audit.equal("Running total marker", "T", RentzScoreContent.TOTAL_MARK);
-        audit.equal("Romanian legend", "P: punctele mâinii · T: total după mână",
+        audit.equal("Hand points marker", "Δ:", RentzScoreContent.HAND_POINTS_MARK);
+        audit.equal("Running total marker", "Σ:", RentzScoreContent.TOTAL_MARK);
+        audit.equal("Romanian legend", "Δ: punctele mâinii · Σ: total după mână",
                 RentzScoreContent.legend(new RentzUiText(RentzUiText.Language.RO)));
-        audit.equal("English legend", "P: hand points · T: running total",
+        audit.equal("English legend", "Δ: hand points · Σ: running total",
                 RentzScoreContent.legend(new RentzUiText(RentzUiText.Language.EN)));
     }
 
@@ -125,8 +155,8 @@ public final class RentzScoreContentTest {
                 RentzScoreContent.finalStandings(end));
         var names = List.of("Ana", "Mihai", "Ioana", "Dan", "Eva", "Radu");
         audit.equal("Android final labels use the shared platform-neutral format", List.of(
-                "1. Mihai · T 20", "1. Ioana · T 20", "3. Radu · T 5", "4. Dan · T 0",
-                "5. Ana · T -30", "5. Eva · T -30"),
+                "1. Mihai · Σ: 20", "1. Ioana · Σ: 20", "3. Radu · Σ: 5", "4. Dan · Σ: 0",
+                "5. Ana · Σ: -30", "5. Eva · Σ: -30"),
                 RentzScoreContent.finalStandings(end).stream()
                         .map(row -> RentzScoreContent.standingLabel(row, names.get(row.seat()))).toList());
         audit.equal("Final ranking does not mutate seat totals", totals, end.totals());

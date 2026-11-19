@@ -11,15 +11,21 @@ import java.security.MessageDigest;
 @AndroidComponentLayer
 public final class CardUiAdoptionTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
+    @Test public void scoreAndScrollableHistoryAreDeliveredByTheCommonLibrary() {
+        for (String type : java.util.List.of("ScoreTableView", "ScoreHistoryView")) {
+            audit.truth("Common Android score widget delivered: " + type,
+                    getClass().getResource("/ro/cardtable/ui/score/" + type + ".class") != null);
+        }
+    }
     @Test public void pinnedArchiveAndLoadedPresentationTypesHaveTheQualifiedBytesWithoutGameOrAtfClasses() throws Exception {
         Path root = Path.of(System.getProperty("rentz.uiRepository"));
         var provenance = JsonParser.parseString(new String(Files.readAllBytes(root.resolve("provenance.json")), java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
-        audit.equal("Adopted UI coordinate", "ro.cardtable:card-table-ui:0.1.19", provenance.get("coordinate").getAsString());
+        audit.equal("Adopted UI coordinate", "ro.cardtable:card-table-ui:0.1.21", provenance.get("coordinate").getAsString());
         audit.equal("Adopted Java coordinate", "ro.cardtable:card-table-names:0.1.0", provenance.get("namesCoordinate").getAsString());
         for (var file : provenance.getAsJsonArray("files")) {
             var value = file.getAsJsonObject(); audit.equal("Pinned " + value.get("path").getAsString(), value.get("sha256").getAsString(), hash(Files.readAllBytes(root.resolve(value.get("path").getAsString()))));
         }
-        Path aar = root.resolve("ro/cardtable/card-table-ui/0.1.19/card-table-ui-0.1.19.aar");
+        Path aar = root.resolve("ro/cardtable/card-table-ui/0.1.21/card-table-ui-0.1.21.aar");
         byte[] classes;
         try (var zip = new ZipFile(aar.toFile())) { classes = zip.getInputStream(zip.getEntry("classes.jar")).readAllBytes(); }
         verifyClassBytes(classes, ro.cardtable.ui.seat.SeatContent.class, ro.cardtable.ui.seat.PlayerSeatView.class,
@@ -37,6 +43,11 @@ public final class CardUiAdoptionTest {
                 ro.cardtable.ui.hand.HandLayoutMetrics.class, ro.cardtable.ui.theme.TableColors.class,
                 ro.cardtable.ui.menu.TableMenuContent.class, ro.cardtable.ui.menu.HomeMenuContent.class,
                 ro.cardtable.ui.menu.HomeMenu.class,
+                ro.cardtable.ui.score.ScoreTableContent.class, ro.cardtable.ui.score.HistoryContent.class,
+                ro.cardtable.ui.score.HistoryGridMetrics.class, ro.cardtable.ui.score.HistoryScrollSync.class,
+                ro.cardtable.ui.score.ScoreTableView.class, ro.cardtable.ui.score.ScoreHistoryView.class,
+                ro.cardtable.ui.screens.GameTitleLayout.class,
+                ro.cardtable.ui.seat.SeatTypography.class,
                 ro.cardtable.ui.animation.TrickCollectionMotion.class);
         verifyClassBytes(Files.readAllBytes(root.resolve("ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar")),
                 ro.cardtable.names.PlayerNames.class);

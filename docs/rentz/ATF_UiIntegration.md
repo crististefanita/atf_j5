@@ -40,7 +40,7 @@ exclusiveContent {
 Dependența se declară în modulul aplicației, după admitere:
 
 ```groovy
-implementation 'ro.cardtable:card-table-ui:0.1.19'
+implementation 'ro.cardtable:card-table-ui:0.1.20'
 implementation 'ro.cardtable:card-table-names:0.1.0'
 ```
 
@@ -187,7 +187,14 @@ Varianta izolată are receipt propriu. Runnerul curent folosește alegeri script
 
 ## Istoricul adaptiv Rentz
 
-Grila folosește lățimi măsurate, subcoloane aliniate și antet fix. Coloana fixă arată numărul mâinii, sub-jocul, alegătorul și marcajul ×2. Grupurile de scor arată **P** pentru mână și **T** pentru totalul confirmat.
+Grila folosește lățimi măsurate, subcoloane aliniate și antet fix. Coloana fixă arată numărul mâinii, sub-jocul, alegătorul și marcajul ×2. Grupurile de scor arată **Δ:** pentru mână și **Σ:** pentru totalul confirmat.
+
+| Proprietar | Contract |
+|---|---|
+| Biblioteca comună | `ScoreTableView` și `ScoreHistoryView` dețin randarea Android, măsurarea coloanelor și sincronizarea derulării. |
+| Rentz | `RentzScoreContent` proiectează modelele portabile `ScoreTableContent` și `HistoryContent`, cu etichetele și punctajul jocului. |
+| Adaptoare | Android păstrează ID-urile și callback-ul mâinii; WEB traduce aceleași modele în protocolul rendererului comun. |
+| Calificare | Componentele Android verifică octeții încărcați din AAR; componentele ATF compară separat amprentele modelelor portabile din receipt-urile Android și WEB. |
 
 | Situație | Comportament |
 |---|---|
@@ -242,7 +249,7 @@ Ajutorul afișează grila pentru 3–6 jucători din profilul efectiv, verificat
 - Bugetul începe la primul desen al mesei: 1.000 ms pentru cărțile nemișcate și 500 ms pentru deplasare și estompare la câștigător. La o pornire rece, checkpoint-ul aflat exact la final de levată permite o singură reluare vizuală. O levată nouă începută păstrează cărțile ei; jurnalul nu primește comenzi pentru animație.
 - Un checkpoint deja punctat se deschide direct, fără o sarcină AI care să redeseneze masa. Termenul absolut este verificat și înainte de desen. Cărțile expirate dispar din masa curentă înainte de construirea paginii de punctaj.
 - Pe ferestre accelerate hardware cu scara implicită, Rentz programează mișcarea, micșorarea și estomparea pe rendererul Android, în aceeași fereastră de 1.500 ms. Cărțile ajung la câștigător înainte de estompare. Traseul software folosește animatorul comun.
-- După colectarea ultimei levate, ecranul „Punctajul mâinii” preia contractul, multiplicatorul, **P** și **T** din același rezultat confirmat ca istoricul. Tabelul principal are un rând per jucător, trei coloane și text normal; contribuțiile și clasamentul final sunt disponibile în „Detalii de punctaj”. Jocul așteaptă acțiunea „Mâna următoare”; masa și istoricul rămân accesibile.
+- După colectarea ultimei levate, ecranul „Punctajul mâinii” preia contractul, multiplicatorul, **Δ:** și **Σ:** din același rezultat confirmat ca istoricul. Tabelul principal are un rând per jucător, trei coloane și text normal; contribuțiile și clasamentul final sunt disponibile în „Detalii de punctaj”. Jocul așteaptă acțiunea „Mâna următoare”; masa și istoricul rămân accesibile.
 - În alegerea normală, după dezvăluirea cărților, jucătorul poate cere o sugestie AI calculată pe opțiunile legale, cu profilul și dificultatea partidei. Alegerea oarbă nu afișează sugestii. O recomandare nu selectează și nu confirmă automat sub-jocul.
 - Separăm termenul exact verificat în componente de intervalul observabil în înregistrarea emulatorului. Extent păstrează și măsurătorile care ies din toleranță.
 
@@ -258,8 +265,8 @@ Biblioteca comună deține ancorele locurilor și măsurarea mesei; adaptorul Re
 | Hint legal | Marchează starea secvenței prin atribut DOM; nu depinde de selectorul CSS `:has`. | Conturul rămâne activ cu sau fără AutoPlay, inclusiv pe Chrome mobil mai vechi. |
 | Browser mobil | Folosește înălțimea vizibilă pentru container, inclusiv cu bara de adresă deschisă. | Mock de viewport și verificare Chrome offline pe dispozitiv. |
 | Actualizarea paginii | O singură revizie de conținut identifică toate importurile, workerul, stilurile și fontul. | Cache deja populat, schimbare numai în adaptorul de scor, dependență lipsă și recitirea octeților publicați. |
-| Punctaj | `RentzScoreContent` și `RentzText` sunt compilate în ambele adaptoare. P = punctele mâinii; T = total după mână, cu legendă sub tabel. | Confruntă proiecția nativă cu rândurile WEB pentru fiecare sub-joc, limbă și alegere normală/oarbă. |
-| Prezentarea rezultatului | Refolosește grila și `ScoreGridStyle`, inclusiv ponderile native Jucător/P/T, fără bold. Contribuțiile apar la cerere. Istoricul complet își păstrează grila pe mâini. | Mese de 3–6, RO/EN, valori semnate și celule fără îngroșare în browser. |
+| Punctaj | `RentzScoreContent` și `RentzText` sunt compilate în ambele adaptoare. Δ = punctele mâinii; Σ = total după mână, cu legendă sub tabel. | Confruntă proiecția nativă cu rândurile WEB pentru fiecare sub-joc, limbă și alegere normală/oarbă. |
+| Prezentarea rezultatului | Refolosește grila și `ScoreGridStyle`, inclusiv ponderile native Jucător/Δ:/Σ:, fără bold. Contribuțiile apar la cerere. Istoricul complet își păstrează grila pe mâini. | Mese de 3–6, RO/EN, valori semnate și celule fără îngroșare în browser. |
 | Levate | Fiecare carte, inclusiv cea proprie, are cadru în playback. `TrickCollectionMotion` fixează afișarea și colectarea la câștigător. | Toate fețele pe masă înainte de colectare; nicio trecere la scor înainte de finalizarea ei, inclusiv cu mișcare redusă. |
 | Reluare | Păstrează toate rândurile confirmate și identitatea sub-jocului. | Rentz plus alt sub-joc, istoric înainte și după reîncărcare. |
 | Meniu | `RentzGameMenu` furnizează disponibilitatea rutelor peste `TableMenuContent`; adaptorul DOM păstrează callbacks și rutele WEB de profil și clasamente. | Ruta de scor cere o mână confirmată; lipsa proiecției este refuzată înainte de afișarea meniului. |

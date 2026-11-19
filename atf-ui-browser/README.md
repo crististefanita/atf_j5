@@ -35,7 +35,7 @@ O revizie de conținut identifică întregul pachet încărcat de browser.
 | Integritate | Build-ul recitește manifestul și fiecare amprentă; refuză dependențele lipsă și împachetarea repetată. |
 | Persistență | Profilul și sesiunea păstrează cheia locală existentă. |
 
-Consumatorul fixează Card Table Browser 0.2.13. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
+Consumatorul fixează Card Table Browser 0.2.15. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
 
 ### Reutilizarea prezentării native
 
@@ -45,7 +45,7 @@ Consumatorul fixează Card Table Browser 0.2.13. [Proveniența pachetului](lib/b
 |---|---|---|
 | Locuri și levată | `TableGeometry.BoardSpec`, `TableSizing`, `PlayedCardMetrics`; `boardProfile` transmite explicit sloturile către renderer. | Aceleași dreptunghiuri și sloturi pentru 3–6 locuri, măsurate în AAR și în motorul Web compilat. |
 | Fețe și marcaj | `CardFaceMetrics`, `HandLayoutMetrics`, `PlayedCardStyle`, `CardHighlight`. | Fixture-ul tipografic livrat în JAR-ul de teste se confruntă cu AAR-ul; funcția reală `placePlayed` primește DOM mock. |
-| Scor și istoric | `RentzScoreContent` proiectează o singură dată valorile confirmate; `RentzScoreLayout` selectează rolurile Jucător/P/T din `ScoreGridStyle`. WEB transmite proiecția direct rendererului comun. | Aceleași rânduri, totaluri, etichete și multiplicatori în ambele adaptoare; reprezentările contradictorii sunt refuzate. |
+| Scor și istoric | `RentzScoreContent` proiectează o singură dată valorile confirmate; `RentzScoreLayout` selectează rolurile Jucător/Δ:/Σ: din `ScoreGridStyle`. WEB transmite proiecția direct rendererului comun. | Aceleași rânduri, totaluri, etichete și multiplicatori în ambele adaptoare; reprezentările contradictorii sunt refuzate. |
 | Meniu | `RentzGameMenu` specializează `TableMenuContent`; WEB filtrează rutele indisponibile folosind aceeași proiecție. Modulele comune `table-menu` și `profile` păstrează callbacks și închiderea. | Scor indisponibil înainte de confirmarea mâinii; istoric direct, oprire condiționată, păstrarea rutelor WEB de profil și clasamente. |
 | Automat | `TurnPacing` furnizează cadența; `auto-game` deține programarea în browser. Controllerul Android păstrează reviziile și lifecycle-ul. | Ceas controlat pentru oprire, pauză, reluare și sosirea la scor; callback-ul nativ întârziat nu modifică alt ecran. |
 | Secvența Rentz | Adaptorul cere banda liberă și dezactivează poziționarea unei cărți per loc. | Ancore neschimbate; cele patru șiruri folosesc geometria Rentz, independent de levată. |
@@ -114,7 +114,7 @@ Săgețile punctate întorc observațiile publice. Așteptarea fixează ritmul r
 - `ScoreSettlement` păstrează ordinea de sosire la Rentz; la celelalte sub-jocuri păstrează ordinea locurilor.
 - Fiecare rând de rezultat adaptează delta, totalul confirmat și contribuțiile din istoricul motorului.
 - Rezultatul folosește rendererul comun de punctaj: un rând pentru fiecare jucător și coloanele Jucător, P, T, cu text normal și legendă imediat sub tabel. Contribuțiile exacte rămân în „Detalii de punctaj”.
-- Istoricul complet păstrează două coloane P/T pentru fiecare loc și identifică mâna împreună cu sub-jocul. `rentz-score.mjs` adaptează cele două prezentări fără să recalculeze puncte.
+- Istoricul complet păstrează două coloane Δ:/Σ: pentru fiecare loc și identifică mâna împreună cu sub-jocul. `rentz-score.mjs` adaptează cele două prezentări fără să recalculeze puncte.
 - `ScoreStandings` aplică departajarea competitivă și eticheta totalului final folosite de APK.
 - Testele compară adaptoarele Android și WEB cu rezultatul motorului pentru mese de 3–6 jucători și verifică un singur zero la Rentz.
 
@@ -147,7 +147,7 @@ Componentele verifică ordinea evenimentelor, toate pozițiile jucătorului prop
 | Paritate cu biblioteca APK | NFC, limita de zece puncte Unicode, intrări valide/invalide și lista deterministă de adversari, comparate cu JAR-ul `card-table-names`; profilul TeaVM verifică și zece litere Unicode din afara planului de bază, apoi respinge a unsprezecea; normalizarea se compară cu sursa Android `DisplayName` | Shim-urile necesare TeaVM nu schimbă contractul de profil Android |
 | Componente pentru API-ul TeaVM și adaptorul DOM | Pornire pentru 3–6 locuri și Normal/Greu; cărți ascunse până la dezvăluire; alegerea Rentz; ancora de deschidere pentru fiecare dimensiune de masă; mutări legale; o mână Rentz completă; cadrele reale ale motorului trec prin adaptorul DOM cu randare mock; placa finală coincide cu starea confirmată; sosirea Rentz înaintea scorului; punctaj, progres, reluare și următoarea mână | Motorul compilat și secvența WEB reală respectă contractele APK fără DOM sau emulator |
 | Componente DOM și transport local | Validarea atomică a tuturor snapshot-urilor; identitatea cărții mutate din mână pe secvență; mâna neschimbată la mutările adverse; locul activ înaintea întârzierii; acțiunile legale din mână identice cu sloturile legale din secvență înainte și după `auto-step`; evidențierea legală în mod manual și automat; bifa „Joc automat” prezentă la fiecare cadru; geometria centrului la 3–6 locuri; selectorul și antetul contractului selectat; sosirea Rentz de 1,8 secunde și revenirea la scor | Un payload inconsistent nu poate produce randare parțială; cardurile legale rămân marcate când automatizarea oprește atingerea, iar checkbox-ul nu clipește în redare; spațiul la patru locuri crește fără să schimbe ancorele comune; shell-ul nu afișează panoul Whist „Atu” |
-| Verificare în browser MCP | Patru locuri, Greu, Rentz complet și încă un sub-joc complet; P/T în rezultat și istoricul ambelor mâini; cumul pe fiecare loc, reluare prin reîncărcare și cărți depuse pe ecran compact și înalt | Integrarea dintre controalele reale, browser, worker, persistență și artefactele construite |
+| Verificare în browser MCP | Patru locuri, Greu, Rentz complet și încă un sub-joc complet; Δ:/Σ: în rezultat și istoricul ambelor mâini; cumul pe fiecare loc, reluare prin reîncărcare și cărți depuse pe ecran compact și înalt | Integrarea dintre controalele reale, browser, worker, persistență și artefactele construite |
 
 - Build-ul verifică hash-urile JAR-urilor comune fixate.
 - Testul `hand-presentation.mjs` din pachetul de teste comun este rulat cu setup-ul Rentz: verifică hint-ul pentru o atingere greșită, ridicarea cărții legale, anularea și aplicarea unică a mutării, fără browser sau emulator.
@@ -187,7 +187,7 @@ $pages = Join-Path $env:RENTZ_WORK_ROOT 'browser-pages'
 | Pas | Verificare |
 |---|---|
 | `start()` | Configurează patru locuri, Greu, dezvăluie cărțile și alege Rentz din dropdown. |
-| `waitForScore()` → `score(1)` | Așteaptă sfârșitul real și confruntă premiile 300/200/100/0, perechile P/T și detaliile. Așteptarea este limitată la 40 de secunde pe apel. |
+| `waitForScore()` → `score(1)` | Așteaptă sfârșitul real și confruntă premiile 300/200/100/0, perechile Δ:/Σ: și detaliile. Așteptarea este limitată la 40 de secunde pe apel. |
 | `next()` → `waitForScore()` → `score(n)` | Termină următorul sub-joc; verifică identitatea și cumulul. Continuă până există și un sub-joc distinct de Rentz. |
 | `history()` → `restore()` | Confruntă toate rândurile, numele și legenda înainte și după reîncărcare. |
 | `geometry(titlu)` | Măsoară DOM-ul vizibil cu cărți depuse: patru rânduri, patru locuri, checkbox prezent și nicio intersecție cu jucătorii. |
@@ -221,5 +221,5 @@ README-ul principal va lega jocul online după ce workflow-ul publică pagina ș
 ## Surse
 
 - [Regulile și arhitectura motorului Rentz](../rentz-lab-app/game-core/README.md)
-- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.13.jar) · [checksum](lib/atf-ui-browser-0.2.13.jar.sha256)
-- [Testul comun de componentă](lib/atf-ui-browser-0.2.13-tests.jar) · [checksum](lib/atf-ui-browser-0.2.13-tests.jar.sha256)
+- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.15.jar) · [checksum](lib/atf-ui-browser-0.2.15.jar.sha256)
+- [Testul comun de componentă](lib/atf-ui-browser-0.2.15-tests.jar) · [checksum](lib/atf-ui-browser-0.2.15-tests.jar.sha256)

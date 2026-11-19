@@ -41,7 +41,7 @@ if($LASTEXITCODE-ne0){throw "Discovery controls failed; inspect $discoveryContro
 $qualifiedRuntimeControls=Join-Path (Get-AtfInfrastructurePath -Area governance -ProjectRoot $root) ('qualified-runtime-controls-'+[guid]::NewGuid().ToString('N'))
 & (Join-Path $root 'atf-tests/tools/test-qualified-runtime.ps1') -RunRoot $qualifiedRuntimeControls *> (Join-Path $RunRoot 'qualified-runtime-controls.log')
 if($LASTEXITCODE-ne0){throw "Qualified runtime controls failed; inspect $qualifiedRuntimeControls"}
-$parts = @('pom.xml','README.md','.gitattributes','.gitignore','library-provenance.json','lib','atf-tests','rentz-lab-app','config','docs','release','reference-tests/README.md','rentz-reference','scripts','atf-ui-browser')
+$parts = @('pom.xml','README.md','.gitattributes','.gitignore','.github','library-provenance.json','lib','atf-tests','rentz-lab-app','config','docs','release','reference-tests/README.md','rentz-reference','scripts','atf-ui-browser')
 $manifest = [Collections.Generic.List[object]]::new()
 foreach ($part in $parts) {
     $origin = Join-Path $source $part

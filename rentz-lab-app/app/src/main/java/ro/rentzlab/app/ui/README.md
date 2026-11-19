@@ -37,7 +37,7 @@ Rendererul trimite identitatea selectată. Adaptorul o rezolvă în legalitatea 
 - O levată parțială și sub-jocul Rentz păstrează afișarea lor curentă. Colectarea din checkpoint este o operație de prezentare și lasă jurnalul și punctajul neschimbate.
 - Mâna vizibilă urmează ordinea ♠ ♥ ♣ ♦ și rangul crescător. Adaptorul rezolvă selecția prin identitatea cărții și legalitatea curentă.
 - În tura manuală, o atingere respinsă marchează temporar cartea în roșu și arată alternativele legale în auriu. În sub-jocul Rentz, marcajul cărților legale rămâne vizibil și la delegare.
-- Același loc primește același nume de adversar la masă, pe depuneri și în istoric. Chenarul afișează P și T, iar descrierea accesibilă citește complet punctele și totalul.
+- Același loc primește același nume de adversar la masă, pe depuneri și în istoric. Chenarul afișează Δ și Σ, iar descrierea accesibilă citește complet punctele și totalul.
 - După ultima levată, ecranul de punctaj folosește rândul confirmat din istoric. Jucătorul poate continua, reveni la masă sau deschide istoricul.
 - [Sugestia AI](screens/ContractAdvice.java) folosește numai observația mâinii dezvăluite și opțiunile legale ale jucătorului. Dialogul anulează calculul dacă alegerea se închide sau ecranul se schimbă.
 - Tabla Rentz folosește rangul de deschidere real al motorului pentru fiecare număr de locuri. Slotul gol și ancora nu sunt cărți depuse.

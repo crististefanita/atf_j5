@@ -15,6 +15,11 @@
   gap: 0;
 }
 .rentz-score-table { min-width: 0; }
+.rentz-title-lines { --whist-text-scale: 1; flex: 1 1 72px; min-width: 0; min-height: 48px; display: flex; flex-direction: column; justify-content: center; }
+.rentz-title-row > .whist-auto { font-size: .8125rem; }
+.rentz-title-lines p { margin: 0; line-height: 1.2; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+.rentz-title-lines .whist-progress { height: calc(var(--progress-size) * 1.2); }
+.rentz-title-lines .whist-bids { height: calc(var(--bid-size) * 1.2); }
 .record-history.rentz-history-grid thead tr { background: var(--whist-score-header); }
 .record-history.rentz-history-grid tbody tr:nth-child(odd) { background: var(--whist-score-paper); }
 .record-history.rentz-history-grid tbody tr:nth-child(even) { background: var(--whist-score-stripe); }

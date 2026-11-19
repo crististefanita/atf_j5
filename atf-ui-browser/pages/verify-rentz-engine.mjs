@@ -154,7 +154,7 @@ for (let players = 3; players <= 6; players++) {
     check(`${players}/${difficulty}: complete Rentz hand reaches score history`, completed);
     check(`${players}/${difficulty}: score history has every table seat`, view.history.grid.rows[0].cells.length === players);
     check(`${players}/${difficulty}: compiled settlement keeps the canonical native column roles`,
-      ["Jucător","P","T"], view.score.table.headings);
+      ["Jucător","Δ:","Σ:"], view.score.table.headings);
     check(`${players}/${difficulty}: compiled settlement and full history have identical confirmed values`,
       view.history.grid.players.map((name,seat)=>[name,view.history.grid.rows[0].cells[seat].bid,view.history.grid.rows[0].cells[seat].total]),
       view.score.table.rows);
@@ -174,7 +174,7 @@ for (let players = 3; players <= 6; players++) {
     const contributionLines = awardLines.filter(line => line.startsWith("  "));
     const historyCells = view.history.grid.rows[0].cells;
     const orderedAwards = playerLines.map((line, row) => {
-      const match = line.match(/^(?:\d+\. )?(.+?) · P (-?\d+) · T (-?\d+)$/);
+      const match = line.match(/^(?:\d+\. )?(.+?) · Δ: (-?\d+) · Σ: (-?\d+)$/);
       const seat = match ? view.seats.findIndex(value => value.name === match[1]) : -1;
       check(`${players}/${difficulty}: score line exposes confirmed delta and total for seat ${seat}`,
         !!match && seat >= 0 && Number(match[2]) === Number(historyCells[seat]?.bid)

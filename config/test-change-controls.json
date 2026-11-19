@@ -982,11 +982,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java",
       "owner": "Rentz UI",
-      "reason": "Admit the shared single-line action indicator with its phase-independent vertical measurement.",
-      "criterion": "Verify the loaded PlayerSeatView, highlight and geometry classes against the pinned AAR, with no engine dependencies.",
+      "reason": "Qualify the pinned shared Android widgets and loaded binary bytes without requiring the sibling WEB checkout layout.",
+      "criterion": "Retain native archive, loaded-class and namespace assertions; move all six cross-platform source hash comparisons to PortableUiBuildTest with a rejecting altered-receipt fixture.",
       "proof": "../../whist_back/component-suites/card-highlight-20261111/whist-lab-app-card-table-ui-testDebugUnitTest.html",
       "expires": "2026-11-20",
-      "sha256": "0d1f75002fff64e255c5835f596242107d3a4fbc73841e69ebb3aaf64b71fd8f",
+      "sha256": "a8f70f3e78f93c8f3eb7479d1db090f86d1f1042144803948a7de17fb5755438",
       "allowDelete": false
     },
     {
@@ -1032,11 +1032,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java",
       "owner": "Rentz UI",
-      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
-      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "reason": "Preserve the original Rentz Δ:/Σ: vocabulary while extracting neutral score/history widgets.",
+      "criterion": "Retain every award, cumulative score, restore and place-order oracle; extend immutable model, duplicate-name identity and stable detail-callback coverage for 3–6 seats in RO/EN.",
       "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
       "expires": "2026-12-18",
-      "sha256": "ba50ce1c23c36c88f33c5e9e9a3e20416055aff19c3165dcbc944c95aea81e06",
+      "sha256": "3032ef55ee13238e627e9a9306145bdd859e74b046882ac4ec6554a5dd84d1f2",
       "allowDelete": false
     },
     {
@@ -1052,11 +1052,11 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTableContentTest.java",
       "owner": "Rentz UI",
-      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
-      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "reason": "Restore the original APK Δ:/Σ: captions without changing table rules or scoring.",
+      "criterion": "Retain every actor, legal-card, signed-score and seat-order assertion; change only the captions required by the original Rentz presentation contract.",
       "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
       "expires": "2026-12-18",
-      "sha256": "bd2afc001b1dfae63ab94c4885fcbc2548a43957bf5ffc4a9bd8a1defde09430",
+      "sha256": "0cea444008a7e91b3c12167de66e5ea1b95389a37eff9e589b0a5b3180108f7c",
       "allowDelete": false
     },
     {
@@ -1172,11 +1172,11 @@
     {
       "path": "scripts/run-rentz-components.ps1",
       "owner": "Rentz release",
-      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
-      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "reason": "Snapshot Pages workflows with the actual portable native Java inputs in the component source manifest.",
+      "criterion": "The isolated runner includes the workflow bytes and hashes; the workflow coverage test must pass without source-root fallback or exclusions.",
       "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
       "expires": "2026-12-18",
-      "sha256": "b58d1b515d2e28625bbb02f8121726208fca5bdc0c61fe6fda3b9158b00b0fb1",
+      "sha256": "c4bfb06eacd53ac9458d103cc5cd1175e315e99c61b54692abebd12c00ba28da",
       "allowDelete": false
     },
     {
@@ -1322,11 +1322,11 @@
     {
       "path": "rentz-lab-app/app/build.gradle",
       "owner": "Rentz release",
-      "reason": "Advance the qualified Rentz candidate to 0.27.0.",
-      "criterion": "VersionCode increases to 31 and the test-only seed stays isolated from normal game starts.",
+      "reason": "Pin the extracted common Android widgets without producing a new APK.",
+      "criterion": "VersionCode remains 31, versionName remains 0.27.0 and the test seed stays isolated; only the product UI dependency advances to 0.1.21 with verified provenance.",
       "proof": "docs/rentz/ATF_Release.md#ordinea-calificării-android-curente",
       "expires": "2027-02-12",
-      "sha256": "f4a9cf02907f10aba7949cd003f29d4bc2ac256b8b71ef5cf966cdc031f03f6e",
+      "sha256": "934eac9977a5721dcd0881590c03cf7e392f8c11dcccb8d4d1ef6d7b041d9430",
       "allowDelete": false
     },
     {
@@ -1630,11 +1630,11 @@
     {
       "path": "atf-ui-browser/pages/src/test/java/ro/cardtable/browser/RentzPageComponentTest.java",
       "owner": "Rentz WEB/APK parity",
-      "reason": "Register the browser build, preserve source variants separately and integrate P/T presentation with complete card-band coverage.",
-      "criterion": "All source files remain inventoried; duplicate types in one build and unregistered paths remain rejected. Preserve native population, exact shared seat anchors and P/T cumulative invariants.",
+      "reason": "Restore Rentz Δ:/Σ: notation in the existing compiled-page score and history contracts.",
+      "criterion": "Retain every engine, DTO, award, restoration and complete-hand expectation; the captions and legend agree with the original APK, independently of Whist labels.",
       "proof": "TestLayerGovernanceTest, runtime controls, RentzPageComponentTest, verify-rentz-ui.mjs, RentzScoreContentTest",
       "expires": "2026-12-18",
-      "sha256": "a59c859a9c43515715e017e00c1b7dcadacbb162f23bd6a1a1b5f2ef303bd9a2",
+      "sha256": "ba4e47340b591a69216f24d0f45ce2ffde472026ac4725cc7a3573fb16ac5bfd",
       "allowDelete": false
     },
     {
@@ -1679,12 +1679,12 @@
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/chrome/RentzGameHeaderComponentTest.java",
       "owner": "Rentz UI cohesion",
-      "reason": "Move the unchanged native chrome contract to its own package.",
-      "criterion": "Retain every native assertion and public behavior; only package and imports change.",
+      "reason": "Extend the retained native chrome checks with the public common title-layout contract.",
+      "criterion": "Retain every control-state, localization and cancellation assertion; add measured compact/wide and font-scale scenarios while preserving the menu touch region and AutoPlay stop action.",
       "proof": "Android JVM regression",
       "expires": "2026-12-18",
       "allowDelete": false,
-      "sha256": "9e35abb797ec348ddbae1bff2fbe99e6bd79cc3fe006c4160d679a5a3d271814"
+      "sha256": "2a9a3f3bff91d501f1bb91d174d7acb97b96307ab4b0f6c47f88449a36316ab8"
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/screens/RentzGameMenuComponentTest.java",
@@ -1723,6 +1723,16 @@
       "expires": "2026-12-18",
       "allowDelete": false,
       "sha256": "aefd81bd525d02c1be9f251008b32a4bd1dd9383d0b64cddb45d55797a763cab"
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/libraries/PortableUiBuildTest.java",
+      "owner": "Rentz portable UI build",
+      "reason": "Keep WEB rebuild triggers aligned with native Java projections compiled by the browser adapter.",
+      "criterion": "Cover actual compiled native inputs in Pages triggers, retain the negative narrow-trigger fixture, compare all six portable source hashes across platforms and reject a changed receipt.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser",
+      "expires": "2026-12-18",
+      "sha256": "ee9c48e9329e5dd07792880de18a4bc4dcec201ccac7ec22573d240f41203606",
+      "allowDelete": false
     }
   ]
 }
