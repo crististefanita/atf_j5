@@ -1332,11 +1332,11 @@
     {
       "path": "release/index.json",
       "owner": "Rentz release",
-      "reason": "Prepare numeric minor candidate 0.28.0.",
-      "criterion": "Published 0.27.0 identity remains unchanged until qualified download of the successor.",
+      "reason": "Promote verified public Rentz 0.28.0 catalog after native acceptance, signed build and both downloads.",
+      "criterion": "Single latest edition, numeric APK, exact source tag and public canonical asset; preserve original component/native/RAG evidence and historical source tags.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "6999772eda16a90c411d2a486cae85229120cc5011140f6554cb6790d21ea345",
+      "sha256": "940da424254e35c75e886a0310eda8ad24b59b4f3d96128f039787136b60e534",
       "allowDelete": false
     },
     {

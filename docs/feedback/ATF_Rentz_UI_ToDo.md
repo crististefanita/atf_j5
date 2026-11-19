@@ -10,7 +10,7 @@ Probele focalizate pentru 3, 5 și 6 locuri urmăresc selectorul, prima atingere
 |---|---|
 | U01, U04, U05, R02 | Extindeți matricea de ferestre scunde la cazurile cu o carte, mâna goală și pasul forțat. Urmăriți starea mâinii proprii până la continuarea vizibilă. |
 | R03 | Marcați ultima mutare și explicați extensiile legale sau pasul fără a divulga cărți adverse. Testați explicația pentru ambele capete ale secvenței. |
-| U07, S01, S04 | Jocul offline verifică premiile, ordinea locurilor și egalitățile. Pe dispozitiv rămân de calificat randarea egalităților și a valorilor semnate la decontare. |
+| U07, S01, S04 | Jocul offline verifică premiile, ordinea locurilor și egalitățile. Pe APK rămân de calificat egalitățile și valorile extreme pe mesele compacte de 3, 5 și 6 locuri. |
 
 Folosiți comparații pe aceeași configurație efectivă și captați doar tranziția relevantă. [Matricea de afișaj](../rentz/ATF_UiIntegration.md#matricea-de-afișaj) · [Istoricul adaptiv](../rentz/ATF_UiIntegration.md#istoricul-adaptiv-rentz)
 
@@ -32,7 +32,7 @@ Păstrați AAR-ul Android `0.1.21` și pachetul Browser `0.2.20` cu JAR-ul de te
 | Prioritate | Cerință rămasă | Criteriu de închidere |
 |---|---|---|
 | P1 | Paritatea pe profile dinamice | Componentele confruntă sloturile și dreptunghiurile AAR–TeaVM și păstrează identitatea elementelor WEB între AI și jucător; pe platformă confirmați după redimensionare și font mărit stabilitatea vizuală a chenarelor între alegere, joc și colectare. O egalitate de coordonate nu închide singură observația de mișcare percepută. Proba nativă identifică profilul, APK-ul și regiunea observată. |
-| P1 | Secvența Rentz la 3–6 jucători | Măsurați banda centrală și toate cele patru șiruri, inclusiv ultima carte și pasul forțat. Nu schimbați geometria comună a locurilor pentru a compensa conținutul specific. |
+| P1 | Rasterul APK al secvenței la 3, 5 și 6 jucători | Pe profil compact și font mărit, confirmați indicii suprapuși, ultima carte și pasul forțat. Calificarea Chrome nu închide rasterul APK-ului. Păstrați geometria comună a locurilor. |
 | P1 | Oprirea AutoPlay în ambele adaptoare | Oprirea rămâne accesibilă când AI-ul calculează; livrarea întârziată nu aplică o comandă. În Web, includeți și oprirea între două cadre de playback. |
 | P2 | Meniuri și fonturi comune | Contractele livrate de meniu și proporțiile tipografice sunt verificate fără emulator. Calificați rasterul la font mărit, focusul tastaturii și clickul în exterior pe platformă; nu repetați calculele pure prin E2E. |
 
@@ -44,16 +44,10 @@ Pentru contractele cu levate, păstrați matricea completă în [componente](../
 |---|---|
 | U02, U03 | Calificați rutele negative la font mărit: anularea, resetarea numelui, refuzul de salvare și confirmarea înlocuirii sesiunii. Aliniați filtrul UTF-16 al dialogului comun cu politica Rentz în puncte de cod. |
 | Istoric | Porniți tragerea de pe coloana fixă, inclusiv după fling. Confirmați deplasarea rândurilor la tragere și deschiderea exact a unui detaliu la atingere. |
-| U09 | Widgeturile `ScoreTableView` și `ScoreHistoryView` sunt extrase în biblioteca comună, iar Rentz furnizează proiecția `Δ:/Σ:`, identitățile mâinilor și callback-ul detaliilor. Rămân de calificat pe Android rasterul la font mărit, drag/fling pornit din coloana fixă, sincronizarea antetului și restaurarea poziției. Testele JVM cu măsurători și porturi de scroll nu închid aceste criterii native. |
+| U09 | Widgeturile `ScoreTableView` și `ScoreHistoryView` sunt comune. Rentz furnizează `Δ`/`Σ` în istoric și `Δ:`/`Σ:` la rezultat, identitățile mâinilor și callback-ul detaliilor. Pe Android rămân drag/fling pornit din coloana fixă, sincronizarea antetului și restaurarea poziției. Testele JVM cu porturi de scroll nu închid aceste criterii native. |
 
 [Strategia de testare](../rentz/ATF_TestingStrategy.md) · [Admiterea bibliotecilor](../rentz/ATF_UiIntegration.md#admiterea-bibliotecilor-de-produs)
 
-## Paritatea WEB: spațiu, scor și istoric
+## P2 · Acceptanța nativă a rezultatului compact
 
-Contractul stabil și testele rapide sunt în [ghidul integrării](../rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser). Acceptanța prin browser cere o secvență Rentz completă în patru locuri și încă un sub-joc complet, cu Δ:/Σ:, un singur premiu zero la Rentz, cumul corect și istoric păstrat după reîncărcare. O pagină încărcată fără aceste verificări nu califică randarea.
-
-Pentru Android rămân exclusiv verificările de raster și de gesturi deja enumerate mai sus. Nu închideți aceste observații pe baza simulării DOM sau a probei WEB.
-
-### P2 · Acceptanța nativă a rezultatului compact
-
-Pagina de punctaj folosește acum tabelul neutru Jucător/Δ:/Σ:, cu contribuțiile la cerere. Componentele validează proiecția pentru 3–6 locuri și ambele limbi; înaintea calificării unui APK, confirmați rasterul la font mărit, derularea pe ferestre scunde și deschiderea/închiderea detaliilor fără pierderea accesului la „Mâna următoare”. Nu echivalați compilarea sau verificarea WEB cu această acceptanță Android.
+Pagina de punctaj folosește tabelul neutru Jucător/Δ:/Σ:, cu contribuțiile la cerere. Pe mesele APK de 3, 5 și 6 locuri rămân rasterul la font mărit, derularea pe ferestre scunde și detaliile fără pierderea accesului la „Mâna următoare”. [Contractul și testele rapide](../rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser) păstrează separat proiecția comună și observația de platformă.

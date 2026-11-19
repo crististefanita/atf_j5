@@ -6,7 +6,7 @@ Catalogul arată ultima ediție calificată și starea reală a descărcării. R
 
 ## Ultima ediție calificată
 
-[Rentz Lab 0.27.0](0.27.0/README.md) este ultima ediție calificată. APK-ul nu este disponibil momentan: depozitul Rentz nu are un release publicat, iar vechiul canal privat nu mai există.
+[Rentz Lab 0.28.0](0.28.0/README.md) este ediția publicată și verificată prin descărcare. APK-ul este disponibil din README-ul principal.
 
 ## Organizare
 
@@ -16,6 +16,6 @@ Catalogul arată ultima ediție calificată și starea reală a descărcării. R
 | Rapoarte | Rulări Extent și receipts păstrate în depozitul extern de audit. |
 | Descărcare | Linkul APK apare în README numai după publicare și verificarea asset-ului prin RAG. |
 
-Catalogul surselor păstrează numai ultima ediție calificată; tagurile istorice și dovezile de audit sunt arhivate separat. Starea descărcării a fost verificată la 17 noiembrie 2026.
+Catalogul surselor păstrează numai ultima ediție calificată; tagurile istorice și dovezile de audit sunt arhivate separat.
 
 [Procesul livrării](../docs/rentz/ATF_Release.md) · [Calificarea componentelor](../docs/rentz/ATF_Qualification.md)

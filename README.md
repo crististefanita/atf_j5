@@ -8,8 +8,7 @@ Proiectul ATF J5 modelează regulile Rentz în Java și verifică motorul folosi
 
 ## Jocul
 
-- [Ediția Android și disponibilitatea APK](release/README.md)
-- APK indisponibil momentan — nu există un release descărcabil în depozitul Rentz.
+- [Descarcă Rentz APK 0.28.0](https://github.com/crististefanita/rentz/releases/download/v0.28.0/RentzLab-0.28.0.apk)
 - [Joacă Rentz online](https://crististefanita.github.io/rentz/)
 
 ## Arhitectura ATF
@@ -84,7 +83,7 @@ Regresia Maven și Android JVM pornește din rădăcina proiectului, în PowerSh
 
 - [Harta documentației Rentz](docs/README.md)
 - [Evaluarea offline a jucătorilor AI](docs/rentz/ATF_Learning.md)
-- [Documentația ediției Rentz Lab 0.27.0](release/0.27.0/README.md)
+- [Documentația ediției Rentz Lab 0.28.0](release/0.28.0/README.md)
 - [Catalogul edițiilor](release/README.md)
 - [Feedback activ](docs/feedback/README.md)
 
