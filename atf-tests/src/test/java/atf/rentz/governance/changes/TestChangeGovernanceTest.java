@@ -79,6 +79,8 @@ class TestChangeGovernanceTest {
                 || path.equals("atf-ui-browser/Build-RentzPages.ps1")
                 || path.equals("atf-ui-browser/Test-RentzBrowserComponents.ps1")
                 || path.equals("atf-ui-browser/pages/verify-trick-playback.mjs")
+                || path.equals("atf-ui-browser/pages/verify-rentz-ui.mjs")
+                || path.equals("atf-ui-browser/tests/rentz-web-flow.mjs")
                 || path.equals("scripts/TestSourceInventory.psm1") || path.equals("scripts/RuntimeQualification.psm1")
                 || path.equals("config/infrastructure-workspaces.json")
                 || path.equals("config/release-rag-corpus.json") || path.equals("scripts/run-release-rag.ps1")
@@ -120,6 +122,8 @@ class TestChangeGovernanceTest {
         assertTrue(protectedPath("scripts/run-release-rag.ps1"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/publication/PublicationCommand.java"));
         assertTrue(protectedPath("scripts/verify-release-readme.ps1"));
+        assertTrue(protectedPath("atf-ui-browser/pages/verify-rentz-ui.mjs"));
+        assertTrue(protectedPath("atf-ui-browser/tests/rentz-web-flow.mjs"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/ReleaseReadinessRag.java"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/retrieval/ReleaseCorpusSearch.java"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/qualification/ReleaseQualification.java"));

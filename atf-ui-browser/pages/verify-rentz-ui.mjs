@@ -81,6 +81,24 @@ const autoGateFlow = new RentzWebFlow({playwright: {
 await autoGateFlow.automatic();
 check("MCP AutoPlay waits for the public busy marker before touching a replacement checkbox",
   ['visible transition finishes', 'checkbox checked'], autoGateCalls);
+const visibleScore = {labels:['Jucător','Δ:','Σ:'],rows:[['Ana','300','300'],['Dan','100','100'],['Ioana','200','200'],['Radu','0','0']],weights:Array(15).fill('400')};
+const scoreFlow = new RentzWebFlow({screenshot:async()=>new Uint8Array(),playwright:{
+  domSnapshot:async()=> 'Confirmed Rentz score and complete public history',
+  locator:selector=>({evaluate:async()=>visibleScore,innerText:async()=>selector.includes('status')?'Rentz · Mâna 1':visibleScore.rows.map(row=>`${row[0]} · Δ: ${row[1]} · Σ: ${row[2]}`).join('\n')}),
+  getByRole:()=>({click:async()=>{}}),getByText:()=>({isVisible:async()=>true})
+}},async()=>{});
+let scoreFlowError;
+try { await scoreFlow.score(1); } catch(error) { scoreFlowError=error.message; }
+check('Real WEB flow accepts the canonical native Δ:/Σ: settlement instead of obsolete P/T headings','PASS',scoreFlowError??'PASS');
+check('History expectations use Δ/Σ without colons',Array.from({length:4},()=>['Δ','Σ']).flat(),scoreFlow.first?.labels);
+visibleScore.labels=['Jucător','P','T'];
+const staleCaptures=[];
+const staleScoreFlow=new RentzWebFlow(scoreFlow.tab,async point=>staleCaptures.push(point));
+let staleScoreRejected=false;
+try { await staleScoreFlow.score(1); } catch { staleScoreRejected=true; }
+check('Obsolete settlement captions remain rejected by the real WEB flow',true,staleScoreRejected);
+check('The negative neighbor fails only the caption contract',['Compact settlement headings'],staleCaptures[0].checks.filter(row=>!row.passed).map(row=>row.name));
+visibleScore.labels=['Jucător','Δ:','Σ:'];
 const rows = ["♣", "♦", "♥", "♠"].map((suit, suitIndex) => ({
   suit,
   cells: ["9", "10", "J", "Q", "K", "A"].map((rank, column) => ({

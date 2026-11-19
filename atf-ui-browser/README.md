@@ -113,8 +113,9 @@ Săgețile punctate întorc observațiile publice. Așteptarea fixează ritmul r
 
 - `ScoreSettlement` păstrează ordinea de sosire la Rentz; la celelalte sub-jocuri păstrează ordinea locurilor.
 - Fiecare rând de rezultat adaptează delta, totalul confirmat și contribuțiile din istoricul motorului.
-- Rezultatul folosește rendererul comun de punctaj: un rând pentru fiecare jucător și coloanele Jucător, P, T, cu text normal și legendă imediat sub tabel. Contribuțiile exacte rămân în „Detalii de punctaj”.
-- Istoricul complet păstrează două coloane Δ:/Σ: pentru fiecare loc și identifică mâna împreună cu sub-jocul. `rentz-score.mjs` adaptează cele două prezentări fără să recalculeze puncte.
+- Rezultatul folosește rendererul comun de punctaj: un rând pentru fiecare jucător și coloanele Jucător, Δ:, Σ:, cu text normal și legendă imediat sub tabel. Contribuțiile exacte rămân în „Detalii de punctaj”.
+- Istoricul complet păstrează două coloane Δ și Σ, fără două puncte, pentru fiecare loc și identifică mâna împreună cu sub-jocul. `rentz-score.mjs` adaptează cele două prezentări fără să recalculeze puncte.
+- Fluxul WEB verifică același contract de etichete ca rendererul și adaptorul Android; probele rapide includ un scor valid și refuzul etichetelor învechite.
 - `ScoreStandings` aplică departajarea competitivă și eticheta totalului final folosite de APK.
 - Testele compară adaptoarele Android și WEB cu rezultatul motorului pentru mese de 3–6 jucători și verifică un singur zero la Rentz.
 

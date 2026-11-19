@@ -486,7 +486,7 @@
       "criterion": "Missing, changed or expired review blocks each Browser boundary; existing transport, source, workspace and release controls remain mandatory. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest; docs/rentz/ATF_Release.md",
       "expires": "2026-12-19",
-      "sha256": "47d97b218233d6ca2730845f42917684f41d6e9a8667716a267bdf3169a75627",
+      "sha256": "02974789eccd0aba4d5a9a8f3d21e6d385c7ad1e512ebc2a4a10d859860e7dd0",
       "allowDelete": false
     },
     {
@@ -1933,6 +1933,26 @@
       "expires": "2026-12-19",
       "allowDelete": false,
       "sha256": "4cbb8c50a8e7c95361f0e912bfb7578108d16dc8163aed959841611aef6605b1"
+    },
+    {
+      "path": "atf-ui-browser/pages/verify-rentz-ui.mjs",
+      "owner": "Rentz native/browser acceptance",
+      "reason": "Bind the real WEB flow to the canonical native score captions instead of obsolete P/T labels.",
+      "criterion": "Valid Δ:/Σ: settlement passes, old captions fail for that exact reason, and history retains Δ/Σ without colons; no score or history assertion is removed.",
+      "proof": "atf-ui-browser/pages/verify-rentz-ui.mjs",
+      "expires": "2026-12-19",
+      "allowDelete": false,
+      "sha256": "c6973dca9d17fd20df9905b990f9b4a7d03aa33bdf7ce3cf4f3f5c79b43d015b"
+    },
+    {
+      "path": "atf-ui-browser/tests/rentz-web-flow.mjs",
+      "owner": "Rentz native/browser acceptance",
+      "reason": "Bind the real WEB flow to the canonical native score captions instead of obsolete P/T labels.",
+      "criterion": "Valid Δ:/Σ: settlement passes, old captions fail for that exact reason, and history retains Δ/Σ without colons; no score or history assertion is removed.",
+      "proof": "atf-ui-browser/pages/verify-rentz-ui.mjs",
+      "expires": "2026-12-19",
+      "allowDelete": false,
+      "sha256": "503559900c50c3be02fab16977168b39e3162d9ad9bc77d24b973c8c0aeecb80"
     }
   ]
 }

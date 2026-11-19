@@ -86,12 +86,12 @@ export class RentzWebFlow {
     const summary=await this.tab.playwright.locator('.whist-score-status').innerText();
     const match=summary.match(/^(.*?) · Mâna (\d+)$/);
     if(!match) throw new Error('Unknown visible settlement identity: '+summary);
-    const table={names:visible.rows.map(row=>row[0]),labels:Array.from({length:4},()=>['P','T']).flat(),
+    const table={names:visible.rows.map(row=>row[0]),labels:Array.from({length:4},()=>['Δ','Σ']).flat(),
       rows:[{contract:match[2]+' · '+match[1],values:visible.rows.flatMap(row=>row.slice(1).map(Number))}]};
     await this.click('Detalii de punctaj');
     const text=await this.tab.playwright.locator('dialog[open]').innerText();
     await this.click('Închide');
-    const checks=[comparison('Compact settlement headings',['Jucător','P','T'],visible.labels),
+    const checks=[comparison('Compact settlement headings',['Jucător','Δ:','Σ:'],visible.labels),
       comparison('One row per player',4,visible.rows.length),
       comparison('No bold score cells',true,visible.weights.every(weight=>weight==='400')),
       comparison('One Δ/Σ pair per seat',8,table.rows[0].values.length),
