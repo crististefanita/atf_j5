@@ -76,6 +76,9 @@ class TestChangeGovernanceTest {
                 || path.equals("config/java-source-layout.json") || path.equals("config/documentation-policy.json")
                 || path.equals("config/documentation-validators.json")
                 || path.equals("scripts/run-rentz-components.ps1") || path.equals("scripts/TestCollections.psm1")
+                || path.equals("atf-ui-browser/Build-RentzPages.ps1")
+                || path.equals("atf-ui-browser/Test-RentzBrowserComponents.ps1")
+                || path.equals("atf-ui-browser/pages/verify-trick-playback.mjs")
                 || path.equals("scripts/TestSourceInventory.psm1") || path.equals("scripts/RuntimeQualification.psm1")
                 || path.equals("config/infrastructure-workspaces.json")
                 || path.equals("config/release-rag-corpus.json") || path.equals("scripts/run-release-rag.ps1")
@@ -122,6 +125,25 @@ class TestChangeGovernanceTest {
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/editorial/DocumentationReconciliation.java"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/evidence/ComponentSuiteEvidence.java"));
         assertTrue(protectedPath("atf-tests/src/main/java/atf/rentz/distribution/evidence/MavenFailureExtent.java"));
+    }
+
+    @Test void sharedBrowserQualificationRequiresAnExactReviewForEachExecutableBoundary(@TempDir Path root) throws Exception {
+        String base="a".repeat(40);
+        for(String path:List.of("atf-ui-browser/Build-RentzPages.ps1",
+                "atf-ui-browser/Test-RentzBrowserComponents.ps1","atf-ui-browser/pages/verify-trick-playback.mjs")) {
+            assertTrue(protectedPath(path),"Shared browser test entry point needs a review");
+            Path file=root.resolve(path);Files.createDirectories(file.getParent());Files.writeString(file,"reviewed input");
+            var policy=new ObjectMapper().createObjectNode().put("schemaVersion",1).put("base",base);
+            policy.putArray("controls");
+            var snapshot=new GitTestChanges.Snapshot(base,List.of(new GitTestChanges.Change("M",path)));
+            assertFalse(validate(root,snapshot,policy,LocalDate.now()).isEmpty(),"Missing review cannot qualify");
+            policy.withArray("controls").addObject().put("path",path).put("owner","browser fixture")
+                    .put("reason","Exact shared adoption").put("criterion","Keep the contract checks")
+                    .put("proof","fixture").put("expires",LocalDate.now().plusDays(1).toString()).put("sha256",sha(file));
+            assertEquals(List.of(),validate(root,snapshot,policy,LocalDate.now()));
+            Files.writeString(file,"changed after review");
+            assertFalse(validate(root,snapshot,policy,LocalDate.now()).isEmpty(),"Changed bytes need a new review");
+        }
     }
 
     @Test void releaseArtifactsReportingAndWorkspaceBoundariesAreProtected() {

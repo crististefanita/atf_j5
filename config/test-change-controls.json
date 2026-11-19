@@ -482,11 +482,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/governance/changes/TestChangeGovernanceTest.java",
       "owner": "Rentz Android qualification",
-      "reason": "Separate ADB transport from native observation and bind both modules to the qualification receipt.",
-      "criterion": "Fresh hierarchy, route and recovery keep the existing gates. Simulated stale or late frames acquire no checkpoint. Missing or changed tool digests block release qualification.",
+      "reason": "Protect the shared Browser build and executable component-adoption boundaries in addition to native qualification.",
+      "criterion": "Missing, changed or expired review blocks each Browser boundary; existing transport, source, workspace and release controls remain mandatory.",
       "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
       "expires": "2026-12-12",
-      "sha256": "b1c5d1c3d7247943568c82c4302502793355d1248912d7fac9b9a15e075eead3",
+      "sha256": "db741f41ce763efd426381f0ecc270dd5f9ff53c3314487a4b89af4f1335d6dd",
       "allowDelete": false
     },
     {
@@ -1762,6 +1762,16 @@
       "proof": "atf-ui-browser/README.md",
       "expires": "2026-12-19",
       "sha256": "627f00bd482b6a77e353a854b86f4646730bcef0c3ddb15a69046e403fcc4d4b",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-ui-browser/Build-RentzPages.ps1",
+      "owner": "Rentz shared browser admission",
+      "reason": "Use one extracted and verified contract inventory including the shared playback exports.",
+      "criterion": "Pinned JAR checksum, extraction exit code and presence of every executable contract are required; keep actual renderer and collection comparisons.",
+      "proof": "atf-ui-browser/README.md",
+      "expires": "2026-12-19",
+      "sha256": "3cadec358ae37c76bb905b3cc752385dcd52c3c27da2bd91a94fa56d4fd593f4",
       "allowDelete": false
     }
   ]

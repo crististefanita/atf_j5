@@ -228,4 +228,5 @@ README-ul principal va lega jocul online după ce workflow-ul publică pagina ș
 
 - Textele scorului Web folosesc scara comună 1,5 o singură dată. Rolul dialogului de calcul rămâne explicit în adaptor; regulile și valorile provin din Rentz.
 - JAR-ul de teste livrează și `shared-presentation.test.mjs`: constructorul real, ordinea AI/jucător, colectarea și tipografia în Chromium. Probele specifice Rentz păstrează oraclele celor șapte contracte de levate și ale secvenței.
+- Build-ul Pages extrage și verifică toate contractele din aceeași listă. Exporturile de playback vin din JAR-ul fixat; lipsa unui fișier oprește calificarea înaintea executării adaptorului.
 - Contractele portabile și comparațiile DOM nu înlocuiesc acceptanța pixelilor Android. Artefactul Android nu se schimbă prin actualizarea JAR-ului Web.

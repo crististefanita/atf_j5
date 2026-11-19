@@ -77,13 +77,15 @@ try { & jar xf $library 'ro/cardtable/browser/web' }
 finally { Pop-Location }
 $commonTestRoot = Join-Path $run 'common-component-tests'
 $null = New-Item -ItemType Directory -Force -Path $commonTestRoot
+$commonContracts = @('hand-presentation.mjs', 'viewport-contract.mjs', 'menu-presentation.mjs', 'score-presentation.mjs', 'seat-presentation.mjs', 'card-typography.mjs', 'card-typography.tsv', 'trick-playback.mjs')
 Push-Location $commonTestRoot
-try { & jar xf $commonTests 'hand-presentation.mjs' 'viewport-contract.mjs' 'menu-presentation.mjs' 'score-presentation.mjs' 'seat-presentation.mjs' 'card-typography.mjs' 'card-typography.tsv' }
+try { & jar xf $commonTests @commonContracts }
 finally { Pop-Location }
+if ($LASTEXITCODE -ne 0) { throw 'Shared component contract extraction failed.' }
 $commonWeb = Join-Path $commonRoot 'ro/cardtable/browser/web'
 Get-ChildItem -LiteralPath $commonWeb -File | Copy-Item -Destination $site
 Get-ChildItem -LiteralPath (Join-Path $pages 'web') -File | Copy-Item -Destination $site
-foreach ($contract in @('hand-presentation.mjs', 'viewport-contract.mjs', 'menu-presentation.mjs', 'score-presentation.mjs', 'seat-presentation.mjs', 'card-typography.mjs', 'card-typography.tsv')) {
+foreach ($contract in $commonContracts) {
     if (!(Test-Path -LiteralPath (Join-Path $commonTestRoot $contract))) {
         throw "The shared Card Table Browser component contract is missing: $contract"
     }
