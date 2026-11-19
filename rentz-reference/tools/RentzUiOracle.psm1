@@ -85,6 +85,51 @@ function Get-RentzTapTarget {
     return $null
 }
 
+function Find-RentzVisibleControl {
+    param(
+        [Parameter(Mandatory)][string]$Label,[string]$Class='',
+        [Parameter(Mandatory)][datetime]$Deadline,
+        [Parameter(Mandatory)][scriptblock]$ReadUi,
+        [Parameter(Mandatory)][scriptblock]$Scroll,
+        [string]$Package='ro.rentzlab.app.uisanity',
+        [ValidateRange(1,12)][int]$MaxScrolls=6,
+        [ValidateRange(1,64)][int]$MaxFrames=32,
+        [scriptblock]$Clock={ [datetime]::UtcNow },
+        [scriptblock]$Pause={param($Milliseconds) Start-Sleep -Milliseconds $Milliseconds}
+    )
+    $direction='forward';$forward=0;$scrolls=0;$last='';$stable=0
+    for($frame=0;$frame-lt$MaxFrames;$frame++){
+        if((& $Clock)-ge$Deadline){break}
+        $nodes=@(& $ReadUi $Deadline)
+        if((& $Clock)-ge$Deadline){break}
+        $own=@($nodes|Where-Object {$_.package-ceq$Package})
+        if(!$own.Count){& $Pause 250;continue}
+        $target=Get-RentzTapTarget -Nodes $own -Label $Label -Class $Class
+        if($null-ne$target){$null=Read-RentzVisibleBounds $target.bounds;return $target}
+        $disabled=@($own|Where-Object {($_.text-ieq$Label-or$_.'content-desc'-ceq$Label)-and
+            (!$Class-or$_.class-ceq$Class)-and$_.enabled-ne'true'})
+        if($disabled.Count){& $Pause 250;continue}
+        $viewports=@($own|Where-Object {$_.class-ceq'android.widget.ScrollView'-and
+            $_.scrollable-ceq'true'-and$_.enabled-ceq'true'})
+        if($viewports.Count-gt1){throw "Ambiguous native scroll viewport: $Label"}
+        if(!$viewports.Count){& $Pause 250;continue}
+        $null=Read-RentzVisibleBounds $viewports[0].bounds
+        $signature=($own|ForEach-Object {$_.class+'|'+$_.text+'|'+$_.'content-desc'+'|'+$_.bounds})-join"`n"
+        if($signature-ceq$last){
+            $stable++
+            if($stable-eq1){& $Pause 200;continue}
+            if($direction-ceq'forward'){$direction='backward'}
+        }else{$stable=0}
+        if($direction-ceq'forward'-and$forward-ge3){$direction='backward'}
+        if($scrolls-ge$MaxScrolls){break}
+        & $Scroll $viewports[0] $direction|Out-Null
+        $scrolls++;if($direction-ceq'forward'){$forward++}
+        $last=$signature;$stable=0
+        & $Pause 200
+    }
+    throw "Native control unavailable: $Label (fresh-frame, deadline or scroll budget exhausted)"
+}
+
 function Get-RentzSystemUiWaitTarget {
     param([Parameter(Mandatory)][System.Xml.XmlElement[]]$Nodes)
     $title=@($Nodes|Where-Object {$_.package-ceq'android'-and$_.'resource-id'-ceq'android:id/alertTitle'-and
@@ -318,4 +363,4 @@ function Get-RentzPresentationChecks {
         actual="$measured ms, frame order=$correctFrame";passed=$correctFrame-and$measured-ge$minimum}
 }
 
-Export-ModuleMember -Function Wait-RentzUiHierarchy,Wait-RentzActorCheckpoint,Wait-RentzVisualCheckpoint,Get-RentzTapTarget,Get-RentzSystemUiWaitTarget,Start-RentzNextDeal,Get-RentzCompletedDealChecks,Get-RentzHistoryPageChecks,Get-RentzSeatFrames,Get-RentzTurnBadgeChecks,Get-RentzBotPacingChecks,Get-RentzVisibleSequenceIndices,Get-RentzScoreRouteChecks,Get-RentzPresentationChecks
+Export-ModuleMember -Function Wait-RentzUiHierarchy,Wait-RentzActorCheckpoint,Wait-RentzVisualCheckpoint,Get-RentzTapTarget,Find-RentzVisibleControl,Get-RentzSystemUiWaitTarget,Start-RentzNextDeal,Get-RentzCompletedDealChecks,Get-RentzHistoryPageChecks,Get-RentzSeatFrames,Get-RentzTurnBadgeChecks,Get-RentzBotPacingChecks,Get-RentzVisibleSequenceIndices,Get-RentzScoreRouteChecks,Get-RentzPresentationChecks

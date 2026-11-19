@@ -812,11 +812,11 @@
     {
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz release qualification",
-      "reason": "Align real PowerShell README fixtures with APK then browser; documentation remains outside the game section.",
-      "criterion": "Retain missing, duplicate, stale, reordered, decorated and suffixed-link rejections in both channel fixtures.",
-      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
+      "reason": "Support the common scrollable score actions through bounded, transport-neutral native control discovery.",
+      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection.",
+      "proof": "test-ui-selectors.ps1 (98 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
       "expires": "2026-12-19",
-      "sha256": "7cf3a4c0d591605f8bc7c47848b53e2ac6513ffdbf8a430017a4f76d6f5b353e",
+      "sha256": "6ce18949398b41c1455bab6e76b30e2f3031a767f42bec071515875c1644f16c",
       "allowDelete": false
     },
     {
@@ -1282,11 +1282,11 @@
     {
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz source-owned release and UI adapters",
-      "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance. Extend the source-owned reservation and retirement contracts.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. The focused Android route compares chooser and first play at 3, 5 and 6 places, with the same compact viewport and exact seat positions. The focused Rentz ending keeps action pacing, score and terminal table evidence distinct from the release route. The short viewport records a visible Rentz arrival before score and one completed trick at each target table size. One reservation spans preparation, test and verified restoration; foreign commands and unknown APK removal are refused, recovery bytes remain immutable and failed restoration retains ownership.",
-      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest; docs/rentz/ATF_Release.md",
+      "reason": "Support the common scrollable score actions through bounded, transport-neutral native control discovery.",
+      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection.",
+      "proof": "test-ui-selectors.ps1 (98 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
       "expires": "2026-12-19",
-      "sha256": "bf6a869620bf4685fc5ff055fbf6176465a099c41b74507169441dc345f7b822",
+      "sha256": "72ec68c83b3a3a9cf5a55f07921d3e9f3b92c6dc35e903b3800e858a7d963a5f",
       "allowDelete": false
     },
     {
@@ -1600,21 +1600,21 @@
     {
       "path": "rentz-reference/tools/RentzUiOracle.psm1",
       "owner": "Rentz Android qualification",
-      "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. Validate measurable non-intersecting frames, actor badge placement and the full Rentz finish permutation. Require a current frame, the measured delay and a single accepted revision. Reconcile the score route and clip a visible index at the next played face. Check distinct arrival and score frames and bind trick collection to the public suit/rank winner.",
-      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "reason": "Support the common scrollable score actions through bounded, transport-neutral native control discovery.",
+      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection.",
+      "proof": "test-ui-selectors.ps1 (98 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
       "expires": "2026-12-14",
-      "sha256": "cdac59861f2ed761f3c41a6f1fdde7d32dbfded39e70cdd8528440e8d2727b49",
+      "sha256": "cbf160c42eae06392229b053ae3f96237e538ef193b53acf17b6341aa233a71c",
       "allowDelete": false
     },
     {
       "path": "atf-tests/tools/test-ui-selectors.ps1",
       "owner": "Rentz Android qualification",
-      "reason": "Move consecutive-deal actor and settlement checks behind mockable ports while preserving native acceptance.",
-      "criterion": "Mocked selectors, actor transitions and history pages preserve the native gesture and capture contract. Empty, wrong and out-of-range rows cannot qualify completion. At 3, 5 and 6 places, refuse duplicated or foreign finishers, overlapping frames and an action badge over the wrong seat. Negative neighbors cover early and duplicate actions, batched revisions and premature scores at 3, 5 and 6 seats. Refuse premature settlement or collection to the wrong seat using mocked native timelines.",
-      "proof": "test-qualified-runtime.ps1 and ReleaseGovernanceTest",
+      "reason": "Support the common scrollable score actions through bounded, transport-neutral native control discovery.",
+      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection.",
+      "proof": "test-ui-selectors.ps1 (98 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
       "expires": "2026-12-14",
-      "sha256": "2d9c94d4369a88d4bed8afbfd123ef3de9e7bdbc37fa0387dbebd9978e387b01",
+      "sha256": "241577d87b48f215559e5651ce7b16a800b7c9f503df6b1a1b348cadd5a1545b",
       "allowDelete": false
     },
     {

@@ -26,6 +26,55 @@ try{
     $rejected=$false;try{$null=Get-RentzTapTarget -Nodes @($ambiguous.SelectNodes('//node')) -Label 'Choice'}catch{$rejected=$_.Exception.Message-like'Ambiguous native control:*'}
     Check 'Two matching targets fail rather than choosing one' $true $rejected
 
+    function NavigationFrame([string]$Label='', [string]$Package='ro.rentzlab.app.uisanity', [switch]$Disabled, [switch]$Duplicate, [switch]$TwoScrolls){
+        $button=if($Label){'<node text="'+$Label+'" class="android.widget.Button" package="'+$Package+'" enabled="'+$(if($Disabled){'false'}else{'true'})+'" clickable="true" bounds="[20,120][300,170]"/>'}else{''}
+        $extra=if($Duplicate){$button}else{''}
+        $other=if($TwoScrolls){'<node class="android.widget.ScrollView" package="'+$Package+'" enabled="true" scrollable="true" bounds="[0,300][320,640]"/>'}else{''}
+        [xml]('<hierarchy><node class="android.widget.ScrollView" package="'+$Package+'" enabled="true" scrollable="true" bounds="[0,0][320,640]">'+$button+$extra+'</node>'+$other+'</hierarchy>')
+    }
+    $nav=@{reads=0;gestures=[Collections.Generic.List[string]]::new()}
+    $found=Find-RentzVisibleControl -Label 'View table' -Deadline ([datetime]::UtcNow.AddSeconds(5)) -ReadUi {
+        param($deadline) $nav.reads++; $frame=if($nav.reads-ge3){NavigationFrame 'View table'}else{NavigationFrame};@($frame.SelectNodes('//node'))
+    } -Scroll {param($viewport,$direction)$nav.gestures.Add($direction)} -Pause {param($ms)}
+    Check 'A below-viewport score action is discovered through the real selector' 'View table' $found.text
+    Check 'A delayed hierarchy does not cause a second gesture' 'forward' ($nav.gestures-join',')
+    Check 'A delayed hierarchy is re-observed before navigating again' 3 $nav.reads
+
+    $nav=@{reads=0;back=$false;gestures=[Collections.Generic.List[string]]::new()}
+    $found=Find-RentzVisibleControl -Label 'Scoring details' -Deadline ([datetime]::UtcNow.AddSeconds(5)) -ReadUi {
+        param($deadline)$nav.reads++;$frame=if($nav.back){NavigationFrame 'Scoring details'}else{NavigationFrame};@($frame.SelectNodes('//node'))
+    } -Scroll {param($viewport,$direction)$nav.gestures.Add($direction);if($direction-ceq'backward'){$nav.back=$true}} -Pause {param($ms)}
+    Check 'A score action above the viewport is reachable after reversal' 'Scoring details' $found.text
+    Check 'The search reverses once at an unchanged scroll edge' 'forward,backward' ($nav.gestures-join',')
+
+    $nav=@{reads=0;gestures=0}
+    $found=Find-RentzVisibleControl -Label 'Next hand' -Deadline ([datetime]::UtcNow.AddSeconds(5)) -ReadUi {param($deadline)$nav.reads++;$f=NavigationFrame 'Next hand';@($f.SelectNodes('//node'))} -Scroll {param($viewport,$direction)$nav.gestures++} -Pause {param($ms)}
+    Check 'A visible action uses its existing viewport without scrolling' 0 $nav.gestures
+    Check 'A visible action requires one fresh hierarchy' 1 $nav.reads
+
+    $nav=@{clock=[datetime]::UtcNow;gestures=0};$limit=$nav.clock.AddSeconds(1);$refused=$false
+    try{Find-RentzVisibleControl -Label 'Next hand' -Deadline $limit -Clock {$nav.clock} -ReadUi {param($deadline)$nav.clock=$limit.AddSeconds(1);$f=NavigationFrame 'Next hand';@($f.SelectNodes('//node'))} -Scroll {param($viewport,$direction)$nav.gestures++} -Pause {param($ms)}|Out-Null}catch{$refused=$true}
+    Check 'A hierarchy arriving after the deadline cannot provide a target' $true $refused
+    Check 'No gesture is sent for a late hierarchy' 0 $nav.gestures
+
+    $nav=@{gestures=0};$refused=$false
+    try{Find-RentzVisibleControl -Label 'Next hand' -Deadline ([datetime]::UtcNow.AddSeconds(5)) -ReadUi {param($deadline)$f=NavigationFrame 'Next hand' -Disabled;@($f.SelectNodes('//node'))} -Scroll {param($viewport,$direction)$nav.gestures++} -Pause {param($ms)}|Out-Null}catch{$refused=$true}
+    Check 'A disabled action never becomes a successful tap target' $true ($refused-and$nav.gestures-eq0)
+
+    $nav=@{gestures=0};$refused=$false
+    try{Find-RentzVisibleControl -Label 'Next hand' -Deadline ([datetime]::UtcNow.AddSeconds(5)) -ReadUi {param($deadline)$f=NavigationFrame 'Next hand' -Duplicate;@($f.SelectNodes('//node'))} -Scroll {param($viewport,$direction)$nav.gestures++} -Pause {param($ms)}|Out-Null}catch{$refused=$true}
+    Check 'Ambiguous actions are rejected before scrolling' $true ($refused-and$nav.gestures-eq0)
+    $refused=$false
+    try{Find-RentzVisibleControl -Label 'Absent' -Deadline ([datetime]::UtcNow.AddSeconds(5)) -ReadUi {param($deadline)$f=NavigationFrame -TwoScrolls;@($f.SelectNodes('//node'))} -Scroll {param($viewport,$direction)$nav.gestures++} -Pause {param($ms)}|Out-Null}catch{$refused=$true}
+    Check 'Ambiguous vertical viewports cannot select an arbitrary container' $true ($refused-and$nav.gestures-eq0)
+
+    $nav=@{gestures=0};$refused=$false
+    try{Find-RentzVisibleControl -Label 'Absent' -MaxScrolls 2 -Deadline ([datetime]::UtcNow.AddSeconds(5)) -ReadUi {param($deadline)$f=NavigationFrame;@($f.SelectNodes('//node'))} -Scroll {param($viewport,$direction)$nav.gestures++} -Pause {param($ms)}|Out-Null}catch{$refused=$true}
+    Check 'An absent control consumes only the declared gesture budget' $true ($refused-and$nav.gestures-eq2)
+    $nav=@{gestures=0};$refused=$false
+    try{Find-RentzVisibleControl -Label 'Next hand' -Deadline ([datetime]::UtcNow.AddSeconds(5)) -ReadUi {param($deadline)$f=NavigationFrame 'Next hand' 'android';@($f.SelectNodes('//node'))} -Scroll {param($viewport,$direction)$nav.gestures++} -Pause {param($ms)}|Out-Null}catch{$refused=$true}
+    Check 'A foreign package is never scrolled or accepted as the target' $true ($refused-and$nav.gestures-eq0)
+
     function Actor([long]$Revision,[int]$Hand,[string]$Phase,[int]$Turn,[string]$Contract='RENTZ',$Points=@(10,5,0),$Finish=@(0,2,1)){
         @{revision=$Revision;screen='GAME';busy=$false;view=@{handNumber=$Hand;phase=$Phase;turn=$Turn;contract=$Contract;players=3;dealPoints=$Points;finishOrder=$Finish}}
     }

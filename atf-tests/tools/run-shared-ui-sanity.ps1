@@ -151,15 +151,17 @@ function Bounds($node){
 }
 function Tap([string]$Label,[string]$Class=''){
     $deadline=[datetime]::UtcNow.AddSeconds(30)
-    do{
-        $node=Get-RentzTapTarget -Nodes @(Ui $deadline) -Label $Label -Class $Class
-        if($null-ne$node){
-            TapNode $node $Label
-            return
-        }
-        Start-Sleep -Milliseconds 250
-    }while([datetime]::UtcNow-lt$deadline)
-    throw "Native control unavailable: $Label"
+    $node=Find-RentzVisibleControl -Label $Label -Class $Class -Deadline $deadline -ReadUi {
+        param($limit) @(Ui $limit)
+    } -Scroll {
+        param($viewport,$direction)
+        $box=Bounds $viewport;$x=[int](($box[0]+$box[2])/2);$padding=[int](($box[3]-$box[1])/5)
+        $from=$box[3]-$padding;$to=$box[1]+$padding
+        if($direction-ceq'backward'){$swap=$from;$from=$to;$to=$swap}
+        Adb @('shell','input','swipe',[string]$x,[string]$from,[string]$x,[string]$to,'280') 'control-scroll'|Out-Null
+        $actions.Add([pscustomobject]@{operation='Scroll native controls';control=$Label;direction=$direction;bounds=$viewport.bounds})
+    }
+    TapNode $node $Label
 }
 function TapNode($Node,[string]$Label){
     $box=Bounds $Node;$watch=[Diagnostics.Stopwatch]::StartNew()
