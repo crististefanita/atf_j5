@@ -119,6 +119,14 @@ stateDiagram-v2
     Recuperare --> RESTORE: același proprietar și backup intact
 ```
 
+<details>
+<summary>Legendă</summary>
+
+- PREPARE conservă pachetul izolat; TEST execută acceptanța; RESTORE verifică datele și afișajul.
+- Săgețile numesc precondiția tranziției. Recuperarea păstrează proprietarul și copia originală până la închiderea verificată.
+
+</details>
+
 | Fază | Contract |
 |---|---|
 | Pregătire | Dacă pachetul izolat există, salvează APK-ul, arhiva și manifestul fișierelor înaintea primei comenzi distructive. Absența inițială este înregistrată explicit. |
@@ -134,14 +142,22 @@ Retragerea este o operație explicită după publicare. Un raport local ori un l
 
 ```mermaid
 flowchart LR
-    Q[Calificare originală: șapte porți] --> E[Două Extent originale și octeții descărcați]
-    E --> R[README remote și descărcări noi]
-    R --> L[Rezervarea comună de promovare]
-    L --> A[Recitire autoritate și arhivare metadata]
-    A --> D[DELETE numai pentru ediții stabile mai vechi]
-    D --> C[Confirmare prin inventarul remote]
-    C --> P[Receipt separat și Extent]
+    Q[Calificare originală: șapte porți] -->|fixează| E[Două Extent originale și octeții descărcați]
+    E -->|condiționează| R[README remote și descărcări noi]
+    R -->|precedă| L[Rezervarea comună de promovare]
+    L -->|protejează| A[Recitire autoritate și arhivare metadata]
+    A -->|autorizează| D[DELETE numai pentru ediții stabile mai vechi]
+    D -->|cere| C[Confirmare prin inventarul remote]
+    C -->|fundamentează| P[Receipt separat și Extent]
 ```
+
+<details>
+<summary>Legendă</summary>
+
+- Calificarea originală descrie produsul publicat, iar verificarea curentă descrie canalul și uneltele retragerii.
+- Fiecare săgeată exprimă o precondiție. Numai confirmarea inventarului permite raportarea unei ediții drept retrasă.
+
+</details>
 
 - **Două surse de dovadă.** Regresia curentă califică uneltele care execută retragerea. Calificarea originală fixează versiunea, commitul produsului, APK-ul și cele două rapoarte originale. Niciuna nu este rescrisă pentru a o adapta la HEAD.
 - **Autoritate actuală.** Verifică dreptul de scriere, `main`, tagul exact, `latest` și singurul link APK din README. Descarcă din nou APK-ul și checksum-ul, autentificat și anonim, cu SHA-256 și CRC. Repetă verificarea autorității sub aceeași rezervare folosită la promovare și înaintea fiecărui DELETE.
@@ -156,7 +172,12 @@ flowchart LR
   -OriginalComponentExtent $componentExtent -OriginalNativeExtent $nativeExtent
 ```
 
-Variabilele indică dovezi originale păstrate extern, în inventarul ATF. Verificarea README trebuie să fi recitit ambele Extent și să declare eligibilitatea. Comanda produce `release-retirement.json`, `release-retirement-extent.html`, descărcări noi și metadata arhivate. Credenciala existentă se citește din mediul procesului sau din Git Credential Manager; nu intră în argumente sau rapoarte. Lipsa unui raport, un SHA diferit, un README vechi, o ediție stabilă mai nouă ori un cont fără scriere blochează retragerea. [Politică și mock-uri](../../atf-tests/src/test/java/atf/rentz/distribution/publication/ReleaseRetirementTest.java) · [Admiterea dovezilor](../../atf-tests/src/main/java/atf/rentz/distribution/retirement/RetirementEvidence.java)
+- **Intrări:** variabilele indică dovezi originale păstrate extern, în inventarul ATF. Verificarea README recitește ambele Extent și declară eligibilitatea.
+- **Ieșiri:** comanda produce `release-retirement.json`, `release-retirement-extent.html`, descărcări noi și metadata arhivate.
+- **Acces:** credențiala existentă se citește din mediul procesului sau din Git Credential Manager; nu intră în argumente sau rapoarte.
+- **Refuz:** lipsa unui raport, un SHA diferit, un README vechi, o ediție stabilă mai nouă ori un cont fără scriere blochează retragerea.
+
+[Politică și mock-uri](../../atf-tests/src/test/java/atf/rentz/distribution/publication/ReleaseRetirementTest.java) · [Admiterea dovezilor](../../atf-tests/src/main/java/atf/rentz/distribution/retirement/RetirementEvidence.java)
 
 ## Semnare și păstrarea cheii
 

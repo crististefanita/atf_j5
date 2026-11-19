@@ -6,17 +6,32 @@ Whist publică nucleul Android ca AAR și shell-ul Web ca JAR. Ambele folosesc c
 
 ## Frontiera consumatorului
 
-Scorul detaliat are un singur prezentator de produs: `RentzScoreDetails`. Primește rezultatul confirmat, numele în ordinea locurilor și textele RO/EN. Returnează rânduri imuabile cu identitatea locului, ordinea de sosire, Δ:/Σ: și contribuțiile exacte. Android adaptează rândurile în widgeturi derulabile; WEB le adaptează în `BrowserGame.ScoreDetails`. Istoricul păstrează antetele Δ și Σ fără două puncte.
+Scorul detaliat are un singur prezentator de produs: `RentzScoreDetails`.
+
+| Frontieră | Contract |
+|---|---|
+| Intrări | Rezultatul confirmat, numele în ordinea locurilor și textele RO/EN. |
+| Proiecție | Rânduri imuabile cu identitatea locului, ordinea de sosire, Δ:/Σ: și contribuțiile exacte. |
+| Adaptoare | Android creează widgeturile derulabile; WEB furnizează `BrowserGame.ScoreDetails`. |
+| Istoric | Antetele Δ și Σ rămân fără două puncte. |
 
 ```mermaid
 flowchart LR
-    M[Rezultat confirmat din motor] --> S[RentzScoreContent]
-    S --> P[RentzScoreDetails: conținut comun]
-    P --> A[RentzHandDetails: adaptor Android]
-    P --> W[RentzTable: adaptor WEB]
-    A --> N[Widgeturi native]
-    W --> B[Shell Browser comun]
+    M[Rezultat confirmat din motor] -->|alimentează| S[RentzScoreContent]
+    S -->|furnizează| P[RentzScoreDetails: conținut comun]
+    P -->|alimentează| A[RentzHandDetails: adaptor Android]
+    P -->|alimentează| W[RentzTable: adaptor WEB]
+    A -->|adaptează| N[Widgeturi native]
+    W -->|adaptează| B[Shell Browser comun]
 ```
+
+<details>
+<summary>Legendă</summary>
+
+- Motorul deține faptele confirmate; prezentatorul deține conținutul specific Rentz.
+- Adaptoarele primesc aceleași rânduri. Săgețile descriu fluxul datelor, nu o conversie între widgeturi Android și DOM.
+
+</details>
 
 Adaptoarele nu recalculează puncte, premii sau clasamente. Probele de componentă confruntă rândurile cu motorul pentru toate contractele și mesele de 3–6 jucători, inclusiv nume identice, contribuții negative, limbi diferite și ordine de sosire. Contractele bibliotecii acoperă separat geometria pe rezoluții; identitatea conținutului nu demonstrează singură randarea nativă. [Prezentator](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/RentzScoreDetails.java) · [Probe comune](../../rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/score/RentzScoreContentTest.java)
 
