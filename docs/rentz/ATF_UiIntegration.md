@@ -259,6 +259,8 @@ Ajutorul afișează grila pentru 3–6 jucători din profilul efectiv, verificat
 
 Biblioteca comună deține ancorele locurilor și măsurarea mesei; adaptorul Rentz specializează numai secvența și proiecția punctajului.
 
+În browser, un container de comenzi gol nu intră în fluxul mesei, indiferent de spațierea CSS. Observațiile geometrice folosesc numai masa vizibilă, excluzând arborii `data-preparing`. La colectare, copia animată pornește pe dreptunghiul cărții și ajunge la chenarul câștigătorului; această mișcare intenționată se verifică separat de stabilitatea sloturilor.
+
 | Zonă | Contract de adaptare | Verificare |
 |---|---|---|
 | Locuri | `RentzCardSpace.profile` furnizează aceleași sloturi `PlayedCardMetrics` și rezervarea mâinii; `BoardSpec` stabilește centrul. Numai secvența Rentz folosește `fullWidthCardBand`, la 3–6 locuri. | Confruntă adaptorul nativ și AAR-ul fixat cu răspunsul TeaVM pentru aceleași măsurători. |

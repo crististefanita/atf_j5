@@ -21,7 +21,7 @@ engine.initialize(0, 31);
 const call = (path, values = {}) => JSON.parse(engine.commandLocal(path, JSON.stringify(values), null, null, null, null)).result;
 const setup = call('/api/setup');
 check('The delivered renderer keeps the same card origin across playback and human turns',
-  { emptyStates: 4, emptyControlDrift: 0, realActionsPreserved: true, legacyPromptPreserved: true },
+  { emptyStates: 4, emptyControlSiblings: 0, realActionsPreserved: true, legacyPromptPreserved: true },
   verifyCenterContinuity(readFileSync(join(site, 'table.mjs'), 'utf8'), { rentzChoiceDropdown, action() {}, language: 'ro' }));
 const palette = new Map(setup.palette.map(token => [token.name, token.color]));
 check('Shared menu target matches the Android header 48dp touch contract', '48px', palette.get('--whist-menu-touch') ?? 'missing');

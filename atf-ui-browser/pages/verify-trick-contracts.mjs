@@ -25,9 +25,10 @@ const points = (contract, cards) => {
     WHIST: 10, TEN_CLUBS: cards.some(card => rank(card) === 10 && card.suit === '♣') ? 100 : 0 })[contract];
 };
 
-function presentation(previous, result, reduced, faults = {}) {
+function presentation(previous, result, reduced, options) {
   let now = 0, sequence = 0, openCollection = false, scoreShown = false;
-  const queue = new Map(), events = [], violations = [];
+  let activeCue;
+  const queue = new Map(), events = [], violations = [], poses = [];
   const clock = {
     setTimeout(callback, delay) { const id = ++sequence; queue.set(id, { callback, at: now + delay }); return id; },
     clearTimeout(id) { queue.delete(id); }
@@ -36,7 +37,21 @@ function presentation(previous, result, reduced, faults = {}) {
     dataset: { seat: String(seat) }, style: {}, children: [], offsetWidth: 50, offsetHeight: 70,
     getBoundingClientRect: () => ({ left: seat * 10 + 10, top: 10, width: 50, height: 70 }),
     append(child) { this.children.push(child); }, remove() {}, setAttribute() {},
-    cloneNode() { return node(seat); }, animate() { return { cancel() {} }; }
+    cloneNode() { return node(seat); },
+    animate(keyframes, timing) {
+      const original = this.getBoundingClientRect();
+      const target = node(activeCue.winningSeat).getBoundingClientRect();
+      const end = keyframes.at(-1).transform.match(/translate\((-?[\d.]+)px, (-?[\d.]+)px\) scale/);
+      const left = Number.parseFloat(this.style.left), top = Number.parseFloat(this.style.top);
+      const failures = [];
+      const compare = (name, expected, actual) => { if (JSON.stringify(expected) !== JSON.stringify(actual)) failures.push({ name, expected, actual }); };
+      compare('hold starts on the actual public face', [original.left + original.width / 2, original.top + original.height / 2], [left, top]);
+      compare('clone retains the measured face size', [original.width, original.height], [Number.parseFloat(this.style.width), Number.parseFloat(this.style.height)]);
+      compare('motion ends at the confirmed winner', [target.left + target.width / 2, target.top + target.height / 2], [left + Number(end?.[1]), top + Number(end?.[2])]);
+      compare('shared hold and travel timing', [activeCue.holdMillis, activeCue.travelMillis], [timing.delay, timing.duration]);
+      poses.push({ seat, failures });
+      return { cancel() {} };
+    }
   });
   const seats = previous.view.seats.map((_, seat) => node(seat));
   const baseline = [...seats];
@@ -64,8 +79,7 @@ function presentation(previous, result, reduced, faults = {}) {
   for (const play of previous.view.played) center.children.push(Object.assign(node(play.seat), { face: node(play.seat) }));
   const vm = {
     state: previous, pending: false, animation: undefined, stage, language: 'ro',
-    presentRentzPlayback, presentRentzArrival, automation: { set() {} }, setup: { collectionSamples: [
-      { offset: 0, travel: 0, scale: 1, alpha: 1 }, { offset: 1, travel: 1, scale: .5, alpha: 0 }] },
+    presentRentzPlayback, presentRentzArrival, automation: { set() {} }, setup: { collectionSamples: options.collectionSamples },
     errorBox: { textContent: '' }, selectedBid: undefined,
     document: { createElement: () => node() }, matchMedia: () => ({ matches: reduced }),
     ...clock, requestAnimationFrame: callback => clock.setTimeout(callback, 16),
@@ -90,6 +104,7 @@ function presentation(previous, result, reduced, faults = {}) {
   };
   const commonCollect = runInNewContext(`${collection}; collect`, vm);
   vm.collect = (target, cue, draw, samples) => {
+    activeCue = cue;
     if (scoreShown) violations.push('collection started after the score');
     assert.deepEqual(center.children.map(card => Number(card.dataset.seat)), cue.cards.map(play => play.seat),
       'all public faces remain in play order before collection');
@@ -101,7 +116,7 @@ function presentation(previous, result, reduced, faults = {}) {
     }, cue.displayMillis - 1);
     return { ...motion, done: motion.done.then(() => { openCollection = false; events.push(`collected:${deadline}`); }) };
   };
-  const executable = faults.earlyScore ? issue.replace('await playCards(result.playback);', 'void playCards(result.playback);') : issue;
+  const executable = options.earlyScore ? issue.replace('await playCards(result.playback);', 'void playCards(result.playback);') : issue;
   const run = runInNewContext(`${executable}; issue`, vm)('/api/action', { action: 'auto-step' });
   return { async finish() {
     let settled = false, failure;
@@ -117,7 +132,7 @@ function presentation(previous, result, reduced, faults = {}) {
     assert.equal(settled, true, 'shared issue completes within the bounded virtual clock');
     assert.equal(vm.errorBox.textContent, '', 'the shell does not hide a playback exception');
     assert.deepEqual(seats, baseline, 'playback keeps each physical frame object');
-    return { events, violations, scoreShown, frames: seats.length };
+    return { events, violations, poses, scoreShown, frames: seats.length };
   } };
 }
 
@@ -134,12 +149,14 @@ for (const players of [3, 4, 5, 6]) for (const contract of contracts) for (const
     for (const field of Object.keys(profile)) profile[field] = response[field] ?? null;
     return response.result;
   };
+  const motion = { collectionSamples: call('/api/setup').collectionSamples };
+  assert.equal(motion.collectionSamples.length, 11, 'Exercise all motion samples from the compiled native-backed setup');
   let state = call('/api/state');
   state = call('/api/start', { players, mode: 'RENTZ', difficulty: 'NORMAL', series: '5', streaks: 'no', zero: 'no', revision: state.revision });
   state = call('/api/action', { action: 'reveal', revision: state.revision });
   const previous = state;
   state = call('/api/action', { action: `choose:${contract}`, revision: state.revision });
-  const awards = Array(players).fill(0), played = [], winners = [], violations = [];
+  const awards = Array(players).fill(0), played = [], winners = [], violations = [], poses = [];
   let last = previous, completed = false;
   for (let command = 0; command < 32; command++) {
     for (const step of state.playback ?? []) {
@@ -155,18 +172,21 @@ for (const players of [3, 4, 5, 6]) for (const contract of contracts) for (const
       awards[winner] += points(contract, cue.cards.map(play => play.card));
       winners.push(winner); tricks++;
     }
-    const observed = await presentation(last, state, reduced).finish();
+    const observed = await presentation(last, state, reduced, motion).finish();
     violations.push(...observed.violations);
+    poses.push(...observed.poses);
     assert.equal(observed.scoreShown, Boolean(state.view.score), `${key}: score is committed only for a settled hand`);
     if (state.view.score) {
       check(`${key}: complete real hand, actor-before-card, full hold, collection before score`, [], violations);
       check(`${key}: independent trick awards match the native-backed history`, awards,
         state.view.history.grid.rows[0].cells.map(cell => Number(cell.bid)));
       check(`${key}: result table exposes exactly the confirmed history row`, state.view.history.grid.rows, state.view.score.table.grid.rows);
+      check(`${key}: all animated clones preserve source pose, size, winner and timing`, [], poses.flatMap(pose => pose.failures));
+      check(`${key}: each collected face is covered, with no animation in reduced-motion mode`, reduced ? 0 : winners.length * players, poses.length);
       check(`${key}: distinct played cards and bounded complete tricks`, { unique: played.length, cards: winners.length * players },
         { unique: new Set(played).size, cards: played.length });
       if (!negativeExercised && state.playback?.some(step => step.collection)) {
-        const broken = await presentation(last, state, reduced, { earlyScore: true }).finish();
+        const broken = await presentation(last, state, reduced, { ...motion, earlyScore: true }).finish();
         check('negative control: removing the shell await is detected before the last collection', true,
           broken.violations.length > 0 || !broken.events.some(event => event.startsWith('collected:')));
         negativeExercised = true;

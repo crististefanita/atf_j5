@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "0.2.18",
-  "sourceCommit": "5de652f69067e8688f033114c50a025a01e3f48e",
-  "inputSha256": "67b3abc675a6dc1b8571bcf1f7e95186adc83c9ad6eaff942cb44e9bbe6eabba",
+  "version": "0.2.19",
+  "sourceCommit": "a55f8cfce8a2df4f04aa2730f2f7389fef51d8ea",
+  "inputSha256": "4df255a77141b589a7d19192aeb635db0f6600ab7c2497b65e4b5474f9e5afa3",
   "inputs": [
     {
       "path": "atf-ui-browser/Package-CardTableBrowser.ps1",
@@ -122,7 +122,7 @@
     },
     {
       "path": "atf-ui-browser/tests/seat-presentation.mjs",
-      "sha256": "10a4c731aa20f99869db524a4a6521ad5a570e2405f0405a253eacf440edf37c"
+      "sha256": "a00098f2855212268808b70e02091c4b1f46dc4fd0585bbb2c64bba8e99cd73e"
     },
     {
       "path": "atf-ui-browser/tests/trump-text-fit.mjs",
@@ -263,24 +263,24 @@
   ],
   "files": [
     {
-      "path": "atf-ui-browser-0.2.18.jar",
+      "path": "atf-ui-browser-0.2.19.jar",
       "bytes": 155881,
       "sha256": "11896cd672530c66aa29468cf6c4cabc09575e39574362117b70531dfd605fd7"
     },
     {
-      "path": "atf-ui-browser-0.2.18.jar.sha256",
+      "path": "atf-ui-browser-0.2.19.jar.sha256",
       "bytes": 65,
       "sha256": "c9535fd3057cd0b0f208c0e020b1f437f5bcdcc52071f927c2b8e448d049f5c3"
     },
     {
-      "path": "atf-ui-browser-0.2.18-tests.jar",
-      "bytes": 15733,
-      "sha256": "de8cba4b90d1d5d61d45cd00f5018799efcd135bb42b92f9844a61465598dd90"
+      "path": "atf-ui-browser-0.2.19-tests.jar",
+      "bytes": 15635,
+      "sha256": "cec023c9ce46dd7d64f1f01fefc0c3c0ec7ba6af3774e795105d143a4f72fb5e"
     },
     {
-      "path": "atf-ui-browser-0.2.18-tests.jar.sha256",
+      "path": "atf-ui-browser-0.2.19-tests.jar.sha256",
       "bytes": 65,
-      "sha256": "d31c80c65250d8c043d0d6e26b365c38eb7b15ff827ba82fbfcd0fc31511ff7d"
+      "sha256": "5244c7f74bce34565b8b899573fb492dda2be6983361a095a78a078f6fab3aad"
     }
   ]
 }

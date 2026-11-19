@@ -27,7 +27,7 @@ Antetul folosește `GameTitleBar` din AAR-ul fixat. Contractul stabil este în [
 
 ## P1 · Admiterea bibliotecilor și paritatea Whist
 
-Păstrați AAR-ul Android `0.1.21` și pachetul Browser `0.2.18` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
+Păstrați AAR-ul Android `0.1.21` și pachetul Browser `0.2.19` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
 
 | Prioritate | Cerință rămasă | Criteriu de închidere |
 |---|---|---|
@@ -36,7 +36,7 @@ Păstrați AAR-ul Android `0.1.21` și pachetul Browser `0.2.18` cu JAR-ul de te
 | P1 | Oprirea AutoPlay în ambele adaptoare | Oprirea rămâne accesibilă când AI-ul calculează; livrarea întârziată nu aplică o comandă. În Web, includeți și oprirea între două cadre de playback. |
 | P2 | Meniuri și fonturi comune | Contractele livrate de meniu și proporțiile tipografice sunt verificate fără emulator. Calificați rasterul la font mărit, focusul tastaturii și clickul în exterior pe platformă; nu repetați calculele pure prin E2E. |
 
-Pentru contractele cu levate, păstrați matricea completă în [componente](../rentz/ATF_Components.md): motor compilat, renderer comun, ceas controlat și oracol separat de punctare. Controlul central gol nu se atașează mesei cu antet, ca spațiul flex să nu mute cărțile la ieșirea din playback. Pe platformă rămân de observat continuitatea vizuală a chenarelor și rasterul colectării în profilul efectiv; nu cereți câte un E2E pentru fiecare combinație deja calificată prin componente.
+Pentru contractele cu levate, păstrați matricea completă în [componente](../rentz/ATF_Components.md): motor compilat, renderer comun, ceas controlat și oracol separat de punctare. Contractul DOM și criteriul copiilor animate sunt în [integrare](../rentz/ATF_UiIntegration.md#adaptarea-secvenței-și-a-scorului-în-browser). Acceptanța Chrome Android nu închide rasterul APK-ului; păstrați separat profilul și rendererul observat, fără câte un E2E pentru fiecare combinație deja calificată prin componente.
 
 ## P2 · Meniu și istoric
 
