@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { presentRentzArrival, presentRentzPlayback, rentzArrivalView, rentzChoiceDropdown, rentzSequence,
-  rentzSequenceLayout, rentzCenterInsets, rentzSequenceLowerShift, applyRentzSequenceLayout, refreshRentzSequence, rentzMenuRoutes } from "./web/rentz-ui.mjs";
+  rentzSequenceLayout, rentzCenterInsets, rentzSequenceLowerShift, applyRentzSequenceLayout, refreshRentzSequence } from "./web/rentz-ui.mjs";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -312,14 +312,13 @@ for(const rows of [[],[{cells:[]}],[{cells:[{},{},{}]},{cells:[{},{},{}]}]]) {
   assert.throws(()=>rentzScoreTable({grid:{players:["A","B","C"],rows}},element,sharedScoreGrid,"ro"), TypeError,"Reject missing, malformed or ambiguous current hand");
 }
 check("score adaptation uses shared score renderer",true,generatedShell.includes("rentzScoreTable(match.score.table, element, scoreGrid)"));
-const menuRoutes=["score-history","score-sheet","stop-auto","settings","rankings","home"].map(id=>({id,action(){}}));
-check("live menu omits a native score route without a confirmed hand",
-  ["score-history","stop-auto","settings","rankings","home"],
-  rentzMenuRoutes(menuRoutes,{rentzMenuUnavailable:["score-sheet"]}).map(route=>route.id));
-check("settled menu keeps the shared route objects and callback identities",true,
-  rentzMenuRoutes(menuRoutes,{rentzMenuUnavailable:[]}).every((route,index)=>route===menuRoutes[index]));
-refuses("Missing native menu availability fails closed",()=>rentzMenuRoutes(menuRoutes,{}));
-check("shared menu renderer consumes native availability",true,generatedShell.includes("for (const route of rentzMenuRoutes(routes, match))"));
+const {menuFromEntries}=await import(pathToFileURL(join(dirname(process.argv[3]),'table-menu.mjs')));
+const menuRoutes=['score-history','score-sheet','stop-auto','settings','rankings','home'].map(id=>({id,label:id,action(){}}));
+const nativeEntries=[{id:'score-history',label:'Istoricul jocului'},{id:'home',label:'Meniul principal'},{id:'stop-auto',label:'Oprește jocul automat'},{id:'settings',label:'Nume'}];
+check('Native descriptor order excludes unsupported in-game routes',nativeEntries.map(e=>e.id),menuFromEntries(menuRoutes,nativeEntries).map(e=>e.id));
+check('Native descriptor labels remain authoritative',nativeEntries.map(e=>e.label),menuFromEntries(menuRoutes,nativeEntries).map(e=>e.label));
+refuses('An unknown native intention fails closed',()=>menuFromEntries(menuRoutes,[{id:'unknown',label:'Unknown'}]));
+check('Shared menu renderer consumes the same native entries',true,generatedShell.includes('menuFromEntries(routes, match.menuEntries)'));
 check("full history keeps its renderer",true,generatedShell.includes("rentzHistoryGrid(data.grid, element, historyGrid)"));
 check("contributions remain available in quiet details",true,generatedShell.includes("rentzScoreRules(details)"));
 check("score values override the shared bold human cells",true,/\.whist-score \.rentz-score-table \.whist-score-grid :is\(th, td\)\s*\{[^}]*font-weight: 400/.test(generatedRentzCss));

@@ -381,11 +381,3 @@ export function rentzChoiceDropdown(actions, element, play, language) {
   label.append(select);
   return label;
 }
-/** Route availability is projected by the native menu model; callbacks remain browser-owned. */
-export function rentzMenuRoutes(routes, match) {
-  if (!Array.isArray(match.rentzMenuUnavailable)
-      || match.rentzMenuUnavailable.some(id => typeof id !== "string")) {
-    throw new TypeError("Rentz menu needs the native route-availability projection.");
-  }
-  return routes.filter(route => !match.rentzMenuUnavailable.includes(route.id));
-}

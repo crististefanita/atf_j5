@@ -20,12 +20,12 @@ public final class CardUiAdoptionTest {
     @Test public void pinnedArchiveAndLoadedPresentationTypesHaveTheQualifiedBytesWithoutGameOrAtfClasses() throws Exception {
         Path root = Path.of(System.getProperty("rentz.uiRepository"));
         var provenance = JsonParser.parseString(new String(Files.readAllBytes(root.resolve("provenance.json")), java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
-        audit.equal("Adopted UI coordinate", "ro.cardtable:card-table-ui:0.1.24", provenance.get("coordinate").getAsString());
+        audit.equal("Adopted UI coordinate", "ro.cardtable:card-table-ui:0.2", provenance.get("coordinate").getAsString());
         audit.equal("Adopted Java coordinate", "ro.cardtable:card-table-names:0.1.0", provenance.get("namesCoordinate").getAsString());
         for (var file : provenance.getAsJsonArray("files")) {
             var value = file.getAsJsonObject(); audit.equal("Pinned " + value.get("path").getAsString(), value.get("sha256").getAsString(), hash(Files.readAllBytes(root.resolve(value.get("path").getAsString()))));
         }
-        Path aar = root.resolve("ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.aar");
+        Path aar = root.resolve("ro/cardtable/card-table-ui/0.2/card-table-ui-0.2.aar");
         byte[] classes;
         try (var zip = new ZipFile(aar.toFile())) { classes = zip.getInputStream(zip.getEntry("classes.jar")).readAllBytes(); }
         verifyClassBytes(classes, ro.cardtable.ui.seat.SeatContent.class, ro.cardtable.ui.seat.PlayerSeatView.class,

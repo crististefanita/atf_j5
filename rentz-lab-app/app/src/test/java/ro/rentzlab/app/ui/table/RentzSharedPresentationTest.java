@@ -14,6 +14,14 @@ import ro.rentzlab.app.testing.UiAuditRule;
 public final class RentzSharedPresentationTest {
     @Rule public final UiAuditRule audit = new UiAuditRule();
 
+    @Test public void historyUsesRegularTextAndTheWhistReferenceGroupDividers() {
+        var policy = ro.cardtable.ui.score.HistoryAppearance.REGULAR_GROUPS;
+        audit.equal("History does not use bold names or headings", false, policy.boldPlayerNames());
+        audit.equal("Native history uses the exported separator width", policy.separatorDp(), ro.rentzlab.app.ui.score.RentzScoreLayout.HISTORY_SEPARATOR_DP);
+        audit.equal("Browser and native divider color match Whist", "#71846c", policy.cssTokens().get("--history-divider-color"));
+        audit.equal("Native regular typeface maps to browser 400", "400", policy.cssTokens().get("--history-heading-weight"));
+    }
+
     @Test public void scoreActionsUseTheSharedReadableRolesAndOneAccessibleScale() {
         for (float scale : new float[]{1f, 1.5f, 2f}) {
             audit.equal("Shared primary result action at scale " + scale, 24f * scale,

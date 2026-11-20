@@ -41,7 +41,17 @@ public final class RentzNativePresentationReference {
         }
         var scoreTypography = new java.util.LinkedHashMap<String, String>();
         for (var role : ro.cardtable.ui.score.ScoreTypography.values()) scoreTypography.put(role.cssName(), role.rem());
-        System.out.println(new JSONObject(Map.of("faces", faces, "boards", boards, "scoreTypography", scoreTypography)));
+        System.out.println(new JSONObject(Map.of("faces", faces, "boards", boards, "scoreTypography", scoreTypography, "historyAppearance", ro.cardtable.ui.score.HistoryAppearance.REGULAR_GROUPS.cssTokens(), "menuPlans", menuPlans())));
+    }
+
+    private static List<Map<String, Object>> menuPlans() {
+        var result = new ArrayList<Map<String, Object>>();
+        for (boolean romanian : new boolean[]{false,true}) for (boolean settled : new boolean[]{false,true}) {
+            var entries = ro.rentzlab.app.ui.chrome.RentzGameMenu.entries(new ro.rentzlab.app.ui.copy.RentzText(romanian), settled);
+            result.add(Map.of("language", romanian ? "ro" : "en", "settled", settled, "entries",
+                    entries.stream().map(e -> Map.of("id",e.id(),"label",e.label())).toList()));
+        }
+        return result;
     }
 
     private static List<Integer> rect(TableGeometry.Rect rect) {

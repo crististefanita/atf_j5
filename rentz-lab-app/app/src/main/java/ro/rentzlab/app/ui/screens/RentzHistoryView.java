@@ -2,12 +2,14 @@ package ro.rentzlab.app.ui.screens;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import ro.cardtable.ui.theme.TablePalette;
+import ro.cardtable.ui.score.HistoryAppearance;
 import ro.rentzlab.app.GameSession;
 import ro.rentzlab.app.ui.copy.RentzUiText;
 import ro.rentzlab.app.ui.score.RentzHandDetails;
@@ -21,7 +23,8 @@ public final class RentzHistoryView {
 
     public static AlertDialog show(Context context, GameSession session, RentzUiText copy, String name, Runnable dismissed) {
         var container = new FrameLayout(context);
-        var dialog = new AlertDialog.Builder(context).setTitle(copy.history()).setView(container)
+        var title = title(context, copy.history());
+        var dialog = new AlertDialog.Builder(context).setCustomTitle(title).setView(container)
                 .setPositiveButton(copy.close(), null).create();
         var history = session == null ? java.util.Collections.<RentzScoreContent.Row>emptyList()
                 : RentzScoreContent.rows(session.history(), copy);
@@ -32,7 +35,7 @@ public final class RentzHistoryView {
                 if (container.getChildCount() != 1) return;
                 container.getChildAt(0).setVisibility(View.GONE);
                 container.addView(new RentzHandDetails(context, hand, players, copy, session.scoreProfileId(), java.util.Collections.emptyList()));
-                dialog.setTitle(copy.text("Hand ", "Mâna ") + hand.hand() + " · " + hand.label());
+                title.setText(copy.text("Hand ", "Mâna ") + hand.hand() + " · " + hand.label());
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setText(copy.text("Back to history", "Înapoi la istoric"));
             });
             container.addView(grid);
@@ -40,22 +43,32 @@ public final class RentzHistoryView {
         dialog.setOnDismissListener(ignored -> dismissed.run());
         dialog.show();
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(ignored -> {
-            if (!returnToGrid(dialog, container, copy)) dialog.dismiss();
+            if (!returnToGrid(dialog, container, title, copy)) dialog.dismiss();
         });
         dialog.setOnKeyListener((ignored, key, event) -> key == KeyEvent.KEYCODE_BACK
-                && event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled() && returnToGrid(dialog, container, copy));
+                && event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled() && returnToGrid(dialog, container, title, copy));
         int width = Math.max(1, Math.min(720, WindowContent.widthDp(context) - 16));
         dialog.getWindow().setLayout(dp(context, width), ViewGroup.LayoutParams.WRAP_CONTENT);
         return dialog;
     }
 
-    private static boolean returnToGrid(AlertDialog dialog, FrameLayout container, RentzUiText copy) {
+    private static boolean returnToGrid(AlertDialog dialog, FrameLayout container, TextView title, RentzUiText copy) {
         if (container.getChildCount() != 2) return false;
         container.removeViewAt(1);
         container.getChildAt(0).setVisibility(View.VISIBLE);
-        dialog.setTitle(copy.history());
+        title.setText(copy.history());
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setText(copy.close());
         return true;
+    }
+
+    private static TextView title(Context context, String label) {
+        var title = new TextView(context);
+        title.setText(label);
+        title.setTextSize(20);
+        title.setTextColor(TablePalette.ACTIVE_SEAT_TEXT);
+        title.setTypeface(Typeface.DEFAULT, HistoryAppearance.REGULAR_GROUPS.boldPlayerNames() ? Typeface.BOLD : Typeface.NORMAL);
+        title.setPadding(dp(context, 24), dp(context, 16), dp(context, 24), dp(context, 8));
+        return title;
     }
 
     private static View empty(Context context, RentzUiText copy) {

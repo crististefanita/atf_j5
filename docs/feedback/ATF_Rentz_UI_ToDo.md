@@ -27,7 +27,7 @@ Antetul folosește `GameTitleBar` din AAR-ul fixat. Contractul stabil este în [
 
 ## P1 · Admiterea bibliotecilor și paritatea Whist
 
-Păstrați AAR-ul Android `0.1.24` și pachetul Browser `0.2.27` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
+Păstrați AAR-ul Android `0.2` și pachetul Browser `0.4` cu JAR-ul de teste asociat. O modificare a adaptorului Rentz nu justifică înlocuirea octeților bibliotecii. La admitere, confruntați intrările producătorului, commitul, SHA-256 și clasele încărcate. [Contractul de livrare](../../rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz)
 
 | Prioritate | Cerință rămasă | Criteriu de închidere |
 |---|---|---|
@@ -40,22 +40,13 @@ Pentru contractele cu levate, păstrați matricea completă în [componente](../
 
 ## P2 · Meniu și istoric
 
-### U10–U11 · Istoric lizibil și același meniu WEB–APK
+### U10–U11 · Acceptanța nativă a meniului și istoricului
 
-**P2 · Adaptoarele Rentz și ownerul bibliotecii UI comune.** Această cerință schimbă prezentarea, nu regulile sau punctajele jocului. Modelul Whist și widgeturile livrate sunt referința; adaptați o proiecție comună, fără două inventare de meniu sau reguli CSS/Android independente.
+Contractul implementat aparține [integrării WEB–APK](../rentz/ATF_UiIntegration.md#meniul-și-aspectul-istoricului). Componentele verifică planul comun, disponibilitatea, comenzile și tokenurile din AAR/JAR; probele Chromium măsoară stilul și derularea rendererului real.
 
-| ID | Comportament cerut | Criteriu de componentă |
-|---|---|---|
-| U10 | Istoricul fără bold: titlu, nume de jucători, antete și valori numerice. Păstrați `Δ` și `Σ`, fără două puncte în antetul istoricului. | Greutatea normală și rolurile tipografice sunt identice în proiecția comună, widgetul Android și rendererul WEB; verificați starea inițială și după derulare. |
-| U10 | Separatoare verticale mai evidente între grupurile de coloane ale jucătorilor, după modelul tabelului Whist. Linia continuă traversează antetul și corpul; nu separă artificial `Δ` de `Σ` pentru același jucător. | Același token de grosime/contrast și aceeași geometrie adaptată la densitate. Cazuri cu 3–6 jucători, o mână și istoric lung; fără suprapuneri, tăieri ori schimbarea valorilor. |
-| U11 | În joc, ordinea comună este **Istoricul jocului → Rezultate → Meniul principal → Oprește Auto-play → Nume**. WEB și APK folosesc aceleași identități de acțiune, etichete și condiții de disponibilitate. | Aceeași proiecție de meniu alimentează adaptoarele. Verificați înaintea scorului, după scor, Auto-play pornit/oprit și AI în așteptare; un callback per acțiune, fără comandă tardivă după oprire. |
-
-[RentzGameMenu](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/chrome/RentzGameMenu.java) este punctul comun al meniului. [RentzScoreLayout](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/RentzScoreLayout.java) fixează în prezent separatorul la 1 dp; confruntați această alegere cu API-ul și testele Whist înainte de înlocuire. [Adaptorul istoricului WEB](../../atf-ui-browser/pages/web/rentz-score.mjs) păstrează exclusiv proiecția Rentz peste rendererul comun.
-
-- **Profile:** lățimi logice 320, 360, 393 și 600, cu font normal și mărit.
-- **Componente:** aceleași fixture-uri de model, mock-uri DOM/Android și valori pozitive, negative și zero; premiile Rentz rămân verificate separat.
-- **E2E:** rasterul, gestul și callback-ul real pe câte un profil reprezentativ.
-- **Închidere:** cerința rămâne deschisă până la implementarea și calificarea ambelor adaptoare.
+- Pe un APK identificat, confirmați titlul și tabelul fără bold, separatoare continue între grupurile de jucători, 3–6 locuri și font mărit.
+- Verificați gestul din coloana fixă, revenirea din detaliile unei mâini și păstrarea poziției; comparațiile JVM nu certifică rasterul Android.
+- Confirmați focusul și tastatura pentru Nume deschis în timpul jocului; dialogul suspendă livrarea AI și reia același checkpoint la închidere. Politica Unicode rămâne în U02/U03.
 
 | ID | Criteriu rămas |
 |---|---|

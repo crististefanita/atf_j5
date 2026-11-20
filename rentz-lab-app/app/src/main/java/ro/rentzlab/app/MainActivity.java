@@ -46,6 +46,7 @@ public final class MainActivity extends Activity {
     private boolean showSettledTable;
     private boolean autoPlay;
     private AlertDialog historyDialog;
+    private AlertDialog profileDialog;
     private View achievementPopup;
     private Exception pendingProblem;
     private Runnable unregisterBack = () -> { };
@@ -92,6 +93,7 @@ public final class MainActivity extends Activity {
     }
     private void redraw() {
         if (!active || isFinishing() || isDestroyed()) return;
+        if (profileDialog != null && profileDialog.isShowing()) return;
         display.removeCallbacksAndMessages(null);
         dismissAchievementPopup();
         long frame = ++generation;
@@ -125,13 +127,22 @@ public final class MainActivity extends Activity {
         try { profile.language(next); redraw(); } catch (IllegalStateException error) { showFailure(error); }
     }
     private void profile() {
-        PlayerNameDialog.show(this, copy().profile(), profile.preferredName(), DisplayName.MAX_LENGTH, DisplayName::normalize,
+        if (profileDialog != null && profileDialog.isShowing()) return;
+        boolean game = screen.equals("GAME");
+        if (game) { generation++; display.removeCallbacksAndMessages(null); controller.deactivate(); }
+        profileDialog = PlayerNameDialog.show(this, copy().profile(), profile.preferredName(), DisplayName.MAX_LENGTH, DisplayName::normalize,
                 value -> {
                     var session = controller.session();
                     if (session != null && session.opponentNames().stream().anyMatch(value::equalsIgnoreCase))
                         throw new IllegalArgumentException(copy().text("That name is already used at this table.", "Numele este deja folosit la această masă."));
-                    profile.name(value); redraw();
+                    profile.name(value);
                 });
+        profileDialog.setOnDismissListener(ignored -> {
+            profileDialog = null;
+            if (!active) return;
+            try { if (game) controller.activate(); redraw(); }
+            catch (Exception error) { showFailure(error); }
+        });
     }
     private void start() {
         try {
@@ -205,8 +216,8 @@ public final class MainActivity extends Activity {
             if (!gameFrame(frame) || controller.isBusy() && !autoPlay) return;
             var menu = new PopupMenu(this, options);
             for (var entry : RentzGameMenu.items(copy, settlement.isPresent(), autoPlay,
-                    this::openHistory, () -> { showSettledTable = false; redraw(); },
-                    () -> { stopAutoPlay(); redraw(); }, () -> route("MENU"))) {
+                    new RentzGameMenu.Actions(this::openHistory, () -> { showSettledTable = false; redraw(); },
+                    () -> route("MENU"), () -> { stopAutoPlay(); redraw(); }, this::profile))) {
                 menu.getMenu().add(entry.label()).setOnMenuItemClickListener(item -> {
                     entry.action().run(); return true;
                 });
@@ -394,6 +405,7 @@ public final class MainActivity extends Activity {
         stopAutoPlay();
         picker.dismiss();
         if (historyDialog != null) { historyDialog.setOnDismissListener(null); historyDialog.dismiss(); historyDialog = null; }
+        if (profileDialog != null) { profileDialog.setOnDismissListener(null); profileDialog.dismiss(); profileDialog = null; }
         controller.deactivate(); super.onPause();
     }
     @Override protected void onSaveInstanceState(Bundle saved) {

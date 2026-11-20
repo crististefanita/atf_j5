@@ -23,8 +23,7 @@
 .record-history.rentz-history-grid thead tr { background: var(--whist-score-header); }
 .record-history.rentz-history-grid tbody tr:nth-child(odd) { background: var(--whist-score-paper); }
 .record-history.rentz-history-grid tbody tr:nth-child(even) { background: var(--whist-score-stripe); }
-.record-history.rentz-history-grid :is(th, td) { border-color: var(--whist-score-rule); color: var(--whist-score-ink); }
-.record-history.rentz-history-grid .history-seat { border-left: var(--rentz-history-separator) solid var(--whist-score-rule); }
+.record-history.rentz-history-grid :is(th, td) { color: var(--whist-score-ink); }
 #table .whist-score .rentz-score-table .whist-score-grid :is(th, td) { font-weight: 400; }
 .whist-score .rentz-score-table {
   --whist-score-col-0: var(--rentz-score-col-0);

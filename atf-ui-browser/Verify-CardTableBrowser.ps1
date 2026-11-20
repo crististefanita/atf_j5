@@ -5,7 +5,7 @@ param(
     [string]$LibraryRoot = (Join-Path $PSScriptRoot 'lib')
 )
 $ErrorActionPreference = 'Stop'
-if ($Version -cnotmatch '^\d+\.\d+\.\d+$' -or $SourceCommit -cnotmatch '^[a-f0-9]{40}$') {
+if ($Version -cnotmatch '^0\.(0|[1-9][0-9]*)(?:\.(0|[1-9][0-9]*))?$' -or $SourceCommit -cnotmatch '^[a-f0-9]{40}$') {
     throw 'Invalid Card Table Browser pin.'
 }
 $receipt = Get-Content -LiteralPath (Join-Path $LibraryRoot 'browser-build.json') -Raw | ConvertFrom-Json -AsHashtable
