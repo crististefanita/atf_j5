@@ -17,9 +17,9 @@ Case 'Android selectors, deal transitions and history qualify offline' {
     $selection = Join-Path $product 'ui-selectors'
     & (Join-Path $PSScriptRoot 'test-ui-selectors.ps1') -RunRoot $selection
     $audit = Get-Content -Raw -LiteralPath (Join-Path $selection 'assertions.json') | ConvertFrom-Json
-    Require ($audit.status-ceq'PASS'-and$audit.checks.Count-eq98-and
-        @($audit.checks.name | Sort-Object -Unique).Count-eq98-and
-        @($audit.checks | Where-Object { !$_.passed }).Count-eq0) 'Expected 98 distinct passing comparisons across selectors, bounded scrolling, table sizes, pacing, presentation, settlement and history'
+    Require ($audit.status-ceq'PASS'-and$audit.checks.Count-eq106-and
+        @($audit.checks.name | Sort-Object -Unique).Count-eq106-and
+        @($audit.checks | Where-Object { !$_.passed }).Count-eq0) 'Expected 106 distinct passing comparisons across selectors, bounded scrolling, table sizes, pacing, presentation, settlement, history and current shared-menu bindings'
 }
 function Hash([string]$File){return (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash.ToLowerInvariant()}
 function Json([string]$File,$Value){ConvertTo-Json -InputObject $Value -Depth 12|Set-Content -LiteralPath $File -Encoding utf8NoBOM}

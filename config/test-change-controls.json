@@ -813,10 +813,10 @@
       "path": "atf-tests/tools/test-qualified-runtime.ps1",
       "owner": "Rentz release qualification",
       "reason": "Support the common scrollable score actions through bounded, transport-neutral native control discovery.",
-      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion.",
-      "proof": "test-ui-selectors.ps1 (98 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
+      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion.",
+      "proof": "test-ui-selectors.ps1 (106 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
       "expires": "2026-12-19",
-      "sha256": "6ce18949398b41c1455bab6e76b30e2f3031a767f42bec071515875c1644f16c",
+      "sha256": "23d7a0169531b0627c75108714bf2341895f878037494a54990bdf52996f8fef",
       "allowDelete": false
     },
     {
@@ -1283,8 +1283,8 @@
       "path": "atf-tests/tools/run-shared-ui-sanity.ps1",
       "owner": "Rentz source-owned release and UI adapters",
       "reason": "Support the common scrollable score actions through bounded, transport-neutral native control discovery.",
-      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion.",
-      "proof": "test-ui-selectors.ps1 (98 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
+      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion.",
+      "proof": "test-ui-selectors.ps1 (106 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
       "expires": "2026-12-19",
       "sha256": "3111a868b981d4ae597bbae44a8c8445bfbd33205439cf3f3398b2077c64d0c3",
       "allowDelete": false
@@ -1601,8 +1601,8 @@
       "path": "rentz-reference/tools/RentzUiOracle.psm1",
       "owner": "Rentz Android qualification",
       "reason": "Support the common scrollable score actions through bounded, transport-neutral native control discovery.",
-      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion.",
-      "proof": "test-ui-selectors.ps1 (98 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
+      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion.",
+      "proof": "test-ui-selectors.ps1 (106 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
       "expires": "2026-12-14",
       "sha256": "cbf160c42eae06392229b053ae3f96237e538ef193b53acf17b6341aa233a71c",
       "allowDelete": false
@@ -1611,8 +1611,8 @@
       "path": "atf-tests/tools/test-ui-selectors.ps1",
       "owner": "Rentz Android qualification",
       "reason": "Support the common scrollable score actions through bounded, transport-neutral native control discovery.",
-      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion.",
-      "proof": "test-ui-selectors.ps1 (98 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
+      "criterion": "Preserve all original 84 selector comparisons and add 14 bounded-navigation comparisons. Fresh observations, finite gestures, one reversal, ambiguous/disabled/foreign rejection and the unchanged deadline remain mandatory. No APK data, card, result or renderer injection. Bind the in-game Results and Game history commands to the delivered shared menu, preserve score-page titles, reject legacy menu commands in AST controls, and retain every score, replay, fresh-frame, disabled and ambiguity assertion.",
+      "proof": "test-ui-selectors.ps1 (106 comparisons), test-qualified-runtime.ps1; docs/rentz/ATF_Release.md",
       "expires": "2026-12-14",
       "sha256": "2c37b5145c0be15e0020b36ba7c763d9ee11435c28457cf04017da77b5771647",
       "allowDelete": false
