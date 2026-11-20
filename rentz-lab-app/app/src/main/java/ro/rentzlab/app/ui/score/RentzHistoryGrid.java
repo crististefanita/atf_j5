@@ -10,7 +10,8 @@ import ro.rentzlab.app.ui.copy.RentzUiText;
 public final class RentzHistoryGrid extends ScoreHistoryView {
     public RentzHistoryGrid(Context context, List<RentzScoreContent.Row> history, List<String> players,
             RentzUiText copy, Consumer<RentzScoreContent.Row> openDetails) {
-        super(context, RentzScoreContent.historyContent(history, players, copy), RentzScoreContent.detailAction(history, openDetails));
+        super(context, RentzScoreContent.historyContent(history, players, copy), RentzScoreContent.detailAction(history, openDetails),
+                ro.cardtable.ui.score.HistoryAppearance.REGULAR_GROUPS);
         setTag("score-history-table");
         setId(ro.rentzlab.app.R.id.history_content);
         headingsView().setId(ro.rentzlab.app.R.id.history_headings);

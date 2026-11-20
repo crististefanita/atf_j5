@@ -19,8 +19,8 @@ $jvm = & (Join-Path $PSScriptRoot 'Start-RentzBrowser.ps1') -WorkRoot $root -Jso
 if ($LASTEXITCODE -ne 0 -or !$jvm) { throw 'Rentz JVM sources did not compile.' }
 $classpath = $jvm -join ''
 $run = Split-Path ($classpath.Split([IO.Path]::PathSeparator)[0])
-$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.27.jar'
-$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.2.27-tests.jar'
+$library = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.4.jar'
+$commonTests = Join-Path $PSScriptRoot 'lib/atf-ui-browser-0.4-tests.jar'
 $commonTestsExpected = (Get-Content -LiteralPath "$commonTests.sha256" -Raw).Trim()
 if ((Get-FileHash -Algorithm SHA256 -LiteralPath $commonTests).Hash -ine $commonTestsExpected) {
     throw 'Shared browser component test checksum mismatch.'
@@ -77,7 +77,7 @@ try { & jar xf $library 'ro/cardtable/browser/web' }
 finally { Pop-Location }
 $commonTestRoot = Join-Path $run 'common-component-tests'
 $null = New-Item -ItemType Directory -Force -Path $commonTestRoot
-$commonContracts = @('fixtures.mjs', 'hand-presentation.mjs', 'viewport-contract.mjs', 'menu-presentation.mjs', 'score-presentation.mjs', 'seat-presentation.mjs', 'card-typography.mjs', 'card-typography.tsv', 'trick-playback.mjs')
+$commonContracts = @('fixtures.mjs', 'hand-presentation.mjs', 'viewport-contract.mjs', 'menu-presentation.mjs', 'score-presentation.mjs', 'menu-history-contract.mjs', 'seat-presentation.mjs', 'card-typography.mjs', 'card-typography.tsv', 'trick-playback.mjs')
 Push-Location $commonTestRoot
 try { & jar xf $commonTests @commonContracts }
 finally { Pop-Location }
@@ -95,7 +95,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Shared browser viewport component checks faile
 
 $tableScript = Join-Path $site 'table.mjs'
 $markup = [IO.File]::ReadAllText($tableScript).Replace("`r`n", "`n")
-$importAnchor = 'import { historyGrid } from "./records.mjs";'
+$importAnchor = 'import { historyGrid, applyHistoryAppearance } from "./records.mjs?v=0.3";'
 $renderAnchor = '  const visible = element("div", "", "cards-on-table");' + "`n" + '  if (!match.header) for (const face of match.center) visible.append(card(face));'
 $contentAnchor = '  const content = element("section", "", match.header ? "match whist-match" : "match");'
 $centerAnchor = '  const center = element("div", "", "center");'
@@ -110,9 +110,9 @@ $choiceAnchor = @(
 ) -join "`n"
 foreach ($anchor in @($importAnchor, $renderAnchor, $contentAnchor, $centerAnchor, $automationAnchor, $rentzHeaderAnchor, $rentzDetailsAnchor, $issueAnchor, $choiceAnchor)) {
     $count = ([regex]::Matches($markup, [regex]::Escape($anchor))).Count
-    if ($count -ne 1) { throw "Card Table Browser 0.2.27 adapter anchor changed; expected one match, found $count." }
+    if ($count -ne 1) { throw "Card Table Browser 0.4 adapter anchor changed; expected one match, found $count." }
 }
-$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence, refreshRentzSequence, rentzMenuRoutes } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable, rentzScoreRules } from "./rentz-score.mjs";')
+$markup = $markup.Replace($importAnchor, $importAnchor + "`n" + 'import { presentRentzArrival, presentRentzPlayback, rentzCenterInsets, rentzChoiceDropdown, rentzSequence, refreshRentzSequence } from "./rentz-ui.mjs";' + "`n" + 'import { rentzHistoryGrid, rentzScoreTable, rentzScoreRules } from "./rentz-score.mjs";')
 $preparedLayoutAnchor = '    await placeTable(content);'
 if (([regex]::Matches($markup, [regex]::Escape($preparedLayoutAnchor))).Count -ne 1) {
     throw 'The shared prepared-table layout anchor changed; sequence measurement cannot be bound safely.'
@@ -128,11 +128,6 @@ foreach ($anchor in @($scoreAnchor, $historyAnchor, $layoutAnchor)) {
     }
 }
 $markup = $markup.Replace($scoreAnchor, '(match.score.table.grid ? rentzScoreTable(match.score.table, element, scoreGrid) : scoreGrid(match.score.table, true))')
-$menuRoutesAnchor = '  for (const route of routes) {'
-if (([regex]::Matches($markup, [regex]::Escape($menuRoutesAnchor))).Count -ne 1) {
-    throw 'The shared menu renderer changed; native Rentz route availability cannot be bound safely.'
-}
-$markup = $markup.Replace($menuRoutesAnchor, '  for (const route of rentzMenuRoutes(routes, match)) {')
 $awardsAnchor = '  if (details.awards) page.append(element("p", details.awards, "whist-score-awards"));'
 $rulesAnchor = 'profileDialogs.message(copy("scoringDetails", "Calculul punctajului"), details.rules, "game-score-rules")'
 foreach ($anchor in @($awardsAnchor, $rulesAnchor)) {
@@ -249,14 +244,14 @@ if ($LASTEXITCODE -ne 0) { throw 'Complete trick-contract presentation checks fa
     (Join-Path $commonTestRoot 'hand-presentation.mjs') (Join-Path $site 'hand-feedback.mjs') `
     (Join-Path $site 'rentz-ui.mjs')
 if ($LASTEXITCODE -ne 0) { throw 'Generated Rentz engine component checks failed.' }
-$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.aar'
+$nativeUiAar = Join-Path $checkout 'rentz-lab-app/ui-library/ro/cardtable/card-table-ui/0.2/card-table-ui-0.2.aar'
 $nativeUiProvenance = Get-Content -LiteralPath (Join-Path $checkout 'rentz-lab-app/ui-library/provenance.json') -Raw | ConvertFrom-Json
-$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.aar' })
+$nativeUiPin = @($nativeUiProvenance.files | Where-Object { $_.path -eq 'ro/cardtable/card-table-ui/0.2/card-table-ui-0.2.aar' })
 if ($nativeUiPin.Count -ne 1 -or
         (Get-FileHash -Algorithm SHA256 -LiteralPath $nativeUiAar).Hash -ine $nativeUiPin[0].sha256) {
     throw 'The native Rentz layout reference does not match the pinned Android UI AAR.'
 }
-$nativeUiClasses = Join-Path $run 'card-table-ui-0.1.24-classes.jar'
+$nativeUiClasses = Join-Path $run 'card-table-ui-0.2-classes.jar'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archive = [IO.Compression.ZipFile]::OpenRead($nativeUiAar)
 try {
@@ -285,6 +280,8 @@ $nativePresentation = Join-Path $run 'rentz-native-presentation.json'
 if ($LASTEXITCODE -ne 0) { throw 'Could not read the pinned Android UI presentation reference.' }
 & node (Join-Path $pages 'verify-shared-ui.mjs') $site $commonTestRoot $nativePresentation
 if ($LASTEXITCODE -ne 0) { throw 'Shared native/browser UI adoption checks failed.' }
+& node (Join-Path $pages 'verify-menu-history.mjs') $site $commonTestRoot $nativePresentation (Join-Path $root 'menu-history')
+if ($LASTEXITCODE -ne 0) { throw 'Shared menu/history adapter component checks failed.' }
 & node (Join-Path $pages 'verify-score-actions.mjs') $site $commonTestRoot $nativePresentation (Join-Path $root 'score-actions')
 if ($LASTEXITCODE -ne 0) { throw 'Shared score action accessibility component checks failed.' }
 & node (Join-Path $pages 'verify-shared-automation.mjs') $site

@@ -4,12 +4,12 @@
   "controls": [
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzSharedPresentationTest.java",
-      "owner": "Rentz UI adoption",
-      "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
-      "criterion": "Preserve complete localized labels, exactly one accessible scale, signed score columns, existing callbacks and shared viewport behavior.",
-      "proof": "atf-ui-browser/README.md#acțiunile-scorului",
-      "expires": "2026-12-19",
-      "sha256": "8801ba91219a197411eac01186428d3701a47227783b64e770ee9ff3a2ad15b8",
+      "owner": "Rentz shared menu and history adapters",
+      "reason": "Use the same localized menu plan and regular history policy through the pinned native/browser package pair.",
+      "criterion": "Preserve confirmed-result and AutoPlay gates, one callback per intent, no late AI delivery during name editing, signed history values and Whist group separators; retain unchanged legacy geometry and score tests.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#meniul-și-aspectul-istoricului",
+      "expires": "2026-12-20",
+      "sha256": "ffefb6b85dfeed2030a6b9fd49c4c6b2bcfaae28f172dd6c4b9fe14f01338bef",
       "allowDelete": false
     },
     {
@@ -981,12 +981,12 @@
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/libraries/CardUiAdoptionTest.java",
-      "owner": "Rentz UI",
-      "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
-      "criterion": "Preserve complete localized labels, exactly one accessible scale, signed score columns, existing callbacks and shared viewport behavior.",
-      "proof": "atf-ui-browser/README.md#acțiunile-scorului",
-      "expires": "2026-12-19",
-      "sha256": "ee7db3dca2a395ab80bd633112be4b4f9be3a73a018c8c9a21d9c687cae2d36b",
+      "owner": "Rentz shared menu and history adapters",
+      "reason": "Use the same localized menu plan and regular history policy through the pinned native/browser package pair.",
+      "criterion": "Preserve confirmed-result and AutoPlay gates, one callback per intent, no late AI delivery during name editing, signed history values and Whist group separators; retain unchanged legacy geometry and score tests.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#meniul-și-aspectul-istoricului",
+      "expires": "2026-12-20",
+      "sha256": "e5c9026bc7d1a0e9983d8c7a6c2938a75e3eae3d7ac025dae48bd01f275077a8",
       "allowDelete": false
     },
     {
@@ -1321,12 +1321,12 @@
     },
     {
       "path": "rentz-lab-app/app/build.gradle",
-      "owner": "Rentz release",
-      "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
-      "criterion": "One numeric current edition, exact signed APK and source tag, source-bound component/native/RAG proof and verified canonical downloads; preserve historical tags and original audit receipts.",
-      "proof": "atf-ui-browser/README.md#acțiunile-scorului",
-      "expires": "2026-12-19",
-      "sha256": "794f6a488d37f67418935f06ca3068ca4d44e2cb8db07333b672a42f1b50ef52",
+      "owner": "Rentz release and shared menu/history adapters",
+      "reason": "Prepare the numeric minor candidate while adopting the same localized menu plan and regular history policy through the pinned native/browser package pair.",
+      "criterion": "One numeric current edition, exact signed APK and source tag, source-bound component/native/RAG proof and verified canonical downloads; preserve historical tags and original audit receipts. Preserve confirmed-result and AutoPlay gates, one callback per intent, no late AI delivery during name editing, signed history values and Whist group separators; retain unchanged legacy geometry and score tests.",
+      "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme; docs/rentz/ATF_UiIntegration.md#meniul-și-aspectul-istoricului",
+      "expires": "2026-12-20",
+      "sha256": "337e638e8fd1e796db69ac2e29e0ef67be0a0dd20122549dd0a5be936af778e9",
       "allowDelete": false
     },
     {
@@ -1697,13 +1697,13 @@
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/chrome/RentzGameMenuComponentTest.java",
-      "owner": "Rentz UI cohesion",
-      "reason": "Move the unchanged native chrome contract to its own package.",
-      "criterion": "Retain every native assertion and public behavior; only package and imports change.",
-      "proof": "Android JVM regression",
-      "expires": "2026-12-18",
+      "owner": "Rentz shared menu and history adapters",
+      "reason": "Use the same localized menu plan and regular history policy through the pinned native/browser package pair.",
+      "criterion": "Preserve confirmed-result and AutoPlay gates, one callback per intent, no late AI delivery during name editing, signed history values and Whist group separators; retain unchanged legacy geometry and score tests.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#meniul-și-aspectul-istoricului",
+      "expires": "2026-12-20",
       "allowDelete": false,
-      "sha256": "b5438ac76358fdc0c1ac1a35d8b9707a92ebf7e23f2187e33537146ada06614b"
+      "sha256": "164b0b43c3ce55b15935a7136ead7063c6747aec6ba479ac16f5e73eb54e9572"
     },
     {
       "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/ui/table/RentzTurnBadgeComponentTest.java",
@@ -1746,12 +1746,12 @@
     },
     {
       "path": "atf-ui-browser/Test-RentzBrowserComponents.ps1",
-      "owner": "Shared browser consumer",
-      "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
-      "criterion": "Preserve complete localized labels, exactly one accessible scale, signed score columns, existing callbacks and shared viewport behavior.",
-      "proof": "atf-ui-browser/README.md#acțiunile-scorului",
-      "expires": "2026-12-19",
-      "sha256": "01532f95d67d1f00036148797f4fdfa9dc02664271c82e0d614c375c711c5be2",
+      "owner": "Rentz shared menu and history adapters",
+      "reason": "Use the same localized menu plan and regular history policy through the pinned native/browser package pair.",
+      "criterion": "Preserve confirmed-result and AutoPlay gates, one callback per intent, no late AI delivery during name editing, signed history values and Whist group separators; retain unchanged legacy geometry and score tests.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#meniul-și-aspectul-istoricului",
+      "expires": "2026-12-20",
+      "sha256": "615910feee3d52912b8766060cc31600f8c92ceffcc64710bb0a779f92fc0153",
       "allowDelete": false
     },
     {
@@ -1766,12 +1766,12 @@
     },
     {
       "path": "atf-ui-browser/Build-RentzPages.ps1",
-      "owner": "Rentz shared browser admission",
-      "reason": "Adopt one shared result action policy and the identical native/browser package pair.",
-      "criterion": "Preserve complete localized labels, exactly one accessible scale, signed score columns, existing callbacks and shared viewport behavior.",
-      "proof": "atf-ui-browser/README.md#acțiunile-scorului",
-      "expires": "2026-12-19",
-      "sha256": "9e83c436c8c5737173b602ddc4c717db5009205e845f3e81e4bb2c2cd77c3d9a",
+      "owner": "Rentz shared menu and history adapters",
+      "reason": "Use the same localized menu plan and regular history policy through the pinned native/browser package pair.",
+      "criterion": "Preserve confirmed-result and AutoPlay gates, one callback per intent, no late AI delivery during name editing, signed history values and Whist group separators; retain unchanged legacy geometry and score tests.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#meniul-și-aspectul-istoricului",
+      "expires": "2026-12-20",
+      "sha256": "c9de5538245b0f2dc1bf941ce07f9aa59f8a4dbe024924eec21de4a6d0262673",
       "allowDelete": false
     },
     {
@@ -1936,13 +1936,13 @@
     },
     {
       "path": "atf-ui-browser/pages/verify-rentz-ui.mjs",
-      "owner": "Rentz native/browser acceptance",
-      "reason": "Bind the real WEB flow to the canonical native score captions instead of obsolete P/T labels.",
-      "criterion": "Valid Δ:/Σ: settlement passes, old captions fail for that exact reason, and history retains Δ/Σ without colons; no score or history assertion is removed.",
-      "proof": "atf-ui-browser/pages/verify-rentz-ui.mjs",
-      "expires": "2026-12-19",
+      "owner": "Rentz shared menu and history adapters",
+      "reason": "Use the same localized menu plan and regular history policy through the pinned native/browser package pair.",
+      "criterion": "Preserve confirmed-result and AutoPlay gates, one callback per intent, no late AI delivery during name editing, signed history values and Whist group separators; retain unchanged legacy geometry and score tests.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#meniul-și-aspectul-istoricului",
+      "expires": "2026-12-20",
       "allowDelete": false,
-      "sha256": "c6973dca9d17fd20df9905b990f9b4a7d03aa33bdf7ce3cf4f3f5c79b43d015b"
+      "sha256": "88ec2a95dbe9e29d43619d23c21ad0e2f56288a83ad43d2ddc9ae995732b2ba6"
     },
     {
       "path": "atf-ui-browser/tests/rentz-web-flow.mjs",
@@ -1983,6 +1983,16 @@
       "expires": "2026-12-20",
       "sha256": "3f5d5bc745a0a92ae886c94c1250c7b03a98120a71ff380d8ade5a299a52ff0d",
       "allowDelete": false
+    },
+    {
+      "path": "rentz-lab-app/app/src/test/java/ro/rentzlab/app/lifecycle/ProfileModalComponentTest.java",
+      "owner": "Rentz shared menu and history adapters",
+      "reason": "Use the same localized menu plan and regular history policy through the pinned native/browser package pair.",
+      "criterion": "Preserve confirmed-result and AutoPlay gates, one callback per intent, no late AI delivery during name editing, signed history values and Whist group separators; retain unchanged legacy geometry and score tests.",
+      "proof": "docs/rentz/ATF_UiIntegration.md#meniul-și-aspectul-istoricului",
+      "expires": "2026-12-20",
+      "allowDelete": false,
+      "sha256": "bfae47483635ace3b9cc545da495634e1a53869b33492901d224aa0846e99044"
     }
   ]
 }

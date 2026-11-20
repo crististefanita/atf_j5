@@ -35,7 +35,7 @@ O revizie de conținut identifică întregul pachet încărcat de browser.
 | Integritate | Build-ul recitește manifestul și fiecare amprentă; refuză dependențele lipsă și împachetarea repetată. |
 | Persistență | Profilul și sesiunea păstrează cheia locală existentă. |
 
-Consumatorul fixează Card Table Browser 0.2.27. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
+Consumatorul fixează Card Table Browser 0.4. [Proveniența pachetului](lib/browser-build.json) leagă cele două JAR-uri de commitul Whist și de amprentele SHA-256. Fontul comun `CardTableSuits` redă simbolurile de culoare în secvența Rentz; build-ul verifică prezența fontului și a licenței sale în pachetul static.
 
 ### Reutilizarea prezentării native
 
@@ -222,8 +222,8 @@ README-ul principal va lega jocul online după ce workflow-ul publică pagina ș
 ## Surse
 
 - [Regulile și arhitectura motorului Rentz](../rentz-lab-app/game-core/README.md)
-- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.2.27.jar) · [checksum](lib/atf-ui-browser-0.2.27.jar.sha256)
-- [Testul comun de componentă](lib/atf-ui-browser-0.2.27-tests.jar) · [checksum](lib/atf-ui-browser-0.2.27-tests.jar.sha256)
+- [JAR-ul comun Card Table Browser](lib/atf-ui-browser-0.4.jar) · [checksum](lib/atf-ui-browser-0.4.jar.sha256)
+- [Testul comun de componentă](lib/atf-ui-browser-0.4-tests.jar) · [checksum](lib/atf-ui-browser-0.4-tests.jar.sha256)
 
 ### Textul scorului și continuitatea comună
 
@@ -239,3 +239,9 @@ Acțiunile de rezultat folosesc rolurile comune de 24/21 unități logice, cu 50
 - Etichetele lungi se împachetează, iar înălțimea urmează conținutul cu țintă tactilă minimă de 48 de unități. Pagina completă rămâne derulabilă.
 - Cifrele tabelului, punctele și dialogurile generice își păstrează rolurile; profilul, regulile și callback-urile rămân ale jocului.
 - Testele consumă JAR-ul comun de teste și compară rolurile cu AAR-ul efectiv. Acoperiți RO/EN, ferestre scunde, text mărit și ultima acțiune, fără a echivala componentele cu rasterizarea nativă.
+
+## Meniu și istoric comune
+
+JAR-ul de teste livrează `menu-history-contract.mjs`, iar `verify-menu-history.mjs` confruntă meniul real și istoricul rendererului cu planul emis de adaptorul Android din AAR-ul fixat. Verificările includ RO/EN, AutoPlay pornit/oprit, rezultatul confirmat, 3–6 jucători, ferestre înguste și text mărit. Titlul și tabelul folosesc text normal; separatoarele apar între jucători, fără a despărți Δ de Σ.
+
+Rutele și suspendarea AI rămân în adaptoare. [Contractul comun și limitele native](../docs/rentz/ATF_UiIntegration.md#meniul-și-aspectul-istoricului) separă componentele de acceptanța unui APK publicat.

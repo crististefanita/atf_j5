@@ -14,7 +14,7 @@ const { verifyScorePresentation } = await load(join(contracts, 'score-presentati
 const { verifySeatFitting, verifyActorLabels, verifySeatRetention, verifyCenterContinuity, verifySeatActionClearance } = await load(join(contracts, 'seat-presentation.mjs'));
 const { fitSeatLine, retainSeatFrames, measureSeatActionClearance } = await load(join(site, 'seat-presentation.mjs'));
 const { rentzChoiceDropdown } = await load(join(site, 'rentz-ui.mjs'));
-const { historyFirst } = await load(join(site, 'table-menu.mjs'));
+const { historyFirst, menuFromEntries } = await load(join(site, 'table-menu.mjs'));
 const { dismissGameMenuOnOutsideClick } = await load(join(site, 'profile.mjs'));
 const native = JSON.parse(readFileSync(nativeFile, 'utf8').replace(/^\uFEFF/, ''));
 engine.initialize(0, 31);
@@ -43,6 +43,13 @@ for (const expected of await verifyCardTypography(setup)) {
 }
 check('Delivered history menu contract runs on the actual shared module',
   { languages: 2, historyRoutes: 1, constructorActions: 0, selectedActions: 1, invalidPlansRefused: true }, verifyHistoryMenu(historyFirst));
+const {verifyMenuEntries}=await load(join(contracts,'menu-history-contract.mjs'));
+for(const plan of native.menuPlans){
+ const expectedIds=['score-history',...(plan.settled?['score-sheet']:[]),'home','stop-auto','settings'];
+ check('Native menu order '+plan.language+'/'+plan.settled,expectedIds,plan.entries.map(e=>e.id));
+ check('Delivered adapter keeps native menu labels and callbacks '+plan.language+'/'+plan.settled,
+  {entries:plan.entries.length,callbacks:expectedIds,labels:plan.entries.map(e=>e.label),invalidPlansRefused:true},verifyMenuEntries(menuFromEntries,plan.entries));
+}
 check('Delivered dismissal contract survives a menu redraw',
   { insideKeepsOpen: true, outsideDismisses: true, afterRerenderDismisses: true }, verifyGameMenuDismissal(dismissGameMenuOnOutsideClick));
 

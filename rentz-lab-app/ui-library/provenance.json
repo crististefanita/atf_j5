@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "coordinate": "ro.cardtable:card-table-ui:0.1.24",
+  "coordinate": "ro.cardtable:card-table-ui:0.2",
   "namesCoordinate": "ro.cardtable:card-table-names:0.1.0",
   "producer": "whist",
-  "qualification": "https://github.com/crististefanita/whist/blob/a577476c657593abc19c8ad13dab4104a7b78be3/whist-lab-app/atf-card-table-ui/src/main/java/ro/cardtable/ui/score/README.md",
+  "qualification": "https://github.com/crististefanita/whist/blob/12c16d8b87635f4e6f3d41eab0a332e6c92ec075/whist-lab-app/atf-card-table-ui/README.md",
   "files": [
     {
       "path": "ro/cardtable/card-table-names/0.1.0/card-table-names-0.1.0.jar",
@@ -22,26 +22,26 @@
       "sha256": "92a5fb18ad5e183f89a09392b177803b0b42227f83cf5a278012760291d3c030"
     },
     {
-      "path": "ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.aar",
-      "sha256": "d15433a107d12411ca95dd1e484574cddbd30887f5239efd96003b73c2541d84"
+      "path": "ro/cardtable/card-table-ui/0.2/card-table-ui-0.2-sources.jar",
+      "sha256": "2f1b606122516cb3622077c15f34abfd02e044dcd7f637bfc4ceada5d594a7e8"
     },
     {
-      "path": "ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.pom",
-      "sha256": "69446074f9b22cac71c7fce6238b55418e687e0fcbde0d4d109393516dd4312e"
+      "path": "ro/cardtable/card-table-ui/0.2/card-table-ui-0.2.aar",
+      "sha256": "8fcb3f059928274dbf0c6da765ea957ec341d9c1ade5a76cffdbedd64a042853"
     },
     {
-      "path": "ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24.module",
-      "sha256": "0124eb235cfa612bd9239969bf9330368d165015d9e4763fba73290e60611908"
+      "path": "ro/cardtable/card-table-ui/0.2/card-table-ui-0.2.module",
+      "sha256": "0f47c7efc292fd10d39e1e38401b047a3c7d3098629e3346d6865e9d2df68bce"
     },
     {
-      "path": "ro/cardtable/card-table-ui/0.1.24/card-table-ui-0.1.24-sources.jar",
-      "sha256": "1fdd422411d42de6c5b20e5cdfad7181ec1b30d9d69dbaaded6c396118e8d79c"
+      "path": "ro/cardtable/card-table-ui/0.2/card-table-ui-0.2.pom",
+      "sha256": "cc7edfe44ebabdfee8619af8219a64a6c800c7dc2e3b8ec5299df58d4ff52223"
     },
     {
-      "path": "ro/cardtable/card-table-ui/0.1.24/card-ui-build.json",
-      "sha256": "7d5e354050c2aa9a1e84b48f12d4c461c3d742b6656e2017301dae36f07459db"
+      "path": "ro/cardtable/card-table-ui/0.2/card-ui-build.json",
+      "sha256": "63963f28017978d8ad7c0d0e05c204902e62823933857aaf1b719b38989ca279"
     }
   ],
-  "producerCommit": "a577476c657593abc19c8ad13dab4104a7b78be3",
-  "producerSourceFingerprint": "17418bda087e1b002be4c05547db280132e2181583dc0b7de358b40a254e58a4"
+  "producerCommit": "12c16d8b87635f4e6f3d41eab0a332e6c92ec075",
+  "producerSourceFingerprint": "70d846bbb0fa47581a4a49a8b364e676761dbbfc3740958b9f6d981e6201200e"
 }

@@ -344,3 +344,21 @@ Acțiunile de rezultat folosesc rolurile comune de 24/21 unități logice, cu 50
 - Etichetele lungi se împachetează, iar înălțimea urmează conținutul cu țintă tactilă minimă de 48 de unități. Pagina completă rămâne derulabilă.
 - Cifrele tabelului, punctele și dialogurile generice își păstrează rolurile; profilul, regulile și callback-urile rămân ale jocului.
 - Testele consumă JAR-ul comun de teste și compară rolurile cu AAR-ul efectiv. Acoperiți RO/EN, ferestre scunde, text mărit și ultima acțiune, fără a echivala componentele cu rasterizarea nativă.
+
+## Meniul și aspectul istoricului
+
+`RentzGameMenu.entries` este unica proiecție localizată a meniului din joc. Adaptorul Android leagă intrările prin `TableMenuContent.bind`; browserul primește aceleași intrări serializate și le leagă prin `menuFromEntries`. Platformele dețin navigarea și ciclul de viață, fără inventare separate de etichete sau ordine.
+
+| Acțiune | Disponibilitate |
+|---|---|
+| Istoricul jocului | Prima acțiune, inclusiv înaintea primei mâini confirmate. |
+| Rezultate | Numai după confirmarea mâinii, potrivit fazei native. |
+| Meniul principal | După rezultatele disponibile. |
+| Oprește Auto-play | Numai cât automatizarea este selectată. |
+| Nume | Ultima acțiune; nu schimbă jurnalul partidei. |
+
+- Deschiderea numelui invalidează callback-urile AI vechi și suspendă controllerul. Salvarea modifică profilul, iar închiderea reactivează aceeași sesiune; un răspuns întârziat nu dublează mutarea.
+- `HistoryAppearance.REGULAR_GROUPS` stabilește text normal și separatorul Whist de două unități logice, `#71846c`. Android folosește politica în widgetul comun și titlul dialogului; Web aplică proprietățile CSS exportate, fără suprascrieri locale de contrast sau grosime.
+- Separatorul delimitează jucătorii și păstrează perechea Δ/Σ a fiecăruia. Valorile și premiile rămân în modelul Rentz.
+- Biblioteca Android folosește coordonata 0.2, iar Browser 0.4 cu arhiva sa de teste. Coordonatele UI noi au două segmente 0.x; coordonatele istorice se pot doar reutiliza cu aceiași octeți.
+- Componentele consumatorului confruntă planul nativ, stilul măsurat în Chromium, modelul de istoric și proveniența binară. Acceptanța raster, focusul și gesturile Android rămân o calificare separată.

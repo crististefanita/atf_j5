@@ -198,6 +198,7 @@ final class RentzTable implements BrowserGame.Match {
         result.put("score", view.score());
         result.put("scoreDetails", view.scoreDetails());
         result.put("rentzSequence", RentzBrowser.sequence(state));
+        result.put("menuEntries", view.menuEntries());
         result.put("rentzMenuUnavailable", RentzGameMenu.unavailable(copy, view.score() != null));
         return result;
     }
@@ -260,7 +261,7 @@ final class RentzTable implements BrowserGame.Match {
                 ? text("Clasament final", "Final standings") : text("Rezultatul mâinii", "Hand result"), currentHandHistory(state)) : null;
         ScoreDetails scoreDetails = scoreScreen ? scoreDetails(state) : null;
         return new View(text("Mâna", "Hand") + " " + state.handNumber(), contract, prompt,
-                List.copyOf(seats), hand, played, List.of(), controls(state), history, header, score, scoreDetails);
+                List.copyOf(seats), hand, played, List.of(), controls(state), history, header, score, scoreDetails).withMenuEntries(RentzGameMenu.entries(copy, scoreScreen));
     }
 
     private List<Action> controls(Observation state) {
@@ -306,7 +307,7 @@ final class RentzTable implements BrowserGame.Match {
             rows.add(new HistoryRow(hand.hand(), hand.label(), row(content.rows().get(index))));
         }
         return new HistoryGrid(content.players().stream().map(player -> player.label()).toList(), rows,
-                text("Mână", "Hand"), content.columns().get(0), content.columns().get(1), content.legend());
+                text("Mână", "Hand"), content.columns().get(0), content.columns().get(1), content.legend(), ro.cardtable.ui.score.HistoryAppearance.REGULAR_GROUPS.cssTokens());
     }
 
     private List<HistoryCell> row(ro.cardtable.ui.score.HistoryContent.Row hand) {
