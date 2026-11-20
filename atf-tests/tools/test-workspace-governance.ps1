@@ -21,6 +21,16 @@ function Setup([string]$Name){
 function Findings($case){return @(Get-AtfWorkspaceFindings -ProjectRoot $case.project -DataRoot $case.data -SystemTempRoot $case.system -Policy $case.policy)}
 Case 'Registered source and artifact directories pass' {$c=Setup 'registered';New-Item -ItemType Directory -Path "$($c.data)/learning"|Out-Null;Require ((Findings $c).Count-eq0) 'Valid registry rejected'}
 Case 'Unknown source directory fails' {$c=Setup 'source';New-Item -ItemType Directory -Path "$($c.project)/scratch-unregistered"|Out-Null;Require (((Findings $c).code)-contains'INFRA-UNREGISTERED-DIRECTORY') 'Unknown source directory accepted'}
+Case 'Legacy in-source data is rejected and removing it restores the same inventory' {
+    $c=Setup 'legacy-source-data'
+    $legacy=Join-Path $c.project '.atf-data'
+    Require ((Findings $c).Count-eq0) 'Clean source fixture was rejected'
+    New-Item -ItemType Directory -Path $legacy|Out-Null
+    $findings=Findings $c
+    Require ($findings.Count-eq1-and$findings[0].code-ceq'INFRA-UNREGISTERED-DIRECTORY'-and[IO.Path]::GetFullPath($findings[0].path)-ceq[IO.Path]::GetFullPath($legacy)) 'Legacy data was accepted or a different boundary failed'
+    Remove-Item -LiteralPath $legacy
+    Require ((Findings $c).Count-eq0) 'The original inventory did not recover after removing legacy data'
+}
 Case 'Unknown project beside ATF projects fails' {$c=Setup 'project';New-Item -ItemType Directory -Path (Join-Path (Split-Path $c.project) 'random-project')|Out-Null;Require (((Findings $c).code)-contains'INFRA-UNREGISTERED-DIRECTORY') 'Unknown checkout accepted'}
 Case 'Unknown artifact collection fails' {$c=Setup 'artifact';New-Item -ItemType Directory -Path "$($c.data)/misc-random"|Out-Null;Require (((Findings $c).code)-contains'INFRA-UNREGISTERED-DIRECTORY') 'Unknown output collection accepted'}
 Case 'Future legacy compile name is rejected while unrelated OS folders are ignored' {$c=Setup 'legacy';New-Item -ItemType Directory -Path "$($c.system)/other-application","$($c.system)/whist-screen-compile-FutureSuffix"|Out-Null;$f=Findings $c;Require ($f.Count-eq1-and$f[0].code-eq'INFRA-FORBIDDEN-TEMP-WORKSPACE') 'Legacy scope is too broad or only matches the original name'}

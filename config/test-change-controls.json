@@ -1292,11 +1292,11 @@
     {
       "path": "atf-tests/tools/test-workspace-governance.ps1",
       "owner": "Rentz release",
-      "reason": "Keep all active data inside the permanent .imp root and refuse disposable overrides and OS temporary output.",
-      "criterion": "Real Git worktrees share the verified permanent root; preserve signing, path traversal, long-path and non-Git fixture controls.",
+      "reason": "Keep all active data inside the permanent .imp root and refuse disposable overrides and OS temporary output. Reject legacy .atf-data in sources and prove recovery after removal.",
+      "criterion": "Real Git worktrees share the verified permanent root; preserve signing, path traversal, long-path and non-Git fixture controls. The same clean fixture passes before and after the isolated legacy-directory rejection.",
       "proof": "docs/rentz/ATF_Retention.md",
       "expires": "2026-12-12",
-      "sha256": "fd43fb73ccbedadf4452ebf6af84dd7378f3b4802b34251486fa3df5e99b9d0d",
+      "sha256": "6fb0d9326bf1ac1ca18421cc577cd14676b3fed6234e16e414913754fb61e9df",
       "allowDelete": false
     },
     {
@@ -1326,7 +1326,7 @@
       "criterion": "One numeric current edition, exact signed APK and source tag, source-bound component/native/RAG proof and verified canonical downloads; preserve historical tags and original audit receipts.",
       "proof": "atf-ui-browser/README.md#acțiunile-scorului",
       "expires": "2026-12-19",
-      "sha256": "ff5e60ac0d71e9bc26ff8c7baa4c3cc9e81d50e2bbd3ae9f1f24fc9c996a76ab",
+      "sha256": "794f6a488d37f67418935f06ca3068ca4d44e2cb8db07333b672a42f1b50ef52",
       "allowDelete": false
     },
     {
@@ -1336,7 +1336,7 @@
       "criterion": "One numeric current edition, exact signed APK and source tag, source-bound component/native/RAG proof and verified canonical downloads; preserve historical tags and original audit receipts.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "f6ea3c51535a8e9f3f50e85aed069faf412d6d8a417ca681f5fbbdd7acd41b16",
+      "sha256": "a3e20497892e0041efb5706178dc52d8cc3e46c473234e31c4df321d8e689ba0",
       "allowDelete": false
     },
     {

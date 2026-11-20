@@ -3,6 +3,10 @@
   "repository": "crististefanita/rentz",
   "currentVersion": "0.31.0",
   "browserUrl": "https://crististefanita.github.io/rentz/",
+  "candidate": {
+    "version": "0.32.0",
+    "versionCode": 36
+  },
   "versions": [
     "0.31.0"
   ]
