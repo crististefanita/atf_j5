@@ -1003,7 +1003,7 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
                 RentzSequenceChecks $captured $terminal
             }
         }
-        if($contract-eq'RENTZ'){Tap 'Options';Tap 'Hand score'}
+        if($contract-eq'RENTZ'){Tap 'Options';Tap 'Results'}
         $startTitle="Consecutive subgame $deal starts: $contract"
         $moveTitle="Subgame $deal first human move remains visible"
         $completeTitle="Subgame $deal completed: $contract"
@@ -1109,7 +1109,7 @@ function RunConsecutiveSubgames($state,[string]$journalFile){
         Check 'Restored seat geometry' $baseSeats (SeatGeometry $captured $restored)
         TableChecks $captured $restored
     }
-    Tap 'Options';Tap 'Score history';$null=State -Screen 'HISTORY'
+    Tap 'Options';Tap 'Game history';$null=State -Screen 'HISTORY'
     $historyCount=ReadConsecutiveHistory 'Restarted score history' $selectedContracts.ToArray()
     Observe 'The confirmed rows remain after process restart' {param($captured)
         Check 'Restarted history retains all completed subgames' $consecutiveGameCount $historyCount
@@ -1289,7 +1289,7 @@ try{
     Adb @('shell','am','start','-W','-n','ro.rentzlab.app.uisanity/ro.rentzlab.app.MainActivity') 'restart-start'|Out-Null
     Tap 'Resume game';Tap 'View table';$restored=State
     Observe 'Process restart keeps the confirmed Rentz hand' {param($nodes) Check 'Restored totals' ($terminal.view.totals-join',') ($restored.view.totals-join',');Check 'No replayed command' $terminal.revision $restored.revision;Check 'Same completed phase' 'DEAL_END' $restored.view.phase;Check 'Same opponents in seat order' ($terminal.opponents-join',') ($restored.opponents-join',');TableChecks $nodes $restored}
-    Tap 'Options';Tap 'Score history';$null=State -Screen 'HISTORY'
+    Tap 'Options';Tap 'Game history';$null=State -Screen 'HISTORY'
     Observe 'Restored score history still contains the confirmed row' {param($nodes) $t=Text $nodes;Check 'History restored' $true ($t.Contains('1 · Tricks'));Check 'Restored player identity' $true ($t.Contains('Ana'))}
     if($CompactScores){RunCompactScores $terminal}
     }

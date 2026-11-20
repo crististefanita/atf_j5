@@ -13,6 +13,20 @@ function Check([string]$Name,$Expected,$Actual){
     $checks.Add([pscustomobject]@{name=$Name;expected=[string]$Expected;actual=[string]$Actual;passed=$pass})
     if(-not$pass){throw "Selector assertion failed: $Name"}
 }
+function NativeMenuBindings([string]$Source) {
+    $tokens=$null;$errors=$null
+    $ast=[Management.Automation.Language.Parser]::ParseInput($Source,[ref]$tokens,[ref]$errors)
+    if($errors.Count){throw 'Native runner syntax is invalid'}
+    $taps=@($ast.FindAll({param($node)$node-is[Management.Automation.Language.CommandAst]-and$node.GetCommandName()-ceq'Tap'},$true)|Sort-Object {$_.Extent.StartOffset})
+    $labels=[Collections.Generic.List[string]]::new()
+    for($index=0;$index-lt$taps.Count-1;$index++){
+        if($taps[$index].CommandElements.Count-lt2-or$taps[$index].CommandElements[1].Extent.Text-cne"'Options'"){continue}
+        $label=$taps[$index+1].CommandElements[1].Extent.Text.Trim("'")
+        if($label-notin@('Results','Game history','Main menu')){throw "Unknown or obsolete native game-menu binding: $label"}
+        $labels.Add($label)
+    }
+    return $labels.ToArray()
+}
 $failure=''
 try{
     [xml]$picker='<hierarchy><node class="android.widget.ListView"><node text="Choice" content-desc="" class="android.widget.CheckedTextView" enabled="true" clickable="false" bounds="[10,20][50,60]"/></node></hierarchy>'
@@ -31,6 +45,20 @@ try{
         $extra=if($Duplicate){$button}else{''}
         $other=if($TwoScrolls){'<node class="android.widget.ScrollView" package="'+$Package+'" enabled="true" scrollable="true" bounds="[0,300][320,640]"/>'}else{''}
         [xml]('<hierarchy><node class="android.widget.ScrollView" package="'+$Package+'" enabled="true" scrollable="true" bounds="[0,0][320,640]">'+$button+$extra+'</node>'+$other+'</hierarchy>')
+    }
+    $bindings=@(NativeMenuBindings ([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'run-shared-ui-sanity.ps1'))))
+    Check 'The current menu routes once to Results' 1 @($bindings|Where-Object{$_-ceq'Results'}).Count
+    Check 'Both in-game history routes use Game history' 2 @($bindings|Where-Object{$_-ceq'Game history'}).Count
+    foreach($obsolete in @('Hand score','Score history')){
+        $refused=$false;try{$null=NativeMenuBindings "Tap 'Options'; Tap '$obsolete'"}catch{$refused=$_.Exception.Message-like'Unknown or obsolete native game-menu binding:*'}
+        Check "Legacy menu command $obsolete is refused" $true $refused
+    }
+    foreach($label in @('Results','Game history')){
+        $frame=NavigationFrame $label
+        $target=Get-RentzTapTarget -Nodes @($frame.SelectNodes('//node')) -Label $label
+        Check "Current menu command $label resolves its actual enabled button" '[20,120][300,170]' $target.bounds
+        $disabled=NavigationFrame $label -Disabled
+        Check "Disabled menu command $label is not actionable" $true ($null-eq(Get-RentzTapTarget -Nodes @($disabled.SelectNodes('//node')) -Label $label))
     }
     $nav=@{reads=0;gestures=[Collections.Generic.List[string]]::new()}
     $found=Find-RentzVisibleControl -Label 'View table' -Deadline ([datetime]::UtcNow.AddSeconds(5)) -ReadUi {
