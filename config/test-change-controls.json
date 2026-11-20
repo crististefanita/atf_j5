@@ -1728,10 +1728,10 @@
       "path": "atf-tests/src/test/java/atf/rentz/libraries/PortableUiBuildTest.java",
       "owner": "Rentz portable UI build",
       "reason": "Admit the coherent Android 0.1.22 and Browser 0.2.25 pair, including score typography and the exact native producer receipt.",
-      "criterion": "Keep every physical archive and loaded-class comparison; pin the current native receipt and reject each of the seven changed portable inputs independently.",
+      "criterion": "Keep every physical archive and loaded-class comparison; pin the current native receipt and reject each of the seven changed portable inputs independently. Admit exact numeric minor or patch coordinates while refusing ranges, dynamic versions, snapshots and traversal. Preserve exact producer receipt hashes and every cross-platform input comparison.",
       "proof": "rentz-lab-app/ui-library/README.md#regresie-și-livrare-către-rentz",
       "expires": "2026-12-18",
-      "sha256": "8a2f1035323eb300ee8f9d73634806f091569c4fe515199b1932bfe85c3fb0ae",
+      "sha256": "7c4d3591d551f24e0fc1047b5057a212a3fc6ba02e8edc338239c5ada8d29589",
       "allowDelete": false
     },
     {

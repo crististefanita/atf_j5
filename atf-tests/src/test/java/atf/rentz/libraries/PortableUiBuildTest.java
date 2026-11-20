@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @AtfComponentTest
 class PortableUiBuildTest {
+    private static final Pattern NATIVE_COORDINATE = Pattern.compile(
+            "ro[.]cardtable:card-table-ui:(?:0|[1-9][0-9]*)[.](?:0|[1-9][0-9]*)(?:[.](?:0|[1-9][0-9]*))?");
     private static final List<String> PORTABLE = List.of("score/ScoreTableContent", "score/ScoreTypography", "score/HistoryContent",
             "score/HistoryGridMetrics", "score/HistoryScrollSync", "screens/GameTitleLayout", "seat/SeatTypography");
     @Test void androidAndBrowserPinTheSamePortablePresentationSources() throws Exception {
@@ -40,7 +42,7 @@ class PortableUiBuildTest {
         Path repository = root.resolve("rentz-lab-app/ui-library");
         var pin = json.readTree(repository.resolve("provenance.json").toFile());
         String coordinate = pin.required("coordinate").asText();
-        assertTrue(coordinate.matches("ro[.]cardtable:card-table-ui:[0-9]+[.][0-9]+[.][0-9]+"), "Explicit native coordinate");
+        assertTrue(NATIVE_COORDINATE.matcher(coordinate).matches(), "Explicit native coordinate");
         String relative = "ro/cardtable/card-table-ui/" + coordinate.substring(coordinate.lastIndexOf(':') + 1) + "/card-ui-build.json";
         var hashes = java.util.stream.StreamSupport.stream(pin.required("files").spliterator(), false)
                 .filter(row -> relative.equals(row.required("path").asText())).toList();
@@ -52,6 +54,22 @@ class PortableUiBuildTest {
         var receipt = json.readTree(bytes);
         assertEquals(coordinate, receipt.required("coordinate").asText(), "The receipt belongs to the admitted native version");
         return receipt;
+    }
+
+    @Test void numericMinorVersionsDoNotAdmitDynamicOrForeignCoordinates(
+            @org.junit.jupiter.api.io.TempDir Path fixture) throws Exception {
+        var json = new ObjectMapper();
+        Path repository = fixture.resolve("rentz-lab-app/ui-library");
+        Files.createDirectories(repository);
+        for (String version : List.of("0.+", "LATEST", "[0.2,)", "0.2-SNAPSHOT", "00.2", "0.02", "0.2/../other")) {
+            var pin = json.createObjectNode().put("coordinate", "ro.cardtable:card-table-ui:" + version);
+            json.writeValue(repository.resolve("provenance.json").toFile(), pin);
+            var error = assertThrows(AssertionError.class, () -> nativeReceipt(fixture, json), version);
+            assertTrue(error.getMessage().contains("Explicit native coordinate"),
+                    "Reject the unpinned version before accessing a receipt: " + version);
+        }
+        assertTrue(NATIVE_COORDINATE.matcher("ro.cardtable:card-table-ui:0.1.24").matches(),
+                "Historical exact patch coordinates remain valid");
     }
 
     @Test void nativeBuildReceiptCannotBeUnpinnedOrReplaced(@org.junit.jupiter.api.io.TempDir Path fixture) throws Exception {
