@@ -47,6 +47,8 @@ public static void publish(AssertionAuditRun run, String actual) {
 
 ## Scope și integrare
 
+Textele explicative ale rapoartelor Rentz sunt în engleză. Valorile UI, capturile și jurnalele rămân în forma observată. [Contractul de limbă și regenerare](../docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor) separă responsabilitatea adaptorului de dovezile originale.
+
 | Owner | Închidere și limită |
 |---|---|
 | AssertionAuditRun | Deține sesiunea; close publică HTML-ul final. |

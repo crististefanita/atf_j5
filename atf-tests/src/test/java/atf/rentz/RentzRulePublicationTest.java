@@ -23,6 +23,7 @@ class RentzRulePublicationTest {
     static final class Probe {
         final List<String> events=new ArrayList<>();
         final List<AtfAssertion> assertions=new ArrayList<>();
+        final List<String> assertionCaptions=new ArrayList<>();
         ReportPhaseTiming timing; String diagnostic=""; String failOn=""; boolean closeFails;
         @SuppressWarnings("unchecked") <T>T port(Class<T> type){return (T)Proxy.newProxyInstance(type.getClassLoader(),new Class<?>[]{type},(proxy,method,args)->{
             String name=method.getName();events.add(type.getSimpleName()+"."+name);
@@ -30,7 +31,7 @@ class RentzRulePublicationTest {
             if(name.equals("close")&&closeFails)throw new IllegalStateException("close-"+type.getSimpleName());
             if(name.equals("startScenario"))return port(AtfReportPorts.Scenario.class);
             if(name.equals("startPhase"))return port(AtfReportPorts.Phase.class);
-            if(name.equals("startAssertionStep"))return port(AtfReportPorts.AssertionStep.class);
+            if(name.equals("startAssertionStep")){assertionCaptions.add((String)args[0]);return port(AtfReportPorts.AssertionStep.class);}
             if(name.equals("assertions"))assertions.addAll((Collection<AtfAssertion>)args[0]);
             if(name.equals("executionTiming"))timing=(ReportPhaseTiming)args[0];
             if(name.equals("diagnostic"))diagnostic=(String)args[1];
@@ -48,6 +49,11 @@ class RentzRulePublicationTest {
     @Test void forwardsExecutionTimingWithoutMeasuringRendererAsExecution(){
         var probe=new Probe();probe.publisher().publish(result(ComponentAssertionAudit.Phase.TEST_BODY,null));
         assertEquals(new ReportPhaseTiming(Duration.ofNanos(123456789),2),probe.timing);
+    }
+    @Test void publishesEnglishCaptionsAndKeepsEvaluatedUnicodeChecks(){
+        var probe=new Probe();probe.publisher().publish(result(ComponentAssertionAudit.Phase.TEST_BODY,null));
+        assertEquals(List.of("Evaluated Test Kit comparisons"),probe.assertionCaptions);
+        assertTrue(probe.assertions.getFirst().toString().contains("unicode – ș ț"));
     }
     @Test void publishesTheDiagnosticInTheActualFailedLifecyclePhase(){
         var probe=new Probe();probe.publisher().publish(result(ComponentAssertionAudit.Phase.SETUP,new IllegalStateException("setup failed")));
@@ -73,7 +79,7 @@ class RentzRulePublicationTest {
                 var publisher=new RentzRulePublication(report,"fixture");publisher.publish(result(ComponentAssertionAudit.Phase.TEST_BODY,null));publisher.publish(result(ComponentAssertionAudit.Phase.TEST_BODY,new AssertionError("controlled mismatch")));
             }
             var scenarios=new ArrayList<ReportArtifactProfile.Scenario>();
-            for(var status:List.of(AtfReportStatus.PASS,AtfReportStatus.FAIL))scenarios.add(new ReportArtifactProfile.Scenario("fixture","Rentz rule contracts – laboratory profile, reference parity unconfirmed",status,List.of(new ReportArtifactProfile.Phase("TEST_BODY",status,List.of(new ReportArtifactProfile.Assertions("Comparații evaluate prin Test Kit",List.of(new ReportArtifactProfile.Comparison("unicode – ș ț",status))))))));
+            for(var status:List.of(AtfReportStatus.PASS,AtfReportStatus.FAIL))scenarios.add(new ReportArtifactProfile.Scenario("fixture","Rentz rule contracts – laboratory profile, reference parity unconfirmed",status,List.of(new ReportArtifactProfile.Phase("TEST_BODY",status,List.of(new ReportArtifactProfile.Assertions("Evaluated Test Kit comparisons",List.of(new ReportArtifactProfile.Comparison("unicode – ș ț",status))))))));
             var inspection=ReportArtifactInspector.inspect(output,new ReportArtifactProfile(renderer,scenarios));
             assertTrue(inspection.isCompliant(),()->renderer+": "+inspection.violations()+" "+inspection.diagnostics());
             var html=Files.readString(output);assertTrue(html.contains("expected"));assertTrue(html.contains("actual"));

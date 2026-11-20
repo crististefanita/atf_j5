@@ -47,8 +47,8 @@ public final class ReleaseQualification {
         for (String id : List.of("offline-regression", "component-extent-report", "android-jvm", "native-ui", "native-ui-report", "release-build", "local-catalog",
                 "remote-publication", "authenticated-download", "anonymous-download", "release-retirement")) {
             ObjectNode gate = gates.addObject(); gate.put("id", id); gate.put("status", "NOT_RUN");
-            gate.put("expected", "Receiptul desemnat trebuie să identifice același candidat.");
-            gate.put("actual", "RAG-ul este read-only și nu a primit un receipt verificabil pentru această poartă.");
+            gate.put("expected", "The designated receipt must identify the same candidate.");
+            gate.put("actual", "RAG is read-only and received no verifiable receipt for this gate.");
             gate.put("receipt", "");
         }
         gate(gates, "release-build").put("expected", "The signed product APK has the numeric candidate version and exact filename RentzLab-<version>.apk.");

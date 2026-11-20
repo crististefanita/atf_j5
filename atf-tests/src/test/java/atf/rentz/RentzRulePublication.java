@@ -44,7 +44,7 @@ public final class RentzRulePublication implements ComponentAuditExtension.Publi
         try(var scenario=report.session.startScenario(name,scope,List.of("component","rentz","laboratory"))){
             for(var phaseResult:result.phases()){
                 var phaseStatus=AtfReportStatus.valueOf(phaseResult.outcome()==ComponentAssertionAudit.Outcome.ABORTED?"SKIP":phaseResult.outcome().name());
-                try(var phase=scenario.startPhase(phaseResult.phase().name());var checks=phase.startAssertionStep("Comparații evaluate prin Test Kit")){
+                try(var phase=scenario.startPhase(phaseResult.phase().name());var checks=phase.startAssertionStep("Evaluated Test Kit comparisons")){
                     phaseResult.timing().ifPresent(timing->phase.executionTiming(new ReportPhaseTiming(timing.elapsed(),timing.intervals())));
                     if(!phaseResult.diagnostic().isBlank())phase.diagnostic(phaseResult.outcome()==ComponentAssertionAudit.Outcome.ABORTED?ReportPhaseDiagnostic.Kind.EXECUTION_ABORTED:ReportPhaseDiagnostic.Kind.EXECUTION_FAILURE,phaseResult.diagnostic());
                     checks.assertions(phaseResult.checks().stream().map(c->new AtfAssertion(c.name(),c.expected(),c.actual(),c.passed())).toList());

@@ -352,21 +352,21 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlow.java",
       "owner": "Rentz release",
-      "reason": "Rentz release · Require the consecutive-game Android acceptance to be explicit in the native report. Q32 adds capture binding.",
-      "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim. Capture binding and completion use the registry contract. An arbitrary journal with the correct token cannot complete a bound reservation. A decision accepts the public view for the actor on turn and fails before returning any choice for a foreign turn.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "reason": "Rentz release · Require the consecutive-game Android acceptance to be explicit in the native report. Q32 adds capture binding. Publish caller-owned report narrative in English, retaining original localized observations and outcomes.",
+      "criterion": "The atf-reporting Extent names one complete Rentz deal and two complete non-Rentz deals, with honest scope and per-game identity; no whole-series claim. Capture binding and completion use the registry contract. An arbitrary journal with the correct token cannot complete a bound reservation. A decision accepts the public view for the actor on turn and fails before returning any choice for a foreign turn. English report labels must preserve captured Unicode values, original PNG/receipt bytes, exact execution scope and PASS/FAIL; no renderer or release gate changes.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md; docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
       "expires": "2026-12-15",
-      "sha256": "28de87c246f41c149ae658a79067fd8c536a009fdbf556f12633643e8cba56f8",
+      "sha256": "d251cd9384fde41c45552f72665a989cc78b069f2e8bff1005e5cfefad0e1cf9",
       "allowDelete": false
     },
     {
       "path": "atf-tests/src/test/java/atf/rentz/android/RentzNativeFlowTest.java",
       "owner": "Rentz release",
-      "reason": "Keep the native Extent title and scope truthful for each UI sanity mode.",
-      "criterion": "The acceptance reports the measured scope of consecutive complete games. Narrower sanity reports describe their own scope. The in-JVM decision oracle keeps one positive CLI encoding proof and rejects a foreign turn at the CLI boundary.",
-      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md",
+      "reason": "Keep the native Extent title and scope truthful for each UI sanity mode. Publish caller-owned report narrative in English, retaining original localized observations and outcomes.",
+      "criterion": "The acceptance reports the measured scope of consecutive complete games. Narrower sanity reports describe their own scope. The in-JVM decision oracle keeps one positive CLI encoding proof and rejects a foreign turn at the CLI boundary. English report labels must preserve captured Unicode values, original PNG/receipt bytes, exact execution scope and PASS/FAIL; no renderer or release gate changes.",
+      "proof": "../../rentz_back/infrastructure/governance/j5-release-rag-20261108/TDD.md; docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
       "expires": "2026-12-15",
-      "sha256": "cc7394189caf156f2a844601a148f183d5ae359948043b2602c7aa379905b64b",
+      "sha256": "f41dcfa6ca4f7fa065ea45a96fd6d4afa15bca8b128b75b67ebf7c2cbc1d006f",
       "allowDelete": false
     },
     {
@@ -752,11 +752,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/RentzRulePublication.java",
       "owner": "Rentz consumer",
-      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
-      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates. Publish caller-owned report narrative in English, retaining original localized observations and outcomes.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass. English report labels must preserve captured Unicode values, original PNG/receipt bytes, exact execution scope and PASS/FAIL; no renderer or release gate changes.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md; docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
       "expires": "2026-11-20",
-      "sha256": "5e3298074a79d1cd53441ebed688d13da3b25f2da1aa0f98c28f7f15d3a49cbe",
+      "sha256": "3ab897e9c8662d1616348efdcab124fd72464eda541c89144addc4a49c05bd8b",
       "allowDelete": false
     },
     {
@@ -772,11 +772,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/RentzRulePublicationTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates.",
-      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass.",
-      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md",
+      "reason": "Q11-Q12: permanent governance and behavior-preserving separation; retain incoming P1/release and library updates. Publish caller-owned report narrative in English, retaining original localized observations and outcomes.",
+      "criterion": "Existing behavioral assertions stay intact; layer metadata, independent negatives, fixed-baseline parity and actual test population must pass. English report labels must preserve captured Unicode values, original PNG/receipt bytes, exact execution scope and PASS/FAIL; no renderer or release gate changes.",
+      "proof": "../../rentz_back/infrastructure/governance/20261106-q11-q12-bb020681/TDD.md; docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
       "expires": "2026-11-20",
-      "sha256": "ed8716cee6241da607ace69735da5517080e4be8ac51eac1d01c5893ac330ea5",
+      "sha256": "cd03cc58d42bff6d854285f6b2b32202308bc78537b50a82b5ac891f37e999e0",
       "allowDelete": false
     },
     {
@@ -872,11 +872,11 @@
     {
       "path": "config/test-collections.json",
       "owner": "Rentz source-owned release and UI adapters",
-      "reason": "Q20 · Bind evaluation seed identity to the actual v1 generator and protect the learning collection. Extend the source-owned reservation and retirement contracts.",
-      "criterion": "In-batch aliases, historical aliases and false cluster sufficiency are refused; exact development replay, signed seeds, distinct tables, old rows and adjacent arena contracts remain covered. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q20/TDD.md; docs/rentz/ATF_Release.md",
+      "reason": "Q20 · Bind evaluation seed identity to the actual v1 generator and protect the learning collection. Extend the source-owned reservation and retirement contracts. Publish caller-owned report narrative in English, retaining original localized observations and outcomes.",
+      "criterion": "In-batch aliases, historical aliases and false cluster sufficiency are refused; exact development replay, signed seeds, distinct tables, old rows and adjacent arena contracts remain covered. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly. English report labels must preserve captured Unicode values, original PNG/receipt bytes, exact execution scope and PASS/FAIL; no renderer or release gate changes.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q20/TDD.md; docs/rentz/ATF_Release.md; docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
       "expires": "2026-12-19",
-      "sha256": "7cc93891eaf4ab1d2b80c4259eb15572deabb9b92716ca684de665ffa2583121",
+      "sha256": "8f25a3a6432633e71ec65819d91482aa7b97d9d2f4961a6e881beb1363177484",
       "allowDelete": false
     },
     {
@@ -1550,11 +1550,11 @@
     {
       "path": "atf-tests/src/main/java/atf/rentz/distribution/qualification/ReleaseQualification.java",
       "owner": "Rentz release",
-      "reason": "Give read-only receipt validation and release decisions an independent owner.",
-      "criterion": "Preserve receipt identities, gate order and strict PASS requirements; abstention and snapshot drift can only veto eligibility.",
-      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest",
+      "reason": "Give read-only receipt validation and release decisions an independent owner. Publish caller-owned report narrative in English, retaining original localized observations and outcomes.",
+      "criterion": "Preserve receipt identities, gate order and strict PASS requirements; abstention and snapshot drift can only veto eligibility. English report labels must preserve captured Unicode values, original PNG/receipt bytes, exact execution scope and PASS/FAIL; no renderer or release gate changes.",
+      "proof": "ReleaseGovernanceTest, ReleaseQualificationTest and ReleaseReadinessSnapshotTest; docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
       "expires": "2026-12-12",
-      "sha256": "fc3f038788c5bb22176b91be1cdc1dc98c250e9ba1c8bfdce91f1682c3529eea",
+      "sha256": "93034f90c0811a19f9ad37a31bce3aaa87abd9e8e31f38583a96b99f38b49644",
       "allowDelete": false
     },
     {
@@ -1947,12 +1947,42 @@
     {
       "path": "atf-ui-browser/tests/rentz-web-flow.mjs",
       "owner": "Rentz native/browser acceptance",
-      "reason": "Bind the real WEB flow to the canonical native score captions instead of obsolete P/T labels.",
-      "criterion": "Valid Δ:/Σ: settlement passes, old captions fail for that exact reason, and history retains Δ/Σ without colons; no score or history assertion is removed.",
-      "proof": "atf-ui-browser/pages/verify-rentz-ui.mjs",
+      "reason": "Bind the real WEB flow to the canonical native score captions instead of obsolete P/T labels. Publish caller-owned report narrative in English, retaining original localized observations and outcomes.",
+      "criterion": "Valid Δ:/Σ: settlement passes, old captions fail for that exact reason, and history retains Δ/Σ without colons; no score or history assertion is removed. English report labels must preserve captured Unicode values, original PNG/receipt bytes, exact execution scope and PASS/FAIL; no renderer or release gate changes.",
+      "proof": "atf-ui-browser/pages/verify-rentz-ui.mjs; docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
       "expires": "2026-12-19",
       "allowDelete": false,
-      "sha256": "503559900c50c3be02fab16977168b39e3162d9ad9bc77d24b973c8c0aeecb80"
+      "sha256": "09d60da0885ac0a5e8809e25e373e5ede1f1997b3092ea4f78998274582a2c0a"
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/reporting/ReportNarrativeGovernanceTest.java",
+      "owner": "Rentz reporting adapters",
+      "reason": "Enforce English authored report copy at the consumer boundary.",
+      "criterion": "Execute actual Reporting JAR output and preserve raw UI language, immutable capture/receipt bytes and the original verdict. Source governance skips only the localized native decision transport.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
+      "expires": "2026-12-20",
+      "sha256": "ed85b20f018e0f3a300a04b25aed5bf3739f3c44e45c8ab105484e1819619824",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/reporting/OfflineArenaReportLanguageTest.java",
+      "owner": "Rentz reporting adapters",
+      "reason": "Enforce English authored report copy at the consumer boundary.",
+      "criterion": "Execute actual Reporting JAR output and preserve raw UI language, immutable capture/receipt bytes and the original verdict. Source governance skips only the localized native decision transport.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
+      "expires": "2026-12-20",
+      "sha256": "fe28f65db8cb19d054de2d5beada896726cb7a5e7c917b1e4bc96da7e6e56492",
+      "allowDelete": false
+    },
+    {
+      "path": "atf-tests/src/test/java/atf/rentz/reporting/WebReportLanguageTest.java",
+      "owner": "Rentz reporting adapters",
+      "reason": "Enforce English authored report copy at the consumer boundary.",
+      "criterion": "Execute actual Reporting JAR output and preserve raw UI language, immutable capture/receipt bytes and the original verdict. Source governance skips only the localized native decision transport.",
+      "proof": "docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
+      "expires": "2026-12-20",
+      "sha256": "3f5d5bc745a0a92ae886c94c1250c7b03a98120a71ff380d8ade5a299a52ff0d",
+      "allowDelete": false
     }
   ]
 }

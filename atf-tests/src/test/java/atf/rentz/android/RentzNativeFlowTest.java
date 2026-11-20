@@ -19,13 +19,35 @@ class RentzNativeFlowTest {
     @TempDir Path directory;
     @Test void nativeReportNamesOnlyTheGameScopeThatActuallyRan(){
         var acceptance=RentzNativeFlow.reportScope("0.6.0",true,"five deals across three contracts at enlarged font");
-        assertTrue(acceptance.title().contains("jocuri consecutive complete"));
+        assertTrue(acceptance.title().contains("complete consecutive games"));
         assertTrue(acceptance.description().contains("five deals across three contracts at enlarged font"));
 
         var narrow=RentzNativeFlow.reportScope("0.4.0",false,"one trick hand and menu navigation");
-        assertFalse(narrow.title().contains("jocuri consecutive"));
+        assertFalse(narrow.title().contains("complete consecutive games"));
         assertTrue(narrow.description().contains("one trick hand and menu navigation"));
-        assertTrue(narrow.description().contains("nu pretinde acceptanța cu jocuri consecutive complete"));
+        assertTrue(narrow.description().contains("does not claim complete consecutive-game acceptance"));
+    }
+    @Test void englishReportNarrativePreservesRomanianEvidenceAndOriginalPng() throws Exception {
+        Path run=Files.createDirectory(directory.resolve("report-language"));
+        byte[] png=java.util.Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j3ioAAAAASUVORK5CYII=");
+        Files.write(run.resolve("capture.png"),png);
+        String observed="Cărți jucabile: Joacă J♣; jucătorul a ales legal.";
+        JSON.writeValue(run.resolve("ui-result.json").toFile(),Map.of("status","PASS","versionName","0.31.0-ui-sanity","scope","One recorded checkpoint; no device controlled by this component test","consecutiveSubgames",false));
+        JSON.writeValue(run.resolve("checkpoints.json").toFile(),List.of(Map.of("title","Human chooses a legal card","image","capture.png","observed",observed,"captureMillis",17,"checks",List.of(Map.of("name","Localized card text","expected","Joacă J♣","actual","Joacă J♣","passed",true)))));
+        String receipt=Files.readString(run.resolve("ui-result.json")),checkpoints=Files.readString(run.resolve("checkpoints.json"));
+        RentzNativeFlow.main(new String[]{"report",run.toString()});
+        String html=Files.readString(run.resolve("android-extent.html"));
+        String text=org.jsoup.Jsoup.parse(html).text();
+        assertTrue(text.contains("Application identity and acceptance scope"),text);
+        assertTrue(text.contains("Native Android receipt"));
+        assertTrue(text.toLowerCase(Locale.ROOT).contains("package"));
+        assertTrue(text.contains("Preserve the complete display and evaluated comparisons"));
+        assertFalse(text.contains("Identitatea aplicației"));
+        assertTrue(text.contains("Joacă J♣"),"Original UI values remain in the observed language");
+        assertTrue(html.contains(Base64.getEncoder().encodeToString(png)),"Capture bytes must not be translated or edited");
+        assertEquals(receipt,Files.readString(run.resolve("ui-result.json")));
+        assertEquals(checkpoints,Files.readString(run.resolve("checkpoints.json")));
+        assertArrayEquals(png,Files.readAllBytes(run.resolve("capture.png")));
     }
     record Execution(int exit,String output,String error){}
     private Execution invoke(String...args)throws Exception{

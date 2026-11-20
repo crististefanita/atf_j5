@@ -114,7 +114,7 @@ export class RentzWebFlow {
     }
     if(number===1) this.first=table;
     if(number===2) this.second=table;
-    await this.observe(`Complete contract ${number}: ${table.rows[0].contract}`,checks);
+    await this.observe(`Complete contract ${number}`,checks);
     this.completed.push(table);
     return table;
   }

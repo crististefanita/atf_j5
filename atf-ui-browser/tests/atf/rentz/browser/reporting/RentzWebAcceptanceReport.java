@@ -51,17 +51,23 @@ public final class RentzWebAcceptanceReport {
                         var decoded=ImageIO.read(original.toFile());
                         if(decoded==null) throw new IllegalArgumentException("Original browser screenshot required");
                         var png=new ByteArrayOutputStream();ImageIO.write(decoded,"png",png);
-                        phase.step(AtfGherkinKeyword.THEN,point.required("title").asText(),point.path("source").asText("Browser MCP visible DOM"),Base64.getEncoder().encodeToString(png.toByteArray()),assertions,List.of(),ReportScreenshotPolicy.CapturePoint.CHECKPOINT,status(assertions));
-                        phase.observation(new ReportObservation("Original browser observation",List.of(new ReportField("Original capture",original.toString())),
+                        phase.step(AtfGherkinKeyword.THEN,checkpointTitle(point),point.path("source").asText("Browser MCP visible DOM"),Base64.getEncoder().encodeToString(png.toByteArray()),assertions,List.of(),ReportScreenshotPolicy.CapturePoint.CHECKPOINT,status(assertions));
+                        phase.observation(new ReportObservation("Original browser observation",List.of(new ReportField("Original capture",original.toString()),new ReportField("Recorded checkpoint title",point.required("title").asText())),
                             List.of(new ReportObservation.Body("Observed UI",point.required("snapshot").asText(),ReportObservation.Format.TEXT),
                                 new ReportObservation.Body("Public UI actions",point.required("actions").toString(),ReportObservation.Format.JSON)),List.of()));
                     }
                     if(Files.exists(root.resolve("source-manifest.json"))) phase.observation(new ReportObservation("Source provenance",List.of(),List.of(new ReportObservation.Body("Manifest",Files.readString(root.resolve("source-manifest.json")),ReportObservation.Format.JSON)),List.of()));
+                    if(Files.exists(root.resolve("presentation-provenance.json"))) phase.observation(new ReportObservation("Report generation provenance",List.of(new ReportField("Execution","Recorded browser checkpoints; this report does not rerun browser acceptance")),List.of(new ReportObservation.Body("Original execution and current report adapter",Files.readString(root.resolve("presentation-provenance.json")),ReportObservation.Format.JSON)),List.of()));
                     phase.complete(good?AtfReportStatus.PASS:AtfReportStatus.FAIL);
                 }
                 ui.complete(good?AtfReportStatus.PASS:AtfReportStatus.FAIL);
             }
         }
+    }
+    private static String checkpointTitle(JsonNode point) {
+        String original=point.required("title").asText();
+        var legacy=java.util.regex.Pattern.compile("^Complete contract ([0-9]+): .+$").matcher(original);
+        return legacy.matches()?"Complete contract "+legacy.group(1):original;
     }
     private static AtfReportStatus status(List<AtfAssertion> checks) { return checks.stream().allMatch(AtfAssertion::passed)?AtfReportStatus.PASS:AtfReportStatus.FAIL; }
     private static List<AtfAssertion> checks(JsonNode rows) {

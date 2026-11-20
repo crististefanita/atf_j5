@@ -68,6 +68,19 @@ Fixture-ul fixează intrarea și interfața exercitată. Oracolul stabilește re
 
 ## Rulare și dovezi
 
+### Limba rapoartelor
+
+Rapoartele Extent publică în engleză titlurile, descrierile, fazele, numele comparațiilor și etichetele câmpurilor scrise de adaptoarele Rentz. Documentația proiectului și limba interfeței jocului au contracte separate.
+
+| Intrare | Regula de publicare |
+|---|---|
+| Text explicativ al adaptorului | Engleză, inclusiv limitările acceptanței și diagnosticul porților RAG. |
+| Valoare observată sau așteptată în UI | Limba originală; compararea nu traduce valorile. |
+| Captură, ierarhie, jurnal și comandă executată | Dovezi originale; fără rescriere pentru uniformizarea limbii. |
+| Raport regenerat dintr-o rulare salvată | Director nou, hash-uri ale intrărilor, sursa execuției și sursa adaptorului distincte; nu reprezintă o nouă rulare E2E. |
+
+Guvernanța verifică textele deținute de publicatori, iar componentele confruntă raportul efectiv cu valorile Unicode și verdictul capturate. Probe pentru Android, WEB și arena offline rulează fără emulator. Biblioteca Reporting păstrează textele primite; traducerea explicativă aparține adaptorului, iar originalele rămân recitibile pentru RAG.
+
 - Pentru o revizie editorială, verifică identitatea intrărilor și păstrează dovada de regresie la commitul executat. Rulează guvernanța pe noua revizie și leagă cele două dovezi prin [reconcilierea editorială](ATF_Qualification.md#reconcilierea-unei-revizii-editoriale).
 - Rulează regresia offline înaintea probei native. Compară inventarul așteptat cu XML-urile Maven și Android JVM. Păstrează refuzurile și aserțiunile cu valori independente în [rapoartele componentei](ATF_Components.md#execuție).
 - Runnerul componentei citește sumarul JSON al publicatorului Extent din fluxul de ieșire standard. Mesajele de diagnostic ale JVM au jurnal separat. Verdictul verifică digestul raportului și integritatea intrărilor.

@@ -19,39 +19,39 @@ public final class OfflineArenaReport {
                 var matchup = policies.families().get(family.family());
                 var candidate = policies.candidate().search();
                 var control = matchup.control().search();
-                String description = "Rentz offline. Profil de laborator, paritate cu originalul neconfirmată."
-                        + " Protocol " + result.protocol() + ", etapă " + result.phase() + ", surse " + result.sourceIdentity()
-                        + ". Profil de scor executat " + result.scoreProfile()
-                        + ". Obiectiv de evaluare " + policies.evaluationObjective() + ". Profil solicitat "
-                        + result.policyFile() + " " + result.candidateSettings() + ". Candidat efectiv "
-                        + policies.candidate() + ". Adversari efectivi " + matchup.opponent() + ". Control efectiv "
-                        + matchup.control() + ". Bootstrap-ul operează pe distribuiri distincte.";
+                String description = "Rentz offline. Laboratory profile. Original application parity is unconfirmed."
+                        + " Protocol " + result.protocol() + ", phase " + result.phase() + ", sources " + result.sourceIdentity()
+                        + ". Executed score profile " + result.scoreProfile()
+                        + ". Evaluation objective " + policies.evaluationObjective() + ". Requested policy "
+                        + result.policyFile() + " " + result.candidateSettings() + ". Effective candidate "
+                        + policies.candidate() + ". Effective opponents " + matchup.opponent() + ". Effective control "
+                        + matchup.control() + ". Bootstrap samples distinct deal seeds.";
                 description += matchup.control().equals(matchup.opponent())
-                        ? " Controlul folosește aceeași politică la toate locurile."
-                        : " Controlul schimbă politica locului evaluat și păstrează adversarii, poziția și distribuirea.";
+                        ? " The control uses the same policy at every seat."
+                        : " The control changes the evaluated seat policy while preserving opponents, position and deal.";
                 try(var scenario=report.startScenario("Rentz "+protocol.candidate()+" / "+family.family(),description,List.of("offline","rentz","arena",result.phase().toLowerCase(Locale.ROOT)));
-                    var phase=scenario.startPhase("Evaluare pe distribuiri pereche și locuri rotite");var checks=phase.startAssertionStep("Criterii declarate și metrici observate")) {
+                    var phase=scenario.startPhase("Paired distributions and rotated seats");var checks=phase.startAssertionStep("Declared criteria and observed metrics")) {
                     boolean winGuard=family.winCredit()+1e-12>=family.controlWinCredit();
                     boolean progress=family.assessment().promotes()&&winGuard;
                     var cost=family.cost();
                     var assertions = new ArrayList<>(List.of(
-                            new AtfAssertion("Partide complete auditate pe tranziții și scor",String.valueOf(protocol.players()*protocol.seeds().size()),String.valueOf(family.pairedGames()),family.pairedGames()==protocol.players()*protocol.seeds().size()),
-                            new AtfAssertion("Stări distincte ale generatorului; rotațiile rămân în același cluster",String.valueOf(protocol.seeds().size()),String.valueOf(family.seedClusters()),family.seedClusters()==protocol.seeds().size()),
-                            new AtfAssertion("Delta medie a marjei de puncte față de control","metrică secundară finită",String.valueOf(family.meanDelta()),Double.isFinite(family.meanDelta())),
-                            new AtfAssertion("Delta medie de puncte finale proprii","metrică distinctă finită",String.valueOf(family.meanPointsDelta()),Double.isFinite(family.meanPointsDelta())),
-                            new AtfAssertion("Creditul controlului, egalități împărțite","metrică descriptivă [0,1]",String.valueOf(family.controlWinCredit()),family.controlWinCredit()>=0&&family.controlWinCredit()<=1),
-                            new AtfAssertion("Credit de victorie, egalități împărțite","metrică descriptivă [0,1]",String.valueOf(family.winCredit()),family.winCredit()>=0&&family.winCredit()<=1),
-                            new AtfAssertion("Creditul de victorie nu regresează față de control",">= "+family.controlWinCredit(),String.valueOf(family.winCredit()),winGuard),
-                            new AtfAssertion("Tranziții simulate efective; comparație descriptivă","costuri nenegative; Normal nu caută lumi","candidat="+cost.candidateTransitions()+"; control="+cost.controlTransitions(),cost.candidateTransitions()>=0&&cost.controlTransitions()>=0),
-                            new AtfAssertion("Timp efectiv în decizii; nu este buget determinist","nanosecunde măsurate, fără egalitate de latență","candidat="+cost.candidateNanos()+"; control="+cost.controlNanos(),cost.candidateNanos()>=0&&cost.controlNanos()>=0),
-                            new AtfAssertion("Limitări de buget și fallback-uri rămân vizibile","numere nenegative, fără ascunderea căutărilor incomplete","limitate="+cost.candidateLimited()+"/"+cost.controlLimited()+"; fallback="+cost.candidateFallbacks()+"/"+cost.controlFallbacks(),cost.candidateLimited()>=0&&cost.controlLimited()>=0&&cost.candidateFallbacks()>=0&&cost.controlFallbacks()>=0),
-                            new AtfAssertion("Obiectiv primar pe clustere: "+family.assessment().metric(),"cel puțin 8 stări distincte și limită inferioară bootstrap > 0; încredere "+family.assessment().familyAdjustedConfidence(),"clustere="+family.assessment().seedClusters()+"; medie="+family.assessment().mean()+"; limită="+family.assessment().lowerBound(),progress),
-                            new AtfAssertion("Cea mai mică medie pe seed; pierderile rămân vizibile","valoare finită, fără garanție de câștig",String.valueOf(family.minimumSeedMean()),Double.isFinite(family.minimumSeedMean()))));
+                            new AtfAssertion("Complete matches audited for transitions and score",String.valueOf(protocol.players()*protocol.seeds().size()),String.valueOf(family.pairedGames()),family.pairedGames()==protocol.players()*protocol.seeds().size()),
+                            new AtfAssertion("Distinct generator states; seat rotations stay in the same cluster",String.valueOf(protocol.seeds().size()),String.valueOf(family.seedClusters()),family.seedClusters()==protocol.seeds().size()),
+                            new AtfAssertion("Mean score-margin delta against control","finite secondary metric",String.valueOf(family.meanDelta()),Double.isFinite(family.meanDelta())),
+                            new AtfAssertion("Mean final own-points delta","finite separate metric",String.valueOf(family.meanPointsDelta()),Double.isFinite(family.meanPointsDelta())),
+                            new AtfAssertion("Control win credit with shared ties","descriptive metric in [0,1]",String.valueOf(family.controlWinCredit()),family.controlWinCredit()>=0&&family.controlWinCredit()<=1),
+                            new AtfAssertion("Candidate win credit with shared ties","descriptive metric in [0,1]",String.valueOf(family.winCredit()),family.winCredit()>=0&&family.winCredit()<=1),
+                            new AtfAssertion("Win credit does not regress against control",">= "+family.controlWinCredit(),String.valueOf(family.winCredit()),winGuard),
+                            new AtfAssertion("Actual simulated transitions; descriptive comparison","nonnegative costs; Normal does not sample worlds","candidate="+cost.candidateTransitions()+"; control="+cost.controlTransitions(),cost.candidateTransitions()>=0&&cost.controlTransitions()>=0),
+                            new AtfAssertion("Actual decision time is not a deterministic budget","measured nanoseconds; equal latency is not required","candidate="+cost.candidateNanos()+"; control="+cost.controlNanos(),cost.candidateNanos()>=0&&cost.controlNanos()>=0),
+                            new AtfAssertion("Budget limits and fallbacks remain visible","nonnegative counts; incomplete searches remain visible","limited="+cost.candidateLimited()+"/"+cost.controlLimited()+"; fallback="+cost.candidateFallbacks()+"/"+cost.controlFallbacks(),cost.candidateLimited()>=0&&cost.controlLimited()>=0&&cost.candidateFallbacks()>=0&&cost.controlFallbacks()>=0),
+                            new AtfAssertion("Primary clustered objective: "+family.assessment().metric(),"at least 8 distinct states and bootstrap lower bound > 0; confidence "+family.assessment().familyAdjustedConfidence(),"clusters="+family.assessment().seedClusters()+"; mean="+family.assessment().mean()+"; bound="+family.assessment().lowerBound(),progress),
+                            new AtfAssertion("Lowest seed mean; losses remain visible","finite value; victory is not guaranteed",String.valueOf(family.minimumSeedMean()),Double.isFinite(family.minimumSeedMean()))));
                     if (candidate != null && control != null) {
                         boolean equalBudget = candidate.worlds() == control.worlds()
                                 && candidate.maxTransitions() == control.maxTransitions()
                                 && Double.compare(candidate.riskWeight(), control.riskWeight()) == 0;
-                        assertions.add(new AtfAssertion("Plafoane și risc pentru politicile de căutare efective",
+                        assertions.add(new AtfAssertion("Search ceilings and risk for the effective policies",
                                 budget(candidate), budget(control), equalBudget));
                     }
                     checks.assertions(assertions);
@@ -61,6 +61,6 @@ public final class OfflineArenaReport {
         }
     }
     private static String budget(ro.rentzlab.ai.PolicySettings settings) {
-        return "lumi=" + settings.worlds() + ", tranziții=" + settings.maxTransitions() + ", risc=" + settings.riskWeight();
+        return "worlds=" + settings.worlds() + ", transitions=" + settings.maxTransitions() + ", risk=" + settings.riskWeight();
     }
 }

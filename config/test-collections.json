@@ -10,7 +10,8 @@
         "RentzSettlementTest",
         "RentzRuleComponentTest",
         "Library*Test",
-        "SourceLayoutTest"
+        "SourceLayoutTest",
+        "ReportNarrativeGovernanceTest"
       ],
       "androidJvm": false,
       "runtimeControls": true
@@ -37,6 +38,7 @@
     },
     "infrastructure": {
       "maven": [
+        "ReportNarrativeGovernanceTest",
         "RuleBindingGovernanceTest",
         "SourceLayoutTest",
         "DocumentationContractTest",

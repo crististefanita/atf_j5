@@ -24,10 +24,10 @@ public final class RentzNativeFlow {
     static ReportScope reportScope(String versionName,boolean completeGameAcceptance,String scope){
         String version=versionName==null||versionName.isBlank()?"0.1.0":versionName;
         String checkedScope=scope==null||scope.isBlank()?"unspecified native sanity scope":scope;
-        if(completeGameAcceptance)return new ReportScope("Rentz Lab · jocuri consecutive complete și reluare prin interfață",
-                "APK local "+version+", profil de laborator; acceptanță nativă: "+checkedScope+".");
-        return new ReportScope("Rentz Lab · sanity nativ și reluare prin interfață",
-                "APK local "+version+", profil de laborator; domeniu verificat: "+checkedScope+". Acest raport nu pretinde acceptanța cu jocuri consecutive complete sau acoperirea tuturor fluxurilor.");
+        if(completeGameAcceptance)return new ReportScope("Rentz Lab · complete consecutive games and UI restart",
+                "Local APK "+version+", laboratory profile; native acceptance: "+checkedScope+".");
+        return new ReportScope("Rentz Lab · native sanity and UI restart",
+                "Local APK "+version+", laboratory profile; verified scope: "+checkedScope+". This report does not claim complete consecutive-game acceptance or coverage of every workflow.");
     }
     public static void main(String[] args)throws Exception{
         switch (args[0]) {
@@ -110,8 +110,11 @@ public final class RentzNativeFlow {
         try(var session=new ExtentReportSession(directory.resolve("android-extent.html"),ReportingSettings.defaults())){
             var tags=receipt.path("consecutiveSubgames").asBoolean(false)?List.of("android","rentz","native","sanity","consecutive-complete-games"):List.of("android","rentz","native","sanity");
             var raw=session.startScenario(reportScope.title(),"atf.rentz",reportScope.description(),tags);
-            try(var phase=raw.startPhase("Identitatea aplicației și domeniul acceptanței")){
-                phase.observation(new ReportObservation("Receipt Android",List.of(new ReportField("APK SHA-256",receipt.path("apkSha256").asText()),new ReportField("Pachet",receipt.path("package").asText()),new ReportField("Dispozitiv",receipt.path("serial").asText()),new ReportField("API Android",receipt.path("api").asText()),new ReportField("Domeniu",receipt.path("scope").asText())),List.of(new ReportObservation.Body("Rezultat, proveniență și limitări",JSON.writerWithDefaultPrettyPrinter().writeValueAsString(receipt),ReportObservation.Format.JSON)),List.of()));phase.complete(all?AtfReportStatus.PASS:AtfReportStatus.FAIL);
+            try(var phase=raw.startPhase("Application identity and acceptance scope")){
+                phase.observation(new ReportObservation("Native Android receipt",List.of(new ReportField("APK SHA-256",receipt.path("apkSha256").asText()),new ReportField("Package",receipt.path("package").asText()),new ReportField("Device",receipt.path("serial").asText()),new ReportField("Android API",receipt.path("api").asText()),new ReportField("Scope",receipt.path("scope").asText())),List.of(new ReportObservation.Body("Result, provenance and limitations",JSON.writerWithDefaultPrettyPrinter().writeValueAsString(receipt),ReportObservation.Format.JSON)),List.of()));
+                Path provenance=directory.resolve("presentation-provenance.json");
+                if(Files.exists(provenance))phase.observation(new ReportObservation("Report generation provenance",List.of(new ReportField("Execution","Recorded checkpoints; regenerating this report does not rerun Android acceptance")),List.of(new ReportObservation.Body("Original execution and current report adapter",Files.readString(provenance),ReportObservation.Format.JSON)),List.of()));
+                phase.complete(all?AtfReportStatus.PASS:AtfReportStatus.FAIL);
             }
             try(var ui=UiExtentReportSession.adaptScenario(raw,ReportEvidenceProfile.forScreenshotPolicy(ReportScreenshotPolicy.EACH_CHECKPOINT),"Android native PNG")){
                 try(var phase=ui.startPhase("Visual acceptance observation")){
@@ -120,7 +123,7 @@ public final class RentzNativeFlow {
                         var checks=new ArrayList<AtfAssertion>();boolean passed=true;
                         for(var check:point.required("checks")){boolean ok=check.required("passed").booleanValue();checks.add(new AtfAssertion(check.required("name").asText(),check.required("expected").asText(),check.required("actual").asText(),ok));passed&=ok;}
                         byte[] png=Files.readAllBytes(directory.resolve(point.required("image").asText()));if(png.length<8||png[0]!=(byte)137||png[1]!=80||png[2]!=78||png[3]!=71)throw new IllegalArgumentException("Original PNG required");
-                        String title=point.required("title").asText();var observation=new AtfUiActionRecord(++ordinal,"Read Android native display",title,"Păstrează afișajul complet și comparațiile",point.path("observed").asText(),point.path("captureMillis").asLong(),passed?AtfReportStatus.PASS:AtfReportStatus.FAIL,AtfUiEvidenceSource.OBSERVE);
+                        String title=point.required("title").asText();var observation=new AtfUiActionRecord(++ordinal,"Read Android native display",title,"Preserve the complete display and evaluated comparisons",point.path("observed").asText(),point.path("captureMillis").asLong(),passed?AtfReportStatus.PASS:AtfReportStatus.FAIL,AtfUiEvidenceSource.OBSERVE);
                         phase.step(AtfGherkinKeyword.THEN,title,"Android display",Base64.getEncoder().encodeToString(png),checks,List.of(observation),ReportScreenshotPolicy.CapturePoint.CHECKPOINT,passed?AtfReportStatus.PASS:AtfReportStatus.FAIL);all&=passed;
                     }
                     phase.complete(all?AtfReportStatus.PASS:AtfReportStatus.FAIL);

@@ -40,6 +40,20 @@ Pentru contractele cu levate, păstrați matricea completă în [componente](../
 
 ## P2 · Meniu și istoric
 
+### U10–U11 · Istoric lizibil și același meniu WEB–APK
+
+**P2 · Adaptoarele Rentz și ownerul bibliotecii UI comune.** Această cerință schimbă prezentarea, nu regulile sau punctajele jocului. Modelul Whist și widgeturile livrate sunt referința; adaptați o proiecție comună, fără două inventare de meniu sau reguli CSS/Android independente.
+
+| ID | Comportament cerut | Criteriu de componentă |
+|---|---|---|
+| U10 | Istoricul fără bold: titlu, nume de jucători, antete și valori numerice. Păstrați `Δ` și `Σ`, fără două puncte în antetul istoricului. | Greutatea normală și rolurile tipografice sunt identice în proiecția comună, widgetul Android și rendererul WEB; verificați starea inițială și după derulare. |
+| U10 | Separatoare verticale mai evidente între grupurile de coloane ale jucătorilor, după modelul tabelului Whist. Linia continuă traversează antetul și corpul; nu separă artificial `Δ` de `Σ` pentru același jucător. | Același token de grosime/contrast și aceeași geometrie adaptată la densitate. Cazuri cu 3–6 jucători, o mână și istoric lung; fără suprapuneri, tăieri ori schimbarea valorilor. |
+| U11 | În joc, ordinea comună este **Istoricul jocului → Rezultate → Meniul principal → Oprește Auto-play → Nume**. WEB și APK folosesc aceleași identități de acțiune, etichete și condiții de disponibilitate. | Aceeași proiecție de meniu alimentează adaptoarele. Verificați înaintea scorului, după scor, Auto-play pornit/oprit și AI în așteptare; un callback per acțiune, fără comandă tardivă după oprire. |
+
+[RentzGameMenu](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/chrome/RentzGameMenu.java) este punctul comun al meniului. [RentzScoreLayout](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/RentzScoreLayout.java) fixează în prezent separatorul la 1 dp; confruntați această alegere cu API-ul și testele Whist înainte de înlocuire. [Adaptorul istoricului WEB](../../atf-ui-browser/pages/web/rentz-score.mjs) păstrează exclusiv proiecția Rentz peste rendererul comun.
+
+Matricea rapidă include lățimi logice 320, 360, 393 și 600, cu font normal și mărit. Folosiți aceleași fixture-uri de model, mock-uri DOM/Android și valori pozitive, negative și zero; premiile Rentz rămân verificate separat. E2E confirmă numai rasterul, gestul și callback-ul real pe câte un profil reprezentativ. Această cerință rămâne deschisă până la implementarea și calificarea ambelor adaptoare.
+
 | ID | Criteriu rămas |
 |---|---|
 | U02, U03 | Calificați rutele negative la font mărit: anularea, resetarea numelui, refuzul de salvare și confirmarea înlocuirii sesiunii. Aliniați filtrul UTF-16 al dialogului comun cu politica Rentz în puncte de cod. |
