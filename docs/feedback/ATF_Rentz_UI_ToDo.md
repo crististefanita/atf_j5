@@ -8,7 +8,7 @@ Probele focalizate pentru 3, 5 și 6 locuri urmăresc selectorul, prima atingere
 
 | ID | Criteriu rămas |
 |---|---|
-| U01, U04, U05, R02 | Extindeți matricea de ferestre scunde la cazurile cu o carte, mâna goală și pasul forțat. Urmăriți starea mâinii proprii până la continuarea vizibilă. |
+| U01, U04, U05, R02 | Extindeți matricea de ferestre scunde la mâna completă, o carte, mâna goală și pasul forțat. Rangul 10 și indicii cărților de margine rămân integral lizibili în evantai; eticheta actorului păstrează cuvintele întregi la text mărit. Urmăriți starea mâinii proprii până la continuarea vizibilă. |
 | R03 | Marcați ultima mutare și explicați extensiile legale sau pasul fără a divulga cărți adverse. Testați explicația pentru ambele capete ale secvenței. |
 | U07, S01, S04 | Jocul offline verifică premiile, ordinea locurilor și egalitățile. Pe APK rămân de calificat egalitățile și valorile extreme pe mesele compacte de 3, 5 și 6 locuri. |
 

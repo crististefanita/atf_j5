@@ -1336,7 +1336,7 @@
       "criterion": "One numeric current edition, exact signed APK and source tag, source-bound component/native/RAG proof and verified canonical downloads; preserve historical tags and original audit receipts.",
       "proof": "docs/rentz/ATF_Release.md#linkurile-din-readme",
       "expires": "2026-12-19",
-      "sha256": "a3e20497892e0041efb5706178dc52d8cc3e46c473234e31c4df321d8e689ba0",
+      "sha256": "b16f3132ff15948104be6ec15b8ad8824e8ac66c6546800f55bdb2b82a161e11",
       "allowDelete": false
     },
     {

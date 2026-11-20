@@ -6,7 +6,7 @@ Catalogul arată ultima ediție calificată și starea reală a descărcării. R
 
 ## Ultima ediție calificată
 
-[Rentz Lab 0.31.0](0.31.0/README.md) este ediția publicată și verificată prin descărcare. APK-ul este disponibil din README-ul principal.
+[Rentz Lab 0.32.0](0.32.0/README.md) este ediția publicată și verificată prin descărcare. APK-ul este disponibil din README-ul principal.
 
 ## Organizare
 

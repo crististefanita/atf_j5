@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "versionName": "0.32.0",
+    "versionCode": 36,
+    "applicationId": "ro.rentzlab.app",
+    "sourceCommit": "c75d7d38bf111d3f715f982fd7ec26ac105917f6",
+    "minSdk": 26,
+    "targetSdk": 36,
+    "apkName": "RentzLab-0.32.0.apk",
+    "apkBytes": 952566,
+    "sha256": "c4b4be0827deaca6048c169b4f7fb7e71ec57cbfb4e4a26bd95f42bf50694ae5",
+    "certificateSha256": "81957593fdc2af3c4d9809c8dd46eb8ac26fc7de78402a364e3c98a568e74829",
+    "debuggable": false
+  },
+  "publication": {
+    "state": "PUBLISHED",
+    "channel": "public",
+    "sourceCommit": "c75d7d38bf111d3f715f982fd7ec26ac105917f6",
+    "sourceTag": "v0.32.0",
+    "releaseId": 452593728,
+    "provider": "GitHub",
+    "releaseRepository": "crististefanita/rentz",
+    "assetId": 771517768,
+    "checksumAssetId": 771517962,
+    "link": "https://github.com/crististefanita/rentz/releases/download/v0.32.0/RentzLab-0.32.0.apk",
+    "authenticatedDownload": "PASS",
+    "anonymousDownload": "PASS",
+    "latestTag": "v0.32.0"
+  },
+  "publicDownload": {
+    "url": "https://github.com/crististefanita/rentz/releases/download/v0.32.0/RentzLab-0.32.0.apk",
+    "httpStatus": 200,
+    "bytes": 952566,
+    "sha256": "c4b4be0827deaca6048c169b4f7fb7e71ec57cbfb4e4a26bd95f42bf50694ae5",
+    "verifiedUtc": "2026-11-20T11:10:25.043887100Z"
+  },
+  "qualification": {
+    "status": "PASS",
+    "scope": "maven-components-android-jvm-native-ui-and-signed-build",
+    "e2e": "PASS",
+    "ragPublication": "STANDARD",
+    "tests": 757,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": {
+      "maven": 65,
+      "mavenTests": 604,
+      "androidJvm": 30,
+      "androidJvmTests": 153
+    },
+    "evidence": {
+      "components": {
+        "path": "components/rentz-032-final-controls/component-suite-extent.html",
+        "bytes": 8469629,
+        "sha256": "53ace5e6eb22f5acc683f15b31c79c842808f2f0b78ca438cff50f042718913b"
+      },
+      "componentResult": {
+        "path": "components/rentz-032-final-controls/result.json",
+        "bytes": 37200,
+        "sha256": "e76be94d185791700fdd034a6e4e4358d543e47a4652ad3abe7d073ebd72e841"
+      },
+      "androidJvm": {
+        "path": "components/rentz-032-final-controls/android-jvm/result.json",
+        "bytes": 5303,
+        "sha256": "2fe4d1513baa4a4631fc7b3cab3b8ad637d464116122ba66dd37ef6e7538eda1"
+      },
+      "build": {
+        "path": "validation/rentz-032-live-20261120/product/build-qualification.json",
+        "bytes": 9763,
+        "sha256": "5205709f4000a82fc8dd570eccbad628c8fde27d6f8daf508dd51f918e07d504"
+      },
+      "native": {
+        "path": "validation/rentz-032-live-20261120/native-ui-final/android-extent.html",
+        "bytes": 13067287,
+        "sha256": "14c615c2f73155b6cdfc3b0611f7c55b12ec39fe4bb6e1a25c356e8def261b8a"
+      },
+      "nativeResult": {
+        "path": "validation/rentz-032-live-20261120/native-ui-final/result.json",
+        "bytes": 122291,
+        "sha256": "e3acdd04deb79cad5d03591eeb94c4066a011de284b5edd835efb68701ac4800"
+      },
+      "rag": {
+        "path": "validation/rentz-032-live-20261120/rag-final/report/release-rag-report.json",
+        "bytes": 17724,
+        "sha256": "b17ac85db21f47158c316028f1ea72c73a338bbbbe7119db1a4f054e640243e9"
+      },
+      "distribution": {
+        "path": "validation/rentz-032-live-20261120/publication/publication-resume/distribution/github-release.json",
+        "bytes": 1035,
+        "sha256": "839539ba601b8bda0bc2beaf426ecd695bc5bde06e65b8d77052892b50e75c9f"
+      },
+      "publicDownload": {
+        "path": "validation/rentz-032-live-20261120/publication/publication-resume/distribution/public-download.json",
+        "bytes": 785,
+        "sha256": "3725a672320c2bb7e7feeac677426be1e34ab24b0ee2f665d0d1958891494d05"
+      },
+      "webComponents": {
+        "path": "validation/rentz-032-live-20261120/web-acceptance/web-components-extent.html",
+        "bytes": 6193796,
+        "sha256": "950a5a8da02bb689ae47b94b41b0ba6c8720e08bd56d4f26374682b05b02e801"
+      },
+      "web": {
+        "path": "validation/rentz-032-live-20261120/web-acceptance/web-extent.html",
+        "bytes": 7328880,
+        "sha256": "700ec0aa8a321b1e7d58b7907a7e1a9cc96cd8dc31aa3d3ca1f34506ea727961"
+      },
+      "webResult": {
+        "path": "validation/rentz-032-live-20261120/mobile-web-r14/result.json",
+        "bytes": 17570,
+        "sha256": "e198ed98a29a33312da7e671049b942169677bf44f8b47c9295405de06c2d5e9"
+      },
+      "webPublic": {
+        "path": "validation/rentz-032-live-20261120/public-web-current.json",
+        "bytes": 5676,
+        "sha256": "baa8df874c55b215678b0abdc8e6cdde6fd7d2eed48f9511bbb90fb15fc43b30"
+      },
+      "webNativeWindows": {
+        "path": "validation/rentz-032-live-20261120/native-web-capture-audit.json",
+        "bytes": 4429,
+        "sha256": "b5c5033b7ea11d6912e1ea0318cd7022c85a8025b7d44f9f53b5b6d53d92268d"
+      },
+      "nativeVisualFollowUp": {
+        "path": "validation/rentz-032-live-20261120/native-visual-review.json",
+        "bytes": 933,
+        "sha256": "7a2bc65a68a37b602a17f8facca1a9e02c6a347b6b7263dc9a7f1bc105eb86e0"
+      },
+      "storageCleanup": {
+        "path": "validation/rentz-032-20261120/cleanup/cleanup-complete.json",
+        "bytes": 599,
+        "sha256": "22f418c3e5b63e71dadf434d31a6256af5c802bcbbc2928a57d9cc24c73d0ee4"
+      },
+      "signingVerification": {
+        "path": "validation/rentz-032-20261120/cleanup/signing-verification.json",
+        "bytes": 835,
+        "sha256": "537dab0b852f6a77351a6b2b3668b2d6361cefbee82c1ab2c4b259ee0a8ddd5a"
+      },
+      "webVisualFollowUp": {
+        "path": "validation/rentz-032-live-20261120/web-visual-review.json",
+        "bytes": 528,
+        "sha256": "292de21ba2ebec8bea7f2c5d40f846116ad0109ebf6a2dd28a0fab0e3d0de1db"
+      },
+      "runtimeCounterTdd": {
+        "path": "validation/rentz-032-live-20261120/runtime-counter-tdd.json",
+        "bytes": 574,
+        "sha256": "0cb3831ba498cc9364291efb61523d09c5b612a3d02b955fb97cea0ae08a436c"
+      },
+      "browserMenuMeasurements": {
+        "path": "validation/rentz-032-live-20261120/browser-components-original/menu-history/browser-checks.json",
+        "bytes": 62207,
+        "sha256": "81cfabfd3fb02821712eb7a2cb6b451da10c8391151a9a4a3591588175870401"
+      },
+      "browserScoreMeasurements": {
+        "path": "validation/rentz-032-live-20261120/browser-components-original/score-actions/browser-checks.json",
+        "bytes": 25206,
+        "sha256": "5d5891980e41cbfab11a0c686ecb35dab5603738eb6eb28c93135fbc3864b360"
+      }
+    }
+  },
+  "integrity": {
+    "files": [
+      {
+        "path": "README.md",
+        "bytes": 308,
+        "sha256": "eb6c82727cf5263e4cc89c3d0f69d8448e63b1324b81a93bdba06d5f9b24ba25"
+      },
+      {
+        "path": "release-notes.md",
+        "bytes": 1267,
+        "sha256": "3dda941da96849433c503b6f7c2d5521294ffb3b645b0302dec1eccdecafca0d"
+      },
+      {
+        "path": "reports/README.md",
+        "bytes": 946,
+        "sha256": "00dda6842676280d62275e3fea955e6ae9dea34d29a141600d74e172502d9f0d"
+      },
+      {
+        "path": "RentzLab-0.32.0.apk",
+        "bytes": 952566,
+        "sha256": "c4b4be0827deaca6048c169b4f7fb7e71ec57cbfb4e4a26bd95f42bf50694ae5"
+      },
+      {
+        "path": "RentzLab-0.32.0.apk.sha256",
+        "bytes": 87,
+        "sha256": "0224b95babebedcfd7f311621fb06a7ddc8fb1815b3e9b9f1c44d15fa10f263c"
+      }
+    ]
+  },
+  "verifiedUtc": "2026-11-20T11:10:30.422Z"
+}
