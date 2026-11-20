@@ -4,6 +4,9 @@
   "sourceGroupDirectories": [
     "atf_j0",
     "atf_j1",
+    "atf_j1_ro",
+    "atf_j1_validation_main_20261120",
+    "atf_j1_validation_ro_20261120",
     "atf_j2",
     "atf_j3",
     "atf_j4",

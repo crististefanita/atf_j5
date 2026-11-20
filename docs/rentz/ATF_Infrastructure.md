@@ -70,7 +70,13 @@ Analiza AST protejează formele declarate și recunoscute, nu reprezintă un san
 
 Sursa păstrează numai intrările întreținute: cod, configurație, documentație și biblioteci declarate. Datele generate, inclusiv un director istoric `.atf-data`, nu se reintroduc în checkout; allocatorul comun direcționează toate worktree-urile către depozitul extern. [Proba de inventar](../../atf-tests/tools/test-workspace-governance.ps1) verifică refuzul directorului istoric și revenirea aceluiași inventar după eliminare.
 
-Semnarea are trei intrări persistente în `.atf-signing`: `rentz-release.p12`, `password.dpapi` și `identity.json`. Identitatea declară aliasul, locațiile și amprenta certificatului; build-ul verifică semnătura APK-ului față de această identitate. Exporturile DER și logurile de verificare se generează în rularea externă, apoi se retrag. Copia de recuperare păstrează aceiași octeți esențiali, iar o identitate istorică se arhivează separat de cheia activă.
+| Intrare de semnare | Contract |
+|---|---|
+| `rentz-release.p12` | Cheia persistentă din `.atf-signing`; nu se regenerează la curățarea build-urilor. |
+| `password.dpapi` | Credențiala necesară folosirii cheii existente. |
+| `identity.json` | Alias, locații și amprenta certificatului; build-ul compară semnătura APK-ului cu identitatea declarată. |
+| Copie de recuperare | Aceiași octeți esențiali; o identitate istorică se arhivează separat de cheia activă. |
+| Export DER și loguri | Ieșiri regenerate în rularea externă, apoi retrase. |
 
 1. Rulați testul pe starea reală și păstrați rezultatul eșuat înaintea ștergerii.
 2. Identificați proprietarul, conținutul, referințele active și căile absolute; nu ștergeți prin wildcard sau după nume aproximativ.

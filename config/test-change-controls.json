@@ -856,7 +856,7 @@
       "criterion": "Real Git worktrees share the verified permanent root; preserve signing, path traversal, long-path and non-Git fixture controls. Public retirement needs both original Extents, complete qualification, fresh downloads, current README and coordinated channel authority; preserve source tags and audit, archive before DELETE, never retry uncertain DELETE blindly.",
       "proof": "docs/rentz/ATF_Retention.md; docs/rentz/ATF_Release.md",
       "expires": "2026-12-19",
-      "sha256": "e7c23428c4ace02a49af40cecf2d3b23b7a4c8ea8b91a2270e77b33d229309d4",
+      "sha256": "5a4392e844cf9aa7f1bbd8d39090a333c16328c320d08e30e05ceabb8fb74c12",
       "allowDelete": false
     },
     {
