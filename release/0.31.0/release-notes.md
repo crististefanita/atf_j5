@@ -1,8 +1,10 @@
-# Notele ediției 0.30.0
+# Notele ediției 0.31.0
 
 ## Joc și prezentare
 
 Scorul și istoricul Android și WEB folosesc prezentatorul comun Rentz, cu Δ pentru punctele mâinii și Σ pentru total. Rentz păstrează ordinea sosirii și un singur jucător cu zero puncte.
+
+Comenzile scorului și istoricului consumă noile roluri de text din biblioteca comună: etichetele mărite pot ocupa mai multe rânduri, iar suprafețele compacte permit derularea. Runnerul caută ținta într-un cadru proaspăt și derulează numai containerul propriu, cu buget limitat.
 
 ## Acceptanță și conservare
 

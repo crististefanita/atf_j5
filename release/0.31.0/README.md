@@ -1,4 +1,4 @@
-# Rentz Lab 0.30.0
+# Rentz Lab 0.31.0
 
 [Descarcă APK-ul](../../README.md#jocul) · [Notele ediției](release-notes.md) · [Rapoarte](reports/README.md)
 
