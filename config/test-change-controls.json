@@ -742,11 +742,11 @@
     {
       "path": "atf-tests/src/test/java/atf/rentz/OfflineArenaComponentTest.java",
       "owner": "Rentz consumer",
-      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting. Q32 adds capture binding.",
-      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry. The captured bytes refuse a foreign journal and same-seed edits before commit. The exact capture resumes after either interruption boundary, keeps other reservations, and blocks aliases.",
-      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md",
+      "reason": "Q31 · Register native seed exposure at capture with a pending gate and read-only reporting. Q32 adds capture binding. Publish caller-owned report narrative in English, retaining original localized observations and outcomes.",
+      "criterion": "Pending exposure blocks reserved evaluation. Capture completes once under its token and the reporter verifies evidence without writing the registry. The captured bytes refuse a foreign journal and same-seed edits before commit. The exact capture resumes after either interruption boundary, keeps other reservations, and blocks aliases. English report labels must preserve captured Unicode values, original PNG/receipt bytes, exact execution scope and PASS/FAIL; no renderer or release gate changes.",
+      "proof": "../../rentz_back/infrastructure/governance/20261107-q29-q31/TDD.md; docs/rentz/ATF_TestingStrategy.md#limba-rapoartelor",
       "expires": "2026-11-20",
-      "sha256": "63cd4ea8982696d092b1c8b5cbc7a049a93a5c4a4ff83850025c0b1b5e94cc19",
+      "sha256": "88ff321a39bffc801c34a92e2da7911b2a61a8c862862639c0d56e4b43f6962c",
       "allowDelete": false
     },
     {

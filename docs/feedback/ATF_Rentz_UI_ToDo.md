@@ -52,7 +52,10 @@ Pentru contractele cu levate, păstrați matricea completă în [componente](../
 
 [RentzGameMenu](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/chrome/RentzGameMenu.java) este punctul comun al meniului. [RentzScoreLayout](../../rentz-lab-app/app/src/main/java/ro/rentzlab/app/ui/score/RentzScoreLayout.java) fixează în prezent separatorul la 1 dp; confruntați această alegere cu API-ul și testele Whist înainte de înlocuire. [Adaptorul istoricului WEB](../../atf-ui-browser/pages/web/rentz-score.mjs) păstrează exclusiv proiecția Rentz peste rendererul comun.
 
-Matricea rapidă include lățimi logice 320, 360, 393 și 600, cu font normal și mărit. Folosiți aceleași fixture-uri de model, mock-uri DOM/Android și valori pozitive, negative și zero; premiile Rentz rămân verificate separat. E2E confirmă numai rasterul, gestul și callback-ul real pe câte un profil reprezentativ. Această cerință rămâne deschisă până la implementarea și calificarea ambelor adaptoare.
+- **Profile:** lățimi logice 320, 360, 393 și 600, cu font normal și mărit.
+- **Componente:** aceleași fixture-uri de model, mock-uri DOM/Android și valori pozitive, negative și zero; premiile Rentz rămân verificate separat.
+- **E2E:** rasterul, gestul și callback-ul real pe câte un profil reprezentativ.
+- **Închidere:** cerința rămâne deschisă până la implementarea și calificarea ambelor adaptoare.
 
 | ID | Criteriu rămas |
 |---|---|

@@ -380,9 +380,9 @@ class OfflineArenaComponentTest {
         var report = output.resolve("arena-extent.html");
         OfflineArenaReport.publish(result, protocol, report);
         String html = Files.readString(report);
-        assertTrue(html.contains("Candidat efectiv Actor[kind=HARD_REFERENCE"));
+        assertTrue(html.contains("Effective candidate Actor[kind=HARD_REFERENCE"));
         assertTrue(html.contains("tactic=LEGACY"));
-        assertTrue(html.contains("Obiectiv de evaluare MATCH_POINTS"));
+        assertTrue(html.contains("Evaluation objective MATCH_POINTS"));
     }
     @Test void allArenaKindsBindTheEffectiveCandidateOpponentAndControl() throws Exception {
         var requested = new PolicySettings(8, .05, 8, .3, 2, PolicySettings.Objective.MATCH_POINTS,
