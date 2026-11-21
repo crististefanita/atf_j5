@@ -360,5 +360,5 @@ Acțiunile de rezultat folosesc rolurile comune de 24/21 unități logice, cu 50
 - Deschiderea numelui invalidează callback-urile AI vechi și suspendă controllerul. Salvarea modifică profilul, iar închiderea reactivează aceeași sesiune; un răspuns întârziat nu dublează mutarea.
 - `HistoryAppearance.REGULAR_GROUPS` stabilește text normal și separatorul Whist de două unități logice, `#71846c`. Android folosește politica în widgetul comun și titlul dialogului; Web aplică proprietățile CSS exportate, fără suprascrieri locale de contrast sau grosime.
 - Separatorul delimitează jucătorii și păstrează perechea Δ/Σ a fiecăruia. Valorile și premiile rămân în modelul Rentz.
-- Biblioteca Android folosește coordonata 0.2, iar Browser 0.4 cu arhiva sa de teste. Coordonatele UI noi au două segmente 0.x; coordonatele istorice se pot doar reutiliza cu aceiași octeți.
+- Biblioteca Android folosește coordonata 0.2, iar Browser 0.5 cu arhiva sa de teste. Coordonatele UI noi au două segmente 0.x; coordonatele istorice se pot doar reutiliza cu aceiași octeți.
 - Componentele consumatorului confruntă planul nativ, stilul măsurat în Chromium, modelul de istoric și proveniența binară. Acceptanța raster, focusul și gesturile Android rămân o calificare separată.

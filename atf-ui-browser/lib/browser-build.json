@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": "0.4",
-  "sourceCommit": "c64e1d3743f0ed93171204092e02728af2c458b0",
-  "inputSha256": "bece8c693873a4c3c6980e47d86bc01b0b9105a81483b2cdb7edfebe9f02df19",
+  "version": "0.5",
+  "sourceCommit": "944e05bf17e1e79ee5c902a78e0f8744ec3a2ca5",
+  "inputSha256": "49a3791d54db11ff08d134ce1b9ce321e6093188662b931fa2401bd902a7226d",
   "inputs": [
     {
       "path": "atf-ui-browser/Package-CardTableBrowser.ps1",
@@ -90,7 +90,7 @@
     },
     {
       "path": "atf-ui-browser/src/main/web/table.mjs",
-      "sha256": "1ddc86234b9506b081b6b730228e3407c08128342fcc5671f641bee99a01196e"
+      "sha256": "21fe0cd140c4cb59b68e717f1b3e0709e6cbd04715138a30ffa0819713b820fc"
     },
     {
       "path": "atf-ui-browser/src/main/web/viewport.mjs",
@@ -299,22 +299,22 @@
   ],
   "files": [
     {
-      "path": "atf-ui-browser-0.4.jar",
-      "bytes": 162088,
-      "sha256": "1090bb3c2533fdc989da1bbb1e69124a4c5f73350c1417da619cff63f1f6c199"
+      "path": "atf-ui-browser-0.5.jar",
+      "bytes": 162081,
+      "sha256": "afd9c818bd72a184a1ee715772041c49d444fb8ccc2326303cb91525f1f9033a"
     },
     {
-      "path": "atf-ui-browser-0.4.jar.sha256",
+      "path": "atf-ui-browser-0.5.jar.sha256",
       "bytes": 65,
-      "sha256": "4c8cc185399695aa4fb9dc40ce50d5e631eb9f5aa5b43c728acd9ce78f1f5c1f"
+      "sha256": "8db568c295cb5ebf3dcbe1ca942effdd9fcca0561354dec08311e90add2aed3c"
     },
     {
-      "path": "atf-ui-browser-0.4-tests.jar",
+      "path": "atf-ui-browser-0.5-tests.jar",
       "bytes": 29219,
       "sha256": "c9bb9b1a29214157b8e3e79633e31f5f8af94bae6cd69139e2cadf26e1d1105d"
     },
     {
-      "path": "atf-ui-browser-0.4-tests.jar.sha256",
+      "path": "atf-ui-browser-0.5-tests.jar.sha256",
       "bytes": 65,
       "sha256": "390a12e7abd536a61b4171ceb1a46aa27d1ef1564fa9c78c7fd0819b6b2b8444"
     }
